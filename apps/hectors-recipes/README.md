@@ -2,7 +2,7 @@
 
 Shared recipe books, a weekly meal plan, one grocery list, and a cook mode, for a household cooking from the same recipes. Mobile-first and installable to the home screen. Part of [hector-mono](../../README.md).
 
-What it does and why each decision was made: [docs/meal-planner-spec.md](docs/meal-planner-spec.md) (see "As built" at the end).
+What it does and why each decision was made: [docs/meal-planner-spec.md](docs/meal-planner-spec.md) (see "As built" at the end). How each feature works now, and what to keep true when changing it: [docs/features.md](docs/features.md).
 
 > Agent context lives in [`AGENTS.md`](./AGENTS.md). Read it before making changes.
 

@@ -23,7 +23,7 @@ PR numbers, branch names and commits in this plan are from the earlier private r
    ```bash
    grep -nE "^- \[( |~)\] \*\*P" apps/hectors-recipes/docs/ux-plan.md | head -5
    ```
-2. Read the app's [AGENTS.md](../AGENTS.md) and [`packages/ui/AGENTS.md`](../../../packages/ui/AGENTS.md). Read only the decisions the task cites.
+2. Read the app's [AGENTS.md](../AGENTS.md) and [`packages/ui/AGENTS.md`](../../../packages/ui/AGENTS.md), and the section of [features.md](./features.md) for the feature the task changes. Read only the decisions the task cites.
 3. Check the repo matches the log:
    ```bash
    git status --short apps/hectors-recipes
