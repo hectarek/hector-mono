@@ -12,14 +12,16 @@ Deployment: not deployed; no Vercel project.
 ## Stack
 - Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui via `@repo/ui`
 - DI via `@evyweb/ioctopus` (wires `ILoggerService` + `IAiService` and the resume-analyzer use-case/controller)
-- AI via the `ai` SDK v6 (`generateText` + `Output.object`) through the **Vercel AI Gateway**
+- AI via the `ai` SDK 7 (`generateText` with `Output.object` and `instructions`) through the **Vercel AI Gateway**
 - No DB / no auth (yet)
 
 ## AI / environment
 - The Gateway is the AI SDK's built-in default provider — no per-provider keys. Set in `.env`:
   - `AI_GATEWAY_API_KEY` — Vercel AI Gateway key (required for live calls).
   - `AI_MODEL` — optional model override (default `anthropic/claude-sonnet-4.6`), as a `provider/model` string.
-- **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser.
+- **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser. The interface's `system` goes to the SDK as `instructions` (v7's name for the system prompt).
+- **Model:** a constructor argument of `AiService` (default: `AI_MODEL`, else `anthropic/claude-sonnet-4.6`; a per-call `model` overrides it), so tests pass `MockLanguageModelV4` from `ai/test` and never reach the Gateway.
+- **Version:** `ai` is pinned to the exact version `hectors-recipes` uses; upgrade the two together.
 
 ## Architecture
 
@@ -61,6 +63,9 @@ di/
   types.ts                    # DI_SYMBOLS + DI_RETURN_TYPES
   modules/logger.module.ts
   modules/resume-analyzer.module.ts  # IAiService + the resume-analyzer use case and controller
+
+tests/                        # bun test; mirrors the source tree (src/infrastructure/services/ai.service.ts → tests/src/infrastructure/services/ai.service.test.ts)
+  _support/preload.ts         # bunfig.toml preload: drops the Gateway credentials Bun loads from .env
 ```
 
 **No root `lib/` yet:** `stash` and `hectors-recipes` keep framework-agnostic setup there (`@/lib/*`), e.g. `lib/logger.ts`, a standalone `ConsoleLoggerService` for root or edge code the DI container doesn't reach (a route handler, `proxy.ts`). Add it when the first such file needs it. `app/_lib/` is different: an App-Router-private folder for route-scoped modules (the tool registry); don't put root `lib/` code under `app/`.
@@ -108,11 +113,12 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
 ```bash
 bun run dev --filter=hectors-tools
 bun run build --filter=hectors-tools
+bun run test --filter=hectors-tools          # or: cd apps/hectors-tools && bun test
 bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ```
 
 ## Before Finishing Any Change
 Scope checks to this app:
 ```bash
-bun check --filter=hectors-tools && bun ts --filter=hectors-tools
+bun check --filter=hectors-tools && bun ts --filter=hectors-tools && bun run test --filter=hectors-tools
 ```

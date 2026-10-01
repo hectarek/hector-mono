@@ -1,4 +1,10 @@
-import { generateText, type ModelMessage, Output, type UserContent } from "ai";
+import {
+  generateText,
+  type LanguageModel,
+  type ModelMessage,
+  Output,
+  type UserContent,
+} from "ai";
 import type { z } from "zod";
 import type {
   AiGenerateOptions,
@@ -11,32 +17,38 @@ import { DatabaseOperationError } from "@/src/entities/errors/common";
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4.6";
 
 /**
- * AI client backed by the Vercel AI Gateway (built into the `ai` package as the
- * default global provider). Auth comes from the `AI_GATEWAY_API_KEY` env var;
- * models are addressed as `provider/model` strings.
+ * AI client on AI SDK 7, backed by the Vercel AI Gateway (the SDK's default
+ * global provider, so a `provider/model` string is a Gateway model). Auth comes
+ * from the `AI_GATEWAY_API_KEY` env var. Tests pass a mock model instead.
  */
 export class AiService implements IAiService {
   private readonly logger: ILoggerService;
 
-  constructor(loggerService: ILoggerService) {
+  constructor(
+    loggerService: ILoggerService,
+    // `||`, not `??`: an empty `AI_MODEL=` (as in .env.example) means the default.
+    private readonly defaultModel: LanguageModel = process.env.AI_MODEL ||
+      DEFAULT_MODEL,
+  ) {
     this.logger = loggerService.child({ layer: "service", op: "ai" });
   }
 
   async generateObject<T>(
     options: AiGenerateOptions & { schema: z.ZodType<T> },
   ): Promise<T> {
-    const model = this.resolveModel(options.model);
+    const model = options.model ?? this.defaultModel;
+    const modelId = typeof model === "string" ? model : model.modelId;
     const logger = this.logger.child({ op: "generateObject" });
 
     try {
       logger.debug("Generating structured output", {
-        model,
+        model: modelId,
         fileCount: options.files?.length ?? 0,
       });
 
       const result = await generateText({
         model,
-        system: options.system,
+        instructions: options.system,
         output: Output.object({ schema: options.schema }),
         ...this.buildContent(options),
       });
@@ -44,15 +56,14 @@ export class AiService implements IAiService {
       return result.output;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error("Structured generation failed", { model, error: message });
+      logger.error("Structured generation failed", {
+        model: modelId,
+        error: message,
+      });
       throw new DatabaseOperationError("AI generation failed", {
         cause: error,
       });
     }
-  }
-
-  private resolveModel(override?: string): string {
-    return override ?? process.env.AI_MODEL ?? DEFAULT_MODEL;
   }
 
   /**

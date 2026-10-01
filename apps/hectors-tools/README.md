@@ -19,5 +19,6 @@ Lean clean architecture: `entities → application → interface-adapters → in
 ```bash
 bun run dev --filter=hectors-tools
 bun run build --filter=hectors-tools
+bun run test --filter=hectors-tools
 bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ```
