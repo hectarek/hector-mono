@@ -14,8 +14,7 @@ import { isPublicAddress } from "./public-address";
 
 // Says who's asking rather than posing as a browser; a site that refuses it gets "paste the
 // text or a screenshot instead" (ux-plan P10.3).
-const USER_AGENT =
-  "HectorsRecipes/1.0 (+https://hector-mono-hectors-recipes.vercel.app)";
+const USER_AGENT = "HectorsRecipes/1.0 (+https://recipes.hectorfgonzalez.com)";
 
 type Resolve = (hostname: string) => Promise<LookupAddress[]>;
 
