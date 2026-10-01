@@ -4,7 +4,7 @@ Short style guide for the portfolio. The goal: make every page feel like a singl
 
 ## The Vibe
 
-A fresh, clean dot-grid journal. Imagine a high-quality Leuchtturm/Moleskine-style notebook — crisp cream paper, faint dots holding the page together, mono labels written like field notes, hairline rules between sections, hand-numbered chapters, and one warm honey accent doing all the color work.
+A fresh, clean dot-grid journal. Imagine a high-quality Leuchtturm/Moleskine-style notebook — crisp neutral paper, faint dots holding the page together, mono labels written like field notes, hairline rules between sections, hand-numbered chapters, and one warm honey accent doing all the color work.
 
 It should feel: clean, crisp, organized, hopeful, and modern. A working notebook from a builder/operator who keeps things tidy. Practical, technical, and personal — never corporate, never flashy, never aged.
 
@@ -24,7 +24,7 @@ The page itself is the brand element.
 
 - The whole site sits on a subtle dot grid (~20px spacing) that visually reads as dot-grid notebook paper. The dots are very faint — present in every empty area, hidden behind cards and content surfaces.
 - A barely-perceptible paper grain (SVG noise overlay) sits across the entire page. It adds the fiber/texture of real paper without going vintage.
-- Cards, panels, and content blocks use the warm paper surface to "cover" the dots underneath, the same way writing on a notebook covers the dot grid where ink lands.
+- Cards, panels, and content blocks use the paper surface to "cover" the dots underneath, the same way writing on a notebook covers the dot grid where ink lands.
 - Section eyebrows act like hand-numbered chapter markers. Hairline rules act like a deliberate page break.
 
 The intent is fresh notebook paper, not parchment, not aged stock, not "bookish." Modern, slightly warm, optimistic.
@@ -44,7 +44,7 @@ CTA buttons are mono, uppercase, tracking-wide. Same treatment whether primary o
 
 One color, used with intent.
 
-- **Paper** — warm-leaning off-white in light mode, warm-leaning charcoal in dark mode. Effectively neutral grayscale.
+- **Paper** — neutral off-white in light mode, neutral charcoal in dark mode. True grayscale (`background`, with `muted` as the second paper).
 - **Ink** — soft off-black for primary text, mid-gray for secondary, faint gray for mono labels.
 - **Rule** — hairline grays for borders and dividers.
 - **Accent — warm honey amber.** `oklch(58% 0.15 75)` in light mode, `oklch(82% 0.16 88)` in dark mode. Used for status dots, key metric values, the period after the name, hover states, and the few signature flourishes (pulsing "available" dot, accent links, the rare handwritten word). It is the only color in the design.
@@ -57,15 +57,15 @@ If something else needs color, we make it ink, paper, or accent. Anything else d
 - Inner narrative content (paragraphs, dl lists, single-column timelines) constrains to `max-w-3xl` or `max-w-4xl` for comfortable reading. The visual edge stays wide; the reading width stays narrow.
 - Section eyebrows: a large faded mono numeral (`01`, `02`...) followed by a small mono label, set off by a hairline tick. Sequential numbering across the homepage tells the reader it's a structured document.
 - Page-level dot grid + paper grain set the constant background atmosphere. Individual sections don't need to add extra dots — the page is already the journal.
-- Hairline rules separate major sections (`rule mb-8` / `rule mb-10`). No card shadows. No drop-shadows.
+- Hairline rules separate major sections (`border-t mb-8` / `border-t mb-10`, which draw in the `border` colour; a strong rule is `border-foreground/25`). No card shadows. No drop-shadows.
 - Cards: hairline border + accent border on hover. Status chips show a small colored category dot.
 - Asymmetric hero: name + tagline + bio + CTAs on the left, big portrait photo with a mono caption strip on the right.
 
 ## Component Hints
 
-- **Buttons** — mono uppercase, tracking-`[0.18em]`. Primary is solid ink on paper. Outline is hairline border that animates to accent on hover. Tertiary is a plain mono link with an accent icon.
+- **Buttons** — `size="label"` (mono, uppercase, tracked) with the `default` variant (solid ink on paper) or `outline` (hairline border). Never restyle a Button's type or colour through `className`. Tertiary is a plain mono link with an accent icon.
 - **Project cards** — hairline border, accent on hover, status chip in the image corner, a key metric in the top-right of the card body in accent.
-- **Proof / approach grids** — `gap-px on bg-rule` so cells share clean hairlines without double borders.
+- **Proof / approach grids** — `gap-px` on a `bg-border` grid (inside `border border-border`) so cells share clean hairlines without double borders.
 - **Timeline** — single hairline rule on the left, small status dot at each role, mono period label.
 - **Photo** — 4:5 portrait rectangle, hairline border, mono caption strip below (`location` left, `availability` with pulsing dot right).
 - **Nav** — three items (`Work`, `About`, `Contact`). Brand is `/ Hector Gonzalez`. The cursor `>` shows on hover and persists for the active route.

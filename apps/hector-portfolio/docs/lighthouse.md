@@ -4,15 +4,18 @@ Lighthouse CI is configured to test your app for 100% scores across all categori
 
 ## Quick Start
 
-### Option 1: Run with Existing Dev Server
+Run it from the app directory. It isn't part of CI (`.github/workflows/ci.yml` runs lint, typecheck and tests only).
 
-If you already have `bun run dev` running:
+### Option 1: Let Lighthouse Start the Server
 
-1. **Stop the existing dev server** (or use Option 2)
+1. **Stop anything on port 3000** (a dev server, or an earlier `next start`)
 2. Run Lighthouse:
    ```bash
+   cd apps/hector-portfolio
    bun run lighthouse
    ```
+
+`.lighthouserc.js` runs `bun run build && bun run start`, so it audits a production build, not the dev server.
 
 ### Option 2: Use Existing Server
 
@@ -27,9 +30,9 @@ If you want to test against an already-running server:
    }
    ```
 
-2. **Start your dev server manually**:
+2. **Build and start a production server manually**:
    ```bash
-   bun run dev
+   bun run build && bun run start
    ```
 
 3. **Run Lighthouse** (in another terminal):
@@ -45,7 +48,8 @@ Lighthouse CI is configured in `.lighthouserc.js`:
 - **Accessibility**: Minimum score 1.0 (100%)
 - **Best Practices**: Minimum score 1.0 (100%)
 - **SEO**: Minimum score 1.0 (100%)
-- **PWA**: Minimum score 1.0 (100%)
+
+Lighthouse 12 (the version `@lhci/cli` 0.15 runs) has no PWA category, so there's no PWA assertion.
 
 ## Troubleshooting
 
@@ -54,49 +58,21 @@ Lighthouse CI is configured in `.lighthouserc.js`:
 **Error**: `Port 3000 is in use`
 
 **Solution**: 
-1. Stop the existing dev server:
-   ```bash
-   # Find and kill the process
-   lsof -ti:3000 | xargs kill -9
-   ```
+1. Stop the server that's using the port (the dev server, or an earlier `next start`).
 
 2. Or update `.lighthouserc.js` to use a different port:
    ```javascript
    url: ["http://localhost:3001"],
+   startServerCommand: "bun run build && bun run start --port 3001",
    ```
-
-### Lock File Error
-
-**Error**: `Unable to acquire lock at .next/dev/lock`
-
-**Solution**:
-1. Stop all Next.js dev servers
-2. Delete the lock file:
-   ```bash
-   rm -rf .next/dev/lock
-   ```
-3. Run Lighthouse again
 
 ### Server Not Starting
 
 **Error**: Server doesn't start in time
 
-**Solution**: Increase timeout in `.lighthouserc.js`:
+**Solution**: Increase timeout in `.lighthouserc.js` (it covers the build too):
 ```javascript
-startServerReadyTimeout: 60000, // 60 seconds instead of 30
-```
-
-## CI/CD Integration
-
-Add to your GitHub Actions workflow:
-
-```yaml
-- name: Run Lighthouse CI
-  run: |
-    bun run build
-    bun run start &
-    sleep 5
-    bun run lighthouse:ci
+startServerReadyTimeout: 180000, // 3 minutes instead of 2
 ```
 
 ## Manual Testing
@@ -114,5 +90,4 @@ You can also run Lighthouse manually in Chrome:
 - **Accessibility**: ARIA labels, contrast, keyboard navigation
 - **Best Practices**: HTTPS, modern APIs, no console errors
 - **SEO**: Meta tags, structured data, sitemap
-- **PWA**: Service worker, manifest, offline support
 
