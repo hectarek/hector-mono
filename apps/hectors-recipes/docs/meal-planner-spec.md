@@ -1,6 +1,6 @@
 # Meal Planner — Adapted Spec
 
-Status: **built (MVP)**, 2026-09-23, in 9 increments on PR #8. The spec below is rev 4 as agreed; [As built](#as-built) records where the build departed from it and what's still to verify.
+Status: **built (MVP)**, 2026-09-23, in 9 increments (one PR in the earlier private repo; see [history](../../../docs/public-repo.md#history)). The spec below is rev 4 as agreed; [As built](#as-built) records where the build departed from it and what's still to verify.
 
 This adapts the original meal-planner build spec to the existing `hectors-recipes` app: clean architecture, Drizzle + Neon, and per-user Neon Auth accounts. The weekly loop:
 
@@ -230,7 +230,7 @@ Designed at 375px first, with a bottom tab bar: **Recipes · Plan · Groceries**
 
 ## Seeding from Obsidian
 
-Source: `MainVault/2 - Source Material/Recipes/` (iCloud), 76 notes. The script only reads the vault.
+Source: the vault's recipes folder. The script only reads the vault.
 
 What's there:
 - **Frontmatter:** `created` (75), `meal` (74), `recipe_tags` (65), `source` (55), `cover` (42), `time` as text like "20 min" (12), `servings` (2)
@@ -321,6 +321,8 @@ Two people with their own accounts share a meal plan and a grocery list, and one
 
 ## As built
 
+Phases 9–14 changed more than this table shows: see [ux-plan.md](./ux-plan.md) Decisions D8, D19, D23–D25, D29, D34, D35, D38–D45 and D48, and `db/schema.ts` for the current schema.
+
 Everything in the build order shipped. Where the build differs from the spec above:
 
 | Area | Spec | Built | Why |
@@ -343,5 +345,5 @@ Everything in the build order shipped. Where the build differs from the spec abo
 **Worth knowing:**
 - Joining is always an explicit "Join" tap, never on opening the link (link previews fetch URLs).
 - Deleting a book or a plan (with its grocery list) deletes its contents for everyone in it.
-- The app icon is the design system's leaf on a herb-green tile (since PR #15); the drawing is in `app/_lib/app-icon.tsx`.
+- The app icon is the design system's leaf on a herb-green tile; the drawing is in `app/_lib/app-icon.tsx`.
 
