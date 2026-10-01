@@ -20,7 +20,7 @@ app/
   _components/         # Private components organized by section
     portfolio/
       hero/, proof/, skills/, projects/, experience/, approach/, contact/, about/, now/, reading/, nav/, shared/
-    shared/            # brand-icons, plus animated-* wrappers nothing imports
+    shared/            # brand-icons
   _providers/          # @repo/ui ThemeProvider + TooltipProvider + Toaster
   ui/                  # Public @repo/ui component gallery with a theme switcher (why globals.css imports neobrutalist.css)
   robots.ts, sitemap.ts
