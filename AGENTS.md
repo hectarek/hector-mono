@@ -3,6 +3,7 @@
 ## Important
 - This file is the **canonical agent context** for the monorepo (read by Claude Code, Cursor, Codex, etc.). `.cursor/rules` only holds Cursor-specific or on-demand reference material — don&apos;t duplicate this file there.
 - MUST fully read this file before writing ANY code
+- Don't add a `CLAUDE.md` or `CLAUDE.local.md` anywhere in the repo: Claude Code reads `AGENTS.md` only when neither exists in the working directory or above it
 - Each app in `apps/` has its own `AGENTS.md` with app-specific context — read it too. Scope work to the relevant app directory.
 - When unsure about pattern complexity, check **Pattern Complexity** section below
 - Simplicity wins: YAGNI, KISS, Rule of Three
