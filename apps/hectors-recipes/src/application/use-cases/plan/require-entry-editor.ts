@@ -3,22 +3,28 @@ import type { ISpacesRepository } from "@/src/application/repositories/spaces.re
 import { requireSpaceRole } from "@/src/application/use-cases/spaces/require-space-role";
 import { NotFoundError } from "@/src/entities/errors/common";
 import type { PlanEntry } from "@/src/entities/models/plan-entry.model";
+import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 export async function requireEntryEditor(
   planEntriesRepository: IPlanEntriesRepository,
   spacesRepository: ISpacesRepository,
   entryId: string,
   userId: string,
+  tx: ITransaction,
 ): Promise<PlanEntry> {
-  const entry = await planEntriesRepository.getById(entryId);
+  const entry = await planEntriesRepository.getById(entryId, tx);
   if (!entry) {
     throw new NotFoundError("That meal is no longer on the plan");
   }
-  await requireSpaceRole(spacesRepository, {
-    spaceId: entry.spaceId,
-    userId,
-    type: "meal-plan",
-    minRole: "editor",
-  });
+  await requireSpaceRole(
+    spacesRepository,
+    {
+      spaceId: entry.spaceId,
+      userId,
+      type: "meal-plan",
+      minRole: "editor",
+    },
+    tx,
+  );
   return entry;
 }

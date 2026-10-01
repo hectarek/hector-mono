@@ -38,7 +38,7 @@ export interface ISpacesRepository {
     spaceId: string | null,
     tx?: ITransaction,
   ): Promise<void>;
-  rename(spaceId: string, name: string): Promise<void>;
+  rename(spaceId: string, name: string, tx?: ITransaction): Promise<void>;
   delete(spaceId: string, tx?: ITransaction): Promise<void>;
   // Serializes concurrent "create my personal space" calls for the same user and type.
   lockOwnerScope(
@@ -61,23 +61,33 @@ export interface ISpacesRepository {
     spaceId: string,
     userId: string,
     role: InviteRole,
+    tx?: ITransaction,
   ): Promise<void>;
-  removeMember(spaceId: string, userId: string): Promise<void>;
+  removeMember(
+    spaceId: string,
+    userId: string,
+    tx?: ITransaction,
+  ): Promise<void>;
   getMemberRole(
     spaceId: string,
     userId: string,
+    tx?: ITransaction,
   ): Promise<SpaceRole | undefined>;
 
   createInvite(
     spaceId: string,
     role: InviteRole,
     createdBy: string,
+    tx?: ITransaction,
   ): Promise<SpaceInvite>;
   listActiveInvites(spaceId: string, tx?: ITransaction): Promise<SpaceInvite[]>;
   getActiveInviteByToken(
     token: string,
     tx?: ITransaction,
   ): Promise<SpaceInvite | undefined>;
-  getInviteById(inviteId: string): Promise<SpaceInvite | undefined>;
-  revokeInvite(inviteId: string): Promise<void>;
+  getInviteById(
+    inviteId: string,
+    tx?: ITransaction,
+  ): Promise<SpaceInvite | undefined>;
+  revokeInvite(inviteId: string, tx?: ITransaction): Promise<void>;
 }

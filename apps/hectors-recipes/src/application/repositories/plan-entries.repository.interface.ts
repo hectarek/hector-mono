@@ -25,9 +25,18 @@ export interface IPlanEntriesRepository {
   // Whether the plan has any meal on any day.
   hasEntries(spaceId: string, tx?: ITransaction): Promise<boolean>;
   getById(id: string, tx?: ITransaction): Promise<PlanEntry | undefined>;
-  create(entry: NewPlanEntry, createdBy: string): Promise<PlanEntry>;
-  setCooked(id: string, cooked: boolean): Promise<void>;
-  setDays(id: string, cookDate: string, eatDates: string[]): Promise<void>;
+  create(
+    entry: NewPlanEntry,
+    createdBy: string,
+    tx?: ITransaction,
+  ): Promise<PlanEntry>;
+  setCooked(id: string, cooked: boolean, tx?: ITransaction): Promise<void>;
+  setDays(
+    id: string,
+    cookDate: string,
+    eatDates: string[],
+    tx?: ITransaction,
+  ): Promise<void>;
   markAddedToList(ids: string[], at: Date, tx?: ITransaction): Promise<void>;
-  delete(id: string): Promise<void>;
+  delete(id: string, tx?: ITransaction): Promise<void>;
 }

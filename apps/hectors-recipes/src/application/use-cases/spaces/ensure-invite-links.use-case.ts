@@ -1,5 +1,6 @@
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
+import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { requireOwner } from "@/src/application/use-cases/spaces/require-owner";
 import type {
   InviteRole,
@@ -15,6 +16,7 @@ export type IEnsureInviteLinksUseCase = ReturnType<
 // only opens the share sheet straight from a tap).
 export const ensureInviteLinksUseCase = (
   spacesRepository: ISpacesRepository,
+  transactionManagerService: ITransactionManagerService,
   loggerService: ILoggerService,
 ) => {
   const logger = loggerService.child({
@@ -26,17 +28,21 @@ export const ensureInviteLinksUseCase = (
     spaceId: string,
     userId: string,
   ): Promise<Record<InviteRole, SpaceInvite>> => {
-    await requireOwner(spacesRepository, spaceId, userId);
-    // Newest first, so find() takes the latest link of each role.
-    const live = await spacesRepository.listActiveInvites(spaceId);
-    const linkFor = async (role: InviteRole) =>
-      live.find((invite) => invite.role === role) ??
-      (await spacesRepository.createInvite(spaceId, role, userId));
+    const links = await transactionManagerService.startTransaction(
+      async (tx) => {
+        await requireOwner(spacesRepository, spaceId, userId, tx);
+        // Newest first, so find() takes the latest link of each role.
+        const live = await spacesRepository.listActiveInvites(spaceId, tx);
+        const linkFor = async (role: InviteRole) =>
+          live.find((invite) => invite.role === role) ??
+          (await spacesRepository.createInvite(spaceId, role, userId, tx));
 
-    const links = {
-      editor: await linkFor("editor"),
-      viewer: await linkFor("viewer"),
-    };
+        return {
+          editor: await linkFor("editor"),
+          viewer: await linkFor("viewer"),
+        };
+      },
+    );
     logger.debug("Invite links ready", { spaceId });
     return links;
   };

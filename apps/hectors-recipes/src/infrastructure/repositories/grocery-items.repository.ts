@@ -41,9 +41,12 @@ export class GroceryItemsRepository
     }
   }
 
-  async getById(id: string): Promise<GroceryItem | undefined> {
+  async getById(
+    id: string,
+    tx?: ITransaction,
+  ): Promise<GroceryItem | undefined> {
     try {
-      const [row] = await this.getDbContext()
+      const [row] = await this.getDbContext(tx)
         .select(itemColumns)
         .from(groceryItems)
         .leftJoin(ingredients, eq(ingredients.id, groceryItems.ingredientId))
@@ -58,9 +61,10 @@ export class GroceryItemsRepository
     spaceId: string,
     text: string,
     createdBy: string,
+    tx?: ITransaction,
   ): Promise<void> {
     try {
-      const executor = this.getDbContext();
+      const executor = this.getDbContext(tx);
       await executor.insert(groceryItems).values({
         spaceId,
         text,
@@ -137,9 +141,13 @@ export class GroceryItemsRepository
     }
   }
 
-  async setChecked(id: string, checked: boolean): Promise<void> {
+  async setChecked(
+    id: string,
+    checked: boolean,
+    tx?: ITransaction,
+  ): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(groceryItems)
         .set({ checked })
         .where(eq(groceryItems.id, id));
@@ -148,9 +156,9 @@ export class GroceryItemsRepository
     }
   }
 
-  async updateText(id: string, text: string): Promise<void> {
+  async updateText(id: string, text: string, tx?: ITransaction): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(groceryItems)
         .set({ text, quantity: null, unit: null, ingredientId: null })
         .where(eq(groceryItems.id, id));
@@ -159,9 +167,9 @@ export class GroceryItemsRepository
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, tx?: ITransaction): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .delete(groceryItems)
         .where(eq(groceryItems.id, id));
     } catch (err) {
@@ -169,9 +177,9 @@ export class GroceryItemsRepository
     }
   }
 
-  async deleteChecked(spaceId: string): Promise<number> {
+  async deleteChecked(spaceId: string, tx?: ITransaction): Promise<number> {
     try {
-      const removed = await this.getDbContext()
+      const removed = await this.getDbContext(tx)
         .delete(groceryItems)
         .where(
           and(

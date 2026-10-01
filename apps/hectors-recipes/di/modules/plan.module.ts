@@ -29,6 +29,7 @@ export function createPlanModule() {
   const entryDeps = [
     DI_SYMBOLS.IPlanEntriesRepository,
     DI_SYMBOLS.ISpacesRepository,
+    DI_SYMBOLS.ITransactionManagerService,
     DI_SYMBOLS.ILoggerService,
   ];
 
@@ -55,6 +56,7 @@ export function createPlanModule() {
       DI_SYMBOLS.IPlanEntriesRepository,
       DI_SYMBOLS.IRecipesRepository,
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
 
