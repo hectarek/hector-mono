@@ -50,7 +50,7 @@ Context is part of the deliverable — keep it lean, layered, and current. See [
 - loosen a check to make it pass: no disabling or downgrading lint rules (Biome, Oxlint), no relaxing `tsconfig` flags, no `biome-ignore` / `@ts-ignore` / `@ts-expect-error`, no skipping or weakening tests, and no per-folder overrides that do the same. Fix the code. If a rule genuinely blocks (e.g. unmodified third-party code can't satisfy it), stop and raise it with the options instead of changing the rule
 - push to main directly
 - commit .env, secrets, or credentials
-- commit personal information or personal docs: the repo is public. They go in the gitignored root `docs/private/` folder (see [docs/public-repo.md](docs/public-repo.md))
+- commit personal information or personal docs: the repo is public. They go in the gitignored root `docs/private/` folder (see [docs/public-repo.md](docs/public-repo.md)). Commit messages, PR titles and descriptions, and review comments are public too: nothing from `docs/private/` in them either
 - skip `bun check && bun ts` before finishing
 - run `npm` or `yarn`
 - use `git stash` or switch branches without asking
@@ -93,12 +93,18 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package
 - Prefer the fix the error suggests (a variant or size prop, a theme token). For a real exception: `// oxlint-disable-next-line shadcn/<rule> -- reason`.
 - Loosening a rule for a component is a design-system decision: use `contracts` in `.oxlintrc.json` rather than scattering disable comments.
 
-## Commits
+## Commits, branches and pull requests
 When asked to commit:
 - format: `type(scope): description`
 - types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-- keep commits atomic and focused
-- reference issue numbers if applicable
+- keep commits atomic and focused: one per task, so `git log --grep` finds it
+- commit by path (`git commit -m "…" -- <paths>`), never `git add -A` or `git commit -a`: Hector stages his own work in the same checkout
+- refer to issues and PRs as `hectarek/hector-mono#123`, never a bare `#123`: numbering restarted on 2026-10-01, and older docs' numbers mean the earlier private repo ([docs/public-repo.md](docs/public-repo.md#history))
+
+Branches and PRs:
+- branch from `main` as `type/short-topic` (e.g. `feat/recipes-ux-p9-itemized`, `docs/public-repo-followups`)
+- one PR per topic or plan phase, titled in the commit format, its description following `.github/pull_request_template.md`
+- agents open PRs; Hector merges. PRs merge with a merge commit (squash and rebase are off), which keeps each task's commit, and the branch is deleted on merge
 
 ## Before Finishing
 Ask yourself: can this be simpler? If you can simplify the code without changing behavior, do it.
