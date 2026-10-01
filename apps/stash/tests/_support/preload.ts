@@ -19,3 +19,6 @@ for (const key of [
 mock.module("@/db", () => ({
   db: drizzle({ client: new PGlite(), schema }),
 }));
+
+// The real module throws at import without those variables; tests use MockAuthService.
+mock.module("@/lib/auth/server", () => ({ auth: {} }));

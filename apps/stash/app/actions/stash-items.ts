@@ -1,15 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getInjection } from "@/di/container";
 import {
-  InputParseError,
-  NotFoundError,
-  UnauthenticatedError,
-  UnauthorizedError,
-} from "@/src/entities/errors/common";
-
-export type ActionState = { error?: string; success?: boolean } | null;
+  type ActionState,
+  actionLogger,
+  text,
+  toActionError,
+} from "@/app/actions/shared";
+import { getInjection } from "@/di/container";
 
 async function getUserId(): Promise<string | undefined> {
   const authService = getInjection("IAuthenticationService");
@@ -21,14 +19,11 @@ export async function addItem(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const logger = getInjection("ILoggerService").child({
-    layer: "action",
-    op: "addItem",
-  });
+  const logger = actionLogger("addItem");
 
   try {
     const userId = await getUserId();
-    const rawType = formData.get("type") as string | null;
+    const rawType = text(formData, "type");
     const validTypes = [
       "video",
       "article",
@@ -42,11 +37,11 @@ export async function addItem(
         : undefined;
 
     const data = {
-      url: formData.get("url") as string,
-      title: formData.get("title") as string,
-      description: (formData.get("description") as string) || undefined,
+      url: text(formData, "url"),
+      title: text(formData, "title"),
+      description: text(formData, "description"),
       type,
-      source: (formData.get("source") as string) || undefined,
+      source: text(formData, "source"),
     };
 
     logger.debug("Processing request", { url: data.url, title: data.title });
@@ -54,16 +49,7 @@ export async function addItem(
     const controller = getInjection("IAddItemController");
     await controller(data, userId);
   } catch (err) {
-    if (err instanceof InputParseError) {
-      logger.warn("Input validation failed", { error: err.message });
-      return { error: err.message };
-    }
-    if (err instanceof UnauthenticatedError) {
-      logger.warn("Unauthenticated attempt");
-      return { error: "Must be logged in to add items" };
-    }
-    logger.error("Unexpected failure", { error: String(err) });
-    return { error: "Failed to add item. Please try again." };
+    return toActionError(err, logger, "Failed to add item. Please try again.");
   }
 
   revalidatePath("/");
@@ -71,26 +57,16 @@ export async function addItem(
 }
 
 export async function completeItem(formData: FormData): Promise<void> {
-  const logger = getInjection("ILoggerService").child({
-    layer: "action",
-    op: "completeItem",
-  });
-  const itemId = formData.get("itemId") as string;
+  const itemId = text(formData, "itemId");
+  const logger = actionLogger("completeItem").child({ itemId });
 
   try {
     const userId = await getUserId();
     const controller = getInjection("ICompleteItemController");
     await controller({ itemId }, userId);
   } catch (err) {
-    if (
-      err instanceof NotFoundError ||
-      err instanceof UnauthorizedError ||
-      err instanceof UnauthenticatedError
-    ) {
-      logger.warn("Operation denied", { error: err.message, itemId });
-      return;
-    }
-    logger.error("Unexpected failure", { error: String(err), itemId });
+    // The card shows no error, so this only logs.
+    toActionError(err, logger, "Failed to complete item. Please try again.");
     return;
   }
 
@@ -98,26 +74,16 @@ export async function completeItem(formData: FormData): Promise<void> {
 }
 
 export async function deleteItem(formData: FormData): Promise<void> {
-  const logger = getInjection("ILoggerService").child({
-    layer: "action",
-    op: "deleteItem",
-  });
-  const itemId = formData.get("itemId") as string;
+  const itemId = text(formData, "itemId");
+  const logger = actionLogger("deleteItem").child({ itemId });
 
   try {
     const userId = await getUserId();
     const controller = getInjection("IDeleteItemController");
     await controller({ itemId }, userId);
   } catch (err) {
-    if (
-      err instanceof NotFoundError ||
-      err instanceof UnauthorizedError ||
-      err instanceof UnauthenticatedError
-    ) {
-      logger.warn("Operation denied", { error: err.message, itemId });
-      return;
-    }
-    logger.error("Unexpected failure", { error: String(err), itemId });
+    // The card shows no error, so this only logs.
+    toActionError(err, logger, "Failed to remove item. Please try again.");
     return;
   }
 
