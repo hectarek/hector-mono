@@ -1,7 +1,6 @@
 ---
-description: Checklist for onboarding new apps into the monorepo
-globs: 
-alwaysApply: false
+name: new-app
+description: Checklist for adding a new Next.js app to this monorepo (package.json scripts and workspace packages, tsconfig, styling through @repo/ui, files to delete, the app's AGENTS.md, checks). Use when creating an app under apps/ or bringing an existing Next.js app into the repo.
 ---
 
 # New App Onboarding Checklist
@@ -41,7 +40,7 @@ Update `package.json` (take current versions from an existing app, e.g. `apps/he
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^5"
+    "typescript": "…"
   }
 }
 ```
@@ -64,7 +63,7 @@ Replace `tsconfig.json`:
 
 ## 3. Styling, Fonts, Dark Mode
 
-Follow "Setting up an app" in [docs/ui-package.md](../../docs/ui-package.md): `components.json`, `postcss.config.mjs`, a one-line `app/globals.css`, fonts on `<html>`, and `ThemeProvider` from `@repo/ui` in `app/_providers/providers.tsx`. Don't define tokens or add `@source` lines in the app.
+Follow "Setting up an app" in [docs/ui-package.md](../../../docs/ui-package.md): `components.json`, `postcss.config.mjs`, a one-line `app/globals.css`, fonts on `<html>`, and `ThemeProvider` from `@repo/ui` in `app/_providers/providers.tsx`. Don't define tokens or add `@source` lines in the app.
 
 ## 4. Files to Delete
 
@@ -75,7 +74,12 @@ Remove these files/folders (use monorepo equivalents):
 - [ ] `tailwind.config.ts` (Tailwind v4 uses CSS config)
 - [ ] Unused public assets (`next.svg`, `vercel.svg`, etc.)
 
-## 5. Final Steps
+## 5. Agent Context
+
+- [ ] An `AGENTS.md` for the app, modelled on an app of the same complexity (`apps/relationship-meter/AGENTS.md` for a simple one, `apps/hectors-recipes/AGENTS.md` for one with a backend), with its scoped check commands
+- [ ] The app in the root `AGENTS.md` "Monorepo Structure" block and in the README's app table
+
+## 6. Final Steps
 
 1. Run `bun install` from root
 2. Run `bun check && bun ts` to verify

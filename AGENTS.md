@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Important
-- This file is the **canonical agent context** for the monorepo (read by Claude Code, Cursor, Codex, etc.). `.cursor/rules` only holds Cursor-specific or on-demand reference material — don&apos;t duplicate this file there.
+- This file is the **canonical agent context** for the monorepo (read by Claude Code, Cursor, Codex, etc.). Claude Code's project settings, hook and skills live in `.claude/`; don't duplicate this file anywhere.
 - MUST fully read this file before writing ANY code
 - Don't add a `CLAUDE.md` or `CLAUDE.local.md` anywhere in the repo: Claude Code reads `AGENTS.md` only when neither exists in the working directory or above it
 - Each app in `apps/` has its own `AGENTS.md` with app-specific context — read it too. Scope work to the relevant app directory.
@@ -19,7 +19,7 @@ Context is part of the deliverable — keep it lean, layered, and current. See [
 - Read the relevant `AGENTS.md` (root + app + `packages/ui`) before editing; scope work to that app.
 - When you learn something durable (new pattern, structure, or gotcha), write it back into the nearest `AGENTS.md` in the same change.
 - Fix or remove any stale reference you touch — stale context misleads more than missing context.
-- Commit `AGENTS.md` / `.cursor/` / `docs/` updates alongside the code they describe.
+- Commit `AGENTS.md` / `.claude/` / `docs/` updates alongside the code they describe.
 - Big reference material → a kebab-case doc under `docs/` (global) or `apps/<app>/docs/` (app-specific), linked from `AGENTS.md` — don&apos;t inline it here.
 
 ## Do

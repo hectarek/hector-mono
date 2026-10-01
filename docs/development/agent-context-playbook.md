@@ -26,14 +26,15 @@ The "harness" — everything around the model — matters as much as the model. 
 | Layer | What it is | This repo |
 | --- | --- | --- |
 | **`AGENTS.md`** | Context files read automatically every session. Root = big picture; per-dir = local conventions. | ✅ Canonical. Root `AGENTS.md` + one per app + `packages/ui`. **Start here.** |
-| **Ignore files** | Exclude generated/build/vendor noise from agent search. | ✅ `.cursorignore` (lockfile, `.next`, `.turbo`, migrations, generated types). |
-| **Hooks** | Scripts at events; deterministic enforcement + self-improvement. | ✅ Biome formats each edited file: Cursor's `afterFileEdit` (`.cursor/hooks.json`) and Claude Code's `PostToolUse` (`.claude/settings.json`) both run `.cursor/hooks/format.sh`. |
+| **Ignore files** | Exclude generated/build/vendor noise from agent search. | ✅ Build output and dependencies are gitignored. The lockfile and `db/migrations/` are tracked, so read `schema.ts` rather than the migrations. |
+| **Hooks** | Scripts at events; deterministic enforcement + self-improvement. | ✅ Claude Code's `PostToolUse` hook (`.claude/settings.json`) runs `.claude/hooks/format.sh`: Biome formats each edited file. |
 | **Permissions** | What an agent may run without asking, must ask about, or can't read. | ✅ Claude Code: `.claude/settings.json` allows the checks (`bun check`, `bun ts`, tests, `gh pr view`), asks before `git stash`, discarding changes or `gh pr merge`, and denies reading `.env` files (Claude's Read tool only; a shell command isn't covered). Personal additions go in the gitignored `.claude/settings.local.json`. |
-| **Rules** | Cursor-specific or on-demand reference. | ✅ Trimmed `.cursor/rules` — no duplication of `AGENTS.md`. |
-| **Skills** | On-demand expertise, path-scoped. | Global skills only; add project skills when a workflow repeats. |
-| **LSP** | Symbol-level navigation. | ✅ Built into Cursor. |
+| **Skills** | On-demand expertise for a repeated multi-step workflow. | ✅ `.claude/skills/new-app` (adding an app to the monorepo). Add one when a workflow repeats. |
+| **LSP** | Symbol-level navigation. | From the editor; agents navigate by search and by reading files. |
 | **Subagents** | Isolated context for explore-vs-edit splits. | Use a subagent (Claude Code's Agent tool) for broad exploration; edit in the main session. |
 | **MCP** | Connections to external tools/data. | Configured (Neon, Vercel, GitHub, etc.). Build only after the basics are solid. |
+
+Cursor's setup (`.cursor/`, `.cursorignore`) was retired on 2026-10-01, since Claude Code is the agent used here; Cursor and Codex still read `AGENTS.md`.
 
 **Rule of thumb:** if it's project knowledge → `AGENTS.md`. If it's reusable expertise across projects → a skill. If it must run automatically → a hook.
 
@@ -42,9 +43,9 @@ The "harness" — everything around the model — matters as much as the model. 
 ## The context-file rules
 
 1. **Lean and layered.** The root `AGENTS.md` is pointers + critical gotchas only. Local conventions live in the nearest `AGENTS.md`. Agents load them additively as they walk the tree, so root context is never lost.
-2. **`AGENTS.md` is the single source of truth.** Don't duplicate it into `.cursor/rules`. Duplicate context is double the maintenance and double the drift.
+2. **`AGENTS.md` is the single source of truth.** Don't duplicate it into tool-specific files (a `CLAUDE.md`, editor rules). Duplicate context is double the maintenance and double the drift.
 3. **Scope to the subdirectory.** Work in the relevant app folder, not the repo root. Per-app `AGENTS.md` files carry the scoped `bun check --filter=<app>` / `bun ts --filter=<app>` commands — use them instead of running the whole monorepo.
-4. **Keep generated files out of context** via `.cursorignore`. If you start working _on_ generated output, override locally — don't delete the shared ignore.
+4. **Keep generated files out of context.** Build output and dependencies are gitignored; for the database, read `db/schema.ts`, not the generated migrations.
 5. **Provide a map when structure doesn't.** The root `AGENTS.md` "Monorepo Structure" block is that table of contents.
 6. **No `CLAUDE.md`.** Claude Code (v2.1.277+) reads `AGENTS.md` itself, but only when there's no `CLAUDE.md` or `CLAUDE.local.md` in the working directory or above it, so adding one hides the `AGENTS.md` files ([Claude Code docs](https://code.claude.com/docs/en/memory#agents-md)).
 
@@ -62,7 +63,7 @@ Context rots. Models also evolve — instructions that helped an older model can
    - New pattern, convention, or gotcha → the nearest `AGENTS.md`.
    - New folder/module/entry point → update that app's structure block.
    - A workaround for a model/tool limitation → note it _and_ a date, so it can be retired later.
-4. **Commit context with the code.** `AGENTS.md`, `.cursor/`, and docs changes ship in the same PR as the change they describe. Context is version-controlled, reviewed, and diffable like any other code.
+4. **Commit context with the code.** `AGENTS.md`, `.claude/`, and docs changes ship in the same PR as the change they describe. Context is version-controlled, reviewed, and diffable like any other code.
 5. **Prune.** If a file/convention referenced in `AGENTS.md` no longer exists, fix or remove the reference in the same change. Stale context is worse than none — it actively misleads.
 
 **What does NOT belong in `AGENTS.md`:** changelogs, one-off task notes, long reference material. Those go in `docs/` (and get linked, not inlined).

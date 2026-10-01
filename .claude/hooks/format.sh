@@ -1,10 +1,10 @@
 #!/bin/bash
-# Formats and lint-fixes an edited source file with Biome. Run by Cursor's afterFileEdit hook
-# (.cursor/hooks.json) and Claude Code's PostToolUse hook (.claude/settings.json).
+# Formats and lint-fixes an edited source file with Biome: Claude Code's PostToolUse hook
+# (.claude/settings.json) after Edit and Write.
 # Fails open (exit 0) so a formatting hiccup never blocks the agent.
 
 input=$(cat)
-file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // .file_path // .filePath // .path // (.edits[0].file_path) // empty')
+file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 
 [ -z "$file" ] && exit 0
 [ -f "$file" ] || exit 0
