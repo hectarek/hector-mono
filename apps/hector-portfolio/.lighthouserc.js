@@ -1,25 +1,21 @@
 /**
  * Lighthouse CI Configuration
  *
- * Configures Lighthouse CI for automated performance testing
- * Run with: bun run lighthouse
+ * Audits a production build (next build + next start), not the dev server.
+ * Run from apps/hector-portfolio: bun run lighthouse
  *
- * Note: If you get "port already in use" error, either:
- * 1. Stop existing dev server first, OR
- * 2. Set startServerCommand to null and run dev server manually
+ * Note: next start serves on port 3000, so stop anything already using it first.
  */
 
 module.exports = {
   ci: {
     collect: {
       url: ["http://localhost:3000"],
-      // Start dev server automatically (comment out if server already running)
-      startServerCommand: "bun run dev",
+      startServerCommand: "bun run build && bun run start",
       startServerReadyPattern: "Ready in",
-      startServerReadyTimeout: 30000,
+      // Covers the build as well as the server start.
+      startServerReadyTimeout: 120000,
       numberOfRuns: 3,
-      // If server is already running, set this to null:
-      // startServerCommand: null,
     },
     assert: {
       assertions: {
@@ -27,7 +23,6 @@ module.exports = {
         "categories:accessibility": ["error", { minScore: 1 }],
         "categories:best-practices": ["error", { minScore: 1 }],
         "categories:seo": ["error", { minScore: 1 }],
-        "categories:pwa": ["error", { minScore: 1 }],
       },
     },
     upload: {

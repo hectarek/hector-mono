@@ -1,12 +1,11 @@
 # Application / Repo Specification
 
 ## 1. Summary
-Briefly describe what this repo or feature does.  
 This is a personal portfolio website for myself.
+
 ---
 
 ## 2. Goals
-List what this code *should accomplish*.  
 - [ ] Should be a portfolio to convey my skills and experience
 - [ ] Should be mobile responsive and accessible on all devices 
 - [ ] Should be professional and visually appealing to potential employers
@@ -19,11 +18,9 @@ List what this code *should accomplish*.
 ---
 
 ## 3. Non-Goals
-List what is *explicitly not included* in scope.  
 - [ ] Should not include authentication or role-based permissions
 - [ ] Should not include a blog section
 - [ ] Should not include a contact form section
-- 
 
 ---
 
@@ -45,6 +42,10 @@ List what is *explicitly not included* in scope.
         - There should be a dynamic page that shows the details of the project
 - Contact Page
     - Simple page with links to my social media profiles, email, etc.
+- Now Page
+    - What I'm working on right now: current projects, focus, and learning
+- Reading Page
+    - Newsletters, blogs, podcasts, and feeds I use to stay current (unlisted: not in the nav, and `noIndex`)
 
 ## 5. My Brand and Personality
 
@@ -70,7 +71,6 @@ Voice Qualities
 Tone Adjustments by Context
 	•	Homepage: confident, concise, high-level.
 	•	Project Pages: structured, technical, explicit about process and decisions.
-	•	Blogs/Thinking: explanatory, systemic, reference-friendly.
 
 ⸻
 
@@ -92,7 +92,7 @@ B. Structural Style
 	•	Use clear section headers: “Problem,” “Constraints,” “Solution,” “Results.”
 
 C. Technical Style
-	•	Name the tools only where relevant (Next.js 14, Bun, Drizzle, Vercel Blob, Railroad microservices).
+	•	Name the tools only where relevant (Next.js 16, Bun, Drizzle, Vercel Blob, Railroad microservices).
 	•	Show architecture diagrams or schemas (JSON, TypeScript interfaces, system flows).
 	•	Emphasize reproducibility and automation.
 

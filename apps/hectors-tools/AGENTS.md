@@ -7,6 +7,8 @@ A catalog of small AI and general-purpose web tools, navigable from a `@repo/ui`
 
 This is a **complex app** structurally — it uses clean architecture and DI — but it is currently **lean**: no database, no auth, no transactions. Those layers are deferred until a specific tool needs persistence or users. (Tools therefore skip the `userId`/auth gate in controllers and actions.)
 
+Deployment: not deployed; no Vercel project.
+
 ## Stack
 - Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui via `@repo/ui`
 - DI via `@evyweb/ioctopus` (wires `ILoggerService` + `IAiService` and the resume-analyzer use-case/controller)
@@ -14,7 +16,7 @@ This is a **complex app** structurally — it uses clean architecture and DI —
 - No DB / no auth (yet)
 
 ## AI / environment
-- The Gateway is the AI SDK's built-in default provider — no per-provider keys. Set in `.env.local`:
+- The Gateway is the AI SDK's built-in default provider — no per-provider keys. Set in `.env`:
   - `AI_GATEWAY_API_KEY` — Vercel AI Gateway key (required for live calls).
   - `AI_MODEL` — optional model override (default `anthropic/claude-sonnet-4.6`), as a `provider/model` string.
 - **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser.
@@ -41,9 +43,16 @@ src/
   entities/
     errors/common.ts          # InputParseError, NotFoundError, etc.
     models/logger.model.ts    # LogLevel + LOG_LEVEL_PRIORITY
+    models/resume-analysis.model.ts       # Resume Analyzer Zod schemas (input, file, result)
   application/
+    services/ai.service.interface.ts      # IAiService
     services/logger.service.interface.ts  # ILoggerService
+    use-cases/resume-analyzer/            # analyze-resume
+  interface-adapters/
+    controllers/resume-analyzer/          # analyze-resume
   infrastructure/
+    services/ai.service.ts                # AiService (the only file that imports `ai`)
+    services/mock-ai.service.ts           # MockAiService (NODE_ENV=test)
     services/console-logger.service.ts    # ConsoleLoggerService
     services/mock-logger.service.ts       # MockLoggerService (NODE_ENV=test)
 
@@ -51,16 +60,17 @@ di/
   container.ts                # getInjection<K>(symbol)
   types.ts                    # DI_SYMBOLS + DI_RETURN_TYPES
   modules/logger.module.ts
+  modules/resume-analyzer.module.ts  # IAiService + the resume-analyzer use case and controller
 
 lib/
   logger.ts                   # Standalone ConsoleLoggerService for edge/root code
 ```
 
-**`lib/` vs `app/_lib/`:** `lib/` lives at the app root (alongside `db/`, outside `src/`) for framework-agnostic shared initialization imported across layers via `@/lib/*` — e.g. the edge-safe logger used where the DI container isn't available (proxy, route handlers). This matches `stash`/`hectors-recipes`. `app/_lib/` is an App-Router-private folder for route-scoped modules (the tool registry). They are not interchangeable — don't move `lib/` under `app/`.
+**`lib/` vs `app/_lib/`:** `lib/` lives at the app root (outside `src/`) for framework-agnostic shared initialization imported across layers via `@/lib/*` — e.g. the edge-safe logger for code where the DI container isn't available, kept for the first route handler or proxy (nothing imports it yet). This matches `stash`/`hectors-recipes`. `app/_lib/` is an App-Router-private folder for route-scoped modules (the tool registry). They are not interchangeable — don't move `lib/` under `app/`.
 
 **Components:** all components live under `app/_components/`, never inside a route folder. Layout-level components sit at the top; route-specific components go in a `app/_components/<route-id>/` subfolder (e.g. `resume-analyzer/`). Route `page.tsx` files stay thin and import from there.
 
-When a tool needs an inward layer (entity, use-case, controller, repository) follow the canonical [clean-architecture guide](../../docs/clean-architecture.md). `stash` is the reference implementation.
+When a tool needs an inward layer (entity, use-case, controller, repository) follow the canonical [clean-architecture guide](../../docs/clean-architecture.md). `hectors-recipes` is the reference implementation; where `stash` differs, follow recipes.
 
 ## Adding a Tool
 
@@ -72,10 +82,10 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
    - Service impl → `src/infrastructure/services/<name>.service.ts`
    - Use case → `src/application/use-cases/<tool-id>/<name>.use-case.ts`
    - Controller → `src/interface-adapters/controllers/<tool-id>/<name>.controller.ts`
-   - DI symbol + binding → `di/types.ts` + `di/modules/<tool-id>.module.ts` (load it in `di/container.ts`)
+   - DI symbol + binding → `di/types.ts` + `di/modules/<tool-id>.module.ts` (load it in `di/container.ts`). `IAiService` is bound once (in `resume-analyzer.module.ts`); new tools reuse it, don't re-bind.
    - Server action → `app/actions/<tool-id>.ts`
    - UI → `app/_components/<tool-id>/` (imported by the thin `app/tools/<id>/page.tsx`)
-4. Only introduce `db/`, `proxy.ts`, or auth layers when a tool genuinely needs persistence or user identity. Port from `stash` when that day comes.
+4. Only introduce `db/`, `proxy.ts`, or auth layers when a tool genuinely needs persistence or user identity. Port from `hectors-recipes` when that day comes.
 
 ## Conventions
 
@@ -85,7 +95,7 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
 
 ### File Naming
 - All files and folders use kebab-case.
-- Model files use `.model.ts`, interfaces use `.interface.ts`, mocks use `.mock.ts`.
+- Model files use `.model.ts`, interfaces use `.interface.ts`; mocks are `<name>.repository.mock.ts` for repositories and `mock-<name>.service.ts` for services.
 
 ### Zod 4
 - `import { z } from "zod"` (we are on `zod@^4`).
@@ -105,7 +115,7 @@ bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ```
 
 ## Before Finishing Any Change
+Scope checks to this app:
 ```bash
-bun check --filter=hectors-tools
-bun ts --filter=hectors-tools
+bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ```

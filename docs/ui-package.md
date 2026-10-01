@@ -17,7 +17,7 @@ Style with the theme's utilities (`bg-primary`, `text-muted-foreground`, `text-w
 
 Copy an existing app where you can: `apps/hectors-tools` for a plain app, `apps/hectors-recipes` for one with Neon Auth. The pieces:
 
-**`package.json`**: `"@repo/ui": "workspace:*"`, plus `tailwindcss`, `@tailwindcss/postcss` and `tw-animate-css` as dev dependencies. Not `next-themes`; it comes through `@repo/ui`.
+**`package.json`**: `"@repo/ui": "workspace:*"`, plus `tailwindcss` and `@tailwindcss/postcss` as dev dependencies. Not `next-themes`; it comes through `@repo/ui`. Not `tw-animate-css` either: `@repo/ui`'s `globals.css` imports it and resolves it from `@repo/ui`'s own devDependencies (`hectors-recipes` and `stash` don't list it).
 
 **`components.json`** (so the shadcn CLI, run from the app, installs components into `packages/ui`):
 
@@ -72,7 +72,7 @@ const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
 </html>
 ```
 
-**`app/_providers/providers.tsx`**: `ThemeProvider` from `@repo/ui` at the top. It follows the device's light or dark setting by default; read or change the mode with `useTheme` (`setTheme("light" | "dark" | "system")`). With Neon Auth, `ThemeProvider` goes outside `NeonAuthUIProvider`.
+**`app/_providers/providers.tsx`**: `ThemeProvider` from `@repo/ui` at the top. It follows the device's light or dark setting by default; read or change the mode with `useTheme` (`setTheme("light" | "dark" | "system")`). With Neon Auth, `ThemeProvider` goes outside `NeonAuthUIProvider`. A light-only app leaves it out: `relationship-meter` renders only `TooltipProvider`.
 
 ```tsx
 "use client";

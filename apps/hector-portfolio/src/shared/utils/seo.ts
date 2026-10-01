@@ -5,6 +5,7 @@
  */
 
 import type { Metadata } from "next";
+import { SITE_URL } from "@/src/shared/config/site";
 
 export interface SEOConfig {
   title: string;
@@ -30,13 +31,12 @@ export function generateMetadata(config: SEOConfig): Metadata {
     noIndex = false,
   } = config;
 
-  const baseUrl = process.env["NEXT_PUBLIC_SITE_URL"] || "https://example.com";
   const fullImageUrl = image
     ? image.startsWith("http")
       ? image
-      : `${baseUrl}${image}`
+      : `${SITE_URL}${image}`
     : undefined;
-  const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
+  const fullUrl = url ? `${SITE_URL}${url}` : SITE_URL;
 
   const metadata: Metadata = {
     title,
@@ -70,8 +70,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
  * Generate canonical URL
  */
 export function generateCanonicalUrl(path: string, baseUrl?: string): string {
-  const base =
-    baseUrl || process.env["NEXT_PUBLIC_SITE_URL"] || "https://example.com";
+  const base = baseUrl || SITE_URL;
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${base}${cleanPath}`;
 }

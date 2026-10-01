@@ -1,6 +1,6 @@
 # stash
 
-Stash/bookmark app with auth and a database. The reference implementation for clean architecture in this monorepo. Part of [hector-mono](../../README.md).
+Stash/bookmark app with auth and a database. The first app built on the monorepo's clean architecture; `hectors-recipes` is now the reference implementation. Part of [hector-mono](../../README.md).
 
 > Agent context lives in [`AGENTS.md`](./AGENTS.md) — it's detailed and authoritative. Read it before making changes.
 
@@ -20,8 +20,8 @@ Full clean architecture: `entities → application → interface-adapters → in
 ```bash
 bun run dev --filter=stash
 bun run build --filter=stash
-bun run db:push --filter=stash
-bun run db:studio --filter=stash
+bun run --filter=stash db:push
+bun run --filter=stash db:studio
 bun check --filter=stash && bun ts --filter=stash
 ```
 

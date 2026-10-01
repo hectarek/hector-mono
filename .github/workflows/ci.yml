@@ -1,6 +1,5 @@
 # Lint, typecheck and test whatever a PR changes (and anything that depends on it).
-# Modelled on set-mono's CI, minus the team guardrails. Builds aren't repeated here:
-# Vercel builds every PR for each deployed app.
+# Builds aren't repeated here: Vercel builds every PR for each deployed app.
 name: CI
 
 on:

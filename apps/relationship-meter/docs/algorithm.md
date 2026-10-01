@@ -316,7 +316,7 @@ newStrength = min(100, max(0, currentStrength + finalBoost))
 
 ### Activity Diversity
 
-Relationships are stronger when people share multiple contexts:
+Relationships are stronger when people share multiple contexts. Computed but not yet applied to strength: `applyInteraction` updates the diversity level, and nothing calls `calculateComprehensiveScore`, which would apply the multiplier.
 
 | Contexts | Multiplier | Example |
 |----------|------------|---------|
@@ -326,7 +326,7 @@ Relationships are stronger when people share multiple contexts:
 
 ### Interdependence
 
-How much you influence each other's lives:
+How much you influence each other's lives. Recorded but not yet applied to strength: the level is set in the edit dialog, and nothing calls `getInterdependenceWeight` or `calculateComprehensiveScore`.
 
 | Level | Weight | Description |
 |-------|--------|-------------|

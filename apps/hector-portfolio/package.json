@@ -5,10 +5,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hectarek/hector-portfolio"
+    "url": "https://github.com/hectarek/hector-mono",
+    "directory": "apps/hector-portfolio"
   },
   "bugs": {
-    "url": "https://github.com/hectarek/hector-portfolio/issues"
+    "url": "https://github.com/hectarek/hector-mono/issues"
   },
   "scripts": {
     "dev": "next dev",

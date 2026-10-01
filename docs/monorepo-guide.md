@@ -24,6 +24,7 @@ hector-mono/
     hectors-recipes/      # Recipes app (Neon + Drizzle + auth)
     stash/                # Stash/bookmark app (Neon + Drizzle + auth)
     relationship-meter/   # Client-side relationship tracker
+    hectors-tools/        # AI/web tools catalog (AI SDK, no DB or auth)
   packages/
     ui/                   # Shared UI components (shadcn/ui based)
     biome-config/         # Shared Biome linting config
@@ -34,7 +35,7 @@ hector-mono/
   bun.lock                # Single lockfile for entire monorepo
 ```
 
-**Key principle**: The root `package.json` only contains monorepo-level tooling (`turbo`, `biome`, `typescript`, `tsx`). App-specific dependencies (`next`, `react`, `drizzle-orm`, etc.) belong in each app&apos;s own `package.json`.
+**Key principle**: The root `package.json` only contains monorepo-level tooling (`@biomejs/biome`, `@shadcn/lint`, `drizzle-kit`, `oxlint`, `tsx`, `turbo`, `typescript`). App-specific dependencies (`next`, `react`, `drizzle-orm`, etc.) belong in each app's own `package.json`.
 
 ---
 
@@ -53,21 +54,19 @@ This tells bun that every directory matching those globs is a **workspace member
 1. Reads every `package.json` across all workspaces
 2. Resolves a single unified dependency tree
 3. Generates one `bun.lock` at the root
-4. Installs packages into `node_modules/` using **hoisting**
+4. Installs packages with the **isolated** linker (below)
 
-### Hoisting
+### Isolated installs
 
-Bun installs most packages in the **root** `node_modules/`. All workspaces share these packages via Node&apos;s module resolution (Node walks up directories until it finds `node_modules`).
+`bun.lock` has `configVersion: 1`, and for a workspace that makes Bun's isolated linker the default ([Bun: isolated installs](https://bun.com/docs/pm/isolated-installs)). Each package version is stored once in `node_modules/.bun/`, and each workspace's own `node_modules/` holds symlinks to only the packages it declares. The root `node_modules/` holds the root's own devDependencies.
 
-When hoisting isn&apos;t possible (version conflicts), bun creates a **local** `node_modules/` inside the app with just the conflicting packages. Everything else still resolves from root.
-
-**Example**: If `@react-email/tailwind` needs exactly `tailwindcss@4.1.18` but your apps resolve `^4` to `4.2.2`, bun can&apos;t put a single version at root. It installs `4.2.2` in each app&apos;s local `node_modules/` and `4.1.18` in the `.bun/` cache for the transitive dep.
+So a workspace can't import a package it doesn't declare, even when another workspace has it. When two workspaces resolve the same package to different versions, each gets its own copy.
 
 ### Why `bun install` must run from the root
 
 In a workspace, the lockfile lives at the root. Running `bun install` from an app directory:
 
-- Detects it&apos;s inside a workspace
+- Detects it's inside a workspace
 - Validates against the existing lockfile
 - Reports "no changes" even if symlinks are broken
 - **Does not** do a fresh resolution or create missing links
@@ -113,9 +112,9 @@ The distinction is: `bun install` = root only, `bun run <script>` = anywhere.
 }
 ```
 
-When you run `turbo run check-types`, turbo looks at every workspace and runs the `check-types` script if that workspace has one. **If a workspace doesn&apos;t have a matching script name, turbo silently skips it.**
+When you run `turbo run check-types`, turbo looks at every workspace and runs the `check-types` script if that workspace has one. **If a workspace doesn't have a matching script name, turbo silently skips it.**
 
-This means script naming is critical. If the root runs `turbo run check-types` but an app only has a `ts` script, that app&apos;s typecheck will never run.
+This means script naming is critical. If the root runs `turbo run check-types` but an app only has a `ts` script, that app's typecheck will never run.
 
 ### Script naming convention
 
@@ -128,7 +127,7 @@ All Next.js apps in this monorepo use:
 | `start` | `next start` | Start production server |
 | `ts` | `tsc --noEmit` | Typecheck (local alias) |
 | `check-types` | `tsc --noEmit` | Typecheck (turbo alias) |
-| `lint` | `biome check --write` | Lint and format (turbo alias) |
+| `lint` | `biome check --write && oxlint .` | Biome lint and format, then the design-system lint (turbo alias) |
 
 Both `ts` and `check-types` run the same command. `ts` is a convenience for running locally (`bun ts`), `check-types` is what turbo looks for. Same pattern for `lint`.
 
@@ -158,7 +157,7 @@ The `^` prefix means "run this task in all dependencies first." So if `hectors-r
 
 ### Caching
 
-Turbo caches task outputs. If inputs haven&apos;t changed, it replays the cached output instantly. The `.turbo/` directories store this cache locally. The `clean:install` script clears these caches along with `node_modules`.
+Turbo caches task outputs. If inputs haven't changed, it replays the cached output instantly. The `.turbo/` directories store this cache locally. The `clean:install` script clears these caches along with every `node_modules` and `bun.lock` (see [Troubleshooting](#troubleshooting)).
 
 ---
 
@@ -168,131 +167,75 @@ Turbo caches task outputs. If inputs haven&apos;t changed, it replays the cached
 
 | Location | What goes there | Examples |
 |---|---|---|
-| Root `devDependencies` | Monorepo tooling used across all workspaces | `turbo`, `@biomejs/biome`, `typescript`, `tsx` |
+| Root `devDependencies` | Monorepo tooling used across all workspaces | `turbo`, `@biomejs/biome`, `oxlint`, `@shadcn/lint`, `typescript`, `tsx`, `drizzle-kit` |
 | Root `dependencies` | Nothing — keep empty | — |
 | App `dependencies` | Runtime deps for that specific app | `next`, `react`, `drizzle-orm` |
 | App `devDependencies` | Build/dev-time deps for that specific app | `tailwindcss`, `@types/react`, `typescript` |
-| Package `dependencies` | Runtime deps for the shared package | `tailwind-merge`, `clsx` |
+| Package `dependencies` | Runtime deps for the shared package | `@base-ui/react`, `cn` |
 | Package `peerDependencies` | Deps the consumer must provide | `react`, `react-dom` |
 
-**Why keep root `dependencies` empty?** Root deps are available to all workspaces via hoisting, which creates confusion about where a dep actually belongs. It also installs unnecessary packages for apps that don&apos;t need them. Each app should declare its own deps.
+**Why keep root `dependencies` empty?** Root deps are reachable from every workspace (Node's resolution walks up to the root `node_modules/`), which creates confusion about where a dep actually belongs. It also installs unnecessary packages for apps that don't need them. Each app should declare its own deps.
 
 ### Version range consistency
 
-When multiple workspaces depend on the same package, use the **same version range string** everywhere. This helps bun deduplicate and hoist a single copy.
+When multiple workspaces depend on the same package, use the **same version string** everywhere (`"tailwindcss": "^4.3.3"` in every app), so they resolve to one version. Two versions mean two copies, and for a package that holds shared state that fails without an error: an app's `recharts` chart inside `@repo/ui`'s `ChartContainer` renders nothing, and a second `next-themes` can split the theme context (see [packages/ui/AGENTS.md](../packages/ui/AGENTS.md)).
 
-```json
-// Good — all apps use the same range
-"tailwindcss": "^4"
-"tailwindcss": "^4"
-"tailwindcss": "^4"
+### Version ranges in practice
 
-// Bad — different ranges, may resolve to different versions
-"tailwindcss": "^4"
-"tailwindcss": "^4.1.18"
-"tailwindcss": "4.2.2"
-```
-
-Even if `^4` and `^4.1.18` resolve to the same version today, the different range strings can cause bun to treat them as separate entries and break hoisting.
-
-### Version range best practices
-
-- **`^major`** (e.g., `^4`): For most deps. Accepts any compatible version within the major. Broadest range, best for deduplication.
-- **`^major.minor`** (e.g., `^4.1`): When you need features from a specific minor release.
-- **`^major.minor.patch`** (e.g., `^4.1.18`): When you need a specific bugfix. Avoid unless necessary — it limits deduplication.
-- **Exact** (e.g., `4.1.18`): Only for deps that break on minor/patch bumps. Rare.
+- **`^major.minor.patch`** (e.g. `^4.3.3`, what `bun add` writes): most deps.
+- **Exact** (e.g. `16.3.7`): `next`, `react` and `react-dom` (the same in every app), `recharts` (identical in `packages/ui` and every app that imports it), and a few tools and SDKs (`@biomejs/biome`, `@types/bun`, `babel-plugin-react-compiler`, and recipes' `ai`, `ably`, `@ai-sdk/gateway`).
 - **`workspace:*`**: For internal packages (`@repo/ui`, `@repo/biome-config`). Always use this for cross-workspace references.
 
 ### Updating dependencies
 
 ```bash
-bun run deps:check        # See what's outdated
-bun run deps:update       # Update all to latest compatible
-bun run deps:interactive  # Interactive update picker
+bun run deps:check        # bun outdated --recursive: what's outdated in every workspace
+bun run deps:update       # bun update --latest --recursive: see below
+bun run deps:interactive  # bun update --interactive --recursive: pick what to update
 ```
 
-After updating, always run `bun ts && bun check` to verify nothing broke.
+`deps:update` is not "latest compatible": `--latest` ignores the current ranges, jumps major versions, and rewrites the ranges in every `package.json`. Read the changelogs of anything that crossed a major, and check that `recharts` is still the identical version in `packages/ui` and every app that imports it.
+
+After updating, always run `bun ts && bun check && bun run test` to verify nothing broke.
 
 ---
 
 ## Adding a New App
 
-1. Create the directory: `apps/my-new-app/`
-2. Add a `package.json` with the standard scripts (`dev`, `build`, `start`, `ts`, `check-types`, `lint`)
-3. Use the same version ranges as existing apps for shared deps
-4. Add `@repo/ui`, `@repo/biome-config`, `@repo/typescript-config` as applicable
-5. Create a `tsconfig.json` extending `@repo/typescript-config/nextjs.json`
-6. Create a `biome.json` extending `@repo/biome-config`
-7. Run `bun install` from the root
-8. Verify: `bun ts` and `bun check` should include the new app
-
-### Standard scripts template (Next.js app)
-
-```json
-{
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "ts": "tsc --noEmit",
-    "check-types": "tsc --noEmit",
-    "lint": "biome check --write"
-  }
-}
-```
-
-Add app-specific scripts as needed (`db:push`, `test`, etc.) — these don&apos;t need to be universal.
-
-### Standard devDependencies template (Next.js app)
-
-```json
-{
-  "devDependencies": {
-    "@repo/biome-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^25.1.0",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
-}
-```
+Follow the `new-app` skill ([.claude/skills/new-app/SKILL.md](../.claude/skills/new-app/SKILL.md); in Claude Code, `/new-app`). It covers the `package.json` scripts and dependencies, `tsconfig.json`, styling through `@repo/ui`, the design-system lint, the app's `turbo.json`, tests, files to delete, and the app's `AGENTS.md`. There's no per-app `biome.json`: the root one covers every app.
 
 ---
 
 ## Deployment
 
-### How Vercel handles monorepos
+### How Vercel builds an app
 
-When deploying a specific app (e.g., `hectors-recipes`) to Vercel:
+Each deployed app is its own Vercel project whose **root directory is the app's folder** (`apps/hector-portfolio`, `apps/hectors-recipes`, `apps/relationship-meter`), with the Next.js framework preset. For each deploy, Vercel:
 
-1. Vercel clones the entire monorepo
-2. Runs `bun install` from the root (creates full `node_modules` with hoisting)
-3. Runs `turbo run build --filter=hectors-recipes`
-4. Turbo resolves the dependency graph (`@repo/ui` builds first via `dependsOn: ["^build"]`)
-5. Next.js outputs `.next/` which Vercel deploys
+1. Clones the whole monorepo and runs `bun install` (it detects Bun from the root `bun.lock`)
+2. Detects Turborepo and runs `turbo run build` from the app's folder, which Turborepo scopes to that app and its dependencies
+3. Deploys the app's `.next/` output
+
+Because the build runs through Turborepo, its strict env mode applies: an env var not listed in the app's `turbo.json` (`tasks.build.env`) is withheld from `next build`, even when it's set in Vercel.
+
+`apps/hector-portfolio/vercel.json` overrides the build command with `bun run build` (the app's own `next build`, without Turborepo), and sets its install command and a few env flags.
 
 ### Vercel project settings
 
-- **Root directory**: `/` (the monorepo root, not the app directory)
-- **Build command**: `turbo run build --filter=hectors-recipes`
-- **Install command**: `bun install` (default, runs from root)
-- **Output directory**: `apps/hectors-recipes/.next`
+- **Root directory**: the app's folder (e.g. `apps/hectors-recipes`)
+- **Framework preset**: Next.js. Build, install and output settings stay at the preset's defaults unless the app's `vercel.json` overrides them
 
 ### Important considerations
 
 - The `bun.lock` must be committed — Vercel uses it for deterministic installs
 - Environment variables are set per-project in Vercel, not in `.env` files
-- Turbo&apos;s remote caching can speed up CI/CD builds across deploys (optional, requires Vercel account linking)
+- Turbo's remote caching can speed up CI/CD builds across deploys (optional, requires Vercel account linking)
 
-### Deployments "blocked" (`TEAM_ACCESS_REQUIRED`)
+### Deploying from a public repo
 
-The projects live in the `hectareks-projects` Hobby team and the repo is private, so Vercel only builds commits whose GitHub author it can match to the team owner. It finds that owner through the GitHub **Login Connection** on the Vercel account ([Vercel: deploying private repos from Hobby teams](https://vercel.com/docs/git#using-hobby-teams)). If that connection moves to another Vercel account (e.g. a work account signed in with the same GitHub), every deploy, production included, shows "Deployment was blocked" and stays that way; nothing fails in the build.
+The projects live in the `hectareks-projects` Hobby team, connected to the public `hectarek/hector-mono`. Hector's pushes deploy as usual. A pull request from someone else's fork deploys only after Hector authorizes it from the link Vercel comments on the PR (Git Fork Protection, on in each project), and preview deployments need a Vercel login ([Vercel: deploying forks of public Git repositories](https://vercel.com/docs/git#deploying-forks-of-public-git-repositories)).
 
-- Confirm: `vercel api /v13/deployments/<deployment id> --scope hectareks-projects` shows `"seatBlock": {"blockCode": "TEAM_ACCESS_REQUIRED"}`.
-- Fix: reconnect GitHub under Account Settings → Authentication → Login Connections on the personal Vercel account, then push again (blocked deployments don't retry).
+While the repo was private (until 2026-10-01), Vercel only built commits whose author it matched to the team's owner through the GitHub **Login Connection**, and when that connection moved to another Vercel account every deploy was "blocked" (`TEAM_ACCESS_REQUIRED`). That rule is for private repos only ([Vercel: deploying private Git repositories](https://vercel.com/docs/git#deploying-private-git-repositories)). If the repo goes private again: `vercel api /v13/deployments/<deployment id> --scope hectareks-projects` shows the `seatBlock`; reconnect GitHub under Account Settings → Authentication → Login Connections on the personal Vercel account, then push again (blocked deployments don't retry).
 
 ---
 
@@ -320,21 +263,21 @@ bun run lint         # Lint this app only
 
 ```bash
 bun run deps:check       # See outdated deps across all workspaces
-bun run deps:update      # Update all to latest
+bun run deps:update      # Update all to latest, across majors, rewriting ranges (see Updating dependencies)
 bun run deps:interactive # Interactive update picker
 ```
 
 ### Troubleshooting
 
 ```bash
-bun run clean:install    # Nuclear option — wipe everything and reinstall
+bun run clean:install    # Nuclear option — delete every node_modules, the .turbo caches and bun.lock, then reinstall
 ```
 
 ---
 
 ## Troubleshooting
 
-### "Can&apos;t resolve &apos;X&apos;" errors
+### "Can't resolve 'X'" errors
 
 **Cause**: Package is in the lockfile but not properly linked in `node_modules`. Happens when the lockfile gets out of sync with installed packages.
 
@@ -343,29 +286,29 @@ bun run clean:install    # Nuclear option — wipe everything and reinstall
 bun run clean:install
 ```
 
+`clean:install` runs `rm -rf node_modules apps/*/node_modules packages/*/node_modules .turbo apps/*/.turbo packages/*/.turbo bun.lock && bun install`. Deleting `bun.lock` means a fresh resolution: every dependency can move to the newest version its range allows, so review the regenerated `bun.lock` before committing it.
+
 ### `bun ts` or `bun check` skips an app
 
 **Cause**: The app is missing the `check-types` or `lint` script that turbo looks for. Turbo silently skips workspaces without a matching script.
 
-**Fix**: Add the missing script to the app&apos;s `package.json`:
+**Fix**: Add the missing script to the app's `package.json`:
 ```json
 "check-types": "tsc --noEmit",
-"lint": "biome check --write"
+"lint": "biome check --write && oxlint ."
 ```
 
 ### `bun install` from app directory shows "no changes" but deps are missing
 
-**Cause**: In a workspace, `bun install` from a subdirectory validates against the existing lockfile but doesn&apos;t do a fresh resolution.
+**Cause**: In a workspace, `bun install` from a subdirectory validates against the existing lockfile but doesn't do a fresh resolution.
 
 **Fix**: Always run `bun install` from the monorepo root.
 
 ### Apps have local `node_modules/` directories
 
-**Cause**: Version conflicts prevent hoisting. When two packages need different versions of the same dependency, bun installs the app-specific version locally.
+**Cause**: Bun's isolated installs (see [Isolated installs](#isolated-installs)): each workspace's `node_modules/` holds symlinks to the packages it declares, which live in the root `node_modules/.bun/`.
 
-**Not a problem**: This is normal. The local `node_modules/` only contains conflicting packages; everything else resolves from root. Common culprit: transitive dependencies pinning exact versions (e.g., `@react-email/tailwind` pinning `tailwindcss@4.1.18` while apps use `^4`).
-
-**To minimize**: Use consistent, broad version ranges (`^4` over `^4.1.18`) across all workspaces.
+**Not a problem**: This is normal.
 
 ### `.next/types/` TypeScript errors
 
@@ -379,6 +322,6 @@ bun ts
 
 ### Peer dependency warnings during install
 
-**Cause**: A dependency declares a peer dependency that doesn&apos;t match the installed version. Common with `@neondatabase/auth` and `better-auth` ecosystem packages during beta periods.
+**Cause**: A dependency declares a peer dependency that doesn't match the installed version. Common with `@neondatabase/auth` and `better-auth` ecosystem packages during beta periods.
 
-**Usually safe to ignore**: These are warnings, not errors. If they cause runtime issues, check the package&apos;s changelog for compatibility notes.
+**Usually safe to ignore**: These are warnings, not errors. If they cause runtime issues, check the package's changelog for compatibility notes.

@@ -6,13 +6,13 @@ Personal monorepo for Hector Gonzalez's apps and shared packages. Turborepo + Bu
 
 ## Apps
 
-| App | What it is | Stack |
-|---|---|---|
-| [`hector-portfolio`](./apps/hector-portfolio) | Static personal portfolio | Next.js 16, React 19, Tailwind, Framer Motion — no backend |
-| [`relationship-meter`](./apps/relationship-meter) | Client-side relationship tracker | Next.js 16, React 19 — in-memory state, no backend |
-| [`hectors-recipes`](./apps/hectors-recipes) | Recipes app (auth + DB) | Next.js 16, Neon Postgres, Drizzle, Neon Auth, clean architecture |
-| [`stash`](./apps/stash) | Stash/bookmark app (auth + DB) | Next.js 16, Neon Postgres, Drizzle, Neon Auth, full clean architecture |
-| [`hectors-tools`](./apps/hectors-tools) | Catalog of small AI and web tools | Next.js 16, AI SDK via the Vercel AI Gateway, clean architecture + DI, no DB or auth yet |
+| App | What it is | Live | Stack |
+|---|---|---|---|
+| [`hector-portfolio`](./apps/hector-portfolio) | Static personal portfolio | [hectorfgonzalez.com](https://hectorfgonzalez.com) | Next.js 16, React 19, Tailwind, Framer Motion — no backend |
+| [`relationship-meter`](./apps/relationship-meter) | Client-side relationship tracker | [relationship-meter.vercel.app](https://relationship-meter.vercel.app) | Next.js 16, React 19 — in-memory state, no backend |
+| [`hectors-recipes`](./apps/hectors-recipes) | Recipes app (auth + DB) | [recipes.hectorfgonzalez.com](https://recipes.hectorfgonzalez.com) | Next.js 16, Neon Postgres, Drizzle, Neon Auth, clean architecture |
+| [`stash`](./apps/stash) | Stash/bookmark app (auth + DB) | — | Next.js 16, Neon Postgres, Drizzle, Neon Auth, full clean architecture |
+| [`hectors-tools`](./apps/hectors-tools) | Catalog of small AI and web tools | — | Next.js 16, AI SDK via the Vercel AI Gateway, clean architecture + DI, no DB or auth yet |
 
 ## Packages
 
@@ -27,6 +27,7 @@ Personal monorepo for Hector Gonzalez's apps and shared packages. Turborepo + Bu
 - **Bun** — package manager + runtime (never npm/yarn)
 - **Turborepo** — task orchestration + caching
 - **Biome** — lint + format (no ESLint/Prettier)
+- **Oxlint** — design-system lint only (`@shadcn/lint` rules on how apps use `@repo/ui`)
 - **TypeScript** — strict everywhere
 
 ## Quick start

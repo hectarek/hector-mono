@@ -1,8 +1,9 @@
 # AGENTS.md
 
 ## Important
-- This file is the **canonical agent context** for the monorepo (read by Claude Code, Cursor, Codex, etc.). `.cursor/rules` only holds Cursor-specific or on-demand reference material — don&apos;t duplicate this file there.
+- This file is the **canonical agent context** for the monorepo (read by Claude Code, Cursor, Codex, etc.). Claude Code's project settings, hook and skills live in `.claude/`; don't duplicate this file anywhere.
 - MUST fully read this file before writing ANY code
+- Don't add a `CLAUDE.md` or `CLAUDE.local.md` anywhere in the repo: Claude Code reads `AGENTS.md` only when neither exists in the working directory or above it
 - Each app in `apps/` has its own `AGENTS.md` with app-specific context — read it too. Scope work to the relevant app directory.
 - When unsure about pattern complexity, check **Pattern Complexity** section below
 - Simplicity wins: YAGNI, KISS, Rule of Three
@@ -18,42 +19,43 @@ Context is part of the deliverable — keep it lean, layered, and current. See [
 - Read the relevant `AGENTS.md` (root + app + `packages/ui`) before editing; scope work to that app.
 - When you learn something durable (new pattern, structure, or gotcha), write it back into the nearest `AGENTS.md` in the same change.
 - Fix or remove any stale reference you touch — stale context misleads more than missing context.
-- Commit `AGENTS.md` / `.cursor/` / `docs/` updates alongside the code they describe.
-- Big reference material → a kebab-case doc under `docs/` (global) or `apps/<app>/docs/` (app-specific), linked from `AGENTS.md` — don&apos;t inline it here.
+- Commit `AGENTS.md` / `.claude/` / `docs/` updates alongside the code they describe.
+- Big reference material → a kebab-case doc under `docs/` (global) or `apps/<app>/docs/` (app-specific), linked from `AGENTS.md` — don't inline it here.
 
 ## Do
 - use `bun` for everything (never npm/yarn)
 - use `@repo/ui` components before creating new ones
-- use kebab-case for all file and folder names
+- use kebab-case for all file and folder names. Exceptions: `AGENTS.md`, `README.md`, `SECURITY.md`, `LICENSE`, `SKILL.md` (the name Claude Code requires), `.github/pull_request_template.md`, generated Drizzle migrations (`db/migrations/`), and Next.js route syntax such as `(main)`, `[id]` and `_components`
 - use named exports over default exports
 - use async/await over `.then()` chains
 - use Server Components first, add `"use client"` only when necessary
-- use `&apos;` for apostrophes in JSX text
+- use `&apos;` for apostrophes in JSX text (only there: not in Markdown, strings or comments)
 - use strict TypeScript mode always
 - use union types over enums
 - use type inference where obvious, explicit return types for exported functions
 - inject interfaces, never concrete implementations (complex apps only)
 - keep diffs small and focused
 
-## Don&apos;t
-- don&apos;t use `any` — find the correct type, use `unknown` with type guards if truly needed
-- don&apos;t use `_unused` variables — fix the root cause
-- don&apos;t use ESLint or Prettier — Biome handles linting and formatting, Oxlint only runs the shadcn design-system rules (see **Design-System Lint**)
-- don&apos;t use barrel files (index files solely for re-exporting)
-- don&apos;t use class components — functional only
-- don&apos;t abstract until 3 duplications exist
-- don&apos;t add single-implementation interfaces
-- don&apos;t add comments everywhere — only explain non-obvious essential logic
-- don&apos;t add features beyond what&apos;s asked
+## Don't
+- don't use `any` — find the correct type, use `unknown` with type guards if truly needed
+- don't use `_unused` variables — fix the root cause
+- don't use ESLint or Prettier — Biome handles linting and formatting, Oxlint only runs the shadcn design-system rules (see **Design-System Lint**)
+- don't use barrel files (index files solely for re-exporting)
+- don't use class components — functional only
+- don't abstract until 3 duplications exist
+- don't add single-implementation interfaces
+- don't add comments everywhere — only explain non-obvious essential logic
+- don't add features beyond what's asked
 
 ## Never
 - loosen a check to make it pass: no disabling or downgrading lint rules (Biome, Oxlint), no relaxing `tsconfig` flags, no `biome-ignore` / `@ts-ignore` / `@ts-expect-error`, no skipping or weakening tests, and no per-folder overrides that do the same. Fix the code. If a rule genuinely blocks (e.g. unmodified third-party code can't satisfy it), stop and raise it with the options instead of changing the rule
 - push to main directly
 - commit .env, secrets, or credentials
-- commit personal information or personal docs: the repo is public. They go in the gitignored root `docs/private/` folder (see [docs/public-repo.md](docs/public-repo.md))
-- skip `bun check && bun ts` before finishing
+- commit personal information or personal docs: the repo is public. They go in the gitignored root `docs/private/` folder (see [docs/public-repo.md](docs/public-repo.md)). Commit messages, PR titles and descriptions, and review comments are public too: nothing from `docs/private/` in them either
+- finish without running the checks in **After Changes**
 - run `npm` or `yarn`
-- use `git stash` or switch branches without asking
+- switch branches, stash, reset or clean in the main checkout: it's Hector's. Branch work happens in your own worktree (see **Working in parallel**)
+- write to a real database (migrations, seeds with `--commit`, bulk updates) without Hector's explicit OK at that moment
 - make speculative changes without confirming the approach
 
 ## Commands
@@ -62,10 +64,11 @@ bun install                          # install dependencies
 bun check                            # lint (biome + shadcn design rules)
 bun ts                               # typecheck
 bun run test                         # all app tests (turbo)
-bun test path/to/file.test.ts        # single test
-bun run dev --filter=app-name        # dev server for specific app
+cd apps/<app> && bun test tests/path/to/file.test.ts   # single test (from the app, so its bunfig.toml preload applies)
+bun run dev --filter=app-name        # dev server for specific app (--filter after the script works only for root scripts: dev, build, test, check, ts)
+bun run --filter=app-name db:studio  # an app's own script (db:*): --filter goes before the script name
 bun run build --filter=app-name      # build specific app
-turbo run build                      # build all apps
+bun run build                        # build all apps
 ```
 
 ## After Changes
@@ -74,7 +77,7 @@ Scope checks to the app you touched (faster, less noise) before finishing any ta
 bun check --filter=<app-name> && bun ts --filter=<app-name>
 ```
 Use the unscoped `bun check && bun ts` only when changes span multiple apps or shared packages.
-If you touched tests, also run `bun test path/to/affected.test.ts`.
+If you touched tests, also run them from the app: `cd apps/<app> && bun test tests/path/to/affected.test.ts`.
 
 CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package a PR affects, using Turbo's `--filter='...[origin/main]'`. Lint fails if `biome check --write` would change a file, so run `bun check` before pushing. Builds are left to Vercel's per-PR deploys. An app with tests needs a `test` script in its `package.json` for Turbo to pick it up.
 
@@ -84,21 +87,35 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package
 - Remote images go through `next/image` with `unoptimized` when they can come from any site (recipe photos): it serves them as they are, needs no `remotePatterns`, and uses no image-optimization quota.
 
 ## Design-System Lint
-`@shadcn/lint` runs on [Oxlint](https://oxc.rs/docs/guide/usage/linter/js-plugins.html) to check how apps consume `@repo/ui`. Biome still owns everything else; Oxlint&apos;s own rule categories are off, so the two never report the same thing.
-- Config: root `.oxlintrc.json`. Every rule is listed there on purpose — relax from the full set, don&apos;t add rules back one at a time.
-- Each app&apos;s `lint` script is `biome check --write && oxlint .`, so Turbo filtering and CI cover it. Oxlint finds the root config from any app directory.
+`@shadcn/lint` runs on [Oxlint](https://oxc.rs/docs/guide/usage/linter/js-plugins.html) to check how apps consume `@repo/ui`. Biome still owns everything else; Oxlint's own rule categories are off, so the two never report the same thing.
+- Config: root `.oxlintrc.json`. Every rule is listed there on purpose — relax from the full set, don't add rules back one at a time.
+- Each app's `lint` script is `biome check --write && oxlint .`, so Turbo filtering and CI cover it. Oxlint finds the root config from any app directory.
 - Rules: `no-restyle` (restyling `@repo/ui` components through `className`), `no-raw-colors`, `no-unknown-classes`, `require-static-classes`, `no-inline-styles`, `no-arbitrary-values`.
-- Rules are `warn` by default, so lint stays green. Promote an app's rules to `error` once its count is zero, in an `overrides` entry that keeps each rule's options (`no-restyle` keeps `allow: ["layout"]`). Every app is there (2026-10-01): design lint fails the build in all five.
+- Rules are `warn` by default, so lint stays green. Promote an app's rules to `error` once its count is zero, in an `overrides` entry that keeps each rule's options (`no-restyle` keeps `allow: ["layout"]`). Every app is there (2026-10-01): in all five, a design-lint finding fails the app's `lint` script, so it fails `bun check` and CI (the build doesn't run Oxlint).
 - Deliberate relaxations, both in `overrides`: all rules off for `packages/ui/src/components/**` (shadcn registry source; the two hand-written files there, `file-drop-zone` and `theme-provider`, pass the rules without it), and `no-arbitrary-values` off for `hector-portfolio` (its custom type scale; that override comes after the apps' `error` one, so it still wins). Tests are in `ignorePatterns` — `cn()` tests use fake class names.
 - Prefer the fix the error suggests (a variant or size prop, a theme token). For a real exception: `// oxlint-disable-next-line shadcn/<rule> -- reason`.
 - Loosening a rule for a component is a design-system decision: use `contracts` in `.oxlintrc.json` rather than scattering disable comments.
 
-## Commits
+## Commits, branches and pull requests
 When asked to commit:
 - format: `type(scope): description`
 - types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-- keep commits atomic and focused
-- reference issue numbers if applicable
+- keep commits atomic and focused: one per task, so `git log --grep` finds it
+- in the main checkout, commit by path (`git commit -m "…" -- <paths>`), never `git add -A` or `git commit -a`: Hector stages his own work there
+- refer to issues and PRs as `hectarek/hector-mono#123`, never a bare `#123`: numbering restarted on 2026-10-01, and older docs' numbers mean the earlier private repo ([docs/public-repo.md](docs/public-repo.md#history))
+
+Branches and PRs:
+- branches start from `main` and are named `type/short-topic` (e.g. `feat/recipes-ux-p9-itemized`, `docs/public-repo-followups`); an agent's branch is its worktree's (see **Working in parallel**)
+- one PR per topic or plan phase, titled in the commit format, its description following `.github/pull_request_template.md`
+- agents open PRs from their worktree branch; Hector merges. PRs merge with a merge commit (squash and rebase are off), which keeps each task's commit, and the branch is deleted on merge
+
+### Working in parallel
+Hector runs several Claude Code sessions at once, so each agent does its branch and PR work in its own git worktree ([Claude Code: worktrees](https://code.claude.com/docs/en/worktrees)):
+- Start one with `claude --worktree <name>` (or `-w`), the desktop app's worktree option, or by asking Claude to "work in a worktree". It's created at `.claude/worktrees/<name>/` (gitignored) on a new branch `worktree-<name>` from `origin/main`.
+- A worktree is a fresh checkout: run `bun install` in it first. The root `.worktreeinclude` copies the apps' gitignored `.env` files into each new worktree.
+- Rename the branch to the convention before pushing: `git branch -m <type/short-topic>`.
+- Never switch branches, stash, reset or clean the main checkout: Hector stages his own work there. Claude Code blocks a worktree session from editing it. Anything committed in the main checkout is committed by path (above).
+- On exit, Claude Code removes a clean worktree and asks about one that has work in it.
 
 ## Before Finishing
 Ask yourself: can this be simpler? If you can simplify the code without changing behavior, do it.
@@ -127,17 +144,18 @@ Choose the simplest pattern that solves the problem.
 - No DI containers, no domain error classes
 - Server Components for static data
 
-**Complex apps (stash, hectors-recipes, future apps with backend/auth/database)**:
+**Complex apps (stash, hectors-recipes, hectors-tools, future apps with backend/auth/database)**:
 - Typed domain errors, caught at the server-action boundary (see **Error Handling**)
 - DI containers for dependency injection (`@evyweb/ioctopus`)
 - Repository/Use Case/Controller layers
 - Server actions for mutations
 - Clean architecture boundaries
 - `hectors-recipes` keeps the clean-arch structure but favors the simplest implementation per feature
+- `hectors-tools` has no DB or auth: no repositories, transactions or auth gate
 
 ## Shared Packages
 - **`@repo/ui`**: shadcn/ui components — always check here before creating new components
-- **`@repo/biome-config`**: Extends root biome.json
+- **`@repo/biome-config`**: Shared Biome config; the root `biome.json` extends it and adds per-path overrides (see **Biome**)
 - **`@repo/typescript-config`**: Base tsconfig presets
 
 ## React & Next.js Patterns
@@ -148,14 +166,17 @@ Choose the simplest pattern that solves the problem.
 
 ## Data Flow (Complex Apps)
 ```
-Page (Server) → Server Action → Controller → Use Case → Repository
-      ↓
-Client Components (receive data via props)
+Reads:  Page (Server) → Controller (via getInjection) → Use Case → Repository
+              ↓
+        Client Components (receive data via props)
+
+Writes: form / Client Component → Server Action (app/actions/<domain>.ts)
+        → Controller → Use Case → Repository, then revalidatePath (or redirect)
 ```
 
 ## Error Handling (complex apps only)
 Both `stash` and `hectors-recipes` throw typed errors below the server action and catch them in it. Neither uses a `Result<T>` return type.
-- Errors are the classes in `src/entities/errors/common.ts`: `InputParseError`, `UnauthenticatedError`, `UnauthorizedError`, `NotFoundError`, `DatabaseOperationError`.
+- Errors are the classes in `src/entities/errors/common.ts`: `InputParseError`, `UnauthenticatedError`, `UnauthorizedError`, `NotFoundError`, `DatabaseOperationError`. An app may add errors that carry a `reason` the action turns into a message (recipes: `RecipeReadError`, `PageFetchError`, mapped in `toActionError`).
 - Controllers throw `UnauthenticatedError` / `InputParseError` (Zod error as `cause`); use cases throw `NotFoundError` / `UnauthorizedError`; repositories wrap driver errors as `DatabaseOperationError` via `BaseRepository.handleError`.
 - Server actions catch, log, and turn the error into state the UI shows (e.g. `{ error: string }`). Only unexpected errors fall back to a generic message.
 ```typescript
@@ -179,28 +200,21 @@ Full reference: [docs/clean-architecture.md](docs/clean-architecture.md). `hecto
 - **DI** (`di/`) → wires everything together
 
 ## Feature Implementation Order (complex apps)
-1. Zod schema → `src/entities/models/`
-2. Repo interface → `src/application/repositories/`
-3. Repo impl → `src/infrastructure/repositories/`
-4. Use case → `src/application/use-cases/`
-5. Controller → `src/interface-adapters/controllers/`
-6. DI module → `di/modules/`
-7. Server action → `app/actions.ts`
-8. UI → `app/_components/`
+Inward-out, starting with the Zod schema and ending with the server action and UI: the steps, with their paths, are in [docs/clean-architecture.md §9](docs/clean-architecture.md#9-adding-a-feature-order).
 
-## Hook Placement (complex apps with client state)
-- **Container components** (`*-container.tsx`): Call domain hooks, orchestrate logic
+## Hook Placement (apps with client state)
+- **Container components** (`*-container.tsx`, e.g. relationship-meter's `relationship-meter-container.tsx`): Call domain hooks, orchestrate logic
 - **Leaf components**: Receive plain functions as props, only use local state hooks
 
 ## Task Approach
-- **Bug fixes**: Minimize blast radius, reproduce first, don&apos;t refactor unrelated code
+- **Bug fixes**: Minimize blast radius, reproduce first, don't refactor unrelated code
 - **New features**: Follow feature implementation order, start with Zod schema
 - **Refactors**: Preserve existing behavior, run checks frequently
 
 ## When Stuck
 - Ask a clarifying question
 - Propose a plan
-- Don&apos;t push speculative changes
+- Don't push speculative changes
 
 <!-- BEGIN:turborepo-agent-rules -->
 

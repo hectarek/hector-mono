@@ -5,6 +5,8 @@
 ## Overview
 Full-stack stash/bookmark app with auth and database. This is a complex app — use clean architecture patterns.
 
+Deployment: not deployed; no Vercel project.
+
 ## Stack
 - Next.js 16, React 19, Tailwind CSS, shadcn/ui
 - Neon Postgres via `@neondatabase/serverless` (WebSocket Pool driver), Drizzle ORM
@@ -20,9 +22,9 @@ app/
   _providers/          # Providers: @repo/ui ThemeProvider around AuthProvider
   _lib/auth.ts         # Auth client config (only used by AuthProvider)
   actions/             # Server actions, split per domain (stash-items.ts)
-  account/[path]/      # Account routes
-  auth/[path]/         # Auth routes (sign-in, sign-up)
-  api/auth/[...path]/  # Auth API catch-all (framework plumbing, delegates to SDK)
+  (main)/account/[path]/     # Account routes
+  (auth)/auth/[path]/        # Auth routes (sign-in, sign-up)
+  (api)/api/auth/[...path]/  # Auth API catch-all (framework plumbing, delegates to SDK)
   page.tsx             # Main page
 src/
   entities/
@@ -60,10 +62,9 @@ di/
 db/
   schema.ts            # Drizzle schema (stash_items table)
   index.ts             # DB connection (Pool + drizzle-orm/neon-serverless)
-  migrations/
 lib/
   auth/server.ts       # Neon auth server config (used by NeonAuthService, the auth route handler and the auth page)
-  logger.ts            # Standalone logger instance (edge-safe, used by proxy.ts)
+  logger.ts            # Standalone logger instance (edge-safe, used by the auth route handler)
 proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
 ```
 
@@ -72,7 +73,7 @@ proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
 2. **Writes**: Form (`action` prop) -> server action (`actions/stash-items.ts`) -> `getInjection("IAuthenticationService")` -> `getInjection(controller)` -> use case -> repository -> `revalidatePath("/")`
 
 ## Key Patterns
-- Server actions split per domain in `app/actions/` (e.g. `stash-items.ts`). If shared helpers are needed across action files, extract to `app/actions/shared.ts`.
+- Server actions split per domain in `app/actions/` (e.g. `stash-items.ts`). Existing actions inline their catch blocks; a new action adds `toActionError` in `app/actions/shared.ts`, as hectors-recipes does.
 - Controllers are higher-order functions: `(useCase, logger) => (input, userId) => ...`
 - Use cases are higher-order functions: `(repository, logger) => (input, userId) => ...`
 - All infrastructure classes that need logging accept `ILoggerService` via constructor and create a scoped child
@@ -81,8 +82,7 @@ proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
 - Forms use `action` prop with server actions, `useActionState` for forms needing state feedback, `useFormStatus` for pending indicators
 
 ## Database
-- Schema in `db/schema.ts`
-- Never update schema/relations directly — user will run `db:pull` to sync
+- Schema in `db/schema.ts`. Stash has no migrations yet: edit the schema, then `bun run --filter=stash db:push` (applies it straight to stash's database; ask Hector first, it's a real database).
 - Drizzle Kit commands: `db:push`, `db:generate`, `db:studio`
 
 ## Good Examples
@@ -108,14 +108,14 @@ proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
 ```bash
 bun run dev --filter=stash
 bun run build --filter=stash
-bun run db:push --filter=stash
-bun run db:studio --filter=stash
+bun run --filter=stash db:push
+bun run --filter=stash db:studio
 bun run test --filter=stash           # tests/ mirrors the source tree (proxy, app/_lib so far)
 ```
 
 ## Environment
 - Env vars: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET` (`LOG_LEVEL` optional), the same names as `hectors-recipes`. `lib/auth/server.ts` throws at import without the two auth vars, so every auth page fails.
-- Turborepo runs builds in strict env mode: a variable not listed in this app's `turbo.json` (`tasks.build.env`) is withheld from `next build` even if it's set in Vercel. Add new env vars there too.
+- Turborepo runs builds in strict env mode: a variable not listed in this app's `turbo.json` (`tasks.build.env`) is withheld from `next build` even if it's set in Vercel (once deployed). Add new env vars there too.
 
 ## Before Finishing Any Change
 Scope checks to this app:
@@ -154,7 +154,7 @@ bun check --filter=stash && bun ts --filter=stash && bun run test --filter=stash
 - `proxy.ts` is the Next.js 16 convention (replaces deprecated `middleware.ts`)
 - Handles auth redirects for all protected routes -- pages should NOT duplicate redirect logic
 - If you need to check session in a page, it is for getting the userId, not for redirect guards
-- It checks the session cookie only, except when Neon's 5-minute session cache cookie has expired: then it refreshes the cache through `/api/auth/get-session`, because a page can't write the refreshed cookie (`getSession()` throws in a page and it fails as signed out). Same as `hectors-recipes`; see `docs/proxy-auth-research.md` (2026-09 addendum).
+- It checks the session cookie only, except when Neon's 5-minute session cache cookie has expired: then it refreshes the cache through `/api/auth/get-session`, because a page can't write the refreshed cookie (`getSession()` throws in a page and it fails as signed out). Same as `hectors-recipes`; see [docs/proxy-auth-research.md](../../docs/proxy-auth-research.md) (2026-09 addendum).
 
 ### Providers
 - Live in `app/_providers/`
@@ -166,26 +166,26 @@ bun check --filter=stash && bun ts --filter=stash && bun run test --filter=stash
 - Do not change this setting
 
 ### Clean Architecture
-- `app/` layer only imports from `entities`, `di`, and other `app/` files
+- `app/` layer only imports from `entities`, `di`, and other `app/` files, plus root `lib/` for the auth route handler, the auth page and route-handler logging
 - Never import infrastructure implementations directly in `app/` -- always go through DI
 - Interface definitions live in `application/` layer, implementations in `infrastructure/`
 
 ### Server Actions
 - Split per domain into `app/actions/` (e.g. `stash-items.ts`, not a single `actions.ts`)
 - Each action file is `"use server"` and handles its own auth + error handling
-- If a shared helper (e.g. `getUserId`) is needed across multiple action files, extract to `app/actions/shared.ts`
+- If a shared helper (e.g. `getUserId`, or `toActionError` for a new action's catch block; see Key Patterns) is needed across multiple action files, extract to `app/actions/shared.ts`
 
 ### Folder Structure Rationale
 - **`db/`** and **`lib/`** stay at project root (not in `src/infrastructure/`). They are shared initialization consumed by multiple layers (infrastructure wraps them, framework delegates to them). They sit outside any clean architecture layer, like `drizzle.config.ts`.
-- **`lib/auth/server.ts`** is consumed by `proxy.ts` (framework), `NeonAuthService` (infrastructure), and the auth route handler (framework). It cannot live in infrastructure because the app layer must not import from infrastructure.
+- **`lib/auth/server.ts`** is consumed by `NeonAuthService` (infrastructure), the auth route handler and the auth page (framework). It cannot live in infrastructure because the app layer must not import from infrastructure.
 - **`app/_lib/auth.ts`** is the client-side auth config. It stays in the app layer because it is a `"use client"` concern that does NOT go through DI (the DI container is server-side only).
 - **`src/infrastructure/`** contains clean architecture implementations that _wrap_ the root-level initializations (e.g. `NeonAuthService` wraps `lib/auth/server.ts`, `StashItemsRepository` wraps `db/`).
 - **Infrastructure-to-infrastructure imports** are acceptable for shared utilities (e.g. `unwrapDrizzleTx` in `transaction-manager.service.ts` is imported by `base.repository.ts`). Both are infrastructure; the utility bridges domain abstractions (`ITransaction`) to concrete Drizzle types.
 
 ### Entry Points
 The app has three types of entry points. Not every entry point goes through the full clean architecture stack. **All entry points must have error logging** -- use DI logger for server-side code, `lib/logger.ts` for edge/root code:
-- **Server Actions** (`app/actions/`): Internal UI mutations. Go through DI -> Controller -> Use Case -> Repository. Always contain business logic. Wrap in try/catch with scoped logger.
-- **Route Handlers** (`app/api/`): External/SDK endpoints. If they contain business logic, go through DI -> Controller. If they are pure framework plumbing (e.g. auth handler), they delegate directly to the SDK. Wrap with error logging using `lib/logger.ts`.
+- **Server Actions** (`app/actions/`): Internal UI mutations. Go through DI -> Controller -> Use Case -> Repository. Always contain business logic. Wrap in try/catch with scoped logger (a new action's catch returns `toActionError`; see Key Patterns).
+- **Route Handlers** (`app/(api)/api/`): External/SDK endpoints. If they contain business logic, go through DI -> Controller. If they are pure framework plumbing (e.g. auth handler), they delegate directly to the SDK. Wrap with error logging using `lib/logger.ts`.
 - **Proxy** (`proxy.ts`): Route protection. Checks the session cookie and refreshes the session cache when it has expired (see Proxy above). No SDK middleware, no logging.
 - **Pages** (`app/page.tsx`): Server components that fetch data. Wrap data fetching in try/catch with logged fallback to prevent unlogged crashes.
 
@@ -209,7 +209,7 @@ The app has three types of entry points. Not every entry point goes through the 
 - Infrastructure uses an opaque `DrizzleTransactionWrapper` class with `_brand` + `_internal` to hide Drizzle types from the domain
 - **Double-completion guard**: `rollback()` throws if the transaction is already completed
 - **Timeout**: `startTransaction()` starts each transaction with `set local statement_timeout` (15s), so Postgres cancels a stuck statement and the whole transaction rolls back. Don't race the transaction against a JS timer: that reported failure while the work carried on and could still commit. Not `transaction_timeout` either: it kills the connection, which the Neon driver surfaces as an unhandled error
-- **Rollback vs error distinction**: Drizzle&apos;s `TransactionRollbackError` is caught separately and logged at `warn` (not `error`)
+- **Rollback vs error distinction**: Drizzle's `TransactionRollbackError` is caught separately and logged at `warn` (not `error`)
 - Mock implementations ignore `tx` and `MockTransactionManagerService` just executes the callback directly
 - DB driver: `@neondatabase/serverless` Pool (WebSocket) via `drizzle-orm/neon-serverless` -- required for transaction support (HTTP driver does not support transactions)
 
@@ -230,7 +230,6 @@ The app has three types of entry points. Not every entry point goes through the 
   - **Server actions**: obtained via `getInjection("ILoggerService").child({ layer: "action", op: "fnName" })`
   - **Route handlers**: `import { logger } from "@/lib/logger"` then `.child({ layer: "route", op: "auth" })`
   - **Pages**: `getInjection("ILoggerService").child({ layer: "page", op: "getStash" })`
-  - **Proxy**: `import { logger } from "@/lib/logger"` then `.child({ layer: "proxy", op: "middleware" })`
 - Standard `layer` values: `action`, `use-case`, `controller`, `repository`, `service`, `route`, `page`, `proxy`
 - `op` is the specific function/method name (e.g. `addItem`, `create`, `auth`, `transaction`)
 - Log output format: `[LEVEL] [layer/op] message { context }`
@@ -240,6 +239,6 @@ The app has three types of entry points. Not every entry point goes through the 
   - `warn` -- recoverable issues (validation failures, denied access)
   - `error` -- failures (database errors, unexpected exceptions)
 - `LOG_LEVEL` env var controls minimum level. Defaults: `debug` (dev), `warn` (prod), `error` (test)
-- **Edge / root-level code** (e.g. `proxy.ts`): `import { logger } from "@/lib/logger"` -- standalone instance, no DI dependency
+- **Edge / root-level code** (e.g. route handlers): `import { logger } from "@/lib/logger"` -- standalone instance, no DI dependency
 - `lib/logger.ts` follows the same root-level initialization pattern as `lib/auth/server.ts`
 - Future enhancement: request correlation IDs via `AsyncLocalStorage` for cross-layer tracing
