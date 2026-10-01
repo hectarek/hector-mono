@@ -1,0 +1,15 @@
+{
+  "$schema": "https://v2-11-5.turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": [
+        "$TURBO_EXTENDS$",
+        "DATABASE_URL",
+        "NEON_AUTH_BASE_URL",
+        "NEON_AUTH_COOKIE_SECRET",
+        "LOG_LEVEL"
+      ]
+    }
+  }
+}

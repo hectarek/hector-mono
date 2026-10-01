@@ -1,0 +1,70 @@
+---
+description: Best practices for creating and managing Cursor rules
+globs: .cursor/rules/**/*
+alwaysApply: false
+---
+
+# Cursor Rules Best Practices
+
+## Rule Types
+
+| Type | When Applied | Use Case |
+|------|--------------|----------|
+| Always Apply (`alwaysApply: true`) | Every chat | Core patterns, communication style |
+| Agent-Decided (with `description`) | When relevant | Domain-specific patterns |
+| File-Scoped (`globs`) | When files match | Feature-specific rules |
+| Manual (`@rule-name`) | When mentioned | Specialized workflows |
+
+## Rule File Structure
+```markdown
+---
+description: Clear description for agent-decided rules
+globs: pattern/**/*,*.tsx
+alwaysApply: false
+---
+
+# Rule Title
+
+Brief content focused on patterns and decisions.
+Reference docs for full examples.
+```
+
+## Best Practices (from Cursor docs)
+
+### Do ✅
+- Keep rules under 500 lines
+- Split large rules into composable parts
+- Reference files instead of copying contents
+- Provide concrete, actionable guidance
+- Use globs for file-specific rules
+- Write clear descriptions for agent-decided rules
+- Check rules into git for team sharing
+
+### Don't ❌
+- Copy entire style guides (use linters)
+- Document every CLI command (agent knows npm, git, etc.)
+- Add edge case instructions that rarely apply
+- Duplicate what's in your codebase
+- Over-optimize before understanding patterns
+
+## Rule Categories for This Project
+
+**`AGENTS.md` is the canonical context source.** It is loaded every session by Cursor (and other agents) and holds behavioral rules, coding standards, monorepo structure, pattern complexity, and clean-architecture guidance. Per-app `AGENTS.md` files hold app-specific context. Do NOT duplicate that content here — `.cursor/rules` is only for Cursor-specific or on-demand reference material.
+
+**Current rules (all on-demand, none always-applied):**
+- `frontend-patterns.mdc` - Agent-decided. Complex-app code patterns (TanStack Query, hooks, server actions)
+- `new-app-checklist.mdc` - Agent-decided/manual. Step-by-step new app onboarding template
+- `cursor-rules.mdc` - File-scoped (`.cursor/rules/**`). This meta guide
+
+**Add as needed:**
+- App-specific context belongs in that app&apos;s `AGENTS.md`, not here
+- Add a rule only for Cursor-specific behavior or detailed on-demand references that would bloat `AGENTS.md`
+
+## Adding New Rules
+
+1. Determine scope: always, agent-decided, file-scoped, or manual?
+2. Write concise content (<100 lines ideal)
+3. Reference existing docs for detailed examples
+4. Add clear description for agent-decided rules
+5. Use specific globs for file-scoped rules
+6. Test by @-mentioning in chat to verify behavior

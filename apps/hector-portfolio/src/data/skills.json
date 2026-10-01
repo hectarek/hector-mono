@@ -1,0 +1,88 @@
+{
+  "categories": [
+    {
+      "name": "Full-Stack Product Engineering",
+      "description": "Shipping modern web products end to end with serverless infrastructure and managed services.",
+      "skills": [
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Bun",
+        "Node.js",
+        "Tailwind CSS",
+        "Drizzle ORM",
+        "PostgreSQL",
+        "Vercel",
+        "Cloudflare",
+        "GitHub Actions",
+        "Zod"
+      ]
+    },
+    {
+      "name": "Applied AI & Workflow Design",
+      "description": "Designing real product workflows around modern AI tools, not research demos.",
+      "skills": [
+        "AI SDK",
+        "Claude",
+        "Cursor",
+        "MCP integrations",
+        "Multi-step agents",
+        "Context engineering",
+        "AI-assisted dev workflows",
+        "Org-level AI enablement"
+      ]
+    },
+    {
+      "name": "Product & Systems Strategy",
+      "description": "Turning ambiguous client and executive asks into scoped, buildable systems.",
+      "skills": [
+        "Requirements shaping",
+        "Technical scoping",
+        "Architecture planning",
+        "Feasibility analysis",
+        "Stakeholder communication",
+        "Roadmap tradeoffs",
+        "Cross-functional execution"
+      ]
+    },
+    {
+      "name": "Automation & Internal Tools",
+      "description": "Replacing spreadsheets, manual workflows, and operational friction with small focused tools.",
+      "skills": [
+        "AI auto-grading",
+        "Admin CRUD systems",
+        "Reporting scripts",
+        "CRM syncing",
+        "Messaging tools",
+        "Internal APIs",
+        "Apps Script",
+        "Background jobs"
+      ]
+    },
+    {
+      "name": "Learning Systems & Technical Education",
+      "description": "Designing and building software for how people actually learn, teach, and run programs.",
+      "skills": [
+        "Curriculum design",
+        "Mastery pathways",
+        "Micro-credentials",
+        "Game-based learning",
+        "Workforce development",
+        "Instructor & teacher tooling",
+        "Program operations"
+      ]
+    },
+    {
+      "name": "Technical Operations",
+      "description": "Owning the boring-but-critical layer: accounts, access, services, and maintainability.",
+      "skills": [
+        "Google Workspace admin",
+        "Service & account management",
+        "Access & security hygiene",
+        "Vendor / tool selection",
+        "Knowledge organization",
+        "IT ownership"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+/* ==========================================================================
+   RECIPES THEME (hectors-recipes)
+   From the "Hector's Recipes" design system
+   (https://claude.ai/artifact/LjXi5gzWvjsaw1w1vKcNQn). Herb-green brand, produce
+   palette on chart-1..5, roomy spacing.
+
+   Opt in: @import "@repo/ui/styles/themes/recipes.css" and data-theme="recipes"
+   on <html>. Fonts: Figtree as --font-sans, Young Serif as --font-heading.
+
+   Surfaces: the Market values below are the base (library, plan, groceries).
+   A page marks itself data-surface="reading" (a recipe) or "cook" (cook mode);
+   :has() applies it to the whole document, so sheets and dialogs, which render
+   outside the page, match it. Status colours come from the default theme.
+   ========================================================================== */
+
+[data-theme="recipes"] {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.22 0.02 160);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 160);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 160);
+  --primary: oklch(0.5 0.13 150);
+  --primary-foreground: oklch(0.99 0.01 150);
+  --secondary: oklch(0.955 0.03 150);
+  --secondary-foreground: oklch(0.33 0.08 150);
+  --muted: oklch(0.966 0.008 150);
+  --muted-foreground: oklch(0.5 0.02 160);
+  --accent: oklch(0.94 0.04 150);
+  --accent-foreground: oklch(0.3 0.08 150);
+  --destructive: oklch(0.56 0.2 27);
+  --border: oklch(0.915 0.01 150);
+  --input: oklch(0.89 0.012 150);
+  --ring: oklch(0.56 0.13 150);
+  --chart-1: oklch(0.7 0.17 32);
+  --chart-2: oklch(0.77 0.15 58);
+  --chart-3: oklch(0.88 0.15 98);
+  --chart-4: oklch(0.74 0.14 145);
+  --chart-5: oklch(0.72 0.11 330);
+  --chart-foreground: oklch(0.22 0.03 60);
+  --sidebar: oklch(0.966 0.008 150);
+  --sidebar-foreground: oklch(0.22 0.02 160);
+  --sidebar-primary: oklch(0.5 0.13 150);
+  --sidebar-primary-foreground: oklch(0.99 0.01 150);
+  --sidebar-accent: oklch(0.94 0.04 150);
+  --sidebar-accent-foreground: oklch(0.3 0.08 150);
+  --sidebar-border: oklch(0.915 0.01 150);
+  --sidebar-ring: oklch(0.56 0.13 150);
+  --radius: 0.75rem;
+  /* Roomy: every spacing step is 5px instead of Tailwind's 4px, so buttons are 40px
+     (lg 45px) and gutters 20px. */
+  --spacing: 0.3125rem;
+}
+
+[data-theme="recipes"].dark,
+.dark [data-theme="recipes"] {
+  --radius: 0.75rem;
+  --background: oklch(0.17 0.012 160);
+  --foreground: oklch(0.97 0.008 150);
+  --card: oklch(0.21 0.014 160);
+  --card-foreground: oklch(0.97 0.008 150);
+  --popover: oklch(0.21 0.014 160);
+  --popover-foreground: oklch(0.97 0.008 150);
+  --primary: oklch(0.76 0.14 150);
+  --primary-foreground: oklch(0.2 0.04 150);
+  --secondary: oklch(0.28 0.04 150);
+  --secondary-foreground: oklch(0.92 0.03 150);
+  --muted: oklch(0.25 0.014 160);
+  --muted-foreground: oklch(0.73 0.02 150);
+  --accent: oklch(0.31 0.05 150);
+  --accent-foreground: oklch(0.95 0.03 150);
+  --destructive: oklch(0.7 0.18 24);
+  --border: oklch(0.3 0.014 160);
+  --input: oklch(0.34 0.016 160);
+  --ring: oklch(0.66 0.13 150);
+  --chart-1: oklch(0.7 0.17 32);
+  --chart-2: oklch(0.77 0.15 58);
+  --chart-3: oklch(0.88 0.15 98);
+  --chart-4: oklch(0.74 0.14 145);
+  --chart-5: oklch(0.72 0.11 330);
+  --chart-foreground: oklch(0.22 0.03 60);
+  --sidebar: oklch(0.25 0.014 160);
+  --sidebar-foreground: oklch(0.97 0.008 150);
+  --sidebar-primary: oklch(0.76 0.14 150);
+  --sidebar-primary-foreground: oklch(0.2 0.04 150);
+  --sidebar-accent: oklch(0.31 0.05 150);
+  --sidebar-accent-foreground: oklch(0.95 0.03 150);
+  --sidebar-border: oklch(0.3 0.014 160);
+  --sidebar-ring: oklch(0.66 0.13 150);
+}
+
+/* Reading surface */
+[data-theme="recipes"]:has([data-surface="reading"]) {
+  --background: oklch(0.976 0.012 80);
+  --foreground: oklch(0.25 0.02 60);
+  --card: oklch(0.992 0.006 80);
+  --card-foreground: oklch(0.25 0.02 60);
+  --popover: oklch(0.992 0.006 80);
+  --popover-foreground: oklch(0.25 0.02 60);
+  --secondary: oklch(0.94 0.03 140);
+  --secondary-foreground: oklch(0.32 0.07 145);
+  --muted: oklch(0.948 0.015 80);
+  --muted-foreground: oklch(0.48 0.025 60);
+  --accent: oklch(0.93 0.035 140);
+  --accent-foreground: oklch(0.3 0.07 145);
+  --border: oklch(0.905 0.016 80);
+  --input: oklch(0.88 0.018 80);
+  --sidebar: oklch(0.948 0.015 80);
+  --sidebar-foreground: oklch(0.25 0.02 60);
+  --sidebar-accent: oklch(0.93 0.035 140);
+  --sidebar-accent-foreground: oklch(0.3 0.07 145);
+  --sidebar-border: oklch(0.905 0.016 80);
+}
+
+[data-theme="recipes"].dark:has([data-surface="reading"]),
+.dark [data-theme="recipes"]:has([data-surface="reading"]) {
+  --background: oklch(0.19 0.01 60);
+  --foreground: oklch(0.95 0.012 80);
+  --card: oklch(0.225 0.012 60);
+  --card-foreground: oklch(0.95 0.012 80);
+  --popover: oklch(0.225 0.012 60);
+  --popover-foreground: oklch(0.95 0.012 80);
+  --secondary: oklch(0.29 0.03 140);
+  --secondary-foreground: oklch(0.92 0.03 140);
+  --muted: oklch(0.26 0.012 60);
+  --muted-foreground: oklch(0.75 0.02 75);
+  --accent: oklch(0.31 0.04 140);
+  --accent-foreground: oklch(0.95 0.03 140);
+  --border: oklch(0.32 0.012 60);
+  --input: oklch(0.36 0.014 60);
+  --sidebar: oklch(0.26 0.012 60);
+  --sidebar-foreground: oklch(0.95 0.012 80);
+  --sidebar-accent: oklch(0.31 0.04 140);
+  --sidebar-accent-foreground: oklch(0.95 0.03 140);
+  --sidebar-border: oklch(0.32 0.012 60);
+}
+
+/* Cook surface */
+[data-theme="recipes"]:has([data-surface="cook"]) {
+  --background: oklch(0.988 0.008 85);
+  --foreground: oklch(0.18 0.015 60);
+  --card-foreground: oklch(0.18 0.015 60);
+  --popover-foreground: oklch(0.18 0.015 60);
+  --secondary: oklch(0.94 0.03 140);
+  --secondary-foreground: oklch(0.3 0.07 145);
+  --muted: oklch(0.955 0.012 85);
+  --muted-foreground: oklch(0.42 0.02 60);
+  --accent: oklch(0.93 0.035 140);
+  --accent-foreground: oklch(0.28 0.07 145);
+  --border: oklch(0.87 0.015 80);
+  --input: oklch(0.85 0.016 80);
+  --sidebar: oklch(0.955 0.012 85);
+  --sidebar-foreground: oklch(0.18 0.015 60);
+  --sidebar-accent: oklch(0.93 0.035 140);
+  --sidebar-accent-foreground: oklch(0.28 0.07 145);
+  --sidebar-border: oklch(0.87 0.015 80);
+}
+
+[data-theme="recipes"].dark:has([data-surface="cook"]),
+.dark [data-theme="recipes"]:has([data-surface="cook"]) {
+  --background: oklch(0.15 0.008 60);
+  --foreground: oklch(0.97 0.01 85);
+  --card: oklch(0.19 0.01 60);
+  --card-foreground: oklch(0.97 0.01 85);
+  --popover: oklch(0.19 0.01 60);
+  --popover-foreground: oklch(0.97 0.01 85);
+  --secondary: oklch(0.27 0.03 140);
+  --secondary-foreground: oklch(0.93 0.03 140);
+  --muted: oklch(0.23 0.01 60);
+  --muted-foreground: oklch(0.79 0.02 80);
+  --accent: oklch(0.3 0.04 140);
+  --accent-foreground: oklch(0.96 0.03 140);
+  --border: oklch(0.33 0.01 60);
+  --input: oklch(0.37 0.012 60);
+  --sidebar: oklch(0.23 0.01 60);
+  --sidebar-foreground: oklch(0.97 0.01 85);
+  --sidebar-accent: oklch(0.3 0.04 140);
+  --sidebar-accent-foreground: oklch(0.96 0.03 140);
+  --sidebar-border: oklch(0.33 0.01 60);
+}

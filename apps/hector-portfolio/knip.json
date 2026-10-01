@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "project": ["app/**/*.{ts,tsx}", "src/**/*.ts", "tests/**/*.{ts,tsx}"],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    ".next/**",
+    "node_modules/**",
+    "tests/happydom.ts",
+    "tests/testing-library.ts"
+  ],
+  "ignoreDependencies": [
+    "@happy-dom/global-registrator",
+    "happy-dom",
+    "tailwindcss",
+    "tw-animate-css",
+    "postcss"
+  ],
+  "next": {
+    "entry": ["app/**/*.{ts,tsx}", "src/**/*.ts"]
+  }
+}

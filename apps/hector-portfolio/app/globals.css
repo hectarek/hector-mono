@@ -1,0 +1,101 @@
+@import "@repo/ui/styles/globals.css";
+@import "@repo/ui/styles/themes/portfolio.css";
+/* Only for the /ui component gallery's theme switcher. */
+@import "@repo/ui/styles/themes/neobrutalist.css";
+
+/* Colours are the shared portfolio theme (data-theme="portfolio" on <html>). Fonts load in
+   layout.tsx: Geist as --font-sans and Plex Mono as --font-mono (the shared mapping), and
+   Instrument Serif for font-serif, set here as fonts aren't theme tokens. */
+@theme inline {
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+}
+
+/* ==========================================================================
+   GLOBAL TYPE + ATMOSPHERE
+   The page is a fresh dot-grid notebook: subtle paper grain + dot grid.
+   ========================================================================== */
+
+html,
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Page-level dot grid — the journal paper itself */
+body {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--foreground) 9%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+
+/* Subtle paper-grain overlay sits above content for uniform texture */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.dark body {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--foreground) 14%, transparent) 1px,
+    transparent 0
+  );
+}
+
+.dark body::before {
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--accent) 25%, transparent);
+  color: var(--foreground);
+}
+
+/* The dot grid inside cards and image fallbacks, where the page-level dots are hidden behind
+   the card's surface: data-texture="dot-grid" on the element. */
+[data-texture="dot-grid"] {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--foreground) 14%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+  background-position: 0 0;
+}
+
+.dark [data-texture="dot-grid"] {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--foreground) 20%, transparent) 1px,
+    transparent 0
+  );
+}
+
+/* Handwritten accent — used VERY sparingly for one-word marginalia, never body:
+   data-font="hand" on the element. */
+[data-font="hand"] {
+  font-family: var(--font-caveat), "Caveat", "Segoe Print", cursive;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Focus ring for keyboard nav */
+:where(a, button, [role="button"]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

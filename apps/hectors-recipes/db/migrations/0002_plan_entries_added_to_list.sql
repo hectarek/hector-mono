@@ -1,0 +1,1 @@
+ALTER TABLE "plan_entries" ADD COLUMN "added_to_list_at" timestamp with time zone;

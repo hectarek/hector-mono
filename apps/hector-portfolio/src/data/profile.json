@@ -1,0 +1,22 @@
+{
+  "name": "Hector Gonzalez",
+  "title": "Full-Stack Engineer · Co-Founder · Applied AI Builder",
+  "tagline": "Product-minded builder of learning systems, internal tools, and applied AI.",
+  "bio": "I build practical software across product, engineering, operations, and applied AI. My work tends to live at the intersection of full-stack development, learning systems, automation, and the messy operational layer that makes products actually run.",
+  "image": "/hector.webp",
+  "email": "hector@example.com",
+  "location": "Charlotte, NC",
+  "social": {
+    "github": "https://github.com/hectarek",
+    "linkedin": "https://linkedin.com/in/hectorg"
+  },
+  "consulting": {
+    "available": true,
+    "note": "Open to selective consulting on full-stack builds, internal tools, and applied AI workflows."
+  },
+  "currentlyBuilding": [
+    "The Notwork edtech platform",
+    "AI curriculum generator",
+    "Internal automations for youth programming"
+  ]
+}

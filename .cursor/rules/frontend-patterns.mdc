@@ -1,0 +1,77 @@
+---
+description: Frontend patterns for complex apps with backend/state management
+globs: 
+alwaysApply: false
+---
+
+# Frontend Patterns
+
+**When to apply**: Apps with backend, auth, or complex client state.
+**Skip for**: Static sites like portfolio (use direct imports, Server Components).
+
+## Data Flow (Complex Apps)
+```
+Page (Server) → Server Action → Controller → Use Case → Repository
+      ↓
+Client Components (receive data via props)
+```
+
+## Server Components (Pages)
+```typescript
+// app/*/page.tsx - Only place to call server actions
+export default async function Page() {
+  const data = await getDataAction()
+  return <ClientComponent data={data} />
+}
+```
+
+## Server Actions
+```typescript
+'use server'
+export async function getDataAction() {
+  const controller = diContainer.getController()
+  const response = await controller.method()
+  if (!response.success) return null
+  return response.data
+}
+```
+
+## Hook Placement Pattern
+- **Container components** (`*-container.tsx`): Call domain hooks, orchestrate logic
+- **Leaf components**: Receive plain functions as props, only use local state hooks
+
+```typescript
+// Container - calls hooks
+export function SomeContainer({ onSubmit }: Props) {
+  const { mutate } = useSomeMutation()
+  return <LeafComponent onAction={mutate} />
+}
+
+// Leaf - receives functions
+export function LeafComponent({ onAction }: Props) {
+  return <Button onClick={onAction}>Do thing</Button>
+}
+```
+
+## TanStack Query Patterns
+```typescript
+// Query keys - hierarchical
+export const entityKeys = {
+  all: ['entity'] as const,
+  list: () => [...entityKeys.all, 'list'] as const,
+  detail: (id: string) => [...entityKeys.all, 'detail', id] as const,
+}
+
+// Query with conservative defaults
+const { data } = useQuery({
+  queryKey: entityKeys.detail(id),
+  queryFn: () => fetchEntity(id),
+  staleTime: 5 * 60 * 1000,
+  refetchOnWindowFocus: false,
+})
+
+// After mutations - invalidate, don't refresh
+const { invalidateAll } = useInvalidateUserStats()
+await mutateAction()
+invalidateAll()
+```

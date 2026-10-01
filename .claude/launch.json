@@ -1,0 +1,83 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hectors-recipes",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/hectors-recipes",
+        "dev",
+        "--port",
+        "3100"
+      ],
+      "port": 3100
+    },
+    {
+      "name": "hector-portfolio-prod",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/hector-portfolio",
+        "start",
+        "--port",
+        "3201"
+      ],
+      "port": 3201
+    },
+    {
+      "name": "hectors-tools-prod",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/hectors-tools",
+        "start",
+        "--port",
+        "3202"
+      ],
+      "port": 3202
+    },
+    {
+      "name": "relationship-meter-prod",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/relationship-meter",
+        "start",
+        "--port",
+        "3203"
+      ],
+      "port": 3203
+    },
+    {
+      "name": "stash-dev",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/stash",
+        "dev",
+        "--port",
+        "3204"
+      ],
+      "port": 3204
+    },
+    {
+      "name": "hectors-recipes-prod",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/hectors-recipes",
+        "start",
+        "--port",
+        "3205"
+      ],
+      "port": 3205
+    }
+  ]
+}

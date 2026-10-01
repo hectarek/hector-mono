@@ -1,0 +1,2249 @@
+/* ==========================================================================
+   NEOBRUTALIST THEME
+   Enable with data-theme="neobrutalist" on <html> (or on any element, to theme
+   just that subtree) and pick a colour with data-neo="<color>" on the same
+   element. Apps opt in with one import after the base stylesheet:
+     @import "@repo/ui/styles/themes/neobrutalist.css";
+   Unlike a token-only theme, this one also restyles components (borders,
+   offset shadows) by data-slot; see the Buttons note below.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Neobrutalist Design Tokens
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] {
+  /* Neobrutalist design tokens */
+  --neo-border: 2px solid var(--foreground);
+  --neo-shadow: 4px 4px 0 0 var(--foreground);
+  --neo-shadow-sm: 2px 2px 0 0 var(--foreground);
+
+  /* Color preview variables (for color picker UI) */
+  --neo-preview-red: oklch(67.28% 0.2147 24.22);
+  --neo-preview-orange: oklch(72.27% 0.1894 50.19);
+  --neo-preview-amber: oklch(84.08% 0.1725 84.2);
+  --neo-preview-yellow: oklch(86.03% 0.176 92.36);
+  --neo-preview-lime: oklch(83.29% 0.2331 132.51);
+  --neo-preview-green: oklch(79.76% 0.2044 153.08);
+  --neo-preview-emerald: oklch(77.54% 0.1681 162.78);
+  --neo-preview-teal: oklch(78.57% 0.1422 180.36);
+  --neo-preview-cyan: oklch(76.89% 0.1392 219.13);
+  --neo-preview-sky: oklch(66.9% 0.1837 248.81);
+  --neo-preview-blue: oklch(67.47% 0.1726 259.49);
+  --neo-preview-indigo: oklch(66.34% 0.1806 277.2);
+  --neo-preview-violet: oklch(66.34% 0.1806 277.2);
+  --neo-preview-purple: oklch(71.9% 0.198 310.03);
+  --neo-preview-fuchsia: oklch(73.43% 0.2332 321.41);
+  --neo-preview-pink: oklch(71.5% 0.197 354.23);
+  --neo-preview-rose: oklch(70.79% 0.1862 16.25);
+
+  /* Base semantic colors (constant across all color themes) */
+  --foreground: oklch(0% 0 0);
+  --secondary: oklch(100% 0 0);
+  --secondary-foreground: oklch(0% 0 0);
+  --muted: oklch(100% 0 0);
+  --muted-foreground: oklch(0% 0 0);
+  --border: oklch(0% 0 0);
+  --input: oklch(0% 0 0);
+  --ring: oklch(0% 0 0);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(0% 0 0);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(0% 0 0);
+  --primary-foreground: oklch(0% 0 0);
+  --accent-foreground: oklch(0% 0 0);
+
+  /* Default color theme (Blue) - applied when no color modifier */
+  --background: oklch(93.46% 0.0305 255.11);
+  --primary: oklch(67.47% 0.1726 259.49);
+  --accent: oklch(67.47% 0.1726 259.49);
+  --chart-1: oklch(66.5% 0.18 260);
+  --chart-2: oklch(63.5% 0.25 25);
+  --chart-3: oklch(85% 0.19 90);
+  --chart-4: oklch(80% 0.22 155);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Neobrutalist Dark Mode Base
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"].dark,
+.dark [data-theme="neobrutalist"] {
+  /* Base semantic colors (constant across all color themes) */
+  --foreground: oklch(92.49% 0 0);
+  --secondary: oklch(23.93% 0 0);
+  --secondary-foreground: oklch(92.49% 0 0);
+  --muted: oklch(23.93% 0 0);
+  --muted-foreground: oklch(92.49% 0 0);
+  --border: oklch(92.49% 0 0);
+  --input: oklch(92.49% 0 0);
+  --ring: oklch(100% 0 0);
+  --card: oklch(23.93% 0 0);
+  --card-foreground: oklch(92.49% 0 0);
+  --popover: oklch(23.93% 0 0);
+  --popover-foreground: oklch(92.49% 0 0);
+  --primary-foreground: oklch(0% 0 0);
+  --accent-foreground: oklch(0% 0 0);
+
+  /* Default color theme (Blue) - applied when no color modifier */
+  --background: oklch(29.23% 0.0626 270.49);
+  --primary: oklch(67.47% 0.1726 259.49);
+  --accent: oklch(67.47% 0.1726 259.49);
+  --chart-1: oklch(66.5% 0.18 260);
+  --chart-2: oklch(66% 0.22 20);
+  --chart-3: oklch(78% 0.17 90);
+  --chart-4: oklch(72% 0.18 160);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* ==========================================================================
+   NEOBRUTALIST COLOR THEMES
+   Usage: <html data-theme="neobrutalist" data-neo="red">
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Red
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="red"] {
+  --background: oklch(93.3% 0.0339 17.77);
+  --primary: oklch(67.28% 0.2147 24.22);
+  --accent: oklch(67.28% 0.2147 24.22);
+  --chart-1: oklch(63.5% 0.25 25);
+  --chart-2: oklch(66.5% 0.18 260);
+  --chart-3: oklch(85% 0.19 90);
+  --chart-4: oklch(80% 0.22 155);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="red"].dark,
+.dark [data-theme="neobrutalist"][data-neo="red"] {
+  --background: oklch(24.95% 0.0491 20.19);
+  --primary: oklch(70.49% 0.1869 22.23);
+  --accent: oklch(70.49% 0.1869 22.23);
+  --chart-1: oklch(66% 0.22 20);
+  --chart-2: oklch(66.5% 0.18 260);
+  --chart-3: oklch(78% 0.17 90);
+  --chart-4: oklch(72% 0.18 160);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Orange
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="orange"] {
+  --background: oklch(95.38% 0.0357 72.89);
+  --primary: oklch(72.27% 0.1894 50.19);
+  --accent: oklch(72.27% 0.1894 50.19);
+  --chart-1: oklch(70% 0.23 45);
+  --chart-2: oklch(62% 0.18 250);
+  --chart-3: oklch(84% 0.19 90);
+  --chart-4: oklch(76% 0.18 165);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="orange"].dark,
+.dark [data-theme="neobrutalist"][data-neo="orange"] {
+  --background: oklch(26.86% 0.0327 60.06);
+  --primary: oklch(67.56% 0.1796 49.61);
+  --accent: oklch(67.56% 0.1796 49.61);
+  --chart-1: oklch(65% 0.2 50);
+  --chart-2: oklch(57% 0.16 250);
+  --chart-3: oklch(76% 0.17 88);
+  --chart-4: oklch(68% 0.16 165);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Amber
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="amber"] {
+  --background: oklch(96.22% 0.0569 95.61);
+  --primary: oklch(84.08% 0.1725 84.2);
+  --accent: oklch(84.08% 0.1725 84.2);
+  --chart-1: oklch(84% 0.19 90);
+  --chart-2: oklch(62% 0.18 250);
+  --chart-3: oklch(70% 0.23 45);
+  --chart-4: oklch(76% 0.18 165);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="amber"].dark,
+.dark [data-theme="neobrutalist"][data-neo="amber"] {
+  --background: oklch(28.91% 0.0359 90.09);
+  --primary: oklch(77.7% 0.1594 84.38);
+  --accent: oklch(77.7% 0.1594 84.38);
+  --chart-1: oklch(76% 0.17 88);
+  --chart-2: oklch(57% 0.16 250);
+  --chart-3: oklch(65% 0.2 50);
+  --chart-4: oklch(68% 0.16 165);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Yellow
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="yellow"] {
+  --background: oklch(96.79% 0.0654 102.26);
+  --primary: oklch(86.03% 0.176 92.36);
+  --accent: oklch(86.03% 0.176 92.36);
+  --chart-1: oklch(85% 0.19 90);
+  --chart-2: oklch(62% 0.2 275);
+  --chart-3: oklch(63.5% 0.25 25);
+  --chart-4: oklch(76% 0.18 165);
+  --chart-5: oklch(62% 0.18 250);
+}
+
+[data-theme="neobrutalist"][data-neo="yellow"].dark,
+.dark [data-theme="neobrutalist"][data-neo="yellow"] {
+  --background: oklch(29.28% 0.0373 94.38);
+  --primary: oklch(79.36% 0.1624 92.49);
+  --accent: oklch(79.36% 0.1624 92.49);
+  --chart-1: oklch(78% 0.17 90);
+  --chart-2: oklch(62% 0.2 275);
+  --chart-3: oklch(66% 0.22 20);
+  --chart-4: oklch(68% 0.16 165);
+  --chart-5: oklch(57% 0.16 250);
+}
+
+/* --------------------------------------------------------------------------
+   Lime
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="lime"] {
+  --background: oklch(95.37% 0.0549 125.19);
+  --primary: oklch(83.29% 0.2331 132.51);
+  --accent: oklch(83.29% 0.2331 132.51);
+  --chart-1: oklch(82% 0.24 125);
+  --chart-2: oklch(62% 0.18 250);
+  --chart-3: oklch(63.5% 0.25 25);
+  --chart-4: oklch(85% 0.19 90);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="lime"].dark,
+.dark [data-theme="neobrutalist"][data-neo="lime"] {
+  --background: oklch(23.1% 0.0346 126.75);
+  --primary: oklch(76.26% 0.2131 132.4);
+  --accent: oklch(76.26% 0.2131 132.4);
+  --chart-1: oklch(75% 0.22 125);
+  --chart-2: oklch(57% 0.16 250);
+  --chart-3: oklch(66% 0.22 20);
+  --chart-4: oklch(78% 0.17 90);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Green
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="green"] {
+  --background: oklch(96.47% 0.0401 157.79);
+  --primary: oklch(79.76% 0.2044 153.08);
+  --accent: oklch(79.76% 0.2044 153.08);
+  --chart-1: oklch(76% 0.18 165);
+  --chart-2: oklch(70% 0.23 45);
+  --chart-3: oklch(62% 0.18 250);
+  --chart-4: oklch(84% 0.19 90);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="green"].dark,
+.dark [data-theme="neobrutalist"][data-neo="green"] {
+  --background: oklch(22.45% 0.0316 158.41);
+  --primary: oklch(73.03% 0.1865 153.23);
+  --accent: oklch(73.03% 0.1865 153.23);
+  --chart-1: oklch(68% 0.16 165);
+  --chart-2: oklch(65% 0.2 50);
+  --chart-3: oklch(57% 0.16 250);
+  --chart-4: oklch(76% 0.17 88);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Emerald
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="emerald"] {
+  --background: oklch(95.31% 0.0496 169.04);
+  --primary: oklch(77.54% 0.1681 162.78);
+  --accent: oklch(77.54% 0.1681 162.78);
+  --chart-1: oklch(76% 0.18 165);
+  --chart-2: oklch(62% 0.2 275);
+  --chart-3: oklch(85% 0.19 90);
+  --chart-4: oklch(63.5% 0.25 25);
+  --chart-5: oklch(62% 0.18 250);
+}
+
+[data-theme="neobrutalist"][data-neo="emerald"].dark,
+.dark [data-theme="neobrutalist"][data-neo="emerald"] {
+  --background: oklch(22.71% 0.0252 182.05);
+  --primary: oklch(70.54% 0.1525 162.97);
+  --accent: oklch(70.54% 0.1525 162.97);
+  --chart-1: oklch(68% 0.16 165);
+  --chart-2: oklch(62% 0.2 275);
+  --chart-3: oklch(78% 0.17 90);
+  --chart-4: oklch(66% 0.22 20);
+  --chart-5: oklch(57% 0.16 250);
+}
+
+/* --------------------------------------------------------------------------
+   Teal
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="teal"] {
+  --background: oklch(95.08% 0.0481 184.07);
+  --primary: oklch(78.57% 0.1422 180.36);
+  --accent: oklch(78.57% 0.1422 180.36);
+  --chart-1: oklch(77% 0.14 180);
+  --chart-2: oklch(62% 0.18 250);
+  --chart-3: oklch(62% 0.2 275);
+  --chart-4: oklch(63.5% 0.25 25);
+  --chart-5: oklch(85% 0.19 90);
+}
+
+[data-theme="neobrutalist"][data-neo="teal"].dark,
+.dark [data-theme="neobrutalist"][data-neo="teal"] {
+  --background: oklch(22.65% 0.0236 198.49);
+  --primary: oklch(71.47% 0.1293 180.47);
+  --accent: oklch(71.47% 0.1293 180.47);
+  --chart-1: oklch(68% 0.12 180);
+  --chart-2: oklch(57% 0.16 250);
+  --chart-3: oklch(62% 0.2 275);
+  --chart-4: oklch(66% 0.22 20);
+  --chart-5: oklch(78% 0.17 90);
+}
+
+/* --------------------------------------------------------------------------
+   Cyan
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="cyan"] {
+  --background: oklch(94.61% 0.043 211.12);
+  --primary: oklch(76.89% 0.1392 219.13);
+  --accent: oklch(76.89% 0.1392 219.13);
+  --chart-1: oklch(74% 0.13 220);
+  --chart-2: oklch(70% 0.23 45);
+  --chart-3: oklch(62% 0.2 275);
+  --chart-4: oklch(63.5% 0.25 25);
+  --chart-5: oklch(85% 0.19 90);
+}
+
+[data-theme="neobrutalist"][data-neo="cyan"].dark,
+.dark [data-theme="neobrutalist"][data-neo="cyan"] {
+  --background: oklch(27.11% 0.0303 225.38);
+  --primary: oklch(64.37% 0.1162 218.75);
+  --accent: oklch(64.37% 0.1162 218.75);
+  --chart-1: oklch(59% 0.11 220);
+  --chart-2: oklch(65% 0.2 50);
+  --chart-3: oklch(62% 0.2 275);
+  --chart-4: oklch(66% 0.22 20);
+  --chart-5: oklch(78% 0.17 90);
+}
+
+/* --------------------------------------------------------------------------
+   Sky
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="sky"] {
+  --background: oklch(94.27% 0.0268 242.57);
+  --primary: oklch(66.9% 0.1837 248.81);
+  --accent: oklch(66.9% 0.1837 248.81);
+  --chart-1: oklch(62% 0.18 250);
+  --chart-2: oklch(63.5% 0.25 25);
+  --chart-3: oklch(85% 0.19 90);
+  --chart-4: oklch(80% 0.22 155);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="sky"].dark,
+.dark [data-theme="neobrutalist"][data-neo="sky"] {
+  --background: oklch(27.08% 0.0336 240.69);
+  --primary: oklch(61.9% 0.1691 248.6);
+  --accent: oklch(61.9% 0.1691 248.6);
+  --chart-1: oklch(57% 0.16 250);
+  --chart-2: oklch(66% 0.22 20);
+  --chart-3: oklch(78% 0.17 90);
+  --chart-4: oklch(72% 0.18 160);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Blue (Default - also available as explicit modifier)
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="blue"] {
+  --background: oklch(93.46% 0.0305 255.11);
+  --primary: oklch(67.47% 0.1726 259.49);
+  --accent: oklch(67.47% 0.1726 259.49);
+  --chart-1: oklch(66.5% 0.18 260);
+  --chart-2: oklch(63.5% 0.25 25);
+  --chart-3: oklch(85% 0.19 90);
+  --chart-4: oklch(80% 0.22 155);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="blue"].dark,
+.dark [data-theme="neobrutalist"][data-neo="blue"] {
+  --background: oklch(29.23% 0.0626 270.49);
+  --primary: oklch(67.47% 0.1726 259.49);
+  --accent: oklch(67.47% 0.1726 259.49);
+  --chart-1: oklch(66.5% 0.18 260);
+  --chart-2: oklch(66% 0.22 20);
+  --chart-3: oklch(78% 0.17 90);
+  --chart-4: oklch(72% 0.18 160);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Indigo
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="indigo"] {
+  --background: oklch(92.13% 0.0388 282.36);
+  --primary: oklch(66.34% 0.1806 277.2);
+  --accent: oklch(66.34% 0.1806 277.2);
+  --chart-1: oklch(62% 0.2 275);
+  --chart-2: oklch(85% 0.19 90);
+  --chart-3: oklch(63.5% 0.25 25);
+  --chart-4: oklch(76% 0.18 165);
+  --chart-5: oklch(62% 0.18 250);
+}
+
+[data-theme="neobrutalist"][data-neo="indigo"].dark,
+.dark [data-theme="neobrutalist"][data-neo="indigo"] {
+  --background: oklch(26.58% 0.0737 283.96);
+  --primary: oklch(66.34% 0.1806 277.2);
+  --accent: oklch(66.34% 0.1806 277.2);
+  --chart-1: oklch(62% 0.2 275);
+  --chart-2: oklch(78% 0.17 90);
+  --chart-3: oklch(66% 0.22 20);
+  --chart-4: oklch(68% 0.16 165);
+  --chart-5: oklch(57% 0.16 250);
+}
+
+/* --------------------------------------------------------------------------
+   Violet
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="violet"] {
+  --background: oklch(92.13% 0.0388 282.36);
+  --primary: oklch(66.34% 0.1806 277.2);
+  --accent: oklch(66.34% 0.1806 277.2);
+  --chart-1: oklch(62% 0.2 275);
+  --chart-2: oklch(85% 0.19 90);
+  --chart-3: oklch(63.5% 0.25 25);
+  --chart-4: oklch(76% 0.18 165);
+  --chart-5: oklch(62% 0.18 250);
+}
+
+[data-theme="neobrutalist"][data-neo="violet"].dark,
+.dark [data-theme="neobrutalist"][data-neo="violet"] {
+  --background: oklch(26.58% 0.0737 283.96);
+  --primary: oklch(66.34% 0.1806 277.2);
+  --accent: oklch(66.34% 0.1806 277.2);
+  --chart-1: oklch(62% 0.2 275);
+  --chart-2: oklch(78% 0.17 90);
+  --chart-3: oklch(66% 0.22 20);
+  --chart-4: oklch(68% 0.16 165);
+  --chart-5: oklch(57% 0.16 250);
+}
+
+/* --------------------------------------------------------------------------
+   Purple
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="purple"] {
+  --background: oklch(94.11% 0.0366 308.03);
+  --primary: oklch(71.9% 0.198 310.03);
+  --accent: oklch(71.9% 0.198 310.03);
+  --chart-1: oklch(67% 0.22 310);
+  --chart-2: oklch(85% 0.19 90);
+  --chart-3: oklch(76% 0.18 165);
+  --chart-4: oklch(70% 0.23 45);
+  --chart-5: oklch(62% 0.18 250);
+}
+
+[data-theme="neobrutalist"][data-neo="purple"].dark,
+.dark [data-theme="neobrutalist"][data-neo="purple"] {
+  --background: oklch(29.68% 0.0791 315.62);
+  --primary: oklch(67.34% 0.2314 309.13);
+  --accent: oklch(67.34% 0.2314 309.13);
+  --chart-1: oklch(72% 0.19 305);
+  --chart-2: oklch(78% 0.17 90);
+  --chart-3: oklch(68% 0.16 165);
+  --chart-4: oklch(65% 0.2 50);
+  --chart-5: oklch(57% 0.16 250);
+}
+
+/* --------------------------------------------------------------------------
+   Fuchsia
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="fuchsia"] {
+  --background: oklch(94.79% 0.0407 320.6);
+  --primary: oklch(73.43% 0.2332 321.41);
+  --accent: oklch(73.43% 0.2332 321.41);
+  --chart-1: oklch(68% 0.26 320);
+  --chart-2: oklch(85% 0.19 90);
+  --chart-3: oklch(70% 0.23 45);
+  --chart-4: oklch(63.5% 0.25 25);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="fuchsia"].dark,
+.dark [data-theme="neobrutalist"][data-neo="fuchsia"] {
+  --background: oklch(26.29% 0.0683 327.3);
+  --primary: oklch(60.62% 0.2915 319.64);
+  --accent: oklch(60.62% 0.2915 319.64);
+  --chart-1: oklch(52% 0.3 320);
+  --chart-2: oklch(78% 0.17 90);
+  --chart-3: oklch(65% 0.2 50);
+  --chart-4: oklch(66% 0.22 20);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Pink
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="pink"] {
+  --background: oklch(95.16% 0.0242 343.23);
+  --primary: oklch(71.5% 0.197 354.23);
+  --accent: oklch(71.5% 0.197 354.23);
+  --chart-1: oklch(67% 0.22 355);
+  --chart-2: oklch(85% 0.19 90);
+  --chart-3: oklch(70% 0.23 45);
+  --chart-4: oklch(63.5% 0.25 25);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+[data-theme="neobrutalist"][data-neo="pink"].dark,
+.dark [data-theme="neobrutalist"][data-neo="pink"] {
+  --background: oklch(26.3% 0.054 358.23);
+  --primary: oklch(65.98% 0.2407 358.64);
+  --accent: oklch(65.98% 0.2407 358.64);
+  --chart-1: oklch(60% 0.27 355);
+  --chart-2: oklch(78% 0.17 90);
+  --chart-3: oklch(65% 0.2 50);
+  --chart-4: oklch(66% 0.22 20);
+  --chart-5: oklch(62% 0.2 275);
+}
+
+/* --------------------------------------------------------------------------
+   Rose
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"][data-neo="rose"] {
+  --background: oklch(93.37% 0.0339 12.05);
+  --primary: oklch(70.79% 0.1862 16.25);
+  --accent: oklch(70.79% 0.1862 16.25);
+  --chart-1: oklch(66% 0.22 15);
+  --chart-2: oklch(62% 0.2 275);
+  --chart-3: oklch(85% 0.19 90);
+  --chart-4: oklch(76% 0.18 165);
+  --chart-5: oklch(66.5% 0.18 260);
+}
+
+[data-theme="neobrutalist"][data-neo="rose"].dark,
+.dark [data-theme="neobrutalist"][data-neo="rose"] {
+  --background: oklch(25.15% 0.0495 7.54);
+  --primary: oklch(67.58% 0.2135 18.63);
+  --accent: oklch(67.58% 0.2135 18.63);
+  --chart-1: oklch(63% 0.25 15);
+  --chart-2: oklch(62% 0.2 275);
+  --chart-3: oklch(78% 0.17 90);
+  --chart-4: oklch(68% 0.16 165);
+  --chart-5: oklch(66.5% 0.18 260);
+}
+
+/* ==========================================================================
+   NEOBRUTALIST COMPONENT OVERRIDES (Alphabetical)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Accordion
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="accordion"] {
+  gap: 0.5rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="accordion-item"] {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+}
+
+[data-theme="neobrutalist"] [data-slot="accordion-trigger"] {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 1rem;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--foreground);
+  border-radius: 0;
+  border-top: none;
+  border-right: none;
+  border-left: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="accordion-trigger"]:hover {
+  text-decoration: none;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="accordion-trigger"][aria-expanded="true"] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="accordion-trigger-icon"] {
+  transition: transform 0.2s;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="accordion-trigger"][aria-expanded="true"]
+  [data-slot="accordion-trigger-icon"]:first-of-type {
+  display: none;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="accordion-trigger"][aria-expanded="true"]
+  [data-slot="accordion-trigger-icon"]:last-of-type {
+  display: inline;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="accordion-trigger"][aria-expanded="false"]
+  [data-slot="accordion-trigger-icon"]:first-of-type {
+  display: inline;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="accordion-trigger"][aria-expanded="false"]
+  [data-slot="accordion-trigger-icon"]:last-of-type {
+  display: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="accordion-content"] {
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  background-color: var(--muted);
+  font-weight: 500;
+}
+
+[data-theme="neobrutalist"] [data-slot="accordion-content"] > div {
+  padding: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Alert
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="alert"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="alert-title"] {
+  font-weight: 700;
+}
+
+[data-theme="neobrutalist"] [data-slot="alert-description"] {
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Avatar
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="avatar"] {
+  outline: 2px solid var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="avatar-fallback"] {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Badge
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="badge"] {
+  border: var(--neo-border);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Breadcrumb
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="breadcrumb-list"] {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="breadcrumb-page"] {
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Button
+   -------------------------------------------------------------------------- */
+
+/* Buttons are matched by data-slot OR their `group/button` class: a Button rendered as a
+   trigger (<DialogTrigger render={<Button />}>) takes the trigger's data-slot, but always
+   keeps its variant classes. */
+
+[data-theme="neobrutalist"] :is([data-slot="button"], .group\/button) {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+[data-theme="neobrutalist"]
+  :is([data-slot="button"], .group\/button):hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] :is([data-slot="button"], .group\/button):disabled {
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Button Group
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="button-group"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--foreground);
+  overflow: hidden;
+  gap: 0;
+  box-shadow: var(--neo-shadow);
+  align-items: stretch;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button) {
+  border-radius: 0;
+  border-width: 0;
+  border-right: var(--neo-border);
+  box-shadow: none;
+  font-weight: 700;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):last-child {
+  border-right-width: 0;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):hover:not(:disabled) {
+  transform: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: color-mix(in oklch, var(--primary) 85%, var(--foreground));
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):active:not(:disabled) {
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3);
+  background-color: color-mix(in oklch, var(--primary) 70%, var(--foreground));
+}
+
+/* Outline variant buttons in group */
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button)[class*="border-border"],
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button)[class*="bg-background"] {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button)[class*="border-border"]:hover:not(
+    :disabled
+  ),
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button)[class*="bg-background"]:hover:not(
+    :disabled
+  ) {
+  background-color: var(--muted);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is(
+    [data-slot="button"],
+    .group\/button
+  )[class*="border-border"]:active:not(:disabled),
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is(
+    [data-slot="button"],
+    .group\/button
+  )[class*="bg-background"]:active:not(:disabled) {
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Button Group Separator */
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > [data-slot="button-group-separator"],
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > [data-slot="separator"] {
+  background-color: var(--foreground);
+  width: 2px;
+  min-width: 2px;
+  height: auto;
+  align-self: stretch;
+  margin: -1px 0;
+  padding: 0;
+  flex-shrink: 0;
+  border: none;
+  position: relative;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"][data-orientation="vertical"]
+  > [data-slot="button-group-separator"],
+[data-theme="neobrutalist"]
+  [data-slot="button-group"][data-orientation="vertical"]
+  > [data-slot="separator"] {
+  width: 100%;
+  min-width: auto;
+  height: 2px;
+  min-height: 2px;
+}
+
+/* Buttons before separator - no right border since separator provides it */
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):has(
+    + [data-slot="button-group-separator"]
+  ),
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):has(+ [data-slot="separator"]) {
+  border-right-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Calendar
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="calendar"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  box-shadow: var(--neo-shadow);
+  padding: 0.75rem;
+  font-weight: 700;
+}
+
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-month_caption,
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-caption_label,
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-weekday {
+  color: var(--primary-foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-button_previous,
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-button_next {
+  box-shadow: none;
+  background-color: transparent;
+  border-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-button_previous:hover,
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-button_next:hover {
+  background-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+  transform: none;
+  box-shadow: none;
+  border-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-today {
+  background-color: var(--secondary);
+  color: var(--foreground);
+  border-radius: var(--radius);
+  border-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="calendar"]
+  :is([data-slot="button"], .group\/button)[data-selected-single="true"] {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-radius: var(--radius);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="calendar"]
+  :is([data-slot="button"], .group\/button)[data-range-start="true"],
+[data-theme="neobrutalist"]
+  [data-slot="calendar"]
+  :is([data-slot="button"], .group\/button)[data-range-end="true"] {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="calendar"]
+  :is([data-slot="button"], .group\/button)[data-range-middle="true"] {
+  background-color: color-mix(in oklch, var(--foreground) 50%, transparent);
+  color: var(--background);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-range_start,
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-range_end {
+  background-color: color-mix(in oklch, var(--foreground) 50%, transparent);
+}
+
+/* Combined outside and disabled states */
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-outside,
+[data-theme="neobrutalist"] [data-slot="calendar"] .rdp-disabled {
+  color: var(--primary-foreground);
+  opacity: 0.5;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="calendar"]
+  :is([data-slot="button"], .group\/button) {
+  box-shadow: none;
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="calendar"]
+  :is([data-slot="button"], .group\/button):hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Card
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="card"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  gap: 0;
+  padding: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="card-header"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1.5rem;
+  border-radius: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="card-title"] {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+[data-theme="neobrutalist"] [data-slot="card-description"] {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: color-mix(in oklch, var(--primary-foreground) 80%, transparent);
+  margin-top: 0.75rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="card-content"] {
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="card-footer"] {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-radius: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Chart
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="chart"] {
+  font-weight: 500;
+}
+
+/* Cards containing charts should have white/secondary background */
+[data-theme="neobrutalist"] [data-slot="card"]:has([data-slot="chart"]) {
+  background-color: var(--secondary);
+}
+
+/* A card that reads as plain paper rather than a coloured panel, for content-heavy cards:
+   <Card data-card="plain">. Card passes data attributes through, so the component itself is
+   unchanged. */
+[data-theme="neobrutalist"] [data-slot="card"][data-card="plain"] {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="card"]:has([data-slot="chart"])
+  [data-slot="card-header"],
+[data-theme="neobrutalist"]
+  [data-slot="card"]:has([data-slot="chart"])
+  [data-slot="card-content"],
+[data-theme="neobrutalist"]
+  [data-slot="card"]:has([data-slot="chart"])
+  [data-slot="card-footer"] {
+  background-color: transparent;
+}
+
+/* Chart paths - consistent stroke styling */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-layer path {
+  fill-opacity: 1;
+  stroke-width: 2px;
+  stroke: var(--foreground);
+}
+
+/* Axis tick text */
+[data-theme="neobrutalist"]
+  [data-slot="chart"]
+  .recharts-cartesian-axis-tick
+  text {
+  fill: var(--foreground);
+  font-weight: 700;
+}
+
+/* Grid lines */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-cartesian-grid line {
+  stroke: color-mix(in oklch, var(--foreground) 30%, transparent);
+}
+
+/* Polar grid (for radar/radial charts) */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-polar-grid line,
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-polar-grid circle {
+  stroke: var(--foreground);
+}
+
+/* Reference lines */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-reference-line line {
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+/* Chart tooltip cursor */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-tooltip-cursor {
+  stroke: color-mix(in oklch, var(--foreground) 50%, transparent);
+}
+
+/* Chart legend */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-legend-wrapper {
+  font-weight: 700;
+}
+
+/* Chart bars */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-bar-rectangle {
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+/* Chart lines */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-line .recharts-curve {
+  stroke-width: 3px;
+}
+
+/* Chart areas */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-area .recharts-curve {
+  stroke-width: 2px;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="chart"]
+  .recharts-area
+  .recharts-area-area {
+  fill-opacity: 0.4;
+}
+
+/* Chart pie/donut sectors */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-pie-sector,
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-sector {
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+/* Chart dots */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-dot {
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+/* Active shapes */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-active-shape {
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+/* Radial bar */
+[data-theme="neobrutalist"] [data-slot="chart"] .recharts-radial-bar-sector {
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="chart"]
+  .recharts-radial-bar-background-sector {
+  fill: var(--muted);
+  stroke: var(--foreground);
+  stroke-width: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Checkbox
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="checkbox"] {
+  border-radius: 0;
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="checkbox"][data-checked] {
+  background-color: var(--primary);
+  border-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="checkbox-indicator"] svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--primary-foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Collapsible
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="collapsible-trigger"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--background);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+[data-theme="neobrutalist"] [data-slot="collapsible-trigger"]:hover {
+  background-color: var(--muted);
+}
+
+/* Style items inside collapsible */
+[data-theme="neobrutalist"] [data-slot="collapsible"] .rounded-md.border,
+[data-theme="neobrutalist"]
+  [data-slot="collapsible-content"]
+  .rounded-md.border {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Combobox
+   -------------------------------------------------------------------------- */
+
+/* Combobox input group and trigger button - no shadow */
+[data-theme="neobrutalist"]
+  [data-slot="input-group"]
+  :is([data-slot="button"], .group\/button),
+[data-theme="neobrutalist"]
+  [data-slot="input-group"]
+  [data-slot="input-group-button"] {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="input-group"]
+  :is([data-slot="button"], .group\/button):hover,
+[data-theme="neobrutalist"]
+  [data-slot="input-group"]
+  [data-slot="input-group-button"]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="combobox-content"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+  --tw-ring-opacity: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="combobox-item"] {
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  color: var(--primary-foreground);
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="combobox-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="combobox-item"][data-highlighted] {
+  border-color: var(--foreground);
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="combobox-empty"] {
+  color: var(--primary-foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="input-group"] {
+  border: var(--neo-border);
+  background-color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   Command
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="command"] {
+  border-radius: 0;
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+  padding: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-input-wrapper"] {
+  display: flex;
+  height: 2.25rem;
+  gap: 0.5rem;
+  align-items: center;
+  border-bottom: var(--neo-border);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="command-input-wrapper"]
+  [data-slot="input-group"] {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-input"] {
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-input"]::placeholder {
+  color: var(--primary-foreground);
+  opacity: 0.5;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-list"] {
+  max-height: 18.75rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-group"] {
+  color: var(--primary-foreground);
+  padding: 0.5rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-group"] [cmdk-group-heading] {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-separator"] {
+  height: 2px;
+  background-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="command-item"] {
+  border-radius: var(--radius);
+  color: var(--primary-foreground);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-item"]:hover {
+  background-color: transparent;
+  outline-color: color-mix(in oklch, var(--foreground) 30%, transparent);
+}
+
+[data-theme="neobrutalist"] [data-slot="command-item"][aria-selected="true"],
+[data-theme="neobrutalist"] [data-slot="command-item"][data-selected="true"] {
+  outline-color: var(--foreground);
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="command-item"] svg,
+[data-theme="neobrutalist"] [data-slot="command-shortcut"] {
+  color: var(--primary-foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Context Menu / Dropdown Menu / Menubar (Shared Styles)
+   -------------------------------------------------------------------------- */
+
+/* Content containers */
+[data-theme="neobrutalist"] [data-slot="context-menu-content"],
+[data-theme="neobrutalist"] [data-slot="context-menu-sub-content"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-content"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-sub-content"],
+[data-theme="neobrutalist"] [data-slot="menubar-content"],
+[data-theme="neobrutalist"] [data-slot="menubar-sub-content"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+  --tw-ring-opacity: 0;
+}
+
+/* Menubar content specific */
+[data-theme="neobrutalist"] [data-slot="menubar-content"],
+[data-theme="neobrutalist"] [data-slot="menubar-sub-content"] {
+  margin-top: 0.25rem;
+}
+
+/* Menu items base styles */
+[data-theme="neobrutalist"] [data-slot="context-menu-item"],
+[data-theme="neobrutalist"] [data-slot="context-menu-checkbox-item"],
+[data-theme="neobrutalist"] [data-slot="context-menu-radio-item"],
+[data-theme="neobrutalist"] [data-slot="context-menu-sub-trigger"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-item"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-checkbox-item"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-radio-item"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-sub-trigger"],
+[data-theme="neobrutalist"] [data-slot="menubar-item"],
+[data-theme="neobrutalist"] [data-slot="menubar-checkbox-item"],
+[data-theme="neobrutalist"] [data-slot="menubar-radio-item"],
+[data-theme="neobrutalist"] [data-slot="menubar-sub-trigger"] {
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  color: var(--primary-foreground);
+  background-color: transparent;
+}
+
+/* Menu items hover/focus states */
+[data-theme="neobrutalist"] [data-slot="context-menu-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="context-menu-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="context-menu-checkbox-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="context-menu-checkbox-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="context-menu-radio-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="context-menu-radio-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="context-menu-sub-trigger"]:focus,
+[data-theme="neobrutalist"] [data-slot="context-menu-sub-trigger"]:hover,
+[data-theme="neobrutalist"] [data-slot="context-menu-sub-trigger"][data-open],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-checkbox-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-checkbox-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-radio-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-radio-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-sub-trigger"]:focus,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-sub-trigger"]:hover,
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-sub-trigger"][data-open],
+[data-theme="neobrutalist"] [data-slot="menubar-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="menubar-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="menubar-checkbox-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="menubar-checkbox-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="menubar-radio-item"]:focus,
+[data-theme="neobrutalist"] [data-slot="menubar-radio-item"]:hover,
+[data-theme="neobrutalist"] [data-slot="menubar-sub-trigger"]:focus,
+[data-theme="neobrutalist"] [data-slot="menubar-sub-trigger"]:hover,
+[data-theme="neobrutalist"] [data-slot="menubar-sub-trigger"][data-open] {
+  border-color: var(--foreground);
+  background-color: transparent;
+  color: var(--primary-foreground);
+}
+
+/* Menu labels */
+[data-theme="neobrutalist"] [data-slot="context-menu-label"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-label"],
+[data-theme="neobrutalist"] [data-slot="menubar-label"] {
+  color: var(--primary-foreground);
+}
+
+/* Menu separators */
+[data-theme="neobrutalist"] [data-slot="context-menu-separator"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-separator"],
+[data-theme="neobrutalist"] [data-slot="menubar-separator"] {
+  height: 2px;
+  background-color: var(--foreground);
+}
+
+/* Menu shortcuts */
+[data-theme="neobrutalist"] [data-slot="context-menu-shortcut"],
+[data-theme="neobrutalist"] [data-slot="dropdown-menu-shortcut"],
+[data-theme="neobrutalist"] [data-slot="menubar-shortcut"] {
+  color: var(--primary-foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Menubar (Unique Styles)
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="menubar"] {
+  height: 2.75rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+}
+
+[data-theme="neobrutalist"] [data-slot="menubar-trigger"] {
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  font-weight: 700;
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="menubar-trigger"]:hover,
+[data-theme="neobrutalist"] [data-slot="menubar-trigger"]:focus,
+[data-theme="neobrutalist"] [data-slot="menubar-trigger"][aria-expanded="true"],
+[data-theme="neobrutalist"] [data-slot="menubar-trigger"][data-state="open"] {
+  border-color: var(--foreground);
+  background-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Dialog
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="dialog-overlay"] {
+  background-color: rgb(0 0 0 / 0.8);
+  backdrop-filter: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="dialog-content"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  padding: 1.5rem;
+  max-width: 28rem;
+  --tw-ring-opacity: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="dialog-header"] {
+  gap: 0.5rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="dialog-title"] {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+[data-theme="neobrutalist"] [data-slot="dialog-description"] {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+[data-theme="neobrutalist"] [data-slot="dialog-footer"] {
+  background-color: transparent;
+  border-top: none;
+  margin: 0;
+  padding: 0;
+  margin-top: 1rem;
+  border-radius: 0;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="dialog-content"]
+  [data-slot="dialog-close"] {
+  opacity: 1;
+  border-radius: var(--radius);
+}
+
+/* --------------------------------------------------------------------------
+   Drawer
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="drawer-overlay"] {
+  background-color: rgb(0 0 0 / 0.8);
+  backdrop-filter: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="drawer-content"] {
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="drawer-handle"] {
+  height: 0.5rem;
+  background-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="drawer-header"] {
+  gap: 0.375rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="drawer-title"] {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+[data-theme="neobrutalist"] [data-slot="drawer-description"] {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="drawer-footer"] {
+  gap: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   Input
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="input"] {
+  height: 2.5rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--muted);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Input OTP
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="input-otp-slot"] {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--foreground);
+  border-left-width: 0;
+  background-color: var(--muted);
+  font-weight: 500;
+  color: var(--foreground);
+  border-radius: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="input-otp-slot"]:first-child {
+  border-left-width: 2px;
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+}
+
+[data-theme="neobrutalist"] [data-slot="input-otp-slot"]:last-child {
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+[data-theme="neobrutalist"] [data-slot="input-otp-slot"][data-active="true"] {
+  border-color: var(--foreground);
+  box-shadow: var(--neo-shadow-sm);
+  --tw-ring-opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Label
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="label"] {
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Popover
+   -------------------------------------------------------------------------- */
+
+/* Popover trigger - maintain button styling when expanded */
+[data-theme="neobrutalist"]
+  [data-slot="popover-trigger"][data-popup-open]
+  :is([data-slot="button"], .group\/button),
+[data-theme="neobrutalist"]
+  [data-slot="popover-trigger"][aria-expanded="true"]
+  :is([data-slot="button"], .group\/button) {
+  transform: none;
+  box-shadow: var(--neo-shadow);
+  transition: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="popover-content"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--foreground);
+  padding: 1rem;
+  box-shadow: none;
+  --tw-ring-opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="pagination-link"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="pagination-link"]:hover {
+  transform: none;
+  background-color: color-mix(in oklch, var(--primary) 80%, var(--foreground));
+}
+
+[data-theme="neobrutalist"] [data-slot="pagination-link"][data-active="true"] {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+/* --------------------------------------------------------------------------
+   Progress
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="progress"] {
+  position: relative;
+  width: 100%;
+}
+
+[data-theme="neobrutalist"] [data-slot="progress-track"] {
+  height: 1rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  overflow: hidden;
+}
+
+[data-theme="neobrutalist"] [data-slot="progress-track"]::before,
+[data-theme="neobrutalist"] [data-slot="progress-track"]::after {
+  display: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="progress-indicator"] {
+  background-color: var(--primary);
+  border-radius: 0;
+}
+
+/* Hide any thumb/handle element */
+[data-theme="neobrutalist"]
+  [data-slot="progress-track"]
+  > *:not([data-slot="progress-indicator"]) {
+  display: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="progress-label"] {
+  font-weight: 700;
+}
+
+[data-theme="neobrutalist"] [data-slot="progress-value"] {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Radio Group
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="radio-group-item"] {
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="radio-group-indicator"] {
+  color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Resizable
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="resizable-panel-group"] {
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  background-color: var(--primary);
+}
+
+[data-theme="neobrutalist"] [data-slot="resizable-handle"] {
+  width: 2px;
+  background-color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="resizable-handle"]::after {
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="resizable-handle"] > div {
+  height: 1.5rem;
+  width: 0.5rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--muted);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="resizable-handle"][data-panel-group-direction="vertical"] {
+  height: 2px;
+  width: 100%;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="resizable-handle"][data-panel-group-direction="vertical"]
+  > div {
+  height: 0.5rem;
+  width: 1.5rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="resizable-handle"]:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Scroll Area
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="scroll-area"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  box-shadow: var(--neo-shadow);
+  background-color: var(--primary);
+}
+
+[data-theme="neobrutalist"] [data-slot="scroll-area-viewport"] {
+  font-weight: 500;
+}
+
+[data-theme="neobrutalist"] [data-slot="scroll-area-scrollbar"] {
+  width: 0.625rem;
+  padding: 2px;
+}
+
+[data-theme="neobrutalist"] [data-slot="scroll-area-thumb"] {
+  background-color: var(--foreground);
+  border-radius: var(--radius);
+}
+
+/* --------------------------------------------------------------------------
+   Select
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="select-trigger"] {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--secondary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="select-content"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--secondary);
+  color: var(--primary-foreground);
+  padding: 0.25rem 0.15rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="select-item"] {
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  font-weight: 500;
+  padding: 0.375rem 0.5rem;
+  padding-right: 2rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="select-item"]:focus {
+  border-color: var(--foreground);
+  background-color: transparent;
+}
+
+[data-theme="neobrutalist"] [data-slot="select-label"] {
+  font-weight: 500;
+  color: color-mix(in oklch, var(--primary-foreground) 80%, transparent);
+}
+
+[data-theme="neobrutalist"] [data-slot="select-scroll-up-button"],
+[data-theme="neobrutalist"] [data-slot="select-scroll-down-button"] {
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Separator
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"]
+[data-slot="separator"][data-orientation="horizontal"] {
+  height: 2px;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="separator"][data-orientation="vertical"] {
+  width: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Sheet
+   -------------------------------------------------------------------------- */
+
+/* Sheet trigger - maintain button styling when expanded */
+[data-theme="neobrutalist"]
+  [data-slot="sheet-trigger"][data-popup-open]
+  :is([data-slot="button"], .group\/button),
+[data-theme="neobrutalist"]
+  [data-slot="sheet-trigger"][aria-expanded="true"]
+  :is([data-slot="button"], .group\/button) {
+  transform: none;
+  box-shadow: var(--neo-shadow);
+  transition: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-overlay"] {
+  background-color: rgb(0 0 0 / 0.8);
+  backdrop-filter: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-content"] {
+  border: var(--neo-border);
+  background-color: var(--background);
+  gap: 0;
+  padding: 1.5rem;
+}
+
+/* Box-shadow based on side for lifted appearance */
+[data-theme="neobrutalist"] [data-slot="sheet-content"][data-side="right"] {
+  box-shadow: -4px 0 0 0 var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-content"][data-side="left"] {
+  box-shadow: 4px 0 0 0 var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-content"][data-side="top"] {
+  box-shadow: 0 4px 0 0 var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-content"][data-side="bottom"] {
+  box-shadow: 0 -4px 0 0 var(--foreground);
+}
+
+/* Close button styling */
+[data-theme="neobrutalist"]
+  [data-slot="sheet-content"]
+  [data-slot="sheet-close"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--background);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="sheet-content"]
+  [data-slot="sheet-close"]:hover {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-header"] {
+  gap: 0.375rem;
+  padding: 0;
+  padding-bottom: 1rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-title"] {
+  font-weight: 700;
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-description"] {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="sheet-footer"] {
+  gap: 0.75rem;
+  padding: 0;
+  padding-top: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="skeleton"] {
+  border: var(--neo-border);
+}
+
+/* --------------------------------------------------------------------------
+   Slider
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="slider-track"] {
+  height: 0.75rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="slider-thumb"] {
+  height: 1.25rem;
+  width: 1.25rem;
+  border: var(--neo-border);
+}
+
+/* --------------------------------------------------------------------------
+   Switch
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="switch"] {
+  height: 1.5rem;
+  width: 3rem;
+  border-radius: 9999px;
+  border: var(--neo-border);
+  background-color: var(--muted);
+}
+
+[data-theme="neobrutalist"] [data-slot="switch"][data-checked] {
+  background-color: var(--primary);
+}
+
+[data-theme="neobrutalist"] [data-slot="switch-thumb"] {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 9999px;
+  background-color: white;
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="switch"][data-checked]
+  [data-slot="switch-thumb"] {
+  --tw-translate-x: 0.75rem;
+  --tw-translate-y: 0;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y));
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="switch"]:not([data-checked])
+  [data-slot="switch-thumb"] {
+  --tw-translate-x: 0.125rem;
+  --tw-translate-y: 0;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y));
+}
+
+/* --------------------------------------------------------------------------
+   Table
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="table"] {
+  border: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="table-row"] {
+  border-bottom: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+[data-theme="neobrutalist"] [data-slot="table-header"] [data-slot="table-row"] {
+  border-bottom: var(--neo-border);
+}
+
+[data-theme="neobrutalist"] [data-slot="table-head"] {
+  font-weight: 700;
+  color: var(--primary-foreground);
+  padding: 1rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="table-cell"] {
+  padding: 1rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="table-footer"] {
+  border-top: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+[data-theme="neobrutalist"] [data-slot="table-caption"] {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Tabs
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="tabs-list"] {
+  height: 3rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--background);
+  padding: 0.25rem;
+}
+
+[data-theme="neobrutalist"] [data-slot="tabs-trigger"] {
+  height: calc(100% - 2px);
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  background-color: transparent;
+  font-weight: 700;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  gap: 0.375rem;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="tabs-trigger"]:hover:not([data-active]) {
+  color: var(--foreground);
+}
+
+[data-theme="neobrutalist"] [data-slot="tabs-trigger"][data-active] {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--foreground);
+}
+
+/* Hide the line indicator underline */
+[data-theme="neobrutalist"] [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="tabs-content"] {
+  margin-top: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Textarea
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="textarea"] {
+  min-height: 5rem;
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--muted);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Toggle
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="toggle"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--background);
+  font-weight: 700;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="toggle"]:hover {
+  background-color: var(--muted);
+  transform: none;
+}
+
+[data-theme="neobrutalist"] [data-slot="toggle"][aria-pressed="true"],
+[data-theme="neobrutalist"] [data-slot="toggle"][data-pressed] {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--foreground);
+}
+
+/* --------------------------------------------------------------------------
+   Toggle Group
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="toggle-group"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--background);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+[data-theme="neobrutalist"] [data-slot="toggle-group-item"] {
+  border-radius: 0;
+  border-width: 0;
+  border-right: var(--neo-border);
+  background-color: transparent;
+  font-weight: 700;
+  box-shadow: none;
+  margin: 0;
+  position: relative;
+}
+
+[data-theme="neobrutalist"] [data-slot="toggle-group-item"]:last-child {
+  border-right-width: 0;
+}
+
+/* Vertical orientation */
+[data-theme="neobrutalist"]
+  [data-slot="toggle-group"][data-orientation="vertical"]
+  [data-slot="toggle-group-item"] {
+  border-right-width: 0;
+  border-bottom: var(--neo-border);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="toggle-group"][data-orientation="vertical"]
+  [data-slot="toggle-group-item"]:last-child {
+  border-bottom-width: 0;
+}
+
+[data-theme="neobrutalist"] [data-slot="toggle-group-item"]:hover {
+  background-color: var(--muted);
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="toggle-group-item"][aria-pressed="true"],
+[data-theme="neobrutalist"] [data-slot="toggle-group-item"][data-pressed] {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Tooltip
+   -------------------------------------------------------------------------- */
+
+[data-theme="neobrutalist"] [data-slot="tooltip-content"] {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+  /* Stabilize during animation */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Target tooltip arrow via data-side attribute */
+[data-theme="neobrutalist"] [data-slot="tooltip-content"] > [data-side] {
+  background-color: var(--primary);
+  border-style: solid;
+  border-color: var(--foreground);
+  /* Prevent arrow shift during animation */
+  transition: none;
+  animation: none;
+}
+
+/* Arrow on top (pointing down) */
+[data-theme="neobrutalist"] [data-slot="tooltip-content"] > [data-side="top"] {
+  border-width: 0 2px 2px 0;
+}
+
+/* Arrow on bottom (pointing up) */
+[data-theme="neobrutalist"]
+  [data-slot="tooltip-content"]
+  > [data-side="bottom"] {
+  border-width: 2px 0 0 2px;
+}
+
+/* Arrow on left (pointing right) */
+[data-theme="neobrutalist"] [data-slot="tooltip-content"] > [data-side="left"] {
+  border-width: 2px 2px 0 0;
+}
+
+/* Arrow on right (pointing left) */
+[data-theme="neobrutalist"]
+  [data-slot="tooltip-content"]
+  > [data-side="right"] {
+  border-width: 0 0 2px 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Deliberately last: these are more specific than rules above that end in the
+   same element type (calendar and input-group buttons, the resizable handle's
+   div). Kept after them so specificity never runs backwards through the file.
+   -------------------------------------------------------------------------- */
+
+/* Buttons after separator */
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > [data-slot="button-group-separator"]
+  + :is([data-slot="button"], .group\/button),
+[data-theme="neobrutalist"]
+  [data-slot="button-group"]
+  > [data-slot="separator"]
+  + :is([data-slot="button"], .group\/button) {
+  border-left-width: 0;
+  border-right-width: 0;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Button Group: vertical orientation */
+[data-theme="neobrutalist"]
+  [data-slot="button-group"][data-orientation="vertical"]
+  > :is([data-slot="button"], .group\/button) {
+  border-right-width: 0;
+  border-bottom: var(--neo-border);
+}
+
+[data-theme="neobrutalist"]
+  [data-slot="button-group"][data-orientation="vertical"]
+  > :is([data-slot="button"], .group\/button):last-child {
+  border-bottom-width: 0;
+}
+
+/* Chart tooltip container */
+[data-theme="neobrutalist"]
+  [data-slot="chart"]
+  .recharts-tooltip-wrapper
+  > div {
+  border-radius: var(--radius);
+  border: var(--neo-border);
+  background-color: var(--background);
+  box-shadow: var(--neo-shadow-sm);
+}

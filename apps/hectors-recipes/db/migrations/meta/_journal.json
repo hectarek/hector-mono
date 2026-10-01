@@ -1,0 +1,97 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790109935536,
+      "tag": "0000_drop_legacy_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790109940712,
+      "tag": "0001_spaces_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790339150231,
+      "tag": "0002_plan_entries_added_to_list",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790359638222,
+      "tag": "0003_grocery_list_in_plan",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790360749033,
+      "tag": "0004_personal_space_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790361175912,
+      "tag": "0005_user_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790372230849,
+      "tag": "0006_itemized_recipes",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790719087956,
+      "tag": "0007_drop_recipe_instructions",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790776996639,
+      "tag": "0008_recipe_step_sections",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790793906960,
+      "tag": "0009_plan_meal_days",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790799291613,
+      "tag": "0010_plan_meal_days_required",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790799416428,
+      "tag": "0011_drop_eaten_after_deploy",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790817301054,
+      "tag": "0012_recipe_reads",
+      "breakpoints": true
+    }
+  ]
+}

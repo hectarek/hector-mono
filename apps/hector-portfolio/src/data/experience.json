@@ -1,0 +1,118 @@
+{
+  "experience": [
+    {
+      "company": "Stiegler EdTech",
+      "role": "Co-founder & Chief Technology Officer",
+      "period": "Aug 2023 – Present",
+      "location": "Charlotte, NC",
+      "description": "Own technical strategy and execution for the company, with a heavy focus on the youth product, applied AI, and operational systems. Co-architected and now solely maintain The Notwork, our production edtech platform. Lead applied AI work, including a nine-step curriculum generator, AI-assisted game development, and org-wide tooling for staff. Run the messy operational layer: IT ownership, services, access, and cleanup, so the company can keep moving with a small team.",
+      "bullets": [
+        "Own technical strategy and execution for the company.",
+        "Co-architected and now solely maintain The Notwork, our production edtech platform (~24K active users, ~490K views, peak ~1K DAU).",
+        "Built an AI curriculum generator that compresses lesson production from ~1 week to 10–30 minutes and has produced 55+ lessons.",
+        "Designed and shipped 11 interactive web games for the VESL skilled-trades program.",
+        "Set up org-wide AI tooling (Claude team, MCPs, Cursor workflows) and trained staff on practical use.",
+        "Run the company's IT, services, accounts, and access — the operational layer that keeps a small team moving."
+      ],
+      "metrics": [
+        { "label": "Notwork users", "value": "~24K" },
+        { "label": "Games shipped", "value": "11" },
+        { "label": "Curriculum lessons", "value": "55+" }
+      ],
+      "technologies": [
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Bun",
+        "Drizzle ORM",
+        "PostgreSQL",
+        "Vercel",
+        "Cloudflare",
+        "AI SDK",
+        "Technical strategy",
+        "Product ownership"
+      ]
+    },
+    {
+      "company": "Stiegler EdTech",
+      "role": "Co-founder & Director of Curriculum / Programming",
+      "period": "Mar 2022 – Aug 2023",
+      "location": "Charlotte, NC",
+      "description": "Co-founded the company and ran the careers-in-technology program (CTAC) end to end. Designed curriculum, taught daily, and managed cohort operations. Led a small team of curriculum writers and TAs, and worked directly with corporate sponsors to align training with real hiring needs.",
+      "bullets": [
+        "Helped ~200 students pursue software roles through direct instruction, mentorship, and program design.",
+        "Built and iterated the technical curriculum, taught daily, and ran cohort operations.",
+        "Led a team of 4 curriculum writers and supported TAs across cohorts.",
+        "Worked directly with corporate sponsors to align training with hiring needs.",
+        "Set up internal HR, onboarding, and recruiting processes as the company scaled."
+      ],
+      "metrics": [
+        { "label": "Students supported", "value": "~200" },
+        { "label": "Cohort years", "value": "3" }
+      ],
+      "technologies": [
+        "Curriculum design",
+        "Workforce development",
+        "Program operations",
+        "Teaching",
+        "Mentorship",
+        "TypeScript",
+        "React",
+        "Node.js"
+      ]
+    },
+    {
+      "company": "Ally",
+      "role": "Frontend Web Developer",
+      "period": "Aug 2020 – Mar 2022",
+      "location": "Charlotte, NC",
+      "description": "Contributed production code to ally.com inside a large corporate engineering org. Maintained and improved several legacy codebases, shipped UI updates and net-new content, and prioritized vulnerabilities and key features alongside site owners.",
+      "bullets": [
+        "Contributed production code, content updates, and bug fixes to ally.com.",
+        "Maintained several legacy codebases as the sole regular contributor.",
+        "Prioritized vulnerabilities and feature work directly with site owners.",
+        "Learned production engineering practices from senior and principal engineers."
+      ],
+      "technologies": [
+        "JavaScript",
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "Node.js",
+        "Jest",
+        "Agile"
+      ]
+    },
+    {
+      "company": "Carolina Fintech Hub",
+      "role": "WIN Program — Software Apprentice",
+      "period": "Mar 2020 – Aug 2020",
+      "location": "Charlotte, NC",
+      "description": "Career-changing technical training program. Built and deployed full-stack web applications alongside a 50-person cohort and went through every phase of the SDLC.",
+      "bullets": [
+        "Trained intensively in full-stack development as a career pivot from banking.",
+        "Built and shipped applications across the SDLC with a 50-person cohort.",
+        "Placed into a full-time frontend role at Ally on completion."
+      ],
+      "technologies": ["JavaScript", "Java", "Spring Boot", "React", "SQL"]
+    },
+    {
+      "company": "Wells Fargo",
+      "role": "Early Talent Program — Risk & Analytics",
+      "period": "Aug 2018 – Mar 2020",
+      "location": "Charlotte, NC",
+      "description": "Rotational early-talent program across risk and analytics functions. Built dashboards, mapped business processes, and supported audit and reporting work for senior leadership before transitioning into software.",
+      "bullets": [
+        "Rotated across business functions to learn how a large enterprise actually operates.",
+        "Built a project management dashboard in Tableau and reporting in Excel/VBA for senior leadership.",
+        "Documented complex business processes and supported audit/regulatory work."
+      ],
+      "technologies": [
+        "Tableau",
+        "Excel / VBA",
+        "Business analytics",
+        "Process mapping"
+      ]
+    }
+  ]
+}

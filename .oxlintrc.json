@@ -1,0 +1,79 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "jsPlugins": [
+    "@shadcn/lint"
+  ],
+  "categories": {
+    "correctness": "off"
+  },
+  "ignorePatterns": [
+    "apps/*/tests/**"
+  ],
+  "settings": {
+    "shadcn": {
+      "ui": "@repo/ui/components"
+    }
+  },
+  "rules": {
+    "shadcn/no-restyle": [
+      "warn",
+      {
+        "allow": [
+          "layout"
+        ]
+      }
+    ],
+    "shadcn/no-raw-colors": "warn",
+    "shadcn/no-unknown-classes": "warn",
+    "shadcn/require-static-classes": "warn",
+    "shadcn/no-inline-styles": "warn",
+    "shadcn/no-arbitrary-values": "warn"
+  },
+  "overrides": [
+    {
+      "files": [
+        "packages/ui/src/components/**"
+      ],
+      "rules": {
+        "shadcn/no-restyle": "off",
+        "shadcn/no-raw-colors": "off",
+        "shadcn/no-unknown-classes": "off",
+        "shadcn/require-static-classes": "off",
+        "shadcn/no-inline-styles": "off",
+        "shadcn/no-arbitrary-values": "off"
+      }
+    },
+    {
+      "files": [
+        "apps/hector-portfolio/**",
+        "apps/hectors-recipes/**",
+        "apps/hectors-tools/**",
+        "apps/relationship-meter/**",
+        "apps/stash/**"
+      ],
+      "rules": {
+        "shadcn/no-restyle": [
+          "error",
+          {
+            "allow": [
+              "layout"
+            ]
+          }
+        ],
+        "shadcn/no-raw-colors": "error",
+        "shadcn/no-unknown-classes": "error",
+        "shadcn/require-static-classes": "error",
+        "shadcn/no-inline-styles": "error",
+        "shadcn/no-arbitrary-values": "error"
+      }
+    },
+    {
+      "files": [
+        "apps/hector-portfolio/**"
+      ],
+      "rules": {
+        "shadcn/no-arbitrary-values": "off"
+      }
+    }
+  ]
+}

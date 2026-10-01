@@ -1,0 +1,36 @@
+# Keep agent context lean: exclude generated files, build artifacts, and noise.
+# This reduces what agents search/read so they spend context on real source.
+
+# Lockfile (large, single file)
+bun.lock
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Turbo cache
+.turbo/
+
+# Deploy
+.vercel/
+
+# Dependencies
+node_modules/
+
+# Generated DB migrations (read schema.ts instead)
+**/db/migrations/
+
+# Generated Next.js types
+**/.next/types/
+
+# Coverage
+coverage/
+
+# Experiment app (not part of the build)
+apps/promptfoo/
+
+# OS / misc
+.DS_Store
+*.pem

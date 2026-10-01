@@ -1,0 +1,197 @@
+{
+  "intro": "A curated list of what I actually read, listen to, and check to stay current on engineering, product, and the industry. Not exhaustive — just the sources I keep coming back to.",
+  "lastUpdated": "2026-05-19",
+  "categories": [
+    {
+      "id": "newsletters",
+      "name": "Newsletters",
+      "description": "Inbox sources I open more often than I archive.",
+      "resources": [
+        {
+          "name": "The Pragmatic Engineer",
+          "url": "https://newsletter.pragmaticengineer.com/",
+          "description": "Big-picture software industry trends, eng org design, and how teams actually ship.",
+          "cadence": "Weekly"
+        },
+        {
+          "name": "Bytes",
+          "url": "https://bytes.dev/",
+          "description": "Short, practical JavaScript and React updates without the noise.",
+          "cadence": "Weekly"
+        },
+        {
+          "name": "The Rundown AI",
+          "url": "https://www.therundown.ai/",
+          "description": "Daily AI news and tool drops in a quick skim.",
+          "cadence": "Daily"
+        },
+        {
+          "name": "ByteByteGo",
+          "url": "https://blog.bytebytego.com/",
+          "description": "System design and backend concepts with clear diagrams.",
+          "cadence": "Weekly"
+        },
+        {
+          "name": "Center for Humane Technology",
+          "url": "https://www.humanetech.com/",
+          "description": "How products shape attention, trust, and society — useful counterweight to pure growth thinking.",
+          "cadence": "As published"
+        }
+      ]
+    },
+    {
+      "id": "blogs",
+      "name": "Company blogs",
+      "description": "Official posts from the teams building the models and platforms I use.",
+      "resources": [
+        {
+          "name": "OpenAI Blog",
+          "url": "https://openai.com/blog",
+          "description": "Model releases, product direction, and research notes from OpenAI.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Anthropic News",
+          "url": "https://www.anthropic.com/news",
+          "description": "Claude updates, safety research, and how Anthropic thinks about AI systems.",
+          "cadence": "As published"
+        }
+      ]
+    },
+    {
+      "id": "podcasts",
+      "name": "Podcasts",
+      "description": "The one show I actually keep up with.",
+      "resources": [
+        {
+          "name": "Syntax",
+          "url": "https://syntax.fm/",
+          "description": "Web development banter that stays practical and current.",
+          "cadence": "Weekly"
+        }
+      ]
+    },
+    {
+      "id": "video",
+      "name": "Video",
+      "description": "YouTube channels I watch regularly — tech, science, and how things work.",
+      "resources": [
+        {
+          "name": "Claude",
+          "url": "https://www.youtube.com/@claude",
+          "description": "Claude product demos, research highlights, and applied AI walkthroughs.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Linus Tech Tips",
+          "url": "https://www.youtube.com/@LinusTechTips",
+          "description": "Consumer tech, hardware, and what's new in the gadget world.",
+          "cadence": "As published"
+        },
+        {
+          "name": "TechLinked",
+          "url": "https://www.youtube.com/@TechLinked",
+          "description": "Fast tech news from the LTT team when I want headlines with personality.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Marques Brownlee",
+          "url": "https://www.youtube.com/@mkbhd",
+          "description": "Polished reviews and thoughtful takes on consumer tech.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Two Minute Papers",
+          "url": "https://www.youtube.com/@TwoMinutePapers",
+          "description": "AI and graphics research boiled down to what actually matters.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Veritasium",
+          "url": "https://www.youtube.com/@veritasium",
+          "description": "Science storytelling that makes you rethink what you thought you knew.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Cleo Abram",
+          "url": "https://www.youtube.com/@cleoabram",
+          "description": "Optimistic explainers on big science and tech questions.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Crash Course",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Structured deep dives when I want to learn a topic from zero.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Leon van Zyl",
+          "url": "https://www.youtube.com/@leonvanzyl",
+          "description": "Hands-on AI coding, agents, and automation with real project walkthroughs.",
+          "cadence": "As published"
+        },
+        {
+          "name": "freeCodeCamp",
+          "url": "https://www.youtube.com/@freecodecamp",
+          "description": "Long-form tutorials when I want to go deep on a language or stack.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Jeff Su",
+          "url": "https://www.youtube.com/@JeffSu",
+          "description": "Productivity, career, and practical workflows for knowledge work.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Jack Herrington",
+          "url": "https://www.youtube.com/@jherr",
+          "description": "React, TypeScript, and full-stack patterns from someone in the weeds.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Lazar Nikolov",
+          "url": "https://www.youtube.com/@nikolovlazar",
+          "description": "Web dev tutorials and project walkthroughs with a clear teaching style.",
+          "cadence": "As published"
+        },
+        {
+          "name": "Better Stack",
+          "url": "https://www.youtube.com/@betterstack",
+          "description": "DevOps, observability, and infrastructure explained for builders.",
+          "cadence": "As published"
+        },
+        {
+          "name": "TBPN",
+          "url": "https://www.youtube.com/@TBPNLive",
+          "description": "Live tech and business talk — Silicon Valley news with high-signal guests.",
+          "cadence": "Weekdays"
+        }
+      ]
+    },
+    {
+      "id": "feeds",
+      "name": "Feeds",
+      "description": "Quick scans — not deep reading, just keeping a pulse.",
+      "resources": [
+        {
+          "name": "daily.dev",
+          "url": "https://app.daily.dev/",
+          "description": "Developer news feed when I want a scrollable snapshot of the ecosystem.",
+          "cadence": "Daily skim"
+        },
+        {
+          "name": "GitHub Trending",
+          "url": "https://github.com/trending",
+          "description": "What repos are getting traction this week.",
+          "cadence": "Weekly"
+        }
+      ]
+    },
+    {
+      "id": "articles",
+      "name": "Saved articles",
+      "description": "Standout essays and posts worth revisiting — I add these when something really clicks.",
+      "resources": []
+    }
+  ]
+}
