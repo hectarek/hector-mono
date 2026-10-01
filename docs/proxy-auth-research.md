@@ -130,7 +130,7 @@ export default async function proxy(req: NextRequest) {
 
 ### Security context (CVE-2025-29927)
 
-Next.js 16's shift away from middleware-based auth was also motivated by CVE-2025-29927, which demonstrated that Edge Runtime middleware authentication could be bypassed under high load. The rename to `proxy.ts` and the default Node.js runtime were part of the response to this vulnerability.
+CVE-2025-29927 ([GHSA-f82v-jwr5-mffw](https://github.com/vercel/next.js/security/advisories/GHSA-f82v-jwr5-mffw)) let a request bypass authorization checks done in middleware by sending a spoofed `x-middleware-subrequest` header. It was fixed in Next.js 15.2.3, 14.2.25, 13.5.9 and 12.3.5. It shows why the proxy shouldn't be the only auth check: pages and actions check the session themselves.
 
 ### Layouts vs. Pages for auth
 
@@ -330,7 +330,7 @@ The `__Secure-` prefix is a browser security feature that requires:
 
 The cookie-only proxy left one gap. `auth.getSession()` in a Server Component first reads the signed 5-minute cache cookie (`__Secure-neon-auth.local.session_data`). Once that has expired it asks Neon, and when Neon answers with a refreshed cookie, the SDK tries to set it. Next.js forbids setting cookies while rendering ("Cookies can only be modified in a Server Action or Route Handler"), so `getSession()` threw, the page treated the user as signed out, and every load failed the same way until something else refreshed the cookies. The SDK's Next adapter doesn't catch this (other SSR auth libraries ignore cookie writes from Server Components and rely on middleware), and `createNeonAuth` doesn't accept a custom context.
 
-`apps/hectors-recipes/proxy.ts` now refreshes the cache itself, only when the cache cookie is missing: it calls the app's own `/api/auth/get-session` route (a route handler, which may set cookies), forwards the `Set-Cookie` headers to the browser, and rewrites this request's `cookie` header so the render reads the fresh cache without going to Neon. If the refresh clears the session token it redirects to sign-in; if the call fails it lets the request through as before. That is one extra call per cache lifetime, not per request, and it never redirects RSC requests that have a valid session. `apps/stash/proxy.ts` has the same fix. Tests: `apps/hectors-recipes/tests/proxy.test.ts`, `apps/stash/tests/proxy.test.ts`.
+`apps/hectors-recipes/proxy.ts` now refreshes the cache itself, only when the cache cookie is missing: it calls the app's own `/api/auth/get-session` route (a route handler, which may set cookies), forwards the `Set-Cookie` headers to the browser, and rewrites this request's `cookie` header so the render reads the fresh cache without going to Neon. If the refresh clears the session token it redirects to the welcome screen (`/welcome`, with `redirectTo`); if the call fails it lets the request through as before. That is one extra call per cache lifetime, not per request, and it never redirects RSC requests that have a valid session. `apps/stash/proxy.ts` has the same fix. Tests: `apps/hectors-recipes/tests/proxy.test.ts`, `apps/stash/tests/proxy.test.ts`.
 
 ## When to Revisit
 
@@ -350,7 +350,7 @@ The cookie-only proxy left one gap. `auth.getSession()` in a Server Component fi
 - [Optimistic checks with Proxy](https://nextjs.org/docs/app/guides/authentication#optimistic-checks-with-proxy-optional) — Cookie-only pattern
 - [Middleware to Proxy migration](https://nextjs.org/docs/messages/middleware-to-proxy) — Codemod and changes
 - [Next.js 16 blog post](https://nextjs.org/blog/next-16) — Release announcement
-- CVE-2025-29927 — Middleware bypass vulnerability that motivated the proxy redesign
+- [CVE-2025-29927 (GHSA-f82v-jwr5-mffw)](https://github.com/vercel/next.js/security/advisories/GHSA-f82v-jwr5-mffw) — Authorization bypass in middleware through a spoofed `x-middleware-subrequest` header
 
 ### Better Auth
 

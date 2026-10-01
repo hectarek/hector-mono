@@ -27,6 +27,7 @@ Personal monorepo for Hector Gonzalez's apps and shared packages. Turborepo + Bu
 - **Bun** — package manager + runtime (never npm/yarn)
 - **Turborepo** — task orchestration + caching
 - **Biome** — lint + format (no ESLint/Prettier)
+- **Oxlint** — design-system lint only (`@shadcn/lint` rules on how apps use `@repo/ui`)
 - **TypeScript** — strict everywhere
 
 ## Quick start

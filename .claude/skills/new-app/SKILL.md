@@ -1,6 +1,6 @@
 ---
 name: new-app
-description: Checklist for adding a new Next.js app to this monorepo (package.json scripts and workspace packages, tsconfig, styling through @repo/ui, files to delete, the app's AGENTS.md, checks). Use when creating an app under apps/ or bringing an existing Next.js app into the repo.
+description: Checklist for adding a new Next.js app to this monorepo (package.json scripts and workspace packages, tsconfig, styling through @repo/ui, the design-system lint override, turbo.json env vars, tests, files to delete, the app's AGENTS.md, checks). Use when creating an app under apps/ or bringing an existing Next.js app into the repo.
 ---
 
 # New App Onboarding Checklist
@@ -34,16 +34,20 @@ Update `package.json` (take current versions from an existing app, e.g. `apps/he
   "devDependencies": {
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^25",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "tailwindcss": "^4",
-    "tw-animate-css": "^1.4.0",
+    "@tailwindcss/postcss": "…",
+    "@types/node": "…",
+    "@types/react": "…",
+    "@types/react-dom": "…",
+    "babel-plugin-react-compiler": "…",
+    "tailwindcss": "…",
     "typescript": "…"
   }
 }
 ```
+
+- `babel-plugin-react-compiler` goes with `reactCompiler: true` in `next.config.ts`, as in every app except `relationship-meter`.
+- Add every package the app imports itself (e.g. `lucide-react`): installs are isolated, so an app can't import a package it doesn't declare, even when `@repo/ui` has it. Not `next-themes` or `tw-animate-css`: those come through `@repo/ui`.
+- Use the same version string as the other apps for shared packages; `recharts`, if the app imports it, must be exactly `packages/ui`'s version.
 
 ## 2. TypeScript Configuration
 
@@ -65,7 +69,38 @@ Replace `tsconfig.json`:
 
 Follow "Setting up an app" in [docs/ui-package.md](../../../docs/ui-package.md): `components.json`, `postcss.config.mjs`, a one-line `app/globals.css`, fonts on `<html>`, and `ThemeProvider` from `@repo/ui` in `app/_providers/providers.tsx`. Don't define tokens or add `@source` lines in the app.
 
-## 4. Files to Delete
+## 4. Design-System Lint
+
+The `lint` script above already runs Oxlint. Add `"apps/<app>/**"` to the `files` of the `.oxlintrc.json` override that sets the six `shadcn/*` rules to `error` (the entry listing every app; keep each rule's options, e.g. `no-restyle`'s `allow: ["layout"]`). Once the app is listed, its design-lint findings fail `bun check` and CI. See "Design-System Lint" in the root `AGENTS.md`.
+
+## 5. Environment Variables
+
+If `next build` needs env vars (a module that reads one at import, a page rendered at build time), add `apps/<app>/turbo.json` listing them: Turborepo runs builds in strict env mode, so a variable not listed is withheld from `next build`, even when it's set in Vercel. Copy `apps/hectors-recipes/turbo.json`:
+
+```json
+{
+  "$schema": "https://v2-11-5.turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["$TURBO_EXTENDS$", "DATABASE_URL", "LOG_LEVEL"]
+    }
+  }
+}
+```
+
+Keep secrets in a gitignored `.env` with a tracked `.env.example` listing the names. The root `.worktreeinclude` already copies `apps/*/.env` into new Claude Code worktrees.
+
+## 6. Tests
+
+For an app with tests (as `hectors-recipes`, `stash` and `hector-portfolio` have):
+
+- [ ] A `"test": "bun test"` script, so `bun run test` and CI (Turbo) pick the app up
+- [ ] `@types/bun` in `devDependencies` and `"types": ["bun"]` in `tsconfig.json`'s `compilerOptions`; without it `tsc` and `next build` fail on `bun:test` imports
+- [ ] Test files under `tests/`, mirroring the source tree
+- [ ] If tests must never reach real services: a `bunfig.toml` with `[test]` `preload = ["./tests/_support/preload.ts"]`, and a preload that deletes the credentials Bun loads from `.env` (see `apps/hectors-recipes/tests/_support/preload.ts`)
+
+## 7. Files to Delete
 
 Remove these files/folders (use monorepo equivalents):
 
@@ -74,16 +109,17 @@ Remove these files/folders (use monorepo equivalents):
 - [ ] `tailwind.config.ts` (Tailwind v4 uses CSS config)
 - [ ] Unused public assets (`next.svg`, `vercel.svg`, etc.)
 
-## 5. Agent Context
+## 8. Agent Context
 
 - [ ] An `AGENTS.md` for the app, modelled on an app of the same complexity (`apps/relationship-meter/AGENTS.md` for a simple one, `apps/hectors-recipes/AGENTS.md` for one with a backend), with its scoped check commands
 - [ ] The app in the root `AGENTS.md` "Monorepo Structure" block and in the README's app table
 
-## 6. Final Steps
+## 9. Final Steps
 
 1. Run `bun install` from root
 2. Run `bun check && bun ts` to verify
 3. Run `bun run build --filter=app-name` to test build
+4. With tests: `bun run test --filter=app-name`
 
 ## Common Issues
 
