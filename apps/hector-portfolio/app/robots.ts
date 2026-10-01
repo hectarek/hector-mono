@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
+        // /ui stays crawlable on purpose: its noindex meta only works if crawlers can fetch it.
         disallow: ["/api/", "/_next/"],
       },
     ],

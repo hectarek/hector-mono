@@ -52,9 +52,19 @@ export const metadata = generateSEOMetadata({
 
 Dynamic routes build the path in `generateMetadata()` from the item they render (`app/(main)/projects/[slug]/page.tsx` passes `` `/projects/${project.slug}` ``). Their not-found branch returns a plain title and description, with no canonical or `og:url`.
 
+A client page (`"use client"`) can't export metadata: put it in a `layout.tsx` beside the page, as `app/ui/layout.tsx` does for `/ui`.
+
 ### Root layout
 
 `app/layout.tsx` sets only a default title and description, with no canonical or `og:url`. Metadata merges shallowly down the route tree, so a URL in the root layout would be inherited by any route that doesn't set its own (404s, the error page) and would claim the home page's URL. Every page sets its own through `generateSEOMetadata()`.
+
+### Pages kept out of search
+
+`noIndex: true` adds `<meta name="robots" content="noindex, nofollow">`. Two pages use it, and neither is in the sitemap:
+
+- `/reading`, the reading list
+- `/ui`, the `@repo/ui` component gallery (metadata in `app/ui/layout.tsx`)
+
 ## Robots.txt
 
 The `app/robots.ts` file automatically generates `robots.txt`:
@@ -62,6 +72,9 @@ The `app/robots.ts` file automatically generates `robots.txt`:
 - Allows all crawlers to access `/`
 - Disallows `/api/` and `/_next/` directories
 - Points to the sitemap at `${SITE_URL}/sitemap.xml`
+
+Noindex pages (`/reading`, `/ui`) are deliberately not disallowed: a crawler has to fetch a page to see its noindex, and a URL blocked in robots.txt can still be indexed from links to it, without its content.
+
 ## Sitemap
 
 The `app/sitemap.ts` file generates `sitemap.xml` from the indexable pages and every project page; noindex pages stay out. Add your routes:
