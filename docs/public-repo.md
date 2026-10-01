@@ -24,6 +24,7 @@ The portfolio site's content (`apps/hector-portfolio/src/data/*.json`) is tracke
 
 - Secret scanning and push protection on.
 - Dependabot alerts on.
+- Private vulnerability reporting on; [SECURITY.md](../SECURITY.md) tells reporters how to use it.
 - `main` protected: changes land through a pull request with CI passing. Pull requests merge with a merge commit only (squash and rebase are off), and merged branches are deleted.
 - CI's token is read-only (`permissions: contents: read` in `.github/workflows/ci.yml`), and workflows from first-time contributors' forks need approval to run (GitHub's default).
 - On Vercel, a pull request from a fork deploys only once Hector authorizes it (see [monorepo-guide.md](./monorepo-guide.md#deploying-from-a-public-repo)).
