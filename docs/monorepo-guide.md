@@ -287,12 +287,11 @@ When deploying a specific app (e.g., `hectors-recipes`) to Vercel:
 - Environment variables are set per-project in Vercel, not in `.env` files
 - Turbo&apos;s remote caching can speed up CI/CD builds across deploys (optional, requires Vercel account linking)
 
-### Deployments "blocked" (`TEAM_ACCESS_REQUIRED`)
+### Deploying from a public repo
 
-The projects live in the `hectareks-projects` Hobby team and the repo is private, so Vercel only builds commits whose GitHub author it can match to the team owner. It finds that owner through the GitHub **Login Connection** on the Vercel account ([Vercel: deploying private repos from Hobby teams](https://vercel.com/docs/git#using-hobby-teams)). If that connection moves to another Vercel account (e.g. a work account signed in with the same GitHub), every deploy, production included, shows "Deployment was blocked" and stays that way; nothing fails in the build.
+The projects live in the `hectareks-projects` Hobby team, connected to the public `hectarek/hector-mono`. Hector's pushes deploy as usual. A pull request from someone else's fork deploys only after Hector authorizes it from the link Vercel comments on the PR (Git Fork Protection, on in each project), and preview deployments need a Vercel login ([Vercel: deploying forks of public Git repositories](https://vercel.com/docs/git#deploying-forks-of-public-git-repositories)).
 
-- Confirm: `vercel api /v13/deployments/<deployment id> --scope hectareks-projects` shows `"seatBlock": {"blockCode": "TEAM_ACCESS_REQUIRED"}`.
-- Fix: reconnect GitHub under Account Settings → Authentication → Login Connections on the personal Vercel account, then push again (blocked deployments don't retry).
+While the repo was private (until 2026-10-01), Vercel only built commits whose author it matched to the team's owner through the GitHub **Login Connection**, and when that connection moved to another Vercel account every deploy was "blocked" (`TEAM_ACCESS_REQUIRED`). That rule is for private repos only ([Vercel: deploying private Git repositories](https://vercel.com/docs/git#deploying-private-git-repositories)). If the repo goes private again: `vercel api /v13/deployments/<deployment id> --scope hectareks-projects` shows the `seatBlock`; reconnect GitHub under Account Settings → Authentication → Login Connections on the personal Vercel account, then push again (blocked deployments don't retry).
 
 ---
 

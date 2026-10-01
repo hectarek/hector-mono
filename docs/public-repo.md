@@ -25,3 +25,8 @@ The portfolio site's content (`apps/hector-portfolio/src/data/*.json`) is tracke
 - Dependabot alerts on.
 - `main` protected: changes land through a pull request with CI passing.
 - CI's token is read-only (`permissions: contents: read` in `.github/workflows/ci.yml`), and workflows from first-time contributors' forks need approval to run (GitHub's default).
+- On Vercel, a pull request from a fork deploys only once Hector authorizes it (see [monorepo-guide.md](./monorepo-guide.md#deploying-from-a-public-repo)).
+
+## History
+
+The history starts at the first public commit (2026-10-01). Earlier work was in a private repo, since deleted, so pull request numbers, branch names and commits named in older docs (such as the recipes [ux-plan.md](../apps/hectors-recipes/docs/ux-plan.md) log) refer to it and don't exist here. Pull request numbers here start again at #1.

@@ -10,10 +10,12 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 14 on `fix/recipes-p14-review` (PR #33): P14.1–P14.13 done, including the review's fixes; migration 0012 applied. Phases 1–13 merged (PRs #17–#32). |
-| Next task | Hector merges Phase 14. |
+| Phase | All 14 phases merged (Phase 14 was PR #33); no task open. |
+| Next task | None planned: Hector's phone checks (H5) and the items below. |
 | Waiting on Hector | whether to add a DOM test library for component tests; real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, and whether a running timer pauses music; L2; L3. |
 | Last updated | 2026-10-01 |
+
+PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
 ## How to resume (read first in a new context window)
 
@@ -1674,3 +1676,5 @@ Branch `fix/recipes-p14-review`. Three reviewers read PRs #25, #26 and #28–#31
   - Next: H21 (apply 0012), then the Phase 14 PR.
 - **2026-10-01 (al)** — H21 done: 0012 applied (13 migrations, `recipe_reads` empty, 4 meals and 60 recipes as they were). Three reviewers read PR #33; every finding is fixed (P14.13) apart from the five listed there as left. 944 tests pass.
   - Next: Hector merges Phase 14.
+- **2026-10-01 (am)** — Hector merged Phase 14 (PR #33). The same day the repo went public as a new `hectarek/hector-mono` with one initial commit, and the private repo was deleted: the PR numbers, branches and commits named in this plan are history only ([docs/public-repo.md](../../../docs/public-repo.md#history)).
+  - Next: H5 (phone checks).
