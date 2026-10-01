@@ -5,6 +5,8 @@
 ## Overview
 Client-side relationship strength tracker with research-based decay and interaction models. No backend, no auth, no database.
 
+Deployment: Vercel; https://relationship-meter.vercel.app
+
 ## Stack
 - Next.js 16, React 19, Tailwind CSS, shadcn/ui
 - Client-side state only — data is in-memory, lost on refresh
@@ -28,7 +30,7 @@ app/
     model.ts    # Research-based algorithms (decay, interaction boost, Dunbar layers)
     types.ts    # Relationship, Interaction, CreateRelationshipInput
     data.ts     # Static seed data (initialRelationships)
-    utils.ts    # Helpers (formatRelativeTime, daysSince, etc.)
+    utils.ts    # Helpers (formatRelativeTime, getDaysSinceContact, etc.)
   _providers/
     providers.tsx
 ```
@@ -42,6 +44,10 @@ app/
 - Single-page app — one route, container component owns all state
 - Props drilling: `onInteraction`, `onEdit` passed down from container → list → card
 - Domain logic in `_lib/model.ts` — Granovetter tie strength, Dunbar layers, IOS scale, decay profiles
+
+## Theming
+- `@repo/ui` neobrutalist theme: `app/globals.css` imports `@repo/ui/styles/themes/neobrutalist.css`, and `<html>` in `app/layout.tsx` carries `data-theme="neobrutalist" data-neo="blue"`.
+- Light only: there's no `ThemeProvider` (`app/_providers/providers.tsx` only wraps `TooltipProvider`), so the theme's `.dark` values never apply.
 
 ## Commands
 ```bash
