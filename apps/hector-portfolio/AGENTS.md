@@ -44,7 +44,7 @@ tests/                 # Tests
 ## Patterns
 - Server Components by default — no `"use client"` unless needed for interactivity
 - `generateStaticParams()` for dynamic project routes
-- `generateMetadata()` per page using `generateSEOMetadata()` from `src/shared/utils/seo.ts`
+- Metadata per page through `generateSEOMetadata()` from `src/shared/utils/seo.ts`, with the page's required `path`: it becomes the page's canonical and `og:url`. The root layout sets no URLs (they'd be inherited as the home page's). See `docs/seo.md`.
 - The canonical origin is `SITE_URL` in `src/shared/config/site.ts` (`https://www.hectorfgonzalez.com`), used by the SEO utils, `app/sitemap.ts` and `app/robots.ts`. There's no env var for it.
 - Framer Motion for animations: components use `motion` from `framer-motion` directly, with shared variants (`fadeInUp`, `heroVariants`/`heroItem`, `viewportOptions`, etc.) from `src/lib/animations.ts`, and `useScrollReveal()` (`src/lib/use-scroll-reveal.ts`) for scroll-in reveals that respect reduced motion
 - Dark/light mode via `ThemeProvider` / `useTheme` from `@repo/ui/components/theme-provider` (follows the system setting; no toggle)

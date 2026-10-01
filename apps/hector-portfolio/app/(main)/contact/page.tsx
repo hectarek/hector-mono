@@ -8,6 +8,7 @@ export const metadata: Metadata = generateSEOMetadata({
   description:
     "Get in touch with Hector Gonzalez. Open to consulting opportunities and collaboration.",
   keywords: ["Contact", "Hector Gonzalez", "Consulting", "Collaboration"],
+  path: "/contact",
   type: "website",
 });
 

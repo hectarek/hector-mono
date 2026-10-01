@@ -15,6 +15,7 @@ export const metadata: Metadata = generateSEOMetadata({
     "Full Stack",
     "Web Development",
   ],
+  path: "/projects",
   type: "website",
 });
 

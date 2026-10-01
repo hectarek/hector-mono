@@ -32,6 +32,7 @@ export const metadata: Metadata = generateSEOMetadata({
     "EdTech",
     "Learning Systems",
   ],
+  path: "/",
   type: "website",
 });
 

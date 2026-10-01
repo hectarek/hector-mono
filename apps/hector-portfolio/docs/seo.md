@@ -12,28 +12,28 @@ import { generateSEOMetadata } from "@/src/shared/utils/seo";
 export const metadata = generateSEOMetadata({
   title: "My Page Title",
   description: "Page description for SEO",
+  path: "/my-page",
   keywords: ["keyword1", "keyword2"],
   type: "website",
 });
 ```
 
+`path` is required and must start with `/`: it's the page's own path, and `generateSEOMetadata()` turns it into the page's canonical URL (`<link rel="canonical">`, via `alternates.canonical`) and its `og:url`, both `${SITE_URL}${path}`. The home page passes `"/"`.
+
 ### Advanced Usage
 
 ```typescript
-import { generateCanonicalUrl, generateSEOMetadata } from "@/src/shared/utils/seo";
+import { generateSEOMetadata } from "@/src/shared/utils/seo";
 
 export const metadata = generateSEOMetadata({
   title: "My Page Title",
   description: "Page description",
+  path: "/my-page", // Becomes the canonical URL and og:url
   keywords: ["keyword1", "keyword2"],
   image: "/og-image.png", // Will be converted to full URL
-  url: "/my-page", // Will be converted to full URL
   type: "article",
   noIndex: false, // Set to true to prevent indexing
 });
-
-// Generate canonical URL
-const canonical = generateCanonicalUrl("/my-page");
 ```
 
 ### Page-Level SEO
@@ -45,10 +45,16 @@ import { generateSEOMetadata } from "@/src/shared/utils/seo";
 export const metadata = generateSEOMetadata({
   title: "My Page",
   description: "Page-specific description",
+  path: "/my-page",
   keywords: ["page", "specific", "keywords"],
 });
 ```
 
+Dynamic routes build the path in `generateMetadata()` from the item they render (`app/(main)/projects/[slug]/page.tsx` passes `` `/projects/${project.slug}` ``). Their not-found branch returns a plain title and description, with no canonical or `og:url`.
+
+### Root layout
+
+`app/layout.tsx` sets only a default title and description, with no canonical or `og:url`. Metadata merges shallowly down the route tree, so a URL in the root layout would be inherited by any route that doesn't set its own (404s, the error page) and would claim the home page's URL. Every page sets its own through `generateSEOMetadata()`.
 ## Robots.txt
 
 The `app/robots.ts` file automatically generates `robots.txt`:
@@ -56,10 +62,9 @@ The `app/robots.ts` file automatically generates `robots.txt`:
 - Allows all crawlers to access `/`
 - Disallows `/api/` and `/_next/` directories
 - Points to the sitemap at `${SITE_URL}/sitemap.xml`
-
 ## Sitemap
 
-The `app/sitemap.ts` file generates `sitemap.xml`. Add your routes:
+The `app/sitemap.ts` file generates `sitemap.xml` from the indexable pages and every project page; noindex pages stay out. Add your routes:
 
 ```typescript
 import { SITE_URL } from "@/src/shared/config/site";
@@ -89,7 +94,7 @@ How to run it, and the score thresholds `.lighthouserc.js` asserts, are in [ligh
 
 ## Best Practices
 
-1. **Always set metadata** - Use `generateSEOMetadata()` for all pages
+1. **Always set metadata** - Use `generateSEOMetadata()` for all pages, with the page's own `path`
 2. **Use descriptive titles** - Keep under 60 characters
 3. **Write good descriptions** - 150-160 characters, compelling
 4. **Add keywords** - Relevant keywords for your content
@@ -102,8 +107,7 @@ How to run it, and the score thresholds `.lighthouserc.js` asserts, are in [ligh
 There's no environment variable for it. The canonical origin is set once, as `SITE_URL` in `src/shared/config/site.ts` (`https://www.hectorfgonzalez.com`). The apex `hectorfgonzalez.com` redirects to www, so every URL uses www.
 
 This is used for:
-- Open Graph URLs (and relative image URLs) in `generateSEOMetadata()`
-- `generateCanonicalUrl()` when no base URL is passed
+- Canonical URLs, Open Graph URLs and relative image URLs in `generateSEOMetadata()`
 - Sitemap URLs
 - Robots.txt sitemap reference
 
