@@ -17,7 +17,6 @@
     "@happy-dom/global-registrator",
     "happy-dom",
     "tailwindcss",
-    "tw-animate-css",
     "postcss"
   ],
   "next": {
