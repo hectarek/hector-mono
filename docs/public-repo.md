@@ -6,7 +6,7 @@ This monorepo is public. Everything tracked in git is readable by anyone, includ
 
 | What | Where | Why |
 |---|---|---|
-| Secrets (database URLs, API keys, auth secrets) | Each app's `.env`, which is gitignored. Its `.env.example` lists the names with no values. | Credentials. |
+| Secrets (database URLs, API keys, auth secrets) | Each app's `.env`, which is gitignored. Its `.env.example` lists the names with no values. The root `.worktreeinclude` copies the `.env` files into each new Claude Code worktree, under the gitignored `.claude/worktrees/`. | Credentials. |
 | Hector's personal docs (the portfolio's dossier, résumé, LinkedIn copy and other working notes) | `docs/private/` at the root, which is gitignored. They exist only on Hector's machine. | Personal information. |
 | Personal agent settings and worktrees (`.claude/settings.local.json`, `CLAUDE.local.md`, `.claude/worktrees/`) | Gitignored. The shared `.claude/settings.json` is tracked. | Personal approvals and local paths. |
 | Local data snapshots and one-off data scripts | Gitignored folders such as `apps/hectors-recipes/.reread/`. | Real user data. |

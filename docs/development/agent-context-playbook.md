@@ -27,12 +27,13 @@ The "harness" — everything around the model — matters as much as the model. 
 | --- | --- | --- |
 | **`AGENTS.md`** | Context files read automatically every session. Root = big picture; per-dir = local conventions. | ✅ Canonical. Root `AGENTS.md` + one per app + `packages/ui`. **Start here.** |
 | **Ignore files** | Exclude generated/build/vendor noise from agent search. | ✅ Build output and dependencies are gitignored. The lockfile and `db/migrations/` are tracked, so read `schema.ts` rather than the migrations. |
-| **Hooks** | Scripts at events; deterministic enforcement + self-improvement. | ✅ Claude Code's `PostToolUse` hook (`.claude/settings.json`) runs `.claude/hooks/format.sh`: Biome formats each edited file. |
-| **Permissions** | What an agent may run without asking, must ask about, or can't read. | ✅ Claude Code: `.claude/settings.json` allows the checks (`bun check`, `bun ts`, tests, `gh pr view`), asks before `git stash`, discarding changes or `gh pr merge`, and denies reading `.env` files (Claude's Read tool only; a shell command isn't covered). Personal additions go in the gitignored `.claude/settings.local.json`. |
+| **Hooks** | Scripts at events; deterministic enforcement + self-improvement. | ✅ Claude Code's `PostToolUse` hook (`.claude/settings.json`) runs `.claude/hooks/format.sh` after each Edit or Write. For a `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.json`, `.jsonc` or `.css` file it runs `biome check --write` (format, safe lint fixes, import sorting) from the file's nearest `package.json`, since `@repo/biome-config` only resolves from a package. A file whose nearest `package.json` is the root isn't formatted (Biome fails there and changes nothing). Needs `jq`; never blocks the edit. |
+| **Permissions** | What an agent may run without asking, must ask about, or can't read. | ✅ Claude Code: `.claude/settings.json` allows `bun check`, `bun ts`, `bun test`, `bun run test`, `gh pr view`, `gh pr checks`, `gh pr diff` and `gh run view`; asks before `git stash`, `git reset --hard`, `git clean`, `git restore`, `git switch`, `git checkout` and `gh pr merge`; and denies reading `.env*` files except `.env.example`, at any depth. The deny covers Claude's file tools and the shell file commands Claude Code recognises (`cat`, `head`, `sed`, …), not a script that opens the file itself ([Claude Code: permissions](https://code.claude.com/docs/en/permissions)). Personal additions go in the gitignored `.claude/settings.local.json`. |
+| **Worktrees** | One git checkout per agent session, so parallel sessions don't collide. | ✅ Hector runs several sessions at once: each agent does its branch and PR work in its own worktree under `.claude/worktrees/` (gitignored), never in the main checkout. The root `.worktreeinclude` (`apps/*/.env`) copies the apps' gitignored env files into each new worktree; run `bun install` there. The format hook still runs from the main checkout (`${CLAUDE_PROJECT_DIR}` doesn't follow a worktree), but it works from the edited file's own path, so it formats worktree files once that worktree has run `bun install`. Rules: root `AGENTS.md`, "Working in parallel". |
 | **Skills** | On-demand expertise for a repeated multi-step workflow. | ✅ `.claude/skills/new-app` (adding an app to the monorepo). Add one when a workflow repeats. |
 | **LSP** | Symbol-level navigation. | From the editor; agents navigate by search and by reading files. |
 | **Subagents** | Isolated context for explore-vs-edit splits. | Use a subagent (Claude Code's Agent tool) for broad exploration; edit in the main session. |
-| **MCP** | Connections to external tools/data. | Configured (Neon, Vercel, GitHub, etc.). Build only after the basics are solid. |
+| **MCP** | Connections to external tools/data. | None tracked in the repo (no `.mcp.json`). Hector's Neon, Vercel and GitHub servers are his user-level setup, so another clone won't have them. Build only after the basics are solid. |
 
 Cursor's setup (`.cursor/`, `.cursorignore`) was retired on 2026-10-01, since Claude Code is the agent used here; Cursor and Codex still read `AGENTS.md`.
 
@@ -99,7 +100,7 @@ One plan per stream of work: update it rather than starting a parallel doc, and 
 
 - **Global** (`docs/`): monorepo-wide references — `monorepo-guide.md`, `clean-architecture.md` (the canonical guide for complex apps), `ui-package.md`, shared research like `proxy-auth-research.md`, and this playbook.
 - **App-specific** (`apps/<app>/docs/`): anything that pertains to exactly one app — specs, design notes, app SEO/perf.
-- **Naming:** all docs are lower **kebab-case** (`my-doc.md`), like every other file in the repo.
+- **Naming:** all docs are lower **kebab-case** (`my-doc.md`), like the repo's other files (the exceptions, such as `AGENTS.md` and `README.md`, are listed in the root `AGENTS.md`).
 - A doc is "global" only if 2+ apps use it. When in doubt, colocate it with the app.
 
 ---
@@ -118,6 +119,7 @@ Do a deliberate context review every **3–6 months**, and whenever performance 
 ## Quick checklist (per task)
 
 - [ ] Read the root + app `AGENTS.md` before editing
+- [ ] Branch work happens in your own worktree, with `bun install` run there (root `AGENTS.md`, "Working in parallel")
 - [ ] Scope work and checks to the relevant app (`--filter=<app>`)
 - [ ] Reuse `@repo/ui` before creating components
 - [ ] Update the relevant `AGENTS.md` if a pattern/structure/gotcha changed

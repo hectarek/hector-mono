@@ -16,10 +16,11 @@
       "Bash(git reset --hard *)",
       "Bash(git clean *)",
       "Bash(git restore *)",
-      "Bash(git checkout -- *)",
+      "Bash(git switch *)",
+      "Bash(git checkout *)",
       "Bash(gh pr merge *)"
     ],
-    "deny": ["Read(**/.env)"]
+    "deny": ["Read(.env*)", "Read(!.env.example)"]
   },
   "hooks": {
     "PostToolUse": [
