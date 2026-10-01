@@ -61,12 +61,9 @@ di/
   types.ts                    # DI_SYMBOLS + DI_RETURN_TYPES
   modules/logger.module.ts
   modules/resume-analyzer.module.ts  # IAiService + the resume-analyzer use case and controller
-
-lib/
-  logger.ts                   # Standalone ConsoleLoggerService for edge/root code
 ```
 
-**`lib/` vs `app/_lib/`:** `lib/` lives at the app root (outside `src/`) for framework-agnostic shared initialization imported across layers via `@/lib/*` — e.g. the edge-safe logger for code where the DI container isn't available, kept for the first route handler or proxy (nothing imports it yet). This matches `stash`/`hectors-recipes`. `app/_lib/` is an App-Router-private folder for route-scoped modules (the tool registry). They are not interchangeable — don't move `lib/` under `app/`.
+**No root `lib/` yet:** `stash` and `hectors-recipes` keep framework-agnostic setup there (`@/lib/*`), e.g. `lib/logger.ts`, a standalone `ConsoleLoggerService` for root or edge code the DI container doesn't reach (a route handler, `proxy.ts`). Add it when the first such file needs it. `app/_lib/` is different: an App-Router-private folder for route-scoped modules (the tool registry); don't put root `lib/` code under `app/`.
 
 **Components:** all components live under `app/_components/`, never inside a route folder. Layout-level components sit at the top; route-specific components go in a `app/_components/<route-id>/` subfolder (e.g. `resume-analyzer/`). Route `page.tsx` files stay thin and import from there.
 
@@ -90,7 +87,7 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
 ## Conventions
 
 ### Logging
-- Never use `console.*` directly. Use `ILoggerService` via DI (`getInjection("ILoggerService").child({ layer, op })`) or `@/lib/logger` for edge/root code.
+- Never use `console.*` directly. Use `ILoggerService` via DI (`getInjection("ILoggerService").child({ layer, op })`); root or edge code outside the container gets `lib/logger.ts` (see above).
 - Standard `layer` values: `action`, `use-case`, `controller`, `service`, `route`, `page`. `op` is the function name.
 
 ### File Naming
