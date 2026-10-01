@@ -25,8 +25,10 @@ module.exports = {
         "categories:seo": ["error", { minScore: 1 }],
       },
     },
+    // Reports stay on this machine (gitignored); temporary-public-storage would publish them.
     upload: {
-      target: "temporary-public-storage",
+      target: "filesystem",
+      outputDir: ".lighthouseci/reports",
     },
   },
 };
