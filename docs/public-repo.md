@@ -8,6 +8,7 @@ This monorepo is public. Everything tracked in git is readable by anyone, includ
 |---|---|---|
 | Secrets (database URLs, API keys, auth secrets) | Each app's `.env`, which is gitignored. Its `.env.example` lists the names with no values. | Credentials. |
 | Hector's personal docs (the portfolio's dossier, résumé, LinkedIn copy and other working notes) | `docs/private/` at the root, which is gitignored. They exist only on Hector's machine. | Personal information. |
+| Personal agent settings and worktrees (`.claude/settings.local.json`, `CLAUDE.local.md`, `.claude/worktrees/`) | Gitignored. The shared `.claude/settings.json` is tracked. | Personal approvals and local paths. |
 | Local data snapshots and one-off data scripts | Gitignored folders such as `apps/hectors-recipes/.reread/`. | Real user data. |
 
 The portfolio site's content (`apps/hector-portfolio/src/data/*.json`) is tracked: it's what the public site shows.
@@ -18,6 +19,7 @@ The portfolio site's content (`apps/hector-portfolio/src/data/*.json`) is tracke
 - No personal contact details (phone, private email, address) in tracked files.
 - Commits are authored with the GitHub noreply address, not a work or personal email.
 - Commit messages, pull request titles and descriptions, and review comments are public too, and GitHub keeps a pull request's text after its branch is deleted: no personal details or private-doc content in them.
+- A pull request from someone else that changes `.claude/` (settings, hooks, skills) or `.github/workflows/` is code that runs on Hector's machine or in CI: read the change before checking the branch out or approving its workflow run. Claude Code runs a repo's hooks without asking in some cases (a trusted parent folder, `claude -p`).
 - If something private is committed by mistake, don't just delete it in a new commit: it stays in history, and pull requests keep a copy. Stop and rewrite history (`git filter-repo`), then ask GitHub Support to purge pull request refs and cached views.
 
 ## GitHub settings for a public repo

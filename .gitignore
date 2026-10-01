@@ -40,5 +40,10 @@ yarn-error.log*
 # PromptFoo
 promptfoo/
 
+# Personal agent settings and worktrees (the shared settings are .claude/settings.json)
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
+
 # Personal docs: kept on Hector's machine only, never committed (docs/public-repo.md)
 /docs/private/
