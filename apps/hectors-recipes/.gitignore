@@ -45,3 +45,8 @@ certificates
 
 # the recipe re-read's local output (ux-plan P9.3)
 /.reread/
+
+# Browser flows (playwright test)
+/test-results/
+/playwright-report/
+/blob-report/
