@@ -27,7 +27,8 @@
     "shadcn/no-unknown-classes": "warn",
     "shadcn/require-static-classes": "warn",
     "shadcn/no-inline-styles": "warn",
-    "shadcn/no-arbitrary-values": "warn"
+    "shadcn/no-arbitrary-values": "warn",
+    "import/no-cycle": "error"
   },
   "overrides": [
     {
@@ -74,6 +75,193 @@
       "rules": {
         "shadcn/no-arbitrary-values": "off"
       }
+    },
+    {
+      "files": [
+        "apps/stash/src/entities/**",
+        "apps/hectors-recipes/src/entities/**",
+        "apps/hectors-tools/src/entities/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*",
+                  "!zod",
+                  "!@/src/entities/**",
+                  "!./**",
+                  "!../**",
+                  "../**/application/**",
+                  "../**/interface-adapters/**",
+                  "../**/infrastructure/**"
+                ],
+                "message": "Entities are the innermost layer: import only zod and other entities. See docs/clean-architecture.md \u00a75."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/stash/src/application/**",
+        "apps/hectors-recipes/src/application/**",
+        "apps/hectors-tools/src/application/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*",
+                  "!zod",
+                  "!@/src/entities/**",
+                  "!@/src/application/**",
+                  "!./**",
+                  "!../**",
+                  "../**/interface-adapters/**",
+                  "../**/infrastructure/**"
+                ],
+                "message": "Application imports only entities, application and zod: declare an interface here and implement it in infrastructure. See docs/clean-architecture.md \u00a75."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/stash/src/interface-adapters/**",
+        "apps/hectors-recipes/src/interface-adapters/**",
+        "apps/hectors-tools/src/interface-adapters/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "*",
+                  "!zod",
+                  "!@/src/entities/**",
+                  "!@/src/application/**",
+                  "!@/src/interface-adapters/**",
+                  "!./**",
+                  "!../**",
+                  "../**/infrastructure/**"
+                ],
+                "message": "Controllers import only entities, application and zod: no framework, database or concrete implementation. See docs/clean-architecture.md \u00a75."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/stash/src/infrastructure/**",
+        "apps/hectors-recipes/src/infrastructure/**",
+        "apps/hectors-tools/src/infrastructure/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/src/application/use-cases/**",
+                  "@/src/interface-adapters/**",
+                  "@/di",
+                  "@/di/**",
+                  "@/app/**",
+                  "next",
+                  "next/**",
+                  "react",
+                  "react/**",
+                  "../**/use-cases/**",
+                  "../**/interface-adapters/**"
+                ],
+                "message": "Infrastructure implements application interfaces using entities, interfaces, db/, lib/ and vendor SDKs: never use cases, controllers, DI, app/ or the framework. See docs/clean-architecture.md \u00a75."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/stash/app/**",
+        "apps/stash/proxy.ts",
+        "apps/hectors-recipes/app/**",
+        "apps/hectors-recipes/proxy.ts",
+        "apps/hectors-tools/app/**",
+        "apps/hectors-tools/proxy.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/src/application/**",
+                  "@/src/interface-adapters/**",
+                  "@/src/infrastructure/**",
+                  "@/db",
+                  "@/db/**",
+                  "drizzle-orm",
+                  "drizzle-orm/**",
+                  "../**/src/**",
+                  "@/lib/**"
+                ],
+                "message": "app/ reaches the inner layers only through entities and DI (getInjection): no application, interface-adapters, infrastructure or db/. Root lib/ is only for the auth route and auth page. See docs/clean-architecture.md \u00a75."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/stash/app/(auth)/auth/**",
+        "apps/stash/app/(api)/api/auth/**",
+        "apps/hectors-recipes/app/(auth)/auth/**",
+        "apps/hectors-recipes/app/(api)/api/auth/**",
+        "apps/hectors-tools/app/(auth)/auth/**",
+        "apps/hectors-tools/app/(api)/api/auth/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/src/application/**",
+                  "@/src/interface-adapters/**",
+                  "@/src/infrastructure/**",
+                  "@/db",
+                  "@/db/**",
+                  "drizzle-orm",
+                  "drizzle-orm/**",
+                  "../**/src/**"
+                ],
+                "message": "app/ reaches the inner layers only through entities and DI (getInjection): no application, interface-adapters, infrastructure or db/. See docs/clean-architecture.md \u00a75."
+              }
+            ]
+          }
+        ]
+      }
     }
+  ],
+  "plugins": [
+    "import"
   ]
 }
