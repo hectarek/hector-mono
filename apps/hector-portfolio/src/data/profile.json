@@ -1,22 +1,13 @@
 {
   "name": "Hector Gonzalez",
-  "title": "Full-Stack Engineer · Co-Founder · Applied AI Builder",
-  "tagline": "Product-minded builder of learning systems, internal tools, and applied AI.",
-  "bio": "I build practical software across product, engineering, operations, and applied AI. My work tends to live at the intersection of full-stack development, learning systems, automation, and the messy operational layer that makes products actually run.",
+  "title": "Full-Stack Engineer · Front End · Applied AI",
+  "tagline": "Product-minded full-stack engineer, strongest on the front end, who ships AI features.",
+  "bio": "Six years across a large bank's web properties and a production edtech platform I co-architected and now run for ~24,000 users. I own the whole product: React and Next.js front ends, data, auth, CI/CD, monitoring, and the AI pipeline that cut lesson production from about a week to 10–30 minutes.",
   "image": "/hector.webp",
   "email": "hello@hectorfgonzalez.com",
   "location": "Charlotte, NC",
   "social": {
     "github": "https://github.com/hectarek",
     "linkedin": "https://www.linkedin.com/in/hectorfgonzalez/"
-  },
-  "consulting": {
-    "available": true,
-    "note": "Open to selective consulting on full-stack builds, internal tools, and applied AI workflows."
-  },
-  "currentlyBuilding": [
-    "The Notwork edtech platform",
-    "AI curriculum generator",
-    "Internal automations for youth programming"
-  ]
+  }
 }

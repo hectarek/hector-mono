@@ -164,6 +164,36 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         <ProjectBadges technologies={project.technologies} />
       </SectionBlock>
 
+      {project.demos && project.demos.length > 0 && (
+        <SectionBlock index="02" label="Play" heading="Try them yourself">
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {project.demos.map((demo) => (
+              <li key={demo.url}>
+                <Link
+                  href={demo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex h-full gap-3 rounded-md border border-border bg-background p-3 text-sm transition-colors hover:border-accent"
+                >
+                  <ExternalLink
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <span className="font-medium text-foreground transition-colors group-hover:text-accent">
+                      {demo.title}
+                    </span>
+                    <span className="mt-0.5 block text-muted-foreground">
+                      {demo.description}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </SectionBlock>
+      )}
+
       {hasCaseStudy && (
         <>
           {project.problem && (

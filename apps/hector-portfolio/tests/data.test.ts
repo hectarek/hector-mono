@@ -19,7 +19,6 @@ describe("Data Functions", () => {
       expect(profile).toHaveProperty("bio");
       expect(profile).toHaveProperty("email");
       expect(profile).toHaveProperty("social");
-      expect(profile).toHaveProperty("consulting");
     });
 
     it("should have valid profile data", () => {

@@ -1,87 +1,48 @@
 {
   "categories": [
     {
-      "name": "Full-Stack Product Engineering",
-      "description": "Shipping modern web products end to end with serverless infrastructure and managed services.",
+      "name": "Front end",
+      "description": "Product interfaces in React and Next.js, from design systems to 2D and 3D games.",
       "skills": [
         "TypeScript",
         "React",
         "Next.js",
-        "Bun",
-        "Node.js",
         "Tailwind CSS",
-        "Drizzle ORM",
-        "PostgreSQL",
-        "Vercel",
-        "Cloudflare",
-        "GitHub Actions",
-        "Zod"
+        "shadcn/ui",
+        "Framer Motion",
+        "Pixi.js",
+        "Three.js"
       ]
     },
     {
-      "name": "Applied AI & Workflow Design",
-      "description": "Designing real product workflows around modern AI tools, not research demos.",
+      "name": "Applied AI",
+      "description": "AI features inside real products, with a person reviewing what the model produces.",
       "skills": [
         "AI SDK",
         "Claude",
-        "Cursor",
-        "MCP integrations",
-        "Multi-step agents",
-        "Context engineering",
-        "AI-assisted dev workflows",
-        "Org-level AI enablement"
+        "MCP",
+        "Multi-step pipelines",
+        "Human-in-the-loop review",
+        "Structured outputs",
+        "LLM grading",
+        "Vector search"
       ]
     },
     {
-      "name": "Product & Systems Strategy",
-      "description": "Turning ambiguous client and executive asks into scoped, buildable systems.",
+      "name": "Back end & platform",
+      "description": "Everything behind the interface, owned end to end on a small team.",
       "skills": [
-        "Requirements shaping",
-        "Technical scoping",
-        "Architecture planning",
-        "Feasibility analysis",
-        "Stakeholder communication",
-        "Roadmap tradeoffs",
-        "Cross-functional execution"
-      ]
-    },
-    {
-      "name": "Automation & Internal Tools",
-      "description": "Replacing spreadsheets, manual workflows, and operational friction with small focused tools.",
-      "skills": [
-        "AI auto-grading",
-        "Admin CRUD systems",
-        "Reporting scripts",
-        "CRM syncing",
-        "Messaging tools",
-        "Internal APIs",
-        "Apps Script",
-        "Background jobs"
-      ]
-    },
-    {
-      "name": "Learning Systems & Technical Education",
-      "description": "Designing and building software for how people actually learn, teach, and run programs.",
-      "skills": [
-        "Curriculum design",
-        "Mastery pathways",
-        "Micro-credentials",
-        "Game-based learning",
-        "Workforce development",
-        "Instructor & teacher tooling",
-        "Program operations"
-      ]
-    },
-    {
-      "name": "Technical Operations",
-      "description": "Owning the boring-but-critical layer: accounts, access, services, and maintainability.",
-      "skills": [
-        "Google Workspace admin",
-        "Service & account management",
-        "Access & security hygiene",
-        "Vendor / tool selection",
-        "Knowledge organization",
-        "IT ownership"
+        "Node.js",
+        "Bun",
+        "PostgreSQL",
+        "Drizzle ORM",
+        "Redis",
+        "Zod",
+        "Clerk",
+        "Vercel",
+        "Cloudflare",
+        "GitHub Actions",
+        "Sentry"
       ]
     }
   ]

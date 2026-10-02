@@ -11,11 +11,6 @@ export interface Profile {
     linkedin: string;
     twitter?: string;
   };
-  consulting: {
-    available: boolean;
-    note: string;
-  };
-  currentlyBuilding?: string[];
 }
 
 export interface SkillCategory {
@@ -35,6 +30,12 @@ export interface ProjectMetric {
 
 export interface ProjectLink {
   label: string;
+  url: string;
+}
+
+export interface ProjectDemo {
+  title: string;
+  description: string;
   url: string;
 }
 
@@ -59,6 +60,7 @@ export interface Project {
   impact?: string;
   features?: string[];
   links?: ProjectLink[];
+  demos?: ProjectDemo[];
 }
 
 export interface ProjectsData {

@@ -7,6 +7,9 @@
 import type { Metadata } from "next";
 import { SITE_URL } from "@/src/shared/config/site";
 
+/** The share card every page uses unless it passes its own `image`. */
+export const DEFAULT_SHARE_IMAGE = "/og-image.png";
+
 export interface SEOConfig {
   title: string;
   description: string;
@@ -32,11 +35,10 @@ export function generateSEOMetadata(config: SEOConfig): Metadata {
     noIndex = false,
   } = config;
 
-  const fullImageUrl = image
-    ? image.startsWith("http")
-      ? image
-      : `${SITE_URL}${image}`
-    : undefined;
+  const imagePath = image ?? DEFAULT_SHARE_IMAGE;
+  const fullImageUrl = imagePath.startsWith("http")
+    ? imagePath
+    : `${SITE_URL}${imagePath}`;
   const pageUrl = `${SITE_URL}${path}`;
 
   const metadata: Metadata = {
@@ -50,14 +52,14 @@ export function generateSEOMetadata(config: SEOConfig): Metadata {
       title,
       description,
       type,
-      ...(fullImageUrl && { images: [{ url: fullImageUrl }] }),
+      images: [{ url: fullImageUrl }],
       url: pageUrl,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(fullImageUrl && { images: [fullImageUrl] }),
+      images: [fullImageUrl],
     },
     ...(noIndex && {
       robots: {

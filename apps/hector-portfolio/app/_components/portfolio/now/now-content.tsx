@@ -21,34 +21,36 @@ interface FocusItem {
   body: string;
 }
 
+const LAST_UPDATED = { label: "Oct 2, 2026", iso: "2026-10-02" };
+
 const FOCUS_ITEMS: FocusItem[] = [
   {
     area: "The Notwork",
-    body: "Sole-maintaining the production platform and rolling out season features for our youth STEM and skilled-trades league.",
+    body: "Running the production platform on my own: features, fixes, and the AI tooling built into it.",
   },
   {
-    area: "AI curriculum tooling",
-    body: "Iterating on the nine-step curriculum generator and pushing more of our content production through it.",
+    area: "Building in public",
+    body: "My monorepo, hector-mono, is now public: this site, a recipes app, and an AI tools catalog, with lint, typecheck, and tests on every pull request.",
   },
   {
-    area: "Internal automations",
-    body: "Quiet wins for the operations team — scripts, dashboards, and small admin tools that pull work out of spreadsheets.",
+    area: "AI curriculum pipeline",
+    body: "Keeping the nine-step lesson pipeline in production and pushing more of our content through it.",
   },
   {
-    area: "Reading & exploring",
-    body: "Tracking what's actually shipping in applied AI, modern web tooling, and product/operator practices.",
+    area: "CS fundamentals",
+    body: "Working back through data structures, algorithms, and system design: the computer science I skipped by learning on the job.",
   },
 ];
 
 const READING: string[] = [
   "Patterns for shipping AI features that don't break in production.",
-  "Operator and product management writing for small teams.",
-  "Modern serverless infrastructure tradeoffs.",
+  "Evaluating AI output: how to test and measure what a model produces.",
+  "Learning science: spaced retrieval and how people keep what they learn.",
 ];
 
 const TINKERING: string[] = [
   "3D printing and small home projects.",
-  "Music — still picking up the instruments I have around the house.",
+  "Cooking most nights, and working out.",
   "Travel and short trips when I can fit them in.",
 ];
 
@@ -108,13 +110,12 @@ export function NowContent({ profile }: NowContentProps) {
             </span>
             <span>
               Last updated:{" "}
-              <span className="text-muted-foreground">
-                {new Date().toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </span>
+              <time
+                dateTime={LAST_UPDATED.iso}
+                className="text-muted-foreground"
+              >
+                {LAST_UPDATED.label}
+              </time>
             </span>
           </motion.div>
         </div>

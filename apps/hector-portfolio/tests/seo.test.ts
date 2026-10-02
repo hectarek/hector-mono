@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { SITE_URL } from "@/src/shared/config/site";
-import { generateSEOMetadata } from "@/src/shared/utils/seo";
+import {
+  DEFAULT_SHARE_IMAGE,
+  generateSEOMetadata,
+} from "@/src/shared/utils/seo";
 
 describe("generateSEOMetadata", () => {
   it("sets the canonical and og:url to the page's own URL", () => {
@@ -40,5 +43,29 @@ describe("generateSEOMetadata", () => {
 
     expect(indexed.robots).toBeUndefined();
     expect(hidden.robots).toEqual({ index: false, follow: false });
+  });
+
+  it("gives every page the default share card unless it passes its own", () => {
+    const fallback = generateSEOMetadata({
+      title: "About",
+      description: "About page",
+      path: "/about",
+    });
+    const custom = generateSEOMetadata({
+      title: "Project",
+      description: "Project page",
+      path: "/projects/x",
+      image: "/projects/x.webp",
+    });
+
+    expect(fallback.openGraph?.images).toEqual([
+      { url: `${SITE_URL}${DEFAULT_SHARE_IMAGE}` },
+    ]);
+    expect(fallback.twitter?.images).toEqual([
+      `${SITE_URL}${DEFAULT_SHARE_IMAGE}`,
+    ]);
+    expect(custom.openGraph?.images).toEqual([
+      { url: `${SITE_URL}/projects/x.webp` },
+    ]);
   });
 });

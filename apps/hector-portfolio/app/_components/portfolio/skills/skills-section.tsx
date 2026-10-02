@@ -46,9 +46,9 @@ export function SkillsSection({
             className="max-w-xl text-base text-muted-foreground sm:text-lg"
             variants={fadeInUp}
           >
-            Six capability areas that show up across most of my work, paired
-            with the tools I actually reach for. The list is honest about depth
-            &mdash; broad where it should be, sharper where it counts.
+            Front-end product engineering is the depth, applied AI is the
+            specialty, and the rest of the stack is the breadth that lets me own
+            a product on my own. These are the tools I actually reach for.
           </motion.p>
         </div>
 

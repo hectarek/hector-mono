@@ -42,10 +42,9 @@ const caveat = Caveat({
 // Fallback for routes without their own metadata (404, error). No URLs here: a
 // canonical or og:url in the root layout would be inherited as the home page's.
 export const metadata: Metadata = {
-  title:
-    "Hector Gonzalez | Full-Stack Engineer, Co-Founder, Applied AI Builder",
+  title: "Hector Gonzalez | Full-Stack Engineer, Front End and Applied AI",
   description:
-    "Product-minded full-stack engineer building learning systems, internal tools, and applied AI. Co-founder & CTO at Stiegler EdTech.",
+    "Product-minded full-stack engineer, strongest on the front end, who ships AI features. Co-architect and sole maintainer of The Notwork, a production edtech platform with ~24K users.",
 };
 
 export default function RootLayout({

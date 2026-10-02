@@ -18,20 +18,20 @@ interface BuildArea {
 
 const BUILD_AREAS: BuildArea[] = [
   {
-    title: "Learning systems",
-    body: "Game-based learning, mastery pathways, micro-credentials, and the operational tooling around teachers, programs, and competitions.",
-  },
-  {
-    title: "Applied AI workflows",
-    body: "Multi-step AI pipelines, AI-assisted product development, MCP integrations, and team-level AI enablement that actually changes how work gets done.",
-  },
-  {
-    title: "Internal tools & automation",
-    body: "Admin systems, scripts, reporting, messaging, and the small but high-leverage tools that pull a small team out of spreadsheets.",
-  },
-  {
     title: "Production web platforms",
-    body: "Full-stack Next.js products on serverless infrastructure: auth, data, integrations, content, communication, and the long tail of real product needs.",
+    body: "Full-stack Next.js products, front end first: interfaces people use every day, backed by the data, auth, integrations, and monitoring a real product needs.",
+  },
+  {
+    title: "Applied AI features",
+    body: "Multi-step AI pipelines with a person reviewing each step, AI grading, MCP integrations, and team-level AI enablement that changes how work gets done.",
+  },
+  {
+    title: "Learning systems",
+    body: "Game-based learning, mastery pathways, micro-credentials, and the tooling around teachers, programs, and competitions.",
+  },
+  {
+    title: "Internal tools",
+    body: "Admin systems, reporting, and messaging tools that pull a small team out of spreadsheets.",
   },
 ];
 
@@ -46,7 +46,7 @@ const PRINCIPLES: { title: string; body: string }[] = [
   },
   {
     title: "Honesty about depth",
-    body: "I'm a strong generalist. I'll tell you when something is outside my depth instead of pretending it isn't.",
+    body: "My depth is front-end product engineering and applied AI, and I know the rest of the stack well enough to own a product on my own. I'll tell you when something is outside that instead of pretending it isn't.",
   },
 ];
 
@@ -129,15 +129,19 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
               From there, my old program director asked me to help write
               curriculum for a new tech cohort. That contract turned into
               co-founding Stiegler EdTech, where I ran the CTAC program as
-              Director of Curriculum &mdash; teaching daily, designing the
-              program, and helping roughly 200 students pursue software roles.
+              Director of Curriculum and Programming &mdash; writing the
+              curriculum and teaching it daily. More than 100 graduates of my
+              first two cohorts were placed in full-time roles at Charlotte
+              employers like Bank of America, Wells Fargo, Lowe&apos;s, and
+              Truist.
             </p>
             <p>
-              As the company grew, I shifted into the CTO role to take more
-              weight on technical product decisions. I co-architected and now
-              solely maintain The Notwork &mdash; our youth STEM and
-              skilled-trades platform &mdash; and lead our applied AI work,
-              automation, and internal tooling.
+              As the company grew, I moved into the CTO role. I co-architected
+              The Notwork, our youth STEM and skilled-trades platform, led the
+              team that built it and its 2025 rebuild, and have run it on my own
+              since October 2025, along with the applied-AI work on top of it: a
+              nine-step curriculum pipeline, AI grading, and the company&apos;s
+              AI tooling.
             </p>
           </motion.div>
         </div>
@@ -247,39 +251,13 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
             className="font-serif mt-6 max-w-3xl text-xl leading-relaxed text-muted-foreground sm:text-2xl"
             variants={heroItem}
           >
-            Outside of code, I&apos;m a tinkerer. I have a music degree and
-            still play, I travel when I can, and I&apos;m happiest fixing or
-            building something with my hands &mdash; 3D prints, home projects, a
-            workshop full of tools waiting on the next idea.
+            Outside of code, I cook, work out, 3D print, and travel when I can.
+            I have a music degree, and I&apos;m happiest building something with
+            my hands &mdash; home projects and a workshop full of tools waiting
+            on the next idea.
           </motion.p>
         </div>
       </motion.section>
-
-      {profile.consulting.available && (
-        <motion.section
-          className="relative px-4 py-12"
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOptions}
-          variants={heroVariants}
-        >
-          <div className="mx-auto max-w-6xl">
-            <motion.aside
-              className="relative max-w-3xl rounded-lg border border-border bg-muted p-6 sm:p-7"
-              variants={heroItem}
-            >
-              <div className="absolute -top-px left-6 right-6 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-                Consulting
-              </p>
-              <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-                {profile.consulting.note} If your problem fits, the best way to
-                start is a short note over email.
-              </p>
-            </motion.aside>
-          </div>
-        </motion.section>
-      )}
 
       <ExperienceSection
         experience={experience}

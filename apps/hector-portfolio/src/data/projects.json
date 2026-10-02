@@ -4,64 +4,67 @@
       "id": "the-notwork",
       "slug": "the-notwork",
       "title": "The Notwork",
-      "description": "Production edtech platform where high schoolers learn, play, and compete in STEM and skilled-trades programming.",
-      "longDescription": "The Notwork is a full-stack web platform that powers our youth STEM and skilled-trades league. Students learn through structured pathways, play interactive games, earn micro-credentials, and compete on rosters and leaderboards. Behind the scenes, the same platform runs the league: teachers verify students, staff manage content and operations, and admins push real updates throughout the season.",
+      "description": "Production edtech platform where North Carolina high schoolers learn, play, and compete in STEM and skilled-trades programs.",
+      "longDescription": "The Notwork is the full-stack platform behind North Carolina's first state-backed esports and STEM league. Students learn through mastery pathways, play games, earn micro-credentials, and compete on rosters and leaderboards. The same platform runs the league: teachers verify students, staff manage content and seasons, and admins push updates all year. I co-architected it, led the team that built it and its 2025 rebuild, and have run it on my own since October 2025.",
       "technologies": [
         "TypeScript",
         "React",
         "Next.js",
-        "Bun",
-        "Drizzle ORM",
         "PostgreSQL",
+        "Drizzle ORM",
+        "Bun",
+        "Redis",
+        "Clerk",
         "Vercel",
         "Cloudflare",
+        "Sentry",
         "AI SDK"
       ],
+      "image": "/projects/the-notwork.webp",
       "url": "https://thenotwork.org",
       "github": null,
       "featured": true,
       "date": "2024-01-15",
       "status": "Production Platform",
-      "role": "Co-architect, current sole maintainer and active developer",
+      "role": "Co-architect · led the build team · sole maintainer since Oct 2025",
       "metrics": [
+        { "label": "Users", "value": "~24K" },
         { "label": "Page views", "value": "~490K" },
-        { "label": "Active users", "value": "~24K" },
         { "label": "Peak DAU", "value": "~1K" },
         { "label": "Tracked events", "value": "~1.5M" }
       ],
       "highlights": [
-        "Co-defined the architecture with one other engineer; now sole maintainer of the production platform.",
-        "Built mastery pathways with assignment submissions, rubrics, and micro-credentials.",
-        "Shipped an Explore feed that mixes lessons, videos, games, articles, and submissions.",
-        "Integrated AI services, CDN media uploads, notifications, email, and SMS into a single operational platform."
+        "One of two architects who set the platform's direction. Led five developers through the initial build: hired the team, set coding standards and tooling, reviewed PRs weekly, and refined tickets with product and design.",
+        "Led the 2025 rebuild on a new architecture: schema redesign, end-to-end notifications, server pagination, error handling and logging, and hundreds of regression tests.",
+        "Designed identity verification for in-person competition: a teacher-as-verifier workflow, roster and eligibility logic, and team locking at playoff cutoffs, replacing manual spreadsheet checks.",
+        "Built mastery pathways with submissions, rubrics, AI-assisted grading, and micro-credentials, plus an Explore feed that mixes lessons, video, games, and submissions."
       ],
-      "problem": "Our youth program needed one platform that could deliver structured STEM and skilled-trades learning for students while doubling as the operational tool for staff, teachers, and league administration.",
-      "solution": "A full-stack Next.js platform with role-based experiences for students, teachers, and staff. Students engage through pathways, games, and competitions; staff get admin CRUD, content management, verification, communication, and analytics in one place.",
-      "impact": "Replaced fragmented spreadsheets and ad-hoc tools with a single production system that powers the day-to-day operations of the league and reaches tens of thousands of users per season.",
+      "problem": "The league needed one platform that could both teach students and run the season: learning content, games, and competition for students, plus verification, rosters, communication, and content tools for teachers and staff.",
+      "solution": "A full-stack Next.js platform with role-based experiences for students, teachers, and staff. Students engage through pathways, games, and competitions; staff get admin tooling, content management, verification, messaging, and analytics in one place.",
+      "impact": "Replaced spreadsheets and ad-hoc tools with one production system that runs the league day to day: ~24K users, ~490K page views, and a peak of ~1K daily active users.",
       "features": [
         "Student profiles, teams, rosters, and leaderboards",
         "Mastery pathways, submissions, rubrics, and micro-credentials",
+        "AI-assisted rubric grading",
         "Game-based learning catalog (STEM, skilled trades, and more)",
         "Curriculum, content, and post management",
         "Teacher verification and student communication workflows",
         "Notifications, email, and SMS via integrated providers",
-        "Admin tooling for staff, teachers, and program operators",
         "Season logic: roster locking, playoff cutoffs, in-season state"
-      ],
-      "links": [{ "label": "Live site", "url": "https://thenotwork.org" }]
+      ]
     },
     {
       "id": "ai-curriculum-generator",
       "slug": "ai-curriculum-generator",
-      "title": "AI Curriculum Generator",
-      "description": "A nine-step AI workflow that turns rough lesson ideas into published, multi-modal learning content in 10–30 minutes.",
-      "longDescription": "An applied AI workflow built into The Notwork that generates complete curriculum content. The system runs a nine-step pipeline modeled after real curriculum development practice: blueprint, outline, content, editorialize, accuracy check, media, formatting, audio generation, and release. Educators can refine or regenerate the output at any step and ship the final lesson directly to the platform.",
+      "title": "AI Curriculum Pipeline",
+      "description": "A nine-step AI pipeline, with a human review point at every step, that turns a rough lesson idea into a published, multi-modal lesson in 10–30 minutes.",
+      "longDescription": "An applied-AI pipeline built into The Notwork that produces complete lessons. It runs nine steps modeled on real curriculum development: blueprint, outline, content, editorialize, accuracy check, media, formatting, audio, and release. Each step builds on the last, and an educator can refine or regenerate at any step before the lesson publishes straight to the platform.",
       "technologies": [
         "TypeScript",
         "Next.js",
         "AI SDK",
         "Claude",
-        "Cloudflare CDN",
+        "Cloudflare",
         "PostgreSQL"
       ],
       "url": null,
@@ -71,74 +74,123 @@
       "status": "Applied AI System",
       "role": "Sole designer and engineer",
       "metrics": [
-        { "label": "Per-lesson time", "value": "~1 week → 10–30 min" },
-        { "label": "Content generated", "value": "55+ lessons" },
-        { "label": "Pipeline steps", "value": "9" }
+        { "label": "Per lesson, was ~1 week", "value": "10–30 min" },
+        { "label": "Lessons published", "value": "55" },
+        { "label": "Pipeline steps", "value": "9" },
+        { "label": "Human review", "value": "Every step" }
       ],
       "highlights": [
-        "Designed a multi-step pipeline modeled on real curriculum development practice.",
-        "Each step uses prior output as context; users can refine or regenerate at any stage.",
-        "Generated images upload to the Cloudflare CDN in real time and rewrite into the lesson.",
-        "Final output includes a full lesson, generated audio narration, and quick-practice questions."
+        "Modeled the pipeline on how curriculum teams actually build lessons, so each step has one job and a clear output.",
+        "Human-in-the-loop by design: each step takes the previous output as context, and an educator can refine or regenerate it before it feeds the next.",
+        "Generated images upload to the Cloudflare CDN in real time and are written into the lesson.",
+        "Each finished lesson ships with text-to-speech narration and practice questions."
       ],
-      "problem": "Curriculum production is high-effort and inconsistent. Building a single quality lesson manually could take a week, and our team needed to ship a steady stream of multi-modal content for students.",
-      "solution": "A nine-step AI workflow that walks an educator from rough requirements to a fully published, multi-modal lesson, with refine/regenerate controls at every step and direct publishing into The Notwork.",
-      "impact": "Compressed a multi-day curriculum task into roughly 10–30 minutes per lesson and produced more consistent, higher-quality output than the previous manual process.",
+      "problem": "Curriculum production was slow and inconsistent. A single quality lesson could take a week by hand, and the platform needed a steady stream of multi-modal content for students.",
+      "solution": "A nine-step pipeline that walks an educator from rough requirements to a published, multi-modal lesson, with refine and regenerate controls at every step and direct publishing into The Notwork.",
+      "impact": "Cut lesson production from about a week to 10–30 minutes, with higher consistency than the manual process. 55 lessons published so far.",
       "features": [
-        "Nine-step pipeline: blueprint → outline → content → editorialize → accuracy check → media → formatting → audio → release",
-        "Per-step refine/regenerate with persistent context",
+        "Nine steps: blueprint → outline → content → editorialize → accuracy check → media → formatting → audio → release",
+        "Per-step refine and regenerate with persistent context",
         "Real-time image generation and CDN upload",
         "Text-to-speech audio narration",
-        "Auto-generated practice questions",
+        "Generated practice questions",
         "Direct publish into The Notwork as a content item"
       ]
     },
     {
       "id": "vesl-skilled-trade-games",
       "slug": "vesl-skilled-trade-games",
-      "title": "VESL Skilled Trade Games",
-      "description": "A suite of interactive web games that teach skilled-trades skills through play, scoring, and short on-the-job scenarios.",
-      "longDescription": "A suite of interactive web games built for the VESL skilled-trades program. The games cover construction, electrical, plumbing, HVAC, site safety, and trade-tool fluency. Each game is short, scored, and designed to slot into the broader learning platform as standalone content or league activities.",
-      "technologies": ["TypeScript", "React", "Next.js", "Tailwind CSS"],
-      "url": null,
+      "title": "Skilled-Trades Games",
+      "description": "Ten playable browser games that teach skilled-trades work through short, scored scenarios. Built solo in Pixi.js and Three.js.",
+      "longDescription": "A suite of browser games built for a skilled-trades workforce program on The Notwork. They cover construction sequencing, electrical, plumbing and HVAC, site safety, and tool fluency, from 2D puzzles in Pixi.js to a 3D isometric job site in Three.js. Each game is short and scored, with levels and progression, so it works as standalone practice or as league content.",
+      "technologies": ["TypeScript", "Pixi.js", "Three.js", "Next.js", "React"],
+      "image": "/projects/skilled-trades-games.webp",
+      "url": "https://games.thenotwork.org",
       "github": null,
       "featured": true,
       "date": "2025-02-01",
-      "status": "Public Game Suite",
+      "status": "Playable Game Suite",
       "role": "Sole designer and engineer",
       "metrics": [
-        { "label": "Games shipped", "value": "11" },
-        { "label": "Subject focus", "value": "Skilled trades" },
-        { "label": "Public", "value": "Yes" }
+        { "label": "Playable games", "value": "10" },
+        { "label": "Rendering", "value": "2D + 3D" },
+        { "label": "Team size", "value": "1" }
       ],
       "highlights": [
-        "Designed and built each game end to end without prior game-dev specialization.",
-        "Used AI-assisted workflows to move quickly through scoping, asset generation, and iteration.",
-        "Each game is short, scored, and reusable as standalone or league content."
+        "Designed and built every game end to end, with no prior game-development background.",
+        "Used AI-assisted workflows for scoping, programmatically generated assets, and fast iteration.",
+        "Each game has scoring, levels, and progression, and works as standalone practice or league content."
       ],
       "features": [
-        "Bubble Blaster — pop the right bubbles before time runs out",
-        "This or That — swipe to keep the right tools for the job",
-        "Crypto Challenge — learn to trade crypto with simulated markets",
-        "Tool Check — discover which trade tool matches your personality",
-        "Task Master Relay — sequence construction tasks to complete the critical path",
-        "Pipe Runner — route building systems through tight spaces without clashes",
-        "Trades Build Off — mini-challenges across safety, tools, and precision building",
-        "Circuit Breaker — wire, diagnose, and fix electrical circuits on real service calls",
-        "Flow State — fix plumbing and HVAC systems on real service calls",
-        "Site Audit — inspect a 3D job site and sign off every checkpoint",
-        "Site Sprint Relay — race through five stations for the highest score before time"
+        "Scoring, levels, and unlock progression in every game",
+        "2D puzzle and arcade games in Pixi.js",
+        "A 3D isometric job-site inspection in Three.js (Site Audit)",
+        "Diagnose-and-fix service calls with a customer story (Circuit Breaker, Flow State)",
+        "Practice modes alongside scored runs in several games",
+        "Phone-first layouts that also work on desktop"
+      ],
+      "demos": [
+        {
+          "title": "Site Audit",
+          "description": "Inspect a 3D job site and sign off every checkpoint before time runs out.",
+          "url": "https://games.thenotwork.org/site-audit"
+        },
+        {
+          "title": "Circuit Breaker",
+          "description": "Wire, diagnose, and fix electrical circuits on real service calls.",
+          "url": "https://games.thenotwork.org/circuit-breaker"
+        },
+        {
+          "title": "Flow State",
+          "description": "Fix plumbing and HVAC systems on real service calls.",
+          "url": "https://games.thenotwork.org/flow-state"
+        },
+        {
+          "title": "Pipe Runner",
+          "description": "Route building systems through tight spaces without clashes.",
+          "url": "https://games.thenotwork.org/pipe-runner"
+        },
+        {
+          "title": "Task Master Relay",
+          "description": "Sequence construction tasks to complete the critical path.",
+          "url": "https://games.thenotwork.org/task-master-relay"
+        },
+        {
+          "title": "Trades Build Off",
+          "description": "Mini-challenges across safety, tools, and precision building.",
+          "url": "https://games.thenotwork.org/trades-build-off"
+        },
+        {
+          "title": "Site Sprint Relay",
+          "description": "Race through five stations for the highest score before time runs out.",
+          "url": "https://games.thenotwork.org/site-sprint-relay"
+        },
+        {
+          "title": "Tool Check",
+          "description": "Find out which trade tool matches your personality.",
+          "url": "https://games.thenotwork.org/tool-check"
+        },
+        {
+          "title": "This or That",
+          "description": "Swipe to keep the right tools for the job.",
+          "url": "https://games.thenotwork.org/this-or-that"
+        },
+        {
+          "title": "Bubble Blaster",
+          "description": "Pop the right bubbles before time runs out.",
+          "url": "https://games.thenotwork.org/bubble-blaster"
+        }
       ]
     },
     {
       "id": "ctac-program",
       "slug": "ctac-program",
       "title": "CTAC — Careers in Technology Cohort",
-      "description": "Co-founded and led a workforce-development program that trained adults for careers in software.",
-      "longDescription": "CTAC was a careers-in-technology cohort program. I went through it as a student, then came back as a co-founder and Director of Curriculum / Programming. Over roughly three years, I shaped what was taught, how cohorts ran, and how students were supported on their path into software roles.",
+      "description": "Ran a software-careers program for adults: wrote the curriculum, taught it daily, and placed 100+ graduates of my first two cohorts in full-time roles.",
+      "longDescription": "CTAC was an intensive careers-in-technology program for adults moving into software. I went through the program as a student, then came back as a co-founder and its Director of Curriculum and Programming. I wrote the curriculum, taught it daily as the sole instructor for two years, supervised a third, and worked with corporate sponsors so each cohort learned what their hiring pipelines needed.",
       "technologies": [
         "Curriculum design",
-        "Workforce development",
+        "Teaching",
         "Program operations",
         "Mentorship"
       ],
@@ -147,17 +199,54 @@
       "featured": false,
       "date": "2022-03-01",
       "status": "Workforce Development Program",
-      "role": "Co-founder & Director of Curriculum / Programming",
+      "role": "Co-founder & Director of Curriculum and Programming",
       "metrics": [
-        { "label": "Students taught", "value": "~200" },
+        { "label": "Graduates placed", "value": "100+" },
+        { "label": "Adults trained", "value": "~200" },
         { "label": "Years running", "value": "3" },
-        { "label": "Curriculum writers led", "value": "4" }
+        { "label": "Curriculum team", "value": "4" }
       ],
       "highlights": [
-        "Helped roughly 200 students pursue software roles through instruction, mentorship, and program leadership.",
-        "Defined what was taught, how cohorts ran, and how outcomes were tracked.",
-        "Worked directly with corporate sponsors to align curriculum with hiring needs.",
-        "Eventually delegated teaching and curriculum work as the program grew."
+        "100+ graduates of the first two cohorts I taught were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
+        "Had a direct hand in training ~200 adults pursuing software careers across three years of cohorts.",
+        "Led a four-person curriculum team on a contracted cohort build for an external client.",
+        "Worked with corporate sponsors so cohorts launched with the curriculum their hiring pipelines needed."
+      ]
+    },
+    {
+      "id": "hector-mono",
+      "slug": "hector-mono",
+      "title": "hector-mono",
+      "description": "My public monorepo: this site, a recipes app, a bookmarks app, and an AI tools catalog, on a shared component library with strict CI.",
+      "longDescription": "A Turborepo monorepo where I build in public. It holds this portfolio, a recipes app with sign-in and a Postgres database, Stash for bookmarks, and a catalog of AI and web tools built on the AI SDK. The apps share a shadcn/ui-based component package, the backend apps follow clean-architecture layers that lint rules enforce, and CI runs lint, typecheck, and tests on every pull request.",
+      "technologies": [
+        "TypeScript",
+        "Next.js",
+        "React",
+        "Bun",
+        "Turborepo",
+        "Drizzle ORM",
+        "PostgreSQL",
+        "Tailwind CSS",
+        "AI SDK"
+      ],
+      "url": null,
+      "github": "https://github.com/hectarek/hector-mono",
+      "featured": false,
+      "date": "2026-10-01",
+      "status": "Open Source",
+      "role": "Sole engineer",
+      "metrics": [
+        { "label": "Apps", "value": "5" },
+        { "label": "License", "value": "MIT" }
+      ],
+      "highlights": [
+        "Clean-architecture layers in the backend apps, enforced by lint rules rather than convention.",
+        "A shared design system: shadcn/ui components with a lint layer that fails CI on off-system colors and styles.",
+        "Every pull request runs lint, typecheck, and tests for the packages it touches."
+      ],
+      "links": [
+        { "label": "Recipes app", "url": "https://recipes.hectorfgonzalez.com" }
       ]
     }
   ]

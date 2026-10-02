@@ -39,9 +39,9 @@ export function ProjectsSection({
             className="font-mono max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
             variants={fadeInUp}
           >
-            Production systems, applied AI,
+            Production platforms, applied AI,
             <br className="hidden sm:block" />
-            and tools people actually use.
+            and games people actually play.
           </motion.h2>
           <motion.a
             href="/projects"

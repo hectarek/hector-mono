@@ -37,10 +37,8 @@ export function ContactCTA({ profile }: ContactCTAProps) {
           className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={heroItem}
         >
-          {profile.consulting.available
-            ? `${profile.consulting.note} `
-            : "Reach out about full-time roles, collaborations, or interesting builds. "}
-          Email is the fastest way in.
+          Reach out about roles, collaborations, or interesting builds. Email is
+          the fastest way in.
         </motion.p>
 
         <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItem}>
