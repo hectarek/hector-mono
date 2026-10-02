@@ -70,7 +70,7 @@ A client page (`"use client"`) can't export metadata: put it in a `layout.tsx` b
 The `app/robots.ts` file automatically generates `robots.txt`:
 
 - Allows all crawlers to access `/`
-- Disallows `/api/` and `/_next/` directories
+- Disallows `/api/`. `/_next/` stays crawlable: it serves the CSS and JS search engines need to render pages
 - Points to the sitemap at `${SITE_URL}/sitemap.xml`
 
 Noindex pages (`/reading`, `/ui`) are deliberately not disallowed: a crawler has to fetch a page to see its noindex, and a URL blocked in robots.txt can still be indexed from links to it, without its content.
