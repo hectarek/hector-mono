@@ -103,15 +103,3 @@ export interface Relationship {
   /** Shared activity contexts for tracking diversity */
   sharedContexts?: string[];
 }
-
-/**
- * Simplified relationship for creation (before defaults are applied).
- */
-export interface CreateRelationshipInput {
-  name: string;
-  type: RelationshipType;
-  dunbarLayer?: DunbarLayer; // Defaults based on type
-  initialIosRating?: IOSLevel; // Used to set initial strength (1-7 scale)
-  relationshipStartDate?: Date; // When the relationship actually began
-  imageUrl?: string;
-}

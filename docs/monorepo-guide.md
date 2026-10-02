@@ -35,7 +35,7 @@ hector-mono/
   bun.lock                # Single lockfile for entire monorepo
 ```
 
-**Key principle**: The root `package.json` only contains monorepo-level tooling (`@biomejs/biome`, `@shadcn/lint`, `drizzle-kit`, `oxlint`, `tsx`, `turbo`, `typescript`). App-specific dependencies (`next`, `react`, `drizzle-orm`, etc.) belong in each app's own `package.json`.
+**Key principle**: The root `package.json` only contains monorepo-level tooling (`@biomejs/biome`, `@shadcn/lint`, `drizzle-kit`, `fallow`, `oxlint`, `turbo`, `typescript`). App-specific dependencies (`next`, `react`, `drizzle-orm`, etc.) belong in each app's own `package.json`.
 
 ---
 
@@ -167,7 +167,7 @@ Turbo caches task outputs. If inputs haven't changed, it replays the cached outp
 
 | Location | What goes there | Examples |
 |---|---|---|
-| Root `devDependencies` | Monorepo tooling used across all workspaces | `turbo`, `@biomejs/biome`, `oxlint`, `@shadcn/lint`, `typescript`, `tsx`, `drizzle-kit` |
+| Root `devDependencies` | Monorepo tooling used across all workspaces | `turbo`, `@biomejs/biome`, `oxlint`, `@shadcn/lint`, `fallow`, `typescript`, `drizzle-kit` |
 | Root `dependencies` | Nothing — keep empty | — |
 | App `dependencies` | Runtime deps for that specific app | `next`, `react`, `drizzle-orm` |
 | App `devDependencies` | Build/dev-time deps for that specific app | `tailwindcss`, `@types/react`, `typescript` |

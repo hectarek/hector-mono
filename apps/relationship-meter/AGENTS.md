@@ -28,7 +28,7 @@ app/
     header.tsx
   _lib/
     model.ts    # Research-based algorithms (decay, interaction boost, Dunbar layers)
-    types.ts    # Relationship, Interaction, CreateRelationshipInput
+    types.ts    # Relationship, Interaction
     data.ts     # Static seed data (initialRelationships)
     utils.ts    # Helpers (formatRelativeTime, getDaysSinceContact, etc.)
   _providers/

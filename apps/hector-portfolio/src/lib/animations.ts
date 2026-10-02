@@ -11,7 +11,7 @@ import type { Variants } from "framer-motion";
  * Animation timing configuration
  * Adjust these values to control animation speed globally
  */
-export const animationConfig = {
+const animationConfig = {
   // Base durations (in seconds)
   fast: 0.2,
   normal: 0.4,
@@ -36,38 +36,10 @@ export const animationConfig = {
  * Common animation variants
  * Reusable animation patterns for consistent motion throughout the portfolio
  */
-export const fadeIn: Variants = {
-  hidden: {
-    opacity: 0,
-  },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: animationConfig.normal,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-};
-
 export const fadeInUp: Variants = {
   hidden: {
     opacity: 0,
     y: 20,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: animationConfig.normal,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-};
-
-export const fadeInDown: Variants = {
-  hidden: {
-    opacity: 0,
-    y: -20,
   },
   visible: {
     opacity: 1,
@@ -87,36 +59,6 @@ export const scaleIn: Variants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: {
-      duration: animationConfig.normal,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-};
-
-export const slideInLeft: Variants = {
-  hidden: {
-    opacity: 0,
-    x: -30,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: animationConfig.normal,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-};
-
-export const slideInRight: Variants = {
-  hidden: {
-    opacity: 0,
-    x: 30,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
     transition: {
       duration: animationConfig.normal,
       ease: animationConfig.easing.smooth,
@@ -144,16 +86,6 @@ export const staggerContainerFast: Variants = {
     transition: {
       staggerChildren: animationConfig.stagger.fast,
       delayChildren: 0.05,
-    },
-  },
-};
-
-export const staggerContainerSlow: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: animationConfig.stagger.slow,
-      delayChildren: 0.2,
     },
   },
 };
@@ -187,44 +119,6 @@ export const staggerItemScale: Variants = {
     scale: 1,
     transition: {
       duration: animationConfig.normal,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-};
-
-/**
- * Hover animation variants
- * Subtle hover effects for interactive elements
- */
-export const hoverScale: Variants = {
-  rest: {
-    scale: 1,
-    transition: {
-      duration: animationConfig.fast,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-  hover: {
-    scale: 1.02,
-    transition: {
-      duration: animationConfig.fast,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-};
-
-export const hoverLift: Variants = {
-  rest: {
-    y: 0,
-    transition: {
-      duration: animationConfig.fast,
-      ease: animationConfig.easing.smooth,
-    },
-  },
-  hover: {
-    y: -4,
-    transition: {
-      duration: animationConfig.fast,
       ease: animationConfig.easing.smooth,
     },
   },

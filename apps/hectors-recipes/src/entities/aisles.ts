@@ -15,7 +15,7 @@ export const AISLES = [
 ] as const;
 export type Aisle = (typeof AISLES)[number];
 
-export const AISLE_LABELS: Record<Aisle, string> = {
+const AISLE_LABELS: Record<Aisle, string> = {
   produce: "Produce",
   "meat-and-seafood": "Meat & seafood",
   "dairy-and-eggs": "Dairy & eggs",

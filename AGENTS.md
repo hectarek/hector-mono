@@ -77,10 +77,11 @@ Scope checks to the app you touched (faster, less noise) before finishing any ta
 bun check --filter=<app-name> && bun ts --filter=<app-name>
 ```
 Use the unscoped `bun check && bun ts` only when changes span multiple apps or shared packages.
+Then run `bun run dead-code` (Fallow, whole repo, under a second): it fails on an unused file, export, type or dependency your change left behind (see **Dead Code**).
 If you touched tests, also run them from the app: `cd apps/<app> && bun test tests/path/to/affected.test.ts`.
 Claude Code's `PostToolUse` hook (`.claude/hooks/lint-on-edit.sh`) already runs each edited file through its package's linters, Biome with `--write` and then Oxlint, and reports what's left; fix it before moving on. Typecheck and tests aren't in the hook, so the checks above still apply.
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package a PR affects, using Turbo's `--filter='...[origin/main]'`. Lint fails if `biome check --write` would change a file, or on any warning (every `lint` script runs `biome check --error-on-warnings` and `oxlint --deny-warnings`), so run `bun check` before pushing. Builds are left to Vercel's per-PR deploys. An app with tests needs a `test` script in its `package.json` for Turbo to pick it up.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package a PR affects, using Turbo's `--filter='...[origin/main]'`, and the dead-code check on the whole repo. Lint fails if `biome check --write` would change a file, or on any warning (every `lint` script runs `biome check --error-on-warnings` and `oxlint --deny-warnings`), so run `bun check` before pushing. Builds are left to Vercel's per-PR deploys. An app with tests needs a `test` script in its `package.json` for Turbo to pick it up.
 
 ## Biome
 - `@repo/biome-config` runs Biome's full recommended set. The one rule off is `useLiteralKeys`: the portfolio typechecks with `noPropertyAccessFromIndexSignature`, which requires `process.env["X"]`, the opposite of what the rule asks.
@@ -105,6 +106,14 @@ Oxlint enforces the complex apps' layer rules ([docs/clean-architecture.md §5](
 - A violation is a design problem: declare an interface in application and implement it in infrastructure, or call a controller through `getInjection`. Never widen a pattern to make it pass.
 - `import/no-cycle` runs for every app. `plugins: ["import"]` replaces Oxlint's default plugin set, which costs nothing since every rule is listed explicitly.
 - Writing patterns: keep each layer to one `group` with the relative escapes (`../**/infrastructure/**`) at the end, re-banning what `!../**` allowed. Oxlint leaks a `!` negation into the rule's other pattern objects. `@/src/*` doesn't match nested paths (write `**`), and regex lookahead isn't supported. A later override replaces a rule's options rather than merging them.
+
+## Dead Code
+[Fallow](https://fallow.tools/docs/) (root devDependency, pinned: it releases often) builds the whole repo's import graph to find what nothing uses, which Biome and tsc can't see one file at a time. `bun run dead-code` runs it, and so does CI.
+- Config: root `.fallowrc.json`. It fails on unused files, exports, types, enum and class members and dependencies, unlisted or misplaced dependencies, Next.js server/client mistakes (a `"use client"` file exporting `metadata`, a misplaced directive, a route collision), CSS drift, and a `fallow-ignore` without a reason. Import cycles are off here because Oxlint owns them (**Architecture Lint**).
+- An export used only in its own file is a finding: drop the `export`. If the code is then unused, delete it.
+- `fallow-baseline.json` lists findings that are already known: those don't fail, new ones do. Fix an entry and re-save the baseline (`bunx fallow dead-code --save-baseline fallow-baseline.json`) in the same change; never re-save it to cover a new finding.
+- Config exceptions, each for a file Fallow can't see being used: `apps/hectors-recipes/scripts/*.ts` is an entry point (Playwright runs one and the other runs by hand), `@repo/biome-config` is resolved by Biome's `extends`, and `generateStaticParams` in a route handler is called by Next.js.
+- Before deleting something Fallow reports, confirm it: `bunx fallow dead-code --trace <file>:<export>`.
 
 ## Commits, branches and pull requests
 When asked to commit:

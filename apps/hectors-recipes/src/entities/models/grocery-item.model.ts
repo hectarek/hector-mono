@@ -40,7 +40,6 @@ export const addRecipesToListSchema = z.object({
     .min(1)
     .max(50),
 });
-export type AddRecipesToListInput = z.infer<typeof addRecipesToListSchema>;
 
 // Which planned meals the grocery button adds, by cook day from today (docs/ux-plan.md D44).
 export const GROCERY_RANGES = [

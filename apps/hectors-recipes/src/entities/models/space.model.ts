@@ -4,7 +4,7 @@ import { z } from "zod";
 export const spaceTypeSchema = z.enum(["recipe-book", "meal-plan"]);
 export type SpaceType = z.infer<typeof spaceTypeSchema>;
 
-export const spaceRoleSchema = z.enum(["owner", "editor", "viewer"]);
+const spaceRoleSchema = z.enum(["owner", "editor", "viewer"]);
 export type SpaceRole = z.infer<typeof spaceRoleSchema>;
 
 export const inviteRoleSchema = spaceRoleSchema.exclude(["owner"]);
@@ -22,7 +22,7 @@ export function hasRole(role: SpaceRole, minRole: SpaceRole): boolean {
 
 // A new book or plan is named after its owner ("Hector's Plan"), so two people's plans can
 // be told apart; these are for an account with no name.
-export const PERSONAL_SPACE_NAMES: Record<SpaceType, string> = {
+const PERSONAL_SPACE_NAMES: Record<SpaceType, string> = {
   "recipe-book": "My Recipes",
   "meal-plan": "My Plan",
 };
@@ -43,7 +43,7 @@ export function personalSpaceName(
     : PERSONAL_SPACE_NAMES[type];
 }
 
-export const spaceSchema = z.object({
+const spaceSchema = z.object({
   id: z.uuid(),
   type: spaceTypeSchema,
   name: z.string().min(1),
@@ -77,7 +77,6 @@ export const setDefaultSpaceSchema = z.object({
   // A book or plan they're in; null clears the choice (for books: All recipes).
   spaceId: z.uuid().nullable(),
 });
-export type SetDefaultSpaceInput = z.infer<typeof setDefaultSpaceSchema>;
 
 export type SpaceMember = {
   userId: string;

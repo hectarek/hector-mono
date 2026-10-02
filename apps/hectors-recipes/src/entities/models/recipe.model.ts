@@ -14,7 +14,7 @@ const tagsSchema = z
   .array(z.string().trim().toLowerCase().min(1))
   .transform((tags) => [...new Set(tags)]);
 
-export const recipeSchema = z.object({
+const recipeSchema = z.object({
   id: z.uuid(),
   spaceId: z.uuid(),
   createdBy: z.uuid(),
@@ -33,7 +33,7 @@ export const recipeSchema = z.object({
 export type Recipe = z.infer<typeof recipeSchema>;
 
 // A recipe with its itemized ingredient lines and steps.
-export const recipeWithIngredientsSchema = recipeSchema.extend({
+const recipeWithIngredientsSchema = recipeSchema.extend({
   ingredients: z.array(recipeIngredientSchema),
   steps: z.array(recipeStepSchema),
 });

@@ -7,7 +7,7 @@ export const isoDateSchema = z
 
 // A planned meal is one cooking of a recipe (docs/ux-plan.md D38): the day it's cooked, and
 // the days it's eaten, which servings don't decide. Only the cook day is checked off (D39).
-export const planEntrySchema = z.object({
+const planEntrySchema = z.object({
   id: z.uuid(),
   spaceId: z.uuid(),
   cookDate: isoDateSchema,
