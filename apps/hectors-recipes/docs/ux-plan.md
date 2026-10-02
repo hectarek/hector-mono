@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.6 done. Phases 1–14, L5 and L6 merged. |
-| Next task | P15.7, once Hector picks its database (H24). Also open: L7 (Later). |
-| Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 15 (screen tests): P15.1–P15.6 done, in review on `test/recipes-p15-screen-tests`; P15.7 gets a PR of its own. Phases 1–14, L5 and L6 merged. |
+| Next task | H24: try a schema-only Neon branch for P15.7. Also open: L7 (Later). |
+| Waiting on Hector | whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1448,7 +1448,7 @@ Branch `fix/recipes-p14-review`. Three reviewers read PRs #25, #26 and #28–#31
 
 ## Phase 15: Screen tests
 
-Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's rules are already tested below the screen, on both backends. This phase covers what only a screen shows: what a sheet or form remembers, where the cursor goes, and what a tap sends. As the app's AGENTS.md says, it's a safety net for the basics, not exhaustive specs. A test of a past bug is checked by putting the bug back and seeing the test fail. One commit per task; the PR when the phase is done.
+Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's rules are already tested below the screen, on both backends. This phase covers what only a screen shows: what a sheet or form remembers, where the cursor goes, and what a tap sends. As the app's AGENTS.md says, it's a safety net for the basics, not exhaustive specs. A test of a past bug is checked by putting the bug back and seeing the test fail. One commit per task. P15.1–P15.6 went in one PR and P15.7 gets its own, since it needs a database and a test account first (Hector, 2026-10-01).
 
 - [x] **P15.1** Screen tests can run — C · D49
   - Do: happy-dom (`@happy-dom/global-registrator`), React Testing Library and user-event as dev dependencies. `tests/_support/dom.ts` gives a screen test its browser. `bunfig.toml` leaves `*.test.tsx` out of a plain `bun test`; `test:screens` runs them, isolated; `test` runs both. AGENTS.md's Testing section says how.
@@ -1601,7 +1601,7 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
 | H21 | OK to apply P14.10's additive migration 0012 (a `recipe_reads` table) to the one database before the Phase 14 PR merges. The deployed code doesn't know the table. | P14.10 | done 2026-10-01: "yes apply 0012"; applied |
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | open |
-| H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | open |
+| H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. |
 
 ## Risks and how they're handled
 
@@ -1783,3 +1783,5 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
   - Next: Hector reviews the PR, H23, then H5.
 - **2026-10-01 (ap)** — Hector merged L5 and L6 (hectarek/hector-mono#5). Hector: a long screenshot is one read (D48), and yes to a test library and a phase of tests (H22). Phase 15 written; P15.1 done on `test/recipes-p15-screen-tests`, in its own worktree (D49: happy-dom and Testing Library, screen tests in an isolated pass of their own). L7 added (grocery items know their recipe), H24 asked (P15.7's database).
   - Next: Hector reviews Phase 15's plan; then P15.2.
+- **2026-10-01 (aq)** — P15.2–P15.6 done (see their Evidence), one commit each: 24 screen tests in 8 files, each lock-in checked by putting its bug back. 953 other tests pass. Hector: open the PR now, P15.7 in a PR of its own, and try a schema-only branch for H24.
+  - Next: Hector reviews the Phase 15 PR; H24's branch, then P15.7.
