@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1 and P15.2 done. Phases 1–14, L5 and L6 merged. |
-| Next task | P15.3. Also open: L7 (Later). |
+| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.3 done. Phases 1–14, L5 and L6 merged. |
+| Next task | P15.4. Also open: L7 (Later). |
 | Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
@@ -1472,9 +1472,12 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
     - Each past bug these lock in was put back to check its test fails: the sheet without `again` (the second batch never comes), the leftovers option offered from the cook day, and the grocery box without moving the cursor. All three failed; restored, all pass.
     - Left to the browser, as layout rather than behaviour: muted text on past days, and the three-column eat days.
     - Found on the way, and fixed in the setup: the first run failed now and then, because a test read the page or the repositories straight after a tap, before the action was back. They wait now (`findBy…`, `waitFor`); each file passed 10 or 20 runs in a row (`--rerun-each`). And the page wasn't emptied between tests, since a hook in an imported helper doesn't attach to the file: `dom.ts` is now a preload of the screen pass, so test files don't import it. Both are in AGENTS.md.
-- [ ] **P15.3** A space's ⋯ menu — C
+- [x] **P15.3** A space's ⋯ menu — C
   - Invite on one plan, then another without a reload, shares the second's link (P14.2: `SpaceMenu` keyed by space).
   - Invite is there only for an owner; Members and the page's own actions are in the sheet.
+  - Evidence (2026-10-01): `space-header.test.tsx`, 2 tests, on two books (one person owns one plan, but can own several books; the menu is the same for both):
+    - Invite on Soups, then on Bakes after the header re-renders with it (as `?book=` does), shares each book's own Can edit link. The test stands in for the phone's share sheet (`navigator.share`) and compares with the links the server keeps. With the `key` taken off `SpaceMenu` it fails; with it back it passes, 10 runs in a row.
+    - An editor's sheet has Members, going to the book's settings, and no Invite.
 - [ ] **P15.4** The recipe form — C
   - Return in a one-line field doesn't save. Enter in New tag adds the tag and the cursor goes back to New tag. Return that confirms an IME's text does nothing.
   - Pasting a list with a section into a section keeps the rows after it in theirs. An empty named section stops Save, with its message and the cursor on it.
