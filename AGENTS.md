@@ -120,10 +120,13 @@ Branches and PRs:
 
 ### Working in parallel
 Hector runs several Claude Code sessions at once, so each agent does its branch and PR work in its own git worktree ([Claude Code: worktrees](https://code.claude.com/docs/en/worktrees)):
-- Start one with `claude --worktree <name>` (or `-w`), the desktop app's worktree option, or by asking Claude to "work in a worktree". It's created at `.claude/worktrees/<name>/` (gitignored) on a new branch `worktree-<name>` from `origin/main`.
+- Start one with `claude --worktree <name>` (or `-w`), the desktop app's worktree option, or by asking Claude to "work in a worktree". It's created at `.claude/worktrees/<name>/` (gitignored) from `origin/main`, on a new branch `worktree-<name>` (CLI and subagents) or `claude/<name>` (desktop app).
 - A worktree is a fresh checkout: run `bun install` in it first. The root `.worktreeinclude` copies the apps' gitignored `.env` files into each new worktree.
 - Rename the branch to the convention before pushing: `git branch -m <type/short-topic>`.
 - Never switch branches, stash, reset or clean the main checkout: Hector stages his own work there. Claude Code blocks a worktree session from editing it. Anything committed in the main checkout is committed by path (above).
+- One topic per worktree: start another worktree for another PR rather than switching this one's branch, so a branch with an open PR stays checked out where its session can find it.
+- `.claude/launch.json` gives each app a fixed port, so only one session at a time can preview a given app.
+- A PR stacked on another branch gets CI when GitHub retargets it to `main` (the workflow listens for that base change).
 - On exit, Claude Code removes a clean worktree and asks about one that has work in it.
 
 ## Before Finishing
@@ -205,7 +208,8 @@ Full reference: [docs/clean-architecture.md](docs/clean-architecture.md). `hecto
 - **Entities** (`src/entities/`) → pure domain logic (Zod schemas), no dependencies
 - **Application** (`src/application/`) → use cases + interfaces, imports only entities
 - **Interface Adapters** (`src/interface-adapters/`) → controllers/DTOs, imports application + entities
-- **Infrastructure** (`src/infrastructure/`) → implements interfaces, can import anything except app/
+- **Infrastructure** (`src/infrastructure/`) → implements interfaces from entities, interfaces, `db/`, `lib/` and vendor SDKs; never use cases, controllers, DI, `app/` or the framework
+- Oxlint enforces these (see **Architecture Lint**)
 - **DI** (`di/`) → wires everything together
 
 ## Feature Implementation Order (complex apps)

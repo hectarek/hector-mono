@@ -22,8 +22,7 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
-    "lighthouse": "lhci autorun",
-    "prepare": "husky"
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
@@ -36,16 +35,15 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/bun": "1.4.2",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "babel-plugin-react-compiler": "1.0.0",
-    "husky": "^9.1.7",
     "knip": "^6.39.0",
     "shadcn": "^4.21.0",
     "tailwindcss": "^4.3.3",
