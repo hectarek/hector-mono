@@ -155,8 +155,8 @@ Strong relationships have "inertia" - they resist decay:
 - Half-life: 30 days (non-kin)
 - Inertia: 0.75x (strong = slower decay)
 - Adjusted half-life: 30 / 0.75 = 40 days
-- Decay factor: 0.5 ^ (30/40) = 0.59
-- New strength: 80 × 0.59 = **47**
+- Decay factor: 0.5 ^ (30/40) = 0.595
+- New strength: 80 × 0.595 = **47.6** (strength is kept to one decimal)
 
 **Example 2: Family Member (Kin)**
 - Current strength: 80
@@ -164,8 +164,10 @@ Strong relationships have "inertia" - they resist decay:
 - Half-life: 180 days (kin)
 - Inertia: 0.75x
 - Adjusted half-life: 180 / 0.75 = 240 days
-- Decay factor: 0.5 ^ (30/240) = 0.92
-- New strength: 80 × 0.92 = **74**
+- Decay factor: 0.5 ^ (30/240) = 0.917
+- New strength: 80 × 0.917 = **73.4**
+
+Both examples, and the interaction examples below, are tests in `tests/app/_lib/model.test.ts`, so a change to the model that breaks one fails `bun run test`.
 
 ---
 

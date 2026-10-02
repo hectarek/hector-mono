@@ -33,6 +33,7 @@ app/
     utils.ts    # Helpers (formatRelativeTime, getDaysSinceContact, etc.)
   _providers/
     providers.tsx
+tests/          # bun test, mirroring the source tree (app/_lib/model.ts → tests/app/_lib/model.test.ts)
 ```
 
 ## Data
@@ -53,10 +54,16 @@ app/
 ```bash
 bun run dev --filter=relationship-meter
 bun run build --filter=relationship-meter
+bun run test --filter=relationship-meter     # or: cd apps/relationship-meter && bun test
 ```
+
+## Testing
+- `_lib/model.ts` is pure functions, and `tests/app/_lib/model.test.ts` covers each exported one: decay (profiles, inertia, floors, overdue, recommended interval), health thresholds, interactions (the boost formula, caps, contexts), reciprocity, Dunbar layer capacity and the shown-strength bonus.
+- The worked examples in `docs/algorithm.md` are tests too. When the model changes, update the doc's numbers and the tests together.
+- Components and the container have no tests yet. The container's interaction handling (the reciprocity window, what's stored vs shown) is the next candidate.
 
 ## Before Finishing Any Change
 Scope checks to this app:
 ```bash
-bun check --filter=relationship-meter && bun ts --filter=relationship-meter
+bun check --filter=relationship-meter && bun ts --filter=relationship-meter && bun run test --filter=relationship-meter
 ```
