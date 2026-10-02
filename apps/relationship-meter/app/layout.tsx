@@ -1,6 +1,6 @@
+import { cn } from "@repo/ui/lib/utils";
 import type { Metadata, Viewport } from "next";
 import { DM_Mono, DM_Sans } from "next/font/google";
-import { cn } from "@/app/_lib/utils";
 import "@/app/globals.css";
 import { Providers } from "@/app/_providers/providers";
 

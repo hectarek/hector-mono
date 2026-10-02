@@ -1,58 +1,65 @@
-import { generateText, type ModelMessage, Output, type UserContent } from "ai";
+import { GatewayError } from "@ai-sdk/gateway";
+import {
+  generateText,
+  type LanguageModel,
+  type ModelMessage,
+  NoObjectGeneratedError,
+  NoOutputGeneratedError,
+  Output,
+  type UserContent,
+} from "ai";
 import type { z } from "zod";
 import type {
   AiGenerateOptions,
   IAiService,
 } from "@/src/application/services/ai.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
-import { DatabaseOperationError } from "@/src/entities/errors/common";
+import { AiGenerationError } from "@/src/entities/errors/common";
 
 /** Used when neither `opts.model` nor the `AI_MODEL` env var is set. */
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4.6";
 
 /**
- * AI client backed by the Vercel AI Gateway (built into the `ai` package as the
- * default global provider). Auth comes from the `AI_GATEWAY_API_KEY` env var;
- * models are addressed as `provider/model` strings.
+ * AI client on AI SDK 7, backed by the Vercel AI Gateway (the SDK's default
+ * global provider, so a `provider/model` string is a Gateway model). Auth comes
+ * from the `AI_GATEWAY_API_KEY` env var. Tests pass a mock model instead.
  */
 export class AiService implements IAiService {
   private readonly logger: ILoggerService;
 
-  constructor(loggerService: ILoggerService) {
+  constructor(
+    loggerService: ILoggerService,
+    // `||`, not `??`: an empty `AI_MODEL=` (as in .env.example) means the default.
+    private readonly defaultModel: LanguageModel = process.env.AI_MODEL ||
+      DEFAULT_MODEL,
+  ) {
     this.logger = loggerService.child({ layer: "service", op: "ai" });
   }
 
   async generateObject<T>(
     options: AiGenerateOptions & { schema: z.ZodType<T> },
   ): Promise<T> {
-    const model = this.resolveModel(options.model);
+    const model = options.model ?? this.defaultModel;
+    const modelId = typeof model === "string" ? model : model.modelId;
     const logger = this.logger.child({ op: "generateObject" });
 
     try {
       logger.debug("Generating structured output", {
-        model,
+        model: modelId,
         fileCount: options.files?.length ?? 0,
       });
 
       const result = await generateText({
         model,
-        system: options.system,
+        instructions: options.system,
         output: Output.object({ schema: options.schema }),
         ...this.buildContent(options),
       });
 
       return result.output;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logger.error("Structured generation failed", { model, error: message });
-      throw new DatabaseOperationError("AI generation failed", {
-        cause: error,
-      });
+      throw toGenerationError(error, logger, modelId);
     }
-  }
-
-  private resolveModel(override?: string): string {
-    return override ?? process.env.AI_MODEL ?? DEFAULT_MODEL;
   }
 
   /**
@@ -81,4 +88,40 @@ export class AiService implements IAiService {
 
     return { messages: [{ role: "user", content }] };
   }
+}
+
+// Logs only the error's message and status: the SDK's errors carry the whole request,
+// which would log the resume.
+function toGenerationError(
+  error: unknown,
+  logger: ILoggerService,
+  model: string,
+): AiGenerationError {
+  const context = {
+    model,
+    error: error instanceof Error ? error.message : String(error),
+    statusCode: GatewayError.isInstance(error) ? error.statusCode : undefined,
+  };
+  if (
+    NoObjectGeneratedError.isInstance(error) ||
+    NoOutputGeneratedError.isInstance(error)
+  ) {
+    logger.warn("The model's answer didn't fit the schema", context);
+    return new AiGenerationError(
+      "unusable-answer",
+      "The model's answer didn't fit the schema",
+      { cause: error },
+    );
+  }
+  // The Gateway answers 402 when the project's budget or the account's credit is spent.
+  if (GatewayError.isInstance(error) && error.statusCode === 402) {
+    logger.warn("AI Gateway budget reached", context);
+    return new AiGenerationError("budget-paused", "AI budget reached", {
+      cause: error,
+    });
+  }
+  logger.error("Structured generation failed", context);
+  return new AiGenerationError("service-unavailable", "AI generation failed", {
+    cause: error,
+  });
 }

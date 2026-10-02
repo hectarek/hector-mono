@@ -12,14 +12,17 @@ Deployment: not deployed; no Vercel project.
 ## Stack
 - Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui via `@repo/ui`
 - DI via `@evyweb/ioctopus` (wires `ILoggerService` + `IAiService` and the resume-analyzer use-case/controller)
-- AI via the `ai` SDK v6 (`generateText` + `Output.object`) through the **Vercel AI Gateway**
+- AI via the `ai` SDK 7 (`generateText` with `Output.object` and `instructions`) through the **Vercel AI Gateway**
 - No DB / no auth (yet)
 
 ## AI / environment
 - The Gateway is the AI SDK's built-in default provider — no per-provider keys. Set in `.env`:
   - `AI_GATEWAY_API_KEY` — Vercel AI Gateway key (required for live calls).
   - `AI_MODEL` — optional model override (default `anthropic/claude-sonnet-4.6`), as a `provider/model` string.
-- **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser.
+- **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai` and `@ai-sdk/gateway`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser. The interface's `system` goes to the SDK as `instructions` (v7's name for the system prompt).
+- **Model:** a constructor argument of `AiService` (default: `AI_MODEL`, else `anthropic/claude-sonnet-4.6`; a per-call `model` overrides it), so tests pass `MockLanguageModelV4` from `ai/test` and never reach the Gateway.
+- **Failures:** `AiService` throws `AiGenerationError` (`src/entities/errors/common.ts`) with a `reason`: `unusable-answer` (the answer didn't fit the schema), `budget-paused` (the Gateway's 402: budget or credit spent) or `service-unavailable` (anything else). Each tool's action turns the reason into a sentence (`AI_FAILURES` in `app/actions/resume-analyzer.ts`). It logs only the error's message and status, never the error object, which carries the whole request (the resume). In tests, set `MockAiService.failWith` to a reason.
+- **Version:** `ai` is pinned to the exact version `hectors-recipes` uses, and `@ai-sdk/gateway` (for `GatewayError`) to the exact version that `ai` depends on; upgrade them together.
 
 ## Architecture
 
@@ -41,7 +44,7 @@ app/
 
 src/
   entities/
-    errors/common.ts          # InputParseError, NotFoundError, etc.
+    errors/common.ts          # InputParseError, NotFoundError, etc., plus AiGenerationError (reason)
     models/logger.model.ts    # LogLevel + LOG_LEVEL_PRIORITY
     models/resume-analysis.model.ts       # Resume Analyzer Zod schemas (input, file, result)
   application/
@@ -62,11 +65,11 @@ di/
   modules/logger.module.ts
   modules/resume-analyzer.module.ts  # IAiService + the resume-analyzer use case and controller
 
-lib/
-  logger.ts                   # Standalone ConsoleLoggerService for edge/root code
+tests/                        # bun test; mirrors the source tree (src/infrastructure/services/ai.service.ts → tests/src/infrastructure/services/ai.service.test.ts)
+  _support/preload.ts         # bunfig.toml preload: drops the Gateway credentials Bun loads from .env
 ```
 
-**`lib/` vs `app/_lib/`:** `lib/` lives at the app root (outside `src/`) for framework-agnostic shared initialization imported across layers via `@/lib/*` — e.g. the edge-safe logger for code where the DI container isn't available, kept for the first route handler or proxy (nothing imports it yet). This matches `stash`/`hectors-recipes`. `app/_lib/` is an App-Router-private folder for route-scoped modules (the tool registry). They are not interchangeable — don't move `lib/` under `app/`.
+**No root `lib/` yet:** `stash` and `hectors-recipes` keep framework-agnostic setup there (`@/lib/*`), e.g. `lib/logger.ts`, a standalone `ConsoleLoggerService` for root or edge code the DI container doesn't reach (a route handler, `proxy.ts`). Add it when the first such file needs it. `app/_lib/` is different: an App-Router-private folder for route-scoped modules (the tool registry); don't put root `lib/` code under `app/`.
 
 **Components:** all components live under `app/_components/`, never inside a route folder. Layout-level components sit at the top; route-specific components go in a `app/_components/<route-id>/` subfolder (e.g. `resume-analyzer/`). Route `page.tsx` files stay thin and import from there.
 
@@ -90,7 +93,7 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
 ## Conventions
 
 ### Logging
-- Never use `console.*` directly. Use `ILoggerService` via DI (`getInjection("ILoggerService").child({ layer, op })`) or `@/lib/logger` for edge/root code.
+- Never use `console.*` directly. Use `ILoggerService` via DI (`getInjection("ILoggerService").child({ layer, op })`); root or edge code outside the container gets `lib/logger.ts` (see above).
 - Standard `layer` values: `action`, `use-case`, `controller`, `service`, `route`, `page`. `op` is the function name.
 
 ### File Naming
@@ -111,11 +114,12 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
 ```bash
 bun run dev --filter=hectors-tools
 bun run build --filter=hectors-tools
+bun run test --filter=hectors-tools          # or: cd apps/hectors-tools && bun test
 bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ```
 
 ## Before Finishing Any Change
 Scope checks to this app:
 ```bash
-bun check --filter=hectors-tools && bun ts --filter=hectors-tools
+bun check --filter=hectors-tools && bun ts --filter=hectors-tools && bun run test --filter=hectors-tools
 ```

@@ -17,7 +17,7 @@ Style with the theme's utilities (`bg-primary`, `text-muted-foreground`, `text-w
 
 Copy an existing app where you can: `apps/hectors-tools` for a plain app, `apps/hectors-recipes` for one with Neon Auth. The pieces:
 
-**`package.json`**: `"@repo/ui": "workspace:*"`, plus `tailwindcss` and `@tailwindcss/postcss` as dev dependencies. Not `next-themes`; it comes through `@repo/ui`. Not `tw-animate-css` either: `@repo/ui`'s `globals.css` imports it and resolves it from `@repo/ui`'s own devDependencies (`hectors-recipes` and `stash` don't list it).
+**`package.json`**: `"@repo/ui": "workspace:*"`, plus `tailwindcss` and `@tailwindcss/postcss` as dev dependencies. Not `next-themes`; it comes through `@repo/ui`. Not `tw-animate-css` either: `@repo/ui`'s `globals.css` imports it and resolves it from `@repo/ui`'s own devDependencies (no app lists it).
 
 **`components.json`** (so the shadcn CLI, run from the app, installs components into `packages/ui`):
 
