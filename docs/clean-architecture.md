@@ -2,7 +2,7 @@
 
 The single canonical reference for the **complex apps** in this monorepo (`stash`, `hectors-recipes`, `hectors-tools`, and future apps with a backend/auth/database). `hectors-tools` has no database or auth, so it has no repositories, transactions or auth gate. Simple apps (`hector-portfolio`, `relationship-meter`) deliberately skip all of this — see their `AGENTS.md`.
 
-`hectors-recipes` is the reference implementation; when in doubt, read `apps/hectors-recipes/` and its `AGENTS.md`. Each code sample names its file: most are trimmed from recipes, and the few from `stash`, the first app built on the pattern, show parts that work the same way in both. Stash isn't authoritative, so where recipes does something differently (e.g. one `toActionError` in `app/actions/shared.ts` instead of per-action catch blocks), follow recipes.
+`hectors-recipes` is the reference implementation; when in doubt, read `apps/hectors-recipes/` and its `AGENTS.md`. Each code sample names its file: most are trimmed from recipes, and the few from `stash`, the first app built on the pattern, show parts that work the same way in both. Stash isn't authoritative, so where recipes does something differently (e.g. recipes runs each access-checked write and its check in one transaction and keeps generated migrations; stash doesn't yet), follow recipes.
 
 > **Lineage:** the structure is based on Lazar Nikolov's [nextjs-clean-architecture](https://github.com/nikolovlazar/nextjs-clean-architecture). We diverge deliberately in two places: we use a lightweight **`ILoggerService`** instead of Sentry instrumentation/crash-reporter services, and **Neon Auth (Better Auth)** instead of Lucia. This guide reflects our reality, not the upstream template.
 
