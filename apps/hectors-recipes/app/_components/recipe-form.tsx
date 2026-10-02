@@ -293,7 +293,7 @@ export function RecipeForm(props: Props) {
           </DialogHeader>
           <DialogFooter>
             <DialogClose
-              render={<Button variant="outline" size="lg" type="button" />}
+              render={<Button variant="secondary" size="lg" type="button" />}
             >
               Keep editing
             </DialogClose>

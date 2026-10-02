@@ -75,7 +75,7 @@ export function MealDaysPicker({
                 key={date}
                 type="button"
                 size="lg"
-                variant={selected ? "default" : "outline"}
+                variant={selected ? "default" : "secondary"}
                 aria-pressed={selected}
                 onClick={() => toggle(date)}
               >
@@ -86,7 +86,7 @@ export function MealDaysPicker({
           <Button
             type="button"
             size="lg"
-            variant={other ? "default" : "outline"}
+            variant={other ? "default" : "secondary"}
             aria-pressed={other}
             onClick={() => setOther(!other)}
           >

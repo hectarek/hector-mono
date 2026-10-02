@@ -45,7 +45,7 @@ export function DeleteRecipeButton({
           <input type="hidden" name="recipeId" value={recipeId} />
           <DialogFooter>
             <DialogClose
-              render={<Button variant="outline" size="lg" type="button" />}
+              render={<Button variant="secondary" size="lg" type="button" />}
             >
               Cancel
             </DialogClose>

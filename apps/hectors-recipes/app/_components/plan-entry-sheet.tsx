@@ -147,7 +147,7 @@ export function PlanEntrySheet({
               </Button>
               <Button
                 size="lg"
-                variant="outline"
+                variant="secondary"
                 onClick={() => {
                   setChanging(false);
                   setDays(planned);
@@ -161,7 +161,7 @@ export function PlanEntrySheet({
             <>
               <Button
                 size="lg"
-                variant="outline"
+                variant="secondary"
                 onClick={() => {
                   // From the meal's saved days: the sheet stays mounted across a save.
                   setDays(planned);
@@ -174,7 +174,7 @@ export function PlanEntrySheet({
               {entry.recipeId && (
                 <Button
                   size="lg"
-                  variant="outline"
+                  variant="secondary"
                   disabled={isPending}
                   onClick={addToList}
                 >
@@ -198,7 +198,7 @@ export function PlanEntrySheet({
               {canTakeDayOff(planned, date) && (
                 <Button
                   size="lg"
-                  variant="outline"
+                  variant="secondary"
                   disabled={isPending}
                   onClick={notEatingThatDay}
                 >

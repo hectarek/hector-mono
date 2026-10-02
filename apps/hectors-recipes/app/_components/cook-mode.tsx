@@ -290,7 +290,7 @@ function CookModeContent({
           {yieldServings !== null && (
             <fieldset className="flex items-center gap-1" aria-label="Servings">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="icon-lg"
                 aria-label="Fewer servings"
                 disabled={servings <= 1}
@@ -305,7 +305,7 @@ function CookModeContent({
                 {servings}
               </span>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="icon-lg"
                 aria-label="More servings"
                 onClick={() => setServings((value) => value + 1)}
@@ -480,7 +480,7 @@ function StepTimer({
 }) {
   if (endsAt === undefined) {
     return (
-      <Button variant="outline" size="lg" onClick={onStart}>
+      <Button variant="secondary" size="lg" onClick={onStart}>
         <Timer data-icon="inline-start" />
         Start {minutes}-minute timer
       </Button>

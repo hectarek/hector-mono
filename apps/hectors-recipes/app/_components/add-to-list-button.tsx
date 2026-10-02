@@ -84,7 +84,7 @@ export function AddToListButton({
         else setResult(null);
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="lg" />}>
+      <DialogTrigger render={<Button variant="secondary" size="lg" />}>
         <ShoppingCart data-icon="inline-start" />
         Add to list
       </DialogTrigger>
@@ -103,7 +103,7 @@ export function AddToListButton({
             </p>
             <DialogFooter>
               <DialogClose
-                render={<Button variant="outline" size="lg" type="button" />}
+                render={<Button variant="secondary" size="lg" type="button" />}
               >
                 Cancel
               </DialogClose>
@@ -117,7 +117,7 @@ export function AddToListButton({
             <p className="text-sm">{describeAddResult(done)}</p>
             <DialogFooter>
               <DialogClose
-                render={<Button variant="outline" size="lg" type="button" />}
+                render={<Button variant="secondary" size="lg" type="button" />}
               >
                 Done
               </DialogClose>
@@ -158,7 +158,7 @@ export function AddToListButton({
             )}
             <DialogFooter>
               <DialogClose
-                render={<Button variant="outline" size="lg" type="button" />}
+                render={<Button variant="secondary" size="lg" type="button" />}
               >
                 Cancel
               </DialogClose>

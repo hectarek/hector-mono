@@ -61,7 +61,7 @@ export function AddToPlanButton({
         if (!next) setAdded(undefined);
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="lg" />}>
+      <DialogTrigger render={<Button variant="secondary" size="lg" />}>
         <CalendarPlus data-icon="inline-start" />
         Add to plan
       </DialogTrigger>
@@ -76,7 +76,7 @@ export function AddToPlanButton({
             <p className="text-sm">Planned: {mealDaysText(added, today)}.</p>
             <DialogFooter>
               <DialogClose
-                render={<Button variant="outline" size="lg" type="button" />}
+                render={<Button variant="secondary" size="lg" type="button" />}
               >
                 Done
               </DialogClose>
@@ -109,7 +109,7 @@ export function AddToPlanButton({
             )}
             <DialogFooter>
               <DialogClose
-                render={<Button variant="outline" size="lg" type="button" />}
+                render={<Button variant="secondary" size="lg" type="button" />}
               >
                 Cancel
               </DialogClose>

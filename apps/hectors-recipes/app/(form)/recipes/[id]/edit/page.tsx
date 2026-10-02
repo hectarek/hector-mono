@@ -35,7 +35,6 @@ export default async function EditRecipePage({
         {/* This layout has no header or tab bar, so the way back is here. */}
         <EmptyContent>
           <Button
-            variant="outline"
             size="lg"
             nativeButton={false}
             render={<Link href={`/recipes/${recipe.id}`} />}

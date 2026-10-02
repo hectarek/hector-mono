@@ -44,7 +44,7 @@ export function RowSheet({
             <Button
               type="button"
               size="lg"
-              variant="outline"
+              variant="secondary"
               disabled={!canMoveUp}
               onClick={() => onMove(-1)}
             >
@@ -54,7 +54,7 @@ export function RowSheet({
             <Button
               type="button"
               size="lg"
-              variant="outline"
+              variant="secondary"
               disabled={!canMoveDown}
               onClick={() => onMove(1)}
             >
@@ -62,7 +62,12 @@ export function RowSheet({
               Move down
             </Button>
           </div>
-          <Button type="button" size="lg" variant="outline" onClick={onRemove}>
+          <Button
+            type="button"
+            size="lg"
+            variant="secondary"
+            onClick={onRemove}
+          >
             <Trash2 data-icon="inline-start" />
             Remove
           </Button>

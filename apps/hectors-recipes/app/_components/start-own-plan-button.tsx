@@ -10,7 +10,12 @@ export function StartOwnPlanButton() {
   return (
     <ActionForm action={startOwnPlan} fields={{}}>
       {({ isPending }) => (
-        <Button type="submit" variant="outline" size="lg" disabled={isPending}>
+        <Button
+          type="submit"
+          variant="secondary"
+          size="lg"
+          disabled={isPending}
+        >
           <CalendarPlus data-icon="inline-start" />
           {isPending ? "Starting…" : "Start my own plan"}
         </Button>

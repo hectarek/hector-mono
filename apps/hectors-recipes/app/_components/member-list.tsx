@@ -60,7 +60,7 @@ export function MemberList({
                 >
                   {({ isPending }) => (
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="lg"
                       type="submit"
                       disabled={isPending}

@@ -31,8 +31,8 @@ export function ScaledIngredients({ lines }: { lines: Line[] }) {
         {yieldServings !== null && (
           <fieldset className="flex items-center gap-1" aria-label="Servings">
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="secondary"
+              size="icon-lg"
               aria-label="Fewer servings"
               disabled={servings <= 1}
               onClick={() => setServings((value) => value - 1)}
@@ -46,8 +46,8 @@ export function ScaledIngredients({ lines }: { lines: Line[] }) {
               {servings} serving{servings === 1 ? "" : "s"}
             </span>
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="secondary"
+              size="icon-lg"
               aria-label="More servings"
               onClick={() => setServings((value) => value + 1)}
             >

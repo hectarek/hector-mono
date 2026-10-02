@@ -216,7 +216,7 @@ export function IngredientRows({
       <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="lg"
           onClick={() => add(emptyLine())}
         >

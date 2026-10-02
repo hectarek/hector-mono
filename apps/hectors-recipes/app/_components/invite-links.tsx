@@ -78,7 +78,7 @@ export function InviteLinks({
             <Button
               type="submit"
               size="lg"
-              variant="outline"
+              variant="secondary"
               disabled={isPending}
             >
               New link: view only
