@@ -1,7 +1,5 @@
 @import "@repo/ui/styles/globals.css";
 @import "@repo/ui/styles/themes/portfolio.css";
-/* Only for the /ui component gallery's theme switcher. */
-@import "@repo/ui/styles/themes/neobrutalist.css";
 
 /* Colours are the shared portfolio theme (data-theme="portfolio" on <html>). Fonts load in
    layout.tsx: Geist as --font-sans and Plex Mono as --font-mono (the shared mapping), and

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import { heroItem, heroVariants, viewportOptions } from "@/src/lib/animations";
@@ -14,7 +14,7 @@ interface ContactCTAProps {
 
 export function ContactCTA({ profile }: ContactCTAProps) {
   return (
-    <motion.section
+    <m.section
       className="relative px-4 py-20 sm:py-24"
       initial="hidden"
       whileInView="visible"
@@ -26,22 +26,22 @@ export function ContactCTA({ profile }: ContactCTAProps) {
 
         <SectionEyebrow index="07" label="Get in touch" />
 
-        <motion.h2
+        <m.h2
           className="font-mono mt-5 max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={heroItem}
         >
           Have a problem worth building for?
-        </motion.h2>
+        </m.h2>
 
-        <motion.p
+        <m.p
           className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={heroItem}
         >
           Reach out about roles, collaborations, or interesting builds. Email is
           the fastest way in.
-        </motion.p>
+        </m.p>
 
-        <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItem}>
+        <m.div className="mt-8 flex flex-wrap gap-3" variants={heroItem}>
           <Button
             size="label"
             nativeButton={false}
@@ -58,8 +58,8 @@ export function ContactCTA({ profile }: ContactCTAProps) {
           >
             Read the long version
           </Button>
-        </motion.div>
+        </m.div>
       </div>
-    </motion.section>
+    </m.section>
   );
 }

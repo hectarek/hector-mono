@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import { SocialLinks } from "@/app/_components/portfolio/contact/social-links";
@@ -15,7 +15,7 @@ interface ContactPageContentProps {
 
 export function ContactPageContent({ profile }: ContactPageContentProps) {
   return (
-    <motion.div
+    <m.div
       className="relative px-4 py-14 sm:py-20"
       initial="hidden"
       whileInView="visible"
@@ -23,26 +23,26 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
       variants={heroVariants}
     >
       <div className="relative mx-auto max-w-6xl">
-        <motion.div variants={heroItem}>
+        <m.div variants={heroItem}>
           <SectionEyebrow index="C" label="Contact" />
-        </motion.div>
-        <motion.h1
+        </m.div>
+        <m.h1
           className="font-mono mt-6 max-w-4xl text-4xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-5xl"
           variants={heroItem}
         >
           Let&apos;s talk about what you&apos;re building
           <span className="text-accent">.</span>
-        </motion.h1>
-        <motion.p
+        </m.h1>
+        <m.p
           className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={heroItem}
         >
           Roles, collaborations, or a quick technical question &mdash; email is
           the fastest way in.
-        </motion.p>
+        </m.p>
 
-        <motion.div className="mt-12 space-y-10" variants={heroVariants}>
-          <motion.div variants={heroItem}>
+        <m.div className="mt-12 space-y-10" variants={heroVariants}>
+          <m.div variants={heroItem}>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Email
             </p>
@@ -57,29 +57,29 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
                 <span className="lowercase">{profile.email}</span>
               </Button>
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Elsewhere
             </p>
             <div className="mt-3">
               <SocialLinks profile={profile} />
             </div>
-          </motion.div>
+          </m.div>
 
           {profile.location && (
-            <motion.div variants={heroItem}>
+            <m.div variants={heroItem}>
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Based in
               </p>
               <p className="mt-3 text-base text-muted-foreground">
                 {profile.location}
               </p>
-            </motion.div>
+            </m.div>
           )}
-        </motion.div>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

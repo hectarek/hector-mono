@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { fadeInUp, viewportOptions } from "@/src/lib/animations";
@@ -29,7 +29,7 @@ export function ExperienceSection({
   }
 
   return (
-    <motion.section
+    <m.section
       className="relative px-4 py-16 sm:py-20"
       initial="hidden"
       whileInView="visible"
@@ -41,19 +41,19 @@ export function ExperienceSection({
 
         <SectionEyebrow index={eyebrowIndex} label="Experience" />
 
-        <motion.h2
+        <m.h2
           className="font-mono mt-5 text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={fadeInUp}
         >
           {heading}
-        </motion.h2>
+        </m.h2>
         {intro && (
-          <motion.p
+          <m.p
             className="mt-3 max-w-2xl text-base text-muted-foreground"
             variants={fadeInUp}
           >
             {intro}
-          </motion.p>
+          </m.p>
         )}
 
         <div className="mt-10 max-w-4xl">
@@ -61,7 +61,7 @@ export function ExperienceSection({
         </div>
 
         {showCTA && (
-          <motion.div
+          <m.div
             className="mt-8 max-w-4xl text-center"
             variants={fadeInUp}
             initial="hidden"
@@ -77,9 +77,9 @@ export function ExperienceSection({
               See the full background
               <ArrowRight className="ml-2 h-3.5 w-3.5" />
             </Button>
-          </motion.div>
+          </m.div>
         )}
       </div>
-    </motion.section>
+    </m.section>
   );
 }

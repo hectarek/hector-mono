@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import type { Metadata, Viewport } from "next";
 import {
   Caveat,
   Geist,
@@ -9,7 +10,7 @@ import "./globals.css";
 import { getProfile } from "@/src/lib/data";
 import { Footer } from "./_components/portfolio/contact/footer";
 import { Navbar } from "./_components/portfolio/nav/navbar";
-import { Providers } from "./_providers/providers";
+import { MotionProvider } from "./_providers/motion-provider";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -20,7 +21,7 @@ const geistSans = Geist({
 const plexMono = IBM_Plex_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -47,6 +48,13 @@ export const metadata: Metadata = {
     "Product-minded full-stack engineer, strongest on the front end, who ships AI features. Co-architect and sole maintainer of The Notwork, a production edtech platform with ~24K users.",
 };
 
+// Light only: the portfolio theme's dark tokens never apply, and form controls and
+// scrollbars stay light whatever the visitor's system setting is.
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#fbfbfb",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,12 +63,7 @@ export default function RootLayout({
   const profile = getProfile();
 
   return (
-    <html
-      lang="en"
-      data-theme="portfolio"
-      suppressHydrationWarning
-      className="h-full"
-    >
+    <html lang="en" data-theme="portfolio" className="h-full">
       <body
         className={`${geistSans.variable} ${plexMono.variable} ${instrumentSerif.variable} ${caveat.variable} bg-background text-foreground antialiased flex min-h-screen flex-col font-sans selection:bg-accent/20 selection:text-foreground`}
       >
@@ -70,7 +73,7 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Providers>
+        <MotionProvider>
           <div className="flex min-h-screen flex-col">
             <Navbar />
             <main id="main" className="flex flex-1 flex-col">
@@ -78,7 +81,9 @@ export default function RootLayout({
             </main>
             <Footer profile={profile} />
           </div>
-        </Providers>
+        </MotionProvider>
+        {/* The script is served by Vercel, so local builds would only log a 404. */}
+        {process.env["VERCEL"] && <Analytics />}
       </body>
     </html>
   );

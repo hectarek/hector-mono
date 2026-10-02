@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { SectionEyebrow } from "@/app/_components/portfolio/shared/section-eyebrow";
 import {
   fadeInUp,
@@ -57,7 +57,7 @@ const TINKERING: string[] = [
 export function NowContent({ profile }: NowContentProps) {
   return (
     <>
-      <motion.section
+      <m.section
         className="relative px-4 pb-10 pt-12 sm:pt-20"
         initial="hidden"
         whileInView="visible"
@@ -65,17 +65,17 @@ export function NowContent({ profile }: NowContentProps) {
         variants={heroVariants}
       >
         <div className="relative mx-auto max-w-6xl">
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="N" label="Now" />
-          </motion.div>
-          <motion.h1
+          </m.div>
+          <m.h1
             className="font-mono mt-6 max-w-4xl text-4xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-5xl"
             variants={heroItem}
           >
             What I&apos;m working on, right now
             <span className="text-accent">.</span>
-          </motion.h1>
-          <motion.p
+          </m.h1>
+          <m.p
             className="font-serif mt-5 max-w-3xl text-2xl italic leading-snug text-muted-foreground sm:text-3xl"
             variants={heroItem}
           >
@@ -89,16 +89,16 @@ export function NowContent({ profile }: NowContentProps) {
               Derek Sivers&apos; /now page
             </a>{" "}
             idea.
-          </motion.p>
-          <motion.p
+          </m.p>
+          <m.p
             className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             variants={heroItem}
           >
             Below is what currently has my attention &mdash; current focus,
             things I&apos;m reading, and what I&apos;m tinkering with outside of
             work. I update this when it changes meaningfully, not on a schedule.
-          </motion.p>
-          <motion.div
+          </m.p>
+          <m.div
             className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
             variants={heroItem}
           >
@@ -117,11 +117,11 @@ export function NowContent({ profile }: NowContentProps) {
                 {LAST_UPDATED.label}
               </time>
             </span>
-          </motion.div>
+          </m.div>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -131,12 +131,12 @@ export function NowContent({ profile }: NowContentProps) {
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
           <SectionEyebrow index="N1" label="Current focus" />
-          <motion.div
+          <m.div
             className="mt-8 grid max-w-5xl gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2"
             variants={staggerContainer}
           >
             {FOCUS_ITEMS.map((item, index) => (
-              <motion.div
+              <m.div
                 key={item.area}
                 className="flex flex-col gap-2 bg-background p-6 transition-colors hover:bg-muted"
                 variants={staggerItem}
@@ -150,13 +150,13 @@ export function NowContent({ profile }: NowContentProps) {
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {item.body}
                 </p>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -166,12 +166,12 @@ export function NowContent({ profile }: NowContentProps) {
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
           <SectionEyebrow index="N2" label="Reading & thinking about" />
-          <motion.ul
+          <m.ul
             className="mt-8 max-w-3xl space-y-3"
             variants={staggerContainer}
           >
             {READING.map((item) => (
-              <motion.li
+              <m.li
                 key={item}
                 className="flex gap-3 text-base leading-relaxed text-muted-foreground"
                 variants={staggerItem}
@@ -181,13 +181,13 @@ export function NowContent({ profile }: NowContentProps) {
                   aria-hidden
                 />
                 {item}
-              </motion.li>
+              </m.li>
             ))}
-          </motion.ul>
+          </m.ul>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -197,12 +197,12 @@ export function NowContent({ profile }: NowContentProps) {
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
           <SectionEyebrow index="N3" label="Outside of code" />
-          <motion.ul
+          <m.ul
             className="mt-8 max-w-3xl space-y-3"
             variants={staggerContainer}
           >
             {TINKERING.map((item) => (
-              <motion.li
+              <m.li
                 key={item}
                 className="flex gap-3 text-base leading-relaxed text-muted-foreground"
                 variants={staggerItem}
@@ -212,11 +212,11 @@ export function NowContent({ profile }: NowContentProps) {
                   aria-hidden
                 />
                 {item}
-              </motion.li>
+              </m.li>
             ))}
-          </motion.ul>
+          </m.ul>
         </div>
-      </motion.section>
+      </m.section>
     </>
   );
 }

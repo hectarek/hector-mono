@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   fadeInUp,
   staggerContainer,
@@ -35,7 +35,7 @@ const APPROACH_ITEMS: ApproachItem[] = [
 
 export function ApproachSection() {
   return (
-    <motion.section
+    <m.section
       className="relative px-4 py-16 sm:py-20"
       initial="hidden"
       whileInView="visible"
@@ -47,19 +47,19 @@ export function ApproachSection() {
 
         <SectionEyebrow index="06" label="How I work" />
 
-        <motion.h2
+        <m.h2
           className="font-mono mt-5 max-w-2xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={fadeInUp}
         >
           Ambiguity in. Useful systems out.
-        </motion.h2>
+        </m.h2>
 
-        <motion.ol
+        <m.ol
           className="mt-10 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3"
           variants={staggerContainer}
         >
           {APPROACH_ITEMS.map((item) => (
-            <motion.li
+            <m.li
               key={item.step}
               className="group relative flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-muted"
               variants={staggerItem}
@@ -73,10 +73,10 @@ export function ApproachSection() {
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {item.body}
               </p>
-            </motion.li>
+            </m.li>
           ))}
-        </motion.ol>
+        </m.ol>
       </div>
-    </motion.section>
+    </m.section>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   staggerContainer,
   staggerItem,
@@ -15,7 +15,7 @@ interface ExperienceTimelineProps {
 
 export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
   return (
-    <motion.div
+    <m.div
       className="space-y-0"
       initial="hidden"
       whileInView="visible"
@@ -23,13 +23,13 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
       variants={staggerContainer}
     >
       {experiences.map((experience) => (
-        <motion.div
+        <m.div
           key={`${experience.company}-${experience.role}-${experience.period}`}
           variants={staggerItem}
         >
           <ExperienceCard experience={experience} />
-        </motion.div>
+        </m.div>
       ))}
-    </motion.div>
+    </m.div>
   );
 }

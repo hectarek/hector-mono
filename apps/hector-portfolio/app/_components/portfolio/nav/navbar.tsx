@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,7 +20,7 @@ export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <motion.nav
+    <m.nav
       className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md"
       initial="hidden"
       animate="visible"
@@ -28,11 +28,11 @@ export function Navbar() {
       aria-label="Primary"
     >
       <div className="mx-auto max-w-6xl px-4">
-        <motion.div
+        <m.div
           className="flex h-16 items-center justify-between gap-4"
           variants={staggerContainerFast}
         >
-          <motion.div variants={staggerItem}>
+          <m.div variants={staggerItem}>
             <Link
               href="/"
               className="group flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-accent"
@@ -45,15 +45,15 @@ export function Navbar() {
               </span>
               <span>Hector Gonzalez</span>
             </Link>
-          </motion.div>
-          <motion.div
+          </m.div>
+          <m.div
             className="flex items-center gap-0.5 sm:gap-1"
             variants={staggerContainerFast}
           >
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
-                <motion.div key={item.href} variants={staggerItem}>
+                <m.div key={item.href} variants={staggerItem}>
                   <Link
                     href={item.href}
                     className={cn(
@@ -77,12 +77,12 @@ export function Navbar() {
                     </span>
                     {item.label}
                   </Link>
-                </motion.div>
+                </m.div>
               );
             })}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </div>
-    </motion.nav>
+    </m.nav>
   );
 }

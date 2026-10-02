@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { ResourceLink } from "@/app/_components/portfolio/reading/resource-link";
 import { SectionEyebrow } from "@/app/_components/portfolio/shared/section-eyebrow";
@@ -32,35 +32,35 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
 
   return (
     <>
-      <motion.section
+      <m.section
         className="relative px-4 pb-10 pt-12 sm:pt-20"
         {...scrollReveal}
         variants={heroVariants}
       >
         <div className="relative mx-auto max-w-6xl">
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="R" label="Reading list" />
-          </motion.div>
-          <motion.h1
+          </m.div>
+          <m.h1
             className="font-mono mt-6 max-w-4xl text-4xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-5xl"
             variants={heroItem}
           >
             What I read to stay current
             <span className="text-accent">.</span>
-          </motion.h1>
-          <motion.p
+          </m.h1>
+          <m.p
             className="font-serif mt-5 max-w-3xl text-2xl italic leading-snug text-muted-foreground sm:text-3xl"
             variants={heroItem}
           >
             Newsletters, blogs, podcasts, and feeds — the stuff I actually use.
-          </motion.p>
-          <motion.p
+          </m.p>
+          <m.p
             className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             variants={heroItem}
           >
             {readingList.intro}
-          </motion.p>
-          <motion.div
+          </m.p>
+          <m.div
             className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
             variants={heroItem}
           >
@@ -79,12 +79,12 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
             >
               Back to portfolio
             </Link>
-          </motion.div>
+          </m.div>
         </div>
-      </motion.section>
+      </m.section>
 
       {readingList.categories.map((category, categoryIndex) => (
-        <motion.section
+        <m.section
           key={category.id}
           className="relative px-4 py-12 sm:py-16"
           {...scrollReveal}
@@ -107,7 +107,7 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
                 something worth sharing.
               </p>
             ) : (
-              <motion.ul
+              <m.ul
                 className={
                   category.id === "articles"
                     ? "mt-8 grid max-w-3xl gap-3"
@@ -116,17 +116,17 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
                 variants={staggerContainer}
               >
                 {category.resources.map((resource) => (
-                  <motion.li key={resource.url} variants={staggerItem}>
+                  <m.li key={resource.url} variants={staggerItem}>
                     <ResourceLink resource={resource} />
-                  </motion.li>
+                  </m.li>
                 ))}
-              </motion.ul>
+              </m.ul>
             )}
           </div>
-        </motion.section>
+        </m.section>
       ))}
 
-      <motion.section
+      <m.section
         className="relative px-4 pb-16 pt-4 sm:pb-24"
         {...scrollReveal}
         variants={fadeInUp}
@@ -145,7 +145,7 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
             .
           </p>
         </div>
-      </motion.section>
+      </m.section>
     </>
   );
 }

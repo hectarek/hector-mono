@@ -1,9 +1,5 @@
-"use client";
-
-import { useTheme } from "@repo/ui/components/theme-provider";
 import { cn } from "@repo/ui/lib/utils";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { getSkillIconUrl } from "@/src/lib/skill-icons";
 
 interface TechnologyBadgeProps {
@@ -17,17 +13,7 @@ export function TechnologyBadge({
   variant = "outline",
   size = "sm",
 }: TechnologyBadgeProps) {
-  const { theme, systemTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  const currentTheme = theme === "system" ? systemTheme : theme;
-  const iconTheme = currentTheme === "dark" ? "dark" : "light";
-
-  const iconUrl = getSkillIconUrl(technology, iconTheme);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const iconUrl = getSkillIconUrl(technology, "light");
 
   const sizeClasses =
     size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs";
@@ -48,7 +34,7 @@ export function TechnologyBadge({
         variantClasses,
       )}
     >
-      {mounted && iconUrl && (
+      {iconUrl && (
         <Image
           src={iconUrl}
           alt=""

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   staggerContainer,
   staggerItemScale,
@@ -23,7 +23,7 @@ export function ProjectsList({ projects }: ProjectsListProps) {
   }
 
   return (
-    <motion.div
+    <m.div
       className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
       initial="hidden"
       whileInView="visible"
@@ -31,10 +31,10 @@ export function ProjectsList({ projects }: ProjectsListProps) {
       variants={staggerContainer}
     >
       {projects.map((project) => (
-        <motion.div key={project.id} variants={staggerItemScale}>
+        <m.div key={project.id} variants={staggerItemScale}>
           <ProjectCard project={project} />
-        </motion.div>
+        </m.div>
       ))}
-    </motion.div>
+    </m.div>
   );
 }

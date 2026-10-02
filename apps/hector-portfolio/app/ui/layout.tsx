@@ -1,3 +1,6 @@
+import { TooltipProvider } from "@repo/ui/components/tooltip";
+// Only the gallery's theme switcher uses it, so it ships with this route, not every page.
+import "@repo/ui/styles/themes/neobrutalist.css";
 import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/src/shared/utils/seo";
 
@@ -15,5 +18,6 @@ export default function UiLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  // The gallery is the only page with tooltips, so the provider lives here.
+  return <TooltipProvider>{children}</TooltipProvider>;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,7 +18,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const keyMetric = project.metrics?.[0];
 
   return (
-    <motion.article
+    <m.article
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
       initial={{ opacity: 1 }}
@@ -134,6 +134,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </Button>
         </div>
       </div>
-    </motion.article>
+    </m.article>
   );
 }
