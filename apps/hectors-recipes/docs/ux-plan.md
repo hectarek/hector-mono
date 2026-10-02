@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests): P15.1–P15.6 merged (hectarek/hector-mono#7); P15.7 on `test/recipes-p15-7-browser-flows`, its test database ready (H24). Phases 1–14, L5 and L6 merged. |
-| Next task | P15.7, once `.env.test` is in place. Also open: L7 (Later). |
-| Waiting on Hector | `.env.test` for the test project (H24); whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-01 |
+| Phase | 15 (screen tests): P15.1–P15.6 merged (hectarek/hector-mono#7); P15.7 done, in review on `test/recipes-p15-7-browser-flows`. Phases 1–14, L5 and L6 merged. |
+| Next task | Hector reviews P15.7's PR. Also open: L7 (Later). |
+| Waiting on Hector | whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-02 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -1514,9 +1514,27 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
     - Found on the way:
       - The empty list said to add "a recipe or this week's plan", but Plan adds a range (the next 7 days, 3 days or all upcoming), not a week. It now reads "The list is empty. Add items above, or add a recipe or your planned meals."
       - The preload's `useRouter` stand-in returned a new object each call. Next's router is one object, so the list's effects that depend on it ran on every render and the page never settled. It's one object now.
-- [ ] **P15.7** Whole flows in a real browser — C+H · needs H24
+- [x] **P15.7** Whole flows in a real browser — C+H · needs H24
   - Plan a meal from a recipe, add it to the list and check items off, as a person would, in a real browser (Playwright, against the dev server).
   - It needs a database a test can write to, never the real one: a Neon branch for tests, or a local Postgres, and a test account. Options and costs go to Hector first (H24).
+  - Evidence (2026-10-02): `tests/flows/plan-and-shop.flow.ts`, run with `bun run test:flows` (locally; AGENTS.md says how), on a phone-sized Chromium (Pixel 7) against the dev server on the test project (H24):
+    - The flow:
+      - It signs up a new account; it lands on its own empty book, "Flow's Recipes".
+      - It adds Chili by hand (1 lb ground turkey, 1 onion, one step) and adds it to the plan for today.
+      - On Plan, Add 1 meal to the grocery list says "2 added." (it counts items, not meals).
+      - On the list, tapping both rows gives "Everything's in the cart." and Got it (2). After a reload both are still checked.
+    - Each run takes about 10 s once the dev server is up; 3 runs in a row pass.
+    - With check-offs not saved (the action always sending unchecked), the flow fails at "Everything's in the cart.".
+    - The guard (`scripts/check-test-database.ts`) refuses:
+      - production's settings (Bun's own `.env` loading), at the comment check, after one read-only query;
+      - missing settings;
+      - a database and auth on different endpoints.
+    - Sign-up works on a Neon project of its own, which was H24's open question.
+    - Found on the way:
+      - A preview server from earlier in Claude's session was still on port 3100 with production's `.env`. The config's never-reuse rule stopped the run there. Flows now use port 3300, which no preview config uses.
+      - Without `ABLY_API_KEY`, the Groceries page still asks for a live-updates pass. `/api/realtime/token` then answers 500 and logs an error, each time. This only happens where there's no key, as in tests; left as is.
+      - For a moment during a reload, the Groceries page has its text twice, so the flow looks within the Got it section.
+    - Not covered here: two people on two phones (live updates are off in tests), and cook mode's wake lock and sound. Those stay with H5.
 
 ## Later (to-dos, not scheduled)
 
@@ -1787,3 +1805,5 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
   - Next: Hector reviews the Phase 15 PR; H24's branch, then P15.7.
 - **2026-10-02 (ar)** — Hector merged P15.1–P15.6 (hectarek/hector-mono#7). H24 done as a separate Neon project, `hectors-recipes-test`, since the connector can't make a schema-only branch: same schema as production, Neon Auth as production's, no data or accounts.
   - Next: Hector adds `.env.test`; then P15.7.
+- **2026-10-02 (as)** — Hector added `.env.test`. P15.7 done (see its Evidence): one browser flow from sign-up to checked-off groceries, on the test project, with a guard that refuses any other database. Phase 15 is complete once it merges.
+  - Next: Hector reviews P15.7's PR; then H23, H5.
