@@ -5,8 +5,22 @@ import { db } from "@/db";
 import type * as schema from "@/db/schema";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
-import { DatabaseOperationError } from "@/src/entities/errors/common";
+import {
+  DatabaseOperationError,
+  InputParseError,
+  NotFoundError,
+  UnauthenticatedError,
+  UnauthorizedError,
+} from "@/src/entities/errors/common";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+
+const DOMAIN_ERRORS = [
+  DatabaseOperationError,
+  InputParseError,
+  NotFoundError,
+  UnauthenticatedError,
+  UnauthorizedError,
+];
 
 type DrizzleTx = PgTransaction<
   PgQueryResultHKT,
@@ -80,6 +94,14 @@ export class TransactionManagerService implements ITransactionManagerService {
     } catch (err) {
       if (err instanceof TransactionRollbackError) {
         this.logger.warn("Transaction rolled back");
+        throw err;
+      }
+
+      // Domain errors (auth denials, not-found, validation) must reach the caller unchanged.
+      if (DOMAIN_ERRORS.some((ErrorClass) => err instanceof ErrorClass)) {
+        this.logger.debug("Transaction rolled back by domain error", {
+          error: err instanceof Error ? err.message : String(err),
+        });
         throw err;
       }
 

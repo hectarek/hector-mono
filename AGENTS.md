@@ -183,7 +183,7 @@ Both `stash` and `hectors-recipes` throw typed errors below the server action an
 try {
   await getInjection("ICreateThingController")(input, userId);
 } catch (err) {
-  // hectors-recipes centralizes this mapping in app/actions/shared.ts (follow that); stash inlines it per action.
+  // Both apps centralize this mapping in app/actions/shared.ts; hectors-recipes' is the reference.
   return toActionError(err, logger, "Couldn't save it.");
 }
 ```

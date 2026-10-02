@@ -21,7 +21,7 @@ app/
   _components/         # UI (stash-list, stash-item-card, add-item-form, header, empty-stash)
   _providers/          # Providers: @repo/ui ThemeProvider around AuthProvider
   _lib/auth.ts         # Auth client config (only used by AuthProvider)
-  actions/             # Server actions, split per domain (stash-items.ts)
+  actions/             # Server actions, split per domain (stash-items.ts); shared.ts holds their helpers (not "use server")
   (main)/account/[path]/     # Account routes
   (auth)/auth/[path]/        # Auth routes (sign-in, sign-up)
   (api)/api/auth/[...path]/  # Auth API catch-all (framework plumbing, delegates to SDK)
@@ -66,6 +66,7 @@ lib/
   auth/server.ts       # Neon auth server config (used by NeonAuthService, the auth route handler and the auth page)
   logger.ts            # Standalone logger instance (edge-safe, used by the auth route handler)
 proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
+tests/                 # bun:test; mirrors the source tree, shared setup in _support/ (see Testing)
 ```
 
 ## Data Flow
@@ -73,7 +74,7 @@ proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
 2. **Writes**: Form (`action` prop) -> server action (`actions/stash-items.ts`) -> `getInjection("IAuthenticationService")` -> `getInjection(controller)` -> use case -> repository -> `revalidatePath("/")`
 
 ## Key Patterns
-- Server actions split per domain in `app/actions/` (e.g. `stash-items.ts`). Existing actions inline their catch blocks; a new action adds `toActionError` in `app/actions/shared.ts`, as hectors-recipes does.
+- Server actions split per domain in `app/actions/` (e.g. `stash-items.ts`); every action's catch goes through `toActionError` in `app/actions/shared.ts`, as in hectors-recipes.
 - Controllers are higher-order functions: `(useCase, logger) => (input, userId) => ...`
 - Use cases are higher-order functions: `(repository, logger) => (input, userId) => ...`
 - All infrastructure classes that need logging accept `ILoggerService` via constructor and create a scoped child
@@ -96,6 +97,7 @@ proxy.ts               # Next.js 16 proxy (replaces deprecated middleware.ts)
 | Repository impl | `src/infrastructure/repositories/stash-items.repository.ts` |
 | Service impl | `src/infrastructure/services/neon-auth.service.ts` |
 | Server action | `app/actions/stash-items.ts` |
+| Action helpers (`toActionError`) | `app/actions/shared.ts` |
 | DI module | `di/modules/stash-items.module.ts` |
 | Domain model | `src/entities/models/stash-item.model.ts` |
 | Transaction model | `src/entities/models/transaction.model.ts` |
@@ -110,8 +112,13 @@ bun run dev --filter=stash
 bun run build --filter=stash
 bun run --filter=stash db:push
 bun run --filter=stash db:studio
-bun run test --filter=stash           # tests/ mirrors the source tree (proxy, app/_lib so far)
+bun run test --filter=stash           # or: cd apps/stash && bun test tests/path/to/file.test.ts
 ```
+
+## Testing
+- `tests/` mirrors the source tree: the test for `app/actions/shared.ts` is `tests/app/actions/shared.test.ts`. Run tests from the app, so `bunfig.toml`'s preload applies.
+- `tests/_support/preload.ts` runs before every test file. It deletes `DATABASE_URL` and the two auth env vars that Bun loads from `.env`, swaps `@/db` for PGlite (an in-memory Postgres) and stubs `lib/auth/server.ts`, so no test can reach Neon. Under `bun test` the DI container binds the mocks (`NODE_ENV` is `test`).
+- The PGlite database starts with no tables: stash has no migrations to apply. The transaction manager's tests create the table they write to.
 
 ## Environment
 - Env vars: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET` (`LOG_LEVEL` optional), the same names as `hectors-recipes`. `lib/auth/server.ts` throws at import without the two auth vars, so every auth page fails.
@@ -173,7 +180,8 @@ bun check --filter=stash && bun ts --filter=stash && bun run test --filter=stash
 ### Server Actions
 - Split per domain into `app/actions/` (e.g. `stash-items.ts`, not a single `actions.ts`)
 - Each action file is `"use server"` and handles its own auth + error handling
-- If a shared helper (e.g. `getUserId`, or `toActionError` for a new action's catch block; see Key Patterns) is needed across multiple action files, extract to `app/actions/shared.ts`
+- `app/actions/shared.ts` holds what action files share. It isn't `"use server"`, so nothing in it is callable from the client: `ActionState`, `actionLogger(op)`, `text(formData, key)` (trimmed; blank or missing is `undefined`) and `toActionError(err, logger, fallback)`. A helper a second action file needs (e.g. `getUserId`) moves there too
+- `toActionError`: `InputParseError`, `UnauthenticatedError`, `UnauthorizedError` and `NotFoundError` show their own message and are logged at `warn`; anything else is logged at `error` and shows `fallback`. `completeItem` and `deleteItem` return nothing (the card's `<form action>` shows no error), so they call it for its log line only
 
 ### Folder Structure Rationale
 - **`db/`** and **`lib/`** stay at project root (not in `src/infrastructure/`). They are shared initialization consumed by multiple layers (infrastructure wraps them, framework delegates to them). They sit outside any clean architecture layer, like `drizzle.config.ts`.
@@ -184,7 +192,7 @@ bun check --filter=stash && bun ts --filter=stash && bun run test --filter=stash
 
 ### Entry Points
 The app has three types of entry points. Not every entry point goes through the full clean architecture stack. **All entry points must have error logging** -- use DI logger for server-side code, `lib/logger.ts` for edge/root code:
-- **Server Actions** (`app/actions/`): Internal UI mutations. Go through DI -> Controller -> Use Case -> Repository. Always contain business logic. Wrap in try/catch with scoped logger (a new action's catch returns `toActionError`; see Key Patterns).
+- **Server Actions** (`app/actions/`): Internal UI mutations. Go through DI -> Controller -> Use Case -> Repository. Always contain business logic. Wrap in try/catch with a scoped logger (`actionLogger`); the catch goes through `toActionError` (see Server Actions).
 - **Route Handlers** (`app/(api)/api/`): External/SDK endpoints. If they contain business logic, go through DI -> Controller. If they are pure framework plumbing (e.g. auth handler), they delegate directly to the SDK. Wrap with error logging using `lib/logger.ts`.
 - **Proxy** (`proxy.ts`): Route protection. Checks the session cookie and refreshes the session cache when it has expired (see Proxy above). No SDK middleware, no logging.
 - **Pages** (`app/page.tsx`): Server components that fetch data. Wrap data fetching in try/catch with logged fallback to prevent unlogged crashes.
@@ -210,6 +218,7 @@ The app has three types of entry points. Not every entry point goes through the 
 - **Double-completion guard**: `rollback()` throws if the transaction is already completed
 - **Timeout**: `startTransaction()` starts each transaction with `set local statement_timeout` (15s), so Postgres cancels a stuck statement and the whole transaction rolls back. Don't race the transaction against a JS timer: that reported failure while the work carried on and could still commit. Not `transaction_timeout` either: it kills the connection, which the Neon driver surfaces as an unhandled error
 - **Rollback vs error distinction**: Drizzle's `TransactionRollbackError` is caught separately and logged at `warn` (not `error`)
+- **Domain errors pass through**: a domain error thrown inside the callback (`NotFoundError`, `UnauthorizedError`, etc., listed in `DOMAIN_ERRORS`) rolls the transaction back and reaches the caller unchanged; only unexpected driver errors become `DatabaseOperationError("Transaction failed")`. Keep it that way, or denials surface as "Transaction failed". A new domain error class that can be thrown inside a transaction must be added to `DOMAIN_ERRORS`
 - Mock implementations ignore `tx` and `MockTransactionManagerService` just executes the callback directly
 - DB driver: `@neondatabase/serverless` Pool (WebSocket) via `drizzle-orm/neon-serverless` -- required for transaction support (HTTP driver does not support transactions)
 
@@ -227,10 +236,10 @@ The app has three types of entry points. Not every entry point goes through the 
   - **Use cases**: received as second factory argument, scoped with `.child({ layer: "use-case", op: "fnName" })`
   - **Controllers**: received as second factory argument, scoped with `.child({ layer: "controller", op: "fnName" })`
   - **Services** (auth, transaction): received via constructor, scoped with `.child({ layer: "service", op: "name" })`
-  - **Server actions**: obtained via `getInjection("ILoggerService").child({ layer: "action", op: "fnName" })`
+  - **Server actions**: `actionLogger("fnName")` from `app/actions/shared.ts`, which is `getInjection("ILoggerService").child({ layer: "action", op: "fnName" })`
   - **Route handlers**: `import { logger } from "@/lib/logger"` then `.child({ layer: "route", op: "auth" })`
   - **Pages**: `getInjection("ILoggerService").child({ layer: "page", op: "getStash" })`
-- Standard `layer` values: `action`, `use-case`, `controller`, `repository`, `service`, `route`, `page`, `proxy`
+- Standard `layer` values: `action`, `use-case`, `controller`, `repository`, `service`, `route`, `page` (the proxy doesn't log)
 - `op` is the specific function/method name (e.g. `addItem`, `create`, `auth`, `transaction`)
 - Log output format: `[LEVEL] [layer/op] message { context }`
 - Log levels (ordered by severity):
