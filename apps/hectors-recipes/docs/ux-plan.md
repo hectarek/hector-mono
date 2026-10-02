@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1 done. Phases 1–14, L5 and L6 merged. |
-| Next task | P15.2. Also open: L7 (Later). |
+| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1 and P15.2 done. Phases 1–14, L5 and L6 merged. |
+| Next task | P15.3. Also open: L7 (Later). |
 | Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
@@ -1458,11 +1458,20 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
     - Registering per file in one run failed for the second screen file: Bun shares the module cache across files, so the helper's import ran once. `--isolate` for the whole suite worked but took 106 s, against 7 s. Only the screen files are isolated now: `bun run test` is 944 tests in about 7 s, then the screen pass in about 1 s.
     - `plan-entry-sheet.test.tsx` renders the real `PlanEntrySheet` (Base UI's Drawer works in happy-dom) against the real `changeEntryDays` action and the test container's repositories. It takes Tue 6 off a meal eaten Sun 4 to Tue 6, saves, re-renders with the saved meal, and checks that Change days shows Today and Mon 5. With P14.2's `setDays(planned)` taken out, it fails (Tue 6 still selected); with it back, it passes.
     - A single screen file runs with `bun run test:screens <path>`; a plain `bun test <path>` skips it.
-- [ ] **P15.2** The plan's screens — C
+- [x] **P15.2** The plan's screens — C
   - The meal sheet: "Not eating it on Sat Oct 17" only on a leftovers day, and never for the meal's only eat day; Add to grocery list sends which button was pressed (`again`).
   - The grocery box: the range menu's count; "Nothing new to add for the next 7 days" when there's nothing in the range; the result announced and focused when the button goes.
   - The week: a cook row has the check, an eat-only row has "Cooked Thu Oct 15" and no check, and days before today have muted text.
   - The meal-days picker: moving the cook day moves the eat days; three columns once a day shows its month.
+  - Evidence (2026-10-01):
+    - Four files, 11 tests, on `planScreenFixture()` (`tests/_support/plan-screens.ts`: a person with their plan and a recipe, through the real controllers and actions):
+      - `plan-entry-sheet.test.tsx`: Change days from the saved days (P15.1); Not eating it on Mon 5 takes Monday off, and isn't offered from the cook day or for a meal's only eat day; a first Add to grocery list from a sheet that's out of date adds nothing ("1 meal was already on the list."), and Add to list again adds a second batch (1 lb, then 2 lb).
+      - `add-plan-to-list-button.test.tsx`: 2, 1 and 3 meals for the next 7 days, 3 days and all upcoming; "Nothing new to add for the next 3 days"; a press adds, says "1 added." as a status, and the cursor goes there once Plan comes back with nothing left; Open list goes to the plan's list.
+      - `plan-week.test.tsx`: Saturday's cook row has the check and "Cook", Sunday's leftovers row "Cooked Sat 3" and no check; the check marks the meal cooked.
+      - `meal-days-picker.test.tsx`: cook on Tue 6 moves the eat days to Tue 6 and Wed 7; Other adds "Tue Oct 20" (D47); no eat day asks for one.
+    - Each past bug these lock in was put back to check its test fails: the sheet without `again` (the second batch never comes), the leftovers option offered from the cook day, and the grocery box without moving the cursor. All three failed; restored, all pass.
+    - Left to the browser, as layout rather than behaviour: muted text on past days, and the three-column eat days.
+    - Found on the way, and fixed in the setup: the first run failed now and then, because a test read the page or the repositories straight after a tap, before the action was back. They wait now (`findBy…`, `waitFor`); each file passed 10 or 20 runs in a row (`--rerun-each`). And the page wasn't emptied between tests, since a hook in an imported helper doesn't attach to the file: `dom.ts` is now a preload of the screen pass, so test files don't import it. Both are in AGENTS.md.
 - [ ] **P15.3** A space's ⋯ menu — C
   - Invite on one plan, then another without a reload, shares the second's link (P14.2: `SpaceMenu` keyed by space).
   - Invite is there only for an owner; Members and the page's own actions are in the sheet.

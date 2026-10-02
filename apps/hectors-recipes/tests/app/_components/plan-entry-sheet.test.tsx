@@ -1,60 +1,28 @@
-import "@/tests/_support/dom";
 import { beforeEach, describe, expect, it } from "bun:test";
-import { render, within } from "@testing-library/react";
+import { render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlanEntrySheet } from "@/app/_components/plan-entry-sheet";
-import { addPlanEntry } from "@/app/actions/plan";
-import { getInjection } from "@/di/container";
 import type { PlanEntry } from "@/src/entities/models/plan-entry.model";
-import { signInAsNewUser } from "@/tests/_support/next";
+import { planScreenFixture } from "@/tests/_support/plan-screens";
 
 // Sunday 4 October 2026.
 const TODAY = "2026-10-04";
+const MON = "2026-10-05";
+const TUE = "2026-10-06";
 
-// The meal's sheet runs against the real actions and the test container's repositories.
+// A meal's ⋯ sheet, against the real actions and the test container's repositories.
 describe("PlanEntrySheet", () => {
-  let userId: string;
-
-  const meal = async (): Promise<PlanEntry> => {
-    const [entry] = await getInjection("IGetWeekPlanController")(
-      { spaceId: await planId(), date: TODAY },
-      userId,
-    );
-    if (!entry) throw new Error("No meal planned");
-    return entry;
-  };
-  const planId = async () =>
-    (
-      await getInjection("IListMySpacesController")(
-        { type: "meal-plan" },
-        userId,
-      )
-    )[0]?.id ?? "";
+  let fixture: Awaited<ReturnType<typeof planScreenFixture>>;
 
   beforeEach(async () => {
-    userId = signInAsNewUser();
-    const book = await getInjection("IEnsurePersonalSpaceController")(
-      "recipe-book",
-      userId,
-    );
-    const recipe = await getInjection("ICreateRecipeController")(
-      {
-        spaceId: book.id,
-        data: { title: "Chili", ingredients: [{ raw: "1 lb ground turkey" }] },
-      },
-      userId,
-    );
-    await addPlanEntry({
-      recipeId: recipe.id,
-      cookDate: TODAY,
-      eatDates: [TODAY, "2026-10-05", "2026-10-06"],
-    });
+    fixture = await planScreenFixture();
   });
 
-  const sheet = (entry: PlanEntry) => (
+  // The sheet for `entry`, opened from the row for `date`.
+  const sheet = (entry: PlanEntry, date = TODAY) => (
     <PlanEntrySheet
       entry={entry}
-      date={TODAY}
+      date={date}
       today={TODAY}
       open
       onOpenChange={() => {}}
@@ -72,15 +40,82 @@ describe("PlanEntrySheet", () => {
   // the meal as saved, not from the days it was opened with.
   it("starts Change days from the meal's saved days after they change", async () => {
     const user = userEvent.setup();
-    const view = render(sheet(await meal()));
+    const meal = await fixture.planChili({
+      cookDate: TODAY,
+      eatDates: [TODAY, MON, TUE],
+    });
+    const view = render(sheet(meal));
 
     await user.click(view.getByRole("button", { name: "Change days" }));
     await user.click(eatOn(view).getByRole("button", { name: "Tue 6" }));
     await user.click(view.getByRole("button", { name: "Save days" }));
-    expect((await meal()).eatDates).toEqual([TODAY, "2026-10-05"]);
+    await waitFor(async () =>
+      expect((await fixture.meals(TODAY))[0]?.eatDates).toEqual([TODAY, MON]),
+    );
+    const [saved] = await fixture.meals(TODAY);
 
-    view.rerender(sheet(await meal()));
+    view.rerender(sheet(saved ?? meal));
     await user.click(view.getByRole("button", { name: "Change days" }));
     expect(eatDays(view)).toEqual(["Today", "Mon 5"]);
+  });
+
+  // D43: a leftovers day can come off a meal on its own, but not its cook day or its only
+  // eat day.
+  it("takes a leftovers day off, and offers it only on one", async () => {
+    const user = userEvent.setup();
+    const meal = await fixture.planChili({
+      cookDate: TODAY,
+      eatDates: [TODAY, MON, TUE],
+    });
+    const fromMonday = render(sheet(meal, MON));
+    await user.click(
+      fromMonday.getByRole("button", { name: "Not eating it on Mon 5" }),
+    );
+    await waitFor(async () =>
+      expect((await fixture.meals(TODAY))[0]?.eatDates).toEqual([TODAY, TUE]),
+    );
+    fromMonday.unmount();
+
+    const fromCookDay = render(sheet(meal, TODAY));
+    expect(fromCookDay.queryByRole("button", { name: /Not eating it/ })).toBe(
+      null,
+    );
+    fromCookDay.unmount();
+
+    const onlyMonday = await fixture.planChili({
+      cookDate: TODAY,
+      eatDates: [MON],
+    });
+    const lastDay = render(sheet(onlyMonday, MON));
+    expect(lastDay.queryByRole("button", { name: /Not eating it/ })).toBe(null);
+  });
+
+  // D45: the sheet says which button was pressed, so one loaded before the meal went on the
+  // list (someone else's press) adds nothing, and Add to list again adds a second batch.
+  it("adds a meal once from a sheet that's out of date, and again when asked", async () => {
+    const user = userEvent.setup();
+    const meal = await fixture.planChili({
+      cookDate: TODAY,
+      eatDates: [TODAY],
+    });
+    const view = render(sheet(meal));
+
+    await user.click(view.getByRole("button", { name: "Add to grocery list" }));
+    await view.findByText("1 added.");
+    expect(await fixture.groceries()).toEqual(["1 lb ground turkey"]);
+
+    // Still showing the meal as it was before it went on the list.
+    await user.click(
+      await view.findByRole("button", { name: "Add to grocery list" }),
+    );
+    await view.findByText("1 meal was already on the list.");
+    expect(await fixture.groceries()).toEqual(["1 lb ground turkey"]);
+
+    const [added] = await fixture.meals(TODAY);
+    view.rerender(sheet(added ?? meal));
+    await user.click(view.getByRole("button", { name: "Add to list again" }));
+    await waitFor(async () =>
+      expect(await fixture.groceries()).toEqual(["2 lb ground turkey"]),
+    );
   });
 });

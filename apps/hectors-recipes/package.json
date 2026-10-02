@@ -10,7 +10,7 @@
     "check-types": "tsc --noEmit",
     "lint": "biome check --write && oxlint .",
     "test": "bun test && bun run test:screens",
-    "test:screens": "bun test --isolate --path-ignore-patterns='**/*.test.ts'",
+    "test:screens": "bun test --isolate --preload ./tests/_support/dom.ts --path-ignore-patterns='**/*.test.ts'",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
