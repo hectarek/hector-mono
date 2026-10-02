@@ -2,6 +2,7 @@ import { getCurrentUserId } from "@/app/_lib/current-user";
 import { getInjection } from "@/di/container";
 import {
   InputParseError,
+  LiveUpdatesOffError,
   NotFoundError,
   UnauthenticatedError,
   UnauthorizedError,
@@ -10,7 +11,8 @@ import {
 // Ably's authUrl (ux-plan D21): a browser's pass to hear when one plan's grocery list
 // changes. The proxy skips /api, so the controller's session check is the gate. Ably's
 // client stops retrying on a 403 (spec RSA4d) and retries anything else, so a refusal is
-// 403 and only signing in again or a server error is worth retrying.
+// 403 and only signing in again or a server error is worth retrying. With no key, live updates
+// are off: that's a 403 too, so the browser stops asking and the page refreshes instead.
 export async function GET(request: Request): Promise<Response> {
   const planId = new URL(request.url).searchParams.get("plan") ?? undefined;
   try {
@@ -29,6 +31,9 @@ export async function GET(request: Request): Promise<Response> {
       err instanceof UnauthorizedError
     ) {
       return new Response("Not allowed", { status: 403 });
+    }
+    if (err instanceof LiveUpdatesOffError) {
+      return new Response("Live updates are off", { status: 403 });
     }
     getInjection("ILoggerService")
       .child({ layer: "route", op: "realtimeToken" })
