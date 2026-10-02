@@ -9,7 +9,8 @@
     "ts": "tsc --noEmit",
     "check-types": "tsc --noEmit",
     "lint": "biome check --write --error-on-warnings && oxlint --deny-warnings .",
-    "test": "bun test",
+    "test": "bun test && bun run test:screens",
+    "test:screens": "bun test --isolate --preload ./tests/_support/dom.ts --path-ignore-patterns='**/*.test.ts'",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
@@ -33,9 +34,13 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
+    "@happy-dom/global-registrator": "^20.14.5",
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/bun": "1.4.2",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
