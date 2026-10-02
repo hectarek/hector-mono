@@ -22,7 +22,7 @@ app/
       hero/, proof/, skills/, projects/, experience/, approach/, contact/, about/, now/, reading/, nav/, shared/
     shared/            # brand-icons, plus animated-* wrappers nothing imports
   _providers/          # @repo/ui ThemeProvider + TooltipProvider + Toaster
-  ui/                  # Public @repo/ui component gallery with a theme switcher (why globals.css imports neobrutalist.css)
+  ui/                  # Public, noindex @repo/ui component gallery with a theme switcher (why globals.css imports neobrutalist.css)
   robots.ts, sitemap.ts
 src/
   data/                # Static JSON (profile, skills, experience, projects, reading-list)
@@ -44,7 +44,7 @@ tests/                 # Tests
 ## Patterns
 - Server Components by default — no `"use client"` unless needed for interactivity
 - `generateStaticParams()` for dynamic project routes
-- `generateMetadata()` per page using `generateSEOMetadata()` from `src/shared/utils/seo.ts`
+- Metadata per page through `generateSEOMetadata()` from `src/shared/utils/seo.ts`, with the page's required `path`: it becomes the page's canonical and `og:url`. The root layout sets no URLs (they'd be inherited as the home page's), and a client page puts its metadata in a sibling `layout.tsx` (`app/ui/layout.tsx`). See `docs/seo.md`.
 - The canonical origin is `SITE_URL` in `src/shared/config/site.ts` (`https://www.hectorfgonzalez.com`), used by the SEO utils, `app/sitemap.ts` and `app/robots.ts`. There's no env var for it.
 - Framer Motion for animations: components use `motion` from `framer-motion` directly, with shared variants (`fadeInUp`, `heroVariants`/`heroItem`, `viewportOptions`, etc.) from `src/lib/animations.ts`, and `useScrollReveal()` (`src/lib/use-scroll-reveal.ts`) for scroll-in reveals that respect reduced motion
 - Dark/light mode via `ThemeProvider` / `useTheme` from `@repo/ui/components/theme-provider` (follows the system setting; no toggle)

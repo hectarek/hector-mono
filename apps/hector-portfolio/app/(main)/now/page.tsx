@@ -8,6 +8,7 @@ export const metadata: Metadata = generateSEOMetadata({
   description:
     "What I'm working on right now — current projects, current focus, current learning. Updated occasionally.",
   keywords: ["Now", "Hector Gonzalez", "Current focus", "Currently building"],
+  path: "/now",
   type: "website",
 });
 

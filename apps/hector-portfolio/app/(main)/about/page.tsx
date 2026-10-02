@@ -17,6 +17,7 @@ export const metadata: Metadata = generateSEOMetadata({
     "EdTech",
     "Internal Tools",
   ],
+  path: "/about",
   type: "profile",
 });
 

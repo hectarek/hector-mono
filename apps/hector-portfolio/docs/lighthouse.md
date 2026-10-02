@@ -49,6 +49,8 @@ Lighthouse CI is configured in `.lighthouserc.js`:
 - **Best Practices**: Minimum score 1.0 (100%)
 - **SEO**: Minimum score 1.0 (100%)
 
+Reports stay local: the `filesystem` upload target writes the HTML and JSON reports for each URL, plus a `manifest.json`, to `.lighthouseci/reports/`. LHCI keeps its raw run results in `.lighthouseci/` too, and the whole folder is gitignored. Nothing is uploaded; the `temporary-public-storage` target would publish each report at a public URL.
+
 Lighthouse 12 (the version `@lhci/cli` 0.15 runs) has no PWA category, so there's no PWA assertion.
 
 ## Troubleshooting

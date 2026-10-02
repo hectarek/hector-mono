@@ -7,7 +7,6 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { getProfile } from "@/src/lib/data";
-import { generateMetadata as generateSEOMetadata } from "@/src/shared/utils/seo";
 import { Footer } from "./_components/portfolio/contact/footer";
 import { Navbar } from "./_components/portfolio/nav/navbar";
 import { Providers } from "./_providers/providers";
@@ -40,27 +39,14 @@ const caveat = Caveat({
   display: "swap",
 });
 
-export const metadata: Metadata = generateSEOMetadata({
+// Fallback for routes without their own metadata (404, error). No URLs here: a
+// canonical or og:url in the root layout would be inherited as the home page's.
+export const metadata: Metadata = {
   title:
     "Hector Gonzalez | Full-Stack Engineer, Co-Founder, Applied AI Builder",
   description:
     "Product-minded full-stack engineer building learning systems, internal tools, and applied AI. Co-founder & CTO at Stiegler EdTech.",
-  keywords: [
-    "Hector Gonzalez",
-    "Full-Stack Engineer",
-    "Technical Product",
-    "Applied AI",
-    "AI Engineer",
-    "CTO",
-    "Co-Founder",
-    "Next.js",
-    "TypeScript",
-    "EdTech",
-    "Learning Systems",
-    "Internal Tools",
-  ],
-  type: "website",
-});
+};
 
 export default function RootLayout({
   children,

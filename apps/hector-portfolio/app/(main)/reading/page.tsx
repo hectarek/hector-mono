@@ -7,6 +7,7 @@ export const metadata: Metadata = generateSEOMetadata({
   title: "Reading list | Hector Gonzalez",
   description:
     "Newsletters, blogs, podcasts, and feeds I use to stay current on engineering and the industry.",
+  path: "/reading",
   noIndex: true,
 });
 
