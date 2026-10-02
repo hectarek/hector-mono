@@ -79,6 +79,7 @@ bun check --filter=<app-name> && bun ts --filter=<app-name>
 Use the unscoped `bun check && bun ts` only when changes span multiple apps or shared packages.
 Then run `bun run dead-code` (Fallow, whole repo, under a second): it fails on an unused file, export, type or dependency your change left behind (see **Dead Code**).
 If you touched tests, also run them from the app: `cd apps/<app> && bun test tests/path/to/affected.test.ts`.
+Claude Code's `PostToolUse` hook (`.claude/hooks/lint-on-edit.sh`) already runs each edited file through its package's linters, Biome with `--write` and then Oxlint, and reports what's left; fix it before moving on. Typecheck and tests aren't in the hook, so the checks above still apply.
 
 CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package a PR affects, using Turbo's `--filter='...[origin/main]'`, and the dead-code check on the whole repo. Lint fails if `biome check --write` would change a file, or on any warning (every `lint` script runs `biome check --error-on-warnings` and `oxlint --deny-warnings`), so run `bun check` before pushing. Builds are left to Vercel's per-PR deploys. An app with tests needs a `test` script in its `package.json` for Turbo to pick it up.
 
