@@ -11,23 +11,29 @@ import {
 import { initialRelationships } from "@/app/_lib/data";
 import {
   applyInteraction,
+  assignDunbarLayer,
+  calculateComprehensiveScore,
+  calculateReciprocityState,
   calculateRelationshipDecay,
   type DunbarLayer,
-  type EmotionalTone,
   getHealthStatus,
-  type InteractionType,
   type IOSLevel,
   iosToStrength,
   isContactOverdue,
+  RECIPROCITY_WINDOW,
 } from "@/app/_lib/model";
-import type { Interaction, Relationship } from "@/app/_lib/types";
+import type {
+  Interaction,
+  InteractionEntry,
+  Relationship,
+} from "@/app/_lib/types";
 import { TYPE_TO_CATEGORY } from "@/app/_lib/types";
 import { getDaysSinceContact, getRelationshipYears } from "@/app/_lib/utils";
 
 /**
- * Calculate the display strength with decay applied.
+ * The stored strength with decay applied: what an interaction builds on.
  */
-function getDisplayStrength(relationship: Relationship): number {
+function getDecayedStrength(relationship: Relationship): number {
   if (!relationship.lastInteraction) return relationship.strength;
 
   const result = calculateRelationshipDecay({
@@ -40,6 +46,18 @@ function getDisplayStrength(relationship: Relationship): number {
   });
 
   return result.newStrength;
+}
+
+/**
+ * The strength shown, sorted and filtered on: decay, then shared contexts and
+ * interdependence. Kept out of the stored strength so the bonus never compounds.
+ */
+function getDisplayStrength(relationship: Relationship): number {
+  return calculateComprehensiveScore(
+    getDecayedStrength(relationship),
+    relationship.activityDiversity ?? "single",
+    relationship.interdependence ?? "independent",
+  );
 }
 
 export function RelationshipMeterContainer() {
@@ -59,42 +77,45 @@ export function RelationshipMeterContainer() {
     }));
   }, [relationships]);
 
-  const handleInteraction = (
-    id: number,
-    interactionType: InteractionType,
-    emotionalTone: EmotionalTone = "positive",
-    durationMinutes = 15,
-    activityContext?: string,
-  ) => {
+  const handleInteraction = (id: number, entry: InteractionEntry) => {
     setRelationships((prevRelationships) =>
       prevRelationships.map((relationship) => {
         if (relationship.id !== id) return relationship;
 
-        const result = applyInteraction({
-          currentStrength: getDisplayStrength(relationship),
-          interactionType,
-          emotionalTone,
-          reciprocityState: relationship.reciprocity ?? "mutual",
-          durationMinutes,
-          activityContext,
-          existingContexts: relationship.sharedContexts ?? [],
-        });
-
         const newInteraction: Interaction = {
+          ...entry,
           id: crypto.randomUUID(),
           date: new Date(),
-          type: interactionType,
-          initiatedByUser: true,
-          emotionalTone,
-          durationMinutes,
-          activityContext,
         };
+        const interactions = [
+          ...(relationship.interactions ?? []),
+          newInteraction,
+        ];
+
+        // This interaction counts toward the balance it's then boosted by.
+        const recent = interactions.slice(-RECIPROCITY_WINDOW);
+        const reciprocity = calculateReciprocityState(
+          recent.filter((interaction) => interaction.initiatedByUser).length,
+          recent.length,
+          relationship.reciprocity ?? "mutual",
+        );
+
+        const result = applyInteraction({
+          currentStrength: getDecayedStrength(relationship),
+          interactionType: entry.type,
+          emotionalTone: entry.emotionalTone ?? "positive",
+          reciprocityState: reciprocity,
+          durationMinutes: entry.durationMinutes,
+          activityContext: entry.activityContext,
+          existingContexts: relationship.sharedContexts ?? [],
+        });
 
         return {
           ...relationship,
           strength: result.newStrength,
-          lastInteraction: new Date(),
-          interactions: [...(relationship.interactions ?? []), newInteraction],
+          reciprocity,
+          lastInteraction: newInteraction.date,
+          interactions,
           sharedContexts: result.newContexts,
           activityDiversity: result.newActivityDiversity,
         };
@@ -111,14 +132,18 @@ export function RelationshipMeterContainer() {
     const newId = Math.max(...relationships.map((r) => r.id), 0) + 1;
     const strength = iosToStrength(initialIosRating);
 
-    // Auto-assign Dunbar layer based on strength if not provided
-    let assignedLayer: DunbarLayer = dunbarLayer ?? "activeNetwork";
-    if (!dunbarLayer) {
-      if (strength >= 85) assignedLayer = "supportClique";
-      else if (strength >= 65) assignedLayer = "sympathyGroup";
-      else if (strength >= 40) assignedLayer = "affinityGroup";
-      else assignedLayer = "activeNetwork";
+    // Without a chosen layer, the closest one the strength qualifies for that still has room.
+    const layerCounts: Record<DunbarLayer, number> = {
+      supportClique: 0,
+      sympathyGroup: 0,
+      affinityGroup: 0,
+      activeNetwork: 0,
+    };
+    for (const relationship of relationships) {
+      layerCounts[relationship.dunbarLayer ?? "activeNetwork"] += 1;
     }
+    const assignedLayer =
+      dunbarLayer ?? assignDunbarLayer(strength, layerCounts);
 
     const newRelationship: Relationship = {
       id: newId,

@@ -21,13 +21,11 @@ import { EditDialog } from "@/app/_components/edit-dialog";
 import { InteractionDialog } from "@/app/_components/interaction-dialog";
 import { InteractionHistory } from "@/app/_components/interaction-history";
 import {
-  type EmotionalTone,
   getHealthStatus,
   type HealthStatusKey,
-  type InteractionType,
   isContactOverdue,
 } from "@/app/_lib/model";
-import type { Relationship } from "@/app/_lib/types";
+import type { LogInteraction, Relationship } from "@/app/_lib/types";
 import { TYPE_TO_CATEGORY } from "@/app/_lib/types";
 import {
   formatRelativeTime,
@@ -38,13 +36,7 @@ import {
 
 interface RelationshipCardProps {
   relationship: Relationship;
-  onInteraction: (
-    id: number,
-    interactionType: InteractionType,
-    emotionalTone: EmotionalTone,
-    durationMinutes: number,
-    activityContext?: string,
-  ) => void;
+  onInteraction: LogInteraction;
   onEdit: (id: number, updates: Partial<Relationship>) => void;
 }
 

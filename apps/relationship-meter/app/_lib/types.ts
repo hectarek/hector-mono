@@ -46,6 +46,11 @@ export interface Interaction {
   notes?: string;
 }
 
+/** What the interaction dialog logs; the container adds the id and date. */
+export type InteractionEntry = Omit<Interaction, "id" | "date">;
+
+export type LogInteraction = (id: number, entry: InteractionEntry) => void;
+
 /**
  * Core relationship model aligned with research findings.
  *

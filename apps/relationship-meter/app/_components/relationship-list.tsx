@@ -8,18 +8,11 @@ import {
 } from "@repo/ui/components/accordion";
 import { useMemo } from "react";
 import { RelationshipCard } from "@/app/_components/relationship-card";
-import type { EmotionalTone, InteractionType } from "@/app/_lib/model";
-import type { Relationship } from "@/app/_lib/types";
+import type { LogInteraction, Relationship } from "@/app/_lib/types";
 
 interface RelationshipListProps {
   relationships: Relationship[];
-  onInteraction: (
-    id: number,
-    interactionType: InteractionType,
-    emotionalTone: EmotionalTone,
-    durationMinutes: number,
-    activityContext?: string,
-  ) => void;
+  onInteraction: LogInteraction;
   onEdit: (id: number, updates: Partial<Relationship>) => void;
   isGrouped: boolean;
 }

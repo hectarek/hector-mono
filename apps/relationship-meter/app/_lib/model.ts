@@ -13,18 +13,14 @@
 // 1. Granovetter's Tie Strength Factors
 // =============================================================================
 
-/**
- * The four factors that define relationship strength according to Granovetter.
- * Each factor contributes equally to overall tie strength.
+/*
+ * Granovetter defines tie strength by four factors. The app has no direct measure of
+ * any of them, so each one enters through the inputs it does collect:
+ * - time spent: interaction type and duration (applyInteraction)
+ * - emotional intensity: the IOS rating on creation and each interaction's tone
+ * - intimacy: interdependence (calculateComprehensiveScore)
+ * - reciprocity: who initiated recent interactions (calculateReciprocityState)
  */
-export const TIE_STRENGTH_FACTORS = {
-  timeSpent: 0.25, // Amount of time together
-  emotionalIntensity: 0.25, // Depth of feelings/affection
-  intimacy: 0.25, // Mutual confiding, trust, vulnerability
-  reciprocity: 0.25, // Balanced give-and-take
-} as const;
-
-export type TieStrengthFactor = keyof typeof TIE_STRENGTH_FACTORS;
 
 // =============================================================================
 // 2. Relationship Categories (by Decay Behavior)
@@ -537,7 +533,7 @@ function getActivityDiversityMultiplier(sharedContextCount: number): {
  * @param level - The interdependence level
  * @returns Weight value between 0.2 and 1.0
  */
-export function getInterdependenceWeight(level: InterdependenceLevel): number {
+function getInterdependenceWeight(level: InterdependenceLevel): number {
   return INTERDEPENDENCE_LEVELS[level].weight;
 }
 
@@ -554,28 +550,27 @@ export function iosToStrength(iosLevel: IOSLevel): number {
 
 /**
  * Calculate comprehensive relationship score incorporating multiple factors.
- * Combines base strength with activity diversity and interdependence.
+ * Activity diversity and interdependence each close a share of the gap to 100
+ * (at most 30% and 20%), so the order of relationships is kept and only a
+ * relationship already at 100 shows 100.
  *
  * @param baseStrength - Current raw strength (0-100)
  * @param activityDiversity - Level of activity diversity
  * @param interdependence - Level of interdependence
- * @returns Adjusted relationship score (capped at 100)
+ * @returns Adjusted relationship score (0-100)
  */
 export function calculateComprehensiveScore(
   baseStrength: number,
   activityDiversity: ActivityDiversityLevel,
   interdependence: InterdependenceLevel,
 ): number {
-  const diversityMultiplier = ACTIVITY_DIVERSITY[activityDiversity].multiplier;
-  const interdependenceWeight = INTERDEPENDENCE_LEVELS[interdependence].weight;
+  const diversityShare = ACTIVITY_DIVERSITY[activityDiversity].multiplier - 1;
+  const interdependenceShare = 0.2 * getInterdependenceWeight(interdependence);
 
-  // Activity diversity boosts the score
-  // Interdependence adds weighted bonus (max +20 points at full interdependence)
-  const diversityBoost = baseStrength * (diversityMultiplier - 1);
-  const interdependenceBonus = 20 * interdependenceWeight;
-
-  const score = baseStrength + diversityBoost + interdependenceBonus;
-  return Math.min(100, Math.round(score));
+  const headroom = 100 - baseStrength;
+  return Math.round(
+    baseStrength + headroom * (diversityShare + interdependenceShare),
+  );
 }
 
 // =============================================================================
@@ -732,7 +727,6 @@ export interface InteractionInput {
 export interface InteractionResult {
   newStrength: number;
   strengthChange: number;
-  newReciprocityState: ReciprocityState;
   newActivityDiversity: ActivityDiversityLevel;
   newContexts: string[];
   breakdown: {
@@ -744,25 +738,25 @@ export interface InteractionResult {
   };
 }
 
+/** How many of the latest interactions reciprocity is judged on. */
+export const RECIPROCITY_WINDOW = 10;
+
 /**
  * Calculate new reciprocity state based on interaction history.
  * Tracks recent interactions to determine if relationship effort is balanced.
  *
  * @param recentUserInitiatedCount - How many of recent interactions user initiated
  * @param recentTotalCount - Total recent interactions to consider
+ * @param currentState - Kept while there are too few interactions to judge
  * @returns The appropriate reciprocity state
  */
 export function calculateReciprocityState(
   recentUserInitiatedCount: number,
   recentTotalCount: number,
+  currentState: ReciprocityState,
 ): ReciprocityState {
   if (recentTotalCount < 3) {
-    // Not enough data, assume mutual
-    return "mutual";
-  }
-
-  if (recentTotalCount === 0) {
-    return "dormant";
+    return currentState;
   }
 
   const userRatio = recentUserInitiatedCount / recentTotalCount;
@@ -834,14 +828,9 @@ export function applyInteraction(input: InteractionInput): InteractionResult {
     newContexts.length,
   );
 
-  // Step 9: Reciprocity state update is simplified here
-  // In real usage, you'd track recent interactions and call calculateReciprocityState
-  const newReciprocityState = reciprocityState;
-
   return {
     newStrength: Math.round(newStrength * 10) / 10,
     strengthChange: Math.round(strengthChange * 10) / 10,
-    newReciprocityState,
     newActivityDiversity,
     newContexts,
     breakdown: {

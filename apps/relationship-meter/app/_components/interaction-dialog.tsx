@@ -37,17 +37,12 @@ import {
   INTERACTION_QUALITY,
   type InteractionType,
 } from "@/app/_lib/model";
+import type { LogInteraction } from "@/app/_lib/types";
 
 interface InteractionDialogProps {
   relationshipId: number;
   relationshipName: string;
-  onInteraction: (
-    id: number,
-    interactionType: InteractionType,
-    emotionalTone: EmotionalTone,
-    durationMinutes: number,
-    activityContext?: string,
-  ) => void;
+  onInteraction: LogInteraction;
 }
 
 const interactionIcons: Record<InteractionType, React.ElementType> = {
@@ -83,13 +78,14 @@ export function InteractionDialog({
 
   const handleSubmit = () => {
     if (interactionType) {
-      onInteraction(
-        relationshipId,
-        interactionType,
+      onInteraction(relationshipId, {
+        type: interactionType,
+        initiatedByUser,
         emotionalTone,
-        duration,
-        activityContext || undefined,
-      );
+        durationMinutes: duration,
+        activityContext: activityContext || undefined,
+        notes: notes || undefined,
+      });
       // Reset form
       setInteractionType("");
       setEmotionalTone("positive");
