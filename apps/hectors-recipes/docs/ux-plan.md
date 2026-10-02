@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests): P15.1–P15.6 done, in review on `test/recipes-p15-screen-tests`; P15.7 gets a PR of its own. Phases 1–14, L5 and L6 merged. |
-| Next task | H24: try a schema-only Neon branch for P15.7. Also open: L7 (Later). |
-| Waiting on Hector | whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 15 (screen tests): P15.1–P15.6 merged (hectarek/hector-mono#7); P15.7 on `test/recipes-p15-7-browser-flows`, its test database ready (H24). Phases 1–14, L5 and L6 merged. |
+| Next task | P15.7, once `.env.test` is in place. Also open: L7 (Later). |
+| Waiting on Hector | `.env.test` for the test project (H24); whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1601,7 +1601,7 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
 | H21 | OK to apply P14.10's additive migration 0012 (a `recipe_reads` table) to the one database before the Phase 14 PR merges. The deployed code doesn't know the table. | P14.10 | done 2026-10-01: "yes apply 0012"; applied |
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | open |
-| H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. |
+| H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
 
 ## Risks and how they're handled
 
@@ -1785,3 +1785,5 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
   - Next: Hector reviews Phase 15's plan; then P15.2.
 - **2026-10-01 (aq)** — P15.2–P15.6 done (see their Evidence), one commit each: 24 screen tests in 8 files, each lock-in checked by putting its bug back. 953 other tests pass. Hector: open the PR now, P15.7 in a PR of its own, and try a schema-only branch for H24.
   - Next: Hector reviews the Phase 15 PR; H24's branch, then P15.7.
+- **2026-10-02 (ar)** — Hector merged P15.1–P15.6 (hectarek/hector-mono#7). H24 done as a separate Neon project, `hectors-recipes-test`, since the connector can't make a schema-only branch: same schema as production, Neon Auth as production's, no data or accounts.
+  - Next: Hector adds `.env.test`; then P15.7.
