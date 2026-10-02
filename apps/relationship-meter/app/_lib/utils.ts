@@ -1,15 +1,9 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import {
   type DunbarLayer,
   getHealthStatus,
   type HealthStatusKey,
 } from "@/app/_lib/model";
 import type { Relationship } from "@/app/_lib/types";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 /**
  * Get color based on health status (derived from strength).
