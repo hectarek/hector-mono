@@ -36,6 +36,21 @@ mock.module("next/navigation", () => ({
   notFound: (): never => {
     throw new NotFoundPage();
   },
+  // For the screen tests: a router that records where it was sent.
+  useRouter: () => ({
+    push: (url: string) => {
+      nextState.pushed.push(url);
+    },
+    replace: (url: string) => {
+      nextState.pushed.push(url);
+    },
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+    prefetch: () => {},
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 mock.module("@/app/_lib/current-user", () => ({

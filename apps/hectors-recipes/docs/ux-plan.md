@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.3 done. Phases 1–14, L5 and L6 merged. |
-| Next task | P15.4. Also open: L7 (Later). |
+| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.4 done. Phases 1–14, L5 and L6 merged. |
+| Next task | P15.5. Also open: L7 (Later). |
 | Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
@@ -1478,12 +1478,21 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
   - Evidence (2026-10-01): `space-header.test.tsx`, 2 tests, on two books (one person owns one plan, but can own several books; the menu is the same for both):
     - Invite on Soups, then on Bakes after the header re-renders with it (as `?book=` does), shares each book's own Can edit link. The test stands in for the phone's share sheet (`navigator.share`) and compares with the links the server keeps. With the `key` taken off `SpaceMenu` it fails; with it back it passes, 10 runs in a row.
     - An editor's sheet has Members, going to the book's settings, and no Invite.
-- [ ] **P15.4** The recipe form — C
+- [x] **P15.4** The recipe form — C
   - Return in a one-line field doesn't save. Enter in New tag adds the tag and the cursor goes back to New tag. Return that confirms an IME's text does nothing.
   - Pasting a list with a section into a section keeps the rows after it in theirs. An empty named section stops Save, with its message and the cursor on it.
   - Remove from a row's sheet puts the cursor on the neighbouring ⋯.
   - Each section's rows are a list of their own.
   - Needs `useRouter` in the preload's `next/navigation` stand-in.
+  - Evidence (2026-10-01): `recipe-form.test.tsx`, 5 tests, on the new-recipe form:
+    - Return in Title has its default (the form's submit) stopped; a step's Return (a new line) and the Return that confirms an IME's text (keyCode 229) aren't. happy-dom doesn't run a form's implicit submit, so the test checks the default was stopped.
+    - New tag, "weeknight", Return: the chip is chosen and the cursor is back on New tag.
+    - Two pastes (Pasta's lines, then Sauce's into the Pasta row) give Pasta, pasta, Sauce, butter, milk, Pasta, olive oil, as lists of 1, 2 and 1 lines.
+    - Save with an empty Sauce section shows its message, with the cursor in "Section 2 name".
+    - Remove from the second line's sheet leaves the cursor on the first line's ⋯.
+    - Each lock-in was checked by putting the bug back: no Return guard, no restarted section after a paste, an empty section let through, no focus back on New tag, no focus on the ⋯ after Remove. All five failed; restored, all pass, 10 runs in a row.
+    - Found on the way: the focus tests first passed with their fixes taken out. Focus was on the page, yet `expect(document.activeElement).toBe(button)` passed. Seen only with a large page (the same assertion on a near-empty page fails as it should), so it looks like a Bun problem with large elements. Focus is now compared by name (`focused()`, `tests/_support/focus.ts`), and the grocery box test moved to it too. AGENTS.md says never to compare elements.
+    - `useRouter`, `usePathname` and `useSearchParams` are in the preload's `next/navigation` stand-in; a push is recorded in `nextState.pushed`.
 - [ ] **P15.5** Cook mode — C
   - A step timer counts down once started. A timer restored after a reload shows "Tap anywhere to turn its sound back on", and a tap turns the sound on (against a stand-in for the browser's audio).
   - Crossed-off ingredients and the current step come back after a reload.

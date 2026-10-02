@@ -3,6 +3,7 @@ import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AddPlanToListButton } from "@/app/_components/add-plan-to-list-button";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
+import { focused } from "@/tests/_support/focus";
 import { planScreenFixture } from "@/tests/_support/plan-screens";
 
 // Sunday 4 October 2026.
@@ -64,9 +65,7 @@ describe("AddPlanToListButton", () => {
 
     // Plan comes back with nothing left to add.
     view.rerender(<AddPlanToListButton {...props} cookDays={[]} />);
-    await waitFor(() =>
-      expect(document.activeElement).toBe(view.getByRole("status")),
-    );
+    await waitFor(() => expect(focused()).toBe("1 added."));
     expect(view.getByText("Open list").closest("a")?.getAttribute("href")).toBe(
       `/groceries?plan=${fixture.planId}`,
     );
