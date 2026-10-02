@@ -179,6 +179,9 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Adding a migration needs nothing extra: the test database applies `db/migrations/` itself. A migration that moves data gets its own test from the schema before it (`tests/db/migrations/`): apply the earlier migrations' SQL to a PGlite once in `beforeAll`, `clone()` it in `beforeEach`, seed, then run it in a transaction as the migrator does. Replaying the migrations per test ran past bun's 5 s limit on CI, and the timed-out setup then ran into the next test's database.
 - Controllers: `controllerBasics()` (`tests/_support/controller.ts`) covers the three things every controller does (signed-out rejected, bad input rejected before the use case, parsed input passed on). Give it a valid input, the expected use-case arguments, and labelled bad inputs.
 - The goal is a safety net for the basics, not exhaustive specs: cover the rule and its main denial (e.g. viewer can't), skip restating the implementation.
+- Screen tests (docs/ux-plan.md D49, Phase 15) are `*.test.tsx`, beside the other tests in the mirrored tree (`tests/app/_components/plan-entry-sheet.test.tsx`). They render real components with React Testing Library and user-event in happy-dom, against the real server actions and the test container's repositories (`signInAsNewUser()`, then make data through controllers or actions, as the action tests do). Import `@/tests/_support/dom` first in the file. Don't `mock.module` an action or component there: Bun keeps a module mock for the whole run, so it would change other files' tests.
+- Screen tests run in a pass of their own, each file isolated: happy-dom replaces fetch, Request, Headers and the timers, and its Headers hide cookies, which the rest of the suite needs as Bun has them. `bunfig.toml` leaves `*.test.tsx` out of a plain `bun test`; `bun run test:screens` runs them (`bun run test:screens tests/app/_components/x.test.tsx` for one file); `bun run test` runs both, as CI does.
+- In a screen test, find things as a person would: by role and name (`getByRole("button", { name: "Change days" })`), within a labelled group when a name repeats (`within(getByRole("group", { name: "Eat on" }))`). Use the queries `render` returns rather than `screen`. Bottom sheets (Base UI's Drawer) work in happy-dom.
 - Browser-tool testing note: the automation's Enter key doesn't trigger implicit form submission (verified on a plain HTML form), so click submit buttons in automated checks.
 - Browser-tool testing note: at the mobile preset the pane scales the emulated screen, and taps land about 4% off, worse lower on the screen (a tap sent at y 640 arrived at 667), so a bottom sheet's buttons can be missed. Drive them with `element.click()` in `javascript_tool`, confirm where a tap arrived with a `pointerdown` listener, and leave finger taps to the real-phone check.
 
@@ -212,7 +215,8 @@ bun run build --filter=hectors-recipes
 bun run --filter=hectors-recipes db:generate   # after editing db/schema.ts
 bun run --filter=hectors-recipes db:migrate    # apply pending migrations
 bun run --filter=hectors-recipes db:studio
-bun run test --filter=hectors-recipes          # or: cd apps/hectors-recipes && bun test
+bun run test --filter=hectors-recipes          # both passes; or from apps/hectors-recipes: bun run test
+bun run --filter=hectors-recipes test:screens  # the screen tests (*.test.tsx) alone
 
 # Obsidian seed (from apps/hectors-recipes; reads the vault, never writes to it)
 OBSIDIAN_RECIPES_DIR="<recipes folder>" bun scripts/seed-from-obsidian.ts
