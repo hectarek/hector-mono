@@ -29,6 +29,22 @@ mock.module("next/cache", () => ({
   },
 }));
 
+// For the screen tests: a router that records where it was sent. One object, as Next's
+// router is stable: effects that depend on it would otherwise run on every render.
+const router = {
+  push: (url: string) => {
+    nextState.pushed.push(url);
+  },
+  replace: (url: string) => {
+    nextState.pushed.push(url);
+  },
+  back: () => {},
+  forward: () => {},
+  refresh: () => {},
+  prefetch: () => {},
+};
+const searchParams = new URLSearchParams();
+
 mock.module("next/navigation", () => ({
   redirect: (url: string): never => {
     throw new Redirected(url);
@@ -36,21 +52,9 @@ mock.module("next/navigation", () => ({
   notFound: (): never => {
     throw new NotFoundPage();
   },
-  // For the screen tests: a router that records where it was sent.
-  useRouter: () => ({
-    push: (url: string) => {
-      nextState.pushed.push(url);
-    },
-    replace: (url: string) => {
-      nextState.pushed.push(url);
-    },
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    prefetch: () => {},
-  }),
+  useRouter: () => router,
   usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => searchParams,
 }));
 
 mock.module("@/app/_lib/current-user", () => ({

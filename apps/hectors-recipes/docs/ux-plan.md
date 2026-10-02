@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.5 done. Phases 1–14, L5 and L6 merged. |
-| Next task | P15.6. Also open: L7 (Later). |
+| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.6 done. Phases 1–14, L5 and L6 merged. |
+| Next task | P15.7, once Hector picks its database (H24). Also open: L7 (Later). |
 | Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
@@ -1501,10 +1501,19 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
     - Progress saved for the session as a reload would find it (turkey crossed off, step 2 current, a timer running): "Picked up where you left off.", the line crossed off, step 2 current, the timer counting, and "Tap anywhere to turn its sound back on." with the sound off. A tap on the page turns it on and the hint goes.
     - Crossing off the onion, then opening cook mode again, finds it still crossed off.
     - With the tap listener taken out, the reload test fails; with the restore from session storage taken out, both reload tests fail. Restored, all pass, 10 runs in a row.
-- [ ] **P15.6** Groceries — C
+- [x] **P15.6** Groceries — C
   - Checking an item off moves it to Got it; Clear checked empties Got it.
   - Text typed in the add box doesn't follow you to another plan (the list is keyed by plan).
   - A check-off made with no connection is kept and retried (D8), if the test can take the connection away; if not, it stays with H5.
+  - Evidence (2026-10-01): `tests/app/(main)/groceries/page.test.tsx`, 3 tests, on the whole Groceries page as the server renders it (`await GroceriesPage({ searchParams })`), for someone with their own plan and a partner's:
+    - Milk typed in the add box on one plan is gone once the page re-renders for the other (as `?plan=` does). With the list's `key={current.id}` taken out, it fails.
+    - Checking Milk off saves it; after the refresh it's under Got it (1) with "Everything's in the cart."; Clear checked empties the list, and Got it goes.
+    - With the browser offline (`navigator.onLine` false), checking Milk off shows it under Got it with "Not saved yet" and saves nothing; it's still there after a reload; when the signal comes back (the `online` event) it's saved and "Not saved yet" goes. With the retry on `online` taken out, or the queue not kept in storage, it fails. A phone that says it's online while requests fail takes the other path (the request throws), which `pending-writes.test.ts` covers; a real phone in airplane mode stays in H5.
+    - All three restored, the file passes 10 runs in a row.
+    - The page is kept hidden, so live updates don't connect (the retry test makes it visible and sends `online`, which they don't listen for), with reduced motion, so a checked row moves without its fold (happy-dom has no animations).
+    - Found on the way:
+      - The empty list said to add "a recipe or this week's plan", but Plan adds a range (the next 7 days, 3 days or all upcoming), not a week. It now reads "The list is empty. Add items above, or add a recipe or your planned meals."
+      - The preload's `useRouter` stand-in returned a new object each call. Next's router is one object, so the list's effects that depend on it ran on every render and the page never settled. It's one object now.
 - [ ] **P15.7** Whole flows in a real browser — C+H · needs H24
   - Plan a meal from a recipe, add it to the list and check items off, as a person would, in a real browser (Playwright, against the dev server).
   - It needs a database a test can write to, never the real one: a Neon branch for tests, or a local Postgres, and a test account. Options and costs go to Hector first (H24).
