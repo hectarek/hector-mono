@@ -73,7 +73,7 @@ export type Repositories = {
   transactions: ITransactionManagerService;
 };
 
-export function mockRepositories(): Repositories {
+function mockRepositories(): Repositories {
   const planEntries = new MockPlanEntriesRepository();
   return {
     spaces: new MockSpacesRepository(),
