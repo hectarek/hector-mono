@@ -110,8 +110,8 @@ Oxlint enforces the complex apps' layer rules ([docs/clean-architecture.md §5](
 ## Dead Code
 [Fallow](https://fallow.tools/docs/) (root devDependency, pinned: it releases often) builds the whole repo's import graph to find what nothing uses, which Biome and tsc can't see one file at a time. `bun run dead-code` runs it, and so does CI.
 - Config: root `.fallowrc.json`. It fails on unused files, exports, types, enum and class members and dependencies, unlisted or misplaced dependencies, Next.js server/client mistakes (a `"use client"` file exporting `metadata`, a misplaced directive, a route collision), CSS drift, and a `fallow-ignore` without a reason. Import cycles are off here because Oxlint owns them (**Architecture Lint**).
-- An export used only in its own file is a finding: drop the `export`. If the code is then unused, delete it.
-- `fallow-baseline.json` lists findings that are already known: those don't fail, new ones do. Fix an entry and re-save the baseline (`bunx fallow dead-code --save-baseline fallow-baseline.json`) in the same change; never re-save it to cover a new finding.
+- An export used only in its own file is a finding: drop the `export`. If the code is then unused, delete it, unless it's a feature that was never wired up: then wire it or ask. Check for one before deleting: a doc that says it isn't applied yet, a comment saying what should call it, or a UI field nothing reads.
+- There's no baseline: the repo is at zero findings, and any finding fails.
 - Config exceptions, each for a file Fallow can't see being used: `apps/hectors-recipes/scripts/*.ts` is an entry point (Playwright runs one and the other runs by hand), `@repo/biome-config` is resolved by Biome's `extends`, and `generateStaticParams` in a route handler is called by Next.js.
 - Before deleting something Fallow reports, confirm it: `bunx fallow dead-code --trace <file>:<export>`.
 
