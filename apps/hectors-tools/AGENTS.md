@@ -44,7 +44,7 @@ app/
 
 src/
   entities/
-    errors/common.ts          # InputParseError, NotFoundError, etc., plus AiGenerationError (reason)
+    errors/common.ts          # InputParseError and AiGenerationError (reason); add others (NotFoundError, …) from recipes when a tool needs them
     models/logger.model.ts    # LogLevel + LOG_LEVEL_PRIORITY
     models/resume-analysis.model.ts       # Resume Analyzer Zod schemas (input, file, result)
   application/

@@ -39,7 +39,7 @@ export function timeLeft(endsAt: number, now: number): string {
 
 // A timer rings when it ends while cook mode is open, not when the page opens on one that
 // ended a while ago.
-export const RING_WINDOW_MS = 5000;
+const RING_WINDOW_MS = 5000;
 export function shouldRing(endsAt: number, now: number): boolean {
   return endsAt <= now && now - endsAt < RING_WINDOW_MS;
 }

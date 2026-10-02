@@ -20,7 +20,10 @@
       "Bash(git checkout *)",
       "Bash(gh pr merge *)"
     ],
-    "deny": ["Read(.env*)", "Read(!.env.example)"]
+    "deny": [
+      "Read(.env*)",
+      "Read(!.env.example)"
+    ]
   },
   "hooks": {
     "PostToolUse": [
@@ -29,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format.sh",
+            "command": "input=$(cat); root=$(git -C \"$(printf '%s' \"$input\" | jq -r '.cwd // empty')\" rev-parse --show-toplevel 2>/dev/null || printf '%s' \"$CLAUDE_PROJECT_DIR\"); printf '%s' \"$input\" | \"$root/.claude/hooks/lint-on-edit.sh\"",
             "timeout": 30
           }
         ]

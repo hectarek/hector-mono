@@ -1,32 +1,5 @@
-import {
-  type DunbarLayer,
-  getHealthStatus,
-  type HealthStatusKey,
-} from "@/app/_lib/model";
+import type { DunbarLayer } from "@/app/_lib/model";
 import type { Relationship } from "@/app/_lib/types";
-
-/**
- * Get color based on health status (derived from strength).
- */
-export function getStatusColor(strength: number): string {
-  const status = getHealthStatus(strength);
-  const colors: Record<HealthStatusKey, string> = {
-    thriving: "green",
-    healthy: "blue",
-    needsAttention: "yellow",
-    atRisk: "orange",
-    dormant: "red",
-  };
-  return colors[status.key];
-}
-
-/**
- * Get status text based on strength using research-based thresholds.
- */
-export function getStatusText(strength: number): string {
-  const status = getHealthStatus(strength);
-  return status.label;
-}
 
 /**
  * Get icon name for relationship type.

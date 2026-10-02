@@ -20,7 +20,7 @@ export const DAILY_RECIPE_READS = 20;
 // A recipe read with AI, itemized, for someone to review before anything is saved
 // (ux-plan D26, D29). Each line keeps the source's words in `raw`, and suggests an aisle
 // for its catalog ingredient. `unsure` lists what the reader couldn't make out.
-export const recipeDraftSchema = z.object({
+const recipeDraftSchema = z.object({
   title: z.string().min(1),
   description: z.string().nullable(),
   timeMinutes: z.number().int().positive().nullable(),

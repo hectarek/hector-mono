@@ -8,7 +8,7 @@ import { z } from "zod";
  * `analyzeResumeInputSchema` validates what the controller receives.
  */
 
-export const SUGGESTION_PRIORITIES = ["high", "medium", "low"] as const;
+const SUGGESTION_PRIORITIES = ["high", "medium", "low"] as const;
 
 export const resumeAnalysisSchema = z.object({
   matchScore: z
@@ -57,13 +57,11 @@ export type ResumeAnalysis = z.infer<typeof resumeAnalysisSchema>;
 export type SuggestionPriority = (typeof SUGGESTION_PRIORITIES)[number];
 
 /** A resume supplied as an uploaded file (e.g. a PDF) rather than pasted text. */
-export const resumeFileSchema = z.object({
+const resumeFileSchema = z.object({
   data: z.instanceof(Uint8Array),
   mediaType: z.string().min(1),
   filename: z.string().optional(),
 });
-
-export type ResumeFile = z.infer<typeof resumeFileSchema>;
 
 export const analyzeResumeInputSchema = z.object({
   jobDescription: z

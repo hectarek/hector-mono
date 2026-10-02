@@ -10,7 +10,7 @@ import { stepsFromMarkdown } from "./step-text";
 export type PageRecipe = { draft: CheckedDraft; imageUrl: string | null };
 
 // How much of a page without recipe data the AI reader is given.
-export const PAGE_TEXT_LIMIT = 30_000;
+const PAGE_TEXT_LIMIT = 30_000;
 
 // How much of a page's recipe data is read. It's read without AI or a rate limit, so every
 // field is cut to well past any real recipe's before it's parsed (P14 review): a line, a

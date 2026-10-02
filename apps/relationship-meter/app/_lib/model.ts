@@ -34,7 +34,7 @@ export type TieStrengthFactor = keyof typeof TIE_STRENGTH_FACTORS;
  * Research shows two fundamentally different decay patterns.
  * Family bonds are resilient; friendships require active maintenance.
  */
-export const RELATIONSHIP_CATEGORIES = {
+const RELATIONSHIP_CATEGORIES = {
   kin: {
     decayResistance: "high",
     maintenanceCost: "low",
@@ -90,7 +90,7 @@ export type DunbarLayer = keyof typeof DUNBAR_LAYERS;
  * Decay follows different patterns based on relationship category.
  * Uses half-life model: time for relationship to lose half its strength without contact.
  */
-export const DECAY_PROFILES = {
+const DECAY_PROFILES = {
   kin: {
     halfLifeDays: 180, // Takes ~6 months to lose half strength
     minimumFloor: 30, // Never fully decays (biological bond)
@@ -159,7 +159,7 @@ export type InteractionType = keyof typeof INTERACTION_QUALITY;
  * Research emphasizes two-way interaction as critical for relationship health.
  * Multiplier affects effective strength of interactions.
  */
-export const RECIPROCITY_STATES = {
+const RECIPROCITY_STATES = {
   mutual: {
     healthMultiplier: 1.0,
     description: "Balanced, healthy relationship",
@@ -216,7 +216,7 @@ export interface HealthStatusInfo {
  * Based on decay rates and Dunbar layer expectations.
  * Values are in days between contacts.
  */
-export const CONTACT_INTERVALS_DAYS = {
+const CONTACT_INTERVALS_DAYS = {
   // By Dunbar layer (closer = more frequent)
   supportClique: 3, // Every few days
   sympathyGroup: 7, // Weekly
@@ -237,7 +237,7 @@ export const CONTACT_INTERVALS_DAYS = {
  * The RCI (Relationship Closeness Inventory) includes diversity of shared activities.
  * Multiplier affects overall relationship strength calculations.
  */
-export const ACTIVITY_DIVERSITY = {
+const ACTIVITY_DIVERSITY = {
   single: {
     multiplier: 1.0,
     description: "One shared context (e.g., just work)",
@@ -323,7 +323,7 @@ export type EmotionalTone = keyof typeof EMOTIONAL_TONE;
  * Very close bonds are more resilient to time apart - relationships have inertia.
  * This applies a multiplier to the decay rate based on current strength.
  */
-export const INERTIA_THRESHOLDS = {
+const INERTIA_THRESHOLDS = {
   veryStrong: { minStrength: 90, decayMultiplier: 0.5 }, // Very resistant to decay
   strong: { minStrength: 70, decayMultiplier: 0.75 },
   moderate: { minStrength: 50, decayMultiplier: 1.0 }, // Normal decay rate
@@ -357,48 +357,6 @@ export type IOSLevel = keyof typeof IOS_SCALE;
 // =============================================================================
 // Core Functions
 // =============================================================================
-
-/**
- * Calculate decay based on days since contact using exponential decay model.
- * Uses half-life formula: currentStrength = initialStrength * (0.5 ^ (days / halfLife))
- *
- * @param initialStrength - Starting strength (0-100)
- * @param daysSinceContact - Days since last interaction
- * @param decayProfile - Which decay profile to use (kin, nonKin, longTermNonKin)
- * @returns New strength after decay, respecting minimum floor
- */
-export function calculateDecay(
-  initialStrength: number,
-  daysSinceContact: number,
-  decayProfile: DecayProfile,
-): number {
-  const profile = DECAY_PROFILES[decayProfile];
-  const { halfLifeDays, minimumFloor } = profile;
-
-  // Exponential decay formula
-  const decayFactor = 0.5 ** (daysSinceContact / halfLifeDays);
-  const decayedStrength = initialStrength * decayFactor;
-
-  // Respect the minimum floor
-  return Math.max(decayedStrength, minimumFloor);
-}
-
-/**
- * Calculate the strength boost from an interaction, adjusted by reciprocity.
- *
- * @param interactionType - Type of interaction
- * @param reciprocityState - Current reciprocity state of the relationship
- * @returns Adjusted strength boost value
- */
-export function calculateInteractionBoost(
-  interactionType: InteractionType,
-  reciprocityState: ReciprocityState,
-): number {
-  const interaction = INTERACTION_QUALITY[interactionType];
-  const reciprocity = RECIPROCITY_STATES[reciprocityState];
-
-  return interaction.strengthBoost * reciprocity.healthMultiplier;
-}
 
 /**
  * Determine which Dunbar layer a relationship should belong to based on
@@ -486,7 +444,7 @@ export function isContactOverdue(
  * @param isNewRelationship - Whether this is a recently formed relationship
  * @returns Recommended days between contacts
  */
-export function getRecommendedContactInterval(
+function getRecommendedContactInterval(
   dunbarLayer: DunbarLayer,
   category: RelationshipCategory,
   isNewRelationship = false,
@@ -511,7 +469,7 @@ export function getRecommendedContactInterval(
  * @param relationshipYears - How many years the relationship has existed
  * @returns The appropriate decay profile
  */
-export function getDecayProfile(
+function getDecayProfile(
   category: RelationshipCategory,
   relationshipYears: number,
 ): DecayProfile {
@@ -535,7 +493,7 @@ export function getDecayProfile(
  * @param currentStrength - Current relationship strength (0-100)
  * @returns The inertia level key
  */
-export function getInertiaLevel(currentStrength: number): InertiaLevel {
+function getInertiaLevel(currentStrength: number): InertiaLevel {
   if (currentStrength >= INERTIA_THRESHOLDS.veryStrong.minStrength) {
     return "veryStrong";
   }
@@ -552,74 +510,12 @@ export function getInertiaLevel(currentStrength: number): InertiaLevel {
 }
 
 /**
- * Get the decay multiplier based on current strength (inertia principle).
- * Strong relationships resist decay; weak relationships decay faster.
- *
- * @param currentStrength - Current relationship strength (0-100)
- * @returns Multiplier to apply to decay rate
- */
-export function getInertiaMultiplier(currentStrength: number): number {
-  const level = getInertiaLevel(currentStrength);
-  return INERTIA_THRESHOLDS[level].decayMultiplier;
-}
-
-/**
- * Calculate decay with inertia - strong relationships resist decay.
- * Combines the base decay profile with strength-based inertia.
- *
- * @param initialStrength - Starting strength (0-100)
- * @param daysSinceContact - Days since last interaction
- * @param decayProfile - Which decay profile to use
- * @returns New strength after decay with inertia applied
- */
-export function calculateDecayWithInertia(
-  initialStrength: number,
-  daysSinceContact: number,
-  decayProfile: DecayProfile,
-): number {
-  const profile = DECAY_PROFILES[decayProfile];
-  const { halfLifeDays, minimumFloor } = profile;
-
-  // Apply inertia multiplier to adjust effective decay rate
-  const inertiaMultiplier = getInertiaMultiplier(initialStrength);
-  const adjustedHalfLife = halfLifeDays / inertiaMultiplier;
-
-  // Exponential decay with inertia-adjusted half-life
-  const decayFactor = 0.5 ** (daysSinceContact / adjustedHalfLife);
-  const decayedStrength = initialStrength * decayFactor;
-
-  return Math.max(decayedStrength, minimumFloor);
-}
-
-/**
- * Calculate interaction boost with emotional tone modifier.
- * Positive interactions boost more; negative interactions can harm.
- *
- * @param interactionType - Type of interaction
- * @param reciprocityState - Current reciprocity state
- * @param emotionalTone - Emotional tone of the interaction
- * @returns Adjusted strength boost (can be negative for negative tone)
- */
-export function calculateInteractionBoostWithTone(
-  interactionType: InteractionType,
-  reciprocityState: ReciprocityState,
-  emotionalTone: EmotionalTone,
-): number {
-  const interaction = INTERACTION_QUALITY[interactionType];
-  const reciprocity = RECIPROCITY_STATES[reciprocityState];
-  const tone = EMOTIONAL_TONE[emotionalTone];
-
-  const baseBoost = interaction.strengthBoost * reciprocity.healthMultiplier;
-  return baseBoost * tone.strengthModifier;
-}
-
-/**
  * Get the activity diversity multiplier based on number of shared contexts.
  *
  * @param sharedContextCount - Number of different contexts/activities shared
  * @returns The diversity level and its multiplier
  */
-export function getActivityDiversityMultiplier(sharedContextCount: number): {
+function getActivityDiversityMultiplier(sharedContextCount: number): {
   level: ActivityDiversityLevel;
   multiplier: number;
 } {
@@ -790,7 +686,7 @@ export function calculateRelationshipDecay(input: DecayInput): DecayResult {
  * Duration multiplier constants for interaction boost.
  * Research shows longer interactions are more impactful.
  */
-export const DURATION_MULTIPLIERS = {
+const DURATION_MULTIPLIERS = {
   brief: { maxMinutes: 5, multiplier: 0.5 },
   short: { maxMinutes: 15, multiplier: 0.75 },
   medium: { maxMinutes: 30, multiplier: 1.0 },
@@ -801,7 +697,7 @@ export const DURATION_MULTIPLIERS = {
 /**
  * Get duration multiplier based on interaction length.
  */
-export function getDurationMultiplier(durationMinutes: number): number {
+function getDurationMultiplier(durationMinutes: number): number {
   if (durationMinutes <= DURATION_MULTIPLIERS.brief.maxMinutes) {
     return DURATION_MULTIPLIERS.brief.multiplier;
   }
@@ -955,41 +851,5 @@ export function applyInteraction(input: InteractionInput): InteractionResult {
       durationModifier,
       finalBoost: Math.round(finalBoost * 10) / 10,
     },
-  };
-}
-
-/**
- * Create a new relationship with research-based defaults.
- */
-export interface CreateRelationshipDefaults {
-  iosRating: IOSLevel;
-  dunbarLayer: DunbarLayer;
-  category: RelationshipCategory;
-}
-
-/**
- * Get default values for a new relationship based on IOS rating.
- */
-export function getRelationshipDefaults(
-  iosRating: IOSLevel,
-): CreateRelationshipDefaults {
-  const strength = IOS_SCALE[iosRating].strength;
-
-  // Assign Dunbar layer based on strength
-  let dunbarLayer: DunbarLayer;
-  if (strength >= 85) {
-    dunbarLayer = "supportClique";
-  } else if (strength >= 65) {
-    dunbarLayer = "sympathyGroup";
-  } else if (strength >= 40) {
-    dunbarLayer = "affinityGroup";
-  } else {
-    dunbarLayer = "activeNetwork";
-  }
-
-  return {
-    iosRating,
-    dunbarLayer,
-    category: "nonKin", // Caller should override for family
   };
 }
