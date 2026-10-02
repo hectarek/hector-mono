@@ -39,14 +39,14 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
         <h3 className="text-lg font-semibold text-foreground">
           {experience.role}
         </h3>
-        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70">
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           {experience.period}
         </span>
       </div>
       <p className="text-base font-medium text-muted-foreground">
         {experience.company}
         {experience.location && (
-          <span className="ml-2 font-mono text-xs text-muted-foreground/70">
+          <span className="ml-2 font-mono text-xs text-muted-foreground">
             · {experience.location}
           </span>
         )}
@@ -59,7 +59,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
               key={metric.label}
               className="flex items-baseline gap-2 rounded-md border border-border bg-background px-3 py-1.5"
             >
-              <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+              <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 {metric.label}
               </dt>
               <dd className="font-mono text-sm font-semibold text-accent">

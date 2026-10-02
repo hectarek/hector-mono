@@ -23,7 +23,7 @@ export function HeroImage({ profile }: HeroImageProps) {
     <motion.figure
       className="relative mx-auto w-full max-w-[260px] sm:max-w-[280px] lg:mx-0 lg:max-w-[320px]"
       variants={scaleIn}
-      initial="hidden"
+      initial={false}
       animate="visible"
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-border bg-muted">
@@ -48,7 +48,7 @@ export function HeroImage({ profile }: HeroImageProps) {
         )}
       </div>
 
-      <figcaption className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+      <figcaption className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
         <span>{profile.location ?? "—"}</span>
         <span className="flex items-center gap-2 text-muted-foreground">
           <span

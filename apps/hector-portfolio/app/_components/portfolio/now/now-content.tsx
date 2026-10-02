@@ -99,7 +99,7 @@ export function NowContent({ profile }: NowContentProps) {
             work. I update this when it changes meaningfully, not on a schedule.
           </motion.p>
           <motion.div
-            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70"
+            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
             variants={heroItem}
           >
             <span>
@@ -141,7 +141,7 @@ export function NowContent({ profile }: NowContentProps) {
                 className="flex flex-col gap-2 bg-background p-6 transition-colors hover:bg-muted"
                 variants={staggerItem}
               >
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <h3 className="text-lg font-semibold text-foreground">

@@ -28,7 +28,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         {project.image ? (
           <Image
             src={project.image}
-            alt={`${project.title} project image`}
+            alt={`Screenshot of ${project.title}`}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -41,7 +41,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <span className="font-mono text-2xl font-medium leading-none text-muted-foreground">
               {project.title.split(" ").slice(0, 2).join(" ")}
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               /{project.slug}
             </span>
           </div>
@@ -63,7 +63,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <p className="font-mono text-base font-medium text-accent">
                 {keyMetric.value}
               </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {keyMetric.label}
               </p>
             </div>
@@ -71,7 +71,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
 
         {project.role && (
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             {project.role}
           </p>
         )}
@@ -128,7 +128,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
             size="sm"
             className="ml-auto h-8 bg-foreground px-3 font-mono text-[10px] uppercase tracking-[0.16em] text-background hover:bg-foreground/90"
           >
-            Read more
+            Case study
+            <span className="sr-only">: {project.title}</span>
             <ArrowUpRight className="ml-1.5 h-3 w-3" />
           </Button>
         </div>

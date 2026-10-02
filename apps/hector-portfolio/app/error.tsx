@@ -18,7 +18,7 @@ export default function Error({
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-16">
       <div className="mx-auto max-w-lg space-y-6">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           Error · Something went sideways
         </p>
         <h1 className="font-mono text-4xl font-medium leading-tight tracking-tight text-foreground sm:text-5xl">
@@ -31,7 +31,7 @@ export default function Error({
         </p>
         {process.env.NODE_ENV === "development" && (
           <details className="rounded-md border border-border bg-muted p-4 text-sm text-muted-foreground">
-            <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               Error details
             </summary>
             <pre className="mt-3 overflow-auto text-xs">

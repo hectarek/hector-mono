@@ -60,20 +60,16 @@ export function ProofStrip() {
               className="relative flex flex-col gap-1.5 bg-background p-5 sm:p-6"
               variants={staggerItem}
             >
-              <div className="flex items-center justify-between">
-                <dt className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-                  {item.label}
-                </dt>
-                <span className="font-mono text-[10px] text-muted-foreground/70">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
+              <dt className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                {item.label}
+                <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
+              </dt>
               <dd className="font-mono text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
                 {item.value}
               </dd>
-              <p className="text-xs leading-relaxed text-muted-foreground">
+              <dd className="text-xs leading-relaxed text-muted-foreground">
                 {item.hint}
-              </p>
+              </dd>
             </motion.div>
           ))}
         </motion.dl>

@@ -28,15 +28,28 @@
       "status": "Production Platform",
       "role": "Co-architect · led the build team · sole maintainer since Oct 2025",
       "metrics": [
-        { "label": "Users", "value": "~24K" },
-        { "label": "Page views", "value": "~490K" },
-        { "label": "Peak DAU", "value": "~1K" },
-        { "label": "Tracked events", "value": "~1.5M" }
+        {
+          "label": "Users",
+          "value": "~24K"
+        },
+        {
+          "label": "Page views",
+          "value": "~490K"
+        },
+        {
+          "label": "Peak DAU",
+          "value": "~1K"
+        },
+        {
+          "label": "Tracked events",
+          "value": "~1.5M"
+        }
       ],
       "highlights": [
         "One of two architects who set the platform's direction. Led five developers through the initial build: hired the team, set coding standards and tooling, reviewed PRs weekly, and refined tickets with product and design.",
         "Led the 2025 rebuild on a new architecture: schema redesign, end-to-end notifications, server pagination, error handling and logging, and hundreds of regression tests.",
         "Designed identity verification for in-person competition: a teacher-as-verifier workflow, roster and eligibility logic, and team locking at playoff cutoffs, replacing manual spreadsheet checks.",
+        "AI-assisted judging: the model scores a submission against each rubric criterion with written reasoning and drafts feedback, and staff review and adjust it before saving.",
         "Built mastery pathways with submissions, rubrics, AI-assisted grading, and micro-credentials, plus an Explore feed that mixes lessons, video, games, and submissions."
       ],
       "problem": "The league needed one platform that could both teach students and run the season: learning content, games, and competition for students, plus verification, rosters, communication, and content tools for teachers and staff.",
@@ -50,7 +63,31 @@
         "Curriculum, content, and post management",
         "Teacher verification and student communication workflows",
         "Notifications, email, and SMS via integrated providers",
-        "Season logic: roster locking, playoff cutoffs, in-season state"
+        "Season logic: roster locking, playoff cutoffs, in-season state",
+        "Staff tools: a 750+ item content library, rubrics, AI-assisted judging, SMS campaigns through Twilio, workflows, scripts, a test harness, and metrics"
+      ],
+      "screenshots": [
+        {
+          "src": "/projects/notwork-ai-judge.webp",
+          "width": 1600,
+          "height": 1767,
+          "alt": "Rubric scoring screen with AI analysis, per-criterion scores and reasoning, and a 670 of 1000 total",
+          "caption": "AI-assisted judging: per-criterion scores with the model's reasoning, which staff review and adjust before saving."
+        },
+        {
+          "src": "/projects/notwork-content.webp",
+          "width": 1600,
+          "height": 972,
+          "alt": "Content management table with title, type, difficulty, topic, and publish status columns",
+          "caption": "The content library staff manage: lessons, games, and challenges by type, difficulty, and topic."
+        },
+        {
+          "src": "/projects/notwork-sms.webp",
+          "width": 1600,
+          "height": 1623,
+          "alt": "SMS composer with a live-mode toggle, message template, and recipient filters by region, school, and completion",
+          "caption": "SMS campaigns through Twilio, targeted by region, school, interest, and what a student has completed."
+        }
       ]
     },
     {
@@ -58,12 +95,14 @@
       "slug": "ai-curriculum-generator",
       "title": "AI Curriculum Pipeline",
       "description": "A nine-step AI pipeline, with a human review point at every step, that turns a rough lesson idea into a published, multi-modal lesson in 10–30 minutes.",
-      "longDescription": "An applied-AI pipeline built into The Notwork that produces complete lessons. It runs nine steps modeled on real curriculum development: blueprint, outline, content, editorialize, accuracy check, media, formatting, audio, and release. Each step builds on the last, and an educator can refine or regenerate at any step before the lesson publishes straight to the platform.",
+      "longDescription": "An applied-AI pipeline built into The Notwork that produces complete lessons. It runs nine steps modeled on real curriculum development: blueprint, outline, content, editorialize, accuracy check, media, formatting, audio, and release. Each step builds on the last, runs on the model the educator picks from Anthropic, OpenAI, or Google, and can be refined or regenerated before the lesson publishes straight to the platform.",
       "technologies": [
         "TypeScript",
         "Next.js",
         "AI SDK",
         "Claude",
+        "GPT",
+        "Gemini",
         "Cloudflare",
         "PostgreSQL"
       ],
@@ -74,15 +113,29 @@
       "status": "Applied AI System",
       "role": "Sole designer and engineer",
       "metrics": [
-        { "label": "Per lesson, was ~1 week", "value": "10–30 min" },
-        { "label": "Lessons published", "value": "55" },
-        { "label": "Pipeline steps", "value": "9" },
-        { "label": "Human review", "value": "Every step" }
+        {
+          "label": "Per lesson, was ~1 week",
+          "value": "10–30 min"
+        },
+        {
+          "label": "Lessons published",
+          "value": "55"
+        },
+        {
+          "label": "Pipeline steps",
+          "value": "9"
+        },
+        {
+          "label": "Human review",
+          "value": "Every step"
+        }
       ],
       "highlights": [
         "Modeled the pipeline on how curriculum teams actually build lessons, so each step has one job and a clear output.",
+        "Model choice per step across Anthropic, OpenAI, and Google (Claude, GPT, and Gemini), including Gemini image generation for lesson media.",
         "Human-in-the-loop by design: each step takes the previous output as context, and an educator can refine or regenerate it before it feeds the next.",
-        "Generated images upload to the Cloudflare CDN in real time and are written into the lesson.",
+        "An editorial step scores tone and readability and proposes line edits as before-and-after diffs; an accuracy step checks each factual claim with a confidence score and flags what needs subject-matter review.",
+        "Generated images wait for an educator to approve or regenerate them, then upload to the Cloudflare CDN and are written into the lesson.",
         "Each finished lesson ships with text-to-speech narration and practice questions."
       ],
       "problem": "Curriculum production was slow and inconsistent. A single quality lesson could take a week by hand, and the platform needed a steady stream of multi-modal content for students.",
@@ -90,11 +143,38 @@
       "impact": "Cut lesson production from about a week to 10–30 minutes, with higher consistency than the manual process. 55 lessons published so far.",
       "features": [
         "Nine steps: blueprint → outline → content → editorialize → accuracy check → media → formatting → audio → release",
+        "Per-step model picker across Claude, GPT, and Gemini",
         "Per-step refine and regenerate with persistent context",
-        "Real-time image generation and CDN upload",
+        "Editorial scoring with suggested line edits",
+        "Fact checks with confidence scores and needs-review flags",
+        "Image generation with approve or regenerate, then CDN upload",
         "Text-to-speech audio narration",
         "Generated practice questions",
         "Direct publish into The Notwork as a content item"
+      ],
+      "image": "/projects/pipeline-accuracy.webp",
+      "screenshots": [
+        {
+          "src": "/projects/pipeline-models.webp",
+          "width": 1600,
+          "height": 1023,
+          "alt": "Blueprint step with the model menu open, listing Anthropic, OpenAI, and Google models",
+          "caption": "Every step runs on the model the educator picks: Claude, GPT, or Gemini."
+        },
+        {
+          "src": "/projects/pipeline-editorial.webp",
+          "width": 1600,
+          "height": 1020,
+          "alt": "Editorial step showing overall and readability scores, a tone analysis, and suggested line edits",
+          "caption": "The editorial step scores tone and readability and proposes line edits."
+        },
+        {
+          "src": "/projects/pipeline-media.webp",
+          "width": 1600,
+          "height": 1033,
+          "alt": "Media step showing a generated infographic with Approve and Regenerate buttons",
+          "caption": "Generated images wait for an educator to approve or regenerate them."
+        }
       ]
     },
     {
@@ -112,9 +192,18 @@
       "status": "Playable Game Suite",
       "role": "Sole designer and engineer",
       "metrics": [
-        { "label": "Playable games", "value": "10" },
-        { "label": "Rendering", "value": "2D + 3D" },
-        { "label": "Team size", "value": "1" }
+        {
+          "label": "Playable games",
+          "value": "10"
+        },
+        {
+          "label": "Rendering",
+          "value": "2D + 3D"
+        },
+        {
+          "label": "Team size",
+          "value": "1"
+        }
       ],
       "highlights": [
         "Designed and built every game end to end, with no prior game-development background.",
@@ -201,10 +290,22 @@
       "status": "Workforce Development Program",
       "role": "Co-founder & Director of Curriculum and Programming",
       "metrics": [
-        { "label": "Graduates placed", "value": "100+" },
-        { "label": "Adults trained", "value": "~200" },
-        { "label": "Years running", "value": "3" },
-        { "label": "Curriculum team", "value": "4" }
+        {
+          "label": "Graduates placed",
+          "value": "100+"
+        },
+        {
+          "label": "Adults trained",
+          "value": "~200"
+        },
+        {
+          "label": "Years running",
+          "value": "3"
+        },
+        {
+          "label": "Curriculum team",
+          "value": "4"
+        }
       ],
       "highlights": [
         "100+ graduates of the first two cohorts I taught were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
@@ -237,8 +338,14 @@
       "status": "Open Source",
       "role": "Sole engineer",
       "metrics": [
-        { "label": "Apps", "value": "5" },
-        { "label": "License", "value": "MIT" }
+        {
+          "label": "Apps",
+          "value": "5"
+        },
+        {
+          "label": "License",
+          "value": "MIT"
+        }
       ],
       "highlights": [
         "Clean-architecture layers in the backend apps, enforced by lint rules rather than convention.",
@@ -246,7 +353,10 @@
         "Every pull request runs lint, typecheck, and tests for the packages it touches."
       ],
       "links": [
-        { "label": "Recipes app", "url": "https://recipes.hectorfgonzalez.com" }
+        {
+          "label": "Recipes app",
+          "url": "https://recipes.hectorfgonzalez.com"
+        }
       ]
     }
   ]

@@ -31,7 +31,7 @@ export function Footer({ profile }: FooterProps) {
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
           <motion.div className="space-y-2" variants={fadeInUp}>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Hector Gonzalez
             </p>
             <p className="font-mono text-base font-medium text-foreground">
@@ -45,7 +45,7 @@ export function Footer({ profile }: FooterProps) {
           </motion.div>
 
           <motion.div className="space-y-3" variants={fadeInUp}>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Site
             </p>
             <ul className="space-y-1.5">
@@ -63,13 +63,13 @@ export function Footer({ profile }: FooterProps) {
           </motion.div>
 
           <motion.div className="space-y-3 sm:text-right" variants={fadeInUp}>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Elsewhere
             </p>
             <div className="sm:flex sm:justify-end">
               <SocialLinks profile={profile} variant="footer" />
             </div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Built by hand · Next.js · Tailwind v4 ·{" "}
               <a
                 href="https://github.com/hectarek/hector-mono/tree/main/apps/hector-portfolio"

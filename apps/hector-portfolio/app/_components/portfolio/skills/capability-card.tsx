@@ -24,7 +24,7 @@ export function CapabilityCard({ category, index }: CapabilityCardProps) {
     <article className="group relative flex h-full flex-col rounded-lg border border-border bg-background p-5 transition-colors hover:border-accent/60 sm:p-6">
       <span
         aria-hidden
-        className="absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70"
+        className="absolute left-5 top-5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
       >
         {String(index + 1).padStart(2, "0")}
       </span>

@@ -35,6 +35,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const hasCaseStudy =
     project.problem || project.solution || project.impact || project.features;
   const hasExtraLinks = project.links && project.links.length > 0;
+  let sectionCount = 0;
+  const nextIndex = () => String(++sectionCount).padStart(2, "0");
 
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 sm:py-16">
@@ -57,7 +59,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           {project.title}
         </h1>
         {project.role && (
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70">
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             {project.role}
           </p>
         )}
@@ -70,7 +72,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         <div className="relative mb-12 aspect-[16/9] w-full overflow-hidden rounded-lg border border-border bg-muted">
           <Image
             src={project.image}
-            alt={`${project.title} project image`}
+            alt={`Screenshot of ${project.title}`}
             fill
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 896px"
@@ -86,14 +88,10 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               key={metric.label}
               className="flex flex-col gap-1 bg-background p-4"
             >
-              <div className="flex items-center justify-between">
-                <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
-                  {metric.label}
-                </dt>
-                <span className="font-mono text-[10px] text-muted-foreground/70">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
+              <dt className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                {metric.label}
+                <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
+              </dt>
               <dd className="font-mono text-2xl font-medium tracking-tight text-accent">
                 {metric.value}
               </dd>
@@ -160,12 +158,20 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           ))}
       </div>
 
-      <SectionBlock index="01" label="Stack" heading="What it's built with">
+      <SectionBlock
+        index={nextIndex()}
+        label="Stack"
+        heading="What it's built with"
+      >
         <ProjectBadges technologies={project.technologies} />
       </SectionBlock>
 
       {project.demos && project.demos.length > 0 && (
-        <SectionBlock index="02" label="Play" heading="Try them yourself">
+        <SectionBlock
+          index={nextIndex()}
+          label="Play"
+          heading="Try them yourself"
+        >
           <ul className="grid gap-2 sm:grid-cols-2">
             {project.demos.map((demo) => (
               <li key={demo.url}>
@@ -197,7 +203,11 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       {hasCaseStudy && (
         <>
           {project.problem && (
-            <SectionBlock index="02" label="Context" heading="The problem">
+            <SectionBlock
+              index={nextIndex()}
+              label="Context"
+              heading="The problem"
+            >
               <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {project.problem}
               </p>
@@ -205,15 +215,56 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           )}
 
           {project.solution && (
-            <SectionBlock index="03" label="Approach" heading="What I built">
+            <SectionBlock
+              index={nextIndex()}
+              label="Approach"
+              heading="What I built"
+            >
               <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {project.solution}
               </p>
             </SectionBlock>
           )}
 
+          {project.screenshots && project.screenshots.length > 0 && (
+            <SectionBlock
+              index={nextIndex()}
+              label="Screens"
+              heading="Inside the product"
+            >
+              <div className="grid gap-6 sm:grid-cols-2">
+                {project.screenshots.map((shot) => (
+                  <figure key={shot.src} className="flex flex-col gap-2">
+                    <Link
+                      href={shot.src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block overflow-hidden rounded-lg border border-border bg-muted transition-colors hover:border-accent"
+                    >
+                      <Image
+                        src={shot.src}
+                        alt={shot.alt}
+                        width={shot.width}
+                        height={shot.height}
+                        className="h-auto w-full"
+                        sizes="(max-width: 640px) 100vw, 448px"
+                      />
+                    </Link>
+                    <figcaption className="text-sm leading-relaxed text-muted-foreground">
+                      {shot.caption}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </SectionBlock>
+          )}
+
           {project.features && project.features.length > 0 && (
-            <SectionBlock index="04" label="System" heading="What's inside">
+            <SectionBlock
+              index={nextIndex()}
+              label="System"
+              heading="What's inside"
+            >
               <ul className="grid gap-2 sm:grid-cols-2">
                 {project.features.map((feature) => (
                   <li
@@ -232,7 +283,11 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           )}
 
           {project.impact && (
-            <SectionBlock index="05" label="Outcome" heading="The impact">
+            <SectionBlock
+              index={nextIndex()}
+              label="Outcome"
+              heading="The impact"
+            >
               <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {project.impact}
               </p>
@@ -242,7 +297,11 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       )}
 
       {project.highlights && project.highlights.length > 0 && (
-        <SectionBlock index="06" label="Highlights" heading="What stood out">
+        <SectionBlock
+          index={nextIndex()}
+          label="Highlights"
+          heading="What stood out"
+        >
           <ul className="space-y-3">
             {project.highlights.map((highlight) => (
               <li

@@ -43,7 +43,7 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
 
         <motion.div className="mt-12 space-y-10" variants={heroVariants}>
           <motion.div variants={heroItem}>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Email
             </p>
             <div className="mt-3">
@@ -60,7 +60,7 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
           </motion.div>
 
           <motion.div variants={heroItem}>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Elsewhere
             </p>
             <div className="mt-3">
@@ -70,7 +70,7 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
 
           {profile.location && (
             <motion.div variants={heroItem}>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Based in
               </p>
               <p className="mt-3 text-base text-muted-foreground">
