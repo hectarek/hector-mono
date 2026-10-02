@@ -363,7 +363,7 @@ export function GroceryList({
         <p className="text-muted-foreground py-6 text-center text-sm">
           {got.length
             ? "Everything's in the cart."
-            : "The list is empty. Add items above, or add a recipe or this week's plan."}
+            : "The list is empty. Add items above, or add a recipe or your planned meals."}
         </p>
       )}
 
