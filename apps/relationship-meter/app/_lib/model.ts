@@ -359,48 +359,6 @@ export type IOSLevel = keyof typeof IOS_SCALE;
 // =============================================================================
 
 /**
- * Calculate decay based on days since contact using exponential decay model.
- * Uses half-life formula: currentStrength = initialStrength * (0.5 ^ (days / halfLife))
- *
- * @param initialStrength - Starting strength (0-100)
- * @param daysSinceContact - Days since last interaction
- * @param decayProfile - Which decay profile to use (kin, nonKin, longTermNonKin)
- * @returns New strength after decay, respecting minimum floor
- */
-export function calculateDecay(
-  initialStrength: number,
-  daysSinceContact: number,
-  decayProfile: DecayProfile,
-): number {
-  const profile = DECAY_PROFILES[decayProfile];
-  const { halfLifeDays, minimumFloor } = profile;
-
-  // Exponential decay formula
-  const decayFactor = 0.5 ** (daysSinceContact / halfLifeDays);
-  const decayedStrength = initialStrength * decayFactor;
-
-  // Respect the minimum floor
-  return Math.max(decayedStrength, minimumFloor);
-}
-
-/**
- * Calculate the strength boost from an interaction, adjusted by reciprocity.
- *
- * @param interactionType - Type of interaction
- * @param reciprocityState - Current reciprocity state of the relationship
- * @returns Adjusted strength boost value
- */
-export function calculateInteractionBoost(
-  interactionType: InteractionType,
-  reciprocityState: ReciprocityState,
-): number {
-  const interaction = INTERACTION_QUALITY[interactionType];
-  const reciprocity = RECIPROCITY_STATES[reciprocityState];
-
-  return interaction.strengthBoost * reciprocity.healthMultiplier;
-}
-
-/**
  * Determine which Dunbar layer a relationship should belong to based on
  * emotional closeness score and current layer occupancy.
  *
@@ -549,68 +507,6 @@ function getInertiaLevel(currentStrength: number): InertiaLevel {
     return "weak";
   }
   return "veryWeak";
-}
-
-/**
- * Get the decay multiplier based on current strength (inertia principle).
- * Strong relationships resist decay; weak relationships decay faster.
- *
- * @param currentStrength - Current relationship strength (0-100)
- * @returns Multiplier to apply to decay rate
- */
-export function getInertiaMultiplier(currentStrength: number): number {
-  const level = getInertiaLevel(currentStrength);
-  return INERTIA_THRESHOLDS[level].decayMultiplier;
-}
-
-/**
- * Calculate decay with inertia - strong relationships resist decay.
- * Combines the base decay profile with strength-based inertia.
- *
- * @param initialStrength - Starting strength (0-100)
- * @param daysSinceContact - Days since last interaction
- * @param decayProfile - Which decay profile to use
- * @returns New strength after decay with inertia applied
- */
-export function calculateDecayWithInertia(
-  initialStrength: number,
-  daysSinceContact: number,
-  decayProfile: DecayProfile,
-): number {
-  const profile = DECAY_PROFILES[decayProfile];
-  const { halfLifeDays, minimumFloor } = profile;
-
-  // Apply inertia multiplier to adjust effective decay rate
-  const inertiaMultiplier = getInertiaMultiplier(initialStrength);
-  const adjustedHalfLife = halfLifeDays / inertiaMultiplier;
-
-  // Exponential decay with inertia-adjusted half-life
-  const decayFactor = 0.5 ** (daysSinceContact / adjustedHalfLife);
-  const decayedStrength = initialStrength * decayFactor;
-
-  return Math.max(decayedStrength, minimumFloor);
-}
-
-/**
- * Calculate interaction boost with emotional tone modifier.
- * Positive interactions boost more; negative interactions can harm.
- *
- * @param interactionType - Type of interaction
- * @param reciprocityState - Current reciprocity state
- * @param emotionalTone - Emotional tone of the interaction
- * @returns Adjusted strength boost (can be negative for negative tone)
- */
-export function calculateInteractionBoostWithTone(
-  interactionType: InteractionType,
-  reciprocityState: ReciprocityState,
-  emotionalTone: EmotionalTone,
-): number {
-  const interaction = INTERACTION_QUALITY[interactionType];
-  const reciprocity = RECIPROCITY_STATES[reciprocityState];
-  const tone = EMOTIONAL_TONE[emotionalTone];
-
-  const baseBoost = interaction.strengthBoost * reciprocity.healthMultiplier;
-  return baseBoost * tone.strengthModifier;
 }
 
 /**
@@ -955,41 +851,5 @@ export function applyInteraction(input: InteractionInput): InteractionResult {
       durationModifier,
       finalBoost: Math.round(finalBoost * 10) / 10,
     },
-  };
-}
-
-/**
- * Create a new relationship with research-based defaults.
- */
-export interface CreateRelationshipDefaults {
-  iosRating: IOSLevel;
-  dunbarLayer: DunbarLayer;
-  category: RelationshipCategory;
-}
-
-/**
- * Get default values for a new relationship based on IOS rating.
- */
-export function getRelationshipDefaults(
-  iosRating: IOSLevel,
-): CreateRelationshipDefaults {
-  const strength = IOS_SCALE[iosRating].strength;
-
-  // Assign Dunbar layer based on strength
-  let dunbarLayer: DunbarLayer;
-  if (strength >= 85) {
-    dunbarLayer = "supportClique";
-  } else if (strength >= 65) {
-    dunbarLayer = "sympathyGroup";
-  } else if (strength >= 40) {
-    dunbarLayer = "affinityGroup";
-  } else {
-    dunbarLayer = "activeNetwork";
-  }
-
-  return {
-    iosRating,
-    dunbarLayer,
-    category: "nonKin", // Caller should override for family
   };
 }

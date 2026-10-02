@@ -7,10 +7,8 @@ const stashItemTypeSchema = z.enum([
   "podcast",
   "other",
 ]);
-export type StashItemType = z.infer<typeof stashItemTypeSchema>;
 
 const stashItemStatusSchema = z.enum(["queued", "completed"]);
-export type StashItemStatus = z.infer<typeof stashItemStatusSchema>;
 
 const selectStashItemSchema = z.object({
   id: z.uuid(),

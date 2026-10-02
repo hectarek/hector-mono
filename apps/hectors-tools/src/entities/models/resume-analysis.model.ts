@@ -63,8 +63,6 @@ const resumeFileSchema = z.object({
   filename: z.string().optional(),
 });
 
-export type ResumeFile = z.infer<typeof resumeFileSchema>;
-
 export const analyzeResumeInputSchema = z.object({
   jobDescription: z
     .string()

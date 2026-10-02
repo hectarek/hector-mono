@@ -77,7 +77,6 @@ export const setDefaultSpaceSchema = z.object({
   // A book or plan they're in; null clears the choice (for books: All recipes).
   spaceId: z.uuid().nullable(),
 });
-export type SetDefaultSpaceInput = z.infer<typeof setDefaultSpaceSchema>;
 
 export type SpaceMember = {
   userId: string;
