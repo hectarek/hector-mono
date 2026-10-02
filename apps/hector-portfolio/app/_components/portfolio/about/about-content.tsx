@@ -175,7 +175,7 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
                 className="group flex flex-col gap-2 bg-background p-6 transition-colors hover:bg-muted"
                 variants={heroItem}
               >
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <h3 className="text-lg font-semibold text-foreground">
@@ -208,19 +208,22 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
           >
             A few principles I keep coming back to.
           </motion.h2>
-          <motion.dl
+          <motion.ol
             className="mt-10 max-w-3xl space-y-7"
             variants={heroVariants}
           >
             {PRINCIPLES.map((principle, index) => (
-              <motion.div
+              <motion.li
                 key={principle.title}
                 className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-baseline sm:gap-6"
                 variants={heroItem}
               >
-                <dt className="font-mono text-xl font-medium text-accent sm:w-12">
+                <span
+                  aria-hidden
+                  className="font-mono text-xl font-medium text-accent sm:w-12"
+                >
                   {String(index + 1).padStart(2, "0")}
-                </dt>
+                </span>
                 <div>
                   <p className="text-base font-semibold text-foreground">
                     {principle.title}
@@ -229,9 +232,9 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
                     {principle.body}
                   </p>
                 </div>
-              </motion.div>
+              </motion.li>
             ))}
-          </motion.dl>
+          </motion.ol>
         </div>
       </motion.section>
 

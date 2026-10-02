@@ -33,9 +33,9 @@ export function ProjectsPageContent({ projects }: ProjectsPageContentProps) {
           className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={fadeInUp}
         >
-          Production platforms, applied AI workflows, internal tooling, and
-          program work. Each card opens a deeper case study with role, stack,
-          and outcomes.
+          A production platform, an applied-AI pipeline, playable games, and the
+          program I taught. Each card opens a case study with role, stack,
+          screenshots, and outcomes.
         </motion.p>
 
         <div className="mt-14">

@@ -38,7 +38,7 @@ export function Navbar() {
               className="group flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-accent"
             >
               <span
-                className="font-mono text-muted-foreground/70 transition-colors group-hover:text-accent"
+                className="font-mono text-muted-foreground transition-colors group-hover:text-accent"
                 aria-hidden
               >
                 /
@@ -60,7 +60,7 @@ export function Navbar() {
                       "group inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors sm:px-3 sm:text-xs",
                       isActive
                         ? "text-foreground"
-                        : "text-muted-foreground/70 hover:text-foreground",
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                     aria-current={isActive ? "page" : undefined}
                   >

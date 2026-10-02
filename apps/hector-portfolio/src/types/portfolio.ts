@@ -39,6 +39,14 @@ export interface ProjectDemo {
   url: string;
 }
 
+export interface ProjectScreenshot {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+}
+
 export interface Project {
   id: string;
   slug: string;
@@ -61,6 +69,7 @@ export interface Project {
   features?: string[];
   links?: ProjectLink[];
   demos?: ProjectDemo[];
+  screenshots?: ProjectScreenshot[];
 }
 
 export interface ProjectsData {

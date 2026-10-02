@@ -12,7 +12,8 @@ This is a personal portfolio website for myself.
 - [ ] Should be SEO friendly and easy to find on search engines
 - [ ] Should be clean and simple to navigate and use
 - [ ] Should effectively convey my brand and personality
-- [ ] Should explain open to consulting opportunities (but not a main focus)
+- [ ] Should lead with the positioning: a full-stack engineer, strongest on the front end, who ships AI features
+- [ ] Should link proof people can open: live sites, playable games, screenshots, and code
 
 
 ---
@@ -36,7 +37,7 @@ This is a personal portfolio website for myself.
 - About Me Page
     - Should be a page that explains my background, experience, and skills
     - Should be a page that explains my brand and personality
-    - Should be a page that explains my open to consulting opportunities (but not a main focus)
+    - Should be a page that explains how I work and where my depth is
 - Projects Page
     - Should be a list of my projects with a short description and a link to the project
         - There should be a dynamic page that shows the details of the project
@@ -51,11 +52,11 @@ This is a personal portfolio website for myself.
 
 Portfolio Voice & Style Guide
 
-For Hector Gonzalez — CTO, Start up Co-Founder, Full stack Engineer, Entrepreneur, Maker, Consultant, and Problem Solver
+For Hector Gonzalez — full-stack engineer (front end and applied AI), co-founder and CTO, and former instructor
 
 1. Brand Positioning Statement
 
-A problem-focused technical leader who designs scalable, modern products. Blends engineering clarity with educational vision to turn complex ideas into repeatable, high-impact experiences.
+A product-minded full-stack engineer, strongest on the front end, who ships AI features. Owns a product end to end, from interface to data to the AI pipeline, and turns ambiguous asks into shipped systems. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
 
 ⸻
 
@@ -100,46 +101,27 @@ C. Technical Style
 
 4. What to Emphasize About Yourself
 
-A. Systems Design
+In this order (updated 2026-10; copy that drifts back to "generalist" or IT operations undersells the work):
 
-Your strongest and most consistent theme.
-Highlight:
-	•	Templates
-	•	Pipelines
-	•	Architecture decisions
-	•	Scaling strategies
-	•	Repeatable patterns
-	•	Data flows
-	•	“Reuse → Wrap → Build” design model
+A. Front-end product engineering (the depth)
+	•	Interfaces people use every day, in React and Next.js
+	•	Design systems, and 2D and 3D games in Pixi.js and Three.js
+	•	Whole-product ownership: what the user actually gets out of it
 
-B. Engineering + Product Hybrid
+B. Applied AI with a person in the loop (the specialty)
+	•	Multi-step pipelines with review at every step
+	•	Model choice across providers, fact checks, scoring, and approvals
+	•	AI-assisted grading that staff review before it counts
 
-You are both CTO and hands-on developer.
-Your brand benefits from demonstrating:
-	•	How you define requirements
-	•	How you translate them into architecture
-	•	How you build with minimal complexity
+C. Full-stack ownership (the breadth)
+	•	Data, auth, integrations, CI/CD, monitoring, and tests
+	•	Architecture and rebuilds, sized for a small team
+	•	Leading a team through a build, then running the product alone
 
-C. Educational Innovation
-
-Make clear that you are building modern learning systems, not generic apps:
-	•	Game-based learning
-	•	Micro-credential ecosystems
-	•	Structured curriculum pipelines
-	•	Tools for teachers and administrators
-	•	Student operations and scheduling systems
-
-D. Automation + Tooling
-
-You consistently automate:
-	•	Allocations systems
-	•	Google Sheets Apps Script
-	•	Data ingestion
-	•	Background worker jobs
-	•	AI-integrated flows
-	•	JSON schema generation
-
-This is part of your signature style.
+D. Learning systems (the domain)
+	•	Game-based learning, mastery pathways, and micro-credentials
+	•	Tools for teachers, staff, and program operators
+	•	The teaching record: curriculum written and taught, graduates placed
 
 ⸻
 

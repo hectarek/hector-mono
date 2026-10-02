@@ -23,12 +23,12 @@ export function ResourceLink({ resource }: ResourceLinkProps) {
           </p>
         </div>
         <ExternalLink
-          className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-accent"
+          className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-accent"
           aria-hidden
         />
       </div>
       {resource.cadence && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           {resource.cadence}
         </span>
       )}

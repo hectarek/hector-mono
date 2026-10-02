@@ -18,7 +18,9 @@ export function HeroSection({ profile }: HeroSectionProps) {
     <motion.section
       id="top"
       className="relative overflow-hidden px-4 pb-10 pt-8 sm:pt-12"
-      initial="hidden"
+      // Rendered visible from the first paint: the bio and photo are the page's
+      // largest content, and fading them in from opacity 0 delayed LCP until hydration.
+      initial={false}
       animate="visible"
       variants={heroVariants}
     >

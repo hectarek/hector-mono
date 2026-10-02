@@ -61,7 +61,7 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
             {readingList.intro}
           </motion.p>
           <motion.div
-            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70"
+            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
             variants={heroItem}
           >
             <span>
@@ -75,7 +75,7 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
             </span>
             <Link
               href="/"
-              className="text-muted-foreground/70 transition-colors hover:text-accent"
+              className="text-muted-foreground transition-colors hover:text-accent"
             >
               Back to portfolio
             </Link>
@@ -102,7 +102,7 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
               </p>
             )}
             {category.resources.length === 0 ? (
-              <p className="mt-8 max-w-3xl text-sm leading-relaxed text-muted-foreground/70">
+              <p className="mt-8 max-w-3xl text-sm leading-relaxed text-muted-foreground">
                 Nothing saved yet — I&apos;ll drop standouts here when I find
                 something worth sharing.
               </p>
@@ -133,7 +133,7 @@ export function ReadingContent({ readingList }: ReadingContentProps) {
       >
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
-          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground/70">
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
             Shared on request — if a link is dead or you want a rec in a
             category I missed, say hi via{" "}
             <Link

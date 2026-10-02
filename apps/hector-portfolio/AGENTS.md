@@ -53,7 +53,7 @@ tests/                 # Tests
 Static site — keep it simple. No auth, no database, no API routes, no TanStack Query, no DI containers, no use cases, no domain error classes.
 
 ## Brand Voice
-Personal portfolio for Hector Gonzalez — CTO, Full-Stack Engineer, Entrepreneur. The full voice and style guide is `docs/spec.md` §5; this is the short version.
+Personal portfolio for Hector Gonzalez: a full-stack engineer, strongest on the front end, who ships AI features. The full voice and style guide is `docs/spec.md` §5; this is the short version.
 - **Direct** — information-first, no fluff
 - **Analytical** — grounded in reasoning and structure
 - **Pragmatic** — minimal, efficient, purpose-driven
@@ -64,7 +64,7 @@ Personal portfolio for Hector Gonzalez — CTO, Full-Stack Engineer, Entrepreneu
 - Minimal, clean grids; neutral colors (white, black, gray, sparse accents)
 - Small animations via Framer Motion
 - Code snippets and diagrams as visuals
-- Colours come from the shared portfolio theme (`@repo/ui/styles/themes/portfolio.css`, `data-theme="portfolio"` on `<html>`), through the contract tokens only: ink is `foreground`, soft ink `muted-foreground`, faint ink `muted-foreground/70`, paper `background`, the second paper `muted`, a rule `border`, a strong rule `foreground/25`, honey `accent`. The design lint fails the build on anything else.
+- Colours come from the shared portfolio theme (`@repo/ui/styles/themes/portfolio.css`, `data-theme="portfolio"` on `<html>`), through the contract tokens only: ink is `foreground`, soft ink `muted-foreground` (also for small labels: faint ink `muted-foreground/70` failed WCAG contrast for text, so it's only for non-text marks such as bullet dots), paper `background`, the second paper `muted`, a rule `border`, a strong rule `foreground/25`, honey `accent`. The design lint fails the build on anything else.
 - Buttons in the mono, uppercase label style use `size="label"` with the `default` or `outline` variant; don't restyle a Button's type or colour.
 - Fonts: Geist is `font-sans`, IBM Plex Mono `font-mono` (display type too), Instrument Serif `font-serif`. The dot-grid texture inside a card is `data-texture="dot-grid"` and the handwritten accent `data-font="hand"`, both styled in `app/globals.css`.
 
