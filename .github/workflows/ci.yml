@@ -44,7 +44,7 @@ jobs:
           git diff --exit-code
 
       # Whole repo (well under a second): an export becomes unused when a file it never
-      # touched stops importing it. Findings in fallow-baseline.json don't fail; new ones do.
+      # touched stops importing it.
       - name: Dead code (Fallow)
         run: bun run dead-code
 

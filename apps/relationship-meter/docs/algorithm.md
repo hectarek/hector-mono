@@ -45,6 +45,8 @@ Relationships are organized into layers based on closeness:
 | Affinity Group | ~50 | Bi-weekly | 20% |
 | Active Network | ~150 | Monthly | 20% |
 
+A new relationship without a chosen layer goes to the closest layer its starting strength qualifies for (85+ Support Clique, 65+ Sympathy Group, 40+ Affinity Group) that still has room, else the next one out (`assignDunbarLayer`).
+
 ---
 
 ## Decay Algorithm
@@ -208,6 +210,8 @@ Interactions boost relationship strength. The boost amount depends on:
 | One-Way Initiator | ×0.7 | You're carrying the relationship |
 | Dormant | ×0.5 | Neither party engaging |
 
+The state comes from who initiated the last 10 interactions, counting the one being logged ("You initiated?" in the dialog): 70% or more you is One-Way Initiator, 30% or less is One-Way Receiver, anything between is Mutual. With fewer than 3 interactions the current state stays (`calculateReciprocityState`). Dormant is only ever set directly, never computed.
+
 #### Duration Modifier
 
 | Duration | Modifier |
@@ -316,7 +320,7 @@ newStrength = min(100, max(0, currentStrength + finalBoost))
 
 ### Activity Diversity
 
-Relationships are stronger when people share multiple contexts. Computed but not yet applied to strength: `applyInteraction` updates the diversity level, and nothing calls `calculateComprehensiveScore`, which would apply the multiplier.
+Relationships are stronger when people share multiple contexts. `applyInteraction` updates the diversity level from each interaction's context, and the shown strength applies its multiplier (see Shown Strength below).
 
 | Contexts | Multiplier | Example |
 |----------|------------|---------|
@@ -326,7 +330,7 @@ Relationships are stronger when people share multiple contexts. Computed but not
 
 ### Interdependence
 
-How much you influence each other's lives. Recorded but not yet applied to strength: the level is set in the edit dialog, and nothing calls `getInterdependenceWeight` or `calculateComprehensiveScore`.
+How much you influence each other's lives. The level is set in the edit dialog, and the shown strength adds its weighted bonus (see Shown Strength below).
 
 | Level | Weight | Description |
 |-------|--------|-------------|
@@ -334,6 +338,16 @@ How much you influence each other's lives. Recorded but not yet applied to stren
 | Moderate | 0.5 | Some shared decisions |
 | Intertwined | 0.8 | Significant daily influence |
 | Merged | 1.0 | Deeply interconnected (partners) |
+
+### Shown Strength
+
+The meter, health status, filters and sorting use the decayed strength adjusted by both factors above (`calculateComprehensiveScore`):
+
+```
+shown = decayed + (100 − decayed) × ((diversityMultiplier − 1) + 0.2 × interdependenceWeight)
+```
+
+Each factor closes a share of the gap to 100: diversity up to 30% (Diverse), interdependence up to 20% (Merged), so at most half the gap. The order of relationships is kept, and only one already at 100 shows 100. A friend at 81 with diverse contexts and moderate interdependence shows 89. The adjustment isn't stored: an interaction builds on the decayed strength alone, so the bonus never compounds.
 
 ### IOS Scale (Initial Calibration)
 
