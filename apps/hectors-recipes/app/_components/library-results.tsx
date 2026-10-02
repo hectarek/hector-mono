@@ -93,7 +93,7 @@ export function LibraryResults({
           </EmptyHeader>
           <EmptyContent>
             <Button
-              variant="outline"
+              variant="secondary"
               size="lg"
               nativeButton={false}
               render={

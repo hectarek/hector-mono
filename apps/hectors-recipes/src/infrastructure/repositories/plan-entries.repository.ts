@@ -145,9 +145,13 @@ export class PlanEntriesRepository
     }
   }
 
-  async create(entry: NewPlanEntry, createdBy: string): Promise<PlanEntry> {
+  async create(
+    entry: NewPlanEntry,
+    createdBy: string,
+    tx?: ITransaction,
+  ): Promise<PlanEntry> {
     try {
-      const [created] = await this.getDbContext()
+      const [created] = await this.getDbContext(tx)
         .insert(planEntries)
         .values({ ...entry, createdBy })
         .returning(entryColumns);
@@ -160,9 +164,13 @@ export class PlanEntriesRepository
     }
   }
 
-  async setCooked(id: string, cooked: boolean): Promise<void> {
+  async setCooked(
+    id: string,
+    cooked: boolean,
+    tx?: ITransaction,
+  ): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(planEntries)
         .set({ cooked, updatedAt: new Date() })
         .where(eq(planEntries.id, id));
@@ -175,9 +183,10 @@ export class PlanEntriesRepository
     id: string,
     cookDate: string,
     eatDates: string[],
+    tx?: ITransaction,
   ): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(planEntries)
         .set({ cookDate, eatDates, updatedAt: new Date() })
         .where(eq(planEntries.id, id));
@@ -202,9 +211,9 @@ export class PlanEntriesRepository
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, tx?: ITransaction): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .delete(planEntries)
         .where(eq(planEntries.id, id));
     } catch (err) {

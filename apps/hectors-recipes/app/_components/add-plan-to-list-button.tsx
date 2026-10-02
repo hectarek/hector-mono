@@ -139,7 +139,7 @@ export function AddPlanToListButton({
       )}
       {(result?.ok || count === 0) && (
         <Button
-          variant="outline"
+          variant="secondary"
           size="lg"
           nativeButton={false}
           render={<Link href={`/groceries?plan=${planId}`} />}

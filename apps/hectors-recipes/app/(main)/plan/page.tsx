@@ -88,8 +88,8 @@ export default async function PlanPage({
         className="flex items-center justify-between gap-2"
       >
         <Button
-          variant="outline"
-          size="icon"
+          variant="secondary"
+          size="icon-lg"
           nativeButton={false}
           render={
             <Link
@@ -107,8 +107,8 @@ export default async function PlanPage({
           )}
         </div>
         <Button
-          variant="outline"
-          size="icon"
+          variant="secondary"
+          size="icon-lg"
           nativeButton={false}
           render={
             <Link href={weekHref(addDays(monday, 7))} aria-label="Next week" />

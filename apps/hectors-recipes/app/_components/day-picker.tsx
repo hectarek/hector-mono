@@ -34,7 +34,7 @@ export function DayPicker({
               key={day.date}
               type="button"
               size="lg"
-              variant={selected ? "default" : "outline"}
+              variant={selected ? "default" : "secondary"}
               aria-pressed={selected}
               onClick={() => {
                 setOther(false);
@@ -48,7 +48,7 @@ export function DayPicker({
         <Button
           type="button"
           size="lg"
-          variant={other ? "default" : "outline"}
+          variant={other ? "default" : "secondary"}
           aria-pressed={other}
           onClick={() => setOther(true)}
         >

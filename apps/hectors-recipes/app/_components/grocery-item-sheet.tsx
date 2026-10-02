@@ -101,7 +101,7 @@ export function GroceryItemSheet({
               <Button
                 type="button"
                 size="lg"
-                variant="outline"
+                variant="secondary"
                 onClick={() => setEditing(false)}
               >
                 Cancel
@@ -111,7 +111,7 @@ export function GroceryItemSheet({
             <>
               <Button
                 size="lg"
-                variant="outline"
+                variant="secondary"
                 onClick={() => setEditing(true)}
               >
                 <Pencil data-icon="inline-start" />

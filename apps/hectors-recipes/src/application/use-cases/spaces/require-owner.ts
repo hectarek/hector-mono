@@ -2,22 +2,24 @@ import type { ISpacesRepository } from "@/src/application/repositories/spaces.re
 import { requireSpaceRole } from "@/src/application/use-cases/spaces/require-space-role";
 import { NotFoundError } from "@/src/entities/errors/common";
 import type { Space } from "@/src/entities/models/space.model";
+import type { ITransaction } from "@/src/entities/models/transaction.model";
 
-// For operations on a space of any type that only its owner may perform.
+// For operations on a space of any type that only its owner may perform. They're writes, so
+// the check runs in the write's transaction.
 export async function requireOwner(
   spacesRepository: ISpacesRepository,
   spaceId: string,
   userId: string,
+  tx: ITransaction,
 ): Promise<Space> {
-  const space = await spacesRepository.getById(spaceId);
+  const space = await spacesRepository.getById(spaceId, tx);
   if (!space) {
     throw new NotFoundError("Space not found");
   }
-  await requireSpaceRole(spacesRepository, {
-    spaceId,
-    userId,
-    type: space.type,
-    minRole: "owner",
-  });
+  await requireSpaceRole(
+    spacesRepository,
+    { spaceId, userId, type: space.type, minRole: "owner" },
+    tx,
+  );
   return space;
 }

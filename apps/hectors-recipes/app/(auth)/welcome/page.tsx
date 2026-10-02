@@ -100,7 +100,7 @@ export default async function WelcomePage({
         </Button>
         <Button
           size="lg"
-          variant="outline"
+          variant="secondary"
           nativeButton={false}
           render={<Link href={`/auth/${authViewPaths.SIGN_IN}${query}`} />}
         >

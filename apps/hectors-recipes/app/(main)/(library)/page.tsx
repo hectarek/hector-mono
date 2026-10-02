@@ -64,7 +64,7 @@ export default async function LibraryPage({
   // In the ⋯ sheet (D42): the Books page, to add a book or choose the default.
   const allBooks = (
     <Button
-      variant="outline"
+      variant="secondary"
       size="lg"
       nativeButton={false}
       render={<Link href="/books" />}
@@ -131,7 +131,7 @@ export default async function LibraryPage({
             {canEdit && (
               <EmptyContent>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="lg"
                   nativeButton={false}
                   render={<Link href={newHref} />}

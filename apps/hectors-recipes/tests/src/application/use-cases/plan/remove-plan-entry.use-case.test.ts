@@ -1,10 +1,11 @@
 import { expect, it } from "bun:test";
-import { NotFoundError } from "@/src/entities/errors/common";
+import { NotFoundError, UnauthorizedError } from "@/src/entities/errors/common";
 import {
   describeEachBackend,
   MONDAY,
   makeApp,
   OWNER,
+  PARTNER,
 } from "@/tests/_support/app";
 
 describeEachBackend("removePlanEntry", () => {
@@ -18,5 +19,17 @@ describeEachBackend("removePlanEntry", () => {
     await expect(
       app.setEntryCooked(entry.id, false, OWNER),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("viewers can't remove", async () => {
+    const app = makeApp();
+    const planId = await app.newSpace("meal-plan");
+    const entry = await app.planMeal(planId, MONDAY);
+
+    await app.join(planId, PARTNER, "viewer");
+    await expect(app.removePlanEntry(entry.id, PARTNER)).rejects.toBeInstanceOf(
+      UnauthorizedError,
+    );
+    expect(await app.getWeekPlan(planId, MONDAY, OWNER)).toHaveLength(1);
   });
 });

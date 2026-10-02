@@ -190,9 +190,13 @@ export class SpacesRepository
     }
   }
 
-  async rename(spaceId: string, name: string): Promise<void> {
+  async rename(
+    spaceId: string,
+    name: string,
+    tx?: ITransaction,
+  ): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(spaces)
         .set({ name, updatedAt: new Date() })
         .where(eq(spaces.id, spaceId));
@@ -280,9 +284,10 @@ export class SpacesRepository
     spaceId: string,
     userId: string,
     role: InviteRole,
+    tx?: ITransaction,
   ): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(spaceMembers)
         .set({ role })
         .where(
@@ -297,9 +302,13 @@ export class SpacesRepository
     }
   }
 
-  async removeMember(spaceId: string, userId: string): Promise<void> {
+  async removeMember(
+    spaceId: string,
+    userId: string,
+    tx?: ITransaction,
+  ): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .delete(spaceMembers)
         .where(
           and(
@@ -316,9 +325,10 @@ export class SpacesRepository
   async getMemberRole(
     spaceId: string,
     userId: string,
+    tx?: ITransaction,
   ): Promise<SpaceRole | undefined> {
     try {
-      const [row] = await this.getDbContext()
+      const [row] = await this.getDbContext(tx)
         .select({ role: spaceMembers.role })
         .from(spaceMembers)
         .where(
@@ -337,9 +347,10 @@ export class SpacesRepository
     spaceId: string,
     role: InviteRole,
     createdBy: string,
+    tx?: ITransaction,
   ): Promise<SpaceInvite> {
     try {
-      const [created] = await this.getDbContext()
+      const [created] = await this.getDbContext(tx)
         .insert(spaceInvites)
         .values({
           spaceId,
@@ -395,9 +406,12 @@ export class SpacesRepository
     }
   }
 
-  async getInviteById(inviteId: string): Promise<SpaceInvite | undefined> {
+  async getInviteById(
+    inviteId: string,
+    tx?: ITransaction,
+  ): Promise<SpaceInvite | undefined> {
     try {
-      const [row] = await this.getDbContext()
+      const [row] = await this.getDbContext(tx)
         .select(inviteColumns)
         .from(spaceInvites)
         .where(eq(spaceInvites.id, inviteId));
@@ -407,9 +421,9 @@ export class SpacesRepository
     }
   }
 
-  async revokeInvite(inviteId: string): Promise<void> {
+  async revokeInvite(inviteId: string, tx?: ITransaction): Promise<void> {
     try {
-      await this.getDbContext()
+      await this.getDbContext(tx)
         .update(spaceInvites)
         .set({ revokedAt: new Date() })
         .where(eq(spaceInvites.id, inviteId));

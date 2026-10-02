@@ -59,12 +59,7 @@ export default async function JoinPage({
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button
-              variant="outline"
-              size="lg"
-              nativeButton={false}
-              render={<Link href="/" />}
-            >
+            <Button size="lg" nativeButton={false} render={<Link href="/" />}>
               Go to recipes
             </Button>
           </EmptyContent>

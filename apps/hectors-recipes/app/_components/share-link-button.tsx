@@ -11,7 +11,7 @@ export function ShareLinkButton({
   token,
   spaceName,
   children = "Share link",
-  variant = "outline",
+  variant = "secondary",
 }: {
   token: string | undefined;
   spaceName: string;

@@ -35,7 +35,7 @@ export default async function CookPage({
       <div className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky top-0 z-10 -mx-5 flex items-center justify-between gap-3 px-5 py-2 backdrop-blur">
         <h1 className="font-heading truncate text-2xl">{recipe.title}</h1>
         <Button
-          variant="outline"
+          variant="secondary"
           size="lg"
           nativeButton={false}
           render={<Link href={`/recipes/${recipe.id}`} />}

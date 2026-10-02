@@ -43,6 +43,7 @@ export function createGroceryModule() {
   const writeDeps = [
     DI_SYMBOLS.IGroceryItemsRepository,
     DI_SYMBOLS.ISpacesRepository,
+    DI_SYMBOLS.ITransactionManagerService,
     DI_SYMBOLS.IRealtimeService,
     DI_SYMBOLS.ILoggerService,
   ];

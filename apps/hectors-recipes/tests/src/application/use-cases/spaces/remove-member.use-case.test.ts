@@ -40,4 +40,15 @@ describeEachBackend("removeMember", () => {
       InputParseError,
     );
   });
+
+  it("only the owner can remove someone else", async () => {
+    await app.join(homeId, PARTNER, "editor");
+    await app.join(homeId, STRANGER, "viewer");
+    await expect(
+      app.removeMember(homeId, STRANGER, PARTNER),
+    ).rejects.toBeInstanceOf(UnauthorizedError);
+    expect(await app.repos.spaces.getMemberRole(homeId, STRANGER)).toBe(
+      "viewer",
+    );
+  });
 });

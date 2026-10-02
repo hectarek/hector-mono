@@ -103,6 +103,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.IRenameSpaceUseCase)
     .toHigherOrderFunction(renameSpaceUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -116,6 +117,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.ISetDefaultSpaceUseCase)
     .toHigherOrderFunction(setDefaultSpaceUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -129,6 +131,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.IDeleteSpaceUseCase)
     .toHigherOrderFunction(deleteSpaceUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -142,6 +145,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.ICreateInviteUseCase)
     .toHigherOrderFunction(createInviteUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -155,6 +159,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.IRevokeInviteUseCase)
     .toHigherOrderFunction(revokeInviteUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -168,6 +173,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.IEnsureInviteLinksUseCase)
     .toHigherOrderFunction(ensureInviteLinksUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -212,6 +218,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.IUpdateMemberRoleUseCase)
     .toHigherOrderFunction(updateMemberRoleUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule
@@ -225,6 +232,7 @@ export function createSpacesModule() {
     .bind(DI_SYMBOLS.IRemoveMemberUseCase)
     .toHigherOrderFunction(removeMemberUseCase, [
       DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
     ]);
   spacesModule

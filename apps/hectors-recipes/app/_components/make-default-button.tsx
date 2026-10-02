@@ -17,7 +17,12 @@ export function MakeDefaultButton({
   return (
     <ActionForm action={setDefaultSpace} fields={{ type, spaceId }}>
       {({ isPending }) => (
-        <Button type="submit" variant="outline" size="lg" disabled={isPending}>
+        <Button
+          type="submit"
+          variant="secondary"
+          size="lg"
+          disabled={isPending}
+        >
           <Star data-icon="inline-start" />
           {isPending ? "Saving…" : "Make my default plan"}
         </Button>

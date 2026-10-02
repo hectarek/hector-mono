@@ -48,7 +48,7 @@ export function DeleteSpaceButton({
           <input type="hidden" name="spaceId" value={spaceId} />
           <DialogFooter>
             <DialogClose
-              render={<Button variant="outline" size="lg" type="button" />}
+              render={<Button variant="secondary" size="lg" type="button" />}
             >
               Cancel
             </DialogClose>

@@ -75,7 +75,7 @@ export function SpaceMenu({
             </p>
           )}
           <Button
-            variant="outline"
+            variant="secondary"
             size="lg"
             onClick={() => setInviting(false)}
           >
@@ -92,7 +92,7 @@ export function SpaceMenu({
             </Button>
           )}
           <Button
-            variant="outline"
+            variant="secondary"
             size="lg"
             nativeButton={false}
             render={<Link href={`/spaces/${space.id}/settings`} />}

@@ -2,6 +2,7 @@ import type { IGroceryItemsRepository } from "@/src/application/repositories/gro
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRealtimeService } from "@/src/application/services/realtime.service.interface";
+import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listChanged } from "@/src/application/use-cases/grocery/list-changed";
 import { requireItemEditor } from "@/src/application/use-cases/grocery/require-item-editor";
 
@@ -14,6 +15,7 @@ export type IUpdateGroceryItemUseCase = ReturnType<
 export const updateGroceryItemUseCase = (
   groceryItemsRepository: IGroceryItemsRepository,
   spacesRepository: ISpacesRepository,
+  transactionManagerService: ITransactionManagerService,
   realtimeService: IRealtimeService,
   loggerService: ILoggerService,
 ) => {
@@ -27,13 +29,19 @@ export const updateGroceryItemUseCase = (
     text: string,
     userId: string,
   ): Promise<void> => {
-    const item = await requireItemEditor(
-      groceryItemsRepository,
-      spacesRepository,
-      itemId,
-      userId,
+    const item = await transactionManagerService.startTransaction(
+      async (tx) => {
+        const found = await requireItemEditor(
+          groceryItemsRepository,
+          spacesRepository,
+          itemId,
+          userId,
+          tx,
+        );
+        await groceryItemsRepository.updateText(itemId, text, tx);
+        return found;
+      },
     );
-    await groceryItemsRepository.updateText(itemId, text);
     await listChanged(realtimeService, item.spaceId);
     logger.debug("Item edited", { itemId });
   };

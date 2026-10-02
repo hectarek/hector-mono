@@ -26,7 +26,12 @@ export function RenameSpaceForm({
           maxLength={80}
           className="h-9"
         />
-        <Button type="submit" variant="outline" size="lg" disabled={isPending}>
+        <Button
+          type="submit"
+          variant="secondary"
+          size="lg"
+          disabled={isPending}
+        >
           {isPending ? "Saving…" : "Rename"}
         </Button>
       </div>
