@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | All 14 phases merged (Phase 14 was PR #33). L5 and L6 done on `fix/recipes-l5-l6`, in review. |
-| Next task | None planned: Hector's phone checks (H5) and the items below. |
-| Waiting on Hector | the L5/L6 PR; whether Plan a meal is Plan's main action (H23); whether to add a DOM test library for component tests (H22); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1 done. Phases 1–14, L5 and L6 merged. |
+| Next task | P15.2. Also open: L7 (Later). |
+| Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -111,7 +111,8 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D45 | A planned meal whose recipe is still unchecked on the list is skipped, and marked as on the list, only when no other planned meal of that recipe put those items there. Then they came from the recipe page's Add to list, which covers one meal (the earliest). Otherwise it's added as a second batch. The meal's sheet uses the same rule for its first add; **Add to list again** always adds. Adds to one list run one at a time. | Hector (C): "Sounds good". When in doubt it adds: a doubled amount shows on the list, a missing one shows at the store (Claude's reasoning). |
 | D46 | Add to plan goes to your default plan, the one Plan opens to. It already does: its Plan picker starts on the default and only shows when you can plan in two or more. **Plan a meal** on Plan doesn't carry the plan or week you were looking at. | Hector (D): "ideally it should just go to the active plan (which usually shouldnt change much)". No change to the code. |
 | D47 | A date a week or more from today shows its month ("Thu Oct 15"); within a week it's "Today" or "Sat 26" as now. No comma inside a date, since lists of days use commas. | Hector (E): "ya sounds good". |
-| D48 | AI reads (photo, pasted text, and a page without recipe data) are limited to 20 per account per day. A page's own recipe data, read without AI, doesn't count. | Claude's call from the review, under Hector's "make a PR that addresses all of these": sign-up is open, and about 250 photo reads spend the $10 monthly budget, which pauses import for everyone. Hector reads a few a week. |
+| D48 | AI reads (photo, pasted text, and a page without recipe data) are limited to 20 per account per day. A page's own recipe data, read without AI, doesn't count. A long screenshot sent in pieces (P14.11) is one read. | Claude's call from the review, under Hector's "make a PR that addresses all of these": sign-up is open, and about 250 photo reads spend the $10 monthly budget, which pauses import for everyone. Hector reads a few a week. On the pieces, Hector, 2026-10-01: "count a long screenshot as one read". |
+| D49 | Screen tests use happy-dom with React Testing Library and user-event. They're `*.test.tsx` files that run in a pass of their own, each file in a fresh global (Bun's `--isolate`); `bun run test` runs both passes. They render real components against the real server actions and the test container's repositories, not mocked modules. | Hector, 2026-10-01: "sure, do this" to the library and a phase of tests (H22). Claude's calls: happy-dom replaces fetch, Request, Headers and the timers, and its Headers hide cookies as a browser's do, so it can't share a run with the server tests (6 proxy tests failed when it did); isolating every file took the suite from 7 s to 106 s, so only the screen tests are isolated. Bun's `mock.module` lasts for the whole run, so mocking the actions in one file would change them for the action tests. |
 
 ---
 
@@ -1445,6 +1446,43 @@ Branch `fix/recipes-p14-review`. Three reviewers read PRs #25, #26 and #28–#31
     - A long screenshot counts as one read though it sends up to six images.
     - Past about 16,000 px tall, a screenshot's pieces get narrow (six at most).
 
+## Phase 15: Screen tests
+
+Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's rules are already tested below the screen, on both backends. This phase covers what only a screen shows: what a sheet or form remembers, where the cursor goes, and what a tap sends. As the app's AGENTS.md says, it's a safety net for the basics, not exhaustive specs. A test of a past bug is checked by putting the bug back and seeing the test fail. One commit per task; the PR when the phase is done.
+
+- [x] **P15.1** Screen tests can run — C · D49
+  - Do: happy-dom (`@happy-dom/global-registrator`), React Testing Library and user-event as dev dependencies. `tests/_support/dom.ts` gives a screen test its browser. `bunfig.toml` leaves `*.test.tsx` out of a plain `bun test`; `test:screens` runs them, isolated; `test` runs both. AGENTS.md's Testing section says how.
+  - Verify: the first screen test (P14.2: the meal sheet's Change days after its days change) passes, fails with the fix taken out, and the other 944 tests pass beside it.
+  - Evidence (2026-10-01):
+    - Bun's documented setup registers happy-dom for every test. Tried first: 6 proxy tests failed, because happy-dom's `Headers` hides cookies, as a browser's does. happy-dom replaces about 30 globals, fetch, Request, Headers, FormData and the timers among them.
+    - Registering per file in one run failed for the second screen file: Bun shares the module cache across files, so the helper's import ran once. `--isolate` for the whole suite worked but took 106 s, against 7 s. Only the screen files are isolated now: `bun run test` is 944 tests in about 7 s, then the screen pass in about 1 s.
+    - `plan-entry-sheet.test.tsx` renders the real `PlanEntrySheet` (Base UI's Drawer works in happy-dom) against the real `changeEntryDays` action and the test container's repositories. It takes Tue 6 off a meal eaten Sun 4 to Tue 6, saves, re-renders with the saved meal, and checks that Change days shows Today and Mon 5. With P14.2's `setDays(planned)` taken out, it fails (Tue 6 still selected); with it back, it passes.
+    - A single screen file runs with `bun run test:screens <path>`; a plain `bun test <path>` skips it.
+- [ ] **P15.2** The plan's screens — C
+  - The meal sheet: "Not eating it on Sat Oct 17" only on a leftovers day, and never for the meal's only eat day; Add to grocery list sends which button was pressed (`again`).
+  - The grocery box: the range menu's count; "Nothing new to add for the next 7 days" when there's nothing in the range; the result announced and focused when the button goes.
+  - The week: a cook row has the check, an eat-only row has "Cooked Thu Oct 15" and no check, and days before today have muted text.
+  - The meal-days picker: moving the cook day moves the eat days; three columns once a day shows its month.
+- [ ] **P15.3** A space's ⋯ menu — C
+  - Invite on one plan, then another without a reload, shares the second's link (P14.2: `SpaceMenu` keyed by space).
+  - Invite is there only for an owner; Members and the page's own actions are in the sheet.
+- [ ] **P15.4** The recipe form — C
+  - Return in a one-line field doesn't save. Enter in New tag adds the tag and the cursor goes back to New tag. Return that confirms an IME's text does nothing.
+  - Pasting a list with a section into a section keeps the rows after it in theirs. An empty named section stops Save, with its message and the cursor on it.
+  - Remove from a row's sheet puts the cursor on the neighbouring ⋯.
+  - Each section's rows are a list of their own.
+  - Needs `useRouter` in the preload's `next/navigation` stand-in.
+- [ ] **P15.5** Cook mode — C
+  - A step timer counts down once started. A timer restored after a reload shows "Tap anywhere to turn its sound back on", and a tap turns the sound on (against a stand-in for the browser's audio).
+  - Crossed-off ingredients and the current step come back after a reload.
+- [ ] **P15.6** Groceries — C
+  - Checking an item off moves it to Got it; Clear checked empties Got it.
+  - Text typed in the add box doesn't follow you to another plan (the list is keyed by plan).
+  - A check-off made with no connection is kept and retried (D8), if the test can take the connection away; if not, it stays with H5.
+- [ ] **P15.7** Whole flows in a real browser — C+H · needs H24
+  - Plan a meal from a recipe, add it to the list and check items off, as a person would, in a real browser (Playwright, against the dev server).
+  - It needs a database a test can write to, never the real one: a Neon branch for tests, or a local Postgres, and a test account. Options and costs go to Hector first (H24).
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -1497,6 +1535,9 @@ Branch `fix/recipes-p14-review`. Three reviewers read PRs #25, #26 and #28–#31
     - `requireOwner`, `requireItemEditor` and `requireEntryEditor` take the write's `tx`, required, since only writes use them. The repository methods these writes call take an optional `tx`, like the rest. The DI modules and `makeApp()` pass the transaction manager in.
     - Tests first: viewers can't remove an item, clear checked or remove a meal, and an editor can't remove someone else (both backends; they passed before and still end in `UnauthorizedError` inside a transaction, not "Transaction failed"); and `ensureInviteLinks` leaves no link behind when the second fails (Postgres), which failed before the change and passes after. A read left without `tx` would hang the `[postgres]` runs; none does.
     - 953 tests pass (944 before), and `bun check` and `bun ts` are clean. AGENTS.md says the three helpers take `tx`.
+- [ ] **L7** Grocery items know their recipe — C+H · D45
+  - From P14.13's "left as they are": the no-double rule finds a recipe on the list by the title in its items' "for …" notes. A recipe renamed since it was added isn't recognised (its items are bought again), and two recipes with the same title count as one (a planned one is taken as on the list when the other is).
+  - The fix is a nullable recipe id on grocery items (an additive migration, so Hector's OK first), set when a recipe's lines go on, and the rule matching by it.
 
 ## Needs from Hector (live list)
 
@@ -1523,8 +1564,9 @@ Branch `fix/recipes-p14-review`. Three reviewers read PRs #25, #26 and #28–#31
 | H19 | OK to apply P13.2's additive migration 0009 to the one database: `plan_entries.eat_dates` and `cooked`, filled from `date` and `eaten` for the 4 meals there. The live app keeps working (it doesn't read them), and the local dev server needs it to show the plan. | P13.2, P13.3–P13.5 checks | done 2026-09-30: "yes apply 0009"; applied |
 | H20 | 12 grocery items on Hector's plan say "for Banana-Fig Bread \| Forks Over Knives", the recipe's title before L1 (checked 2026-09-30: the only old name there). The grocery button matches by title, so it would add Banana-Fig Bread again. Rename the notes to "Banana-Fig Bread" (in session, D31), or leave them until they're checked off? | P13.5 | done 2026-09-30: renamed (backup `.reread/h20-notes-before.json`); none left with the old name. Those 12, and 5 for Beef Kofta, were the old versions' ingredients (before L4), which the button counted as on the list. At Hector's ask, the 17 unchecked ones were removed (backup `.reread/old-list-items-before.json`; none shared with another recipe): his list went from 44 items to 27. 12 checked Beef Kofta items stay in Got it for his Clear checked. |
 | H21 | OK to apply P14.10's additive migration 0012 (a `recipe_reads` table) to the one database before the Phase 14 PR merges. The deployed code doesn't know the table. | P14.10 | done 2026-10-01: "yes apply 0012"; applied |
-| H22 | Whether to add a DOM test library for component tests | component tests | open |
+| H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | open |
+| H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | open |
 
 ## Risks and how they're handled
 
@@ -1704,3 +1746,5 @@ Branch `fix/recipes-p14-review`. Three reviewers read PRs #25, #26 and #28–#31
   - Next: H5 (phone checks), L5 and L6.
 - **2026-10-01 (ao)** — L5 and L6 done on `fix/recipes-l5-l6` (see their Evidence), one commit each. L6: the 17 access-checked writes run their check and write in one transaction; five tests added first, one of which failed before the change. L5: no `outline` button is left (43 `secondary`, 2 filled), and two icon-only button sets went to 45 px. The signed-out welcome screen was checked in the browser pane; the signed-in screens went to H5, and Plan's main action to H23. 953 tests pass.
   - Next: Hector reviews the PR, H23, then H5.
+- **2026-10-01 (ap)** — Hector merged L5 and L6 (hectarek/hector-mono#5). Hector: a long screenshot is one read (D48), and yes to a test library and a phase of tests (H22). Phase 15 written; P15.1 done on `test/recipes-p15-screen-tests`, in its own worktree (D49: happy-dom and Testing Library, screen tests in an isolated pass of their own). L7 added (grocery items know their recipe), H24 asked (P15.7's database).
+  - Next: Hector reviews Phase 15's plan; then P15.2.
