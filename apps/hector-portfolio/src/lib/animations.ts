@@ -11,7 +11,7 @@ import type { Variants } from "framer-motion";
  * Animation timing configuration
  * Adjust these values to control animation speed globally
  */
-export const animationConfig = {
+const animationConfig = {
   // Base durations (in seconds)
   fast: 0.2,
   normal: 0.4,
