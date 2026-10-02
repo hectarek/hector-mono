@@ -13,7 +13,7 @@
  * Format: IconName-Dark.svg or IconName.svg (for light theme)
  * Check available icons: https://github.com/tandpfun/skill-icons/tree/main/icons
  */
-export const skillIconMap: Record<string, { light: string; dark: string }> = {
+const skillIconMap: Record<string, { light: string; dark: string }> = {
   // Frameworks & Libraries
   "Next.js": { light: "NextJS-Light.svg", dark: "NextJS-Dark.svg" },
   React: { light: "React-Dark.svg", dark: "React-Dark.svg" },

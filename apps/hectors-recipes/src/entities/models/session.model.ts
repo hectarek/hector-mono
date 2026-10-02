@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { userSchema } from "./user.model";
 
-export const sessionSchema = z.object({
+const sessionSchema = z.object({
   user: userSchema,
 });
 

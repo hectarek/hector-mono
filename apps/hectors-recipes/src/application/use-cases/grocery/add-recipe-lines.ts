@@ -20,7 +20,7 @@ import { scaleLine } from "@/src/entities/scaling";
 // Recipe lines at the chosen servings, ready for the batch planner: the amount and name,
 // never the note, and no optional lines (ux-plan D23, D25). A line with no name yet (never
 // itemized) goes on as its original words, minus the note.
-export function toGroceryLines(
+function toGroceryLines(
   recipe: RecipeWithIngredients,
   servings: number | undefined,
 ): GroceryLine[] {

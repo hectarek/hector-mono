@@ -32,13 +32,12 @@
     "next": "16.3.7",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "recharts": "3.10.1",
-    "zod": "^4.6.5"
+    "recharts": "3.10.1"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/bun": "1.4.2",
     "@types/node": "^26.6.3",
@@ -47,7 +46,6 @@
     "babel-plugin-react-compiler": "1.0.0",
     "husky": "^9.1.7",
     "knip": "^6.39.0",
-    "shadcn": "^4.21.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }

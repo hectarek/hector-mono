@@ -38,6 +38,11 @@ jobs:
           bun turbo lint --filter='...[origin/main]'
           git diff --exit-code
 
+      # Whole repo (well under a second): an export becomes unused when a file it never
+      # touched stops importing it. Findings in fallow-baseline.json don't fail; new ones do.
+      - name: Dead code (Fallow)
+        run: bun run dead-code
+
       - name: Typecheck (affected)
         run: bun turbo check-types --filter='...[origin/main]'
 

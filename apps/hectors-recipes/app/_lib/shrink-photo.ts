@@ -5,7 +5,7 @@ import {
 
 // A photo is shrunk on the phone before it's sent (ux-plan P10.2): a long edge of about 2,000 px
 // keeps a cookbook page's print readable, and as a JPEG it stays well under the upload limit.
-export const PHOTO_LONG_EDGE = 2000;
+const PHOTO_LONG_EDGE = 2000;
 
 export function fitWithin(
   width: number,

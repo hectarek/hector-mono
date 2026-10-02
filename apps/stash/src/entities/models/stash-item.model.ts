@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const stashItemTypeSchema = z.enum([
+const stashItemTypeSchema = z.enum([
   "video",
   "article",
   "movie",
@@ -9,10 +9,10 @@ export const stashItemTypeSchema = z.enum([
 ]);
 export type StashItemType = z.infer<typeof stashItemTypeSchema>;
 
-export const stashItemStatusSchema = z.enum(["queued", "completed"]);
+const stashItemStatusSchema = z.enum(["queued", "completed"]);
 export type StashItemStatus = z.infer<typeof stashItemStatusSchema>;
 
-export const selectStashItemSchema = z.object({
+const selectStashItemSchema = z.object({
   id: z.uuid(),
   userId: z.string(),
   url: z.url(),
@@ -28,7 +28,7 @@ export const selectStashItemSchema = z.object({
 });
 export type StashItem = z.infer<typeof selectStashItemSchema>;
 
-export const insertStashItemSchema = z.object({
+const insertStashItemSchema = z.object({
   userId: z.string(),
   url: z.url(),
   title: z.string().min(1),
