@@ -6,8 +6,13 @@ import { ContactPageContent } from "./contact-page-content";
 export const metadata: Metadata = generateSEOMetadata({
   title: "Contact | Hector Gonzalez",
   description:
-    "Get in touch with Hector Gonzalez. Open to consulting opportunities and collaboration.",
-  keywords: ["Contact", "Hector Gonzalez", "Consulting", "Collaboration"],
+    "Get in touch with Hector Gonzalez about roles, collaborations, or a technical question. Email is the fastest way in.",
+  keywords: [
+    "Contact",
+    "Hector Gonzalez",
+    "Full-Stack Engineer",
+    "Collaboration",
+  ],
   path: "/contact",
   type: "website",
 });

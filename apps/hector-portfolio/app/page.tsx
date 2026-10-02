@@ -15,22 +15,20 @@ import {
 import { generateSEOMetadata } from "@/src/shared/utils/seo";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title:
-    "Hector Gonzalez | Full-Stack Engineer, Co-Founder, Applied AI Builder",
+  title: "Hector Gonzalez | Full-Stack Engineer, Front End and Applied AI",
   description:
-    "Product-minded full-stack engineer building learning systems, internal tools, and applied AI. Co-founder & CTO at Stiegler EdTech.",
+    "Product-minded full-stack engineer, strongest on the front end, who ships AI features. Co-architect and sole maintainer of The Notwork, a production edtech platform with ~24K users.",
   keywords: [
     "Hector Gonzalez",
     "Full-Stack Engineer",
-    "Technical Product",
+    "Front-End Engineer",
     "Applied AI",
     "AI Engineer",
-    "CTO",
-    "Co-Founder",
+    "React",
     "Next.js",
     "TypeScript",
+    "Charlotte",
     "EdTech",
-    "Learning Systems",
   ],
   path: "/",
   type: "website",

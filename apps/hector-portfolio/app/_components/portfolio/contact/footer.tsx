@@ -70,7 +70,15 @@ export function Footer({ profile }: FooterProps) {
               <SocialLinks profile={profile} variant="footer" />
             </div>
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-              Built by hand · Next.js · Tailwind v4
+              Built by hand · Next.js · Tailwind v4 ·{" "}
+              <a
+                href="https://github.com/hectarek/hector-mono/tree/main/apps/hector-portfolio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-4 transition-colors hover:text-accent hover:underline"
+              >
+                Source
+              </a>
             </p>
           </motion.div>
         </div>

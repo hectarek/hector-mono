@@ -5,19 +5,29 @@
       "role": "Co-founder & Chief Technology Officer",
       "period": "Aug 2023 – Present",
       "location": "Charlotte, NC",
-      "description": "Own technical strategy and execution for the company, with a heavy focus on the youth product, applied AI, and operational systems. Co-architected and now solely maintain The Notwork, our production edtech platform. Lead applied AI work, including a nine-step curriculum generator, AI-assisted game development, and org-wide tooling for staff. Run the messy operational layer: IT ownership, services, access, and cleanup, so the company can keep moving with a small team.",
+      "description": "Hands-on lead engineer for the company's platform and applied-AI work. Co-architected and now solely run The Notwork, the production platform behind North Carolina's first state-backed esports and STEM league, and built its AI layer.",
       "bullets": [
-        "Own technical strategy and execution for the company.",
-        "Co-architected and now solely maintain The Notwork, our production edtech platform (~24K active users, ~490K views, peak ~1K DAU).",
-        "Built an AI curriculum generator that compresses lesson production from ~1 week to 10–30 minutes and has produced 55+ lessons.",
-        "Designed and shipped 11 interactive web games for the VESL skilled-trades program.",
-        "Set up org-wide AI tooling (Claude team, MCPs, Cursor workflows) and trained staff on practical use.",
-        "Run the company's IT, services, accounts, and access — the operational layer that keeps a small team moving."
+        "Co-architected The Notwork (Next.js, React 19, TypeScript): ~24K users, ~490K views, peak ~1K daily active users.",
+        "Sole maintainer and product owner since Oct 2025, after leading the team through a 2025 rebuild: schema redesign, notifications, pagination, error handling and logging, and hundreds of regression tests.",
+        "Built a nine-step AI curriculum pipeline on the Vercel AI SDK with a human review point at every step. Cut lesson production from about a week to 10–30 minutes; 55 lessons published.",
+        "Built AI-assisted rubric grading and designed teacher-as-verifier identity verification for in-person competition.",
+        "Designed and shipped 11 browser games solo in Pixi.js and Three.js, 10 of them for a skilled-trades workforce program.",
+        "Stood up org-wide AI tooling (a Claude team workspace, MCP integrations into the platform) and trained staff on it.",
+        "Led five developers through the initial build: hired the team, set coding standards, reviewed PRs weekly, and refined tickets with product and design."
       ],
       "metrics": [
-        { "label": "Notwork users", "value": "~24K" },
-        { "label": "Games shipped", "value": "11" },
-        { "label": "Curriculum lessons", "value": "55+" }
+        {
+          "label": "Notwork users",
+          "value": "~24K"
+        },
+        {
+          "label": "Lessons published",
+          "value": "55"
+        },
+        {
+          "label": "Games shipped",
+          "value": "11"
+        }
       ],
       "technologies": [
         "TypeScript",
@@ -29,26 +39,35 @@
         "Vercel",
         "Cloudflare",
         "AI SDK",
-        "Technical strategy",
-        "Product ownership"
+        "MCP"
       ]
     },
     {
       "company": "Stiegler EdTech",
-      "role": "Co-founder & Director of Curriculum / Programming",
+      "role": "Co-founder & Director of Curriculum and Programming",
       "period": "Mar 2022 – Aug 2023",
       "location": "Charlotte, NC",
-      "description": "Co-founded the company and ran the careers-in-technology program (CTAC) end to end. Designed curriculum, taught daily, and managed cohort operations. Led a small team of curriculum writers and TAs, and worked directly with corporate sponsors to align training with real hiring needs.",
+      "description": "Co-founded the company and ran CTAC, its careers-in-technology program, end to end: curriculum, daily teaching, cohort operations, and sponsor relationships.",
       "bullets": [
-        "Helped ~200 students pursue software roles through direct instruction, mentorship, and program design.",
-        "Built and iterated the technical curriculum, taught daily, and ran cohort operations.",
-        "Led a team of 4 curriculum writers and supported TAs across cohorts.",
-        "Worked directly with corporate sponsors to align training with hiring needs.",
-        "Set up internal HR, onboarding, and recruiting processes as the company scaled."
+        "Wrote the curriculum and taught daily as the sole instructor; had a direct hand in training ~200 adults pursuing software careers across three years of cohorts.",
+        "100+ graduates of the first two cohorts I taught were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
+        "Led a four-person curriculum team on a contracted cohort build for an external client.",
+        "Worked with corporate sponsors so cohorts launched with the curriculum their hiring pipelines needed.",
+        "Set up hiring, onboarding, and program operations as the company scaled from its founding."
       ],
       "metrics": [
-        { "label": "Students supported", "value": "~200" },
-        { "label": "Cohort years", "value": "3" }
+        {
+          "label": "Graduates placed",
+          "value": "100+"
+        },
+        {
+          "label": "Adults trained",
+          "value": "~200"
+        },
+        {
+          "label": "Cohort years",
+          "value": "3"
+        }
       ],
       "technologies": [
         "Curriculum design",
@@ -66,12 +85,12 @@
       "role": "Frontend Web Developer",
       "period": "Aug 2020 – Mar 2022",
       "location": "Charlotte, NC",
-      "description": "Contributed production code to ally.com inside a large corporate engineering org. Maintained and improved several legacy codebases, shipped UI updates and net-new content, and prioritized vulnerabilities and key features alongside site owners.",
+      "description": "Front-end developer on ally.com inside a large, multi-team engineering org with formal release, review, and change control.",
       "bullets": [
-        "Contributed production code, content updates, and bug fixes to ally.com.",
-        "Maintained several legacy codebases as the sole regular contributor.",
-        "Prioritized vulnerabilities and feature work directly with site owners.",
-        "Learned production engineering practices from senior and principal engineers."
+        "Delivered UI features, new content, and bug fixes to ally.com, including the home page.",
+        "Sole owner of several legacy codebases, kept integrated with shared site components.",
+        "Triaged and remediated security vulnerabilities with site owners.",
+        "Learned production engineering practice from senior and principal engineers."
       ],
       "technologies": [
         "JavaScript",

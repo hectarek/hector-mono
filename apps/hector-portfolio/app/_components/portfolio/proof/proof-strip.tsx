@@ -18,23 +18,23 @@ interface ProofItem {
 const PROOF_ITEMS: ProofItem[] = [
   {
     value: "~24K",
-    label: "Active users",
-    hint: "On The Notwork production platform",
+    label: "Users",
+    hint: "On The Notwork, the platform I co-architected and run",
   },
   {
-    value: "55+",
-    label: "AI-generated lessons",
-    hint: "From a 9-step curriculum pipeline",
+    value: "30 min",
+    label: "Lesson build time",
+    hint: "Down from about a week, with a nine-step AI pipeline",
   },
   {
-    value: "11",
-    label: "Skilled-trade games",
-    hint: "Designed and shipped end to end",
+    value: "10",
+    label: "Playable games",
+    hint: "Built solo in Pixi.js and Three.js",
   },
   {
-    value: "~200",
-    label: "Students supported",
-    hint: "Through the CTAC tech cohort program",
+    value: "100+",
+    label: "Graduates placed",
+    hint: "From the first two cohorts I taught",
   },
 ];
 

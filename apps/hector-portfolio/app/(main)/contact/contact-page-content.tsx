@@ -37,9 +37,8 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
           className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={heroItem}
         >
-          {profile.consulting.available ? `${profile.consulting.note} ` : ""}
-          Roles, collaborations, consulting intros, or a quick technical
-          question &mdash; email is the fastest way in.
+          Roles, collaborations, or a quick technical question &mdash; email is
+          the fastest way in.
         </motion.p>
 
         <motion.div className="mt-12 space-y-10" variants={heroVariants}>

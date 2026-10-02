@@ -29,7 +29,7 @@ const APPROACH_ITEMS: ApproachItem[] = [
   {
     step: "03",
     title: "Ship it, then keep it alive",
-    body: "I build to run in production. That includes the operational layer: accounts, access, automations, AI workflows, and the boring parts that keep things working.",
+    body: "I build to run in production: tests, error handling, logging, and monitoring, plus the AI workflows and internal tools that keep a product working after launch.",
   },
 ];
 

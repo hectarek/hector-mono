@@ -30,11 +30,15 @@ export const metadata = generateSEOMetadata({
   description: "Page description",
   path: "/my-page", // Becomes the canonical URL and og:url
   keywords: ["keyword1", "keyword2"],
-  image: "/og-image.png", // Will be converted to full URL
+  image: "/projects/my-page.webp", // Optional: defaults to the share card, made a full URL
   type: "article",
   noIndex: false, // Set to true to prevent indexing
 });
 ```
+
+### Share image
+
+Every page gets `public/og-image.png` (1200×630) as its `og:image` and `twitter:image` unless it passes its own `image` (`DEFAULT_SHARE_IMAGE` in `src/shared/utils/seo.ts`). It's set there rather than as an `app/opengraph-image` file because a page that sets its own `openGraph` replaces the inherited one, so a file-based image reached only the home page. The card is a static PNG, not an `ImageResponse` route: `next/og` needs inline styles, which the design lint bans. To change it, edit and re-render the card (any 1200×630 PNG works) and replace the file. The home-screen icon is `app/apple-icon.png` (180×180), which Next.js links on every page.
 
 ### Page-Level SEO
 
@@ -111,7 +115,7 @@ How to run it, and the score thresholds `.lighthouserc.js` asserts, are in [ligh
 2. **Use descriptive titles** - Keep under 60 characters
 3. **Write good descriptions** - 150-160 characters, compelling
 4. **Add keywords** - Relevant keywords for your content
-5. **Set images** - Open Graph images improve social sharing
+5. **Set images** - every page has the default share card; pass `image` for a page-specific one
 6. **Update sitemap** - Add new routes to sitemap.ts
 7. **Run Lighthouse** - Test before deploying
 

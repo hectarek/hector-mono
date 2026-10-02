@@ -19,8 +19,6 @@ function getInitials(name: string): string {
 }
 
 export function HeroImage({ profile }: HeroImageProps) {
-  const isAvailable = profile.consulting.available;
-
   return (
     <motion.figure
       className="relative mx-auto w-full max-w-[260px] sm:max-w-[280px] lg:mx-0 lg:max-w-[320px]"
@@ -60,7 +58,7 @@ export function HeroImage({ profile }: HeroImageProps) {
             <span className="absolute h-1.5 w-1.5 animate-ping rounded-full bg-accent/70" />
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
           </span>
-          {isAvailable ? "Available" : "Heads down"}
+          Building
         </span>
       </figcaption>
     </motion.figure>
