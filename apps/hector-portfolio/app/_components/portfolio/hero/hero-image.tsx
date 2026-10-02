@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Image from "next/image";
 import { scaleIn } from "@/src/lib/animations";
 import type { Profile } from "@/src/types/portfolio";
@@ -20,7 +20,7 @@ function getInitials(name: string): string {
 
 export function HeroImage({ profile }: HeroImageProps) {
   return (
-    <motion.figure
+    <m.figure
       className="relative mx-auto w-full max-w-[260px] sm:max-w-[280px] lg:mx-0 lg:max-w-[320px]"
       variants={scaleIn}
       initial={false}
@@ -61,6 +61,6 @@ export function HeroImage({ profile }: HeroImageProps) {
           Building
         </span>
       </figcaption>
-    </motion.figure>
+    </m.figure>
   );
 }

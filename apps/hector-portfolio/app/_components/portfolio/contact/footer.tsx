@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { fadeInUp } from "@/src/lib/animations";
 import type { Profile } from "@/src/types/portfolio";
@@ -21,7 +21,7 @@ export function Footer({ profile }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <motion.footer
+    <m.footer
       className="border-t border-border bg-muted px-4 py-12"
       initial="hidden"
       animate="visible"
@@ -30,7 +30,7 @@ export function Footer({ profile }: FooterProps) {
     >
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
-          <motion.div className="space-y-2" variants={fadeInUp}>
+          <m.div className="space-y-2" variants={fadeInUp}>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Hector Gonzalez
             </p>
@@ -42,9 +42,9 @@ export function Footer({ profile }: FooterProps) {
               © {currentYear}
               {profile.location ? ` · Built in ${profile.location}` : ""}
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div className="space-y-3" variants={fadeInUp}>
+          <m.div className="space-y-3" variants={fadeInUp}>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Site
             </p>
@@ -60,9 +60,9 @@ export function Footer({ profile }: FooterProps) {
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </m.div>
 
-          <motion.div className="space-y-3 sm:text-right" variants={fadeInUp}>
+          <m.div className="space-y-3 sm:text-right" variants={fadeInUp}>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Elsewhere
             </p>
@@ -80,9 +80,9 @@ export function Footer({ profile }: FooterProps) {
                 Source
               </a>
             </p>
-          </motion.div>
+          </m.div>
         </div>
       </div>
-    </motion.footer>
+    </m.footer>
   );
 }

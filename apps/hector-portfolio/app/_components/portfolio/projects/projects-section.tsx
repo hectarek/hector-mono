@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   fadeInUp,
   staggerContainer,
@@ -23,7 +23,7 @@ export function ProjectsSection({
   const scrollReveal = useScrollReveal();
 
   return (
-    <motion.section
+    <m.section
       id="work"
       className="relative px-4 py-16 sm:py-20"
       {...scrollReveal}
@@ -35,15 +35,15 @@ export function ProjectsSection({
         <SectionEyebrow index={eyebrowIndex} label="Selected work" />
 
         <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
-          <motion.h2
+          <m.h2
             className="font-mono max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
             variants={fadeInUp}
           >
             Production platforms, applied AI,
             <br className="hidden sm:block" />
             and games people actually play.
-          </motion.h2>
-          <motion.a
+          </m.h2>
+          <m.a
             href="/projects"
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-accent"
             variants={fadeInUp}
@@ -55,20 +55,20 @@ export function ProjectsSection({
             >
               →
             </span>
-          </motion.a>
+          </m.a>
         </div>
 
-        <motion.div
+        <m.div
           className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           variants={staggerContainer}
         >
           {projects.map((project) => (
-            <motion.div key={project.id} variants={staggerItemScale}>
+            <m.div key={project.id} variants={staggerItemScale}>
               <ProjectCard project={project} />
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       </div>
-    </motion.section>
+    </m.section>
   );
 }

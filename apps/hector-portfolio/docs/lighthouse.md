@@ -2,6 +2,15 @@
 
 Lighthouse CI is configured to test your app for 100% scores across all categories.
 
+## Status (2026-10-02)
+
+Home page, mobile, simulated throttling: accessibility, best practices and SEO 100; performance 89 (was 82), so the performance assertion still fails.
+
+- The gap is simulated LCP (~3.7 s) against an observed LCP under 0.1 s: Lighthouse charges every request that starts before the paint to it, and on this site that's ~240 KB of JavaScript (most of it Next.js and React) and ~140 KB of fonts.
+- What moved it: the hero renders visible instead of fading in, `app/loading.tsx` is gone (it hid every page's content behind a skeleton until a script ran), no `ThemeProvider` or `Toaster`, `LazyMotion` for framer-motion, the gallery-only `neobrutalist.css` scoped to `/ui`, and no Plex Mono 700.
+- Tried with no effect: `display: "optional"` for Geist, and `preload: false` for the decorative fonts.
+- The next lever is replacing framer-motion with CSS transitions and turning the motion-only client components back into server components.
+
 ## Quick Start
 
 Run it from the app directory. It isn't part of CI (`.github/workflows/ci.yml` runs lint, typecheck and tests only).

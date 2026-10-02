@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   fadeInUp,
   staggerContainer,
@@ -40,7 +40,7 @@ const PROOF_ITEMS: ProofItem[] = [
 
 export function ProofStrip() {
   return (
-    <motion.section
+    <m.section
       className="relative px-4 py-12 sm:py-16"
       initial="hidden"
       whileInView="visible"
@@ -50,12 +50,12 @@ export function ProofStrip() {
       <div className="mx-auto max-w-6xl">
         <SectionEyebrow index="02" label="Proof" />
 
-        <motion.dl
+        <m.dl
           className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4"
           variants={staggerContainer}
         >
           {PROOF_ITEMS.map((item, index) => (
-            <motion.div
+            <m.div
               key={item.label}
               className="relative flex flex-col gap-1.5 bg-background p-5 sm:p-6"
               variants={staggerItem}
@@ -70,10 +70,10 @@ export function ProofStrip() {
               <dd className="text-xs leading-relaxed text-muted-foreground">
                 {item.hint}
               </dd>
-            </motion.div>
+            </m.div>
           ))}
-        </motion.dl>
+        </m.dl>
       </div>
-    </motion.section>
+    </m.section>
   );
 }

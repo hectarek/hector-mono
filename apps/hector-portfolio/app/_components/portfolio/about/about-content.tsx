@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ExperienceSection } from "@/app/_components/portfolio/experience/experience-section";
 import { SectionEyebrow } from "@/app/_components/portfolio/shared/section-eyebrow";
 import { heroItem, heroVariants, viewportOptions } from "@/src/lib/animations";
@@ -53,7 +53,7 @@ const PRINCIPLES: { title: string; body: string }[] = [
 export function AboutContent({ profile, experience }: AboutContentProps) {
   return (
     <>
-      <motion.section
+      <m.section
         className="relative px-4 pb-10 pt-12 sm:pt-20"
         initial="hidden"
         whileInView="visible"
@@ -61,35 +61,35 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
         variants={heroVariants}
       >
         <div className="relative mx-auto max-w-6xl">
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="A1" label="About" />
-          </motion.div>
-          <motion.h1
+          </m.div>
+          <m.h1
             className="font-mono mt-6 max-w-4xl text-4xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-5xl"
             variants={heroItem}
           >
             I build practical software
             <br className="hidden sm:block" />
             around real problems<span className="text-accent">.</span>
-          </motion.h1>
+          </m.h1>
           {profile.tagline && (
-            <motion.p
+            <m.p
               className="font-serif mt-5 max-w-3xl text-2xl italic leading-snug text-muted-foreground sm:text-3xl"
               variants={heroItem}
             >
               {profile.tagline}
-            </motion.p>
+            </m.p>
           )}
-          <motion.p
+          <m.p
             className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             variants={heroItem}
           >
             {profile.bio}
-          </motion.p>
+          </m.p>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -98,16 +98,16 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
       >
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="A2" label="The path" />
-          </motion.div>
-          <motion.h2
+          </m.div>
+          <m.h2
             className="font-mono mt-6 max-w-3xl text-2xl font-medium leading-tight tracking-tight text-foreground sm:text-3xl"
             variants={heroItem}
           >
             Banking → software → edtech CTO.
-          </motion.h2>
-          <motion.div
+          </m.h2>
+          <m.div
             className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             variants={heroItem}
           >
@@ -143,11 +143,11 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
               nine-step curriculum pipeline, AI grading, and the company&apos;s
               AI tooling.
             </p>
-          </motion.div>
+          </m.div>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -156,21 +156,21 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
       >
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="A3" label="What I build" />
-          </motion.div>
-          <motion.h2
+          </m.div>
+          <m.h2
             className="font-mono mt-6 max-w-2xl text-2xl font-medium leading-tight tracking-tight text-foreground sm:text-3xl"
             variants={heroItem}
           >
             Software that runs in production for real people.
-          </motion.h2>
-          <motion.div
+          </m.h2>
+          <m.div
             className="mt-10 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2"
             variants={heroVariants}
           >
             {BUILD_AREAS.map((area, index) => (
-              <motion.div
+              <m.div
                 key={area.title}
                 className="group flex flex-col gap-2 bg-background p-6 transition-colors hover:bg-muted"
                 variants={heroItem}
@@ -184,13 +184,13 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {area.body}
                 </p>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -199,21 +199,18 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
       >
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="A4" label="How I work" />
-          </motion.div>
-          <motion.h2
+          </m.div>
+          <m.h2
             className="font-mono mt-6 max-w-3xl text-2xl font-medium leading-tight tracking-tight text-foreground sm:text-3xl"
             variants={heroItem}
           >
             A few principles I keep coming back to.
-          </motion.h2>
-          <motion.ol
-            className="mt-10 max-w-3xl space-y-7"
-            variants={heroVariants}
-          >
+          </m.h2>
+          <m.ol className="mt-10 max-w-3xl space-y-7" variants={heroVariants}>
             {PRINCIPLES.map((principle, index) => (
-              <motion.li
+              <m.li
                 key={principle.title}
                 className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-baseline sm:gap-6"
                 variants={heroItem}
@@ -232,13 +229,13 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
                     {principle.body}
                   </p>
                 </div>
-              </motion.li>
+              </m.li>
             ))}
-          </motion.ol>
+          </m.ol>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section
+      <m.section
         className="relative px-4 py-12 sm:py-16"
         initial="hidden"
         whileInView="visible"
@@ -247,10 +244,10 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
       >
         <div className="mx-auto max-w-6xl">
           <div className="border-t mb-8" />
-          <motion.div variants={heroItem}>
+          <m.div variants={heroItem}>
             <SectionEyebrow index="A5" label="Outside of work" />
-          </motion.div>
-          <motion.p
+          </m.div>
+          <m.p
             className="font-serif mt-6 max-w-3xl text-xl leading-relaxed text-muted-foreground sm:text-2xl"
             variants={heroItem}
           >
@@ -258,9 +255,9 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
             I have a music degree, and I&apos;m happiest building something with
             my hands &mdash; home projects and a workshop full of tools waiting
             on the next idea.
-          </motion.p>
+          </m.p>
         </div>
-      </motion.section>
+      </m.section>
 
       <ExperienceSection
         experience={experience}
