@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.4 done. Phases 1–14, L5 and L6 merged. |
-| Next task | P15.5. Also open: L7 (Later). |
+| Phase | 15 (screen tests) in progress on `test/recipes-p15-screen-tests`: P15.1–P15.5 done. Phases 1–14, L5 and L6 merged. |
+| Next task | P15.6. Also open: L7 (Later). |
 | Waiting on Hector | whether Plan a meal is Plan's main action (H23); P15.7's database (H24); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-01 |
 
@@ -1493,9 +1493,14 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
     - Each lock-in was checked by putting the bug back: no Return guard, no restarted section after a paste, an empty section let through, no focus back on New tag, no focus on the ⋯ after Remove. All five failed; restored, all pass, 10 runs in a row.
     - Found on the way: the focus tests first passed with their fixes taken out. Focus was on the page, yet `expect(document.activeElement).toBe(button)` passed. Seen only with a large page (the same assertion on a near-empty page fails as it should), so it looks like a Bun problem with large elements. Focus is now compared by name (`focused()`, `tests/_support/focus.ts`), and the grocery box test moved to it too. AGENTS.md says never to compare elements.
     - `useRouter`, `usePathname` and `useSearchParams` are in the preload's `next/navigation` stand-in; a push is recorded in `nextState.pushed`.
-- [ ] **P15.5** Cook mode — C
+- [x] **P15.5** Cook mode — C
   - A step timer counts down once started. A timer restored after a reload shows "Tap anywhere to turn its sound back on", and a tap turns the sound on (against a stand-in for the browser's audio).
   - Crossed-off ingredients and the current step come back after a reload.
+  - Evidence (2026-10-01): `cook-mode.test.tsx`, 3 tests, on a two-line, two-step recipe, with a stand-in for Web Audio (happy-dom has none):
+    - Start 20-minute timer shows the countdown (20:00) and turns the sound on from that tap, with no hint; Stop puts the button back.
+    - Progress saved for the session as a reload would find it (turkey crossed off, step 2 current, a timer running): "Picked up where you left off.", the line crossed off, step 2 current, the timer counting, and "Tap anywhere to turn its sound back on." with the sound off. A tap on the page turns it on and the hint goes.
+    - Crossing off the onion, then opening cook mode again, finds it still crossed off.
+    - With the tap listener taken out, the reload test fails; with the restore from session storage taken out, both reload tests fail. Restored, all pass, 10 runs in a row.
 - [ ] **P15.6** Groceries — C
   - Checking an item off moves it to Got it; Clear checked empties Got it.
   - Text typed in the add box doesn't follow you to another plan (the list is keyed by plan).
