@@ -127,7 +127,7 @@ All Next.js apps in this monorepo use:
 | `start` | `next start` | Start production server |
 | `ts` | `tsc --noEmit` | Typecheck (local alias) |
 | `check-types` | `tsc --noEmit` | Typecheck (turbo alias) |
-| `lint` | `biome check --write && oxlint .` | Biome lint and format, then the design-system lint (turbo alias) |
+| `lint` | `biome check --write --error-on-warnings && oxlint --deny-warnings .` | Biome lint and format, then the design-system and architecture lint; warnings fail (turbo alias) |
 
 Both `ts` and `check-types` run the same command. `ts` is a convenience for running locally (`bun ts`), `check-types` is what turbo looks for. Same pattern for `lint`.
 
@@ -295,7 +295,7 @@ bun run clean:install
 **Fix**: Add the missing script to the app's `package.json`:
 ```json
 "check-types": "tsc --noEmit",
-"lint": "biome check --write && oxlint ."
+"lint": "biome check --write --error-on-warnings && oxlint --deny-warnings ."
 ```
 
 ### `bun install` from app directory shows "no changes" but deps are missing

@@ -380,11 +380,11 @@ export function createStashItemsModule() {
 | **App (`app/`)** | Entities (models, pure functions, errors), `di` (`getInjection`), other `app/` files; root `lib/` only in the auth route handler and auth page (`lib/auth/server.ts`, `lib/logger.ts`) |
 | **DI (`di/`)** | Everything — it is the composition root |
 
-**Enforcement is by convention**, not tooling — there is no ESLint boundaries plugin and Biome is not configured with layer rules. Agents and reviewers uphold these boundaries. The clearest tells of a violation:
+**Oxlint enforces this table.** `no-restricted-imports` has one `.oxlintrc.json` override per layer, so an import that breaks it fails the app's `lint` script, `bun check`, CI and Claude Code's edit hook. How the rules are written, and their gotchas, are under "Architecture Lint" in the root [AGENTS.md](../AGENTS.md#architecture-lint). Lint sees imports, not intent, so reviewers still look for:
 
-- `app/` importing from `src/infrastructure/` or `src/application/` directly (must go through `di`).
-- A use case or controller importing a concrete repository/service instead of its interface.
-- Anything in `src/entities/` importing from another layer.
+- A use case that does a controller's job (parsing input, checking auth) or a controller that holds business logic.
+- An interface shaped around one implementation (a repository method that leaks Drizzle types or SQL concepts).
+- `app/` code re-implementing domain logic that belongs in an entity or use case.
 
 Infrastructure-to-infrastructure imports are acceptable for shared utilities (e.g. `unwrapDrizzleTx`).
 

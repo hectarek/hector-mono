@@ -22,7 +22,7 @@ Update `package.json` (take current versions from an existing app, e.g. `apps/he
     "start": "next start",
     "ts": "tsc --noEmit",
     "check-types": "tsc --noEmit",
-    "lint": "biome check --write && oxlint .",
+    "lint": "biome check --write --error-on-warnings && oxlint --deny-warnings .",
     "format": "biome format --write"
   },
   "dependencies": {
@@ -71,7 +71,9 @@ Follow "Setting up an app" in [docs/ui-package.md](../../../docs/ui-package.md):
 
 ## 4. Design-System Lint
 
-The `lint` script above already runs Oxlint. Add `"apps/<app>/**"` to the `files` of the `.oxlintrc.json` override that sets the six `shadcn/*` rules to `error` (the entry listing every app; keep each rule's options, e.g. `no-restyle`'s `allow: ["layout"]`). Once the app is listed, its design-lint findings fail `bun check` and CI. See "Design-System Lint" in the root `AGENTS.md`.
+The `lint` script above already runs Oxlint. Add `"apps/<app>/**"` to the `files` of the `.oxlintrc.json` override that sets the six `shadcn/*` rules to `error` (the entry listing every app; keep each rule's options, e.g. `no-restyle`'s `allow: ["layout"]`). The script runs `oxlint --deny-warnings`, so the app's design-lint findings fail `bun check` and CI from the start. See "Design-System Lint" in the root `AGENTS.md`.
+
+**Complex app** (clean architecture): add its paths to every layer override in `.oxlintrc.json` (the entries for `src/entities/**`, `src/application/**`, `src/interface-adapters/**`, `src/infrastructure/**`, `app/**` with `proxy.ts`, and the auth route and page), following the existing apps. Plant one forbidden import (e.g. `@/db` in an entity) and confirm `bun check --filter=<app>` fails before removing it. See "Architecture Lint" in the root `AGENTS.md`.
 
 ## 5. Environment Variables
 

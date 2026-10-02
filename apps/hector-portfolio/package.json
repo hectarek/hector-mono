@@ -17,7 +17,7 @@
     "start": "next start",
     "ts": "tsc --noEmit",
     "check-types": "tsc --noEmit",
-    "lint": "biome check --write && oxlint .",
+    "lint": "biome check --write --error-on-warnings && oxlint --deny-warnings .",
     "format": "biome format --write",
     "test": "bun test",
     "test:watch": "bun test --watch",

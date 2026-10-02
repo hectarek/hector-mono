@@ -15,7 +15,7 @@
   "scripts": {
     "ts": "tsc --noEmit --strict",
     "check-types": "tsc --noEmit --strict",
-    "lint": "bunx biome check --write",
+    "lint": "bunx biome check --write --error-on-warnings",
     "lint:quiet": "bunx biome check --write --diagnostic-level=error",
     "ui:add": "bunx --bun shadcn@latest add",
     "test": "bun test"
