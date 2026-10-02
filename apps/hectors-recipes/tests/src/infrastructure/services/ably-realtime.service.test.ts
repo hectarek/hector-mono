@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import type { TokenParams, TokenRequest } from "ably";
+import { LiveUpdatesOffError } from "@/src/entities/errors/common";
 import {
   AblyRealtimeService,
   type AblyRestClient,
@@ -69,6 +70,6 @@ describe("AblyRealtimeService", () => {
     ).resolves.toBeUndefined();
     await expect(
       service.createSubscribeGrant("plan:1", "user-1"),
-    ).rejects.toThrow("ABLY_API_KEY");
+    ).rejects.toBeInstanceOf(LiveUpdatesOffError);
   });
 });

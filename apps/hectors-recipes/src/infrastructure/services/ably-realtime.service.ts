@@ -1,6 +1,7 @@
 import { Rest, type TokenParams, type TokenRequest } from "ably";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRealtimeService } from "@/src/application/services/realtime.service.interface";
+import { LiveUpdatesOffError } from "@/src/entities/errors/common";
 import type { RealtimeEvent, RealtimeGrant } from "@/src/entities/realtime";
 
 // The part of Ably's REST client this uses, so tests can pass a stand-in without a network.
@@ -49,7 +50,9 @@ export class AblyRealtimeService implements IRealtimeService {
     clientId: string,
   ): Promise<RealtimeGrant> {
     if (!this.client) {
-      throw new Error("Live updates aren't configured (ABLY_API_KEY)");
+      throw new LiveUpdatesOffError(
+        "Live updates aren't configured (ABLY_API_KEY)",
+      );
     }
     return this.client.auth.createTokenRequest({
       clientId,

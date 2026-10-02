@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests): P15.1–P15.6 merged (hectarek/hector-mono#7); P15.7 done, in review on `test/recipes-p15-7-browser-flows`. Phases 1–14, L5 and L6 merged. |
-| Next task | Hector reviews P15.7's PR. Also open: L7 (Later). |
+| Phase | 15 (screen tests) merged (hectarek/hector-mono#7, hectarek/hector-mono#8). The fix for live updates with no key is in review on `fix/recipes-live-updates-off`. Phases 1–14, L5 and L6 merged. |
+| Next task | Hector reviews the live-updates fix. Also open: L7 (Later). |
 | Waiting on Hector | whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-02 |
 
@@ -1532,7 +1532,7 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
     - Sign-up works on a Neon project of its own, which was H24's open question.
     - Found on the way:
       - A preview server from earlier in Claude's session was still on port 3100 with production's `.env`. The config's never-reuse rule stopped the run there. Flows now use port 3300, which no preview config uses.
-      - Without `ABLY_API_KEY`, the Groceries page still asks for a live-updates pass. `/api/realtime/token` then answers 500 and logs an error, each time. This only happens where there's no key, as in tests; left as is.
+      - Without `ABLY_API_KEY`, the Groceries page still asks for a live-updates pass. `/api/realtime/token` then answers 500 and logs an error, each time. This only happens where there's no key, as in tests. Fixed after Phase 15 (log (at)): it's a 403 now, so the browser stops asking.
       - For a moment during a reload, the Groceries page has its text twice, so the flow looks within the Got it section.
     - Not covered here: two people on two phones (live updates are off in tests), and cook mode's wake lock and sound. Those stay with H5.
 
@@ -1807,3 +1807,5 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
   - Next: Hector adds `.env.test`; then P15.7.
 - **2026-10-02 (as)** — Hector added `.env.test`. P15.7 done (see its Evidence): one browser flow from sign-up to checked-off groceries, on the test project, with a guard that refuses any other database. Phase 15 is complete once it merges.
   - Next: Hector reviews P15.7's PR; then H23, H5.
+- **2026-10-02 (at)** — Hector merged P15.7 (hectarek/hector-mono#8), so Phase 15 is done, and added an Ably key to `.env.test`. Fixed what P15.7 found: with no Ably key, the pass route now answers 403, "Live updates are off" (`LiveUpdatesOffError`), and logs nothing. It used to answer 500 and log an error, and Ably retried a 500 again and again; on a 403 it stops (features.md, Live updates).
+  - Next: Hector reviews the fix; then H23, H5.

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import { GET } from "@/app/(api)/api/realtime/token/route";
 import { getInjection } from "@/di/container";
 import { planChannel } from "@/src/entities/realtime";
+import { MockRealtimeService } from "@/src/infrastructure/services/mock-realtime.service";
 import { nextState, signInAsNewUser } from "@/tests/_support/next";
 
 const pass = (plan: string) =>
@@ -38,5 +39,24 @@ describe("GET /api/realtime/token", () => {
 
     nextState.userId = undefined;
     expect((await pass(theirs.id)).status).toBe(401);
+  });
+
+  it("with live updates off (no key), refuses with 403 so the browser stops asking", async () => {
+    const plan = await getInjection("IEnsurePersonalSpaceController")(
+      "meal-plan",
+      userId,
+    );
+    const realtime = getInjection("IRealtimeService");
+    if (!(realtime instanceof MockRealtimeService)) {
+      throw new Error("The test container should use MockRealtimeService");
+    }
+    realtime.off = true;
+    try {
+      const response = await pass(plan.id);
+      expect(response.status).toBe(403);
+      expect(await response.text()).toBe("Live updates are off");
+    } finally {
+      realtime.off = false;
+    }
   });
 });

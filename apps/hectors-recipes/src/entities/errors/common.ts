@@ -31,6 +31,14 @@ export class UnauthorizedError extends Error {
   }
 }
 
+// Live updates aren't set up here (no key): there's nothing to listen to, and pages refresh
+// instead. Expected where there's no key (tests, local), so it's not a failure.
+export class LiveUpdatesOffError extends Error {
+  constructor(message = "Live updates are off", options?: ErrorOptions) {
+    super(message, options);
+  }
+}
+
 // Why reading a recipe with AI failed, as the person should hear it.
 export type RecipeReadFailure =
   | "no-recipe-found"
