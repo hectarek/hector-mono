@@ -46,7 +46,7 @@ fi
 [ -z "$report" ] && exit 0
 
 {
-  echo "Lint errors remain in ${file#"$CLAUDE_PROJECT_DIR"/} after autofix. Fix the code (never loosen a rule):"
+  echo "Lint errors remain in ${file#"$(git rev-parse --show-toplevel 2>/dev/null)"/} after autofix. Fix the code (never loosen a rule):"
   printf '%s' "$report" | head -n 80
 } >&2
 exit 2
