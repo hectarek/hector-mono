@@ -1,1 +1,2 @@
 apps/*/.env
+apps/*/.env.test

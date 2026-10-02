@@ -11,6 +11,7 @@
     "lint": "biome check --write && oxlint .",
     "test": "bun test && bun run test:screens",
     "test:screens": "bun test --isolate --preload ./tests/_support/dom.ts --path-ignore-patterns='**/*.test.ts'",
+    "test:flows": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@happy-dom/global-registrator": "^20.14.5",
+    "@playwright/test": "^1.63.0",
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
