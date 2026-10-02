@@ -1,7 +1,10 @@
+import { GatewayError } from "@ai-sdk/gateway";
 import {
   generateText,
   type LanguageModel,
   type ModelMessage,
+  NoObjectGeneratedError,
+  NoOutputGeneratedError,
   Output,
   type UserContent,
 } from "ai";
@@ -11,7 +14,7 @@ import type {
   IAiService,
 } from "@/src/application/services/ai.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
-import { DatabaseOperationError } from "@/src/entities/errors/common";
+import { AiGenerationError } from "@/src/entities/errors/common";
 
 /** Used when neither `opts.model` nor the `AI_MODEL` env var is set. */
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4.6";
@@ -55,14 +58,7 @@ export class AiService implements IAiService {
 
       return result.output;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logger.error("Structured generation failed", {
-        model: modelId,
-        error: message,
-      });
-      throw new DatabaseOperationError("AI generation failed", {
-        cause: error,
-      });
+      throw toGenerationError(error, logger, modelId);
     }
   }
 
@@ -92,4 +88,40 @@ export class AiService implements IAiService {
 
     return { messages: [{ role: "user", content }] };
   }
+}
+
+// Logs only the error's message and status: the SDK's errors carry the whole request,
+// which would log the resume.
+function toGenerationError(
+  error: unknown,
+  logger: ILoggerService,
+  model: string,
+): AiGenerationError {
+  const context = {
+    model,
+    error: error instanceof Error ? error.message : String(error),
+    statusCode: GatewayError.isInstance(error) ? error.statusCode : undefined,
+  };
+  if (
+    NoObjectGeneratedError.isInstance(error) ||
+    NoOutputGeneratedError.isInstance(error)
+  ) {
+    logger.warn("The model's answer didn't fit the schema", context);
+    return new AiGenerationError(
+      "unusable-answer",
+      "The model's answer didn't fit the schema",
+      { cause: error },
+    );
+  }
+  // The Gateway answers 402 when the project's budget or the account's credit is spent.
+  if (GatewayError.isInstance(error) && error.statusCode === 402) {
+    logger.warn("AI Gateway budget reached", context);
+    return new AiGenerationError("budget-paused", "AI budget reached", {
+      cause: error,
+    });
+  }
+  logger.error("Structured generation failed", context);
+  return new AiGenerationError("service-unavailable", "AI generation failed", {
+    cause: error,
+  });
 }

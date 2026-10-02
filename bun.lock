@@ -83,6 +83,7 @@
       "name": "hectors-tools",
       "version": "0.1.0",
       "dependencies": {
+        "@ai-sdk/gateway": "4.0.101",
         "@evyweb/ioctopus": "^1.4.1",
         "@repo/ui": "workspace:*",
         "ai": "7.0.123",

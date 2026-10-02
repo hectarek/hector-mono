@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
+import { GatewayInternalServerError } from "@ai-sdk/gateway";
 import { MockLanguageModelV4 } from "ai/test";
 import { z } from "zod";
+import { AiGenerationError } from "@/src/entities/errors/common";
 import { AiService } from "@/src/infrastructure/services/ai.service";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 
@@ -73,4 +75,37 @@ describe("AiService", () => {
       },
     ]);
   });
+
+  it.each([
+    {
+      when: "an answer that isn't the schema's shape",
+      answer: { text: "Sorry, I can't help with that." },
+      reason: "unusable-answer",
+    },
+    {
+      when: "the Gateway budget is spent (402)",
+      answer: {
+        error: new GatewayInternalServerError({
+          message: "Quota exceeded",
+          statusCode: 402,
+        }),
+      },
+      reason: "budget-paused",
+    },
+    {
+      when: "any other failure",
+      answer: { error: new Error("socket hang up") },
+      reason: "service-unavailable",
+    },
+  ])(
+    "$when fails as an AiGenerationError with a reason",
+    async ({ answer, reason }) => {
+      const failed = service(fakeModel(answer)).generateObject({
+        schema,
+        prompt: "x",
+      });
+      await expect(failed).rejects.toBeInstanceOf(AiGenerationError);
+      await expect(failed).rejects.toMatchObject({ reason });
+    },
+  );
 });

@@ -19,9 +19,10 @@ Deployment: not deployed; no Vercel project.
 - The Gateway is the AI SDK's built-in default provider — no per-provider keys. Set in `.env`:
   - `AI_GATEWAY_API_KEY` — Vercel AI Gateway key (required for live calls).
   - `AI_MODEL` — optional model override (default `anthropic/claude-sonnet-4.6`), as a `provider/model` string.
-- **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser. The interface's `system` goes to the SDK as `instructions` (v7's name for the system prompt).
+- **Reusable AI client:** `IAiService` (`src/application/services/ai.service.interface.ts`) is a generic, capability-shaped interface — point new AI tools at it. Today it exposes `generateObject<T>({ schema, system?, prompt?, files? })`; `generateText`/`stream` are intended future additions. Impl: `AiService` (`src/infrastructure/services/ai.service.ts`) — the only place that imports `ai` and `@ai-sdk/gateway`. PDFs are passed as `files` (file message parts) straight to a multimodal model, so there is no local PDF parser. The interface's `system` goes to the SDK as `instructions` (v7's name for the system prompt).
 - **Model:** a constructor argument of `AiService` (default: `AI_MODEL`, else `anthropic/claude-sonnet-4.6`; a per-call `model` overrides it), so tests pass `MockLanguageModelV4` from `ai/test` and never reach the Gateway.
-- **Version:** `ai` is pinned to the exact version `hectors-recipes` uses; upgrade the two together.
+- **Failures:** `AiService` throws `AiGenerationError` (`src/entities/errors/common.ts`) with a `reason`: `unusable-answer` (the answer didn't fit the schema), `budget-paused` (the Gateway's 402: budget or credit spent) or `service-unavailable` (anything else). Each tool's action turns the reason into a sentence (`AI_FAILURES` in `app/actions/resume-analyzer.ts`). It logs only the error's message and status, never the error object, which carries the whole request (the resume). In tests, set `MockAiService.failWith` to a reason.
+- **Version:** `ai` is pinned to the exact version `hectors-recipes` uses, and `@ai-sdk/gateway` (for `GatewayError`) to the exact version that `ai` depends on; upgrade them together.
 
 ## Architecture
 
@@ -43,7 +44,7 @@ app/
 
 src/
   entities/
-    errors/common.ts          # InputParseError, NotFoundError, etc.
+    errors/common.ts          # InputParseError, NotFoundError, etc., plus AiGenerationError (reason)
     models/logger.model.ts    # LogLevel + LOG_LEVEL_PRIORITY
     models/resume-analysis.model.ts       # Resume Analyzer Zod schemas (input, file, result)
   application/
