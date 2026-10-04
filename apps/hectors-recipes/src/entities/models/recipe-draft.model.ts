@@ -13,6 +13,8 @@ export type RecipeSource =
 // all: Vercel refuses a request body over 4.5 MB, and the form needs a little room too.
 export const MAX_PHOTO_PIECES = 6;
 export const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
+// The most text read as one recipe: a pasted recipe, a page's text, or a text file (D53).
+export const MAX_RECIPE_TEXT = 50_000;
 
 // How many AI reads one account gets in 24 hours (docs/ux-plan.md D48).
 export const DAILY_RECIPE_READS = 20;

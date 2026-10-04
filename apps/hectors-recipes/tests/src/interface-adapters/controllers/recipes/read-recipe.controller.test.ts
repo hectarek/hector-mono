@@ -1,8 +1,10 @@
 import { describe } from "bun:test";
-import { MAX_PHOTO_PIECES } from "@/src/entities/models/recipe-draft.model";
+import {
+  MAX_PHOTO_PIECES,
+  MAX_RECIPE_TEXT,
+} from "@/src/entities/models/recipe-draft.model";
 import {
   MAX_RECIPE_IMAGE_BYTES,
-  MAX_RECIPE_TEXT,
   readRecipeController,
 } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
 import { OWNER } from "@/tests/_support/app";

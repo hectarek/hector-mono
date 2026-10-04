@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 17 (Add by photo or file; the week slides in) planned, on `feat/recipes-p17-photo-or-file`. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | Hector reviews Phase 17's plan; then P17.1. |
-| Waiting on Hector | Phase 17's plan; the AI key in `.env.test` (H25); real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P17.2. |
+| Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1619,9 +1619,22 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
 
 Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04: one way in for photos and files (D53), and an animation for the week's swipe (D54). One commit per task; the PR when the phase is done.
 
-- [ ] **P17.1** Text and Markdown files — C · D53
+- [x] **P17.1** Text and Markdown files — C · D53
   - Do: the picker takes `.txt` and `.md`. The browser reads the file as text and sends it the way pasted text is sent (`readRecipeFromText`): the same 50,000-character cap, and the draft held to the file's own words (D30). It counts as a text read.
   - Verify: a screen test where choosing a Markdown file sends its text; a file over the cap says so.
+  - Evidence (2026-10-04):
+    - `recipeFileKind` (`app/_lib/recipe-file.ts`) says what a chosen file is read as: by its type, or by its extension when a phone gives none.
+    - The picker takes images and `.txt`/`.md` files. A text file is read on the phone, trimmed, and sent with `readRecipeFromText`.
+    - An empty file says "That file is empty."; one over `MAX_RECIPE_TEXT` says "That file has too much text to be one recipe."; anything else says "Choose a photo, or a text or Markdown file.". None of these is sent.
+    - `MAX_RECIPE_TEXT` moved from the controller to `recipe-draft.model.ts`, so the browser can check it too.
+    - The form's note says "Read from your file." or "Read from your photo.".
+    - `recipe-file.test.ts`, 3 tests, and `photo-import.test.tsx`, 2 screen tests against the test container's stand-in reader:
+      - a type-less `chili.md` reaches the reader as a text read of its exact text and fills in the form;
+      - an empty file and a Word file are refused without a read.
+      - With the extension rule taken out, both fail. Restored, they pass 5 runs in a row.
+    - Found on the way, in the test: a read replaces the picker, so a second file has to be chosen with the new input. The test looks it up each time.
+    - Not checked here: the over-cap message (a 50,000-character file in a screen test adds nothing over the length check), and a real read (P17.4, with H25 done).
+    - All 970 + 31 tests pass.
 - [ ] **P17.2** PDFs — C · D53
   - Do:
     - A new kind of read, `document`: one PDF, at most 4 MB (the same request limit as photos) and 10 pages.
@@ -1668,7 +1681,7 @@ Hector, 2026-10-04: "in our grocery list, we should also have a group by recipe�
 
 ## Phase 20 (planned): Measuring AI reads, links first
 
-Hector, 2026-10-04: "every time we are using ai, we should capture the data so that we can measure the accuracy… independently verify and tweak our prompts / service"; "We should do this with web sites first not photos". Planned in detail when it starts; one PR.
+Hector wants this phase to start with a long discussion, so he can learn the best practices for measuring an AI feature (2026-10-04: "when we get to 20… i want to make sure we spend a lot of time discussing that so that I can learn best practices"). Hector, 2026-10-04: "every time we are using ai, we should capture the data so that we can measure the accuracy… independently verify and tweak our prompts / service"; "We should do this with web sites first not photos". Planned in detail when it starts; one PR.
 - **Every AI read recorded:**
   - what was sent (the link and the page's text), the instructions' version, the model, tokens and time;
   - the draft;
@@ -1761,7 +1774,7 @@ Hector, 2026-10-04: "every time we are using ai, we should capture the data so t
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
-| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | open |
+| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it |
 
 ## Risks and how they're handled
 

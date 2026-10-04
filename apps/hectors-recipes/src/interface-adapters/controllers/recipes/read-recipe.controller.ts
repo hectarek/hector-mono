@@ -9,11 +9,11 @@ import type { CheckedDraft } from "@/src/entities/itemizing-check";
 import {
   MAX_PHOTO_BYTES,
   MAX_PHOTO_PIECES,
+  MAX_RECIPE_TEXT,
 } from "@/src/entities/models/recipe-draft.model";
 
 // The phone shrinks a photo to about 2,000 px before sending it (P10.2), and a page's text is
 // capped before it's read (P10.3); these limits only stop what would never be a recipe.
-export const MAX_RECIPE_TEXT = 50_000;
 export const MAX_RECIPE_IMAGE_BYTES = MAX_PHOTO_BYTES;
 
 const inputSchema = z.discriminatedUnion("kind", [
