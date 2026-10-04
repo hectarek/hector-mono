@@ -34,18 +34,17 @@ import {
 type Stage =
   | { kind: "choose"; error?: string }
   | { kind: "reading"; previews: string[]; fileName: string }
-  | { kind: "read"; draft: CheckedDraft; from: RecipeFileKind };
+  | { kind: "read"; draft: CheckedDraft; from: string };
 
 type NewRecipe = Awaited<ReturnType<typeof loadNewRecipe>>;
 
 const NOT_TAKEN = `Choose up to ${MAX_PHOTOS} photos, a PDF of up to ${MAX_PDF_PAGES} pages, or a text or Markdown file.`;
 
-// What a read was from, for the form's note.
-const READ_FROM: Record<RecipeFileKind, string> = {
-  photo: "photo",
-  pdf: "PDF",
-  text: "file",
-};
+// What a read was from, for the form's note ("Read from your photos.").
+function readFrom(kind: RecipeFileKind, files: number): string {
+  if (kind === "photo") return files > 1 ? "photos" : "photo";
+  return kind === "pdf" ? "PDF" : "file";
+}
 
 // A PDF, sent as it is (D53): the reader counts its pages before reading it. One over the
 // request limit is refused here, since the upload itself would fail.
@@ -131,7 +130,11 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
             : await readTextFile(file);
       setStage(
         "draft" in result
-          ? { kind: "read", draft: result.draft, from: kind }
+          ? {
+              kind: "read",
+              draft: result.draft,
+              from: readFrom(kind, files.length),
+            }
           : { kind: "choose", error: result.error },
       );
     } catch {
@@ -153,7 +156,7 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
         {...form}
         values={values}
         review={review}
-        note={`Read from your ${READ_FROM[stage.from]}. Check it before saving.`}
+        note={`Read from your ${stage.from}. Check it before saving.`}
       />
     );
   }
@@ -172,7 +175,7 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
             Cancel
           </Button>
         }
-        title="Add by photo"
+        title="Add by photo or file"
       />
 
       {stage.kind === "reading" ? (
@@ -211,8 +214,9 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
       ) : (
         <div className="flex flex-col gap-4">
           <p className="text-muted-foreground text-sm">
-            Take a photo of a cookbook page, or choose a screenshot. The recipe
-            is read into the form for you to check before saving.
+            Take or choose up to 3 photos of one recipe, such as cookbook pages
+            or screenshots, or choose a PDF or a text or Markdown file. The
+            recipe is read into the form for you to check before saving.
           </p>
           {/* Hidden, and opened by the button: an input that's only visually hidden still takes
               keyboard focus, which then lands on nothing you can see. */}
@@ -226,7 +230,7 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
           />
           <Button size="lg" onClick={() => fileInput.current?.click()}>
             <Camera data-icon="inline-start" />
-            Choose a photo
+            Choose a photo or file
           </Button>
           {stage.error && (
             <div className="flex flex-col gap-3">

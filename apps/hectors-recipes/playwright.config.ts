@@ -26,9 +26,16 @@ function testEnv(): Record<string, string> {
   );
 }
 
+// A read with the real AI costs a few cents (docs/ux-plan.md H25), so it's asked for:
+// `FLOWS_AI=1 bun run test:flows` runs the flows tagged @ai with the AI key. Otherwise they're
+// skipped and the key is left out, so nothing else can spend it.
+const withAi = process.env["FLOWS_AI"] === "1";
+const env = testEnv();
+
 export default defineConfig({
   testDir: "./tests/flows",
   testMatch: "**/*.flow.ts",
+  grepInvert: withAi ? undefined : /@ai/,
   // A dev server compiles each page on its first visit.
   timeout: 180_000,
   expect: { timeout: 15_000 },
@@ -43,7 +50,7 @@ export default defineConfig({
     // runs on Node, which loads no env files of its own.
     command: `bun --no-env-file scripts/check-test-database.ts && node_modules/.bin/next dev --port ${PORT}`,
     url: `http://localhost:${PORT}/welcome`,
-    env: testEnv(),
+    env: withAi ? env : { ...env, AI_GATEWAY_API_KEY: "" },
     // Never a server that's already running: it could be using production's settings.
     reuseExistingServer: false,
     timeout: 180_000,

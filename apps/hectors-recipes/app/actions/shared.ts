@@ -108,7 +108,7 @@ function fieldErrors(
 
 // What import says when reading fails (ux-plan P10.1). The screen offers Add manually beside it.
 const READ_FAILURES: Record<RecipeReadFailure, string> = {
-  "no-recipe-found": "No recipe found there. Try another photo or link.",
+  "no-recipe-found": "No recipe found there. Try another photo, file or link.",
   "budget-paused":
     "Import is paused until next month: this month's reading budget is used up.",
   "daily-limit": `You've read ${DAILY_RECIPE_READS} recipes in the last day, the most for one day. Try again tomorrow, or add this one by hand.`,
@@ -128,7 +128,7 @@ const FETCH_FAILURES: Record<PageFetchFailure, string> = {
   blocked: "That site won't let the app read it.",
   "not-found": "That page wasn't found. Check the link.",
   "not-a-page":
-    "That link isn't a web page. For a PDF or a photo, add a screenshot instead.",
+    "That link isn't a web page. If it's a PDF, save it and add it by photo or file.",
   "too-large": "That page is too big to read.",
   unreachable: "Couldn't reach that site. Check the link, or try again soon.",
 };

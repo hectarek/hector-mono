@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1–P17.3 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P17.4; the real reads once the worktree's `.env.test` has the AI key (H25). |
+| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1–P17.4 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P17.5; the real reads (`FLOWS_AI=1`) once the worktree's `.env.test` has the AI key (H25). |
 | Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
@@ -1684,7 +1684,7 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
       - A screen test refuses 4 photos, and a photo with a PDF, without a read. With a fourth photo allowed, it fails.
     - Not covered here: a screen test of photos being read. happy-dom can't shrink an image (no `createImageBitmap`), so that's for the browser (P17.4) and a real read (H25).
     - All 990 + 33 tests pass.
-- [ ] **P17.4** One way in — C · D53
+- [x] **P17.4** One way in — C · D53
   - Do:
     - New recipe's *Add by photo* becomes *Add by photo or file*, and its page's button becomes *Choose a photo or file* (photos, PDF, text and Markdown).
     - While reading, it shows the photos, or the file's name for a document.
@@ -1695,6 +1695,22 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
     - Screen tests for each kind, and for a file that isn't taken (a Word document).
     - The browser flow picks a Markdown file. With the AI off on the test project, it reaches the reader's error, which shows the routing works.
     - features.md and AGENTS.md updated.
+  - Evidence (2026-10-04):
+    - The wording:
+      - New recipe's choice is *Add by photo or file* ("Cookbook pages, screenshots, or a PDF or text file."), and so is its page's title. The button is *Choose a photo or file*, with a line on what it takes.
+      - The form's note says what it read ("Read from your photos.").
+      - Add by link's fallback button is *Add by photo or file*. A link that isn't a web page now says "If it's a PDF, save it and add it by photo or file." (it used to say to screenshot it), and *no recipe found* says "Try another photo, file or link.".
+    - Found on the way: the top bar gave its title a third of the width, so "Add by photo or file" showed as "Add by phot…".
+      - It's flex now: the sides share what the title leaves, and a title takes the width it needs.
+      - Screenshots at 375 px show the full title, and the recipe form's bar (Cancel, *New recipe*, Save) still centred.
+    - Browser flows, with sign-up shared (`tests/flows/sign-up.ts`):
+      - `add-recipe.flow.ts` chooses files through the real picker. The 11-page PDF is refused by the server's page count, so `unpdf` works in the Next dev server, and `chili.md` reaches the reader. The AI key is left out, so the reader can't answer, which shows the routing.
+      - A production build (`next build`) compiles with `unpdf` in it.
+    - Real reads, on request:
+      - A test tagged `@ai` reads the Markdown file, the PDF and two photos (`chili-page-1.jpg`, `chili-page-2.jpg`, made in Chromium) with the real reader. Each must fill in the title, 8 lines and 4 steps.
+      - It runs only with `FLOWS_AI=1`; otherwise `playwright.config.ts` skips it and leaves the AI key out of the dev server.
+      - Not yet run against the real reader: the worktree's `.env.test` still has no AI key ("key present: false"; the Gateway refused it as unauthenticated, so nothing was spent). H25.
+    - All 990 + 33 tests pass, and both everyday flows pass.
 - [ ] **P17.5** The week slides in — C · D54
   - Do: `WeekSwipe` knows which week it shows. When the week changes, the days slide in briefly from the side of travel (the next week from the right), and not at all with reduced motion. The swipe itself is unchanged.
   - Verify: a screen test that the direction follows the change; a look in the browser. How it feels on a phone goes to H5.

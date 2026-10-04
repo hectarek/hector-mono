@@ -65,7 +65,7 @@ describe("readRecipeFromPhoto", () => {
   it("says why when the recipe can't be read", async () => {
     reader().failWith = "no-recipe-found";
     expect(await readRecipeFromPhoto(withPhoto(1000))).toEqual({
-      error: "No recipe found there. Try another photo or link.",
+      error: "No recipe found there. Try another photo, file or link.",
     });
   });
 
