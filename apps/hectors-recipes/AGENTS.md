@@ -28,7 +28,7 @@ app/
     spaces/[id]/settings  # Any space type: rename, invite links, members/roles, leave, delete
     join/[token]       # Invite preview + explicit Join button
     plan/              # Week view: ?week= (any date → its Monday), ?plan=; cook and eat rows (PlanWeek), then the grocery box (D50)
-    groceries/         # A plan's grocery list: ?plan=, add box, "Got it" section, clear checked; live (LiveList), refresh every 60s as a safety net
+    groceries/         # A plan's grocery list: ?plan=, add box, "Got it" section, clear checked, Clear list in the ⋯ sheet (D52); live (LiveList), refresh every 60s as a safety net
     account/[path]/    # Neon Auth account views; settings adds our Appearance card (light/dark/system)
   (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), large type, wake lock
   (form)/recipes/new    # How to add one (docs/ux-plan.md D34): by link (new/link), by photo (new/photo), or manually (new/manual, the form)

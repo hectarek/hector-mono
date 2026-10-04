@@ -193,4 +193,16 @@ export class GroceryItemsRepository
       this.handleError(err, "deleteChecked", { spaceId });
     }
   }
+
+  async deleteAll(spaceId: string, tx?: ITransaction): Promise<number> {
+    try {
+      const removed = await this.getDbContext(tx)
+        .delete(groceryItems)
+        .where(eq(groceryItems.spaceId, spaceId))
+        .returning({ id: groceryItems.id });
+      return removed.length;
+    } catch (err) {
+      this.handleError(err, "deleteAll", { spaceId });
+    }
+  }
 }

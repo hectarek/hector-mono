@@ -30,7 +30,9 @@ async function swipe(page: Page, direction: "left" | "right") {
 
 // P15.7: the week's loop as a person does it, in a real browser, against the test project
 // (playwright.config.ts). Each run signs up a new account, so runs never share data.
-test("sign up, add a recipe, plan it, shop for it", async ({ page }) => {
+test("sign up, add a recipe, plan it, shop for it, start the list over", async ({
+  page,
+}) => {
   const email = `flow-${Date.now()}@example.test`;
 
   await page.goto("/");
@@ -106,4 +108,18 @@ test("sign up, add a recipe, plan it, shop for it", async ({ page }) => {
   await expect(
     page.getByRole("checkbox", { name: "1 onion for Chili" }),
   ).toBeChecked();
+
+  // D52: start the list over from the ⋯ sheet, after it asks, and Plan can add the meal again.
+  await page.getByRole("button", { name: /^More for / }).click();
+  await page.getByRole("button", { name: "Clear list" }).click();
+  const question = page.getByRole("group", { name: "Clear the whole list?" });
+  await expect(question).toContainText("all 2 items");
+  await question.getByRole("button", { name: "Clear list" }).click();
+  await expect(page.getByText("List cleared.")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByText(/^The list is empty/)).toBeVisible();
+  await page.getByRole("link", { name: "Plan" }).click();
+  await expect(
+    page.getByRole("button", { name: "Add 1 meal to the grocery list" }),
+  ).toBeVisible();
 });

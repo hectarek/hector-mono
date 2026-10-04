@@ -27,4 +27,6 @@ export interface IGroceryItemsRepository {
   updateText(id: string, text: string, tx?: ITransaction): Promise<void>;
   delete(id: string, tx?: ITransaction): Promise<void>;
   deleteChecked(spaceId: string, tx?: ITransaction): Promise<number>;
+  // Every item, checked or not (D52); how many went.
+  deleteAll(spaceId: string, tx?: ITransaction): Promise<number>;
 }

@@ -4,6 +4,7 @@ import { addGroceryItemUseCase } from "@/src/application/use-cases/grocery/add-g
 import { addPlanToListUseCase } from "@/src/application/use-cases/grocery/add-plan-to-list.use-case";
 import { addRecipesToListUseCase } from "@/src/application/use-cases/grocery/add-recipes-to-list.use-case";
 import { clearCheckedItemsUseCase } from "@/src/application/use-cases/grocery/clear-checked-items.use-case";
+import { clearGroceryListUseCase } from "@/src/application/use-cases/grocery/clear-grocery-list.use-case";
 import { getGroceryListUseCase } from "@/src/application/use-cases/grocery/get-grocery-list.use-case";
 import { listMealsToAddUseCase } from "@/src/application/use-cases/grocery/list-meals-to-add.use-case";
 import { removeGroceryItemUseCase } from "@/src/application/use-cases/grocery/remove-grocery-item.use-case";
@@ -15,6 +16,7 @@ import { addGroceryItemController } from "@/src/interface-adapters/controllers/g
 import { addPlanToListController } from "@/src/interface-adapters/controllers/grocery/add-plan-to-list.controller";
 import { addRecipesToListController } from "@/src/interface-adapters/controllers/grocery/add-recipes-to-list.controller";
 import { clearCheckedItemsController } from "@/src/interface-adapters/controllers/grocery/clear-checked-items.controller";
+import { clearGroceryListController } from "@/src/interface-adapters/controllers/grocery/clear-grocery-list.controller";
 import { getGroceryListController } from "@/src/interface-adapters/controllers/grocery/get-grocery-list.controller";
 import { listMealsToAddController } from "@/src/interface-adapters/controllers/grocery/list-meals-to-add.controller";
 import { removeGroceryItemController } from "@/src/interface-adapters/controllers/grocery/remove-grocery-item.controller";
@@ -66,6 +68,16 @@ export function createGroceryModule() {
   groceryModule
     .bind(DI_SYMBOLS.IClearCheckedItemsUseCase)
     .toHigherOrderFunction(clearCheckedItemsUseCase, writeDeps);
+  groceryModule
+    .bind(DI_SYMBOLS.IClearGroceryListUseCase)
+    .toHigherOrderFunction(clearGroceryListUseCase, [
+      DI_SYMBOLS.IGroceryItemsRepository,
+      DI_SYMBOLS.IPlanEntriesRepository,
+      DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
+      DI_SYMBOLS.IRealtimeService,
+      DI_SYMBOLS.ILoggerService,
+    ]);
   groceryModule
     .bind(DI_SYMBOLS.IAddRecipesToListUseCase)
     .toHigherOrderFunction(addRecipesToListUseCase, [
@@ -125,6 +137,11 @@ export function createGroceryModule() {
       DI_SYMBOLS.IClearCheckedItemsController,
       clearCheckedItemsController,
       DI_SYMBOLS.IClearCheckedItemsUseCase,
+    ],
+    [
+      DI_SYMBOLS.IClearGroceryListController,
+      clearGroceryListController,
+      DI_SYMBOLS.IClearGroceryListUseCase,
     ],
     [
       DI_SYMBOLS.IAddRecipesToListController,

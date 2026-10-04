@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 16 (Plan's week first, a list you can start over) planned, on `feat/recipes-plan-groceries-feedback`. Phases 1–15, L5, L6 and the fix for live updates with no key (hectarek/hector-mono#12) merged. |
-| Next task | Hector reviews Phase 16's plan; then P16.1. Also open: L7 (Later). |
-| Waiting on Hector | Phase 16's plan; real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 16 (Plan's week first, a list you can start over) done, in review on `feat/recipes-plan-groceries-feedback`. Phases 1–15, L5, L6 and the fix for live updates with no key (hectarek/hector-mono#12) merged. |
+| Next task | Hector reviews Phase 16's PR, then his next round of feedback. Also open: L7 (Later). |
+| Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1579,7 +1579,7 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
     - `tests/app/_components/week-swipe.test.tsx`, 2 tests: a swipe left then right goes to the next week, then the one before; a scroll, a swipe from the edge and a mouse drag go nowhere. With the edge rule taken out, the second fails.
     - In a real browser: the P15.7 flow now swipes across the week with touch events, on a phone-sized Chromium, to the next week and back, before adding to the list. It passes 3 runs out of 3.
     - Safari on an iPhone isn't covered here (the flow is Chromium). That, and how the swipe feels, are on H5.
-- [ ] **P16.3** Clear the whole list — C · D52
+- [x] **P16.3** Clear the whole list — C · D52
   - Do:
     - Groceries' ⋯ sheet gets Clear list, for editors, when the list has items. It's the destructive style, and it asks first, as Delete does:
       - title: "Clear the whole list?";
@@ -1594,6 +1594,24 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
   - Verify:
     - Use-case tests on both backends: everything goes; a viewer can't; after clearing, Plan's grocery button can add the meals again.
     - A screen test of the sheet: Clear list asks first, Cancel keeps the list, and Clear list empties it.
+  - Evidence (2026-10-04):
+    - Built inward-out:
+      - `deleteAll` (items) and `unmarkAddedToList` (meals) on both repositories, mock and Postgres.
+      - `clearGroceryList`: an editor only; removing the items and unmarking the meals happen in one transaction; it sends "changed" when anything went.
+      - Its controller, the `clearGroceryList` action (which refreshes `/plan` too, since Plan's count changes), and `ClearListButton` in Groceries' ⋯ sheet.
+    - The question is asked in the sheet itself, as Invite turns the sheet into its links, not in a dialog over the sheet as Delete does. It still asks first, with Cancel and Clear list. A dialog stacked on a bottom sheet risks focus and scroll trouble on iOS.
+    - Use-case tests, on both backends:
+      - Every item goes, checked or not (4 of 4), "changed" is sent once, and Plan's button can add the meal again (the same 3 lines).
+      - A viewer can't clear.
+      - Another plan's list and meals are left alone.
+      - With the unmarking taken out, the first test fails on both backends.
+    - Controller basics, and an action test (it empties the list and refreshes both pages).
+    - A screen test on the Groceries page:
+      - ⋯, then Clear list, asks "Clear the whole list?" ("all 2 items, checked or not"), and Cancel keeps both.
+      - Clear list empties the list, and the sheet says "List cleared.".
+      - With Clear list clearing straight away, the test fails. Restored, it passes 10 runs in a row, and 5 more after the question became a fieldset (Biome's `useSemanticElements`).
+    - In a real browser, the P15.7 flow ends by starting the list over: it clears the 2 checked items from the sheet, the list is empty, and Plan offers Add 1 meal again. It passes 3 runs out of 3. A screenshot of the question in the sheet showed the heading at the top of its box and Clear list in the destructive style.
+    - Lint is clean, types are clean, and all 967 + 29 tests pass.
 
 ## Later (to-dos, not scheduled)
 
@@ -1870,3 +1888,8 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
   - Next: Hector reviews the fix; then H23, H5.
 - **2026-10-04 (au)** — Hector merged the live-updates fix (hectarek/hector-mono#12) and gave feedback from using the app: Plan should show the week without a scroll and change weeks with a swipe; Groceries needs a way to clear the whole list. Phase 16 written (D50–D52), which also answers H23.
   - Next: Hector reviews Phase 16's plan; then P16.1.
+- **2026-10-04 (av)** — Hector: go ahead with all three. Phase 16 done (see each task's Evidence), one commit per task:
+  - Plan shows the week first.
+  - A swipe changes the week; checked with real touches in Chromium.
+  - Clear list starts the list over, and Plan can add the meals again.
+  - Next: Hector reviews the PR. On a phone (H5): the swipe, and Clear list.

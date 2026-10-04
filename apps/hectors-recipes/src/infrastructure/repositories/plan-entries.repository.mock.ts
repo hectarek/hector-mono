@@ -114,6 +114,12 @@ export class MockPlanEntriesRepository implements IPlanEntriesRepository {
     );
   }
 
+  async unmarkAddedToList(spaceId: string): Promise<void> {
+    this.entries = this.entries.map((entry) =>
+      entry.spaceId === spaceId ? { ...entry, addedToListAt: null } : entry,
+    );
+  }
+
   async delete(id: string): Promise<void> {
     this.entries = this.entries.filter((entry) => entry.id !== id);
   }

@@ -1,4 +1,5 @@
 import { AutoRefresh } from "@/app/_components/auto-refresh";
+import { ClearListButton } from "@/app/_components/clear-list-button";
 import { GroceryList } from "@/app/_components/grocery-list";
 import { LiveList } from "@/app/_components/live-list";
 import { SpaceHeader } from "@/app/_components/space-header";
@@ -25,6 +26,7 @@ export default async function GroceriesPage({
     { spaceId: current.id },
     userId,
   );
+  const canEdit = hasRole(current.role, "editor");
 
   return (
     <div className="flex flex-col gap-4">
@@ -38,14 +40,23 @@ export default async function GroceriesPage({
         hrefFor={(id) => `/groceries?plan=${id}`}
       />
 
-      <SpaceHeader space={current} label="Grocery list" />
+      <SpaceHeader space={current} label="Grocery list">
+        {/* Starting the list over (D52), keyed by plan like the list. */}
+        {canEdit && (
+          <ClearListButton
+            key={current.id}
+            spaceId={current.id}
+            count={items.length}
+          />
+        )}
+      </SpaceHeader>
 
       {/* Keyed by plan, so a typed item or a message never follows you to another one. */}
       <GroceryList
         key={current.id}
         spaceId={current.id}
         items={items}
-        canEdit={hasRole(current.role, "editor")}
+        canEdit={canEdit}
       />
     </div>
   );
