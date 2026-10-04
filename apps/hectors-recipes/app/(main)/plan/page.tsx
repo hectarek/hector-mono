@@ -1,5 +1,5 @@
 import { Button } from "@repo/ui/components/button";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { AddPlanToListButton } from "@/app/_components/add-plan-to-list-button";
 import { MakeDefaultButton } from "@/app/_components/make-default-button";
@@ -129,31 +129,6 @@ export default async function PlanPage({
         </Button>
       )}
 
-      {/* Planning starts from a recipe (D40): Recipes, then its Add to plan. */}
-      {canEdit && (
-        <Button
-          variant="secondary"
-          size="lg"
-          nativeButton={false}
-          render={<Link href="/" />}
-        >
-          <Plus data-icon="inline-start" />
-          Plan a meal
-        </Button>
-      )}
-
-      {/* The planned meals in a range not on the list yet (D41, D44); with none, it says so,
-          with the way to the list. Always there for an editor, so a press's result isn't lost
-          when nothing is left to add. Keyed by plan, so its message doesn't follow you. */}
-      {canEdit && (
-        <AddPlanToListButton
-          key={current.id}
-          planId={current.id}
-          today={today}
-          cookDays={cookDaysToAdd}
-        />
-      )}
-
       <PlanWeek
         today={today}
         canEdit={canEdit}
@@ -165,6 +140,28 @@ export default async function PlanPage({
           isPast: date < today,
         }))}
       />
+
+      {/* Planning starts from a recipe (D40); with no button for it (D50), an empty week
+          says how. */}
+      {canEdit && entries.length === 0 && (
+        <p className="text-muted-foreground text-center text-sm">
+          Nothing planned this week. To plan a meal, open a recipe and tap Add
+          to plan.
+        </p>
+      )}
+
+      {/* Under the week (D50): the planned meals in a range not on the list yet (D41, D44);
+          with none, it says so, with the way to the list. Always there for an editor, so a
+          press's result isn't lost when nothing is left to add. Keyed by plan, so its message
+          doesn't follow you. */}
+      {canEdit && (
+        <AddPlanToListButton
+          key={current.id}
+          planId={current.id}
+          today={today}
+          cookDays={cookDaysToAdd}
+        />
+      )}
     </div>
   );
 }

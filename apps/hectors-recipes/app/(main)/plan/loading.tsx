@@ -1,7 +1,7 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { placeholders } from "@/app/_lib/placeholders";
 
-// The plan's shape while it loads: its title, the week switcher, Plan a meal and the seven days.
+// The plan's shape while it loads: its title, the week switcher and the seven days.
 export default function Loading() {
   return (
     <div role="status" aria-busy="true" className="flex flex-col gap-4">
@@ -15,7 +15,6 @@ export default function Loading() {
         <Skeleton className="h-5 w-28" />
         <Skeleton className="size-9" />
       </div>
-      <Skeleton className="h-11 w-full" />
       <div className="flex flex-col divide-y rounded-xl border">
         {placeholders(7).map((key) => (
           <div key={key} className="p-3">

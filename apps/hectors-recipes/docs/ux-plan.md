@@ -1543,7 +1543,7 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
 
 Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's feedback after using the app (2026-10-04). On Plan, the week sits below a button and the grocery box, so it takes a scroll to see; it should come first, and a swipe should change the week. On Groceries, there's no way to start the list over after adding too much. One commit per task; the PR when the phase is done.
 
-- [ ] **P16.1** Plan shows the week first — C · D50
+- [x] **P16.1** Plan shows the week first — C · D50
   - Do:
     - Plan a meal goes. The week's arrows and days come straight after the title, and the grocery box ("Shopping for") moves under the days.
     - The grocery button becomes filled: it's now Plan's one action (D32), which answers H23.
@@ -1552,6 +1552,18 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
     - A screen test of the page: the days come before Shopping for, there's no Plan a meal, and the empty-week line shows only on an empty week.
     - At 375 px in the browser, the whole week shows without scrolling, on a week with a few meals.
     - The browser flow (P15.7) still passes.
+  - Evidence (2026-10-04):
+    - `tests/app/(main)/plan/page.test.tsx`, 2 tests on the page as the server renders it:
+      - there's no Plan a meal, and Shopping for comes after the last day;
+      - the empty-week line shows only on an empty week.
+      - With the box moved back above the days, or the line shown on every week, a test fails. Restored, both pass.
+    - Screenshots at 375 × 812, on the test project, with no scrolling:
+      - This week, with three meals today: the arrows sit right under the title, then six days and two of the meals. The third meal and the grocery box are below the fold.
+      - An empty week: all seven days fit; the empty-week line and the grocery box are just under them.
+      - So the week comes first now, but a week with several meals still needs a scroll on a phone this size, since each meal is a row of its own. Making day rows more compact would be a follow-up.
+    - Plan's loading skeleton lost its Plan a meal bar. features.md (Plan) gives the page's order.
+    - The browser flow passes, and all 954 + 26 tests pass.
+    - Found on the way: the tool that checks a test catches its bug (put the bug back, run the test) misread a failure. Bun indents the "(fail)" line after a long error. That tool lives outside the repo and is fixed. Earlier results stand: the misreading can only hide a failure, and every earlier check reported one.
 - [ ] **P16.2** Swipe between weeks — C · D51
   - Do:
     - On a phone, a sideways swipe across the week goes to the next week (swipe left) or the previous one (swipe right), as the arrows do. The arrows stay.
