@@ -18,11 +18,15 @@ import {
 import { shrinkPhoto } from "@/app/_lib/shrink-photo";
 import {
   type ReadRecipeResult,
+  readRecipeFromDocument,
   readRecipeFromPhoto,
   readRecipeFromText,
 } from "@/app/actions/import";
 import type { CheckedDraft } from "@/src/entities/itemizing-check";
-import { MAX_RECIPE_TEXT } from "@/src/entities/models/recipe-draft.model";
+import {
+  MAX_PHOTO_BYTES,
+  MAX_RECIPE_TEXT,
+} from "@/src/entities/models/recipe-draft.model";
 
 type Stage =
   | { kind: "choose"; error?: string }
@@ -31,7 +35,27 @@ type Stage =
 
 type NewRecipe = Awaited<ReturnType<typeof loadNewRecipe>>;
 
-const NOT_TAKEN = "Choose a photo, or a text or Markdown file.";
+const NOT_TAKEN = "Choose a photo, a PDF, or a text or Markdown file.";
+
+// What a read was from, for the form's note.
+const READ_FROM: Record<RecipeFileKind, string> = {
+  photo: "photo",
+  pdf: "PDF",
+  text: "file",
+};
+
+// A PDF, sent as it is (D53): the reader counts its pages before reading it. One over the
+// request limit is refused here, since the upload itself would fail.
+async function readPdf(file: File): Promise<ReadRecipeResult> {
+  if (file.size > MAX_PHOTO_BYTES) {
+    return {
+      error: "That PDF is over 4 MB. Screenshot the recipe's pages instead.",
+    };
+  }
+  const data = new FormData();
+  data.set("pdf", file);
+  return readRecipeFromDocument(data);
+}
 
 // A photo, shrunk on the phone (one image, or a long screenshot's pieces), for the reader.
 async function readPhoto(file: File): Promise<ReadRecipeResult> {
@@ -85,7 +109,11 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
     setStage({ kind: "reading", preview, fileName: file.name });
     try {
       const result =
-        kind === "photo" ? await readPhoto(file) : await readTextFile(file);
+        kind === "photo"
+          ? await readPhoto(file)
+          : kind === "pdf"
+            ? await readPdf(file)
+            : await readTextFile(file);
       setStage(
         "draft" in result
           ? { kind: "read", draft: result.draft, from: kind }
@@ -110,7 +138,7 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
         {...form}
         values={values}
         review={review}
-        note={`Read from your ${stage.from === "photo" ? "photo" : "file"}. Check it before saving.`}
+        note={`Read from your ${READ_FROM[stage.from]}. Check it before saving.`}
       />
     );
   }

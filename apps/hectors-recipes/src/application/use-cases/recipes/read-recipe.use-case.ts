@@ -1,7 +1,10 @@
 import type { IRecipeReadsRepository } from "@/src/application/repositories/recipe-reads.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRecipeReaderService } from "@/src/application/services/recipe-reader.service.interface";
-import { RecipeReadError } from "@/src/entities/errors/common";
+import {
+  RecipeReadError,
+  type RecipeReadFailure,
+} from "@/src/entities/errors/common";
 import {
   type CheckedDraft,
   checkDraft,
@@ -14,11 +17,20 @@ import {
 
 export type IReadRecipeUseCase = ReturnType<typeof readRecipeUseCase>;
 
-// Reads a recipe from a photo or a page's text for someone to check before saving; nothing is
-// saved here (ux-plan D29). The reader's draft is held to its own words, and a read of text
-// to that text too (D30). A photo has no text to hold it to. Each person gets
+// Reads refused before the model saw anything, which cost nothing: the month's budget is spent,
+// or a PDF is too long, locked or doesn't open (D53).
+const FREE_FAILURES: ReadonlySet<RecipeReadFailure> = new Set([
+  "budget-paused",
+  "too-many-pages",
+  "locked-document",
+  "unreadable-document",
+]);
+
+// Reads a recipe from a photo, a PDF or a page's text for someone to check before saving;
+// nothing is saved here (ux-plan D29). The reader's draft is held to its own words, and a read
+// of text to that text too (D30). A photo or PDF has no text to hold it to. Each person gets
 // DAILY_RECIPE_READS reads in 24 hours (D48); a read counts as it starts, since a failed one
-// costs the same, except one refused because the month's budget is spent, which cost nothing.
+// costs the same, except one refused before the model saw anything (FREE_FAILURES).
 export const readRecipeUseCase = (
   recipeReaderService: IRecipeReaderService,
   recipeReadsRepository: IRecipeReadsRepository,
@@ -45,7 +57,7 @@ export const readRecipeUseCase = (
     try {
       read = await recipeReaderService.read(source);
     } catch (err) {
-      if (err instanceof RecipeReadError && err.reason === "budget-paused") {
+      if (err instanceof RecipeReadError && FREE_FAILURES.has(err.reason)) {
         await recipeReadsRepository.remove(readId);
       }
       throw err;

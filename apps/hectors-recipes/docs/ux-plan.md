@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P17.2. |
+| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1–P17.2 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P17.3; the real reads once the worktree's `.env.test` has the AI key (H25). |
 | Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
@@ -1635,7 +1635,7 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
     - Found on the way, in the test: a read replaces the picker, so a second file has to be chosen with the new input. The test looks it up each time.
     - Not checked here: the over-cap message (a 50,000-character file in a screen test adds nothing over the length check), and a real read (P17.4, with H25 done).
     - All 970 + 31 tests pass.
-- [ ] **P17.2** PDFs — C · D53
+- [x] **P17.2** PDFs — C · D53
   - Do:
     - A new kind of read, `document`: one PDF, at most 4 MB (the same request limit as photos) and 10 pages.
     - The reader sends it to the model as a PDF file part, the way it sends photos as image parts, and the model reads each page's text and image.
@@ -1643,6 +1643,24 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
     - No text is extracted, so like a photo, a PDF's draft isn't held to its source's words. The review flags still apply.
     - It counts as a `document` read. `recipe_reads.kind` is free text, so there's no migration.
   - Verify: controller tests for the type, size and page limits; the reader's parts for a PDF; one real read of a recipe PDF, a few cents (H25).
+  - Evidence (2026-10-04):
+    - The path:
+      - The source kind `document` comes through `readRecipeFromDocument`.
+      - The controller takes non-empty bytes within 4 MB, and the phone refuses a bigger PDF before uploading.
+      - The reader's `checkPdf` opens it with `unpdf`, chosen over `pdf-lib`, whose last release was in 2021. More than `MAX_PDF_PAGES` (10) pages, a password, or a file that doesn't open each get their own reason and message.
+      - Those refusals are taken back from the daily limit with the spent budget (`FREE_FAILURES`).
+      - The PDF goes to the model as a `file` part (`application/pdf`), and the instructions now say "a photo or a PDF".
+      - `recipe_reads.kind` gains `document` in `db/schema.ts` only: `drizzle-kit generate` reports no schema changes.
+    - Test files made in Chromium: `tests/_support/files/chili-two-pages.pdf` (2 pages) and `eleven-pages.pdf`.
+    - Tests:
+      - The reader sends a PDF whole, as a PDF part, and refuses 11 pages and a broken file without calling the model. With the page limit taken out, the refusal test fails.
+      - The use case gives back a refused PDF's read.
+      - The controller takes a PDF, and refuses an empty one, one past the cap, and one that isn't bytes.
+      - `recipeFileKind` reads `.pdf` by type or extension.
+      - A screen test refuses a 4 MB+ PDF without a read, then sends the 2-page one as it is, and the form says "Read from your PDF.".
+    - Found on the way: pdf.js takes over (detaches) the bytes it opens, so counting the pages of the original left the model an empty PDF. It now opens a copy. With the copy taken out, the reader's test fails.
+    - Not done yet: the real read. The worktree's `.env.test` has no AI key, so the Gateway refused it as unauthenticated and nothing was spent. It's re-run once the file is copied again (H25).
+    - All 979 + 32 tests pass.
 - [ ] **P17.3** Up to 3 photos — C · D53
   - Do:
     - The picker takes up to 3 photos at once, for a recipe over two or three pages, read as one recipe in the order chosen.
@@ -1774,7 +1792,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
-| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it |
+| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | 2026-10-04: Hector added it to the main checkout's `.env.test`; the worktree's copy predates it, so it needs copying again |
 
 ## Risks and how they're handled
 

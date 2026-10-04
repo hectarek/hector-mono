@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PhotoImport } from "@/app/_components/photo-import";
 import { loadNewRecipe } from "@/app/_lib/new-recipe";
 import { getInjection } from "@/di/container";
+import { MAX_PHOTO_BYTES } from "@/src/entities/models/recipe-draft.model";
 import { MockRecipeReaderService } from "@/src/infrastructure/services/mock-recipe-reader.service";
 import { signInAsNewUser } from "@/tests/_support/next";
 
@@ -53,6 +55,35 @@ describe("PhotoImport", () => {
     ]);
   });
 
+  it("sends a PDF as it is, and refuses one over 4 MB before uploading it", async () => {
+    const user = userEvent.setup();
+    const { view, input } = await open();
+    const pdf = new Uint8Array(
+      readFileSync(
+        `${import.meta.dir}/../../_support/files/chili-two-pages.pdf`,
+      ),
+    );
+    const before = reader.sources.length;
+
+    await user.upload(
+      input(),
+      new File([new Uint8Array(MAX_PHOTO_BYTES + 1)], "huge.pdf", {
+        type: "application/pdf",
+      }),
+    );
+    await view.findByText(
+      "That PDF is over 4 MB. Screenshot the recipe's pages instead.",
+    );
+    expect(reader.sources.length).toBe(before);
+
+    await user.upload(
+      input(),
+      new File([pdf], "chili.pdf", { type: "application/pdf" }),
+    );
+    await view.findByText("Read from your PDF. Check it before saving.");
+    expect(reader.sources.slice(before)).toEqual([{ kind: "document", pdf }]);
+  });
+
   it("says so for an empty file and for a file it doesn't take, and reads neither", async () => {
     // As a picker might: Choose File can offer anything.
     const user = userEvent.setup({ applyAccept: false });
@@ -68,7 +99,7 @@ describe("PhotoImport", () => {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }),
     );
-    await view.findByText("Choose a photo, or a text or Markdown file.");
+    await view.findByText("Choose a photo, a PDF, or a text or Markdown file.");
     expect(reader.sources.length).toBe(before);
   });
 });

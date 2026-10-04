@@ -8,22 +8,24 @@ import {
   NoOutputGeneratedError,
   Output,
 } from "ai";
+import { getDocumentProxy } from "unpdf";
 import { z } from "zod";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRecipeReaderService } from "@/src/application/services/recipe-reader.service.interface";
 import { AISLES } from "@/src/entities/aisles";
 import { RecipeReadError } from "@/src/entities/errors/common";
 import { UNITS } from "@/src/entities/ingredient-line";
-import type {
-  LineReading,
-  RecipeDraft,
-  RecipeSource,
+import {
+  type LineReading,
+  MAX_PDF_PAGES,
+  type RecipeDraft,
+  type RecipeSource,
 } from "@/src/entities/models/recipe-draft.model";
 import { AI_GATEWAY_MODELS } from "@/src/infrastructure/services/ai-gateway-models";
 
 const TIMEOUT_MS = 120_000;
 
-const READ_INSTRUCTIONS = `You transcribe recipes for a home cook's recipe app, from pasted text or a photo.
+const READ_INSTRUCTIONS = `You transcribe recipes for a home cook's recipe app, from pasted text, a photo or a PDF.
 Copy what the source says. Never invent, complete or improve anything: no amounts, ingredients, steps or times that aren't there. When something is unreadable or ambiguous, leave that field null and say so in "unsure".
 Keep every ingredient line, even one that points to another part of the recipe, such as "Sauce (below)"; never drop, merge or reorder lines. Keep steps in the source's order, and split them only where the source numbers or separates them.
 Ignore everything that isn't the recipe, such as stories, ads, comments and nutrition panels.
@@ -146,6 +148,9 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
   }
 
   async read(source: RecipeSource): Promise<RecipeDraft> {
+    if (source.kind === "document") {
+      await checkPdf(source.pdf);
+    }
     const reading = await this.generate(
       "Read a recipe",
       { source: source.kind },
@@ -225,14 +230,45 @@ function describe(err: unknown): Record<string, unknown> {
   };
 }
 
+// A PDF is opened before it's sent, so one that's too long, locked or broken is refused before
+// the model sees it, and costs nothing (D53). pdf.js may take over the bytes it's given, so it
+// gets a copy and the original goes to the model.
+async function checkPdf(pdf: Uint8Array): Promise<void> {
+  let pages: number;
+  try {
+    const document = await getDocumentProxy(pdf.slice(), { verbosity: 0 });
+    pages = document.numPages;
+    await document.loadingTask.destroy();
+  } catch (err) {
+    const locked = err instanceof Error && err.name === "PasswordException";
+    throw new RecipeReadError(
+      locked ? "locked-document" : "unreadable-document",
+      locked ? "The PDF is password-protected" : "The PDF doesn't open",
+      { cause: err },
+    );
+  }
+  if (pages > MAX_PDF_PAGES) {
+    throw new RecipeReadError("too-many-pages", `The PDF has ${pages} pages`);
+  }
+}
+
 // The source as the message's parts: the text, marked off as material (it may be a web page
-// written to steer the reader), or the photo's images in order.
+// written to steer the reader), the PDF, or the photo's images in order.
 function toParts(source: RecipeSource) {
   if (source.kind === "text") {
     return [
       {
         type: "text" as const,
         text: `<recipe_source>\n${source.text}\n</recipe_source>`,
+      },
+    ];
+  }
+  if (source.kind === "document") {
+    return [
+      {
+        type: "file" as const,
+        mediaType: "application/pdf",
+        data: source.pdf,
       },
     ];
   }

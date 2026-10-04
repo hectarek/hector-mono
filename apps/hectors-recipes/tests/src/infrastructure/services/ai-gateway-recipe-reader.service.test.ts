@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import { GatewayInternalServerError } from "@ai-sdk/gateway";
 import { MockLanguageModelV4 } from "ai/test";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -165,6 +166,47 @@ describe("AiGatewayRecipeReaderService", () => {
       role: "user",
       content: [{ type: "file", mediaType: "image/jpeg" }],
     });
+  });
+
+  // D53: the PDF test files are made in Chromium (tests/_support/files).
+  const pdfFile = (name: string) =>
+    new Uint8Array(
+      readFileSync(`${import.meta.dir}/../../../_support/files/${name}`),
+    );
+
+  it("sends a PDF whole, as a PDF file, once its pages are counted", async () => {
+    const model = fakeModel({ text: JSON.stringify(reading) });
+    const pdf = pdfFile("chili-two-pages.pdf");
+    const size = pdf.byteLength;
+    await reader(model).read({ kind: "document", pdf });
+
+    const user = model.doGenerateCalls[0]?.prompt[1];
+    expect(user).toMatchObject({
+      role: "user",
+      content: [{ type: "file", mediaType: "application/pdf" }],
+    });
+    // Counting the pages didn't take the bytes over.
+    expect(pdf.byteLength).toBe(size);
+    const sent = user?.role === "user" ? user.content[0] : undefined;
+    const bytes =
+      sent?.type === "file" && sent.data.type === "data"
+        ? sent.data.data
+        : undefined;
+    expect(bytes instanceof Uint8Array ? bytes.byteLength : bytes).toBe(size);
+  });
+
+  it("refuses a PDF over the page limit, or one that doesn't open, without asking the model", async () => {
+    const model = fakeModel({ text: JSON.stringify(reading) });
+    await expect(
+      reader(model).read({
+        kind: "document",
+        pdf: pdfFile("eleven-pages.pdf"),
+      }),
+    ).rejects.toMatchObject({ reason: "too-many-pages" });
+    await expect(
+      reader(model).read({ kind: "document", pdf: new Uint8Array([1, 2, 3]) }),
+    ).rejects.toMatchObject({ reason: "unreadable-document" });
+    expect(model.doGenerateCalls).toHaveLength(0);
   });
 
   // The note is the app's, so it goes with the instructions, not beside the source.

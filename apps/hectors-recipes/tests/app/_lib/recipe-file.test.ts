@@ -11,6 +11,13 @@ describe("recipeFileKind", () => {
     );
   });
 
+  it("reads a PDF as a PDF, by type or by extension", () => {
+    expect(recipeFileKind({ name: "chili.pdf", type: "application/pdf" })).toBe(
+      "pdf",
+    );
+    expect(recipeFileKind({ name: "Chili.PDF", type: "" })).toBe("pdf");
+  });
+
   it("reads text and Markdown files as text, by type or by extension", () => {
     expect(recipeFileKind({ name: "chili.txt", type: "text/plain" })).toBe(
       "text",

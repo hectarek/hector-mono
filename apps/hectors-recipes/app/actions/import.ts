@@ -49,6 +49,31 @@ export async function readRecipeFromPhoto(
   }
 }
 
+// Add by file (D53): a PDF, sent as it is; the reader counts its pages before reading it.
+export async function readRecipeFromDocument(
+  formData: FormData,
+): Promise<ReadRecipeResult> {
+  const logger = actionLogger("readRecipeFromDocument");
+  const pdf = formData.get("pdf");
+  try {
+    const draft = await getInjection("IReadRecipeController")(
+      {
+        kind: "document",
+        pdf:
+          pdf instanceof File ? new Uint8Array(await pdf.arrayBuffer()) : pdf,
+      },
+      await getCurrentUserId(),
+    );
+    return { draft };
+  } catch (err) {
+    if (err instanceof InputParseError) {
+      return { error: "Choose a PDF under 4 MB." };
+    }
+    const fallback = "Couldn't read that PDF. Try again.";
+    return { error: toActionError(err, logger, fallback)?.error ?? fallback };
+  }
+}
+
 // Add by link (P10.3): the page's own recipe data, or its text read by the recipe reader.
 export async function readRecipeFromLink(
   formData: FormData,

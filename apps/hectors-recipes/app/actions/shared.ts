@@ -10,7 +10,10 @@ import {
   UnauthenticatedError,
   UnauthorizedError,
 } from "@/src/entities/errors/common";
-import { DAILY_RECIPE_READS } from "@/src/entities/models/recipe-draft.model";
+import {
+  DAILY_RECIPE_READS,
+  MAX_PDF_PAGES,
+} from "@/src/entities/models/recipe-draft.model";
 
 // Helpers for app/actions/*: not a "use server" module, so nothing here is callable from the client.
 
@@ -111,6 +114,11 @@ const READ_FAILURES: Record<RecipeReadFailure, string> = {
   "daily-limit": `You've read ${DAILY_RECIPE_READS} recipes in the last day, the most for one day. Try again tomorrow, or add this one by hand.`,
   "service-unavailable":
     "The recipe reader isn't answering. Try again in a minute.",
+  "too-many-pages": `That PDF has more than ${MAX_PDF_PAGES} pages. For a long PDF like a cookbook, screenshot the recipe's pages instead.`,
+  "locked-document":
+    "That PDF is password-protected. Save a copy without the password, or screenshot it.",
+  "unreadable-document":
+    "Couldn't open that PDF. Try saving it again, or screenshot it.",
 };
 
 // What Add by link says when the page can't be fetched (P10.3). The screen offers pasting the

@@ -2,12 +2,17 @@ import { z } from "zod";
 import { AISLES } from "../aisles";
 import { UNITS } from "../ingredient-line";
 
-// What a recipe is read from: pasted text, or a photo or screenshot (ux-plan D29).
+// What a recipe is read from: pasted text, a photo or screenshot (ux-plan D29), or a PDF (D53).
 // A photo is one image, or a long screenshot cut into pieces, top to bottom (P14.11).
 export type RecipeImage = { data: Uint8Array; mediaType: string };
 export type RecipeSource =
   | { kind: "text"; text: string }
-  | { kind: "image"; images: RecipeImage[] };
+  | { kind: "image"; images: RecipeImage[] }
+  | { kind: "document"; pdf: Uint8Array };
+
+// The most pages a PDF read as one recipe may have (D53): none needs more, and a cookbook's
+// worth would be read, and paid for, page by page.
+export const MAX_PDF_PAGES = 10;
 
 // The most pieces a long screenshot is cut into, and the most a photo's pieces may weigh in
 // all: Vercel refuses a request body over 4.5 MB, and the form needs a little room too.

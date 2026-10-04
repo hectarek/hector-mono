@@ -49,6 +49,24 @@ describe("readRecipeController", () => {
         kind: "link",
         url: "https://example.com",
       },
+      "an empty PDF": { kind: "document", pdf: new Uint8Array(0) },
+      "a PDF past the cap": {
+        kind: "document",
+        pdf: new Uint8Array(MAX_RECIPE_IMAGE_BYTES + 1),
+      },
+    },
+  });
+});
+
+// D53: a PDF passes through as it is; its pages are counted when it's read.
+describe("readRecipeController, a PDF", () => {
+  const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+  controllerBasics({
+    make: (useCase, logger) => readRecipeController(useCase, logger),
+    valid: { kind: "document", pdf },
+    calledWith: [{ kind: "document", pdf }, OWNER],
+    invalid: {
+      "a PDF that isn't bytes": { kind: "document", pdf: "%PDF" },
     },
   });
 });

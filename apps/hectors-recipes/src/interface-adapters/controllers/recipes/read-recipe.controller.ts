@@ -53,6 +53,17 @@ const inputSchema = z.discriminatedUnion("kind", [
         "The photo is too large",
       ),
   }),
+  // A PDF (D53), within the same request limit as a photo; its pages are counted when it's read.
+  z.object({
+    kind: z.literal("document"),
+    pdf: z
+      .instanceof(Uint8Array)
+      .refine(
+        (bytes) =>
+          bytes.byteLength > 0 && bytes.byteLength <= MAX_RECIPE_IMAGE_BYTES,
+        "The PDF is empty or too large",
+      ),
+  }),
 ]);
 
 export type IReadRecipeController = ReturnType<typeof readRecipeController>;
