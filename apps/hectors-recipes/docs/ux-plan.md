@@ -12,7 +12,7 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 |---|---|
 | Phase | 16 (Plan's week first, a list you can start over) planned, on `feat/recipes-plan-groceries-feedback`. Phases 1–15, L5, L6 and the fix for live updates with no key (hectarek/hector-mono#12) merged. |
 | Next task | Hector reviews Phase 16's plan; then P16.1. Also open: L7 (Later). |
-| Waiting on Hector | Phase 16's plan; real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Waiting on Hector | Phase 16's plan; real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1564,7 +1564,7 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
     - Plan's loading skeleton lost its Plan a meal bar. features.md (Plan) gives the page's order.
     - The browser flow passes, and all 954 + 26 tests pass.
     - Found on the way: the tool that checks a test catches its bug (put the bug back, run the test) misread a failure. Bun indents the "(fail)" line after a long error. That tool lives outside the repo and is fixed. Earlier results stand: the misreading can only hide a failure, and every earlier check reported one.
-- [ ] **P16.2** Swipe between weeks — C · D51
+- [x] **P16.2** Swipe between weeks — C · D51
   - Do:
     - On a phone, a sideways swipe across the week goes to the next week (swipe left) or the previous one (swipe right), as the arrows do. The arrows stay.
     - Up-and-down scrolling isn't affected, and a mostly vertical drag isn't a swipe.
@@ -1573,6 +1573,12 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
     - The week changes when the swipe ends. It doesn't slide with the finger in this phase.
   - The rule (distance, angle, edge) is pure, in `app/_lib/swipe.ts`, with a unit test. A screen test fires touches and checks where the page went.
   - How it feels on a real phone goes to H5.
+  - Evidence (2026-10-04):
+    - `WeekSwipe` wraps Plan's arrows and days, and `swipeDirection` holds the rule: at least 60 px sideways, 1.5 times as far sideways as up or down, and not within 24 px of the screen's sides.
+    - `tests/app/_lib/swipe.test.ts`, 3 tests: left and right; a short move and a mostly vertical one; a start at either side.
+    - `tests/app/_components/week-swipe.test.tsx`, 2 tests: a swipe left then right goes to the next week, then the one before; a scroll, a swipe from the edge and a mouse drag go nowhere. With the edge rule taken out, the second fails.
+    - In a real browser: the P15.7 flow now swipes across the week with touch events, on a phone-sized Chromium, to the next week and back, before adding to the list. It passes 3 runs out of 3.
+    - Safari on an iPhone isn't covered here (the flow is Chromium). That, and how the swipe feels, are on H5.
 - [ ] **P16.3** Clear the whole list — C · D52
   - Do:
     - Groceries' ⋯ sheet gets Clear list, for editors, when the list has items. It's the destructive style, and it asks first, as Delete does:

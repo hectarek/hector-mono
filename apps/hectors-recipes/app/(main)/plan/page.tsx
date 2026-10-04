@@ -7,6 +7,7 @@ import { PlanWeek } from "@/app/_components/plan-week";
 import { SpaceHeader } from "@/app/_components/space-header";
 import { SpaceSwitcher } from "@/app/_components/space-switcher";
 import { StartOwnPlanButton } from "@/app/_components/start-own-plan-button";
+import { WeekSwipe } from "@/app/_components/week-swipe";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadPlans } from "@/app/_lib/load-plans";
 import { firstParam, type SearchParams } from "@/app/_lib/search-params";
@@ -58,6 +59,8 @@ export default async function PlanPage({
 
   const planParam = requestedPlan ? `&plan=${requestedPlan}` : "";
   const weekHref = (date: string) => `/plan?week=${date}${planParam}`;
+  const previousWeekHref = weekHref(addDays(monday, -7));
+  const nextWeekHref = weekHref(addDays(monday, 7));
   const isThisWeek = monday === mondayOf(today);
 
   return (
@@ -83,63 +86,61 @@ export default async function PlanPage({
         {!plans.some((plan) => plan.role === "owner") && <StartOwnPlanButton />}
       </SpaceHeader>
 
-      <nav
-        aria-label="Week"
-        className="flex items-center justify-between gap-2"
-      >
-        <Button
-          variant="secondary"
-          size="icon-lg"
-          nativeButton={false}
-          render={
-            <Link
-              href={weekHref(addDays(monday, -7))}
-              aria-label="Previous week"
-            />
-          }
+      {/* A swipe changes the week as the arrows do (D51). */}
+      <WeekSwipe previousHref={previousWeekHref} nextHref={nextWeekHref}>
+        <nav
+          aria-label="Week"
+          className="flex items-center justify-between gap-2"
         >
-          <ChevronLeft />
-        </Button>
-        <div className="flex flex-col items-center">
-          <span className="text-sm font-medium">{formatWeekRange(monday)}</span>
-          {isThisWeek && (
-            <span className="text-muted-foreground text-xs">This week</span>
-          )}
-        </div>
-        <Button
-          variant="secondary"
-          size="icon-lg"
-          nativeButton={false}
-          render={
-            <Link href={weekHref(addDays(monday, 7))} aria-label="Next week" />
-          }
-        >
-          <ChevronRight />
-        </Button>
-      </nav>
-      {!isThisWeek && (
-        <Button
-          variant="secondary"
-          size="lg"
-          nativeButton={false}
-          render={<Link href={weekHref(today)} />}
-          className="self-center"
-        >
-          Back to this week
-        </Button>
-      )}
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            nativeButton={false}
+            render={<Link href={previousWeekHref} aria-label="Previous week" />}
+          >
+            <ChevronLeft />
+          </Button>
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-medium">
+              {formatWeekRange(monday)}
+            </span>
+            {isThisWeek && (
+              <span className="text-muted-foreground text-xs">This week</span>
+            )}
+          </div>
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            nativeButton={false}
+            render={<Link href={nextWeekHref} aria-label="Next week" />}
+          >
+            <ChevronRight />
+          </Button>
+        </nav>
+        {!isThisWeek && (
+          <Button
+            variant="secondary"
+            size="lg"
+            nativeButton={false}
+            render={<Link href={weekHref(today)} />}
+            className="self-center"
+          >
+            Back to this week
+          </Button>
+        )}
 
-      <PlanWeek
-        today={today}
-        canEdit={canEdit}
-        entries={entries}
-        days={weekDates(monday).map((date) => ({
-          date,
-          ...formatDay(date),
-          isToday: date === today,
-          isPast: date < today,
-        }))}
-      />
+        <PlanWeek
+          today={today}
+          canEdit={canEdit}
+          entries={entries}
+          days={weekDates(monday).map((date) => ({
+            date,
+            ...formatDay(date),
+            isToday: date === today,
+            isPast: date < today,
+          }))}
+        />
+      </WeekSwipe>
 
       {/* Planning starts from a recipe (D40); with no button for it (D50), an empty week
           says how. */}
