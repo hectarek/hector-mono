@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 15 (screen tests) merged (hectarek/hector-mono#7, hectarek/hector-mono#8). The fix for live updates with no key is in review on `fix/recipes-live-updates-off`. Phases 1–14, L5 and L6 merged. |
-| Next task | Hector reviews the live-updates fix. Also open: L7 (Later). |
-| Waiting on Hector | whether Plan a meal is Plan's main action (H23); real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-02 |
+| Phase | 16 (Plan's week first, a list you can start over) planned, on `feat/recipes-plan-groceries-feedback`. Phases 1–15, L5, L6 and the fix for live updates with no key (hectarek/hector-mono#12) merged. |
+| Next task | Hector reviews Phase 16's plan; then P16.1. Also open: L7 (Later). |
+| Waiting on Hector | Phase 16's plan; real-phone checks (H5), now including a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -113,6 +113,9 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D47 | A date a week or more from today shows its month ("Thu Oct 15"); within a week it's "Today" or "Sat 26" as now. No comma inside a date, since lists of days use commas. | Hector (E): "ya sounds good". |
 | D48 | AI reads (photo, pasted text, and a page without recipe data) are limited to 20 per account per day. A page's own recipe data, read without AI, doesn't count. A long screenshot sent in pieces (P14.11) is one read. | Claude's call from the review, under Hector's "make a PR that addresses all of these": sign-up is open, and about 250 photo reads spend the $10 monthly budget, which pauses import for everyone. Hector reads a few a week. On the pieces, Hector, 2026-10-01: "count a long screenshot as one read". |
 | D49 | Screen tests use happy-dom with React Testing Library and user-event. They're `*.test.tsx` files that run in a pass of their own, each file in a fresh global (Bun's `--isolate`); `bun run test` runs both passes. They render real components against the real server actions and the test container's repositories, not mocked modules. | Hector, 2026-10-01: "sure, do this" to the library and a phase of tests (H22). Claude's calls: happy-dom replaces fetch, Request, Headers and the timers, and its Headers hide cookies as a browser's do, so it can't share a run with the server tests (6 proxy tests failed when it did); isolating every file took the suite from 7 s to 106 s, so only the screen tests are isolated. Bun's `mock.module` lasts for the whole run, so mocking the actions in one file would change them for the action tests. |
+| D50 | Plan shows the week first. There's no Plan a meal button (planning starts from a recipe's Add to plan, D40), and the grocery box sits under the days, filled as Plan's one action. An empty week says how to plan a meal. Revises D40's "one Plan a meal button". | Hector, 2026-10-04: "the main part i want to see is the calendar and i have to scroll to see it. we can probably remove plan a meal and we can move the shopping for under the calendar." The filled button and the empty-week line are Claude's calls. |
+| D51 | On a phone, a sideways swipe across the week changes the week, as the arrows do (which stay). Swipes from the screen's edge are left to the browser. | Hector, 2026-10-04: "a swipe gesture on mobile to go through the each week in addition to the buttons". The edge rule is Claude's call: Safari's back and forward start there (D22). |
+| D52 | Groceries' ⋯ sheet has Clear list. After asking, it removes every item, checked or not, for everyone in the plan, and marks the plan's meals as not on the list, so Plan can add them again. | Hector, 2026-10-04: "no way to easily clear the whole list… in the 3 dots at the top to reset it so that say we mess up and add it to the list too many times, we have an easy way to reset and try again." Unmarking the meals is Claude's reading of "try again". |
 
 ---
 
@@ -1536,6 +1539,44 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
       - For a moment during a reload, the Groceries page has its text twice, so the flow looks within the Got it section.
     - Not covered here: two people on two phones (live updates are off in tests), and cook mode's wake lock and sound. Those stay with H5.
 
+## Phase 16: Plan's week first, and a list you can start over
+
+Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's feedback after using the app (2026-10-04). On Plan, the week sits below a button and the grocery box, so it takes a scroll to see; it should come first, and a swipe should change the week. On Groceries, there's no way to start the list over after adding too much. One commit per task; the PR when the phase is done.
+
+- [ ] **P16.1** Plan shows the week first — C · D50
+  - Do:
+    - Plan a meal goes. The week's arrows and days come straight after the title, and the grocery box ("Shopping for") moves under the days.
+    - The grocery button becomes filled: it's now Plan's one action (D32), which answers H23.
+    - When the week shown has no meals, a line under the days says how to plan one: "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan." It's plain text: the Recipes tab is the way there.
+  - Verify:
+    - A screen test of the page: the days come before Shopping for, there's no Plan a meal, and the empty-week line shows only on an empty week.
+    - At 375 px in the browser, the whole week shows without scrolling, on a week with a few meals.
+    - The browser flow (P15.7) still passes.
+- [ ] **P16.2** Swipe between weeks — C · D51
+  - Do:
+    - On a phone, a sideways swipe across the week goes to the next week (swipe left) or the previous one (swipe right), as the arrows do. The arrows stay.
+    - Up-and-down scrolling isn't affected, and a mostly vertical drag isn't a swipe.
+    - A swipe that starts at the screen's edge is left to the browser: Safari uses the edges for back and forward (D22).
+    - Mouse drags don't count.
+    - The week changes when the swipe ends. It doesn't slide with the finger in this phase.
+  - The rule (distance, angle, edge) is pure, in `app/_lib/swipe.ts`, with a unit test. A screen test fires touches and checks where the page went.
+  - How it feels on a real phone goes to H5.
+- [ ] **P16.3** Clear the whole list — C · D52
+  - Do:
+    - Groceries' ⋯ sheet gets Clear list, for editors, when the list has items. It's the destructive style, and it asks first, as Delete does:
+      - title: "Clear the whole list?";
+      - text: "This removes all 12 items, checked or not, for everyone in the plan. Planned meals can be added again from Plan.";
+      - buttons: Cancel, Clear list.
+    - Clearing also marks the plan's meals as not on the list. "Already on the list" is a flag on each meal (D45), so without this, Plan would say there's nothing new to add.
+    - Like adding, clearing needs a connection, and it says so when there isn't one (`callAction`).
+  - Build order, inward-out:
+    - A use case, `clearGroceryList`. It needs an editor. In one transaction, it removes the plan's items and clears its meals' "added" mark. When something went, it sends the "changed" signal (live updates).
+    - A repository method on each repository, on both backends.
+    - Then the controller, the action and the button.
+  - Verify:
+    - Use-case tests on both backends: everything goes; a viewer can't; after clearing, Plan's grocery button can add the meals again.
+    - A screen test of the sheet: Clear list asks first, Cancel keeps the list, and Clear list empties it.
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -1618,7 +1659,7 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
 | H20 | 12 grocery items on Hector's plan say "for Banana-Fig Bread \| Forks Over Knives", the recipe's title before L1 (checked 2026-09-30: the only old name there). The grocery button matches by title, so it would add Banana-Fig Bread again. Rename the notes to "Banana-Fig Bread" (in session, D31), or leave them until they're checked off? | P13.5 | done 2026-09-30: renamed (backup `.reread/h20-notes-before.json`); none left with the old name. Those 12, and 5 for Beef Kofta, were the old versions' ingredients (before L4), which the button counted as on the list. At Hector's ask, the 17 unchecked ones were removed (backup `.reread/old-list-items-before.json`; none shared with another recipe): his list went from 44 items to 27. 12 checked Beef Kofta items stay in Got it for his Clear checked. |
 | H21 | OK to apply P14.10's additive migration 0012 (a `recipe_reads` table) to the one database before the Phase 14 PR merges. The deployed code doesn't know the table. | P14.10 | done 2026-10-01: "yes apply 0012"; applied |
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
-| H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | open |
+| H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
 
 ## Risks and how they're handled
@@ -1809,3 +1850,5 @@ Branch `test/recipes-p15-screen-tests`, in its own worktree. Most of the app's r
   - Next: Hector reviews P15.7's PR; then H23, H5.
 - **2026-10-02 (at)** — Hector merged P15.7 (hectarek/hector-mono#8), so Phase 15 is done, and added an Ably key to `.env.test`. Fixed what P15.7 found: with no Ably key, the pass route now answers 403, "Live updates are off" (`LiveUpdatesOffError`), and logs nothing. It used to answer 500 and log an error, and Ably retried a 500 again and again; on a 403 it stops (features.md, Live updates).
   - Next: Hector reviews the fix; then H23, H5.
+- **2026-10-04 (au)** — Hector merged the live-updates fix (hectarek/hector-mono#12) and gave feedback from using the app: Plan should show the week without a scroll and change weeks with a swipe; Groceries needs a way to clear the whole list. Phase 16 written (D50–D52), which also answers H23.
+  - Next: Hector reviews Phase 16's plan; then P16.1.
