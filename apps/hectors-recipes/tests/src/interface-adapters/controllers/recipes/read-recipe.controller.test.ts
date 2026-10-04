@@ -1,6 +1,7 @@
 import { describe } from "bun:test";
 import {
   MAX_PHOTO_PIECES,
+  MAX_PHOTOS,
   MAX_RECIPE_TEXT,
 } from "@/src/entities/models/recipe-draft.model";
 import {
@@ -16,7 +17,7 @@ const piece = (bytes: number, mediaType = "image/jpeg") => ({
 });
 const photo = (bytes: number, mediaType = "image/jpeg") => ({
   kind: "image",
-  images: [piece(bytes, mediaType)],
+  photos: [[piece(bytes, mediaType)]],
 });
 
 describe("readRecipeController", () => {
@@ -33,17 +34,25 @@ describe("readRecipeController", () => {
       "an empty photo": photo(0),
       "a photo past the cap": photo(MAX_RECIPE_IMAGE_BYTES + 1),
       "a file that isn't an image": photo(10, "application/pdf"),
-      "no photo": { kind: "image", images: [] },
-      "pieces past the cap in all": {
+      "no photo": { kind: "image", photos: [] },
+      "a photo with no images": { kind: "image", photos: [[]] },
+      "photos past the cap in all": {
         kind: "image",
-        images: [
-          piece(MAX_RECIPE_IMAGE_BYTES / 2 + 1),
-          piece(MAX_RECIPE_IMAGE_BYTES / 2),
+        photos: [
+          [piece(MAX_RECIPE_IMAGE_BYTES / 2 + 1)],
+          [piece(MAX_RECIPE_IMAGE_BYTES / 2)],
         ],
       },
-      "more pieces than a screenshot is cut into": {
+      "more images than a read takes": {
         kind: "image",
-        images: Array.from({ length: MAX_PHOTO_PIECES + 1 }, () => piece(10)),
+        photos: [
+          Array.from({ length: MAX_PHOTO_PIECES }, () => piece(10)),
+          [piece(10)],
+        ],
+      },
+      "more photos than a read takes": {
+        kind: "image",
+        photos: Array.from({ length: MAX_PHOTOS + 1 }, () => [piece(10)]),
       },
       "a link (read by the page fetcher, not here)": {
         kind: "link",
@@ -53,6 +62,22 @@ describe("readRecipeController", () => {
       "a PDF past the cap": {
         kind: "document",
         pdf: new Uint8Array(MAX_RECIPE_IMAGE_BYTES + 1),
+      },
+    },
+  });
+});
+
+// D53: up to MAX_PHOTOS photos of one recipe pass through in order, pieces and all.
+describe("readRecipeController, photos", () => {
+  const photos = [[piece(10)], [piece(20), piece(30)], [piece(40)]];
+  controllerBasics({
+    make: (useCase, logger) => readRecipeController(useCase, logger),
+    valid: { kind: "image", photos },
+    calledWith: [{ kind: "image", photos }, OWNER],
+    invalid: {
+      "a photo that isn't a list of images": {
+        kind: "image",
+        photos: [piece(10)],
       },
     },
   });

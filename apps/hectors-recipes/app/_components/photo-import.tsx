@@ -2,6 +2,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Spinner } from "@repo/ui/components/spinner";
+import { cn } from "@repo/ui/lib/utils";
 import { Camera, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,11 +12,11 @@ import { TopBar } from "@/app/_components/top-bar";
 import { draftFormValues } from "@/app/_lib/draft-form-values";
 import type { loadNewRecipe } from "@/app/_lib/new-recipe";
 import {
+  chosenFilesKind,
   RECIPE_FILE_ACCEPT,
   type RecipeFileKind,
-  recipeFileKind,
 } from "@/app/_lib/recipe-file";
-import { shrinkPhoto } from "@/app/_lib/shrink-photo";
+import { photoShare, shrinkPhoto } from "@/app/_lib/shrink-photo";
 import {
   type ReadRecipeResult,
   readRecipeFromDocument,
@@ -24,18 +25,20 @@ import {
 } from "@/app/actions/import";
 import type { CheckedDraft } from "@/src/entities/itemizing-check";
 import {
+  MAX_PDF_PAGES,
   MAX_PHOTO_BYTES,
+  MAX_PHOTOS,
   MAX_RECIPE_TEXT,
 } from "@/src/entities/models/recipe-draft.model";
 
 type Stage =
   | { kind: "choose"; error?: string }
-  | { kind: "reading"; preview?: string; fileName: string }
+  | { kind: "reading"; previews: string[]; fileName: string }
   | { kind: "read"; draft: CheckedDraft; from: RecipeFileKind };
 
 type NewRecipe = Awaited<ReturnType<typeof loadNewRecipe>>;
 
-const NOT_TAKEN = "Choose a photo, a PDF, or a text or Markdown file.";
+const NOT_TAKEN = `Choose up to ${MAX_PHOTOS} photos, a PDF of up to ${MAX_PDF_PAGES} pages, or a text or Markdown file.`;
 
 // What a read was from, for the form's note.
 const READ_FROM: Record<RecipeFileKind, string> = {
@@ -57,17 +60,27 @@ async function readPdf(file: File): Promise<ReadRecipeResult> {
   return readRecipeFromDocument(data);
 }
 
-// A photo, shrunk on the phone (one image, or a long screenshot's pieces), for the reader.
-async function readPhoto(file: File): Promise<ReadRecipeResult> {
-  const pieces = await shrinkPhoto(file).catch(() => null);
-  if (!pieces) {
-    return {
-      error: "Couldn't open that photo. Try a JPEG or PNG, or a screenshot.",
-    };
-  }
+// Up to MAX_PHOTOS photos of one recipe (D53), each shrunk on the phone (one image, or a long
+// screenshot's pieces) within its share of the read, and sent in the order chosen.
+async function readPhotos(files: File[]): Promise<ReadRecipeResult> {
+  const share = photoShare(files.length);
+  const photos = await Promise.all(
+    files.map((file) => shrinkPhoto(file, share).catch(() => null)),
+  );
   const data = new FormData();
-  for (const [index, piece] of pieces.entries()) {
-    data.append("photo", piece, `photo-${index + 1}.jpg`);
+  for (const [photo, pieces] of photos.entries()) {
+    if (!pieces) {
+      return {
+        error: "Couldn't open that photo. Try a JPEG or PNG, or a screenshot.",
+      };
+    }
+    for (const [piece, blob] of pieces.entries()) {
+      data.append(
+        `photo-${photo + 1}`,
+        blob,
+        `photo-${photo + 1}-${piece + 1}.jpg`,
+      );
+    }
   }
   return readRecipeFromPhoto(data);
 }
@@ -95,22 +108,24 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   async function choose(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files ?? []);
     // So choosing the same file again still counts as a change.
     event.target.value = "";
+    const [file] = files;
     if (!file) return;
-    const kind = recipeFileKind(file);
+    const kind = chosenFilesKind(files);
     if (!kind) {
       setStage({ kind: "choose", error: NOT_TAKEN });
       return;
     }
 
-    const preview = kind === "photo" ? URL.createObjectURL(file) : undefined;
-    setStage({ kind: "reading", preview, fileName: file.name });
+    const previews =
+      kind === "photo" ? files.map((photo) => URL.createObjectURL(photo)) : [];
+    setStage({ kind: "reading", previews, fileName: file.name });
     try {
       const result =
         kind === "photo"
-          ? await readPhoto(file)
+          ? await readPhotos(files)
           : kind === "pdf"
             ? await readPdf(file)
             : await readTextFile(file);
@@ -126,7 +141,7 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
           "Couldn't reach the server. Check your connection and try again.",
       });
     } finally {
-      if (preview) URL.revokeObjectURL(preview);
+      for (const preview of previews) URL.revokeObjectURL(preview);
     }
   }
 
@@ -162,15 +177,26 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
 
       {stage.kind === "reading" ? (
         <div className="flex flex-col items-center gap-4" aria-live="polite">
-          {stage.preview ? (
-            <Image
-              src={stage.preview}
-              alt=""
-              width={800}
-              height={800}
-              unoptimized
-              className="bg-muted h-auto max-h-80 w-full rounded-xl object-contain"
-            />
+          {stage.previews.length > 0 ? (
+            <div
+              className={cn(
+                "grid w-full gap-2",
+                stage.previews.length === 2 && "grid-cols-2",
+                stage.previews.length === 3 && "grid-cols-3",
+              )}
+            >
+              {stage.previews.map((preview) => (
+                <Image
+                  key={preview}
+                  src={preview}
+                  alt=""
+                  width={800}
+                  height={800}
+                  unoptimized
+                  className="bg-muted h-auto max-h-80 w-full rounded-xl object-contain"
+                />
+              ))}
+            </div>
           ) : (
             <p className="flex items-center gap-2 font-medium">
               <FileText aria-hidden className="size-5" />
@@ -194,6 +220,7 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
             ref={fileInput}
             type="file"
             accept={RECIPE_FILE_ACCEPT}
+            multiple
             onChange={choose}
             hidden
           />

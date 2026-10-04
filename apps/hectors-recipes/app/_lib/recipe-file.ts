@@ -1,3 +1,5 @@
+import { MAX_PHOTOS } from "@/src/entities/models/recipe-draft.model";
+
 // What a chosen file is read as (docs/ux-plan.md D53). Phones don't always give a file's type
 // (a .md from Files often has none), so its name's extension counts too.
 export type RecipeFileKind = "photo" | "pdf" | "text";
@@ -19,6 +21,19 @@ export function recipeFileKind(file: {
     return "text";
   }
   return null;
+}
+
+// What a choice of files is read as (D53): one file of any kind, or up to MAX_PHOTOS photos of
+// one recipe; never a mix, nor several PDFs or text files.
+export function chosenFilesKind(
+  files: { name: string; type: string }[],
+): RecipeFileKind | null {
+  const kinds = files.map(recipeFileKind);
+  if (kinds.length === 0 || kinds.includes(null)) return null;
+  if (kinds.length === 1) return kinds[0] ?? null;
+  return kinds.length <= MAX_PHOTOS && kinds.every((kind) => kind === "photo")
+    ? "photo"
+    : null;
 }
 
 // What the picker offers: by type, and by extension for files that come without one.

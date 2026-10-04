@@ -157,8 +157,8 @@ describe("AiGatewayRecipeReaderService", () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
     await reader(model).read({
       kind: "image",
-      images: [
-        { data: new Uint8Array([0xff, 0xd8, 0xff]), mediaType: "image/jpeg" },
+      photos: [
+        [{ data: new Uint8Array([0xff, 0xd8, 0xff]), mediaType: "image/jpeg" }],
       ],
     });
 
@@ -216,13 +216,43 @@ describe("AiGatewayRecipeReaderService", () => {
       data: new Uint8Array([0xff, 0xd8, 0xff]),
       mediaType: "image/jpeg",
     };
-    await reader(model).read({ kind: "image", images: [piece, piece] });
+    await reader(model).read({ kind: "image", photos: [[piece, piece]] });
 
     const [system, user] = model.doGenerateCalls[0]?.prompt ?? [];
     expect(JSON.stringify(system)).toContain("one long screenshot");
     expect(user).toMatchObject({
       role: "user",
       content: [
+        { type: "file", mediaType: "image/jpeg" },
+        { type: "file", mediaType: "image/jpeg" },
+      ],
+    });
+  });
+
+  // D53: several photos of one recipe, each labelled, and a screenshot's pieces called that.
+  it("says several photos are one recipe, and labels each one's images", async () => {
+    const model = fakeModel({ text: JSON.stringify(reading) });
+    const image = {
+      data: new Uint8Array([0xff, 0xd8, 0xff]),
+      mediaType: "image/jpeg",
+    };
+    await reader(model).read({
+      kind: "image",
+      photos: [[image], [image, image]],
+    });
+
+    const [system, user] = model.doGenerateCalls[0]?.prompt ?? [];
+    expect(JSON.stringify(system)).toContain("photos of one recipe");
+    expect(JSON.stringify(system)).not.toContain("one long screenshot");
+    expect(user).toMatchObject({
+      role: "user",
+      content: [
+        { type: "text", text: "Photo 1 of 2:" },
+        { type: "file", mediaType: "image/jpeg" },
+        {
+          type: "text",
+          text: "Photo 2 of 2, a long screenshot in 2 pieces:",
+        },
         { type: "file", mediaType: "image/jpeg" },
         { type: "file", mediaType: "image/jpeg" },
       ],

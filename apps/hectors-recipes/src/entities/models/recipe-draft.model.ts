@@ -2,20 +2,26 @@ import { z } from "zod";
 import { AISLES } from "../aisles";
 import { UNITS } from "../ingredient-line";
 
-// What a recipe is read from: pasted text, a photo or screenshot (ux-plan D29), or a PDF (D53).
-// A photo is one image, or a long screenshot cut into pieces, top to bottom (P14.11).
+// What a recipe is read from: pasted text, photos or screenshots (ux-plan D29), or a PDF (D53).
+// A photo is one image, or a long screenshot cut into pieces, top to bottom (P14.11), and a
+// read takes up to MAX_PHOTOS photos of one recipe, in order (D53).
 export type RecipeImage = { data: Uint8Array; mediaType: string };
+export type RecipePhoto = RecipeImage[];
 export type RecipeSource =
   | { kind: "text"; text: string }
-  | { kind: "image"; images: RecipeImage[] }
+  | { kind: "image"; photos: RecipePhoto[] }
   | { kind: "document"; pdf: Uint8Array };
+
+// The most photos read as one recipe: a recipe over two or three pages (D53).
+export const MAX_PHOTOS = 3;
 
 // The most pages a PDF read as one recipe may have (D53): none needs more, and a cookbook's
 // worth would be read, and paid for, page by page.
 export const MAX_PDF_PAGES = 10;
 
-// The most pieces a long screenshot is cut into, and the most a photo's pieces may weigh in
-// all: Vercel refuses a request body over 4.5 MB, and the form needs a little room too.
+// The most images a read's photos come to (a long screenshot's pieces count each), and the most
+// they may weigh in all: Vercel refuses a request body over 4.5 MB, and the form needs a little
+// room too. Several photos share both.
 export const MAX_PHOTO_PIECES = 6;
 export const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 // The most text read as one recipe: a pasted recipe, a page's text, or a text file (D53).

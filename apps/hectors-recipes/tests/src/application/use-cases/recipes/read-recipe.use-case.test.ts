@@ -75,7 +75,7 @@ describe("readRecipe", () => {
     const { read } = setup();
     const draft = await read({
       kind: "image" as const,
-      images: [{ data: new Uint8Array(), mediaType: "image/jpeg" }],
+      photos: [[{ data: new Uint8Array(), mediaType: "image/jpeg" }]],
     });
     expect(draft.unsure).toEqual([]);
   });

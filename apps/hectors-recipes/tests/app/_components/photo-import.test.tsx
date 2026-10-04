@@ -99,7 +99,31 @@ describe("PhotoImport", () => {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }),
     );
-    await view.findByText("Choose a photo, a PDF, or a text or Markdown file.");
+    await view.findByText(NOT_TAKEN);
+    expect(reader.sources.length).toBe(before);
+  });
+
+  // D53: up to 3 photos of one recipe, and never photos with a PDF.
+  it("refuses a fourth photo and a photo with a PDF, and reads neither", async () => {
+    const user = userEvent.setup();
+    const { view, input } = await open();
+    const before = reader.sources.length;
+    const photo = (name: string) =>
+      new File(["jpeg"], name, { type: "image/jpeg" });
+
+    await user.upload(
+      input(),
+      [1, 2, 3, 4].map((page) => photo(`${page}.jpg`)),
+    );
+    await view.findByText(NOT_TAKEN);
+    await user.upload(input(), [
+      photo("1.jpg"),
+      new File(["%PDF"], "chili.pdf", { type: "application/pdf" }),
+    ]);
+    await view.findByText(NOT_TAKEN);
     expect(reader.sources.length).toBe(before);
   });
 });
+
+const NOT_TAKEN =
+  "Choose up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file.";

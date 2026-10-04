@@ -17,8 +17,16 @@ const pages = () =>
 
 const withPhoto = (bytes: number, type = "image/jpeg") => {
   const data = new FormData();
-  data.set("photo", new File([new Uint8Array(bytes)], "photo.jpg", { type }));
+  data.set("photo-1", new File([new Uint8Array(bytes)], "photo.jpg", { type }));
   return data;
+};
+const jpeg = (bytes: number) =>
+  new File([new Uint8Array(bytes)], "piece.jpg", { type: "image/jpeg" });
+const sizes = () => {
+  const source = reader().sources.at(-1);
+  return source?.kind === "image"
+    ? source.photos.map((photo) => photo.map((image) => image.data.byteLength))
+    : [];
 };
 
 describe("readRecipeFromPhoto", () => {
@@ -32,23 +40,26 @@ describe("readRecipeFromPhoto", () => {
     expect(result).toMatchObject({ draft: { title: "Chili", flagged: [] } });
     expect(reader().sources.at(-1)).toMatchObject({
       kind: "image",
-      images: [{ mediaType: "image/jpeg" }],
+      photos: [[{ mediaType: "image/jpeg" }]],
     });
   });
 
   // A long screenshot arrives as pieces, top to bottom (P14.11).
   it("sends every piece of a long screenshot, in order", async () => {
     const data = withPhoto(1000);
-    data.append(
-      "photo",
-      new File([new Uint8Array(2000)], "photo-2.jpg", { type: "image/jpeg" }),
-    );
+    data.append("photo-1", jpeg(2000));
     await readRecipeFromPhoto(data);
-    const source = reader().sources.at(-1);
-    expect(
-      source?.kind === "image" &&
-        source.images.map((image) => image.data.byteLength),
-    ).toEqual([1000, 2000]);
+    expect(sizes()).toEqual([[1000, 2000]]);
+  });
+
+  // D53: up to 3 photos of one recipe, each in a field of its own.
+  it("sends several photos in order, each with its own pieces", async () => {
+    const data = withPhoto(1000);
+    data.append("photo-2", jpeg(2000));
+    data.append("photo-2", jpeg(3000));
+    data.append("photo-3", jpeg(4000));
+    await readRecipeFromPhoto(data);
+    expect(sizes()).toEqual([[1000], [2000, 3000], [4000]]);
   });
 
   it("says why when the recipe can't be read", async () => {
@@ -61,7 +72,7 @@ describe("readRecipeFromPhoto", () => {
   it("asks for a photo when it gets anything else", async () => {
     for (const data of [withPhoto(10, "application/pdf"), new FormData()]) {
       expect(await readRecipeFromPhoto(data)).toEqual({
-        error: "Choose a photo: a JPEG, PNG or WebP under 4 MB.",
+        error: "Choose up to 3 photos: JPEG, PNG or WebP, under 4 MB in all.",
       });
     }
   });

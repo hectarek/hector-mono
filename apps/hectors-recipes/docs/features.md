@@ -76,6 +76,10 @@ Paths are from the app's root; a bare file name is the only file of that name in
 ## Import and the AI reader
 
 - Add by photo or file (`PhotoImport`, docs/ux-plan.md D53) has one picker. What a chosen file is read as is `recipeFileKind` (`app/_lib/recipe-file.ts`): by its type, or by its extension when a phone gives none (a `.md` from Files). A photo is shrunk on the phone (`shrinkPhoto`) and read as images. A text or Markdown file is read on the phone and sent as pasted text is (`readRecipeFromText`), so its draft is held to its words, and it's capped at `MAX_RECIPE_TEXT`. Nothing chosen is kept.
+- Up to `MAX_PHOTOS` (3) photos of one recipe can be chosen at once. The rule is `chosenFilesKind`: one file of any kind, or photos only, never a mix.
+  - Each photo is shrunk within its share of the read (`photoShare`: 6 images and 4 MB split evenly; three photos get 2 pieces and about 1.3 MB each).
+  - Each photo is sent in a field of its own (`photo-1`…`photo-3`), and the source is `{ kind: "image", photos: RecipeImage[][] }`, in the order chosen.
+  - The reader keeps today's request for one photo. For several, it adds `PHOTOS_INSTRUCTION` and puts a label before each photo's images ("Photo 2 of 2, a long screenshot in 2 pieces:").
 - A PDF (`readRecipeFromDocument`, source kind `document`) is sent as it is, within the photos' 4 MB (the phone refuses a bigger one before uploading).
   - The reader opens it first (`checkPdf`, with `unpdf`). One over `MAX_PDF_PAGES` (10), a password-protected one, or one that doesn't open is refused with its own message (`too-many-pages`, `locked-document`, `unreadable-document`) before the model sees it. Those don't count against the daily limit (`FREE_FAILURES`).
   - pdf.js takes over the bytes it opens, so it gets a copy. Opening the original left the model an empty PDF; the reader's test checks this.

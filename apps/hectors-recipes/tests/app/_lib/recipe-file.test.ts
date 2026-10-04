@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { recipeFileKind } from "@/app/_lib/recipe-file";
+import { chosenFilesKind, recipeFileKind } from "@/app/_lib/recipe-file";
 
 describe("recipeFileKind", () => {
   it("reads images as photos", () => {
@@ -38,5 +38,23 @@ describe("recipeFileKind", () => {
     expect(
       recipeFileKind({ name: "chili.html", type: "text/html" }),
     ).toBeNull();
+  });
+});
+
+// D53: one file of any kind, or up to 3 photos of one recipe.
+describe("chosenFilesKind", () => {
+  const photo = { name: "page.jpg", type: "image/jpeg" };
+  const pdf = { name: "chili.pdf", type: "application/pdf" };
+
+  it("takes one file of any kind it reads, or up to 3 photos", () => {
+    expect(chosenFilesKind([pdf])).toBe("pdf");
+    expect(chosenFilesKind([photo, photo, photo])).toBe("photo");
+  });
+
+  it("refuses a fourth photo, a mix, two PDFs, and nothing at all", () => {
+    expect(chosenFilesKind([photo, photo, photo, photo])).toBeNull();
+    expect(chosenFilesKind([photo, pdf])).toBeNull();
+    expect(chosenFilesKind([pdf, pdf])).toBeNull();
+    expect(chosenFilesKind([])).toBeNull();
   });
 });

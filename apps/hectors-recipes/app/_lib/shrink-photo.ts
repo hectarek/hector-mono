@@ -34,7 +34,11 @@ export type PhotoPiece = {
   outHeight: number;
 };
 
-export function photoPieces(width: number, height: number): PhotoPiece[] {
+export function photoPieces(
+  width: number,
+  height: number,
+  maxPieces = MAX_PHOTO_PIECES,
+): PhotoPiece[] {
   const piece = (top: number, rows: number): PhotoPiece => {
     const out = fitWithin(width, rows);
     return { top, height: rows, width: out.width, outHeight: out.height };
@@ -45,8 +49,8 @@ export function photoPieces(width: number, height: number): PhotoPiece[] {
   // A tenth of a piece's slack, so a screenshot just past a whole number of pieces doesn't
   // get a last one of a few new rows; the pieces are spread evenly from top to bottom.
   let count = Math.ceil((height - rows) / (rows * (1 - OVERLAP)) - 0.1) + 1;
-  if (count > MAX_PHOTO_PIECES) {
-    count = MAX_PHOTO_PIECES;
+  if (count > maxPieces) {
+    count = maxPieces;
     rows = height / (1 + (count - 1) * (1 - OVERLAP));
   }
   const tall = Math.round(rows);
@@ -55,23 +59,38 @@ export function photoPieces(width: number, height: number): PhotoPiece[] {
   );
 }
 
+// What one photo may use when `photos` photos are read together (D53): an even share of the
+// read's images and bytes. Three photos get 2 pieces and about 1.3 MB each.
+export function photoShare(photos: number): {
+  maxPieces: number;
+  maxBytes: number;
+} {
+  return {
+    maxPieces: Math.max(1, Math.floor(MAX_PHOTO_PIECES / photos)),
+    maxBytes: MAX_PHOTO_BYTES / photos,
+  };
+}
+
 // The photo as JPEGs within PHOTO_LONG_EDGE (one, or a long screenshot's pieces), turned
-// upright from its camera orientation, at a quality that keeps them within MAX_PHOTO_BYTES in
-// all where it can. Browser only; throws when the browser can't open the file (HEIC on a
-// desktop browser).
-export async function shrinkPhoto(file: File): Promise<Blob[]> {
+// upright from its camera orientation, at a quality that keeps them within its share of the
+// read's bytes where it can. Browser only; throws when the browser can't open the file (HEIC
+// on a desktop browser).
+export async function shrinkPhoto(
+  file: File,
+  share = photoShare(1),
+): Promise<Blob[]> {
   const bitmap = await createImageBitmap(file, {
     imageOrientation: "from-image",
   });
   try {
-    const pieces = photoPieces(bitmap.width, bitmap.height);
+    const pieces = photoPieces(bitmap.width, bitmap.height, share.maxPieces);
     let blobs: Blob[] = [];
     for (const quality of [0.85, 0.7, 0.55]) {
       blobs = await Promise.all(
         pieces.map((piece) => drawPiece(bitmap, piece, quality)),
       );
       const bytes = blobs.reduce((total, blob) => total + blob.size, 0);
-      if (bytes <= MAX_PHOTO_BYTES) break;
+      if (bytes <= share.maxBytes) break;
     }
     return blobs;
   } finally {

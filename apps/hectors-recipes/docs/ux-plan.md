@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1–P17.2 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P17.3; the real reads once the worktree's `.env.test` has the AI key (H25). |
+| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1–P17.3 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P17.4; the real reads once the worktree's `.env.test` has the AI key (H25). |
 | Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
@@ -1661,12 +1661,29 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
     - Found on the way: pdf.js takes over (detaches) the bytes it opens, so counting the pages of the original left the model an empty PDF. It now opens a copy. With the copy taken out, the reader's test fails.
     - Not done yet: the real read. The worktree's `.env.test` has no AI key, so the Gateway refused it as unauthenticated and nothing was spent. It's re-run once the file is copied again (H25).
     - All 979 + 32 tests pass.
-- [ ] **P17.3** Up to 3 photos — C · D53
+- [x] **P17.3** Up to 3 photos — C · D53
   - Do:
     - The picker takes up to 3 photos at once, for a recipe over two or three pages, read as one recipe in the order chosen.
     - Each is shrunk on the phone as now. All together they stay within 6 images (a long screenshot's pieces count) and 4 MB.
     - A fourth is refused, with a message.
   - Verify: unit tests for the limits; a screen test where choosing 2 photos sends both, in order; one real read of a two-page recipe (H25). Whether an iPhone keeps the order the photos were picked in goes to H5.
+  - Evidence (2026-10-04):
+    - The source's shape: a photo read is now `photos: RecipeImage[][]`, each photo its pieces. A flat list couldn't tell three photos from one screenshot's three pieces.
+    - Sending: each photo travels in its own field (`photo-1`…`photo-3`). The controller takes 1–3 photos, within 6 images and 4 MB in all.
+    - On the phone:
+      - `chosenFilesKind` takes one file of any kind, or up to 3 photos, never a mix.
+      - `photoShare` splits the 6 images and 4 MB evenly, so three photos get 2 pieces and about 1.3 MB each.
+      - The reading screen shows up to 3 previews side by side.
+    - The reader: one photo's request is unchanged, so today's reads aren't affected. Several photos get `PHOTOS_INSTRUCTION` ("photos of one recipe, in order") and a label before each photo's images.
+    - Refusal wording: anything else gets the final wording, "Choose up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file.". The photo action's error says "Choose up to 3 photos: JPEG, PNG or WebP, under 4 MB in all.".
+    - Tests:
+      - The action sends three photos in order with their pieces (`[[1000], [2000, 3000], [4000]]`).
+      - The controller takes three photos, and refuses four, more than 6 images, more than 4 MB, a photo with no images, and a photo that isn't a list.
+      - The reader labels two photos (one in pieces) and says they're one recipe. With the labels taken out, that test fails.
+      - `photoPieces` keeps to its share; `photoShare`; `chosenFilesKind`.
+      - A screen test refuses 4 photos, and a photo with a PDF, without a read. With a fourth photo allowed, it fails.
+    - Not covered here: a screen test of photos being read. happy-dom can't shrink an image (no `createImageBitmap`), so that's for the browser (P17.4) and a real read (H25).
+    - All 990 + 33 tests pass.
 - [ ] **P17.4** One way in — C · D53
   - Do:
     - New recipe's *Add by photo* becomes *Add by photo or file*, and its page's button becomes *Choose a photo or file* (photos, PDF, text and Markdown).
