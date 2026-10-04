@@ -86,8 +86,12 @@ export default async function PlanPage({
         {!plans.some((plan) => plan.role === "owner") && <StartOwnPlanButton />}
       </SpaceHeader>
 
-      {/* A swipe changes the week as the arrows do (D51). */}
-      <WeekSwipe previousHref={previousWeekHref} nextHref={nextWeekHref}>
+      {/* A swipe changes the week as the arrows do (D51), and a new week slides in (D54). */}
+      <WeekSwipe
+        week={monday}
+        previousHref={previousWeekHref}
+        nextHref={nextWeekHref}
+      >
         <nav
           aria-label="Week"
           className="flex items-center justify-between gap-2"

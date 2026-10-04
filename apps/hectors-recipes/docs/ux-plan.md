@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 17 (Add by photo or file; the week slides in) in progress on `feat/recipes-p17-photo-or-file`: P17.1–P17.4 done. Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P17.5; the real reads (`FLOWS_AI=1`) once the worktree's `.env.test` has the AI key (H25). |
-| Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 17 (Add by photo or file; the week slides in) done, in review on `feat/recipes-p17-photo-or-file`, except its real reads (H25). Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | Hector reviews Phase 17's PR; the real reads (`FLOWS_AI=1`) once the worktree's `.env.test` has the AI key (H25). |
+| Waiting on Hector | real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1711,9 +1711,18 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
       - It runs only with `FLOWS_AI=1`; otherwise `playwright.config.ts` skips it and leaves the AI key out of the dev server.
       - Not yet run against the real reader: the worktree's `.env.test` still has no AI key ("key present: false"; the Gateway refused it as unauthenticated, so nothing was spent). H25.
     - All 990 + 33 tests pass, and both everyday flows pass.
-- [ ] **P17.5** The week slides in — C · D54
+- [x] **P17.5** The week slides in — C · D54
   - Do: `WeekSwipe` knows which week it shows. When the week changes, the days slide in briefly from the side of travel (the next week from the right), and not at all with reduced motion. The swipe itself is unchanged.
   - Verify: a screen test that the direction follows the change; a look in the browser. How it feels on a phone goes to H5.
+  - Evidence (2026-10-04):
+    - `WeekSwipe` takes the week shown (`week`, its Monday). When the week changes, its keyed inner wrapper gets `animate-in fade-in duration-200` and `slide-in-from-right-6` (a later week) or `-left-6` (an earlier one), with `motion-reduce:animate-none`.
+    - The last week shown is a module-level value, set after each commit. Plan's loading screen unmounts the page between weeks, so a ref would forget it.
+    - Screen test: rendering 2 Nov, then 9 Nov, slides from the right; 2 Nov again slides from the left; the same week again doesn't move. With the directions swapped, it fails.
+    - In Chromium (a throwaway flow on the test project):
+      - After Next week, the wrapper runs the `enter` animation for 0.2 s, from the right.
+      - With reduced motion emulated, after Previous week the animation is `none`.
+    - Left as is: entering Plan from another tab on a week other than the last one shown also slides it in. That's harmless, and telling the two apart would need more than this.
+    - All 990 + 34 tests and both everyday flows pass.
 
 ## Phase 18 (planned): Finding recipes — tag categories, a tagging pass, better search, grouping
 
@@ -2024,3 +2033,11 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Next: Hector reviews the PR. On a phone (H5): the swipe, and Clear list.
 - **2026-10-04 (aw)** — Hector merged Phase 16 (hectarek/hector-mono#20) and decided Add by photo's next step: one way in for up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file, nothing kept (D53), and the week's slide-in (D54). Phase 17 written. His six further notes are grouped as Phases 18–20, each its own PR: finding recipes; groceries by recipe and units (taking in L7); measuring AI reads, links first.
   - Next: Hector reviews Phase 17's plan and the order of 18–20; H25.
+- **2026-10-04 (ax)** — Phase 17 done (see each task's Evidence), one commit per task:
+  - Text and Markdown files.
+  - PDFs of up to 10 pages, opened first with `unpdf`, which found that pdf.js takes over the bytes it opens.
+  - Up to 3 photos, labelled for the reader.
+  - One way in, with real reads in the flows on request (`FLOWS_AI=1`).
+  - The week's slide-in.
+  - The real reads wait on the AI key in the worktree's `.env.test` (H25).
+  - Next: Hector reviews the PR; H25; then Phase 18.
