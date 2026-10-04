@@ -38,5 +38,7 @@ export interface IPlanEntriesRepository {
     tx?: ITransaction,
   ): Promise<void>;
   markAddedToList(ids: string[], at: Date, tx?: ITransaction): Promise<void>;
+  // None of the plan's meals is on the list any more (its list was cleared, D52).
+  unmarkAddedToList(spaceId: string, tx?: ITransaction): Promise<void>;
   delete(id: string, tx?: ITransaction): Promise<void>;
 }

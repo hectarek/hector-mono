@@ -135,6 +135,25 @@ export async function clearCheckedItems(spaceId: string): Promise<ActionState> {
   return null;
 }
 
+// Every item goes, and the plan's meals can be added again (D52), so Plan's count changes too.
+export async function clearGroceryList(spaceId: string): Promise<ActionState> {
+  try {
+    await getInjection("IClearGroceryListController")(
+      { spaceId },
+      await getCurrentUserId(),
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("clearGroceryList"),
+      "Couldn't clear the list.",
+    );
+  }
+  revalidatePath("/groceries");
+  revalidatePath("/plan");
+  return null;
+}
+
 export async function addRecipeToList(input: {
   recipeId: string;
   servings?: number;

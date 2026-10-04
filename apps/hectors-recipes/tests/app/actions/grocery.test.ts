@@ -4,6 +4,7 @@ import {
   addPlanToList,
   addRecipeToList,
   clearCheckedItems,
+  clearGroceryList,
   removeGroceryItem,
   setGroceryItemChecked,
   updateGroceryItem,
@@ -73,6 +74,26 @@ describe("grocery actions", () => {
     ]);
     expect(await clearCheckedItems(list.id)).toBeNull();
     expect(await items()).toEqual([]);
+  });
+
+  it("clears the whole list, and refreshes Plan too (its count changes)", async () => {
+    const list = await getInjection("IEnsurePersonalSpaceController")(
+      "meal-plan",
+      userId,
+    );
+    await addGroceryItem(null, form({ spaceId: list.id, text: "Milk" }));
+    await addGroceryItem(null, form({ spaceId: list.id, text: "Eggs" }));
+
+    expect(await clearGroceryList(list.id)).toBeNull();
+    expect(
+      await getInjection("IGetGroceryListController")(
+        { spaceId: list.id },
+        userId,
+      ),
+    ).toEqual([]);
+    expect(nextState.revalidated).toEqual(
+      expect.arrayContaining(["/groceries", "/plan"]),
+    );
   });
 
   it("edits an item's text, and says why a blank edit can't save", async () => {

@@ -64,6 +64,12 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
     return before - this.items.length;
   }
 
+  async deleteAll(spaceId: string): Promise<number> {
+    const before = this.items.length;
+    this.items = this.items.filter((item) => item.spaceId !== spaceId);
+    return before - this.items.length;
+  }
+
   private push(spaceId: string, item: GroceryChanges["inserts"][number]): void {
     this.items.push({
       ...item,

@@ -1,8 +1,38 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+// A one-finger swipe across the middle of the week's first day, as touch events from the
+// screen (Chromium's DevTools protocol): Playwright's own touchscreen only taps.
+async function swipe(page: Page, direction: "left" | "right") {
+  const day = await page
+    .getByRole("heading", { level: 2 })
+    .first()
+    .boundingBox();
+  if (!day) throw new Error("No day to swipe on");
+  const y = day.y + day.height / 2;
+  const middle = day.x + day.width / 2;
+  const [from, to] =
+    direction === "left"
+      ? [middle + 75, middle - 75]
+      : [middle - 75, middle + 75];
+  const screen = await page.context().newCDPSession(page);
+  const touch = (type: "touchStart" | "touchMove" | "touchEnd", x?: number) =>
+    screen.send("Input.dispatchTouchEvent", {
+      type,
+      touchPoints: x === undefined ? [] : [{ x, y }],
+    });
+  await touch("touchStart", from);
+  for (let step = 1; step <= 5; step++) {
+    await touch("touchMove", from + ((to - from) * step) / 5);
+  }
+  await touch("touchEnd");
+  await screen.detach();
+}
 
 // P15.7: the week's loop as a person does it, in a real browser, against the test project
 // (playwright.config.ts). Each run signs up a new account, so runs never share data.
-test("sign up, add a recipe, plan it, shop for it", async ({ page }) => {
+test("sign up, add a recipe, plan it, shop for it, start the list over", async ({
+  page,
+}) => {
   const email = `flow-${Date.now()}@example.test`;
 
   await page.goto("/");
@@ -44,6 +74,15 @@ test("sign up, add a recipe, plan it, shop for it", async ({ page }) => {
   await expect(dialog.getByText(/^Planned: /)).toBeVisible();
   await dialog.getByRole("button", { name: "Open plan" }).click();
   await page.waitForURL(/\/plan/);
+
+  // D51: a swipe across the week, with real touches, goes to the next week and back.
+  const week = page.getByRole("navigation", { name: "Week" });
+  await expect(week).toContainText("This week");
+  await swipe(page, "left");
+  await expect(week).not.toContainText("This week");
+  await swipe(page, "right");
+  await expect(week).toContainText("This week");
+
   await page
     .getByRole("button", { name: "Add 1 meal to the grocery list" })
     .click();
@@ -69,4 +108,18 @@ test("sign up, add a recipe, plan it, shop for it", async ({ page }) => {
   await expect(
     page.getByRole("checkbox", { name: "1 onion for Chili" }),
   ).toBeChecked();
+
+  // D52: start the list over from the ⋯ sheet, after it asks, and Plan can add the meal again.
+  await page.getByRole("button", { name: /^More for / }).click();
+  await page.getByRole("button", { name: "Clear list" }).click();
+  const question = page.getByRole("group", { name: "Clear the whole list?" });
+  await expect(question).toContainText("all 2 items");
+  await question.getByRole("button", { name: "Clear list" }).click();
+  await expect(page.getByText("List cleared.")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByText(/^The list is empty/)).toBeVisible();
+  await page.getByRole("link", { name: "Plan" }).click();
+  await expect(
+    page.getByRole("button", { name: "Add 1 meal to the grocery list" }),
+  ).toBeVisible();
 });

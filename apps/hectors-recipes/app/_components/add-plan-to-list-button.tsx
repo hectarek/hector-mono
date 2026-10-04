@@ -103,12 +103,8 @@ export function AddPlanToListButton({
         </NativeSelect>
       </div>
       {count > 0 ? (
-        <Button
-          variant="secondary"
-          size="lg"
-          disabled={isPending}
-          onClick={add}
-        >
+        // Plan's one action (D50), so filled (D32).
+        <Button size="lg" disabled={isPending} onClick={add}>
           <ShoppingCart data-icon="inline-start" />
           {isPending
             ? "Adding…"

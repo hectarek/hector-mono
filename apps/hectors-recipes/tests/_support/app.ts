@@ -11,6 +11,7 @@ import { addGroceryItemUseCase } from "@/src/application/use-cases/grocery/add-g
 import { addPlanToListUseCase } from "@/src/application/use-cases/grocery/add-plan-to-list.use-case";
 import { addRecipesToListUseCase } from "@/src/application/use-cases/grocery/add-recipes-to-list.use-case";
 import { clearCheckedItemsUseCase } from "@/src/application/use-cases/grocery/clear-checked-items.use-case";
+import { clearGroceryListUseCase } from "@/src/application/use-cases/grocery/clear-grocery-list.use-case";
 import { getGroceryListUseCase } from "@/src/application/use-cases/grocery/get-grocery-list.use-case";
 import { listMealsToAddUseCase } from "@/src/application/use-cases/grocery/list-meals-to-add.use-case";
 import { removeGroceryItemUseCase } from "@/src/application/use-cases/grocery/remove-grocery-item.use-case";
@@ -227,6 +228,14 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     ),
     clearCheckedItems: clearCheckedItemsUseCase(
       groceryItems,
+      spaces,
+      transactions,
+      realtime,
+      log,
+    ),
+    clearGroceryList: clearGroceryListUseCase(
+      groceryItems,
+      planEntries,
       spaces,
       transactions,
       realtime,
