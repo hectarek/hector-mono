@@ -1,5 +1,9 @@
 import type { ListedRecipe } from "./models/recipe.model";
-import type { TagGroups } from "./models/tag.model";
+import {
+  STARTING_TAGS,
+  type TagCategory,
+  type TagGroups,
+} from "./models/tag.model";
 
 export type LibraryFilter = {
   search?: string;
@@ -67,6 +71,38 @@ export function searchRecipes(
     })
     .sort((a, b) => b.inTitle - a.inTitle)
     .map(({ recipe }) => recipe);
+}
+
+// One heading's recipes when the library is grouped; `tag` is null for Other.
+export type RecipeGroup = { tag: string | null; recipes: ListedRecipe[] };
+
+// The library grouped by one tag group (D57). A recipe is under each of its tags in the group,
+// in the order given, and recipes with none are last, under Other. Headings follow the group:
+// a day's meals and the diets in D58's order (any newer tag after them, A to Z), cuisines A to Z.
+export function groupRecipes(
+  recipes: ListedRecipe[],
+  category: TagCategory,
+  tagGroups: TagGroups,
+): RecipeGroup[] {
+  const byTag = new Map<string, ListedRecipe[]>();
+  const other: ListedRecipe[] = [];
+  for (const recipe of recipes) {
+    const tags = recipe.tags.filter((tag) => tagGroups[tag] === category);
+    if (tags.length === 0) {
+      other.push(recipe);
+    }
+    for (const tag of tags) {
+      byTag.set(tag, [...(byTag.get(tag) ?? []), recipe]);
+    }
+  }
+
+  const order = category === "cuisine" ? [] : STARTING_TAGS[category];
+  const rank = (tag: string) =>
+    order.includes(tag) ? order.indexOf(tag) : order.length;
+  const groups: RecipeGroup[] = [...byTag]
+    .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+    .map(([tag, tagged]) => ({ tag, recipes: tagged }));
+  return other.length > 0 ? [...groups, { tag: null, recipes: other }] : groups;
 }
 
 // Lowercase without accents, so "sable" finds "Sablé Cookies".

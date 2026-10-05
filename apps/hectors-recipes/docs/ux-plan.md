@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1 and P18.3 done, P18.2 waiting on production. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P18.4 (group by). P18.2's check once Hector has run H26 and H27 on production. |
+| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1, P18.3 and P18.4 done, P18.2 waiting on production. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P18.5 (a new tag gets its group). P18.2's check once Hector has run H26 and H27 on production. |
 | Waiting on Hector | Running migration 0013 (H26), then the tagging pass's SQL (H27), on production: both approved, but Claude Code's permission check blocks Claude's writes to production; real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
@@ -1787,12 +1787,20 @@ One commit per task; the PR when the phase is done.
       - The browser flow on the test project searches by ingredient. That confirms Neon's driver returns the names as a list, not text.
       - Mutations caught: names left out, tags left out, any word instead of every word, no title-first, accents kept, names out of order (Postgres), the mock without names, the page filtering by title only, and the page not reordering.
     - All 1000 + 35 tests and both flows pass.
-- [ ] **P18.4** Group by — C · D57
+- [x] **P18.4** Group by — C · D57
   - Do:
     - A "Group by" choice on Recipes: None (the default), Meal, Cuisine or Diet, kept in `?group=`.
     - Grouped, the cards sit under headings: meal in the order of a day (breakfast → drink), cuisine alphabetically, diet in D58's order. Other comes last.
     - A recipe shows under each of its tags in the group.
   - Verify: unit tests for the grouping, a screen test, and a screenshot at 375 px.
+  - Evidence (2026-10-04):
+    - `groupRecipes` (`src/entities/library.ts`) groups what search shows, so each heading keeps search's order. Meals and diets follow `STARTING_TAGS`' order with any newer tag after them, A to Z; cuisines are A to Z.
+    - The choice is a `NativeSelect` beside the search box, as the app's other pickers are: Not grouped, By meal, By cuisine, By diet. It's in the search form as `group`, so it works before the script loads, and `LibraryResults` keeps `?group=` up to date in place, as it does `?q=`. Tag chips and Clear filters keep the grouping. Headings look like Groceries' aisles.
+    - Tests:
+      - Unit tests: meals in a day's order with a recipe under each of its meals and Other last; cuisines A to Z with a newer one among them; diets in D58's order with a newer one after; the given order kept within a heading.
+      - The Recipes page's screen test groups by meal, then searches while grouped (the address is `?q=rice&group=meal`), then goes back to Not grouped. It also checks that a tag chip keeps the grouping.
+      - Mutations caught: meals not in a day's order, cuisines in the starting list's order, a recipe under only its first tag, Other first, chips dropping the grouping, the address not updated, grouping ignoring the search, and the page not passing the groups.
+    - Screenshots at 375 px on the test project: by meal (server-rendered from `?group=meal`), by cuisine (picked) and not grouped. Taken with a throwaway flow, deleted after.
 - [ ] **P18.5** A new tag gets its group — C · D55
   - Do: the recipe form's tag picker shows the tags under their groups (Meal, Cuisine, Diet, Other). Making a new tag asks its group (or none), and it's saved with the recipe.
   - Verify: a screen test where a new tag made with a group is saved with it.
@@ -2116,3 +2124,4 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Claude Code's permission check blocked Claude's write to production, so Hector runs both. The tagging SQL is ready and passed a dry run (P18.2).
   - P18.3 done: search reads titles, tags and ingredient names (see its Evidence).
   - Next: P18.4; P18.2's check once H26 and H27 are run.
+  - P18.4 done: Group by (see its Evidence). Next: P18.5.

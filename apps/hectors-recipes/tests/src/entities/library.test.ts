@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { buildLibraryView, searchRecipes } from "@/src/entities/library";
+import {
+  buildLibraryView,
+  groupRecipes,
+  searchRecipes,
+} from "@/src/entities/library";
 import type { ListedRecipe } from "@/src/entities/models/recipe.model";
+import type { TagGroups } from "@/src/entities/models/tag.model";
 
 const recipe = (
   title: string,
@@ -120,5 +125,78 @@ describe("searchRecipes", () => {
     const book = [recipe("Sablé Cookies"), recipe("Zucchini Saute")];
     expect(titles(searchRecipes(book, "sable"))).toEqual(["Sablé Cookies"]);
     expect(titles(searchRecipes(book, "sauté"))).toEqual(["Zucchini Saute"]);
+  });
+});
+
+// Grouping the library (D57), with the catalog's groups as the library gets them.
+describe("groupRecipes", () => {
+  const tagGroups: TagGroups = {
+    breakfast: "meal",
+    lunch: "meal",
+    dinner: "meal",
+    dessert: "meal",
+    italian: "cuisine",
+    british: "cuisine",
+    mexican: "cuisine",
+    vegetarian: "diet",
+    vegan: "diet",
+    "gluten-free": "diet",
+    keto: "diet",
+  };
+  const headings = (groups: ReturnType<typeof groupRecipes>) =>
+    groups.map((group) => [group.tag, titles(group.recipes)]);
+
+  it("puts a recipe under each of its meals, in the order of a day, and the rest under Other last", () => {
+    const book = [
+      recipe("Brownies", ["dessert", "vegan"]),
+      recipe("Frittata", ["dinner", "breakfast"]),
+      recipe("Salad", ["lunch", "dinner"]),
+      recipe("Stock", ["weeknight"]),
+      recipe("Toum"),
+    ];
+    expect(headings(groupRecipes(book, "meal", tagGroups))).toEqual([
+      ["breakfast", ["Frittata"]],
+      ["lunch", ["Salad"]],
+      ["dinner", ["Frittata", "Salad"]],
+      ["dessert", ["Brownies"]],
+      [null, ["Stock", "Toum"]],
+    ]);
+  });
+
+  it("orders cuisines A to Z, a newer one among them", () => {
+    const book = [
+      recipe("Tacos", ["mexican"]),
+      recipe("Pie", ["british"]),
+      recipe("Pasta", ["italian"]),
+    ];
+    expect(headings(groupRecipes(book, "cuisine", tagGroups))).toEqual([
+      ["british", ["Pie"]],
+      ["italian", ["Pasta"]],
+      ["mexican", ["Tacos"]],
+    ]);
+  });
+
+  it("orders diets as D58 lists them, a newer one after", () => {
+    const book = [
+      recipe("Eggs", ["keto", "gluten-free", "vegetarian"]),
+      recipe("Lentils", ["vegan", "vegetarian"]),
+    ];
+    expect(headings(groupRecipes(book, "diet", tagGroups))).toEqual([
+      ["vegetarian", ["Eggs", "Lentils"]],
+      ["vegan", ["Lentils"]],
+      ["gluten-free", ["Eggs"]],
+      ["keto", ["Eggs"]],
+    ]);
+  });
+
+  it("keeps the order it's given within a heading, as search ranked it", () => {
+    const ranked = [
+      recipe("Zucchini Pasta", ["dinner"]),
+      recipe("Apple Pie", ["dinner"]),
+    ];
+    expect(headings(groupRecipes(ranked, "meal", tagGroups))).toEqual([
+      ["dinner", ["Zucchini Pasta", "Apple Pie"]],
+    ]);
+    expect(groupRecipes([], "meal", tagGroups)).toEqual([]);
   });
 });

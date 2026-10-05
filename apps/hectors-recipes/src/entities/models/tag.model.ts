@@ -3,6 +3,10 @@
 export const TAG_CATEGORIES = ["meal", "cuisine", "diet"] as const;
 export type TagCategory = (typeof TAG_CATEGORIES)[number];
 
+export function isTagCategory(value: unknown): value is TagCategory {
+  return TAG_CATEGORIES.some((category) => category === value);
+}
+
 export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
   meal: "Meal",
   cuisine: "Cuisine",

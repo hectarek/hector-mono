@@ -21,7 +21,7 @@ app/
   (auth)/              # Signed out: welcome/ (logo, produce row, Create account / Sign in; names the
                        # space when arriving from an invite) and auth/[path]/ (Neon's forms, full-screen)
   (main)/              # Signed-in app: header + bottom tab bar (layout.tsx)
-    (library)/page.tsx # Library: ?book= (default: your default book, else All recipes when in 2+ books; `all` = every book, cards name their book), ?q= search (narrows as you type, P10.4), ?tag= chips, book switcher.
+    (library)/page.tsx # Library: ?book= (default: your default book, else All recipes when in 2+ books; `all` = every book, cards name their book), ?q= search (narrows as you type, P10.4), ?group= (Group by: meal, cuisine or diet, D57), ?tag= chips, book switcher.
                        # In a route group only so its card-grid loading.tsx doesn't cover every page under (main)
     recipes/[id]       # A recipe (reading surface); new and edit live in (form)
     books/             # Your recipe books, the Default book picker (All recipes or a book), create; books/[id]/copy = bulk copy ("merge")
@@ -56,7 +56,7 @@ src/
     aisles.ts          # the fixed aisle list (D25)
     ingredient-text.ts # pasted ingredient text -> lines ("Section:" lines, pasted Obsidian lists)
     editor-rows.ts     # the recipe editor's rows: from stored lines or pasted text, to what's saved
-    library.ts         # library filtering + tag list
+    library.ts         # library search (searchRecipes), tag list, Group by (groupRecipes)
     week.ts            # date-only helpers ("YYYY-MM-DD", UTC math), PLAN_TIME_ZONE = America/New_York
     meal-days.ts       # a meal's cook and eat days: moveCookDay, toggleEatDay, mealsOnDay, mealDaysText
     scaling.ts         # servings scaling + kitchen-friendly fractions

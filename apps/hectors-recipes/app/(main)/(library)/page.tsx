@@ -29,6 +29,7 @@ export default async function LibraryPage({
   const params = await searchParams;
   const search = firstParam(params.q);
   const tag = firstParam(params.tag);
+  const group = firstParam(params.group);
   const requestedBook = firstParam(params.book);
 
   const userId = await getCurrentUserId();
@@ -101,10 +102,12 @@ export default async function LibraryPage({
       )}
 
       <LibraryResults
-        // A new tag or address starts from its own search; typing only updates ?q= in place.
-        key={`${viewId}|${tag ?? ""}|${search ?? ""}`}
+        // A new tag or address starts from its own search and grouping; typing and Group by
+        // only update ?q= and ?group= in place.
+        key={`${viewId}|${tag ?? ""}|${search ?? ""}|${group ?? ""}`}
         book={requestedBook}
         tags={library.tags}
+        tagGroups={library.tagGroups}
         activeTag={tag}
         recipes={library.recipes}
         bookNames={
