@@ -233,40 +233,65 @@ export function groceryText(line: string): string {
   return splitNote(line).kept;
 }
 
+// A recipe an item is for, and its share of the item's amount (ux-plan D59): null when its
+// line had no amount ("Salt, to taste").
+export type ItemRecipe = {
+  recipeId: string;
+  title: string;
+  quantity: number | null;
+};
+
 export type GroceryLine = GroceryLineCandidate & {
   text: string;
   name: string | null;
-  // Recipe title, shown as "from …" on the list.
-  source: string;
+  // The recipe it's from: the item links to it, and shows its title as "for …".
+  recipeId: string;
+  title: string;
 };
 
 export type GroceryListItem = ExistingGroceryItem & {
   text: string;
-  sourceNote: string | null;
+  recipes: ItemRecipe[];
 };
+
+// What an item says it's "for": its recipes' titles in the order they were added, or null
+// for one typed in.
+export function recipeTitles(
+  item: Pick<GroceryListItem, "recipes">,
+): string | null {
+  return item.recipes.length
+    ? item.recipes.map((recipe) => recipe.title).join(", ")
+    : null;
+}
 
 export type NewGroceryItem = Omit<GroceryListItem, "id" | "checked">;
 
 export type GroceryChanges = {
   inserts: NewGroceryItem[];
-  updates: Pick<GroceryListItem, "id" | "text" | "quantity" | "sourceNote">[];
+  updates: Pick<GroceryListItem, "id" | "text" | "quantity" | "recipes">[];
   skipped: number;
 };
 
-// The recipes a list item is for: its "from …" note is their titles joined by ", ".
-export function noteSources(note: string | null): string[] {
-  return note ? note.split(", ") : [];
-}
-
-function addSource(note: string | null, source: string): string {
-  const sources = noteSources(note);
-  return sources.includes(source)
-    ? sources.join(", ")
-    : [...sources, source].join(", ");
+// Links an item to a line's recipe, adding the line's amount to that recipe's share.
+function withRecipe(recipes: ItemRecipe[], line: GroceryLine): ItemRecipe[] {
+  const share = recipes.find((recipe) => recipe.recipeId === line.recipeId);
+  if (!share) {
+    return [
+      ...recipes,
+      { recipeId: line.recipeId, title: line.title, quantity: line.quantity },
+    ];
+  }
+  if (line.quantity === null) {
+    return recipes;
+  }
+  const quantity = (share.quantity ?? 0) + line.quantity;
+  return recipes.map((recipe) =>
+    recipe === share ? { ...recipe, quantity } : recipe,
+  );
 }
 
 // Plans adding many recipe lines at once: lines merge into what's already on the list
-// and into each other (garlic from three recipes becomes one line).
+// and into each other (garlic from three recipes becomes one line, linked to all three).
 export function planGroceryBatch(
   lines: GroceryLine[],
   existing: GroceryListItem[],
@@ -285,7 +310,7 @@ export function planGroceryBatch(
         : working.find((item) => item.id === plan.itemId);
 
     if (plan.kind === "skip" && target) {
-      target.sourceNote = addSource(target.sourceNote, line.source);
+      target.recipes = withRecipe(target.recipes, line);
       skipped++;
     } else if (plan.kind === "merge" && target && line.name) {
       target.quantity = plan.quantity;
@@ -294,7 +319,7 @@ export function planGroceryBatch(
         unit: line.unit,
         name: line.name,
       });
-      target.sourceNote = addSource(target.sourceNote, line.source);
+      target.recipes = withRecipe(target.recipes, line);
     } else {
       const item: GroceryListItem = {
         id: `new:${inserts.length}`,
@@ -303,7 +328,7 @@ export function planGroceryBatch(
         quantity: line.quantity,
         unit: line.unit,
         ingredientId: line.ingredientId,
-        sourceNote: line.source,
+        recipes: withRecipe([], line),
       };
       working.push(item);
       inserts.push(item);
@@ -316,23 +341,19 @@ export function planGroceryBatch(
   }
 
   return {
-    inserts: inserts.map(
-      ({ text, quantity, unit, ingredientId, sourceNote }) => ({
-        text,
-        quantity,
-        unit,
-        ingredientId,
-        sourceNote,
-      }),
-    ),
-    updates: [...updated.values()].map(
-      ({ id, text, quantity, sourceNote }) => ({
-        id,
-        text,
-        quantity,
-        sourceNote,
-      }),
-    ),
+    inserts: inserts.map(({ text, quantity, unit, ingredientId, recipes }) => ({
+      text,
+      quantity,
+      unit,
+      ingredientId,
+      recipes,
+    })),
+    updates: [...updated.values()].map(({ id, text, quantity, recipes }) => ({
+      id,
+      text,
+      quantity,
+      recipes,
+    })),
     skipped,
   };
 }

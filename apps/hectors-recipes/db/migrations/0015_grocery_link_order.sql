@@ -1,0 +1,1 @@
+ALTER TABLE "grocery_item_recipes" ADD COLUMN "link_order" integer NOT NULL GENERATED ALWAYS AS IDENTITY (sequence name "grocery_item_recipes_link_order_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1);

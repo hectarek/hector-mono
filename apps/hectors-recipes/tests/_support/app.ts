@@ -80,12 +80,16 @@ export type Repositories = {
 
 function mockRepositories(): Repositories {
   const planEntries = new MockPlanEntriesRepository();
+  const groceryItems = new MockGroceryItemsRepository();
   return {
     spaces: new MockSpacesRepository(),
-    recipes: new MockRecipesRepository((id) => planEntries.unlinkRecipe(id)),
+    recipes: new MockRecipesRepository((id) => {
+      planEntries.unlinkRecipe(id);
+      groceryItems.unlinkRecipe(id);
+    }),
     tags: new MockTagsRepository(),
     planEntries,
-    groceryItems: new MockGroceryItemsRepository(),
+    groceryItems,
     transactions: new MockTransactionManagerService(),
   };
 }

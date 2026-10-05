@@ -97,7 +97,29 @@ describe("GroceryItemsRepository (Postgres)", () => {
     ]);
   });
 
-  it("merge updates never reach an item on another list", async () => {
+  // D59: an item shows its recipes' titles as they are now, and outlives a deleted recipe.
+  it("shows a renamed recipe's new title, and keeps a deleted recipe's items", async () => {
+    const g = await groceryFixture(postgresRepositories());
+    await g.app.addRecipesToList(
+      g.planId,
+      [{ recipeId: g.chiliId }, { recipeId: g.tacosId }],
+      OWNER,
+    );
+    await g.app.updateRecipe(g.chiliId, { title: "Turkey Chili" }, OWNER);
+    expect((await g.texts())[0]).toEqual([
+      "6 cloves garlic",
+      "Turkey Chili, Tacos",
+    ]);
+
+    await g.app.deleteRecipe(g.tacosId, OWNER);
+    expect(await g.texts()).toEqual([
+      ["6 cloves garlic", "Turkey Chili"],
+      ["1 lb ground turkey", "Turkey Chili"],
+      ["Salt", "Turkey Chili"],
+    ]);
+  });
+
+  it("merge updates never reach an item on another list, nor link it to a recipe", async () => {
     const g = await groceryFixture(postgresRepositories());
     const otherList = await g.app.newSpace("meal-plan", OWNER, "Other");
     await g.app.addGroceryItem(otherList, "Milk", OWNER);
@@ -113,7 +135,7 @@ describe("GroceryItemsRepository (Postgres)", () => {
               id: milk?.id ?? "",
               text: "hijacked",
               quantity: 9,
-              sourceNote: null,
+              recipes: [{ recipeId: g.chiliId, title: "Chili", quantity: 9 }],
             },
           ],
           skipped: 0,
@@ -123,9 +145,12 @@ describe("GroceryItemsRepository (Postgres)", () => {
       ),
     );
 
-    expect((await g.app.getGroceryList(otherList, OWNER))[0]?.text).toBe(
-      "Milk",
-    );
+    expect(
+      (await g.app.getGroceryList(otherList, OWNER)).map((item) => [
+        item.text,
+        item.recipes,
+      ]),
+    ).toEqual([["Milk", []]]);
   });
 });
 
@@ -143,7 +168,7 @@ function insertBatch(
           quantity: null,
           unit: null,
           ingredientId: null,
-          sourceNote: null,
+          recipes: [],
         })),
         updates: [],
         skipped: 0,

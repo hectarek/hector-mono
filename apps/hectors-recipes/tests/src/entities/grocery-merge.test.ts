@@ -87,6 +87,15 @@ describe("formatGroceryText", () => {
       "2 tbsp olive oil",
     ],
     [{ quantity: 3, unit: null, name: "onion" }, "3 onions"],
+    [
+      { quantity: 2, unit: "stalk" as const, name: "celery" },
+      "2 stalks celery",
+    ],
+    [{ quantity: 1, unit: "sprig" as const, name: "thyme" }, "1 sprig thyme"],
+    [
+      { quantity: 2, unit: "pint" as const, name: "grape tomato" },
+      "2 pints grape tomato",
+    ],
     [{ quantity: 2, unit: null, name: "sweet potato" }, "2 sweet potatoes"],
     [{ quantity: 2, unit: null, name: "bay leaf" }, "2 bay leaves"],
     [{ quantity: 4, unit: null, name: "berry" }, "4 berries"],
@@ -96,9 +105,9 @@ describe("formatGroceryText", () => {
   });
 });
 
-// A recipe line as the add-to-list use case builds it: parsed, with the catalog id
-// standing in for the ingredient name.
-function line(raw: string, source: string): GroceryLine {
+// A recipe line as the add-to-list use case builds it: parsed, with the ingredient's name
+// standing in for its catalog id, and the recipe's title for the recipe's.
+function line(raw: string, recipe: string): GroceryLine {
   const parsed = parseIngredientLine(raw);
   return {
     text: raw,
@@ -106,9 +115,17 @@ function line(raw: string, source: string): GroceryLine {
     unit: parsed.unit,
     name: parsed.name,
     ingredientId: parsed.name,
-    source,
+    recipeId: recipe,
+    title: recipe,
   };
 }
+
+// An item's recipe link, the way `line` makes one.
+const forRecipe = (recipe: string, quantity: number | null) => ({
+  recipeId: recipe,
+  title: recipe,
+  quantity,
+});
 
 // Real lines from the Obsidian vault. The grocery list keeps the recipe's own words and
 // drops only the note on preparing or serving it.
@@ -179,7 +196,7 @@ describe("groceryText", () => {
 });
 
 describe("planGroceryBatch", () => {
-  it("merges within the batch and keeps where each line came from", () => {
+  it("merges within the batch, linking each item to its recipes with their shares", () => {
     const changes = planGroceryBatch(
       [
         line("2 cloves garlic, minced", "Chili"),
@@ -194,15 +211,30 @@ describe("planGroceryBatch", () => {
     expect(changes.updates).toEqual([]);
     expect(changes.skipped).toBe(1);
     expect(
-      changes.inserts.map((item) => [
-        item.text,
-        item.quantity,
-        item.sourceNote,
-      ]),
+      changes.inserts.map((item) => [item.text, item.quantity, item.recipes]),
     ).toEqual([
-      ["6 cloves garlic", 6, "Chili, Tacos"],
-      ["1 onion, diced", 1, "Chili"],
-      ["Salt and pepper, to taste", null, "Chili, Tacos"],
+      ["6 cloves garlic", 6, [forRecipe("Chili", 2), forRecipe("Tacos", 4)]],
+      ["1 onion, diced", 1, [forRecipe("Chili", 1)]],
+      [
+        "Salt and pepper, to taste",
+        null,
+        [forRecipe("Chili", null), forRecipe("Tacos", null)],
+      ],
+    ]);
+  });
+
+  // Adding a recipe again sums into its own share; a line with no amount leaves it as it is.
+  it("adds to a recipe's share when it's added again", () => {
+    const changes = planGroceryBatch(
+      [
+        line("2 cloves garlic", "Chili"),
+        line("2 cloves garlic", "Chili"),
+        line("garlic, to taste", "Chili"),
+      ],
+      [],
+    );
+    expect(changes.inserts.map((item) => item.recipes)).toEqual([
+      [forRecipe("Chili", 4)],
     ]);
   });
 
@@ -215,7 +247,7 @@ describe("planGroceryBatch", () => {
         quantity: 2,
         unit: "clove",
         ingredientId: "garlic",
-        sourceNote: "Pesto",
+        recipes: [forRecipe("Pesto", 2)],
       },
       {
         id: "old-onion",
@@ -224,7 +256,7 @@ describe("planGroceryBatch", () => {
         quantity: 1,
         unit: null,
         ingredientId: "onion",
-        sourceNote: null,
+        recipes: [],
       },
     ];
 
@@ -238,7 +270,7 @@ describe("planGroceryBatch", () => {
         id: "garlic-item",
         text: "3 cloves garlic",
         quantity: 3,
-        sourceNote: "Pesto, Chili",
+        recipes: [forRecipe("Pesto", 2), forRecipe("Chili", 1)],
       },
     ]);
     expect(changes.inserts.map((item) => item.text)).toEqual(["2 onions"]);

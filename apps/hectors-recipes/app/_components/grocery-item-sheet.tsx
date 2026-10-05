@@ -19,6 +19,7 @@ import {
 } from "react";
 import { callAction } from "@/app/_lib/call-action";
 import { updateGroceryItem } from "@/app/actions/grocery";
+import { recipeTitles } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
 
 // A grocery item's actions, as a bottom sheet (the design system's pattern for short
@@ -38,6 +39,7 @@ export function GroceryItemSheet({
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
+  const forRecipes = recipeTitles(item);
 
   useEffect(() => {
     if (editing) inputRef.current?.focus();
@@ -74,8 +76,8 @@ export function GroceryItemSheet({
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{item.text}</DrawerTitle>
-          {item.sourceNote && (
-            <DrawerDescription>For {item.sourceNote}</DrawerDescription>
+          {forRecipes && (
+            <DrawerDescription>For {forRecipes}</DrawerDescription>
           )}
         </DrawerHeader>
 

@@ -274,6 +274,8 @@ export const groceryItems = pgTable(
     ingredientId: uuid("ingredient_id").references(() => ingredients.id, {
       onDelete: "set null",
     }),
+    // No longer read or written (ux-plan D59): `grocery_item_recipes` says which recipes an
+    // item is for. Dropped after the deploy that stopped using it (two deploys, L8).
     sourceNote: text("source_note"),
     createdBy: uuid("created_by").notNull(),
     createdAt: createdAt(),
@@ -288,6 +290,29 @@ export const groceryItems = pgTable(
       sql`${table.spaceType} = 'meal-plan'`,
     ),
     index("grocery_items_space_idx").on(table.spaceId),
+  ],
+);
+
+// The recipes a grocery item is for, each with its share of the item's amount (ux-plan D59).
+// An item merged from several recipes has a row for each. Deleting a recipe drops its rows,
+// and the item stays.
+export const groceryItemRecipes = pgTable(
+  "grocery_item_recipes",
+  {
+    itemId: uuid("item_id")
+      .notNull()
+      .references(() => groceryItems.id, { onDelete: "cascade" }),
+    recipeId: uuid("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    quantity: numeric("quantity", { mode: "number" }),
+    // The order links were made in, so an item's recipes read in the order they were added
+    // (D60). Links made together are numbered in the order they're written.
+    linkOrder: integer("link_order").generatedAlwaysAsIdentity(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.itemId, table.recipeId] }),
+    index("grocery_item_recipes_recipe_idx").on(table.recipeId),
   ],
 );
 

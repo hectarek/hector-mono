@@ -3,7 +3,6 @@ import {
   formatGroceryText,
   type GroceryLine,
   groceryText,
-  noteSources,
   planGroceryBatch,
   singularName,
 } from "@/src/entities/grocery-merge";
@@ -35,7 +34,8 @@ function toGroceryLines(
       quantity,
       unit,
       ingredientId: line.ingredientId,
-      source: recipe.title,
+      recipeId: recipe.id,
+      title: recipe.title,
     };
     if (!line.name) {
       return [
@@ -60,9 +60,9 @@ function toGroceryLines(
   });
 }
 
-// The recipes whose items are still unchecked on the list, by title (the "for …" notes).
-// Adding one of them again would sum into those items and double every amount, so both
-// ways of adding leave them out unless the user asks again.
+// The recipes whose items are still unchecked on the list, by id (D59): a title can change, or
+// be shared. Adding one of them again would sum into those items and double every amount, so
+// both ways of adding leave them out unless the user asks again.
 export async function recipesOnList(
   groceryItemsRepository: IGroceryItemsRepository,
   planId: string,
@@ -72,7 +72,7 @@ export async function recipesOnList(
   return new Set(
     items
       .filter((item) => !item.checked)
-      .flatMap((item) => noteSources(item.sourceNote)),
+      .flatMap((item) => item.recipes.map((recipe) => recipe.recipeId)),
   );
 }
 

@@ -28,7 +28,7 @@ app/
     spaces/[id]/settings  # Any space type: rename, invite links, members/roles, leave, delete
     join/[token]       # Invite preview + explicit Join button
     plan/              # Week view: ?week= (any date → its Monday), ?plan=; cook and eat rows (PlanWeek), then the grocery box (D50)
-    groceries/         # A plan's grocery list: ?plan=, add box, "Got it" section, clear checked, Clear list in the ⋯ sheet (D52); live (LiveList), refresh every 60s as a safety net
+    groceries/         # A plan's grocery list: ?plan=, ?group=recipe (By recipe, D60), add box, "Got it" section, clear checked, Clear list in the ⋯ sheet (D52); live (LiveList), refresh every 60s as a safety net
     account/[path]/    # Neon Auth account views; settings adds our Appearance card (light/dark/system)
   (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), large type, wake lock
   (form)/recipes/new    # How to add one (docs/ux-plan.md D34): by link (new/link), by photo or file (new/photo, D53), or manually (new/manual, the form)
@@ -53,7 +53,7 @@ src/
                        # withSections (a heading step -> the section of the steps after it), stepGroups (for display)
     step-ingredients.ts # the lines a step uses, by their names in its text (cook mode)
     itemizing-check.ts # holds AI line fields and timers to the line's own words (D30)
-    aisles.ts          # the fixed aisle list (D25)
+    aisles.ts          # the fixed aisle list (D25), groupByAisle, stackLikeItems (like items together, D61)
     ingredient-text.ts # pasted ingredient text -> lines ("Section:" lines, pasted Obsidian lists)
     editor-rows.ts     # the recipe editor's rows: from stored lines or pasted text, to what's saved
     library.ts         # library search (searchRecipes), tag list, Group by (groupRecipes)
@@ -61,6 +61,7 @@ src/
     meal-days.ts       # a meal's cook and eat days: moveCookDay, toggleEatDay, mealsOnDay, mealDaysText
     scaling.ts         # servings scaling + kitchen-friendly fractions
     grocery-merge.ts   # merge/skip/insert rule, planGroceryBatch (merges within a batch too), merged-line text
+    grocery-by-recipe.ts # the list by recipe (groupByRecipe), a recipe's share of an item as text (shareText)
     realtime.ts        # planChannel: a plan's live-updates channel
     recipe-page.ts     # recipeFromPage: a page's schema.org Recipe data -> draft, without AI
   application/
@@ -106,6 +107,7 @@ Full rationale in the spec. Summary:
 - **`recipe_steps`**: PK `(recipe_id, position)`, `text`, an optional `timer_minutes` (D24), and an optional `section`, the heading over it and the steps after it that share it (D35, migration 0008). Saving replaces a recipe's steps. They replaced the markdown `instructions` column (migration 0007).
 - **`ingredients`**: global catalog, unique name, and an `aisle` from the fixed list in `src/entities/aisles.ts` (D25).
 - **`plan_entries`** / **`grocery_items`**: both in `meal-plan` spaces; a plan's `grocery_items` are its grocery list. A plan entry is a meal (docs/ux-plan.md D38): one cooking of a recipe, with its cook day (the column is still called `date`; `cookDate` in code), its eat days (`eat_dates`, sorted, at least one (a check since 0010), none before the cook day) and `cooked` (D39).
+- **`grocery_item_recipes`**: which recipes a grocery item is for (migration 0014, docs/ux-plan.md D59), keyed by `(item_id, recipe_id)`, with `quantity`, that recipe's share of the item's amount, and `link_order` (an identity, migration 0015), the order links were made in. Both keys cascade, so deleting a recipe keeps its items. `grocery_items.source_note` is no longer read or written, and is dropped later (L8).
 - **`user_settings`**: one row per person, `default_plan_id` / `default_book_id` (FKs to `spaces`, set null when the space is deleted). No default book means All recipes.
 - **`recipe_reads`**: one row per AI read of a recipe (migration 0012): `user_id`, `kind` (`'image' | 'text' | 'document'`) and `created_at`, indexed on `(user_id, created_at)`, for the daily limit (`DAILY_RECIPE_READS`, docs/ux-plan.md D48). No space columns: the limit is per person.
 - **`tags`**: the tag catalog (migration 0013, docs/ux-plan.md D55): `name` (the key, as `recipes.tags` stores it) and `category` (`'meal' | 'cuisine' | 'diet'`). Only a tag with a group has a row, so there's no row to add when a recipe gets a tag without one; saving a recipe adds one for a new tag given a group in the form (`addGroups`, which never changes a tag's existing group). Shared by everyone, like `ingredients`. The migration fills it with `STARTING_TAGS` (`src/entities/models/tag.model.ts`), and a test checks the two agree.

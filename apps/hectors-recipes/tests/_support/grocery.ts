@@ -1,3 +1,4 @@
+import { recipeTitles } from "@/src/entities/grocery-merge";
 import { makeApp, OWNER, type Repositories } from "@/tests/_support/app";
 
 // A plan (whose grocery list the tests fill) plus two recipes that share garlic (in different
@@ -30,11 +31,11 @@ export async function groceryFixture(repos?: Repositories) {
     bookId,
     chiliId,
     tacosId,
-    // The list as [text, "from" note] pairs, in list order.
+    // The list as [text, "for …"] pairs, in list order.
     texts: async () =>
       (await app.getGroceryList(planId, OWNER)).map((item) => [
         item.text,
-        item.sourceNote,
+        recipeTitles(item),
       ]),
   };
 }

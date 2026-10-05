@@ -64,7 +64,7 @@ export const addRecipesToListUseCase = (
         const onList = again
           ? new Set<string>()
           : await recipesOnList(groceryItemsRepository, planId, tx);
-        const toAdd = loaded.filter(({ recipe }) => !onList.has(recipe.title));
+        const toAdd = loaded.filter(({ recipe }) => !onList.has(recipe.id));
         const alreadyAdded = loaded.length - toAdd.length;
         if (!toAdd.length) {
           return { planId, added: 0, merged: 0, skipped: 0, alreadyAdded };

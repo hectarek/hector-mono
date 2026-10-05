@@ -144,8 +144,56 @@ const NO_QUANTITY: [string, string][] = [
   ["Sugar", "sugar"],
 ];
 
+// Real lines the parser missed (ux-plan P19.4, D62): units and "whole" it didn't know.
+const MORE_UNITS: [string, ParsedIngredientLine][] = [
+  [
+    "1 c. heavy cream, plus more for drizzling",
+    { quantity: 1, unit: "cup", name: "heavy cream" },
+  ],
+  ["1/2 c. Warm Water", { quantity: 0.5, unit: "cup", name: "warm water" }],
+  [
+    "2 tins of chopped tomatoes",
+    { quantity: 2, unit: "can", name: "chopped tomato" },
+  ],
+  [
+    "2 celery stalks, finely diced",
+    { quantity: 2, unit: "stalk", name: "celery" },
+  ],
+  ["2 stalks Celery, Diced", { quantity: 2, unit: "stalk", name: "celery" }],
+  [
+    "2 ribs celery (diced small)",
+    { quantity: 2, unit: "stalk", name: "celery" },
+  ],
+  ["6 sprigs fresh thyme", { quantity: 6, unit: "sprig", name: "fresh thyme" }],
+  ["6 thyme sprigs", { quantity: 6, unit: "sprig", name: "thyme" }],
+  [
+    "1 pint grape tomatoes",
+    { quantity: 1, unit: "pint", name: "grape tomato" },
+  ],
+  // "Whole" in a count is one of it; with a unit it's part of what you buy.
+  ["1 whole Large Onion, Diced", { quantity: 1, unit: null, name: "onion" }],
+  [
+    "1 whole Green Bell Pepper, Seeded And Diced",
+    { quantity: 1, unit: null, name: "green bell pepper" },
+  ],
+  [
+    "1 cup (235ml) whole milk",
+    { quantity: 1, unit: "cup", name: "whole milk" },
+  ],
+  [
+    "2 Tbsp whole grain mustard",
+    { quantity: 2, unit: "tbsp", name: "whole grain mustard" },
+  ],
+  // A trailing "ribs" stays meat: only stalks and sprigs are written after the name.
+  ["4 beef short ribs", { quantity: 4, unit: null, name: "beef short rib" }],
+];
+
 describe("parseIngredientLine", () => {
   it.each(VAULT_LINES)("parses %p", (raw, expected) => {
+    expect(parseIngredientLine(raw)).toEqual(expected);
+  });
+
+  it.each(MORE_UNITS)("parses %p", (raw, expected) => {
     expect(parseIngredientLine(raw)).toEqual(expected);
   });
 

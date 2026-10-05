@@ -2,6 +2,7 @@ export const UNITS = [
   "tsp",
   "tbsp",
   "cup",
+  "pint",
   "fl-oz",
   "oz",
   "lb",
@@ -12,6 +13,8 @@ export const UNITS = [
   "pinch",
   "dash",
   "clove",
+  "sprig",
+  "stalk",
   "can",
   "bunch",
   "slice",
@@ -28,6 +31,7 @@ export const MEASURE_UNITS: ReadonlySet<Unit> = new Set<Unit>([
   "tsp",
   "tbsp",
   "cup",
+  "pint",
   "fl-oz",
   "oz",
   "lb",
@@ -55,6 +59,9 @@ const UNIT_ALIASES: Record<string, Unit> = {
   tablespoons: "tbsp",
   cup: "cup",
   cups: "cup",
+  c: "cup",
+  pint: "pint",
+  pints: "pint",
   oz: "oz",
   ounce: "oz",
   ounces: "oz",
@@ -84,8 +91,17 @@ const UNIT_ALIASES: Record<string, Unit> = {
   dashes: "dash",
   clove: "clove",
   cloves: "clove",
+  sprig: "sprig",
+  sprigs: "sprig",
+  stalk: "stalk",
+  stalks: "stalk",
+  // Celery's ribs are its stalks (LEADING_ONLY_UNIT_WORDS).
+  rib: "stalk",
+  ribs: "stalk",
   can: "can",
   cans: "can",
+  tin: "can",
+  tins: "can",
   bunch: "bunch",
   bunches: "bunch",
   slice: "slice",
@@ -103,6 +119,7 @@ const UNIT_ALIASES: Record<string, Unit> = {
 // Abbreviations (tbsp, g, oz) read the same either way and aren't listed.
 export const UNIT_WORD_FORMS: [singular: string, plural: string][] = [
   ["cup", "cups"],
+  ["pint", "pints"],
   ["teaspoon", "teaspoons"],
   ["tablespoon", "tablespoons"],
   ["ounce", "ounces"],
@@ -111,6 +128,8 @@ export const UNIT_WORD_FORMS: [singular: string, plural: string][] = [
   ["pinch", "pinches"],
   ["dash", "dashes"],
   ["clove", "cloves"],
+  ["sprig", "sprigs"],
+  ["stalk", "stalks"],
   ["can", "cans"],
   ["bunch", "bunches"],
   ["slice", "slices"],
@@ -157,11 +176,15 @@ const IRREGULAR_SINGULARS: Record<string, string> = {
 // Count units that also get written after the name ("2 garlic cloves" = "2 cloves garlic").
 const TRAILING_COUNT_UNITS = new Set<Unit>([
   "clove",
+  "sprig",
+  "stalk",
   "stick",
   "head",
   "bunch",
   "slice",
 ]);
+// Unit words read only before the name: after it, ribs are meat ("4 beef short ribs").
+const LEADING_ONLY_UNIT_WORDS = new Set(["rib", "ribs"]);
 const SINGULAR_EXCEPTIONS = new Set([
   "asparagus",
   "couscous",
@@ -357,13 +380,20 @@ export function parseIngredientLine(raw: string): ParsedIngredientLine {
   text = skipParenthetical(text);
   const { unit, rest } = readUnit(text);
   text = skipParenthetical(skipSlashMeasure(rest));
+  // "1 whole onion" is one onion; with a unit, "whole" is what you buy ("1 cup whole milk").
+  if (quantity !== null && !unit) {
+    text = text.replace(/^whole\s+/i, "");
+  }
 
   let name = toName(text);
   let lineUnit = unit;
 
   if (!lineUnit && name) {
     const words = name.split(" ");
-    const trailing = UNIT_ALIASES[words.at(-1) ?? ""];
+    const last = words.at(-1) ?? "";
+    const trailing = LEADING_ONLY_UNIT_WORDS.has(last)
+      ? undefined
+      : UNIT_ALIASES[last];
     if (trailing && TRAILING_COUNT_UNITS.has(trailing) && words.length > 1) {
       lineUnit = trailing;
       name = words.slice(0, -1).join(" ");

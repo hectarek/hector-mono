@@ -47,3 +47,24 @@ export function groupByAisle<T extends { aisle: Aisle | null }>(
       : [];
   });
 }
+
+// Items of one catalog ingredient moved up to sit under the first of them (ux-plan D61), so
+// "2 cloves garlic" and "1 tbsp garlic" are bought together. Everything else keeps its order,
+// and items with no ingredient (typed in) stay where they are.
+export function stackLikeItems<T extends { ingredientId: string | null }>(
+  items: T[],
+): T[] {
+  const stacks = new Map<string, T[]>();
+  const order: T[][] = [];
+  for (const item of items) {
+    const stack = item.ingredientId ? stacks.get(item.ingredientId) : undefined;
+    if (stack) {
+      stack.push(item);
+      continue;
+    }
+    const fresh = [item];
+    if (item.ingredientId) stacks.set(item.ingredientId, fresh);
+    order.push(fresh);
+  }
+  return order.flat();
+}

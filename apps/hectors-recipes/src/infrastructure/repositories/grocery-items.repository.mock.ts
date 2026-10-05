@@ -2,6 +2,8 @@ import type { IGroceryItemsRepository } from "@/src/application/repositories/gro
 import type { GroceryChanges } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
 
+// An item's recipes keep the titles they were added with: with no recipes of its own, the mock
+// can't show a rename (the Postgres tests do).
 export class MockGroceryItemsRepository implements IGroceryItemsRepository {
   private items: GroceryItem[] = [];
   private sequence = 0;
@@ -20,7 +22,7 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
       quantity: null,
       unit: null,
       ingredientId: null,
-      sourceNote: null,
+      recipes: [],
     });
   }
 
@@ -62,6 +64,14 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
       (item) => !(item.spaceId === spaceId && item.checked),
     );
     return before - this.items.length;
+  }
+
+  // Tests pass it as the mock recipes' onDelete, standing in for the link's cascade.
+  unlinkRecipe(recipeId: string): void {
+    this.items = this.items.map((item) => ({
+      ...item,
+      recipes: item.recipes.filter((recipe) => recipe.recipeId !== recipeId),
+    }));
   }
 
   async deleteAll(spaceId: string): Promise<number> {
