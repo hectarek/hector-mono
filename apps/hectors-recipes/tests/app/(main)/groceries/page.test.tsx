@@ -171,6 +171,48 @@ describe("Groceries", () => {
     again.getByText("Got it (1)");
   });
 
+  // D61: garlic in two units sits together, though the onion was added between them.
+  it("puts like items together", async () => {
+    const book = (
+      await getInjection("IEnsurePersonalSpaceController")(
+        "recipe-book",
+        userId,
+      )
+    ).id;
+    for (const [title, lines] of [
+      ["Stir-fry", ["2 cloves garlic", "1 onion"]],
+      ["Dressing", ["1 tbsp garlic"]],
+    ] as const) {
+      const recipe = await getInjection("ICreateRecipeController")(
+        {
+          spaceId: book,
+          data: { title, ingredients: lines.map((raw) => ({ raw })) },
+        },
+        userId,
+      );
+      await getInjection("IAddRecipesToListController")(
+        { planId: ownPlan, recipes: [{ recipeId: recipe.id }] },
+        userId,
+      );
+    }
+    expect((await items()).map((item) => item.text)).toEqual([
+      "2 cloves garlic",
+      "1 onion",
+      "1 tbsp garlic",
+    ]);
+
+    const view = render(await page(ownPlan));
+    expect(
+      view
+        .getAllByRole("checkbox")
+        .map((box) => box.closest("label")?.textContent),
+    ).toEqual([
+      "2 cloves garlicfor Stir-fry",
+      "1 tbsp garlicfor Dressing",
+      "1 onionfor Stir-fry",
+    ]);
+  });
+
   // D60: by recipe, each recipe's share of an item under its name; items added by hand last.
   it("shows the list by recipe, and checking a shared item there checks the one item", async () => {
     const user = userEvent.setup();

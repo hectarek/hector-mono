@@ -53,7 +53,7 @@ src/
                        # withSections (a heading step -> the section of the steps after it), stepGroups (for display)
     step-ingredients.ts # the lines a step uses, by their names in its text (cook mode)
     itemizing-check.ts # holds AI line fields and timers to the line's own words (D30)
-    aisles.ts          # the fixed aisle list (D25)
+    aisles.ts          # the fixed aisle list (D25), groupByAisle, stackLikeItems (like items together, D61)
     ingredient-text.ts # pasted ingredient text -> lines ("Section:" lines, pasted Obsidian lists)
     editor-rows.ts     # the recipe editor's rows: from stored lines or pasted text, to what's saved
     library.ts         # library search (searchRecipes), tag list, Group by (groupRecipes)

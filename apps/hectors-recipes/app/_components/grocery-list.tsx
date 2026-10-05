@@ -24,7 +24,7 @@ import type { PendingWrite } from "@/app/_lib/pending-writes";
 import { usePendingWrites } from "@/app/_lib/use-pending-writes";
 import { addGroceryItem, clearCheckedItems } from "@/app/actions/grocery";
 import type { ActionState } from "@/app/actions/shared";
-import { groupByAisle } from "@/src/entities/aisles";
+import { groupByAisle, stackLikeItems } from "@/src/entities/aisles";
 import { groupByRecipe } from "@/src/entities/grocery-by-recipe";
 import { recipeTitles } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
@@ -349,9 +349,10 @@ export function GroceryList({
     held.get(item.id) ?? queuedChecked(item) ?? item.checked;
   const toBuy = visible.filter((item) => !shownChecked(item));
   const got = visible.filter((item) => shownChecked(item));
-  // Grouped by aisle once anything on the list has one (ux-plan D25); a list typed by hand
-  // stays one list.
-  const aisles = groupByAisle(toBuy);
+  // Like items together (D61), then grouped by aisle once anything on the list has one
+  // (ux-plan D25); a list typed by hand stays one list.
+  const stacked = stackLikeItems(toBuy);
+  const aisles = groupByAisle(stacked);
   const byAisle = aisles.some((group) => group.aisle !== null);
   const row = (item: GroceryItem, text?: string) => (
     <ItemRow
@@ -425,7 +426,7 @@ export function GroceryList({
         </div>
       ) : toBuy.length > 0 ? (
         <ul className="flex flex-col divide-y">
-          {toBuy.map((item) => row(item))}
+          {stacked.map((item) => row(item))}
         </ul>
       ) : (
         <p className="text-muted-foreground py-6 text-center text-sm">

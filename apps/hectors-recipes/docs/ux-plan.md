@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1 and P19.2 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | P19.3 (like items together). |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1–P19.3 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | P19.4 (more units). |
 | Waiting on Hector | Running migrations 0014 and 0015 on production before Phase 19's PR merges (H28); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
@@ -1898,9 +1898,18 @@ One commit per task; the PR when the phase is done.
       - Mutations caught: whole items instead of shares, Added by hand first, names not made singular, the page showing the whole item, the address not updated, and Postgres ordering by title.
     - Screenshots at 375 px on the test project, by aisle and by recipe, taken with a throwaway flow (deleted).
     - All 1035 + 38 tests and both flows pass.
-- [ ] **P19.3** Like items together — C · D61
+- [x] **P19.3** Like items together — C · D61
   - Do: within each aisle, items of one catalog ingredient are moved up to the first of them. Items without one stay where they are.
   - Verify: unit tests, and the page's screen test.
+  - Evidence (2026-10-05):
+    - `stackLikeItems` (`src/entities/aisles.ts`) runs on what's left to buy before it's grouped by aisle, or shown as one list. By recipe isn't stacked: a recipe rarely lists one ingredient twice.
+    - Tests:
+      - Unit tests: later items of an ingredient move up under the first, with everything else in order. Items with no ingredient stay where they are, with an ingredient between two of them.
+      - The Groceries screen test: garlic from two recipes in two units sits together, though an onion was added between them.
+      - Mutations caught:
+        - the page not stacking;
+        - items typed in stacking together. That needed the test with an ingredient between two typed items: with them all together at the end, it passed.
+    - All 1037 + 39 tests pass.
 - [ ] **P19.4** More units — C · D62
   - Do:
     - `c` / `c.` → cup, `tin(s)` → can.
