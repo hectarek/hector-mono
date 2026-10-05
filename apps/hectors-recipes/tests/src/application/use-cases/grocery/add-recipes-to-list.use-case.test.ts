@@ -130,6 +130,13 @@ describeEachBackend("addRecipesToList, recipes by id", () => {
     ]);
   });
 
+  // D60: so By recipe lists recipes in the order they were added, not A to Z.
+  it("lists an item's recipes in the order they were added", async () => {
+    await g.app.addRecipesToList(g.planId, [{ recipeId: g.tacosId }], OWNER);
+    await g.app.addRecipesToList(g.planId, [{ recipeId: g.chiliId }], OWNER);
+    expect((await g.texts())[0]).toEqual(["6 cloves garlic", "Tacos, Chili"]);
+  });
+
   it("adds to a recipe's share when it's added again", async () => {
     await g.app.addRecipesToList(g.planId, [{ recipeId: g.chiliId }], OWNER);
     await g.app.addRecipesToList(g.planId, [{ recipeId: g.chiliId }], OWNER, {

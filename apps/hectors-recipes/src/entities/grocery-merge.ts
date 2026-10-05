@@ -254,7 +254,8 @@ export type GroceryListItem = ExistingGroceryItem & {
   recipes: ItemRecipe[];
 };
 
-// What an item says it's "for": its recipes' titles, or null for one typed in.
+// What an item says it's "for": its recipes' titles in the order they were added, or null
+// for one typed in.
 export function recipeTitles(
   item: Pick<GroceryListItem, "recipes">,
 ): string | null {

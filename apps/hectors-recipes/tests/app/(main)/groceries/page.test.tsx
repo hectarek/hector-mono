@@ -170,4 +170,70 @@ describe("Groceries", () => {
     await waitFor(() => expect(again.queryByText("Not saved yet")).toBe(null));
     again.getByText("Got it (1)");
   });
+
+  // D60: by recipe, each recipe's share of an item under its name; items added by hand last.
+  it("shows the list by recipe, and checking a shared item there checks the one item", async () => {
+    const user = userEvent.setup();
+    const book = (
+      await getInjection("IEnsurePersonalSpaceController")(
+        "recipe-book",
+        userId,
+      )
+    ).id;
+    const recipe = async (title: string, lines: string[]) =>
+      (
+        await getInjection("ICreateRecipeController")(
+          {
+            spaceId: book,
+            data: { title, ingredients: lines.map((raw) => ({ raw })) },
+          },
+          userId,
+        )
+      ).id;
+    const chili = await recipe("Chili", ["2 cloves garlic", "1 lb turkey"]);
+    const tacos = await recipe("Tacos", ["4 cloves garlic"]);
+    await getInjection("IAddRecipesToListController")(
+      { planId: ownPlan, recipes: [{ recipeId: chili }, { recipeId: tacos }] },
+      userId,
+    );
+    await getInjection("IAddGroceryItemController")(
+      { spaceId: ownPlan, text: "Milk" },
+      userId,
+    );
+    const view = render(await page(ownPlan));
+    const groups = () =>
+      view.getAllByRole("region").map((section) => [
+        section.getAttribute("aria-label"),
+        within(section)
+          .getAllByRole("checkbox")
+          .map((box) => box.closest("label")?.textContent),
+      ]);
+
+    await user.selectOptions(
+      view.getByRole("combobox", { name: "Group by" }),
+      "By recipe",
+    );
+    expect(groups()).toEqual([
+      ["Chili", ["2 cloves garlicfor Chili, Tacos", "1 lb turkeyfor Chili"]],
+      ["Tacos", ["4 cloves garlicfor Chili, Tacos"]],
+      ["Added by hand", ["Milk"]],
+    ]);
+    expect(window.location.search).toBe("?group=recipe");
+
+    const tacosGroup = view.getByRole("region", { name: "Tacos" });
+    await user.click(within(tacosGroup).getByRole("checkbox"));
+    await waitFor(async () =>
+      expect((await items()).map((item) => [item.text, item.checked])).toEqual([
+        ["6 cloves garlic", true],
+        ["1 lb turkey", false],
+        ["Milk", false],
+      ]),
+    );
+
+    await user.selectOptions(
+      view.getByRole("combobox", { name: "Group by" }),
+      "By aisle",
+    );
+    expect(window.location.search).toBe("");
+  });
 });

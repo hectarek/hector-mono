@@ -9,14 +9,11 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
   private sequence = 0;
 
   async list(spaceId: string): Promise<GroceryItem[]> {
-    return this.items
-      .filter((item) => item.spaceId === spaceId)
-      .map(withRecipesSorted);
+    return this.items.filter((item) => item.spaceId === spaceId);
   }
 
   async getById(id: string): Promise<GroceryItem | undefined> {
-    const item = this.items.find((candidate) => candidate.id === id);
-    return item && withRecipesSorted(item);
+    return this.items.find((item) => item.id === id);
   }
 
   async addText(spaceId: string, text: string): Promise<void> {
@@ -94,12 +91,4 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
       aisle: null,
     });
   }
-}
-
-// The order Postgres gives them: A to Z by title.
-function withRecipesSorted(item: GroceryItem): GroceryItem {
-  return {
-    ...item,
-    recipes: [...item.recipes].sort((a, b) => a.title.localeCompare(b.title)),
-  };
 }

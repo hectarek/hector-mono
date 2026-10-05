@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | P19.2 (By recipe). |
-| Waiting on Hector | Running migration 0014 on production before Phase 19's PR merges (H28); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1 and P19.2 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | P19.3 (like items together). |
+| Waiting on Hector | Running migrations 0014 and 0015 on production before Phase 19's PR merges (H28); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1864,7 +1864,7 @@ One commit per task; the PR when the phase is done.
   - Evidence (2026-10-05):
     - Migration 0014 adds `grocery_item_recipes` (both keys cascade, an index on `recipe_id`). An item carries `recipes: ItemRecipe[]` (id, title, share) in place of `sourceNote`.
     - `planGroceryBatch` links each item it inserts, merges into or skips to the line's recipe (`withRecipe`), adding to that recipe's share. `recipesOnList` gives ids, and both adds compare ids.
-    - The Postgres repository reads each item's recipes with their current titles, A to Z (a `json_agg` subquery). It writes links with `on conflict` updating the share, and only for items the update found on the list being written, the guard updates already had.
+    - The Postgres repository reads each item's recipes with their current titles (a `json_agg` subquery), A to Z at first and in the order they were added since P19.2. It writes links with `on conflict` updating the share, and only for items the update found on the list being written, the guard updates already had.
     - The mock keeps the title an item was added with, as it has no recipes (renames are tested on Postgres). It drops a deleted recipe's links when `makeApp`'s mock recipes delete one.
     - "for …" on the row and in the item's sheet is `recipeTitles(item)`.
     - Tests:
@@ -1882,11 +1882,22 @@ One commit per task; the PR when the phase is done.
       - Mutations caught: matching by title again (only the new tests fail, so they're the ones that catch L7), a share that doesn't add up, Postgres keeping an old share (caught after a test was added for it), links for another list's item, and no links for updates.
     - Applied to the test project by Claude, with Drizzle's record of it (15 migrations). The browser flows pass on it, and their "1 lb ground turkey for Chili" now comes from the links.
     - All 1025 + 37 tests pass. Production waits on H28.
-- [ ] **P19.2** By recipe — C · D60
+- [x] **P19.2** By recipe — C · D60
   - Do:
     - `groupByRecipe` puts what's left to buy under each recipe it's for, at that recipe's amount (the item's text when it has no share), and hand-typed items last.
     - Groceries gets a picker (By aisle, By recipe) kept in `?group=`, as Recipes' Group by is. Checking an item under a recipe checks the one item.
   - Verify: unit tests for the grouping, a screen test of the page, and a screenshot at 375 px.
+  - Evidence (2026-10-05):
+    - `groupByRecipe` (`src/entities/grocery-by-recipe.ts`) and `shareText`: a row under a recipe is that recipe's share ("6 cloves garlic" is "2 cloves garlic" for the recipe that put in 2). Only the amount and unit are read back, since `parseIngredientLine` names things for the catalog and would drop "large" or a size in brackets (its first try did; the tests caught it).
+    - Groceries has a `NativeSelect` (By aisle, By recipe) once an item to buy came from a recipe. It's kept in `?group=recipe` in place, with `?plan=` kept. Recipe names are `font-heading` headings; "Added by hand" is styled like an aisle.
+    - Found in the first screenshot: recipes came A to Z, not in the order added. Their first item was shared, and an item's recipes were listed by title. Migration 0015 adds `link_order` (an identity) to the links, and an item's recipes now come in that order, in "for …" too. It's on the test project; production runs it with 0014 (H28).
+    - Tests:
+      - Unit tests for `shareText` (counts, fractions, a size word, a bracketed size, and amount-less or edited items) and `groupByRecipe`.
+      - On both backends, an item's recipes come in the order added. That fails on Postgres when it orders by title.
+      - The Groceries screen test: By recipe shows each recipe's share and Added by hand last, and keeps `?group=recipe`. Checking the shared garlic under the second recipe checks the one item. By aisle clears the address.
+      - Mutations caught: whole items instead of shares, Added by hand first, names not made singular, the page showing the whole item, the address not updated, and Postgres ordering by title.
+    - Screenshots at 375 px on the test project, by aisle and by recipe, taken with a throwaway flow (deleted).
+    - All 1035 + 38 tests and both flows pass.
 - [ ] **P19.3** Like items together — C · D61
   - Do: within each aisle, items of one catalog ingredient are moved up to the first of them. Items without one stay where they are.
   - Verify: unit tests, and the page's screen test.
@@ -2004,7 +2015,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it to the main checkout's `.env.test`; Claude copied that into the worktree (its copy predated the key), and the real reads passed |
 | H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | done 2026-10-05: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check, so Hector ran `bun run db:migrate` |
 | H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
-| H28 | Run P19.1's additive migration (`grocery_item_recipes`) on production, before the PR merges (Vercel's previews use production too). | P19.1 | open |
+| H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | open |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | open |
 
 ## Risks and how they're handled

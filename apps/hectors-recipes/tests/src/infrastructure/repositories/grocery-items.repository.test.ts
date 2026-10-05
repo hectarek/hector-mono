@@ -108,7 +108,7 @@ describe("GroceryItemsRepository (Postgres)", () => {
     await g.app.updateRecipe(g.chiliId, { title: "Turkey Chili" }, OWNER);
     expect((await g.texts())[0]).toEqual([
       "6 cloves garlic",
-      "Tacos, Turkey Chili",
+      "Turkey Chili, Tacos",
     ]);
 
     await g.app.deleteRecipe(g.tacosId, OWNER);

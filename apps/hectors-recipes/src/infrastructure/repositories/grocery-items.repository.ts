@@ -21,13 +21,13 @@ const itemColumns = {
   quantity: groceryItems.quantity,
   unit: groceryItems.unit,
   ingredientId: groceryItems.ingredientId,
-  // Its recipes A to Z, with their titles as they are now (D59).
+  // Its recipes in the order they were added (D60), with their titles as they are now (D59).
   recipes: sql<ItemRecipe[]>`coalesce((
     select json_agg(json_build_object(
       'recipeId', ${recipes.id},
       'title', ${recipes.title},
       'quantity', ${groceryItemRecipes.quantity}
-    ) order by ${recipes.title})
+    ) order by ${groceryItemRecipes.linkOrder})
     from ${groceryItemRecipes}
     join ${recipes} on ${recipes.id} = ${groceryItemRecipes.recipeId}
     where ${groceryItemRecipes.itemId} = ${groceryItems.id}

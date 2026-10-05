@@ -306,6 +306,9 @@ export const groceryItemRecipes = pgTable(
       .notNull()
       .references(() => recipes.id, { onDelete: "cascade" }),
     quantity: numeric("quantity", { mode: "number" }),
+    // The order links were made in, so an item's recipes read in the order they were added
+    // (D60). Links made together are numbered in the order they're written.
+    linkOrder: integer("link_order").generatedAlwaysAsIdentity(),
   },
   (table) => [
     primaryKey({ columns: [table.itemId, table.recipeId] }),

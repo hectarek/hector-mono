@@ -2,8 +2,13 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@repo/ui/components/native-select";
 import { cn } from "@repo/ui/lib/utils";
 import { Check, CloudOff, Ellipsis } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import {
   type FormEvent,
   useActionState,
@@ -20,6 +25,7 @@ import { usePendingWrites } from "@/app/_lib/use-pending-writes";
 import { addGroceryItem, clearCheckedItems } from "@/app/actions/grocery";
 import type { ActionState } from "@/app/actions/shared";
 import { groupByAisle } from "@/src/entities/aisles";
+import { groupByRecipe } from "@/src/entities/grocery-by-recipe";
 import { recipeTitles } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
 
@@ -54,6 +60,7 @@ function fold(row: HTMLElement | null, done: () => void) {
 
 function ItemRow({
   item,
+  text = item.text,
   canEdit,
   queuedChecked,
   unsaved,
@@ -62,6 +69,8 @@ function ItemRow({
   release,
 }: {
   item: GroceryItem;
+  // What the row says: one recipe's share of the item, when the list is by recipe.
+  text?: string;
   canEdit: boolean;
   // A check or uncheck made with no signal, waiting to be sent: shown as done meanwhile.
   queuedChecked: boolean | undefined;
@@ -177,7 +186,7 @@ function ItemRow({
                   : "decoration-transparent",
               )}
             >
-              {item.text}
+              {text}
             </span>
             {forRecipes && (
               <span className="text-muted-foreground truncate text-xs">
@@ -291,6 +300,23 @@ export function GroceryList({
 }) {
   const [isClearing, startClearing] = useTransition();
   const [clearError, setClearError] = useState<string>();
+  // By aisle or by recipe (D60), kept in the address in place, as the library's Group by is.
+  const searchParams = useSearchParams();
+  const [byRecipe, setByRecipe] = useState(
+    searchParams.get("group") === "recipe",
+  );
+  function changeGroup(value: string) {
+    setByRecipe(value === "recipe");
+    const params = new URLSearchParams(window.location.search);
+    if (value === "recipe") params.set("group", "recipe");
+    else params.delete("group");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      query ? `/groceries?${query}` : "/groceries",
+    );
+  }
   const { queue, run } = usePendingWrites(spaceId);
   const queued = new Map(queue.map((write) => [write.itemId, write]));
   const queuedChecked = (item: GroceryItem) => {
@@ -327,10 +353,11 @@ export function GroceryList({
   // stays one list.
   const aisles = groupByAisle(toBuy);
   const byAisle = aisles.some((group) => group.aisle !== null);
-  const row = (item: GroceryItem) => (
+  const row = (item: GroceryItem, text?: string) => (
     <ItemRow
       key={item.id}
       item={item}
+      text={text}
       canEdit={canEdit}
       queuedChecked={queuedChecked(item)}
       unsaved={queued.has(item.id)}
@@ -344,7 +371,42 @@ export function GroceryList({
     <div className="flex flex-col gap-4">
       {canEdit && <AddItemForm spaceId={spaceId} />}
 
-      {toBuy.length > 0 && byAisle ? (
+      {toBuy.some((item) => item.recipes.length) && (
+        <NativeSelect
+          aria-label="Group by"
+          value={byRecipe ? "recipe" : "aisle"}
+          onChange={(event) => changeGroup(event.target.value)}
+          className="self-end"
+        >
+          <NativeSelectOption value="aisle">By aisle</NativeSelectOption>
+          <NativeSelectOption value="recipe">By recipe</NativeSelectOption>
+        </NativeSelect>
+      )}
+
+      {toBuy.length > 0 && byRecipe ? (
+        <div className="flex flex-col gap-4">
+          {groupByRecipe(toBuy).map((group) => (
+            <section
+              key={group.recipeId ?? "by-hand"}
+              aria-label={group.label}
+              className="flex flex-col"
+            >
+              <h3
+                className={
+                  group.recipeId
+                    ? "font-heading text-base"
+                    : "text-muted-foreground text-xs font-semibold tracking-wide uppercase"
+                }
+              >
+                {group.label}
+              </h3>
+              <ul className="flex flex-col divide-y">
+                {group.rows.map(({ item, text }) => row(item, text))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : toBuy.length > 0 && byAisle ? (
         <div className="flex flex-col gap-4">
           {aisles.map((group) => (
             <section
@@ -355,12 +417,16 @@ export function GroceryList({
               <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                 {group.label}
               </h3>
-              <ul className="flex flex-col divide-y">{group.items.map(row)}</ul>
+              <ul className="flex flex-col divide-y">
+                {group.items.map((item) => row(item))}
+              </ul>
             </section>
           ))}
         </div>
       ) : toBuy.length > 0 ? (
-        <ul className="flex flex-col divide-y">{toBuy.map(row)}</ul>
+        <ul className="flex flex-col divide-y">
+          {toBuy.map((item) => row(item))}
+        </ul>
       ) : (
         <p className="text-muted-foreground py-6 text-center text-sm">
           {got.length
@@ -374,7 +440,9 @@ export function GroceryList({
           <summary className="text-muted-foreground flex cursor-pointer items-center justify-between text-sm select-none">
             <span>Got it ({got.length})</span>
           </summary>
-          <ul className="flex flex-col divide-y">{got.map(row)}</ul>
+          <ul className="flex flex-col divide-y">
+            {got.map((item) => row(item))}
+          </ul>
           {canEdit && (
             <Button
               variant="secondary"
