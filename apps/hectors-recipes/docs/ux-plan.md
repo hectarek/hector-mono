@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1–P19.4 done, P19.5's list ready for Hector. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | P19.5's check once Hector has run H28 and H29 on production, then the phase's PR. |
-| Waiting on Hector | The units fix's list, `docs/private/units-fix-2026-10-05.md` in the worktree, then its SQL (H29); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: all five tasks done, the PR next. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | Phase 19's PR; then Phase 20, starting with the discussion on measuring AI reads. |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1928,7 +1928,7 @@ One commit per task; the PR when the phase is done.
       - Mutations caught: no `c.`, "whole" kept in counts, "whole" dropped with a unit, ribs read after the name, and stalk not read after it.
     - Noticed, not changed: a grocery line with a unit names its item in the singular ("2 pints grape tomato", as already "2 cups black bean"), since `toGroceryLines` makes every name singular for counting.
     - All 1057 + 39 tests and both flows pass.
-- [~] **P19.5** The units fix on existing lines — C+H · D62, D31
+- [x] **P19.5** The units fix on existing lines — C+H · D62, D31
   - Do:
     - Claude reads every line the new rules change, and every stray catalog entry, and proposes each fix: the line's new unit and name, and the catalog ingredient it should link to.
     - The list goes to Hector in the gitignored `docs/private/` (H29), with a dry run.
@@ -1946,7 +1946,11 @@ One commit per task; the PR when the phase is done.
     - Dry run in an in-memory Postgres with every migration and the 32 lines as they are:
       - All 32 come out as proposed, the 23 strays go, and a target another line uses stays.
       - With one line's text changed, the whole write is refused: nothing changed, and not even the new catalog entries were added.
-    - Waiting on Hector's check and his run of it (H29).
+    - Hector approved the whole list on 2026-10-05, the four marked lines included ("otherwise it looks good"), after checking that `c.` is only read, never shown. At his "run it", Claude ran the SQL through the Neon connector, and Claude Code's safety check allowed it this time.
+    - Read-only check afterwards, with a query made from the approved list:
+      - All 32 lines are as approved, none missing.
+      - None of the 23 strays is left.
+      - Green bell pepper (produce), cooked lentil (canned-and-jarred) and masa (baking) are in the catalog.
 
 ## Phase 20 (planned): Measuring AI reads, links first
 
@@ -2049,7 +2053,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | done 2026-10-05: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check, so Hector ran `bun run db:migrate` |
 | H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
-| H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | open: the list is ready (2026-10-05): 32 lines in 16 recipes, 3 new catalog entries, 23 strays removed, 4 lines marked to check |
+| H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
 
 ## Risks and how they're handled
 
@@ -2273,3 +2277,5 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Next: P19.1, then H28.
 - **2026-10-05 (bc)** — P19.1–P19.4 done (see each task's Evidence): items link to their recipes with each one's share (migration 0014), By recipe (0015 orders the links), like items together, and more units. The units fix's list and SQL are ready, and passed a dry run (P19.5).
   - Next: Hector checks the list (H29) and runs both migrations (H28), then the fix; Claude checks it read-only; the PR.
+- **2026-10-05 (bd)** — Hector ran migrations 0014 and 0015 (H28) and approved the units fix (H29), which Claude ran at his "run it" and checked read-only. Phase 19 done.
+  - Next: Phase 19's PR.
