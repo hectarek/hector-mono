@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: all five tasks done, the PR next. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | Phase 18's PR; then Phase 19. |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: planned, P19.1 next. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | P19.1 (items know their recipes). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
@@ -122,6 +122,10 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D56 | Search matches a recipe's title, tags and ingredient names. Every word typed must match one of them, and title matches come first. | Hector, 2026-10-04: "not just look up by name, but by relevant info like tags for other common search elements". The rules are Claude's defaults; Hector: "your defaults". |
 | D57 | Recipes can be grouped by meal, cuisine or diet (not grouped by default), kept in the address (`?group=`). A recipe shows under each of its tags in that group, and recipes with none go last, under Other. | Hector, 2026-10-04: "By default we shouldnt group, but we should be able to group by meals… types… and dietary". Showing a recipe under each tag and the Other group are Claude's defaults; Hector: "your defaults". |
 | D58 | The tags: meal is breakfast, lunch, dinner, side dish, snack, dessert, drink; diet is vegetarian, vegan, gluten-free, dairy-free, high-protein; cuisines are added as recipes need them. Claude's tagging pass gives every recipe a meal tag, and its cuisine and diet tags where they're clear, flagging any diet tag it's unsure of. Hector checks the list before anything is written. | Hector, 2026-10-04: "a pass in this session of better tagging… see if they are properly tagged as well as add any missing tags"; "dietary (gluten free, protien, etc)"; "your defaults". |
+| D59 | Grocery items know their recipes through a link table (`grocery_item_recipes`: the item, the recipe, and that recipe's share of the amount). An item merged from several recipes links to each. "Already on this list" and the item's "for …" come from the links, not from titles. | Hector, 2026-10-05: of a link table with each recipe's share (A) or a list of recipe ids on the item (B), "go with A". The grocery list was empty, so nothing is backfilled. |
+| D60 | Groceries can be shown By aisle (the default) or By recipe, kept in the address (`?group=recipe`). By recipe, recipes come in the order they were added, each with its items at that recipe's amounts. Hand-typed items come last, under "Added by hand", and checked items go to Got it as now. | Claude's defaults; Hector, 2026-10-05: "your defaults". |
+| D61 | Within an aisle, items of the same catalog ingredient sit together, in the order the first of them was added. They stay separate rows ("2 cloves garlic", "1 tbsp garlic"), never one combined row. | Claude's default; Hector, 2026-10-05: "your defaults". |
+| D62 | Units: `c.` reads as cup and `tin` as can. New units `stalk` (and `rib`), `sprig` and `pint`. "Whole" comes off a name, like size words. Jar, box, bottle and carton are left out (one or two lines each). Existing lines and stray catalog entries are then fixed once, from a list Hector sees and a dry run, and Hector runs the write. | Hector, 2026-10-04: "a pass data wise on the units… more options (not too many)"; 2026-10-05: "your defaults". From a read-only look at production's 1,007 lines (2026-10-05). |
 
 ---
 
@@ -1826,12 +1830,58 @@ One commit per task; the PR when the phase is done.
       - Mutations caught: create or edit skipping the groups, groups for tags the recipe doesn't have, the mock overwriting a group, Postgres without `on conflict`, the test reset keeping tests' tags, the picker ignoring groups, New tag's group dropped, and either action dropping the groups. In the flow: the form not sending them.
     - All tests and both flows pass.
 
-## Phase 19 (planned): Groceries by recipe, like items together, and more units
+## Phase 19: Groceries by recipe, like items together, and more units
 
-Hector, 2026-10-04: "in our grocery list, we should also have a group by recipe… the ability to see the groceries of each recipe separately"; "group like ingredients so they stack so that we dont have to keep going back and forth"; "a pass data wise on the units… more options (not too many)". Planned in detail when it starts; one PR.
-- **By recipe.** A choice on Groceries: by aisle (the default) or by recipe, each recipe's items under its name. This needs L7 first: items know their recipe by id, not by the title in their "for …" note.
-- **Like items together.** Within an aisle, lines of the same ingredient sit next to each other ("2 cloves garlic" and "1 tbsp garlic"), not in the order they were added. Today lines merge only when the ingredient and the unit both match.
-- **Units.** A read-only look through the recipes' lines for units the parser misses. Then the few that cover them are added to the parser and to the form's list, not too many.
+Branch `feat/recipes-p19-groceries-by-recipe`. Hector, 2026-10-04: "in our grocery list, we should also have a group by recipe… the ability to see the groceries of each recipe separately"; "group like ingredients so they stack so that we dont have to keep going back and forth"; "a pass data wise on the units… more options (not too many)". Decided 2026-10-05: items link to their recipes (D59), By recipe (D60), like items together (D61), the units (D62).
+
+Starting point, 2026-10-05, read-only on production:
+- The grocery list is empty, so items need no backfill.
+- A recipe is found on the list by the titles in its items' "for …" notes, split at ", " (`noteSources`). One of the 81 titles has a comma, so that recipe is never seen as on the list, and adding it again doubles every amount (L7).
+- Of 1,007 lines, 175 have an amount and no unit. Most are counts, 49 of them by size ("1 medium onion"). The parser misses:
+  - `c.` (6 lines)
+  - celery `stalks` / `ribs` (6)
+  - `sprigs` (3)
+  - `pint` (2)
+  - `tins` (2)
+  - jar, box, bottle and carton (one or two each)
+- Size words already fold in the catalog ("medium onion" is onion). Stray catalog entries don't: "celery stalk", "stalks celery", "whole onion" and "minced garlic" are apart from celery, onion and garlic, so they wouldn't stack.
+
+One commit per task; the PR when the phase is done.
+
+- [ ] **P19.1** Items know their recipes — C+H · D59, L7
+  - Do:
+    - An additive migration adds `grocery_item_recipes`: `item_id` (cascade with the item), `recipe_id` (cascade with the recipe; the item stays), `quantity` (this recipe's share, in the item's unit; null for an amount-less line), keyed by both ids.
+    - Adding recipe lines links every item it inserts, merges into or skips to the recipe. A merge adds to that recipe's share.
+    - "Already on this list" (`recipesOnList`, both adds) is the recipes linked to unchecked items, by id.
+    - The list's "for …" comes from the links, with the recipes' titles as they are now. `source_note` is no longer read or written, and is dropped in a later migration after this deploys (two deploys).
+    - Applied to the test project by Claude, and to production by Hector before this deploys (H28).
+  - Verify:
+    - Use-case tests on both backends:
+      - A recipe with a comma in its title is seen as on the list.
+      - A renamed recipe is too, and two recipes with one title count apart.
+      - A merged item links both recipes with their shares.
+    - A Postgres test that deleting a recipe keeps its items.
+- [ ] **P19.2** By recipe — C · D60
+  - Do:
+    - `groupByRecipe` puts what's left to buy under each recipe it's for, at that recipe's amount (the item's text when it has no share), and hand-typed items last.
+    - Groceries gets a picker (By aisle, By recipe) kept in `?group=`, as Recipes' Group by is. Checking an item under a recipe checks the one item.
+  - Verify: unit tests for the grouping, a screen test of the page, and a screenshot at 375 px.
+- [ ] **P19.3** Like items together — C · D61
+  - Do: within each aisle, items of one catalog ingredient are moved up to the first of them. Items without one stay where they are.
+  - Verify: unit tests, and the page's screen test.
+- [ ] **P19.4** More units — C · D62
+  - Do:
+    - `c` / `c.` → cup, `tin(s)` → can.
+    - New units: `stalk` (`rib` too), `sprig` and `pint`, the last a measure (a bracket after it is the same amount).
+    - "Whole" comes off a catalog name, as size words do.
+    - The form's unit list and the reader's schema use `UNITS`, so both get them.
+  - Verify: the real lines above as parser tests, and scaling and grocery text for the new units.
+- [ ] **P19.5** The units fix on existing lines — C+H · D62, D31
+  - Do:
+    - Claude reads every line the new rules change, and every stray catalog entry, and proposes each fix: the line's new unit and name, and the catalog ingredient it should link to.
+    - The list goes to Hector in the gitignored `docs/private/` (H29), with a dry run.
+    - He runs the write.
+  - Verify: a read-only check afterwards that every line and link is as approved.
 
 ## Phase 20 (planned): Measuring AI reads, links first
 
@@ -1896,7 +1946,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
     - `requireOwner`, `requireItemEditor` and `requireEntryEditor` take the write's `tx`, required, since only writes use them. The repository methods these writes call take an optional `tx`, like the rest. The DI modules and `makeApp()` pass the transaction manager in.
     - Tests first: viewers can't remove an item, clear checked or remove a meal, and an editor can't remove someone else (both backends; they passed before and still end in `UnauthorizedError` inside a transaction, not "Transaction failed"); and `ensureInviteLinks` leaves no link behind when the second fails (Postgres), which failed before the change and passes after. A read left without `tx` would hang the `[postgres]` runs; none does.
     - 953 tests pass (944 before), and `bun check` and `bun ts` are clean. AGENTS.md says the three helpers take `tx`.
-- [ ] **L7** Grocery items know their recipe — C+H · D45 · now part of Phase 19
+- [ ] **L7** Grocery items know their recipe — C+H · D45 · now P19.1 (D59)
   - From P14.13's "left as they are": the no-double rule finds a recipe on the list by the title in its items' "for …" notes. A recipe renamed since it was added isn't recognised (its items are bought again), and two recipes with the same title count as one (a planned one is taken as on the list when the other is).
   - The fix is a nullable recipe id on grocery items (an additive migration, so Hector's OK first), set when a recipe's lines go on, and the rule matching by it.
 
@@ -1931,6 +1981,8 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it to the main checkout's `.env.test`; Claude copied that into the worktree (its copy predated the key), and the real reads passed |
 | H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | done 2026-10-05: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check, so Hector ran `bun run db:migrate` |
 | H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
+| H28 | Run P19.1's additive migration (`grocery_item_recipes`) on production, before the PR merges (Vercel's previews use production too). | P19.1 | open |
+| H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | open |
 
 ## Risks and how they're handled
 
@@ -2149,3 +2201,6 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - P18.5 done: the tag picker's groups, and a new tag's group saved with the recipe (see its Evidence). Phase 18's code is done; its PR waits on P18.2's production writes (H26, H27), since the Recipes page reads `tags`.
 - **2026-10-05 (ba)** — Hector ran migration 0013 and the tagging pass on production (H26, H27). Claude's read-only check matches the approved list (P18.2's Evidence). Phase 18 done.
   - Next: Phase 18's PR.
+- **2026-10-05 (bb)** — Hector merged Phase 18 (hectarek/hector-mono#23).
+  - Phase 19 decided after a read-only look at production: items link to their recipes with each one's share (D59, taking in L7), By recipe (D60), like items together (D61), the units (D62). Planned in detail.
+  - Next: P19.1, then H28.
