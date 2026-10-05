@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1, P18.3, P18.4 and P18.5 done, P18.2 waiting on production. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P18.2's check once Hector has run H26 and H27 on production, then the phase's PR. |
-| Waiting on Hector | Running migration 0013 (H26), then the tagging pass's SQL (H27), on production: both approved, but Claude Code's permission check blocks Claude's writes to production; real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-04 |
+| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: all five tasks done, the PR next. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | Phase 18's PR; then Phase 19. |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-05 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -1760,7 +1760,7 @@ One commit per task; the PR when the phase is done.
     - Applied to the test project by Claude, with Drizzle's record of it (14 migrations; 7 meal, 9 cuisine and 5 diet tags), and the browser flows pass on it.
     - Production waits on H26. The Recipes page reads `tags`, so it must be applied before this deploys, and Vercel's previews use production too.
     - All 993 + 34 tests pass.
-- [~] **P18.2** The tagging pass — C+H · D58, D31
+- [x] **P18.2** The tagging pass — C+H · D58, D31
   - Do:
     - Claude reads every recipe in the session: its title, lines and steps. For each it proposes a meal tag (every recipe gets one), and cuisine and diet tags where they're clear.
     - Any diet tag Claude is unsure of is flagged, such as gluten in soy sauce or dairy in butter.
@@ -1770,7 +1770,12 @@ One commit per task; the PR when the phase is done.
   - Evidence so far (2026-10-04):
     - Hector approved the whole list (H27). It's written as one transaction in the gitignored `docs/private/tagging-pass-2026-10-04.sql`: the 4 new cuisines (british, caribbean, french, polish) into the catalog, then the 74 recipes whose tags change, matched by title.
     - Dry run, in an in-memory Postgres with every migration and the 81 recipes' tags as they are today: 4 tags added, 74 recipes changed. Afterwards all 81 have the approved tags and a meal tag, and every tag in use has a group.
-    - Claude's write to production was blocked by Claude Code's permission check, so Hector runs it after migration 0013 (H26). Then the read-only check.
+    - Claude's write to production was blocked by Claude Code's permission check, so Hector ran it after migration 0013 (H26), on 2026-10-05.
+    - Read-only check on production afterwards (2026-10-05):
+      - Drizzle's record has 14 migrations, the last with 0013's hash.
+      - The catalog has 7 meal, 13 cuisine and 5 diet tags, the 4 new cuisines among them.
+      - Compared as sets, every one of the 81 recipes' tags equals the approved list, with none missing on either side.
+      - Every recipe has a meal tag, and every tag in use has a group.
 - [x] **P18.3** Search — C · D56
   - Do:
     - Listed recipes carry their ingredient names. `matchesSearch` checks every word typed against the title, the tags and those names, ignoring case. Title matches come first.
@@ -1924,8 +1929,8 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
 | H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it to the main checkout's `.env.test`; Claude copied that into the worktree (its copy predated the key), and the real reads passed |
-| H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | open: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check. Hector runs `bun run db:migrate` from the worktree's app folder |
-| H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | open: approved 2026-10-04 ("the tags look good please apply all those"). Hector runs `docs/private/tagging-pass-2026-10-04.sql` on production after H26, as Claude's writes there are blocked |
+| H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | done 2026-10-05: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check, so Hector ran `bun run db:migrate` |
+| H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
 
 ## Risks and how they're handled
 
@@ -2142,3 +2147,5 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Next: P18.4; P18.2's check once H26 and H27 are run.
   - P18.4 done: Group by (see its Evidence). Next: P18.5.
   - P18.5 done: the tag picker's groups, and a new tag's group saved with the recipe (see its Evidence). Phase 18's code is done; its PR waits on P18.2's production writes (H26, H27), since the Recipes page reads `tags`.
+- **2026-10-05 (ba)** — Hector ran migration 0013 and the tagging pass on production (H26, H27). Claude's read-only check matches the approved list (P18.2's Evidence). Phase 18 done.
+  - Next: Phase 18's PR.
