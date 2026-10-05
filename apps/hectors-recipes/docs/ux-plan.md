@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1–P19.4 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | P19.5 (the units fix on existing lines: Claude's list for Hector, H29). |
-| Waiting on Hector | Running migrations 0014 and 0015 on production before Phase 19's PR merges (H28); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1–P19.4 done, P19.5's list ready for Hector. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | P19.5's check once Hector has run H28 and H29 on production, then the phase's PR. |
+| Waiting on Hector | Running migrations 0014 and 0015 on production before Phase 19's PR merges (H28); the units fix's list, `docs/private/units-fix-2026-10-05.md` in the worktree, then its SQL (H29); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1928,12 +1928,25 @@ One commit per task; the PR when the phase is done.
       - Mutations caught: no `c.`, "whole" kept in counts, "whole" dropped with a unit, ribs read after the name, and stalk not read after it.
     - Noticed, not changed: a grocery line with a unit names its item in the singular ("2 pints grape tomato", as already "2 cups black bean"), since `toGroceryLines` makes every name singular for counting.
     - All 1057 + 39 tests and both flows pass.
-- [ ] **P19.5** The units fix on existing lines — C+H · D62, D31
+- [~] **P19.5** The units fix on existing lines — C+H · D62, D31
   - Do:
     - Claude reads every line the new rules change, and every stray catalog entry, and proposes each fix: the line's new unit and name, and the catalog ingredient it should link to.
     - The list goes to Hector in the gitignored `docs/private/` (H29), with a dry run.
     - He runs the write.
   - Verify: a read-only check afterwards that every line and link is as approved.
+  - Evidence so far (2026-10-05):
+    - Read-only on production: every line whose text has c., tin, stalk, rib, sprig, pint or whole (41), and the lines linked to the stray entries "fresh thyme", "minced garlic" and "chopped red onion".
+    - 32 lines change, in 16 recipes. Each line's unit and name come from the P19.4 parser, and its note is kept from the AI re-read, which is better than the text split. The two "celery rib" lines are by hand.
+    - Three new catalog entries: green bell pepper, cooked lentil and masa, with their aisles. 23 stray entries go once nothing links to them, among them "c.", "c. chicken broth", "whole onion" and "stalks celery".
+    - Four lines are marked for Hector to check:
+      - "2 tins of chopped tomatoes" linked to diced tomato.
+      - Three "minced garlic" lines linked to garlic, unless they mean a jar.
+    - The list and the SQL are in the gitignored `docs/private/units-fix-2026-10-05.{md,sql}`.
+    - The SQL is one transaction. Each line is matched by its recipe, position and exact text, and it stops if the count isn't 32 or a catalog name is missing.
+    - Dry run in an in-memory Postgres with every migration and the 32 lines as they are:
+      - All 32 come out as proposed, the 23 strays go, and a target another line uses stays.
+      - With one line's text changed, the whole write is refused: nothing changed, and not even the new catalog entries were added.
+    - Waiting on Hector's check and his run of it (H29).
 
 ## Phase 20 (planned): Measuring AI reads, links first
 
@@ -2036,7 +2049,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | done 2026-10-05: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check, so Hector ran `bun run db:migrate` |
 | H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | open |
-| H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | open |
+| H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | open: the list is ready (2026-10-05): 32 lines in 16 recipes, 3 new catalog entries, 23 strays removed, 4 lines marked to check |
 
 ## Risks and how they're handled
 
@@ -2258,3 +2271,5 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 - **2026-10-05 (bb)** — Hector merged Phase 18 (hectarek/hector-mono#23).
   - Phase 19 decided after a read-only look at production: items link to their recipes with each one's share (D59, taking in L7), By recipe (D60), like items together (D61), the units (D62). Planned in detail.
   - Next: P19.1, then H28.
+- **2026-10-05 (bc)** — P19.1–P19.4 done (see each task's Evidence): items link to their recipes with each one's share (migration 0014), By recipe (0015 orders the links), like items together, and more units. The units fix's list and SQL are ready, and passed a dry run (P19.5).
+  - Next: Hector checks the list (H29) and runs both migrations (H28), then the fix; Claude checks it read-only; the PR.
