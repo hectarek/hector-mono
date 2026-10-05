@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1–P19.3 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | P19.4 (more units). |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1–P19.4 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | P19.5 (the units fix on existing lines: Claude's list for Hector, H29). |
 | Waiting on Hector | Running migrations 0014 and 0015 on production before Phase 19's PR merges (H28); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
@@ -1910,13 +1910,24 @@ One commit per task; the PR when the phase is done.
         - the page not stacking;
         - items typed in stacking together. That needed the test with an ingredient between two typed items: with them all together at the end, it passed.
     - All 1037 + 39 tests pass.
-- [ ] **P19.4** More units — C · D62
+- [x] **P19.4** More units — C · D62
   - Do:
     - `c` / `c.` → cup, `tin(s)` → can.
     - New units: `stalk` (`rib` too), `sprig` and `pint`, the last a measure (a bracket after it is the same amount).
     - "Whole" comes off a catalog name, as size words do.
     - The form's unit list and the reader's schema use `UNITS`, so both get them.
   - Verify: the real lines above as parser tests, and scaling and grocery text for the new units.
+  - Evidence (2026-10-05):
+    - New units `pint` (a measure), `sprig` and `stalk`. New spellings `c`/`c.` (cup), `tin(s)` (can) and `rib(s)` (stalk). `stalk` and `sprig` are also read after the name. "Whole" comes off a count's catalog name, never off one with a unit.
+    - Changed from the plan: `rib` is read only before the name (`LEADING_ONLY_UNIT_WORDS`). Read after it too, "4 beef short ribs" became four stalks of "beef short", which a guard test caught. The two "celery rib" lines are left to P19.5.
+    - The reader's instructions say "from this list only" and its schema is `UNITS`, so they need no change.
+    - Tests:
+      - 14 real lines from production as parser tests, 11 of which failed before. Three are guards: whole milk, whole grain mustard and short ribs.
+      - `itemizeLine` for a trailing stalk and a whole onion (the written name keeps "whole", the catalog name drops it).
+      - Scaling and grocery text for each new unit.
+      - Mutations caught: no `c.`, "whole" kept in counts, "whole" dropped with a unit, ribs read after the name, and stalk not read after it.
+    - Noticed, not changed: a grocery line with a unit names its item in the singular ("2 pints grape tomato", as already "2 cups black bean"), since `toGroceryLines` makes every name singular for counting.
+    - All 1057 + 39 tests and both flows pass.
 - [ ] **P19.5** The units fix on existing lines — C+H · D62, D31
   - Do:
     - Claude reads every line the new rules change, and every stray catalog entry, and proposes each fix: the line's new unit and name, and the catalog ingredient it should link to.

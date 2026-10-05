@@ -14,6 +14,13 @@ Paths are from the app's root; a bare file name is the only file of that name in
 - Copying ("adopt") creates independent recipes with `copied_from_recipe_id` set; lines and steps are copied as stored, not split again. If any requested recipe is gone, nothing is copied.
 - Scaling a line with fields multiplies its amount and picks the unit's singular or plural (`unitLabel`, `scaling.ts`). For a line without fields, `scaleLine` rewrites the leading amount and, after a measuring unit only, the bracketed alternate measure ("110 g (⅓ cup)" → "220 g (⅔ cup)"). Brackets after package units are sizes ("1 can (14 oz)") and never scale.
 - Unit words and their plurals (`UNIT_WORD_FORMS` in `ingredient-line.ts`) are the one list both scaling ("1 cup" → "2 cups") and grocery-line text use.
+- Units added in docs/ux-plan.md P19.4 (D62):
+  - `pint` (a measure, so a bracket after it is the same amount), `stalk` and `sprig`.
+  - `c.` is cup and `tin` is can.
+  - `rib` is stalk, but only before the name (`LEADING_ONLY_UNIT_WORDS`): after it, ribs are meat ("4 beef short ribs").
+  - `stalk` and `sprig` are also read after the name ("2 celery stalks"), as `TRAILING_COUNT_UNITS`.
+  - "Whole" comes off a count's catalog name ("1 whole Large Onion" is onion), never with a unit ("1 cup whole milk").
+  - `UNITS` is also the form's unit list and the reader's schema, so both have them.
 
 ## Library and tags
 

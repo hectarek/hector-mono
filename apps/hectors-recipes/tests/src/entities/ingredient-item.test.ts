@@ -17,6 +17,22 @@ describe("itemizeLine", () => {
       "4 garlic cloves, minced",
       { quantity: 4, unit: "clove", name: "garlic", note: "minced" },
     ],
+    // P19.4's units: written after the name too, and "whole" kept as written (the catalog
+    // name drops it).
+    [
+      "2 celery stalks, finely diced",
+      { quantity: 2, unit: "stalk", name: "celery", note: "finely diced" },
+    ],
+    [
+      "1 whole Large Onion, Diced",
+      {
+        quantity: 1,
+        unit: null,
+        name: "whole Large Onion",
+        note: "Diced",
+        catalogName: "onion",
+      },
+    ],
     [
       "Kosher salt, to taste",
       { quantity: null, unit: null, name: "Kosher salt", note: "to taste" },

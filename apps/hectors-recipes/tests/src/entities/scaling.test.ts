@@ -62,6 +62,14 @@ describe("scaleLine", () => {
     expect(scaleLine("1 1/2 cups flour", 1)).toBe("1 1/2 cups flour");
   });
 
+  it("says a new unit in the singular or plural as the amount needs (P19.4)", () => {
+    expect(scaleLine("2 stalks celery", 0.5)).toBe("1 stalk celery");
+    expect(scaleLine("1 sprig thyme", 3)).toBe("3 sprigs thyme");
+    expect(scaleLine("1 pint grape tomatoes", 2)).toBe(
+      "2 pints grape tomatoes",
+    );
+  });
+
   it("rewrites only the leading quantity", () => {
     expect(scaleLine("1 1/2 cups all-purpose flour", 2)).toBe(
       "3 cups all-purpose flour",

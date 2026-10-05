@@ -87,6 +87,15 @@ describe("formatGroceryText", () => {
       "2 tbsp olive oil",
     ],
     [{ quantity: 3, unit: null, name: "onion" }, "3 onions"],
+    [
+      { quantity: 2, unit: "stalk" as const, name: "celery" },
+      "2 stalks celery",
+    ],
+    [{ quantity: 1, unit: "sprig" as const, name: "thyme" }, "1 sprig thyme"],
+    [
+      { quantity: 2, unit: "pint" as const, name: "grape tomato" },
+      "2 pints grape tomato",
+    ],
     [{ quantity: 2, unit: null, name: "sweet potato" }, "2 sweet potatoes"],
     [{ quantity: 2, unit: null, name: "bay leaf" }, "2 bay leaves"],
     [{ quantity: 4, unit: null, name: "berry" }, "4 berries"],
