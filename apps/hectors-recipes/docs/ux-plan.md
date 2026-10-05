@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 16 (Plan's week first, a list you can start over) done, in review on `feat/recipes-plan-groceries-feedback`. Phases 1–15, L5, L6 and the fix for live updates with no key (hectarek/hector-mono#12) merged. |
-| Next task | Hector reviews Phase 16's PR, then his next round of feedback. Also open: L7 (Later). |
-| Waiting on Hector | real-phone checks (H5), now including the week swipe (P16.2), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 17 (Add by photo or file; the week slides in) done, in review on `feat/recipes-p17-photo-or-file`, except its real reads (H25). Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | Hector reviews Phase 17's PR; the real reads (`FLOWS_AI=1`) once the worktree's `.env.test` has the AI key (H25). |
+| Waiting on Hector | real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -116,6 +116,8 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D50 | Plan shows the week first. There's no Plan a meal button (planning starts from a recipe's Add to plan, D40), and the grocery box sits under the days, filled as Plan's one action. An empty week says how to plan a meal. Revises D40's "one Plan a meal button". | Hector, 2026-10-04: "the main part i want to see is the calendar and i have to scroll to see it. we can probably remove plan a meal and we can move the shopping for under the calendar." The filled button and the empty-week line are Claude's calls. |
 | D51 | On a phone, a sideways swipe across the week changes the week, as the arrows do (which stay). Swipes from the screen's edge are left to the browser. | Hector, 2026-10-04: "a swipe gesture on mobile to go through the each week in addition to the buttons". The edge rule is Claude's call: Safari's back and forward start there (D22). |
 | D52 | Groceries' ⋯ sheet has Clear list. After asking, it removes every item, checked or not, for everyone in the plan, and marks the plan's meals as not on the list, so Plan can add them again. | Hector, 2026-10-04: "no way to easily clear the whole list… in the 3 dots at the top to reset it so that say we mess up and add it to the list too many times, we have an easy way to reset and try again." Unmarking the meals is Claude's reading of "try again". |
+| D53 | Add by photo becomes Add by photo or file: one picker for up to 3 photos of one recipe, one PDF of up to 10 pages, or one text or Markdown file. Word, Pages and the like aren't taken ("save it as a PDF"). Photos and files go only to the reader and aren't kept. | Hector, 2026-10-04: "its fine if photos are just one, but for pdfs and files we can add whatever up to a conservative limit… What recipe would be more than 10 pages long?"; "lets just focus on text, markdown, and pdf… pdf is a find backstop"; "We also dont want to keep photos"; one way in, combined; "maybe we do do multiple images but lets cap it at 3". |
+| D54 | When the week changes (a swipe or an arrow), the new week slides in briefly from the side it came from, and not at all with reduced motion. The week doesn't follow the finger. | Hector, 2026-10-04: "it would be nice to have an animation for the swipe, but i would prefer usability if this causing issues". The slide-in after the change was Claude's proposal; Hector: "sure". |
 
 ---
 
@@ -1613,6 +1615,141 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
     - In a real browser, the P15.7 flow ends by starting the list over: it clears the 2 checked items from the sheet, the list is empty, and Plan offers Add 1 meal again. It passes 3 runs out of 3. A screenshot of the question in the sheet showed the heading at the top of its box and Clear list in the destructive style.
     - Lint is clean, types are clean, and all 967 + 29 tests pass.
 
+## Phase 17: Add by photo or file, and a week that slides in
+
+Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04: one way in for photos and files (D53), and an animation for the week's swipe (D54). One commit per task; the PR when the phase is done.
+
+- [x] **P17.1** Text and Markdown files — C · D53
+  - Do: the picker takes `.txt` and `.md`. The browser reads the file as text and sends it the way pasted text is sent (`readRecipeFromText`): the same 50,000-character cap, and the draft held to the file's own words (D30). It counts as a text read.
+  - Verify: a screen test where choosing a Markdown file sends its text; a file over the cap says so.
+  - Evidence (2026-10-04):
+    - `recipeFileKind` (`app/_lib/recipe-file.ts`) says what a chosen file is read as: by its type, or by its extension when a phone gives none.
+    - The picker takes images and `.txt`/`.md` files. A text file is read on the phone, trimmed, and sent with `readRecipeFromText`.
+    - An empty file says "That file is empty."; one over `MAX_RECIPE_TEXT` says "That file has too much text to be one recipe."; anything else says "Choose a photo, or a text or Markdown file.". None of these is sent.
+    - `MAX_RECIPE_TEXT` moved from the controller to `recipe-draft.model.ts`, so the browser can check it too.
+    - The form's note says "Read from your file." or "Read from your photo.".
+    - `recipe-file.test.ts`, 3 tests, and `photo-import.test.tsx`, 2 screen tests against the test container's stand-in reader:
+      - a type-less `chili.md` reaches the reader as a text read of its exact text and fills in the form;
+      - an empty file and a Word file are refused without a read.
+      - With the extension rule taken out, both fail. Restored, they pass 5 runs in a row.
+    - Found on the way, in the test: a read replaces the picker, so a second file has to be chosen with the new input. The test looks it up each time.
+    - Not checked here: the over-cap message (a 50,000-character file in a screen test adds nothing over the length check), and a real read (P17.4, with H25 done).
+    - All 970 + 31 tests pass.
+- [x] **P17.2** PDFs — C · D53
+  - Do:
+    - A new kind of read, `document`: one PDF, at most 4 MB (the same request limit as photos) and 10 pages.
+    - The reader sends it to the model as a PDF file part, the way it sends photos as image parts, and the model reads each page's text and image.
+    - The page count is checked on the server before the read, so a long PDF costs nothing. It says: "For a long PDF like a cookbook, screenshot the recipe's pages instead." A locked (encrypted) PDF says so too.
+    - No text is extracted, so like a photo, a PDF's draft isn't held to its source's words. The review flags still apply.
+    - It counts as a `document` read. `recipe_reads.kind` is free text, so there's no migration.
+  - Verify: controller tests for the type, size and page limits; the reader's parts for a PDF; one real read of a recipe PDF, a few cents (H25).
+  - Evidence (2026-10-04):
+    - The path:
+      - The source kind `document` comes through `readRecipeFromDocument`.
+      - The controller takes non-empty bytes within 4 MB, and the phone refuses a bigger PDF before uploading.
+      - The reader's `checkPdf` opens it with `unpdf`, chosen over `pdf-lib`, whose last release was in 2021. More than `MAX_PDF_PAGES` (10) pages, a password, or a file that doesn't open each get their own reason and message.
+      - Those refusals are taken back from the daily limit with the spent budget (`FREE_FAILURES`).
+      - The PDF goes to the model as a `file` part (`application/pdf`), and the instructions now say "a photo or a PDF".
+      - `recipe_reads.kind` gains `document` in `db/schema.ts` only: `drizzle-kit generate` reports no schema changes.
+    - Test files made in Chromium: `tests/_support/files/chili-two-pages.pdf` (2 pages) and `eleven-pages.pdf`.
+    - Tests:
+      - The reader sends a PDF whole, as a PDF part, and refuses 11 pages and a broken file without calling the model. With the page limit taken out, the refusal test fails.
+      - The use case gives back a refused PDF's read.
+      - The controller takes a PDF, and refuses an empty one, one past the cap, and one that isn't bytes.
+      - `recipeFileKind` reads `.pdf` by type or extension.
+      - A screen test refuses a 4 MB+ PDF without a read, then sends the 2-page one as it is, and the form says "Read from your PDF.".
+    - Found on the way: pdf.js takes over (detaches) the bytes it opens, so counting the pages of the original left the model an empty PDF. It now opens a copy. With the copy taken out, the reader's test fails.
+    - Not done yet: the real read. The worktree's `.env.test` has no AI key, so the Gateway refused it as unauthenticated and nothing was spent. It's re-run once the file is copied again (H25).
+    - All 979 + 32 tests pass.
+- [x] **P17.3** Up to 3 photos — C · D53
+  - Do:
+    - The picker takes up to 3 photos at once, for a recipe over two or three pages, read as one recipe in the order chosen.
+    - Each is shrunk on the phone as now. All together they stay within 6 images (a long screenshot's pieces count) and 4 MB.
+    - A fourth is refused, with a message.
+  - Verify: unit tests for the limits; a screen test where choosing 2 photos sends both, in order; one real read of a two-page recipe (H25). Whether an iPhone keeps the order the photos were picked in goes to H5.
+  - Evidence (2026-10-04):
+    - The source's shape: a photo read is now `photos: RecipeImage[][]`, each photo its pieces. A flat list couldn't tell three photos from one screenshot's three pieces.
+    - Sending: each photo travels in its own field (`photo-1`…`photo-3`). The controller takes 1–3 photos, within 6 images and 4 MB in all.
+    - On the phone:
+      - `chosenFilesKind` takes one file of any kind, or up to 3 photos, never a mix.
+      - `photoShare` splits the 6 images and 4 MB evenly, so three photos get 2 pieces and about 1.3 MB each.
+      - The reading screen shows up to 3 previews side by side.
+    - The reader: one photo's request is unchanged, so today's reads aren't affected. Several photos get `PHOTOS_INSTRUCTION` ("photos of one recipe, in order") and a label before each photo's images.
+    - Refusal wording: anything else gets the final wording, "Choose up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file.". The photo action's error says "Choose up to 3 photos: JPEG, PNG or WebP, under 4 MB in all.".
+    - Tests:
+      - The action sends three photos in order with their pieces (`[[1000], [2000, 3000], [4000]]`).
+      - The controller takes three photos, and refuses four, more than 6 images, more than 4 MB, a photo with no images, and a photo that isn't a list.
+      - The reader labels two photos (one in pieces) and says they're one recipe. With the labels taken out, that test fails.
+      - `photoPieces` keeps to its share; `photoShare`; `chosenFilesKind`.
+      - A screen test refuses 4 photos, and a photo with a PDF, without a read. With a fourth photo allowed, it fails.
+    - Not covered here: a screen test of photos being read. happy-dom can't shrink an image (no `createImageBitmap`), so that's for the browser (P17.4) and a real read (H25).
+    - All 990 + 33 tests pass.
+- [x] **P17.4** One way in — C · D53
+  - Do:
+    - New recipe's *Add by photo* becomes *Add by photo or file*, and its page's button becomes *Choose a photo or file* (photos, PDF, text and Markdown).
+    - While reading, it shows the photos, or the file's name for a document.
+    - A file that isn't taken says what is: "Choose up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file."
+    - The form's note says what the recipe was read from.
+    - Nothing is kept: photos and files go only to the reader.
+  - Verify:
+    - Screen tests for each kind, and for a file that isn't taken (a Word document).
+    - The browser flow picks a Markdown file. With the AI off on the test project, it reaches the reader's error, which shows the routing works.
+    - features.md and AGENTS.md updated.
+  - Evidence (2026-10-04):
+    - The wording:
+      - New recipe's choice is *Add by photo or file* ("Cookbook pages, screenshots, or a PDF or text file."), and so is its page's title. The button is *Choose a photo or file*, with a line on what it takes.
+      - The form's note says what it read ("Read from your photos.").
+      - Add by link's fallback button is *Add by photo or file*. A link that isn't a web page now says "If it's a PDF, save it and add it by photo or file." (it used to say to screenshot it), and *no recipe found* says "Try another photo, file or link.".
+    - Found on the way: the top bar gave its title a third of the width, so "Add by photo or file" showed as "Add by phot…".
+      - It's flex now: the sides share what the title leaves, and a title takes the width it needs.
+      - Screenshots at 375 px show the full title, and the recipe form's bar (Cancel, *New recipe*, Save) still centred.
+    - Browser flows, with sign-up shared (`tests/flows/sign-up.ts`):
+      - `add-recipe.flow.ts` chooses files through the real picker. The 11-page PDF is refused by the server's page count, so `unpdf` works in the Next dev server, and `chili.md` reaches the reader. The AI key is left out, so the reader can't answer, which shows the routing.
+      - A production build (`next build`) compiles with `unpdf` in it.
+    - Real reads, on request:
+      - A test tagged `@ai` reads the Markdown file, the PDF and two photos (`chili-page-1.jpg`, `chili-page-2.jpg`, made in Chromium) with the real reader. Each must fill in the title, 8 lines and 4 steps.
+      - It runs only with `FLOWS_AI=1`; otherwise `playwright.config.ts` skips it and leaves the AI key out of the dev server.
+      - Not yet run against the real reader: the worktree's `.env.test` still has no AI key ("key present: false"; the Gateway refused it as unauthenticated, so nothing was spent). H25.
+    - All 990 + 33 tests pass, and both everyday flows pass.
+- [x] **P17.5** The week slides in — C · D54
+  - Do: `WeekSwipe` knows which week it shows. When the week changes, the days slide in briefly from the side of travel (the next week from the right), and not at all with reduced motion. The swipe itself is unchanged.
+  - Verify: a screen test that the direction follows the change; a look in the browser. How it feels on a phone goes to H5.
+  - Evidence (2026-10-04):
+    - `WeekSwipe` takes the week shown (`week`, its Monday). When the week changes, its keyed inner wrapper gets `animate-in fade-in duration-200` and `slide-in-from-right-6` (a later week) or `-left-6` (an earlier one), with `motion-reduce:animate-none`.
+    - The last week shown is a module-level value, set after each commit. Plan's loading screen unmounts the page between weeks, so a ref would forget it.
+    - Screen test: rendering 2 Nov, then 9 Nov, slides from the right; 2 Nov again slides from the left; the same week again doesn't move. With the directions swapped, it fails.
+    - In Chromium (a throwaway flow on the test project):
+      - After Next week, the wrapper runs the `enter` animation for 0.2 s, from the right.
+      - With reduced motion emulated, after Previous week the animation is `none`.
+    - Left as is: entering Plan from another tab on a week other than the last one shown also slides it in. That's harmless, and telling the two apart would need more than this.
+    - All 990 + 34 tests and both everyday flows pass.
+
+## Phase 18 (planned): Finding recipes — tag categories, a tagging pass, better search, grouping
+
+Hector, 2026-10-04: "the quality of the search needs to be better… not just look up by name, but by relevant info like tags"; "a pass in this session of better tagging"; "group by… meals (dinner, lunch, etc) types (asian, indian, etc), and dietary (gluten free, protien, etc). This means we will need to categorize our tags as well which we need to make sure to cleanly account for in our schema." Planned in detail when it starts; one PR.
+- **Tag categories.** Tags get a category: meal (dinner, lunch, …), cuisine (Asian, Indian, …) and diet (gluten-free, high-protein, …). Today a recipe's tags are a flat list of words (`recipes.tags`) with no categories. The phase's first decision, with Hector, is the schema: a tag catalog with a category, or a category on each recipe's tag.
+- **A tagging pass.** Claude does it in a session (D31): every recipe is read for missing or wrong tags in each category, as a dry run for Hector to check, then written with his OK at that moment.
+- **Search.** It finds more than titles: tags and ingredients (perhaps the description), with title matches first. Today it searches the title only (`matchesSearch`).
+- **Grouping.** Recipes can be grouped: not at all (the default), or by meal, cuisine or diet.
+
+## Phase 19 (planned): Groceries by recipe, like items together, and more units
+
+Hector, 2026-10-04: "in our grocery list, we should also have a group by recipe… the ability to see the groceries of each recipe separately"; "group like ingredients so they stack so that we dont have to keep going back and forth"; "a pass data wise on the units… more options (not too many)". Planned in detail when it starts; one PR.
+- **By recipe.** A choice on Groceries: by aisle (the default) or by recipe, each recipe's items under its name. This needs L7 first: items know their recipe by id, not by the title in their "for …" note.
+- **Like items together.** Within an aisle, lines of the same ingredient sit next to each other ("2 cloves garlic" and "1 tbsp garlic"), not in the order they were added. Today lines merge only when the ingredient and the unit both match.
+- **Units.** A read-only look through the recipes' lines for units the parser misses. Then the few that cover them are added to the parser and to the form's list, not too many.
+
+## Phase 20 (planned): Measuring AI reads, links first
+
+Hector wants this phase to start with a long discussion, so he can learn the best practices for measuring an AI feature (2026-10-04: "when we get to 20… i want to make sure we spend a lot of time discussing that so that I can learn best practices"). Hector, 2026-10-04: "every time we are using ai, we should capture the data so that we can measure the accuracy… independently verify and tweak our prompts / service"; "We should do this with web sites first not photos". Planned in detail when it starts; one PR.
+- **Every AI read recorded:**
+  - what was sent (the link and the page's text), the instructions' version, the model, tokens and time;
+  - the draft;
+  - what was saved after the person's changes.
+  - So the reader's accuracy can be measured, and it can be tuned against real cases.
+- **Links first.** Photos can't be tuned the same way.
+- **First case:** <https://www.thedoctorskitchen.com/recipes/test-rupy-s-overnight-oats> comes back with nothing filled in. Find out why first: no recipe data in the page, a blocked fetch, or text the reader misses.
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -1665,7 +1802,7 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
     - `requireOwner`, `requireItemEditor` and `requireEntryEditor` take the write's `tx`, required, since only writes use them. The repository methods these writes call take an optional `tx`, like the rest. The DI modules and `makeApp()` pass the transaction manager in.
     - Tests first: viewers can't remove an item, clear checked or remove a meal, and an editor can't remove someone else (both backends; they passed before and still end in `UnauthorizedError` inside a transaction, not "Transaction failed"); and `ensureInviteLinks` leaves no link behind when the second fails (Postgres), which failed before the change and passes after. A read left without `tx` would hang the `[postgres]` runs; none does.
     - 953 tests pass (944 before), and `bun check` and `bun ts` are clean. AGENTS.md says the three helpers take `tx`.
-- [ ] **L7** Grocery items know their recipe — C+H · D45
+- [ ] **L7** Grocery items know their recipe — C+H · D45 · now part of Phase 19
   - From P14.13's "left as they are": the no-double rule finds a recipe on the list by the title in its items' "for …" notes. A recipe renamed since it was added isn't recognised (its items are bought again), and two recipes with the same title count as one (a planned one is taken as on the list when the other is).
   - The fix is a nullable recipe id on grocery items (an additive migration, so Hector's OK first), set when a recipe's lines go on, and the rule matching by it.
 
@@ -1697,6 +1834,7 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
+| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | 2026-10-04: Hector added it to the main checkout's `.env.test`; the worktree's copy predates it, so it needs copying again |
 
 ## Risks and how they're handled
 
@@ -1893,3 +2031,13 @@ Branch `feat/recipes-plan-groceries-feedback`, in its own worktree. Hector's fee
   - A swipe changes the week; checked with real touches in Chromium.
   - Clear list starts the list over, and Plan can add the meals again.
   - Next: Hector reviews the PR. On a phone (H5): the swipe, and Clear list.
+- **2026-10-04 (aw)** — Hector merged Phase 16 (hectarek/hector-mono#20) and decided Add by photo's next step: one way in for up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file, nothing kept (D53), and the week's slide-in (D54). Phase 17 written. His six further notes are grouped as Phases 18–20, each its own PR: finding recipes; groceries by recipe and units (taking in L7); measuring AI reads, links first.
+  - Next: Hector reviews Phase 17's plan and the order of 18–20; H25.
+- **2026-10-04 (ax)** — Phase 17 done (see each task's Evidence), one commit per task:
+  - Text and Markdown files.
+  - PDFs of up to 10 pages, opened first with `unpdf`, which found that pdf.js takes over the bytes it opens.
+  - Up to 3 photos, labelled for the reader.
+  - One way in, with real reads in the flows on request (`FLOWS_AI=1`).
+  - The week's slide-in.
+  - The real reads wait on the AI key in the worktree's `.env.test` (H25).
+  - Next: Hector reviews the PR; H25; then Phase 18.

@@ -11,12 +11,18 @@ describe("WeekSwipe", () => {
     resetNextState();
   });
 
+  const shown = (monday: string) => (
+    <WeekSwipe
+      week={monday}
+      previousHref="/plan?week=before"
+      nextHref="/plan?week=after"
+    >
+      <p>The week</p>
+    </WeekSwipe>
+  );
+
   const week = () => {
-    const view = render(
-      <WeekSwipe previousHref="/plan?week=before" nextHref="/plan?week=after">
-        <p>The week</p>
-      </WeekSwipe>,
-    );
+    const view = render(shown("2026-10-05"));
     const swipe = (from: [number, number], to: [number, number]) => {
       const target = view.getByText("The week");
       fireEvent.touchStart(target, { touches: [touch(...from)] });
@@ -40,5 +46,19 @@ describe("WeekSwipe", () => {
     fireEvent.mouseDown(target, touch(300, 200));
     fireEvent.mouseUp(target, touch(100, 200));
     expect(nextState.pushed).toEqual([]);
+  });
+
+  // D54: a later week slides in from the right, an earlier one from the left, and the same
+  // week shown again doesn't move.
+  it("slides a new week in from the side it came from", () => {
+    const slide = () => view.getByText("The week").parentElement?.className;
+    const view = render(shown("2026-11-02"));
+
+    view.rerender(shown("2026-11-09"));
+    expect(slide()).toContain("slide-in-from-right");
+    view.rerender(shown("2026-11-02"));
+    expect(slide()).toContain("slide-in-from-left");
+    view.rerender(shown("2026-11-02"));
+    expect(slide()).not.toContain("animate-in");
   });
 });

@@ -75,7 +75,7 @@ describe("readRecipe", () => {
     const { read } = setup();
     const draft = await read({
       kind: "image" as const,
-      images: [{ data: new Uint8Array(), mediaType: "image/jpeg" }],
+      photos: [[{ data: new Uint8Array(), mediaType: "image/jpeg" }]],
     });
     expect(draft.unsure).toEqual([]);
   });
@@ -118,6 +118,21 @@ describe("readRecipe", () => {
     reader.failWith = "no-recipe-found";
     await read(source).catch(() => null);
     expect(reads.reads).toHaveLength(1);
+  });
+
+  // D53: a PDF refused before the model sees it (too long, locked, or not opening) is free too.
+  it("doesn't count a PDF refused before it's read", async () => {
+    const { reader, reads, read } = setup();
+    const pdf = { kind: "document" as const, pdf: new Uint8Array([1]) };
+    for (const failure of [
+      "too-many-pages",
+      "locked-document",
+      "unreadable-document",
+    ] as const) {
+      reader.failWith = failure;
+      await read(pdf).catch(() => null);
+    }
+    expect(reads.reads).toEqual([]);
   });
 
   it("passes a failure on, so the person hears why", async () => {

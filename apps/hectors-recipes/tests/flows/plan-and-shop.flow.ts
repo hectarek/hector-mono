@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { signUp } from "@/tests/flows/sign-up";
 
 // A one-finger swipe across the middle of the week's first day, as touch events from the
 // screen (Chromium's DevTools protocol): Playwright's own touchscreen only taps.
@@ -33,19 +34,7 @@ async function swipe(page: Page, direction: "left" | "right") {
 test("sign up, add a recipe, plan it, shop for it, start the list over", async ({
   page,
 }) => {
-  const email = `flow-${Date.now()}@example.test`;
-
-  await page.goto("/");
-  await page.getByRole("button", { name: "Create account" }).click();
-  await page.getByRole("textbox", { name: "Name" }).fill("Flow Tester");
-  await page.getByRole("textbox", { name: "Email" }).fill(email);
-  await page
-    .getByRole("textbox", { name: "Password" })
-    .fill(`pw-${crypto.randomUUID()}`);
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Flow's Recipes" }),
-  ).toBeVisible();
+  await signUp(page);
 
   await page.getByRole("button", { name: "New" }).click();
   await page.getByRole("link", { name: /Add manually/ }).click();

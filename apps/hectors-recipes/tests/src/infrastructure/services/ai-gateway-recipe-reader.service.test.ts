@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import { GatewayInternalServerError } from "@ai-sdk/gateway";
 import { MockLanguageModelV4 } from "ai/test";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -156,8 +157,8 @@ describe("AiGatewayRecipeReaderService", () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
     await reader(model).read({
       kind: "image",
-      images: [
-        { data: new Uint8Array([0xff, 0xd8, 0xff]), mediaType: "image/jpeg" },
+      photos: [
+        [{ data: new Uint8Array([0xff, 0xd8, 0xff]), mediaType: "image/jpeg" }],
       ],
     });
 
@@ -167,6 +168,47 @@ describe("AiGatewayRecipeReaderService", () => {
     });
   });
 
+  // D53: the PDF test files are made in Chromium (tests/_support/files).
+  const pdfFile = (name: string) =>
+    new Uint8Array(
+      readFileSync(`${import.meta.dir}/../../../_support/files/${name}`),
+    );
+
+  it("sends a PDF whole, as a PDF file, once its pages are counted", async () => {
+    const model = fakeModel({ text: JSON.stringify(reading) });
+    const pdf = pdfFile("chili-two-pages.pdf");
+    const size = pdf.byteLength;
+    await reader(model).read({ kind: "document", pdf });
+
+    const user = model.doGenerateCalls[0]?.prompt[1];
+    expect(user).toMatchObject({
+      role: "user",
+      content: [{ type: "file", mediaType: "application/pdf" }],
+    });
+    // Counting the pages didn't take the bytes over.
+    expect(pdf.byteLength).toBe(size);
+    const sent = user?.role === "user" ? user.content[0] : undefined;
+    const bytes =
+      sent?.type === "file" && sent.data.type === "data"
+        ? sent.data.data
+        : undefined;
+    expect(bytes instanceof Uint8Array ? bytes.byteLength : bytes).toBe(size);
+  });
+
+  it("refuses a PDF over the page limit, or one that doesn't open, without asking the model", async () => {
+    const model = fakeModel({ text: JSON.stringify(reading) });
+    await expect(
+      reader(model).read({
+        kind: "document",
+        pdf: pdfFile("eleven-pages.pdf"),
+      }),
+    ).rejects.toMatchObject({ reason: "too-many-pages" });
+    await expect(
+      reader(model).read({ kind: "document", pdf: new Uint8Array([1, 2, 3]) }),
+    ).rejects.toMatchObject({ reason: "unreadable-document" });
+    expect(model.doGenerateCalls).toHaveLength(0);
+  });
+
   // The note is the app's, so it goes with the instructions, not beside the source.
   it("says a long screenshot's pieces are one screenshot, then sends them in order", async () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
@@ -174,13 +216,43 @@ describe("AiGatewayRecipeReaderService", () => {
       data: new Uint8Array([0xff, 0xd8, 0xff]),
       mediaType: "image/jpeg",
     };
-    await reader(model).read({ kind: "image", images: [piece, piece] });
+    await reader(model).read({ kind: "image", photos: [[piece, piece]] });
 
     const [system, user] = model.doGenerateCalls[0]?.prompt ?? [];
     expect(JSON.stringify(system)).toContain("one long screenshot");
     expect(user).toMatchObject({
       role: "user",
       content: [
+        { type: "file", mediaType: "image/jpeg" },
+        { type: "file", mediaType: "image/jpeg" },
+      ],
+    });
+  });
+
+  // D53: several photos of one recipe, each labelled, and a screenshot's pieces called that.
+  it("says several photos are one recipe, and labels each one's images", async () => {
+    const model = fakeModel({ text: JSON.stringify(reading) });
+    const image = {
+      data: new Uint8Array([0xff, 0xd8, 0xff]),
+      mediaType: "image/jpeg",
+    };
+    await reader(model).read({
+      kind: "image",
+      photos: [[image], [image, image]],
+    });
+
+    const [system, user] = model.doGenerateCalls[0]?.prompt ?? [];
+    expect(JSON.stringify(system)).toContain("photos of one recipe");
+    expect(JSON.stringify(system)).not.toContain("one long screenshot");
+    expect(user).toMatchObject({
+      role: "user",
+      content: [
+        { type: "text", text: "Photo 1 of 2:" },
+        { type: "file", mediaType: "image/jpeg" },
+        {
+          type: "text",
+          text: "Photo 2 of 2, a long screenshot in 2 pieces:",
+        },
         { type: "file", mediaType: "image/jpeg" },
         { type: "file", mediaType: "image/jpeg" },
       ],
