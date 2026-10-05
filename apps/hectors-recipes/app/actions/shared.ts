@@ -10,7 +10,10 @@ import {
   UnauthenticatedError,
   UnauthorizedError,
 } from "@/src/entities/errors/common";
-import { DAILY_RECIPE_READS } from "@/src/entities/models/recipe-draft.model";
+import {
+  DAILY_RECIPE_READS,
+  MAX_PDF_PAGES,
+} from "@/src/entities/models/recipe-draft.model";
 
 // Helpers for app/actions/*: not a "use server" module, so nothing here is callable from the client.
 
@@ -105,12 +108,17 @@ function fieldErrors(
 
 // What import says when reading fails (ux-plan P10.1). The screen offers Add manually beside it.
 const READ_FAILURES: Record<RecipeReadFailure, string> = {
-  "no-recipe-found": "No recipe found there. Try another photo or link.",
+  "no-recipe-found": "No recipe found there. Try another photo, file or link.",
   "budget-paused":
     "Import is paused until next month: this month's reading budget is used up.",
   "daily-limit": `You've read ${DAILY_RECIPE_READS} recipes in the last day, the most for one day. Try again tomorrow, or add this one by hand.`,
   "service-unavailable":
     "The recipe reader isn't answering. Try again in a minute.",
+  "too-many-pages": `That PDF has more than ${MAX_PDF_PAGES} pages. For a long PDF like a cookbook, screenshot the recipe's pages instead.`,
+  "locked-document":
+    "That PDF is password-protected. Save a copy without the password, or screenshot it.",
+  "unreadable-document":
+    "Couldn't open that PDF. Try saving it again, or screenshot it.",
 };
 
 // What Add by link says when the page can't be fetched (P10.3). The screen offers pasting the
@@ -120,7 +128,7 @@ const FETCH_FAILURES: Record<PageFetchFailure, string> = {
   blocked: "That site won't let the app read it.",
   "not-found": "That page wasn't found. Check the link.",
   "not-a-page":
-    "That link isn't a web page. For a PDF or a photo, add a screenshot instead.",
+    "That link isn't a web page. If it's a PDF, save it and add it by photo or file.",
   "too-large": "That page is too big to read.",
   unreachable: "Couldn't reach that site. Check the link, or try again soon.",
 };

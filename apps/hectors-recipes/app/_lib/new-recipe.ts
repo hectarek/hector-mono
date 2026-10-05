@@ -4,7 +4,7 @@ import { loadBooks } from "@/app/_lib/load-books";
 import { getInjection } from "@/di/container";
 import { hasRole } from "@/src/entities/models/space.model";
 
-// What each way of adding a recipe (manually, by photo, by link) gives the new-recipe form:
+// What each way of adding a recipe (manually, by photo or file, by link) gives the new-recipe form:
 // the book it goes in (the one it was started from, or from All recipes their own), the books
 // they can pick instead, the tag chips, and where Cancel goes.
 export async function loadNewRecipe(requested: string | undefined) {

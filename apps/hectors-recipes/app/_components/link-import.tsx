@@ -26,7 +26,7 @@ type Stage =
 
 // Add by link (ux-plan P10.3): the page's own recipe data, or its text read by the recipe
 // reader, fills the new-recipe form to check. A site that won't be read gets its text pasted
-// instead (D34), a photo, or the form by hand.
+// instead (D34), a photo or file, or the form by hand.
 export function LinkImport({
   form,
   choiceHref,
@@ -169,7 +169,7 @@ export function LinkImport({
                   nativeButton={false}
                   render={<Link href={photoHref} />}
                 >
-                  Add by photo
+                  Add by photo or file
                 </Button>
                 <Button
                   variant="secondary"

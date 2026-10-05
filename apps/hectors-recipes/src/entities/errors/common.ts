@@ -44,7 +44,12 @@ export type RecipeReadFailure =
   | "no-recipe-found"
   | "budget-paused"
   | "daily-limit"
-  | "service-unavailable";
+  | "service-unavailable"
+  // A PDF refused before it's read (D53): longer than MAX_PDF_PAGES, password-protected, or
+  // not a PDF that opens.
+  | "too-many-pages"
+  | "locked-document"
+  | "unreadable-document";
 
 export class RecipeReadError extends Error {
   constructor(

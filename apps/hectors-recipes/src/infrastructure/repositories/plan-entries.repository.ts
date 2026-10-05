@@ -211,6 +211,22 @@ export class PlanEntriesRepository
     }
   }
 
+  async unmarkAddedToList(spaceId: string, tx?: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .update(planEntries)
+        .set({ addedToListAt: null })
+        .where(
+          and(
+            eq(planEntries.spaceId, spaceId),
+            isNotNull(planEntries.addedToListAt),
+          ),
+        );
+    } catch (err) {
+      this.handleError(err, "unmarkAddedToList", { spaceId });
+    }
+  }
+
   async delete(id: string, tx?: ITransaction): Promise<void> {
     try {
       await this.getDbContext(tx)

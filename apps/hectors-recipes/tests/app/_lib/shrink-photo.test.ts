@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { fitWithin, photoPieces } from "@/app/_lib/shrink-photo";
-import { MAX_PHOTO_PIECES } from "@/src/entities/models/recipe-draft.model";
+import { fitWithin, photoPieces, photoShare } from "@/app/_lib/shrink-photo";
+import {
+  MAX_PHOTO_BYTES,
+  MAX_PHOTO_PIECES,
+} from "@/src/entities/models/recipe-draft.model";
 
 describe("fitWithin", () => {
   it("shrinks the long edge to 2,000 px, keeping the shape", () => {
@@ -54,5 +57,27 @@ describe("photoPieces", () => {
     expect(pieces.every((piece) => piece.outHeight <= 2000)).toBe(true);
     const last = pieces.at(-1);
     expect((last?.top ?? 0) + (last?.height ?? 0)).toBe(30_000);
+  });
+
+  // D53: a screenshot read with other photos gets its share of the pieces.
+  it("cuts no more pieces than it's given, still covering the whole screenshot", () => {
+    const pieces = photoPieces(1080, 6000, 2);
+    expect(pieces).toHaveLength(2);
+    const last = pieces.at(-1);
+    expect((last?.top ?? 0) + (last?.height ?? 0)).toBe(6000);
+  });
+});
+
+// D53: photos read together share the read's images and bytes evenly.
+describe("photoShare", () => {
+  it("gives one photo everything, and three a third each", () => {
+    expect(photoShare(1)).toEqual({
+      maxPieces: MAX_PHOTO_PIECES,
+      maxBytes: MAX_PHOTO_BYTES,
+    });
+    expect(photoShare(3)).toEqual({
+      maxPieces: 2,
+      maxBytes: MAX_PHOTO_BYTES / 3,
+    });
   });
 });

@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from "bun:test";
-import { act, render, waitFor } from "@testing-library/react";
+import { act, render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GroceriesPage from "@/app/(main)/groceries/page";
 import { getInjection } from "@/di/container";
@@ -106,6 +106,36 @@ describe("Groceries", () => {
       "The list is empty. Add items above, or add a recipe or your planned meals.",
     );
     expect(view.queryByText(/Got it/)).toBe(null);
+  });
+
+  // D52: starting the list over, from the ⋯ sheet.
+  it("clears the whole list from the ⋯ sheet, after asking", async () => {
+    const user = userEvent.setup();
+    for (const text of ["Milk", "Eggs"]) {
+      await getInjection("IAddGroceryItemController")(
+        { spaceId: ownPlan, text },
+        userId,
+      );
+    }
+    const view = render(await page(ownPlan));
+    const question = () =>
+      view.getByRole("group", { name: "Clear the whole list?" });
+
+    await user.click(view.getByRole("button", { name: /^More for / }));
+    await user.click(await view.findByRole("button", { name: "Clear list" }));
+    within(question()).getByText(/all 2 items, checked or not/);
+    await user.click(
+      within(question()).getByRole("button", { name: "Cancel" }),
+    );
+    expect(await items()).toHaveLength(2);
+
+    await user.click(view.getByRole("button", { name: "Clear list" }));
+    await user.click(
+      within(question()).getByRole("button", { name: "Clear list" }),
+    );
+    await waitFor(async () => expect(await items()).toEqual([]));
+    view.rerender(await page(ownPlan));
+    await view.findByText("List cleared.");
   });
 
   // D8: in a store with no signal, a check-off is kept in the browser, survives a reload,

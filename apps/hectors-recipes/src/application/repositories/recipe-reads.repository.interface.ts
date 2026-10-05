@@ -8,6 +8,6 @@ export interface IRecipeReadsRepository {
     kind: RecipeSource["kind"],
     window: { since: Date; limit: number },
   ): Promise<string | null>;
-  // Takes back a read that cost nothing (the reading budget was already spent).
+  // Takes back a read that cost nothing (refused before the model saw anything).
   remove(id: string): Promise<void>;
 }

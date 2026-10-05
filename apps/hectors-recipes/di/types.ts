@@ -13,6 +13,7 @@ import type { IAddGroceryItemUseCase } from "@/src/application/use-cases/grocery
 import type { IAddPlanToListUseCase } from "@/src/application/use-cases/grocery/add-plan-to-list.use-case";
 import type { IAddRecipesToListUseCase } from "@/src/application/use-cases/grocery/add-recipes-to-list.use-case";
 import type { IClearCheckedItemsUseCase } from "@/src/application/use-cases/grocery/clear-checked-items.use-case";
+import type { IClearGroceryListUseCase } from "@/src/application/use-cases/grocery/clear-grocery-list.use-case";
 import type { IGetGroceryListUseCase } from "@/src/application/use-cases/grocery/get-grocery-list.use-case";
 import type { IListMealsToAddUseCase } from "@/src/application/use-cases/grocery/list-meals-to-add.use-case";
 import type { IRemoveGroceryItemUseCase } from "@/src/application/use-cases/grocery/remove-grocery-item.use-case";
@@ -51,6 +52,7 @@ import type { IAddGroceryItemController } from "@/src/interface-adapters/control
 import type { IAddPlanToListController } from "@/src/interface-adapters/controllers/grocery/add-plan-to-list.controller";
 import type { IAddRecipesToListController } from "@/src/interface-adapters/controllers/grocery/add-recipes-to-list.controller";
 import type { IClearCheckedItemsController } from "@/src/interface-adapters/controllers/grocery/clear-checked-items.controller";
+import type { IClearGroceryListController } from "@/src/interface-adapters/controllers/grocery/clear-grocery-list.controller";
 import type { IGetGroceryListController } from "@/src/interface-adapters/controllers/grocery/get-grocery-list.controller";
 import type { IListMealsToAddController } from "@/src/interface-adapters/controllers/grocery/list-meals-to-add.controller";
 import type { IRemoveGroceryItemController } from "@/src/interface-adapters/controllers/grocery/remove-grocery-item.controller";
@@ -119,6 +121,7 @@ export const DI_SYMBOLS = {
   IRemoveGroceryItemUseCase: Symbol.for("IRemoveGroceryItemUseCase"),
   IUpdateGroceryItemUseCase: Symbol.for("IUpdateGroceryItemUseCase"),
   IClearCheckedItemsUseCase: Symbol.for("IClearCheckedItemsUseCase"),
+  IClearGroceryListUseCase: Symbol.for("IClearGroceryListUseCase"),
   IAddRecipesToListUseCase: Symbol.for("IAddRecipesToListUseCase"),
   IAddPlanToListUseCase: Symbol.for("IAddPlanToListUseCase"),
   IListMealsToAddUseCase: Symbol.for("IListMealsToAddUseCase"),
@@ -159,6 +162,7 @@ export const DI_SYMBOLS = {
   IRemoveGroceryItemController: Symbol.for("IRemoveGroceryItemController"),
   IUpdateGroceryItemController: Symbol.for("IUpdateGroceryItemController"),
   IClearCheckedItemsController: Symbol.for("IClearCheckedItemsController"),
+  IClearGroceryListController: Symbol.for("IClearGroceryListController"),
   IAddRecipesToListController: Symbol.for("IAddRecipesToListController"),
   IAddPlanToListController: Symbol.for("IAddPlanToListController"),
   IListMealsToAddController: Symbol.for("IListMealsToAddController"),
@@ -214,6 +218,7 @@ export interface DI_RETURN_TYPES {
   IRemoveGroceryItemUseCase: IRemoveGroceryItemUseCase;
   IUpdateGroceryItemUseCase: IUpdateGroceryItemUseCase;
   IClearCheckedItemsUseCase: IClearCheckedItemsUseCase;
+  IClearGroceryListUseCase: IClearGroceryListUseCase;
   IAddRecipesToListUseCase: IAddRecipesToListUseCase;
   IAddPlanToListUseCase: IAddPlanToListUseCase;
   IListMealsToAddUseCase: IListMealsToAddUseCase;
@@ -252,6 +257,7 @@ export interface DI_RETURN_TYPES {
   IRemoveGroceryItemController: IRemoveGroceryItemController;
   IUpdateGroceryItemController: IUpdateGroceryItemController;
   IClearCheckedItemsController: IClearCheckedItemsController;
+  IClearGroceryListController: IClearGroceryListController;
   IAddRecipesToListController: IAddRecipesToListController;
   IAddPlanToListController: IAddPlanToListController;
   IListMealsToAddController: IListMealsToAddController;

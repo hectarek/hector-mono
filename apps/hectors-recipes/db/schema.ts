@@ -295,7 +295,7 @@ export const recipeReads = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid("user_id").notNull(),
-    kind: text("kind").$type<"image" | "text">().notNull(),
+    kind: text("kind").$type<"image" | "text" | "document">().notNull(),
     createdAt: createdAt(),
   },
   (table) => [

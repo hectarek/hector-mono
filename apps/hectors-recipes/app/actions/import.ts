@@ -5,6 +5,7 @@ import { actionLogger, text, toActionError } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import { InputParseError } from "@/src/entities/errors/common";
 import type { CheckedDraft } from "@/src/entities/itemizing-check";
+import { MAX_PHOTOS } from "@/src/entities/models/recipe-draft.model";
 
 // A read recipe to check in the form, or why it couldn't be read (ux-plan Phase 10). A link
 // also gives the page's address and, when its recipe data has one, its photo.
@@ -12,39 +13,73 @@ export type ReadRecipeResult =
   | { draft: CheckedDraft; sourceUrl?: string; imageUrl?: string | null }
   | { error: string };
 
-// Add by photo (P10.2): the photo arrives already shrunk to a JPEG on the phone, or as a
-// long screenshot's pieces, top to bottom (P14.11).
+// Add by photo (P10.2): up to MAX_PHOTOS photos of one recipe (D53), in fields `photo-1`,
+// `photo-2` and so on, each already shrunk to JPEG on the phone: one image, or a long
+// screenshot's pieces, top to bottom (P14.11).
 export async function readRecipeFromPhoto(
   formData: FormData,
 ): Promise<ReadRecipeResult> {
   const logger = actionLogger("readRecipeFromPhoto");
-  const photos = formData.getAll("photo");
+  const sent = Array.from({ length: MAX_PHOTOS }, (_, index) =>
+    formData.getAll(`photo-${index + 1}`),
+  ).filter((pieces) => pieces.length > 0);
   try {
-    const images = await Promise.all(
-      photos.map(async (photo) =>
-        photo instanceof File
-          ? {
-              data: new Uint8Array(await photo.arrayBuffer()),
-              mediaType: photo.type,
-            }
-          : photo,
+    const photos = await Promise.all(
+      sent.map((pieces) =>
+        Promise.all(
+          pieces.map(async (piece) =>
+            piece instanceof File
+              ? {
+                  data: new Uint8Array(await piece.arrayBuffer()),
+                  mediaType: piece.type,
+                }
+              : piece,
+          ),
+        ),
       ),
     );
     const draft = await getInjection("IReadRecipeController")(
-      { kind: "image", images },
+      { kind: "image", photos },
       await getCurrentUserId(),
     );
     return { draft };
   } catch (err) {
     if (err instanceof InputParseError) {
-      logger.warn("Not a photo it can read", {
-        types: photos.map((photo) =>
-          photo instanceof File ? photo.type : typeof photo,
-        ),
+      logger.warn("Not photos it can read", {
+        types: sent
+          .flat()
+          .map((piece) => (piece instanceof File ? piece.type : typeof piece)),
       });
-      return { error: "Choose a photo: a JPEG, PNG or WebP under 4 MB." };
+      return {
+        error: `Choose up to ${MAX_PHOTOS} photos: JPEG, PNG or WebP, under 4 MB in all.`,
+      };
     }
     const fallback = "Couldn't read that photo. Try again.";
+    return { error: toActionError(err, logger, fallback)?.error ?? fallback };
+  }
+}
+
+// Add by file (D53): a PDF, sent as it is; the reader counts its pages before reading it.
+export async function readRecipeFromDocument(
+  formData: FormData,
+): Promise<ReadRecipeResult> {
+  const logger = actionLogger("readRecipeFromDocument");
+  const pdf = formData.get("pdf");
+  try {
+    const draft = await getInjection("IReadRecipeController")(
+      {
+        kind: "document",
+        pdf:
+          pdf instanceof File ? new Uint8Array(await pdf.arrayBuffer()) : pdf,
+      },
+      await getCurrentUserId(),
+    );
+    return { draft };
+  } catch (err) {
+    if (err instanceof InputParseError) {
+      return { error: "Choose a PDF under 4 MB." };
+    }
+    const fallback = "Couldn't read that PDF. Try again.";
     return { error: toActionError(err, logger, fallback)?.error ?? fallback };
   }
 }

@@ -11,7 +11,8 @@ import { Camera, ChevronRight, Link2, PenLine } from "lucide-react";
 import Link from "next/link";
 import { TopBar } from "@/app/_components/top-bar";
 
-// Adding a recipe starts with how (ux-plan D34): from a web page, from a photo, or by hand.
+// Adding a recipe starts with how (ux-plan D34): from a web page, from photos or a file (D53),
+// or by hand.
 // Each keeps the book it was started from (?book=).
 export default async function NewRecipePage({
   searchParams,
@@ -30,8 +31,8 @@ export default async function NewRecipePage({
     {
       href: `/recipes/new/photo${query}`,
       Icon: Camera,
-      title: "Add by photo",
-      description: "A cookbook page or a screenshot.",
+      title: "Add by photo or file",
+      description: "Cookbook pages, screenshots, or a PDF or text file.",
     },
     {
       href: `/recipes/new/manual${query}`,
