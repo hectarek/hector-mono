@@ -1,4 +1,4 @@
-import type { Recipe } from "./models/recipe.model";
+import type { ListedRecipe } from "./models/recipe.model";
 import type { TagGroups } from "./models/tag.model";
 
 export type LibraryFilter = {
@@ -7,7 +7,7 @@ export type LibraryFilter = {
 };
 
 export type LibraryView = {
-  recipes: Recipe[];
+  recipes: ListedRecipe[];
   tags: string[];
   // Every grouped tag's group (D55), for grouping and the tag picker.
   tagGroups: TagGroups;
@@ -16,7 +16,7 @@ export type LibraryView = {
 // Tags come from the whole book so the chips don't disappear as you filter. Most-used
 // first: on a phone only the first few chips are in view.
 export function buildLibraryView(
-  recipes: Recipe[],
+  recipes: ListedRecipe[],
   filter: LibraryFilter,
   tagGroups: TagGroups = {},
 ): LibraryView {
@@ -29,21 +29,47 @@ export function buildLibraryView(
   const tags = [...counts.keys()].sort(
     (a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0) || a.localeCompare(b),
   );
-  const matching = recipes.filter(
-    (recipe) =>
-      matchesSearch(recipe, filter.search) &&
-      (!tag || recipe.tags.includes(tag)),
+  const matching = searchRecipes(
+    recipes.filter((recipe) => !tag || recipe.tags.includes(tag)),
+    filter.search,
   );
 
   return { recipes: matching, tags, tagGroups };
 }
 
-// The library's search: its text anywhere in the title, ignoring case. The server filters
-// with it, and so does the page as you type (ux-plan P10.4), so both always agree.
-export function matchesSearch(
-  recipe: Pick<Recipe, "title">,
+// The library's search (D56): every word typed is in the title, a tag or an ingredient's
+// name, ignoring case and accents. Recipes with more of the words in their title come first,
+// otherwise in the order given. The server searches with it, and so does the page as you
+// type (ux-plan P10.4), so both always agree.
+export function searchRecipes(
+  recipes: ListedRecipe[],
   search: string | undefined,
-): boolean {
-  const text = search?.trim().toLowerCase();
-  return !text || recipe.title.toLowerCase().includes(text);
+): ListedRecipe[] {
+  const words = fold(search ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) {
+    return recipes;
+  }
+
+  return recipes
+    .flatMap((recipe) => {
+      const title = fold(recipe.title);
+      const rest = fold([...recipe.tags, ...recipe.ingredientNames].join("\n"));
+      return words.every((word) => title.includes(word) || rest.includes(word))
+        ? [
+            {
+              recipe,
+              inTitle: words.filter((word) => title.includes(word)).length,
+            },
+          ]
+        : [];
+    })
+    .sort((a, b) => b.inTitle - a.inTitle)
+    .map(({ recipe }) => recipe);
+}
+
+// Lowercase without accents, so "sable" finds "Sablé Cookies".
+function fold(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 }

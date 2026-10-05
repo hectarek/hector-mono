@@ -33,6 +33,33 @@ describeEachBackend("getRecipes", () => {
     ]);
   });
 
+  // D56: listed recipes carry their ingredients' names as written, which search reads.
+  it("lists each recipe's ingredient names in order, and searches them", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    await app.newRecipe(bookId, {
+      title: "Kofta",
+      ingredients: [
+        { raw: "1 lb ground beef" },
+        { raw: "2 tsp ground cumin" },
+        { raw: "1 onion, grated" },
+      ],
+    });
+    await app.newRecipe(bookId, {
+      title: "Pancakes",
+      ingredients: [{ raw: "2 cups flour" }],
+    });
+
+    const all = await app.getRecipes(bookId, OWNER);
+    expect(all.recipes.map((recipe) => recipe.ingredientNames)).toEqual([
+      ["ground beef", "ground cumin", "onion"],
+      ["flour"],
+    ]);
+
+    const cumin = await app.getRecipes(bookId, OWNER, { search: "cumin" });
+    expect(cumin.recipes.map((recipe) => recipe.title)).toEqual(["Kofta"]);
+  });
+
   // D55: each grouped tag's group comes with the library, for grouping and the tag picker.
   it("gives each grouped tag's group, and none for a tag without one", async () => {
     const app = makeApp();

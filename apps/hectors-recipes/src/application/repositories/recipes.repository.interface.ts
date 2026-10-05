@@ -1,6 +1,6 @@
 import type {
   CreateRecipeRecord,
-  Recipe,
+  ListedRecipe,
   RecipeWithIngredients,
   UpdateRecipeRecord,
 } from "@/src/entities/models/recipe.model";
@@ -20,8 +20,8 @@ export interface IRecipesRepository {
     userId: string,
     tx?: ITransaction,
   ): Promise<number>;
-  // Library listing: recipe rows only, no ingredient lines.
-  getBySpace(spaceId: string): Promise<Recipe[]>;
+  // Library listing: recipe rows with their ingredients' names (for search), not their lines.
+  getBySpace(spaceId: string): Promise<ListedRecipe[]>;
   getById(
     id: string,
     tx?: ITransaction,

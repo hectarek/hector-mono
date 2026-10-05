@@ -16,8 +16,8 @@ import { LibraryFilters } from "@/app/_components/library-filters";
 import { ProduceTile } from "@/app/_components/produce-tile";
 import { RecipeCard } from "@/app/_components/recipe-card";
 import { libraryHref } from "@/app/_lib/library-href";
-import { matchesSearch } from "@/src/entities/library";
-import type { Recipe } from "@/src/entities/models/recipe.model";
+import { searchRecipes } from "@/src/entities/library";
+import type { ListedRecipe } from "@/src/entities/models/recipe.model";
 
 // The library's search, tag chips and cards (ux-plan P10.4). The page sends every card the
 // tag allows; the search narrows them here as you type, by the same rule the server uses, and
@@ -34,7 +34,7 @@ export function LibraryResults({
   book: string | undefined;
   tags: string[];
   activeTag: string | undefined;
-  recipes: Recipe[];
+  recipes: ListedRecipe[];
   // Each card's book, when the grid mixes books (All recipes).
   bookNames?: Record<string, string>;
   // What a book with no recipes shows: the page knows whether they can add one.
@@ -44,7 +44,7 @@ export function LibraryResults({
   // brings the page back from before it was typed, with ?q= updated in place since.
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
-  const shown = recipes.filter((recipe) => matchesSearch(recipe, search));
+  const shown = searchRecipes(recipes, search);
 
   function changeSearch(text: string) {
     setSearch(text);

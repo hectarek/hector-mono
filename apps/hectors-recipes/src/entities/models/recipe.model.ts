@@ -39,6 +39,10 @@ const recipeWithIngredientsSchema = recipeSchema.extend({
 });
 export type RecipeWithIngredients = z.infer<typeof recipeWithIngredientsSchema>;
 
+// A recipe as the library lists it: its row and, for search (ux-plan D56), the names of its
+// ingredients as written.
+export type ListedRecipe = Recipe & { ingredientNames: string[] };
+
 // Optional fields accept null (explicitly empty) so create and edit share one form shape.
 export const createRecipeSchema = z.object({
   title: z.string().trim().min(1),

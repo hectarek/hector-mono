@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1 done. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P18.3 (search) while H26 and H27 are open; P18.2's write once both are answered. |
-| Waiting on Hector | OK to apply migration 0013 to production (H26); the tagging pass's list, `docs/private/tagging-pass-2026-10-04.md` in the worktree (H27); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1 and P18.3 done, P18.2 waiting on production. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P18.4 (group by). P18.2's check once Hector has run H26 and H27 on production. |
+| Waiting on Hector | Running migration 0013 (H26), then the tagging pass's SQL (H27), on production: both approved, but Claude Code's permission check blocks Claude's writes to production; real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1760,18 +1760,33 @@ One commit per task; the PR when the phase is done.
     - Applied to the test project by Claude, with Drizzle's record of it (14 migrations; 7 meal, 9 cuisine and 5 diet tags), and the browser flows pass on it.
     - Production waits on H26. The Recipes page reads `tags`, so it must be applied before this deploys, and Vercel's previews use production too.
     - All 993 + 34 tests pass.
-- [ ] **P18.2** The tagging pass — C+H · D58, D31
+- [~] **P18.2** The tagging pass — C+H · D58, D31
   - Do:
     - Claude reads every recipe in the session: its title, lines and steps. For each it proposes a meal tag (every recipe gets one), and cuisine and diet tags where they're clear.
     - Any diet tag Claude is unsure of is flagged, such as gluten in soy sauce or dairy in butter.
     - The proposals go to Hector as a list of each recipe's tags now and proposed (H27). The list is kept in the gitignored `docs/private/`: it's his recipes.
     - Once he's checked it, it's written to production with his OK at that moment, with any new cuisine added to the catalog with its group.
   - Verify: a dry run first. After writing, a read-only query shows every recipe's tags as approved, and every recipe has a meal tag.
-- [ ] **P18.3** Search — C · D56
+  - Evidence so far (2026-10-04):
+    - Hector approved the whole list (H27). It's written as one transaction in the gitignored `docs/private/tagging-pass-2026-10-04.sql`: the 4 new cuisines (british, caribbean, french, polish) into the catalog, then the 74 recipes whose tags change, matched by title.
+    - Dry run, in an in-memory Postgres with every migration and the 81 recipes' tags as they are today: 4 tags added, 74 recipes changed. Afterwards all 81 have the approved tags and a meal tag, and every tag in use has a group.
+    - Claude's write to production was blocked by Claude Code's permission check, so Hector runs it after migration 0013 (H26). Then the read-only check.
+- [x] **P18.3** Search — C · D56
   - Do:
     - Listed recipes carry their ingredient names. `matchesSearch` checks every word typed against the title, the tags and those names, ignoring case. Title matches come first.
     - The same rule runs on the server and as you type, as now.
   - Verify: unit tests (a word in an ingredient; a tag; two words matched in different places; title matches first) and a screen test of the Recipes page.
+  - Evidence (2026-10-04):
+    - `searchRecipes` (`src/entities/library.ts`) replaces `matchesSearch`. Every word typed must be in the title, a tag or an ingredient's name. Recipes with more of the words in their title come first, otherwise in the list's order. It also ignores accents ("sable" finds "Sablé Cookies"), which wasn't planned: a phone keyboard rarely types them.
+    - `buildLibraryView` and `LibraryResults` both use it, as before.
+    - Listed recipes are `ListedRecipe`: `getBySpace` adds `ingredientNames`, the lines' names as written, in order. All 1,007 lines in production have one (read-only, 2026-10-04). Written names, not the catalog's, because they're what the recipe shows ("black beans", where the catalog has "black bean").
+    - Tests:
+      - Unit tests for each rule.
+      - On both backends, the library lists ingredient names in order and finds a recipe by one.
+      - A first screen test of the Recipes page: typing finds recipes by ingredient and tag, title matches first, and "No recipes match" when one word matches nothing.
+      - The browser flow on the test project searches by ingredient. That confirms Neon's driver returns the names as a list, not text.
+      - Mutations caught: names left out, tags left out, any word instead of every word, no title-first, accents kept, names out of order (Postgres), the mock without names, the page filtering by title only, and the page not reordering.
+    - All 1000 + 35 tests and both flows pass.
 - [ ] **P18.4** Group by — C · D57
   - Do:
     - A "Group by" choice on Recipes: None (the default), Meal, Cuisine or Diet, kept in `?group=`.
@@ -1885,8 +1900,8 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
 | H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it to the main checkout's `.env.test`; Claude copied that into the worktree (its copy predated the key), and the real reads passed |
-| H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | open |
-| H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | open: the list is ready (2026-10-04): 81 recipes, 74 would change, 6 tags wrong today, 9 depend on a label |
+| H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | open: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check. Hector runs `bun run db:migrate` from the worktree's app folder |
+| H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | open: approved 2026-10-04 ("the tags look good please apply all those"). Hector runs `docs/private/tagging-pass-2026-10-04.sql` on production after H26, as Claude's writes there are blocked |
 
 ## Risks and how they're handled
 
@@ -2097,3 +2112,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Its real reads ran after the merge: H25's key was in the main checkout's `.env.test` but not the worktree's copy, so Claude copied it again, and `FLOWS_AI=1` passed.
   - Phase 18 decided: a tag catalog (D55), search (D56), grouping (D57), the tags and the pass (D58). Planned in detail.
   - Next: P18.1, then H26.
+- **2026-10-04 (az)** — Hector OK'd migration 0013 for production (H26) and approved the tagging pass's whole list (H27).
+  - Claude Code's permission check blocked Claude's write to production, so Hector runs both. The tagging SQL is ready and passed a dry run (P18.2).
+  - P18.3 done: search reads titles, tags and ingredient names (see its Evidence).
+  - Next: P18.4; P18.2's check once H26 and H27 are run.

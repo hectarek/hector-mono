@@ -2,6 +2,7 @@ import type { IRecipesRepository } from "@/src/application/repositories/recipes.
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import type {
   CreateRecipeRecord,
+  ListedRecipe,
   Recipe,
   RecipeWithIngredients,
   UpdateRecipeRecord,
@@ -64,10 +65,16 @@ export class MockRecipesRepository implements IRecipesRepository {
     return inputs.length;
   }
 
-  async getBySpace(spaceId: string): Promise<Recipe[]> {
+  async getBySpace(spaceId: string): Promise<ListedRecipe[]> {
     return this.recipes
       .filter((recipe) => recipe.spaceId === spaceId)
-      .sort((a, b) => a.title.localeCompare(b.title));
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .map((recipe) => ({
+        ...recipe,
+        ingredientNames: this.withLines(recipe).ingredients.flatMap((line) =>
+          line.name ? [line.name] : [],
+        ),
+      }));
   }
 
   async getById(id: string): Promise<RecipeWithIngredients | undefined> {

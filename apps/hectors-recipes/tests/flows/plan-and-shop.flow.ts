@@ -111,4 +111,12 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await expect(
     page.getByRole("button", { name: "Add 1 meal to the grocery list" }),
   ).toBeVisible();
+
+  // D56, on Neon: Recipes finds the recipe by an ingredient, and every word typed counts.
+  await page.getByRole("link", { name: "Recipes", exact: true }).click();
+  const search = page.getByRole("searchbox", { name: "Search recipes" });
+  await search.fill("turkey");
+  await expect(page.getByRole("link", { name: /Chili/ })).toBeVisible();
+  await search.fill("turkey beef");
+  await expect(page.getByText("No recipes match")).toBeVisible();
 });
