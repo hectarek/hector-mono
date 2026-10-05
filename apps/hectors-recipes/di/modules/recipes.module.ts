@@ -9,6 +9,8 @@ import { getRecipesUseCase } from "@/src/application/use-cases/recipes/get-recip
 import { updateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
 import { RecipesRepository } from "@/src/infrastructure/repositories/recipes.repository";
 import { MockRecipesRepository } from "@/src/infrastructure/repositories/recipes.repository.mock";
+import { TagsRepository } from "@/src/infrastructure/repositories/tags.repository";
+import { MockTagsRepository } from "@/src/infrastructure/repositories/tags.repository.mock";
 import { adoptRecipesController } from "@/src/interface-adapters/controllers/recipes/adopt-recipes.controller";
 import { createRecipeController } from "@/src/interface-adapters/controllers/recipes/create-recipe.controller";
 import { deleteRecipeController } from "@/src/interface-adapters/controllers/recipes/delete-recipe.controller";
@@ -24,10 +26,14 @@ export function createRecipesModule() {
     recipesModule
       .bind(DI_SYMBOLS.IRecipesRepository)
       .toClass(MockRecipesRepository);
+    recipesModule.bind(DI_SYMBOLS.ITagsRepository).toClass(MockTagsRepository);
   } else {
     recipesModule
       .bind(DI_SYMBOLS.IRecipesRepository)
       .toClass(RecipesRepository, [DI_SYMBOLS.ILoggerService]);
+    recipesModule
+      .bind(DI_SYMBOLS.ITagsRepository)
+      .toClass(TagsRepository, [DI_SYMBOLS.ILoggerService]);
   }
 
   const writeDeps = [
@@ -37,13 +43,22 @@ export function createRecipesModule() {
     DI_SYMBOLS.ILoggerService,
   ];
 
+  // Saving a recipe also gives its new tags their groups.
+  const saveDeps = [
+    DI_SYMBOLS.IRecipesRepository,
+    DI_SYMBOLS.ITagsRepository,
+    DI_SYMBOLS.ISpacesRepository,
+    DI_SYMBOLS.ITransactionManagerService,
+    DI_SYMBOLS.ILoggerService,
+  ];
+
   recipesModule
     .bind(DI_SYMBOLS.ICreateRecipeUseCase)
-    .toHigherOrderFunction(createRecipeUseCase, writeDeps);
+    .toHigherOrderFunction(createRecipeUseCase, saveDeps);
 
   recipesModule
     .bind(DI_SYMBOLS.IUpdateRecipeUseCase)
-    .toHigherOrderFunction(updateRecipeUseCase, writeDeps);
+    .toHigherOrderFunction(updateRecipeUseCase, saveDeps);
 
   recipesModule
     .bind(DI_SYMBOLS.IDeleteRecipeUseCase)
@@ -53,6 +68,7 @@ export function createRecipesModule() {
     .bind(DI_SYMBOLS.IGetRecipesUseCase)
     .toHigherOrderFunction(getRecipesUseCase, [
       DI_SYMBOLS.IRecipesRepository,
+      DI_SYMBOLS.ITagsRepository,
       DI_SYMBOLS.ISpacesRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
@@ -61,6 +77,7 @@ export function createRecipesModule() {
     .bind(DI_SYMBOLS.IGetAllRecipesUseCase)
     .toHigherOrderFunction(getAllRecipesUseCase, [
       DI_SYMBOLS.IRecipesRepository,
+      DI_SYMBOLS.ITagsRepository,
       DI_SYMBOLS.ISpacesRepository,
       DI_SYMBOLS.ILoggerService,
     ]);

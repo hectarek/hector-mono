@@ -13,7 +13,7 @@ import type { Aisle } from "@/src/entities/aisles";
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import type {
   CreateRecipeRecord,
-  Recipe,
+  ListedRecipe,
   RecipeWithIngredients,
   UpdateRecipeRecord,
 } from "@/src/entities/models/recipe.model";
@@ -89,10 +89,18 @@ export class RecipesRepository
     }
   }
 
-  async getBySpace(spaceId: string): Promise<Recipe[]> {
+  async getBySpace(spaceId: string): Promise<ListedRecipe[]> {
     try {
       return await this.getDbContext()
-        .select(recipeColumns)
+        .select({
+          ...recipeColumns,
+          ingredientNames: sql<string[]>`coalesce((
+            select array_agg(${recipeIngredients.name} order by ${recipeIngredients.position})
+            from ${recipeIngredients}
+            where ${recipeIngredients.recipeId} = ${recipes.id}
+              and ${recipeIngredients.name} is not null
+          ), '{}')`,
+        })
         .from(recipes)
         .where(eq(recipes.spaceId, spaceId))
         .orderBy(asc(recipes.title));

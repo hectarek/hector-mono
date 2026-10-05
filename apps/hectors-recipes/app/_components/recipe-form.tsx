@@ -42,7 +42,7 @@ import { IngredientRows } from "@/app/_components/ingredient-rows";
 import { StepRows } from "@/app/_components/step-rows";
 import { TagPicker } from "@/app/_components/tag-picker";
 import { TopBar } from "@/app/_components/top-bar";
-import { addTags } from "@/app/_lib/tag-choices";
+import { type NewTag, withNewTag } from "@/app/_lib/tag-choices";
 import { createRecipe, updateRecipe } from "@/app/actions/recipes";
 import type { ActionState } from "@/app/actions/shared";
 import {
@@ -53,6 +53,7 @@ import {
   type MethodRow,
   stepInputs,
 } from "@/src/entities/editor-rows";
+import { groupsFor, type TagGroups } from "@/src/entities/models/tag.model";
 
 export type RecipeFormValues = {
   title: string;
@@ -98,6 +99,8 @@ type Props = {
   note?: string;
   // Tags from every book they're in, most-used first, offered as the Tags chips.
   suggestedTags: string[];
+  // The tag catalog's groups, which the chips sit under (D55).
+  tagGroups: TagGroups;
 } & (
   | {
       mode: "create";
@@ -136,7 +139,9 @@ export function RecipeForm(props: Props) {
     key: string | null;
   } | null>(null);
   const [tags, setTags] = useState(values.tags);
-  const [newTag, setNewTag] = useState<string | null>(null);
+  // The catalog's groups, plus those given to new tags here.
+  const [groups, setGroups] = useState(props.tagGroups);
+  const [newTag, setNewTag] = useState<NewTag | null>(null);
   const errors = state?.fields ?? {};
   // A server message for a field the form doesn't show still needs saying somewhere.
   const unshownError =
@@ -225,8 +230,18 @@ export function RecipeForm(props: Props) {
     const formData = new FormData(event.currentTarget);
     formData.set("ingredients", JSON.stringify(ingredients.lines));
     formData.set("steps", JSON.stringify(steps.steps));
-    // Including one typed in New tag but not added yet.
-    formData.set("tags", addTags(tags, newTag ?? "").join(","));
+    // Including one typed in New tag but not added yet, and new tags' groups.
+    const typed = withNewTag(tags, groups, newTag);
+    formData.set("tags", typed.chosen.join(","));
+    formData.set(
+      "tagGroups",
+      JSON.stringify(
+        groupsFor(
+          typed.chosen.filter((tag) => !props.tagGroups[tag]),
+          typed.groups,
+        ),
+      ),
+    );
     startTransition(() => formAction(formData));
   }
   // Return in a one-line field would submit the form (Save is its submit button), saving a
@@ -509,6 +524,8 @@ export function RecipeForm(props: Props) {
               // A chip changes the tags without an input event of its own.
               setDirty(true);
             }}
+            groups={groups}
+            onGroupsChange={setGroups}
             newTag={newTag}
             onNewTagChange={setNewTag}
           />

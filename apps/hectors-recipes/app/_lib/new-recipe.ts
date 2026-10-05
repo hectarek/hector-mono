@@ -21,7 +21,10 @@ export async function loadNewRecipe(requested: string | undefined) {
   }
 
   // Tags from every book they're in, so a household's books share one vocabulary.
-  const { tags } = await getInjection("IGetAllRecipesController")({}, userId);
+  const { tags, tagGroups } = await getInjection("IGetAllRecipesController")(
+    {},
+    userId,
+  );
   const query = requested ? `?book=${encodeURIComponent(requested)}` : "";
 
   return {
@@ -30,6 +33,7 @@ export async function loadNewRecipe(requested: string | undefined) {
       books: editable,
       cancelHref: requested ? `/?book=${requested}` : "/",
       suggestedTags: tags,
+      tagGroups,
       heading: "New recipe",
       note: editable.length > 1 ? undefined : `Saving to ${book.name}`,
     },

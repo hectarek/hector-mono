@@ -48,7 +48,7 @@ export default async function EditRecipePage({
 
   // Tags from every book they're in, most-used first, as on New: the chips are the only way
   // to pick one, so a household's books share one set (D33).
-  const { tags } = await getInjection("IGetAllRecipesController")(
+  const { tags, tagGroups } = await getInjection("IGetAllRecipesController")(
     {},
     await getCurrentUserId(),
   );
@@ -58,6 +58,7 @@ export default async function EditRecipePage({
       mode="edit"
       heading="Edit recipe"
       suggestedTags={tags}
+      tagGroups={tagGroups}
       recipeId={recipe.id}
       values={{
         title: recipe.title,

@@ -33,6 +33,49 @@ describeEachBackend("getRecipes", () => {
     ]);
   });
 
+  // D56: listed recipes carry their ingredients' names as written, which search reads.
+  it("lists each recipe's ingredient names in order, and searches them", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    await app.newRecipe(bookId, {
+      title: "Kofta",
+      ingredients: [
+        { raw: "1 lb ground beef" },
+        { raw: "2 tsp ground cumin" },
+        { raw: "1 onion, grated" },
+      ],
+    });
+    await app.newRecipe(bookId, {
+      title: "Pancakes",
+      ingredients: [{ raw: "2 cups flour" }],
+    });
+
+    const all = await app.getRecipes(bookId, OWNER);
+    expect(all.recipes.map((recipe) => recipe.ingredientNames)).toEqual([
+      ["ground beef", "ground cumin", "onion"],
+      ["flour"],
+    ]);
+
+    const cumin = await app.getRecipes(bookId, OWNER, { search: "cumin" });
+    expect(cumin.recipes.map((recipe) => recipe.title)).toEqual(["Kofta"]);
+  });
+
+  // D55: each grouped tag's group comes with the library, for grouping and the tag picker.
+  it("gives each grouped tag's group, and none for a tag without one", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    await app.newRecipe(bookId, {
+      title: "Pesto Pasta",
+      tags: ["dinner", "italian", "vegetarian", "weeknight"],
+    });
+
+    const { tagGroups } = await app.getRecipes(bookId, OWNER);
+    expect(tagGroups["dinner"]).toBe("meal");
+    expect(tagGroups["italian"]).toBe("cuisine");
+    expect(tagGroups["vegetarian"]).toBe("diet");
+    expect(tagGroups["weeknight"]).toBeUndefined();
+  });
+
   it("rejects listing a space as the wrong type", async () => {
     const app = makeApp();
     const planId = await app.newSpace("meal-plan");

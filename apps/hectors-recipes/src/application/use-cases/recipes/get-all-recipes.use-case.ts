@@ -1,5 +1,6 @@
 import type { IRecipesRepository } from "@/src/application/repositories/recipes.repository.interface";
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
+import type { ITagsRepository } from "@/src/application/repositories/tags.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import {
   buildLibraryView,
@@ -13,6 +14,7 @@ export type IGetAllRecipesUseCase = ReturnType<typeof getAllRecipesUseCase>;
 // check: only their own memberships are read.
 export const getAllRecipesUseCase = (
   recipesRepository: IRecipesRepository,
+  tagsRepository: ITagsRepository,
   spacesRepository: ISpacesRepository,
   loggerService: ILoggerService,
 ) => {
@@ -38,6 +40,6 @@ export const getAllRecipesUseCase = (
       books: books.length,
       count: recipes.length,
     });
-    return buildLibraryView(recipes, filter);
+    return buildLibraryView(recipes, filter, await tagsRepository.listGroups());
   };
 };

@@ -47,6 +47,15 @@ function tags(formData: FormData): string[] {
     .filter(Boolean);
 }
 
+// New tags' groups, sent as JSON (checked by the controller).
+function tagGroups(formData: FormData): unknown {
+  try {
+    return JSON.parse(text(formData, "tagGroups") ?? "{}");
+  } catch {
+    throw fieldError("tags", "Couldn't read the tags' groups. Try again.");
+  }
+}
+
 // The editor's rows, sent as JSON (checked for shape by the controller).
 function rows(formData: FormData, field: "ingredients" | "steps"): unknown[] {
   let parsed: unknown;
@@ -100,7 +109,11 @@ export async function createRecipe(
   try {
     const userId = await getCurrentUserId();
     const recipe = await getInjection("ICreateRecipeController")(
-      { spaceId: text(formData, "spaceId"), data: recipeFields(formData) },
+      {
+        spaceId: text(formData, "spaceId"),
+        data: recipeFields(formData),
+        tagGroups: tagGroups(formData),
+      },
       userId,
     );
     recipeId = recipe.id;
@@ -122,7 +135,11 @@ export async function updateRecipe(
   try {
     const userId = await getCurrentUserId();
     await getInjection("IUpdateRecipeController")(
-      { recipeId, data: recipeFields(formData) },
+      {
+        recipeId,
+        data: recipeFields(formData),
+        tagGroups: tagGroups(formData),
+      },
       userId,
     );
   } catch (err) {

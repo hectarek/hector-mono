@@ -6,6 +6,7 @@ import type { IGroceryItemsRepository } from "@/src/application/repositories/gro
 import type { IPlanEntriesRepository } from "@/src/application/repositories/plan-entries.repository.interface";
 import type { IRecipesRepository } from "@/src/application/repositories/recipes.repository.interface";
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
+import type { ITagsRepository } from "@/src/application/repositories/tags.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { addGroceryItemUseCase } from "@/src/application/use-cases/grocery/add-grocery-item.use-case";
 import { addPlanToListUseCase } from "@/src/application/use-cases/grocery/add-plan-to-list.use-case";
@@ -54,6 +55,8 @@ import { RecipesRepository } from "@/src/infrastructure/repositories/recipes.rep
 import { MockRecipesRepository } from "@/src/infrastructure/repositories/recipes.repository.mock";
 import { SpacesRepository } from "@/src/infrastructure/repositories/spaces.repository";
 import { MockSpacesRepository } from "@/src/infrastructure/repositories/spaces.repository.mock";
+import { TagsRepository } from "@/src/infrastructure/repositories/tags.repository";
+import { MockTagsRepository } from "@/src/infrastructure/repositories/tags.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { MockRealtimeService } from "@/src/infrastructure/services/mock-realtime.service";
 import { MockTransactionManagerService } from "@/src/infrastructure/services/mock-transaction-manager.service";
@@ -69,6 +72,7 @@ export const MONDAY = "2026-09-21";
 export type Repositories = {
   spaces: ISpacesRepository;
   recipes: IRecipesRepository;
+  tags: ITagsRepository;
   planEntries: IPlanEntriesRepository;
   groceryItems: IGroceryItemsRepository;
   transactions: ITransactionManagerService;
@@ -79,6 +83,7 @@ function mockRepositories(): Repositories {
   return {
     spaces: new MockSpacesRepository(),
     recipes: new MockRecipesRepository((id) => planEntries.unlinkRecipe(id)),
+    tags: new MockTagsRepository(),
     planEntries,
     groceryItems: new MockGroceryItemsRepository(),
     transactions: new MockTransactionManagerService(),
@@ -91,6 +96,7 @@ export function postgresRepositories(): Repositories {
   return {
     spaces: new SpacesRepository(log),
     recipes: new RecipesRepository(log),
+    tags: new TagsRepository(log),
     planEntries: new PlanEntriesRepository(log),
     groceryItems: new GroceryItemsRepository(log),
     transactions: new TransactionManagerService(log),
@@ -132,7 +138,8 @@ export function describeEachBackend(name: string, fn: () => void): void {
 
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
   const log = new MockLoggerService();
-  const { spaces, recipes, planEntries, groceryItems, transactions } = repos;
+  const { spaces, recipes, tags, planEntries, groceryItems, transactions } =
+    repos;
 
   // What grocery writes would have published (ux-plan D21).
   const realtime = new MockRealtimeService();
@@ -162,11 +169,11 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     updateMemberRole: updateMemberRoleUseCase(spaces, transactions, log),
     removeMember: removeMemberUseCase(spaces, transactions, log),
 
-    createRecipe: createRecipeUseCase(recipes, spaces, transactions, log),
+    createRecipe: createRecipeUseCase(recipes, tags, spaces, transactions, log),
     getRecipe: getRecipeUseCase(recipes, spaces, log),
-    getRecipes: getRecipesUseCase(recipes, spaces, log),
-    getAllRecipes: getAllRecipesUseCase(recipes, spaces, log),
-    updateRecipe: updateRecipeUseCase(recipes, spaces, transactions, log),
+    getRecipes: getRecipesUseCase(recipes, tags, spaces, log),
+    getAllRecipes: getAllRecipesUseCase(recipes, tags, spaces, log),
+    updateRecipe: updateRecipeUseCase(recipes, tags, spaces, transactions, log),
     deleteRecipe: deleteRecipeUseCase(recipes, spaces, transactions, log),
     adoptRecipes: adoptRecipesUseCase(recipes, spaces, transactions, log),
 

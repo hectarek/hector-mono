@@ -5,6 +5,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import * as schema from "@/db/schema";
+import { STARTING_TAGS, TAG_CATEGORIES } from "@/src/entities/models/tag.model";
 
 const client = new PGlite();
 export const testDb = drizzle({ client, schema });
@@ -25,7 +26,8 @@ function migrateOnce(): Promise<void> {
   return migrated;
 }
 
-// Call in beforeEach: migrates on first use, then empties every table.
+// Call in beforeEach: migrates on first use, then empties every table. The tag catalog keeps
+// the rows its migration adds (STARTING_TAGS) and loses any a test added.
 export async function resetDatabase(): Promise<void> {
   await migrateOnce();
   await client.exec(`
@@ -33,6 +35,9 @@ export async function resetDatabase(): Promise<void> {
       recipe_steps, ingredients, plan_entries, grocery_items, user_settings, recipe_reads,
       neon_auth."user" cascade;
   `);
+  await client.query("delete from tags where name <> all($1)", [
+    TAG_CATEGORIES.flatMap((category) => STARTING_TAGS[category]),
+  ]);
 }
 
 // A Neon Auth user, so member lists can show a name.

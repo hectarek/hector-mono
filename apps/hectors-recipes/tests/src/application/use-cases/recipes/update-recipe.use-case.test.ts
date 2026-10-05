@@ -89,3 +89,19 @@ describeEachBackend("updateRecipe", () => {
     ).toEqual([["Simmer.", 20]]);
   });
 });
+
+// D55: a tag made while editing is saved with its group too.
+describeEachBackend("updateRecipe, new tags' groups", () => {
+  it("gives a tag added in an edit its group", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    const created = await app.newRecipe(bookId, { tags: ["dinner"] });
+
+    await app.updateRecipe(created.id, { tags: ["dinner", "texan"] }, OWNER, {
+      texan: "cuisine",
+    });
+    expect((await app.getRecipes(bookId, OWNER)).tagGroups["texan"]).toBe(
+      "cuisine",
+    );
+  });
+});

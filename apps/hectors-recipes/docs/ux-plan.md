@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 17 (Add by photo or file; the week slides in) done, in review on `feat/recipes-p17-photo-or-file`, except its real reads (H25). Phases 1–16 merged (16: hectarek/hector-mono#20). Planned after it: 18 (finding recipes), 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | Hector reviews Phase 17's PR; the real reads (`FLOWS_AI=1`) once the worktree's `.env.test` has the AI key (H25). |
-| Waiting on Hector | real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-04 |
+| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: all five tasks done, the PR next. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | Phase 18's PR; then Phase 19. |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-05 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -118,6 +118,10 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D52 | Groceries' ⋯ sheet has Clear list. After asking, it removes every item, checked or not, for everyone in the plan, and marks the plan's meals as not on the list, so Plan can add them again. | Hector, 2026-10-04: "no way to easily clear the whole list… in the 3 dots at the top to reset it so that say we mess up and add it to the list too many times, we have an easy way to reset and try again." Unmarking the meals is Claude's reading of "try again". |
 | D53 | Add by photo becomes Add by photo or file: one picker for up to 3 photos of one recipe, one PDF of up to 10 pages, or one text or Markdown file. Word, Pages and the like aren't taken ("save it as a PDF"). Photos and files go only to the reader and aren't kept. | Hector, 2026-10-04: "its fine if photos are just one, but for pdfs and files we can add whatever up to a conservative limit… What recipe would be more than 10 pages long?"; "lets just focus on text, markdown, and pdf… pdf is a find backstop"; "We also dont want to keep photos"; one way in, combined; "maybe we do do multiple images but lets cap it at 3". |
 | D54 | When the week changes (a swipe or an arrow), the new week slides in briefly from the side it came from, and not at all with reduced motion. The week doesn't follow the finger. | Hector, 2026-10-04: "it would be nice to have an animation for the swipe, but i would prefer usability if this causing issues". The slide-in after the change was Claude's proposal; Hector: "sure". |
+| D55 | A tag has a group (`meal`, `cuisine`, `diet`, or none), kept in a tag catalog (`tags`: a tag's name and group), as ingredients keep their aisle. Recipes keep their list of tag names. A new tag is given its group when it's made, in the recipe form, and groups are shared by everyone using the app. | Hector, 2026-10-04: "we will need to categorize our tags as well which we need to make sure to cleanly account for in our schema"; of a list in code (A) or a catalog table (B), "go with B and your defaults". |
+| D56 | Search matches a recipe's title, tags and ingredient names. Every word typed must match one of them, and title matches come first. | Hector, 2026-10-04: "not just look up by name, but by relevant info like tags for other common search elements". The rules are Claude's defaults; Hector: "your defaults". |
+| D57 | Recipes can be grouped by meal, cuisine or diet (not grouped by default), kept in the address (`?group=`). A recipe shows under each of its tags in that group, and recipes with none go last, under Other. | Hector, 2026-10-04: "By default we shouldnt group, but we should be able to group by meals… types… and dietary". Showing a recipe under each tag and the Other group are Claude's defaults; Hector: "your defaults". |
+| D58 | The tags: meal is breakfast, lunch, dinner, side dish, snack, dessert, drink; diet is vegetarian, vegan, gluten-free, dairy-free, high-protein; cuisines are added as recipes need them. Claude's tagging pass gives every recipe a meal tag, and its cuisine and diet tags where they're clear, flagging any diet tag it's unsure of. Hector checks the list before anything is written. | Hector, 2026-10-04: "a pass in this session of better tagging… see if they are properly tagged as well as add any missing tags"; "dietary (gluten free, protien, etc)"; "your defaults". |
 
 ---
 
@@ -1710,6 +1714,7 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
       - A test tagged `@ai` reads the Markdown file, the PDF and two photos (`chili-page-1.jpg`, `chili-page-2.jpg`, made in Chromium) with the real reader. Each must fill in the title, 8 lines and 4 steps.
       - It runs only with `FLOWS_AI=1`; otherwise `playwright.config.ts` skips it and leaves the AI key out of the dev server.
       - Not yet run against the real reader: the worktree's `.env.test` still has no AI key ("key present: false"; the Gateway refused it as unauthenticated, so nothing was spent). H25.
+      - Run 2026-10-04, after the merge: the worktree's `.env.test` was a copy made before Hector added the key to the main checkout's, so Claude copied it again. `FLOWS_AI=1` passed in 39 s. The real reader filled in "Weeknight Chili", 8 lines and 4 steps from the Markdown file, from the 2-page PDF, and from the two photos together.
     - All 990 + 33 tests pass, and both everyday flows pass.
 - [x] **P17.5** The week slides in — C · D54
   - Do: `WeekSwipe` knows which week it shows. When the week changes, the days slide in briefly from the side of travel (the next week from the right), and not at all with reduced motion. The swipe itself is unchanged.
@@ -1724,13 +1729,102 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
     - Left as is: entering Plan from another tab on a week other than the last one shown also slides it in. That's harmless, and telling the two apart would need more than this.
     - All 990 + 34 tests and both everyday flows pass.
 
-## Phase 18 (planned): Finding recipes — tag categories, a tagging pass, better search, grouping
+## Phase 18: Finding recipes — tag groups, a tagging pass, better search, grouping
 
-Hector, 2026-10-04: "the quality of the search needs to be better… not just look up by name, but by relevant info like tags"; "a pass in this session of better tagging"; "group by… meals (dinner, lunch, etc) types (asian, indian, etc), and dietary (gluten free, protien, etc). This means we will need to categorize our tags as well which we need to make sure to cleanly account for in our schema." Planned in detail when it starts; one PR.
-- **Tag categories.** Tags get a category: meal (dinner, lunch, …), cuisine (Asian, Indian, …) and diet (gluten-free, high-protein, …). Today a recipe's tags are a flat list of words (`recipes.tags`) with no categories. The phase's first decision, with Hector, is the schema: a tag catalog with a category, or a category on each recipe's tag.
-- **A tagging pass.** Claude does it in a session (D31): every recipe is read for missing or wrong tags in each category, as a dry run for Hector to check, then written with his OK at that moment.
-- **Search.** It finds more than titles: tags and ingredients (perhaps the description), with title matches first. Today it searches the title only (`matchesSearch`).
-- **Grouping.** Recipes can be grouped: not at all (the default), or by meal, cuisine or diet.
+Branch `feat/recipes-p18-finding-recipes`, in its own worktree. Hector, 2026-10-04: "the quality of the search needs to be better… not just look up by name, but by relevant info like tags"; "a pass in this session of better tagging"; "group by… meals (dinner, lunch, etc) types (asian, indian, etc), and dietary (gluten free, protien, etc)… categorize our tags… cleanly account for in our schema". Decided: a tag catalog (D55), search (D56), grouping (D57), the tags and the pass (D58).
+
+Starting point, 2026-10-04, read-only on production:
+- 81 recipes in one book; 4 have no tags, and the rest about 2 each.
+- The 19 tags are already lowercase:
+  - meal: dinner (33), lunch, dessert, breakfast, side dish, drink, snack;
+  - cuisine: italian, asian, american, mexican, greek, indian, mediterranean, middle eastern, swedish;
+  - diet: gluten-free (16), vegan, vegetarian.
+- Search matches only the title (`matchesSearch`), on the server and as you type. Listed recipes carry no ingredients.
+
+One commit per task; the PR when the phase is done.
+
+- [x] **P18.1** The tag catalog — C+H · D55
+  - Do:
+    - An additive migration adds `tags`: `name` (the key, as recipes store it), `category` (`meal`, `cuisine`, `diet`, or null, checked) and `created_at`. It fills in the 19 existing tags with their groups, and adds dairy-free and high-protein (D58).
+    - Saving a recipe adds any tag the catalog doesn't have, without a group, in the same transaction.
+    - Recipes and the library get each tag's group.
+  - Verify: repository and use-case tests on both backends, and a test of the migration's tags. Applied to the test project by Claude, and to production with Hector's OK at that moment (H26).
+  - Evidence (2026-10-04):
+    - Migration 0013 (`tags`: `name` the key, `category` checked to `meal`/`cuisine`/`diet`, `created_at`) adds the 21 starting tags. `STARTING_TAGS` in `src/entities/models/tag.model.ts` lists the same ones, in each group's order, and `TAG_CATEGORY_LABELS` names the groups.
+    - `ITagsRepository.listGroups` reads it, with a Postgres version and an in-memory stand-in that starts with `STARTING_TAGS`. `getRecipes` and `getAllRecipes` pass it to `buildLibraryView`, whose view gains `tagGroups`.
+    - Simpler than planned: only a tag with a group has a row, so saving a recipe adds nothing to the catalog. A tag without a row has no group. That leaves every path that saves a recipe's tags untouched, and the catalog only gets a row when a group is given: in the migration, the tagging pass (P18.2) and the tag picker (P18.5).
+    - Tests:
+      - On Postgres, the migration's tags equal `STARTING_TAGS`. With dinner's group changed in the migration, that test fails.
+      - On both backends, the library gives dinner, italian and vegetarian their groups and "weeknight" none.
+      - `resetDatabase` leaves `tags` alone, so the migration's rows stay (noted in AGENTS.md).
+    - Applied to the test project by Claude, with Drizzle's record of it (14 migrations; 7 meal, 9 cuisine and 5 diet tags), and the browser flows pass on it.
+    - Production waits on H26. The Recipes page reads `tags`, so it must be applied before this deploys, and Vercel's previews use production too.
+    - All 993 + 34 tests pass.
+- [x] **P18.2** The tagging pass — C+H · D58, D31
+  - Do:
+    - Claude reads every recipe in the session: its title, lines and steps. For each it proposes a meal tag (every recipe gets one), and cuisine and diet tags where they're clear.
+    - Any diet tag Claude is unsure of is flagged, such as gluten in soy sauce or dairy in butter.
+    - The proposals go to Hector as a list of each recipe's tags now and proposed (H27). The list is kept in the gitignored `docs/private/`: it's his recipes.
+    - Once he's checked it, it's written to production with his OK at that moment, with any new cuisine added to the catalog with its group.
+  - Verify: a dry run first. After writing, a read-only query shows every recipe's tags as approved, and every recipe has a meal tag.
+  - Evidence so far (2026-10-04):
+    - Hector approved the whole list (H27). It's written as one transaction in the gitignored `docs/private/tagging-pass-2026-10-04.sql`: the 4 new cuisines (british, caribbean, french, polish) into the catalog, then the 74 recipes whose tags change, matched by title.
+    - Dry run, in an in-memory Postgres with every migration and the 81 recipes' tags as they are today: 4 tags added, 74 recipes changed. Afterwards all 81 have the approved tags and a meal tag, and every tag in use has a group.
+    - Claude's write to production was blocked by Claude Code's permission check, so Hector ran it after migration 0013 (H26), on 2026-10-05.
+    - Read-only check on production afterwards (2026-10-05):
+      - Drizzle's record has 14 migrations, the last with 0013's hash.
+      - The catalog has 7 meal, 13 cuisine and 5 diet tags, the 4 new cuisines among them.
+      - Compared as sets, every one of the 81 recipes' tags equals the approved list, with none missing on either side.
+      - Every recipe has a meal tag, and every tag in use has a group.
+- [x] **P18.3** Search — C · D56
+  - Do:
+    - Listed recipes carry their ingredient names. `matchesSearch` checks every word typed against the title, the tags and those names, ignoring case. Title matches come first.
+    - The same rule runs on the server and as you type, as now.
+  - Verify: unit tests (a word in an ingredient; a tag; two words matched in different places; title matches first) and a screen test of the Recipes page.
+  - Evidence (2026-10-04):
+    - `searchRecipes` (`src/entities/library.ts`) replaces `matchesSearch`. Every word typed must be in the title, a tag or an ingredient's name. Recipes with more of the words in their title come first, otherwise in the list's order. It also ignores accents ("sable" finds "Sablé Cookies"), which wasn't planned: a phone keyboard rarely types them.
+    - `buildLibraryView` and `LibraryResults` both use it, as before.
+    - Listed recipes are `ListedRecipe`: `getBySpace` adds `ingredientNames`, the lines' names as written, in order. All 1,007 lines in production have one (read-only, 2026-10-04). Written names, not the catalog's, because they're what the recipe shows ("black beans", where the catalog has "black bean").
+    - Tests:
+      - Unit tests for each rule.
+      - On both backends, the library lists ingredient names in order and finds a recipe by one.
+      - A first screen test of the Recipes page: typing finds recipes by ingredient and tag, title matches first, and "No recipes match" when one word matches nothing.
+      - The browser flow on the test project searches by ingredient. That confirms Neon's driver returns the names as a list, not text.
+      - Mutations caught: names left out, tags left out, any word instead of every word, no title-first, accents kept, names out of order (Postgres), the mock without names, the page filtering by title only, and the page not reordering.
+    - All 1000 + 35 tests and both flows pass.
+- [x] **P18.4** Group by — C · D57
+  - Do:
+    - A "Group by" choice on Recipes: None (the default), Meal, Cuisine or Diet, kept in `?group=`.
+    - Grouped, the cards sit under headings: meal in the order of a day (breakfast → drink), cuisine alphabetically, diet in D58's order. Other comes last.
+    - A recipe shows under each of its tags in the group.
+  - Verify: unit tests for the grouping, a screen test, and a screenshot at 375 px.
+  - Evidence (2026-10-04):
+    - `groupRecipes` (`src/entities/library.ts`) groups what search shows, so each heading keeps search's order. Meals and diets follow `STARTING_TAGS`' order with any newer tag after them, A to Z; cuisines are A to Z.
+    - The choice is a `NativeSelect` beside the search box, as the app's other pickers are: Not grouped, By meal, By cuisine, By diet. It's in the search form as `group`, so it works before the script loads, and `LibraryResults` keeps `?group=` up to date in place, as it does `?q=`. Tag chips and Clear filters keep the grouping. Headings look like Groceries' aisles.
+    - Tests:
+      - Unit tests: meals in a day's order with a recipe under each of its meals and Other last; cuisines A to Z with a newer one among them; diets in D58's order with a newer one after; the given order kept within a heading.
+      - The Recipes page's screen test groups by meal, then searches while grouped (the address is `?q=rice&group=meal`), then goes back to Not grouped. It also checks that a tag chip keeps the grouping.
+      - Mutations caught: meals not in a day's order, cuisines in the starting list's order, a recipe under only its first tag, Other first, chips dropping the grouping, the address not updated, grouping ignoring the search, and the page not passing the groups.
+    - Screenshots at 375 px on the test project: by meal (server-rendered from `?group=meal`), by cuisine (picked) and not grouped. Taken with a throwaway flow, deleted after.
+- [x] **P18.5** A new tag gets its group — C · D55
+  - Do: the recipe form's tag picker shows the tags under their groups (Meal, Cuisine, Diet, Other). Making a new tag asks its group (or none), and it's saved with the recipe.
+  - Verify: a screen test where a new tag made with a group is saved with it.
+  - Evidence (2026-10-04):
+    - `TagPicker` puts the chips under Meal, Cuisine, Diet and Other (`groupTagChoices`), from the catalog's groups that the form now gets with the library view. New tag has a group picker beside the box (No group, Meal, Cuisine, Diet), and an added tag goes under it straight away (`withNewTag`). It fits on one row at 375 px.
+    - On Save the form sends `tagGroups` (JSON) for its tags the catalog doesn't group. The controllers check it (`tagGroupsSchema`), and `createRecipe` / `updateRecipe` add them through `ITagsRepository.addGroups` in the recipe's transaction, after the access check. Only the recipe's own tags are added, and a tag's existing group never changes (Postgres: `on conflict do nothing`).
+    - The test database: `resetDatabase` now keeps only the migration's rows in `tags`, deleting any a test added.
+    - Tests:
+      - Unit tests for `groupTagChoices` and `withNewTag`.
+      - Controller tests: a group is passed on, and one that isn't a group is turned away.
+      - On both backends:
+        - A new tag gets its group, an existing group stays, and a tag the recipe doesn't have gets nothing.
+        - A viewer's save adds nothing.
+        - An edit's new tag gets its group.
+      - The action test: create and edit save their new tags' groups, and unreadable groups are explained under Tags.
+      - The form's screen test: chips under their groups, a new tag under the group picked, and one with no group under Other.
+      - Saving itself is checked in the browser flow, because a screen test can't follow the save's redirect. The flow makes a cuisine tag new to the catalog each run, saves, and finds Chili under it with Recipes grouped by cuisine.
+      - Mutations caught: create or edit skipping the groups, groups for tags the recipe doesn't have, the mock overwriting a group, Postgres without `on conflict`, the test reset keeping tests' tags, the picker ignoring groups, New tag's group dropped, and either action dropping the groups. In the flow: the form not sending them.
+    - All tests and both flows pass.
 
 ## Phase 19 (planned): Groceries by recipe, like items together, and more units
 
@@ -1834,7 +1928,9 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H22 | Whether to add a DOM test library for component tests | component tests | done 2026-10-01: "sure, do this"; D49, Phase 15 |
 | H23 | Plan has no filled button: Plan a meal and the grocery button are both `secondary` (Phase 13). Is Plan a meal its main action, and so filled (D32)? | L5's last screen | done 2026-10-04: Plan a meal goes and the grocery button is filled (D50, P16.1) |
 | H24 | For P15.7's whole-flow tests in a real browser: which database they write to (a Neon branch for tests, or a local Postgres) and a test account. Claude brings the options and costs. | P15.7 | decided 2026-10-01: try a schema-only Neon branch (tables, no data), so no real accounts are copied; if Neon Auth doesn't work on one, a branch copied from production. Options brought: the app uses Neon's driver and hosted Neon Auth, so a local Postgres would still need Neon Auth or a test-only way past sign-in (ruled out). Each Neon branch has its own Neon Auth users and URL; on the Free plan a project has 10 branches, 3 of them root branches (a schema-only branch is one, 0.5 GB), and compute comes out of the project's 100 CU-hours a month, so $0. Done 2026-10-02, as a separate project rather than a branch: the Neon connector can only branch by copying the parent (no schema-only option), so Claude made `hectors-recipes-test` (same region, Postgres 17, 0.25–0.5 CU) with Neon Auth set up as production's (email and password, no email verification, localhost allowed), and applied migrations 0000–0012 with Drizzle's own record of them (the hashes match production's). Its tables, constraints and indexes match production's; it has no data and no accounts. A project of its own also has its own 100 CU-hours, so tests don't use production's. Hector puts its URLs in the gitignored `.env.test` (Claude's permissions keep it out of env files). |
-| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | 2026-10-04: Hector added it to the main checkout's `.env.test`; the worktree's copy predates it, so it needs copying again |
+| H25 | The AI key in `.env.test` (as in `.env`), so P17's checks can do one real read of each kind on the test project: a few cents each, counted against the test account's daily limit, never Hector's. | P17.2, P17.3 | done 2026-10-04: Hector added it to the main checkout's `.env.test`; Claude copied that into the worktree (its copy predated the key), and the real reads passed |
+| H26 | OK to apply P18.1's additive migration (the `tags` catalog, filled with the existing tags' groups) to production. | P18.1 | done 2026-10-05: OK'd 2026-10-04, but Claude's write was blocked by Claude Code's permission check, so Hector ran `bun run db:migrate` |
+| H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
 
 ## Risks and how they're handled
 
@@ -2041,3 +2137,15 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - The week's slide-in.
   - The real reads wait on the AI key in the worktree's `.env.test` (H25).
   - Next: Hector reviews the PR; H25; then Phase 18.
+- **2026-10-04 (ay)** — Hector merged Phase 17 (hectarek/hector-mono#21).
+  - Its real reads ran after the merge: H25's key was in the main checkout's `.env.test` but not the worktree's copy, so Claude copied it again, and `FLOWS_AI=1` passed.
+  - Phase 18 decided: a tag catalog (D55), search (D56), grouping (D57), the tags and the pass (D58). Planned in detail.
+  - Next: P18.1, then H26.
+- **2026-10-04 (az)** — Hector OK'd migration 0013 for production (H26) and approved the tagging pass's whole list (H27).
+  - Claude Code's permission check blocked Claude's write to production, so Hector runs both. The tagging SQL is ready and passed a dry run (P18.2).
+  - P18.3 done: search reads titles, tags and ingredient names (see its Evidence).
+  - Next: P18.4; P18.2's check once H26 and H27 are run.
+  - P18.4 done: Group by (see its Evidence). Next: P18.5.
+  - P18.5 done: the tag picker's groups, and a new tag's group saved with the recipe (see its Evidence). Phase 18's code is done; its PR waits on P18.2's production writes (H26, H27), since the Recipes page reads `tags`.
+- **2026-10-05 (ba)** — Hector ran migration 0013 and the tagging pass on production (H26, H27). Claude's read-only check matches the approved list (P18.2's Evidence). Phase 18 done.
+  - Next: Phase 18's PR.

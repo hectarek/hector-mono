@@ -3,6 +3,7 @@ import type { IPlanEntriesRepository } from "@/src/application/repositories/plan
 import type { IRecipeReadsRepository } from "@/src/application/repositories/recipe-reads.repository.interface";
 import type { IRecipesRepository } from "@/src/application/repositories/recipes.repository.interface";
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
+import type { ITagsRepository } from "@/src/application/repositories/tags.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRealtimeService } from "@/src/application/services/realtime.service.interface";
@@ -103,6 +104,7 @@ export const DI_SYMBOLS = {
 
   ISpacesRepository: Symbol.for("ISpacesRepository"),
   IRecipesRepository: Symbol.for("IRecipesRepository"),
+  ITagsRepository: Symbol.for("ITagsRepository"),
   IPlanEntriesRepository: Symbol.for("IPlanEntriesRepository"),
   IGroceryItemsRepository: Symbol.for("IGroceryItemsRepository"),
 
@@ -200,6 +202,7 @@ export interface DI_RETURN_TYPES {
 
   ISpacesRepository: ISpacesRepository;
   IRecipesRepository: IRecipesRepository;
+  ITagsRepository: ITagsRepository;
   IPlanEntriesRepository: IPlanEntriesRepository;
   IGroceryItemsRepository: IGroceryItemsRepository;
 

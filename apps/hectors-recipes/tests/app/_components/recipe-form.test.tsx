@@ -3,6 +3,7 @@ import { fireEvent, render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { getInjection } from "@/di/container";
+import type { TagGroups } from "@/src/entities/models/tag.model";
 import { focused } from "@/tests/_support/focus";
 import { signInAsNewUser } from "@/tests/_support/next";
 
@@ -20,12 +21,19 @@ describe("RecipeForm", () => {
     ).id;
   });
 
-  const newRecipe = () =>
+  const newRecipe = ({
+    suggestedTags = [],
+    tagGroups = {},
+  }: {
+    suggestedTags?: string[];
+    tagGroups?: TagGroups;
+  } = {}) =>
     render(
       <RecipeForm
         mode="create"
         heading="New recipe"
-        suggestedTags={[]}
+        suggestedTags={suggestedTags}
+        tagGroups={tagGroups}
         spaceId={bookId}
         books={[{ id: bookId, name: "Soups" }]}
         cancelHref="/"
@@ -73,6 +81,39 @@ describe("RecipeForm", () => {
         .getAttribute("aria-pressed"),
     ).toBe("true");
     expect(focused()).toBe("New tag");
+  });
+
+  // D55: the chips sit under their groups, and a tag made here goes under the group picked.
+  // Saving it with the recipe is in the action's test and the browser flow: a save redirects,
+  // which a screen test can't follow.
+  it("shows the tags under their groups, and a new tag under the group picked for it", async () => {
+    const user = userEvent.setup();
+    const view = newRecipe({
+      suggestedTags: ["dinner", "quick", "italian"],
+      tagGroups: { dinner: "meal", italian: "cuisine" },
+    });
+    const chips = (group: string) =>
+      within(view.getByRole("group", { name: group }))
+        .getAllByRole("button")
+        .map((chip) => chip.textContent);
+    expect(chips("Meal")).toEqual(["dinner"]);
+    expect(chips("Cuisine")).toEqual(["italian"]);
+    expect(chips("Other")).toEqual(["quick"]);
+
+    await user.click(view.getByRole("button", { name: "New tag" }));
+    await user.keyboard("Brunch");
+    await user.selectOptions(
+      view.getByRole("combobox", { name: "New tag's group" }),
+      "Meal",
+    );
+    await user.click(view.getByRole("button", { name: "Add" }));
+    expect(chips("Meal")).toEqual(["dinner", "brunch"]);
+    expect(focused()).toBe("New tag");
+
+    // With no group picked, it's under Other.
+    await user.click(view.getByRole("button", { name: "New tag" }));
+    await user.keyboard("sheet pan{Enter}");
+    expect(chips("Other")).toEqual(["quick", "sheet pan"]);
   });
 
   // P14.7: a paste that brings its own sections puts the rows after it back in theirs.

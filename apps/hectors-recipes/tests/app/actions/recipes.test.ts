@@ -73,6 +73,44 @@ describe("recipe actions", () => {
     expect(nextState.revalidated).toContain("/");
   });
 
+  // D55: a tag made in the form is saved with the group picked for it. The container's
+  // catalog lasts the whole run, so the tag is new to it.
+  it("saves a new tag's group with the recipe, and explains groups it can't read", async () => {
+    const tag = `brunch ${crypto.randomUUID().slice(0, 8)}`;
+    const recipe = {
+      spaceId: bookId,
+      title: "Hash",
+      ingredients: rows([{ raw: "2 potatoes" }]),
+      tags: tag,
+    };
+    const id = await create({
+      ...recipe,
+      tagGroups: JSON.stringify({ [tag]: "meal" }),
+    });
+    // And one made while editing.
+    const edited = `keto ${crypto.randomUUID().slice(0, 8)}`;
+    await updateRecipe(
+      null,
+      form({
+        ...recipe,
+        recipeId: id,
+        tags: `${tag}, ${edited}`,
+        tagGroups: JSON.stringify({ [edited]: "diet" }),
+      }),
+    ).catch((err) => expect(err).toBeInstanceOf(Redirected));
+    const { tagGroups } = await getInjection("IGetAllRecipesController")(
+      {},
+      USER_ID,
+    );
+    expect(tagGroups[tag]).toBe("meal");
+    expect(tagGroups[edited]).toBe("diet");
+
+    const state = await createRecipe(null, form({ ...recipe, tagGroups: "{" }));
+    expect(state?.fields?.["tags"]).toBe(
+      "Couldn't read the tags' groups. Try again.",
+    );
+  });
+
   // `fields` puts each message under the field it's about; `error` is the one-line summary.
   it("explains what's wrong, field by field, instead of saving", async () => {
     const base = {
