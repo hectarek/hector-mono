@@ -1,8 +1,14 @@
+import { randomUUID } from "node:crypto";
 import { and, asc, eq, max, sql } from "drizzle-orm";
-import { groceryItems, ingredients } from "@/db/schema";
+import {
+  groceryItemRecipes,
+  groceryItems,
+  ingredients,
+  recipes,
+} from "@/db/schema";
 import type { IGroceryItemsRepository } from "@/src/application/repositories/grocery-items.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
-import type { GroceryChanges } from "@/src/entities/grocery-merge";
+import type { GroceryChanges, ItemRecipe } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
@@ -15,7 +21,17 @@ const itemColumns = {
   quantity: groceryItems.quantity,
   unit: groceryItems.unit,
   ingredientId: groceryItems.ingredientId,
-  sourceNote: groceryItems.sourceNote,
+  // Its recipes A to Z, with their titles as they are now (D59).
+  recipes: sql<ItemRecipe[]>`coalesce((
+    select json_agg(json_build_object(
+      'recipeId', ${recipes.id},
+      'title', ${recipes.title},
+      'quantity', ${groceryItemRecipes.quantity}
+    ) order by ${recipes.title})
+    from ${groceryItemRecipes}
+    join ${recipes} on ${recipes.id} = ${groceryItemRecipes.recipeId}
+    where ${groceryItemRecipes.itemId} = ${groceryItems.id}
+  ), '[]')`,
   createdAt: groceryItems.createdAt,
   aisle: ingredients.aisle,
 };
@@ -83,34 +99,59 @@ export class GroceryItemsRepository
     tx: ITransaction,
   ): Promise<void> {
     const executor = this.getDbContext(tx);
+    // Ids made here, so each new item's recipe links can name it.
+    const inserts = changes.inserts.map((item) => ({
+      ...item,
+      id: randomUUID(),
+    }));
     try {
-      if (changes.inserts.length) {
+      if (inserts.length) {
         // One insert shares a single now(); step the timestamps so a recipe's
         // ingredients keep their order on the list (it's sorted by created_at).
         const start = await this.nextCreatedAt(executor, spaceId);
         await executor.insert(groceryItems).values(
-          changes.inserts.map((item, index) => ({
-            ...item,
+          inserts.map(({ id, text, quantity, unit, ingredientId }, index) => ({
+            id,
+            text,
+            quantity,
+            unit,
+            ingredientId,
             spaceId,
             createdBy,
             createdAt: new Date(start + index),
           })),
         );
       }
+      // Only items on this list are updated, and only those get links.
+      const updated = [];
       for (const update of changes.updates) {
-        await executor
+        const [row] = await executor
           .update(groceryItems)
-          .set({
-            text: update.text,
-            quantity: update.quantity,
-            sourceNote: update.sourceNote,
-          })
+          .set({ text: update.text, quantity: update.quantity })
           .where(
             and(
               eq(groceryItems.id, update.id),
               eq(groceryItems.spaceId, spaceId),
             ),
-          );
+          )
+          .returning({ id: groceryItems.id });
+        if (row) updated.push(update);
+      }
+      const links = [...inserts, ...updated].flatMap((item) =>
+        item.recipes.map(({ recipeId, quantity }) => ({
+          itemId: item.id,
+          recipeId,
+          quantity,
+        })),
+      );
+      if (links.length) {
+        await executor
+          .insert(groceryItemRecipes)
+          .values(links)
+          .onConflictDoUpdate({
+            target: [groceryItemRecipes.itemId, groceryItemRecipes.recipeId],
+            set: { quantity: sql`excluded.quantity` },
+          });
       }
     } catch (err) {
       this.handleError(err, "applyChanges", { spaceId });

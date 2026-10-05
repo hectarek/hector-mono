@@ -2,16 +2,21 @@ import type { IGroceryItemsRepository } from "@/src/application/repositories/gro
 import type { GroceryChanges } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
 
+// An item's recipes keep the titles they were added with: with no recipes of its own, the mock
+// can't show a rename (the Postgres tests do).
 export class MockGroceryItemsRepository implements IGroceryItemsRepository {
   private items: GroceryItem[] = [];
   private sequence = 0;
 
   async list(spaceId: string): Promise<GroceryItem[]> {
-    return this.items.filter((item) => item.spaceId === spaceId);
+    return this.items
+      .filter((item) => item.spaceId === spaceId)
+      .map(withRecipesSorted);
   }
 
   async getById(id: string): Promise<GroceryItem | undefined> {
-    return this.items.find((item) => item.id === id);
+    const item = this.items.find((candidate) => candidate.id === id);
+    return item && withRecipesSorted(item);
   }
 
   async addText(spaceId: string, text: string): Promise<void> {
@@ -20,7 +25,7 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
       quantity: null,
       unit: null,
       ingredientId: null,
-      sourceNote: null,
+      recipes: [],
     });
   }
 
@@ -64,6 +69,14 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
     return before - this.items.length;
   }
 
+  // Tests pass it as the mock recipes' onDelete, standing in for the link's cascade.
+  unlinkRecipe(recipeId: string): void {
+    this.items = this.items.map((item) => ({
+      ...item,
+      recipes: item.recipes.filter((recipe) => recipe.recipeId !== recipeId),
+    }));
+  }
+
   async deleteAll(spaceId: string): Promise<number> {
     const before = this.items.length;
     this.items = this.items.filter((item) => item.spaceId !== spaceId);
@@ -81,4 +94,12 @@ export class MockGroceryItemsRepository implements IGroceryItemsRepository {
       aisle: null,
     });
   }
+}
+
+// The order Postgres gives them: A to Z by title.
+function withRecipesSorted(item: GroceryItem): GroceryItem {
+  return {
+    ...item,
+    recipes: [...item.recipes].sort((a, b) => a.title.localeCompare(b.title)),
+  };
 }

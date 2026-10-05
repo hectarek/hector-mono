@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: planned, P19.1 next. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | P19.1 (items know their recipes). |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: P19.1 done. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
+| Next task | P19.2 (By recipe). |
+| Waiting on Hector | Running migration 0014 on production before Phase 19's PR merges (H28); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-05 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1848,7 +1848,7 @@ Starting point, 2026-10-05, read-only on production:
 
 One commit per task; the PR when the phase is done.
 
-- [ ] **P19.1** Items know their recipes — C+H · D59, L7
+- [x] **P19.1** Items know their recipes — C+H · D59, L7
   - Do:
     - An additive migration adds `grocery_item_recipes`: `item_id` (cascade with the item), `recipe_id` (cascade with the recipe; the item stays), `quantity` (this recipe's share, in the item's unit; null for an amount-less line), keyed by both ids.
     - Adding recipe lines links every item it inserts, merges into or skips to the recipe. A merge adds to that recipe's share.
@@ -1861,6 +1861,27 @@ One commit per task; the PR when the phase is done.
       - A renamed recipe is too, and two recipes with one title count apart.
       - A merged item links both recipes with their shares.
     - A Postgres test that deleting a recipe keeps its items.
+  - Evidence (2026-10-05):
+    - Migration 0014 adds `grocery_item_recipes` (both keys cascade, an index on `recipe_id`). An item carries `recipes: ItemRecipe[]` (id, title, share) in place of `sourceNote`.
+    - `planGroceryBatch` links each item it inserts, merges into or skips to the line's recipe (`withRecipe`), adding to that recipe's share. `recipesOnList` gives ids, and both adds compare ids.
+    - The Postgres repository reads each item's recipes with their current titles, A to Z (a `json_agg` subquery). It writes links with `on conflict` updating the share, and only for items the update found on the list being written, the guard updates already had.
+    - The mock keeps the title an item was added with, as it has no recipes (renames are tested on Postgres). It drops a deleted recipe's links when `makeApp`'s mock recipes delete one.
+    - "for …" on the row and in the item's sheet is `recipeTitles(item)`.
+    - Tests:
+      - The planner: shares in a batch, and a recipe added again adding to its share.
+      - On both backends:
+        - A merged item links both recipes with their shares.
+        - A recipe added again adds to its share.
+        - A recipe with a comma in its title, or renamed, is still on the list.
+        - Two recipes with one title count apart.
+      - On Postgres:
+        - A renamed recipe shows its new title.
+        - A deleted recipe's items stay.
+        - An update can't link another list's item.
+      - The existing grocery tests read "for …" from the links unchanged.
+      - Mutations caught: matching by title again (only the new tests fail, so they're the ones that catch L7), a share that doesn't add up, Postgres keeping an old share (caught after a test was added for it), links for another list's item, and no links for updates.
+    - Applied to the test project by Claude, with Drizzle's record of it (15 migrations). The browser flows pass on it, and their "1 lb ground turkey for Chili" now comes from the links.
+    - All 1025 + 37 tests pass. Production waits on H28.
 - [ ] **P19.2** By recipe — C · D60
   - Do:
     - `groupByRecipe` puts what's left to buy under each recipe it's for, at that recipe's amount (the item's text when it has no share), and hand-typed items last.
@@ -1946,9 +1967,11 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
     - `requireOwner`, `requireItemEditor` and `requireEntryEditor` take the write's `tx`, required, since only writes use them. The repository methods these writes call take an optional `tx`, like the rest. The DI modules and `makeApp()` pass the transaction manager in.
     - Tests first: viewers can't remove an item, clear checked or remove a meal, and an editor can't remove someone else (both backends; they passed before and still end in `UnauthorizedError` inside a transaction, not "Transaction failed"); and `ensureInviteLinks` leaves no link behind when the second fails (Postgres), which failed before the change and passes after. A read left without `tx` would hang the `[postgres]` runs; none does.
     - 953 tests pass (944 before), and `bun check` and `bun ts` are clean. AGENTS.md says the three helpers take `tx`.
-- [ ] **L7** Grocery items know their recipe — C+H · D45 · now P19.1 (D59)
+- [x] **L7** Grocery items know their recipe — C+H · D45 · done in P19.1 (D59)
   - From P14.13's "left as they are": the no-double rule finds a recipe on the list by the title in its items' "for …" notes. A recipe renamed since it was added isn't recognised (its items are bought again), and two recipes with the same title count as one (a planned one is taken as on the list when the other is).
   - The fix is a nullable recipe id on grocery items (an additive migration, so Hector's OK first), set when a recipe's lines go on, and the rule matching by it.
+- [ ] **L8** Drop `grocery_items.source_note` — C+H · D59
+  - P19.1 stopped reading and writing it. Once that's deployed: take it out of `db/schema.ts` and deploy, then a migration drops it (two deploys, as for `plan_entries.eaten`). Hector runs the drop.
 
 ## Needs from Hector (live list)
 

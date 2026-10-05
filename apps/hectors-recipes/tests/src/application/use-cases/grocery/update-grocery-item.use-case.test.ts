@@ -12,11 +12,8 @@ describeEachBackend("updateGroceryItem", () => {
     await g.app.updateGroceryItem(garlic?.id ?? "", "1 head garlic", OWNER);
 
     const [edited] = await g.app.getGroceryList(g.planId, OWNER);
-    expect(edited).toMatchObject({
-      id: garlic?.id,
-      text: "1 head garlic",
-      sourceNote: "Chili",
-    });
+    expect(edited?.id).toBe(garlic?.id ?? "");
+    expect((await g.texts())[0]).toEqual(["1 head garlic", "Chili"]);
   });
 
   // An edited line is like one typed in: it has no parsed amount, so a later recipe

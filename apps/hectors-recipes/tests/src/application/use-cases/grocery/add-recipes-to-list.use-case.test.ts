@@ -108,3 +108,68 @@ describeEachBackend("addRecipesToList", () => {
     ).rejects.toBeInstanceOf(UnauthorizedError);
   });
 });
+
+// D59, L7: the list knows a recipe by its id, not its title.
+describeEachBackend("addRecipesToList, recipes by id", () => {
+  let g: GroceryFixture;
+
+  beforeEach(async () => {
+    g = await groceryFixture();
+  });
+
+  it("links a merged item to each recipe, with each one's share", async () => {
+    await g.app.addRecipesToList(
+      g.planId,
+      [{ recipeId: g.chiliId }, { recipeId: g.tacosId }],
+      OWNER,
+    );
+    const [garlic] = await g.app.getGroceryList(g.planId, OWNER);
+    expect(garlic?.recipes).toEqual([
+      { recipeId: g.chiliId, title: "Chili", quantity: 2 },
+      { recipeId: g.tacosId, title: "Tacos", quantity: 4 },
+    ]);
+  });
+
+  it("adds to a recipe's share when it's added again", async () => {
+    await g.app.addRecipesToList(g.planId, [{ recipeId: g.chiliId }], OWNER);
+    await g.app.addRecipesToList(g.planId, [{ recipeId: g.chiliId }], OWNER, {
+      again: true,
+    });
+    const [garlic] = await g.app.getGroceryList(g.planId, OWNER);
+    expect(garlic?.recipes).toEqual([
+      { recipeId: g.chiliId, title: "Chili", quantity: 4 },
+    ]);
+  });
+
+  it("knows a recipe whose title has a comma, or has changed since", async () => {
+    const salad = (
+      await g.app.newRecipe(g.bookId, {
+        title: "White Bean, Potato Salad",
+        ingredients: [{ raw: "1 can white beans" }],
+      })
+    ).id;
+    const both = [{ recipeId: salad }, { recipeId: g.chiliId }];
+    await g.app.addRecipesToList(g.planId, both, OWNER);
+    await g.app.updateRecipe(g.chiliId, { title: "Turkey Chili" }, OWNER);
+
+    expect(await g.app.addRecipesToList(g.planId, both, OWNER)).toMatchObject({
+      added: 0,
+      merged: 0,
+      alreadyAdded: 2,
+    });
+  });
+
+  it("counts two recipes with one title apart", async () => {
+    const otherChili = (
+      await g.app.newRecipe(g.bookId, {
+        title: "Chili",
+        ingredients: [{ raw: "2 cups beans" }],
+      })
+    ).id;
+    await g.app.addRecipesToList(g.planId, [{ recipeId: g.chiliId }], OWNER);
+
+    expect(
+      await g.app.addRecipesToList(g.planId, [{ recipeId: otherChili }], OWNER),
+    ).toMatchObject({ added: 1, alreadyAdded: 0 });
+  });
+});

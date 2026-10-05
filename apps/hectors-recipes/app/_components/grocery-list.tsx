@@ -20,6 +20,7 @@ import { usePendingWrites } from "@/app/_lib/use-pending-writes";
 import { addGroceryItem, clearCheckedItems } from "@/app/actions/grocery";
 import type { ActionState } from "@/app/actions/shared";
 import { groupByAisle } from "@/src/entities/aisles";
+import { recipeTitles } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
 
 // How long a checked row stays readable before folding away, and the fold itself.
@@ -78,6 +79,7 @@ function ItemRow({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState<string>();
   const [, startTransition] = useTransition();
+  const forRecipes = recipeTitles(item);
   const rowRef = useRef<HTMLLIElement>(null);
   const settleTimer = useRef<number>(undefined);
   // The state the row was shown in when first tapped; tapping back to it cancels the move.
@@ -177,9 +179,9 @@ function ItemRow({
             >
               {item.text}
             </span>
-            {item.sourceNote && (
+            {forRecipes && (
               <span className="text-muted-foreground truncate text-xs">
-                for {item.sourceNote}
+                for {forRecipes}
               </span>
             )}
             {unsaved && (

@@ -49,7 +49,7 @@ export const addPlanToListUseCase = (
   });
 
   // The recipes whose unchecked items on the list came from adding the recipe on its own
-  // (D45): on the list by title, with no planned meal of them added and still to cook.
+  // (D45): on the list, with no planned meal of them added and still to cook.
   async function coveredByList(
     planId: string,
     recipes: { id: string; title: string }[],
@@ -62,9 +62,7 @@ export const addPlanToListUseCase = (
     );
     return new Set(
       recipes
-        .filter(
-          (recipe) => onList.has(recipe.title) && !fromPlan.has(recipe.id),
-        )
+        .filter((recipe) => onList.has(recipe.id) && !fromPlan.has(recipe.id))
         .map((recipe) => recipe.id),
     );
   }
