@@ -127,6 +127,7 @@ Branches and PRs:
 - branches start from `main` and are named `type/short-topic` (e.g. `feat/recipes-ux-p9-itemized`, `docs/public-repo-followups`); an agent's branch is its worktree's (see **Working in parallel**)
 - one PR per topic or plan phase, titled in the commit format, its description following `.github/pull_request_template.md`
 - agents open PRs from their worktree branch; Hector merges. PRs merge with a merge commit (squash and rebase are off), which keeps each task's commit, and the branch is deleted on merge
+- after opening a PR that changes code, build its [Whiteboard](https://dev.fast) for Hector's review: `session_create` with the PR's `pullRequestUrl`, then author it by Whiteboard's own `session_get_instructions`, not from memory. It opens in Whiteboard Desktop. After pushing more commits to that PR, update the same board (`session_create` with the URL returns it) rather than making another. Docs- or config-only PRs skip it unless asked, and so does any agent without the Whiteboard MCP tools (Hector's user-level `whiteboard@devfast` Claude Code plugin)
 
 ### Working in parallel
 Hector runs several Claude Code sessions at once, so each agent does its branch and PR work in its own git worktree ([Claude Code: worktrees](https://code.claude.com/docs/en/worktrees)):

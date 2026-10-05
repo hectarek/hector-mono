@@ -33,7 +33,7 @@ The "harness" — everything around the model — matters as much as the model. 
 | **Skills** | On-demand expertise for a repeated multi-step workflow. | ✅ `.claude/skills/new-app` (adding an app to the monorepo). Add one when a workflow repeats. |
 | **LSP** | Symbol-level navigation. | From the editor; agents navigate by search and by reading files. |
 | **Subagents** | Isolated context for explore-vs-edit splits. | Use a subagent (Claude Code's Agent tool) for broad exploration; edit in the main session. |
-| **MCP** | Connections to external tools/data. | None tracked in the repo (no `.mcp.json`). Hector's Neon, Vercel and GitHub servers are his user-level setup, so another clone won't have them. Build only after the basics are solid. |
+| **MCP** | Connections to external tools/data. | None tracked in the repo (no `.mcp.json`). Hector's Neon, Vercel and GitHub servers are his user-level setup, so another clone won't have them. So is Whiteboard (the `whiteboard@devfast` plugin, installed with `whiteboard connect claude`), which agents use to build a review board for each code PR (root `AGENTS.md`, "Branches and PRs"). Build only after the basics are solid. |
 
 Cursor's setup (`.cursor/`, `.cursorignore`) was retired on 2026-10-01, since Claude Code is the agent used here; Cursor and Codex still read `AGENTS.md`.
 
