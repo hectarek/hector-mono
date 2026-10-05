@@ -16,4 +16,8 @@ export class MockTagsRepository implements ITagsRepository {
   async listGroups(): Promise<TagGroups> {
     return { ...this.groups };
   }
+
+  async addGroups(groups: TagGroups): Promise<void> {
+    this.groups = { ...groups, ...this.groups };
+  }
 }

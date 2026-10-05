@@ -9,10 +9,12 @@ import {
   type RecipeWithIngredients,
   updateRecipeSchema,
 } from "@/src/entities/models/recipe.model";
+import { tagGroupsSchema } from "@/src/entities/models/tag.model";
 
 const inputSchema = z.object({
   recipeId: z.uuid(),
   data: updateRecipeSchema,
+  tagGroups: tagGroupsSchema.optional(),
 });
 
 export type IUpdateRecipeController = ReturnType<typeof updateRecipeController>;
@@ -44,6 +46,11 @@ export const updateRecipeController = (
       throw new InputParseError("Invalid recipe data", { cause: parseError });
     }
 
-    return updateRecipeUseCase(data.recipeId, data.data, userId);
+    return updateRecipeUseCase(
+      data.recipeId,
+      data.data,
+      userId,
+      data.tagGroups,
+    );
   };
 };

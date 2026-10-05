@@ -2,26 +2,47 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@repo/ui/components/native-select";
 import { cn } from "@repo/ui/lib/utils";
 import { Check, Plus } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef } from "react";
-import { addTags, tagChoices, toggleTag } from "@/app/_lib/tag-choices";
+import {
+  groupTagChoices,
+  type NewTag,
+  tagChoices,
+  toggleTag,
+  withNewTag,
+} from "@/app/_lib/tag-choices";
+import {
+  isTagCategory,
+  TAG_CATEGORIES,
+  TAG_CATEGORY_LABELS,
+  type TagGroups,
+} from "@/src/entities/models/tag.model";
 
 // The recipe form's tags (docs/ux-plan.md D33): the book's tags and the recipe's own as chips,
-// and New tag for one that isn't there. The form holds `newTag` (null while the box is closed)
-// so a tag typed but not yet added still saves.
+// under their groups (D55), and New tag for one that isn't there, with a group to give it. The
+// form holds `newTag` (null while the box is closed) so a tag typed but not yet added still
+// saves, and `groups`, the catalog's plus any given here.
 export function TagPicker({
   suggested,
   chosen,
   onChosenChange,
+  groups,
+  onGroupsChange,
   newTag,
   onNewTagChange,
 }: {
   suggested: string[];
   chosen: string[];
   onChosenChange: (tags: string[]) => void;
-  newTag: string | null;
-  onNewTagChange: (text: string | null) => void;
+  groups: TagGroups;
+  onGroupsChange: (groups: TagGroups) => void;
+  newTag: NewTag | null;
+  onNewTagChange: (newTag: NewTag | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const newTagRef = useRef<HTMLButtonElement>(null);
@@ -44,7 +65,9 @@ export function TagPicker({
   }
 
   function add() {
-    onChosenChange(addTags(chosen, newTag ?? ""));
+    const next = withNewTag(chosen, groups, newTag);
+    onGroupsChange(next.groups);
+    onChosenChange(next.chosen);
     close();
   }
 
@@ -62,40 +85,71 @@ export function TagPicker({
     }
   }
 
+  function chip(tag: string) {
+    const isChosen = chosen.includes(tag);
+    return (
+      <button
+        key={tag}
+        type="button"
+        aria-pressed={isChosen}
+        onClick={() => onChosenChange(toggleTag(chosen, tag))}
+        className={cn(
+          "flex h-9 items-center gap-1 rounded-full border px-3 text-sm font-medium transition-colors",
+          isChosen
+            ? "bg-secondary text-secondary-foreground border-transparent"
+            : "hover:bg-muted",
+        )}
+      >
+        {isChosen && <Check className="size-3.5" aria-hidden />}
+        {tag}
+      </button>
+    );
+  }
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {tagChoices(suggested, chosen).map((tag) => {
-        const isChosen = chosen.includes(tag);
-        return (
-          <button
-            key={tag}
-            type="button"
-            aria-pressed={isChosen}
-            onClick={() => onChosenChange(toggleTag(chosen, tag))}
-            className={cn(
-              "flex h-9 items-center gap-1 rounded-full border px-3 text-sm font-medium transition-colors",
-              isChosen
-                ? "bg-secondary text-secondary-foreground border-transparent"
-                : "hover:bg-muted",
-            )}
-          >
-            {isChosen && <Check className="size-3.5" aria-hidden />}
-            {tag}
-          </button>
-        );
-      })}
+    <div className="flex flex-col gap-3">
+      {groupTagChoices(tagChoices(suggested, chosen), groups).map(
+        ({ category, tags }) => (
+          <fieldset key={category ?? "other"}>
+            <legend className="text-muted-foreground mb-1.5 text-xs font-semibold tracking-wide uppercase">
+              {category ? TAG_CATEGORY_LABELS[category] : "Other"}
+            </legend>
+            <div className="flex flex-wrap gap-2">{tags.map(chip)}</div>
+          </fieldset>
+        ),
+      )}
       {isAdding ? (
-        <div className="flex w-full gap-2">
+        <div className="flex w-full flex-wrap gap-2">
           <Input
             ref={inputRef}
-            value={newTag}
-            onChange={(event) => onNewTagChange(event.target.value)}
+            value={newTag.text}
+            onChange={(event) =>
+              onNewTagChange({ ...newTag, text: event.target.value })
+            }
             onKeyDown={onKeyDown}
             aria-label="New tag"
             placeholder="New tag"
             autoComplete="off"
             className="min-w-0 flex-1"
           />
+          <NativeSelect
+            aria-label="New tag's group"
+            value={newTag.group ?? ""}
+            onChange={(event) => {
+              const group = event.target.value;
+              onNewTagChange({
+                ...newTag,
+                group: isTagCategory(group) ? group : undefined,
+              });
+            }}
+          >
+            <NativeSelectOption value="">No group</NativeSelectOption>
+            {TAG_CATEGORIES.map((category) => (
+              <NativeSelectOption key={category} value={category}>
+                {TAG_CATEGORY_LABELS[category]}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
           <Button type="button" variant="secondary" size="lg" onClick={add}>
             Add
           </Button>
@@ -104,8 +158,8 @@ export function TagPicker({
         <button
           ref={newTagRef}
           type="button"
-          onClick={() => onNewTagChange("")}
-          className="text-muted-foreground hover:bg-muted flex h-9 items-center gap-1 rounded-full border border-dashed px-3 text-sm font-medium transition-colors"
+          onClick={() => onNewTagChange({ text: "", group: undefined })}
+          className="text-muted-foreground hover:bg-muted flex h-9 w-fit items-center gap-1 rounded-full border border-dashed px-3 text-sm font-medium transition-colors"
         >
           <Plus className="size-3.5" aria-hidden />
           New tag

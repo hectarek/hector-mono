@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // What a tag says about a recipe (docs/ux-plan.md D55): its meal, its cuisine, or a diet it
 // suits. Readable values, as aisles are. A tag with none of these has no group.
 export const TAG_CATEGORIES = ["meal", "cuisine", "diet"] as const;
@@ -15,6 +17,19 @@ export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
 
 // Each grouped tag's group, by its name as recipes store it.
 export type TagGroups = Record<string, TagCategory>;
+
+// New tags' groups, as the recipe form sends them with the recipe (D55).
+export const tagGroupsSchema = z.record(z.string(), z.enum(TAG_CATEGORIES));
+
+// The groups given for these tags, leaving out any other.
+export function groupsFor(tags: string[], groups: TagGroups): TagGroups {
+  return Object.fromEntries(
+    tags.flatMap((tag) => {
+      const group = groups[tag];
+      return group ? [[tag, group]] : [];
+    }),
+  );
+}
 
 // The tags the catalog starts with (D58), each group in its order: a day's meals, cuisines A to
 // Z, then diets. The migration that makes the catalog adds the same ones.

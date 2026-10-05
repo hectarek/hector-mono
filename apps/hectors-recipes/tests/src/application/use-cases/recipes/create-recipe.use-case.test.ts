@@ -1,5 +1,11 @@
 import { expect, it } from "bun:test";
-import { describeEachBackend, makeApp, OWNER } from "@/tests/_support/app";
+import { UnauthorizedError } from "@/src/entities/errors/common";
+import {
+  describeEachBackend,
+  makeApp,
+  OWNER,
+  PARTNER,
+} from "@/tests/_support/app";
 
 describeEachBackend("createRecipe", () => {
   it("stores the parsed quantity, unit and ingredient alongside the raw line", async () => {
@@ -100,5 +106,47 @@ describeEachBackend("createRecipe", () => {
       ["Fry the garlic.", 1, "Garlic oil"],
       ["Season.", null, null],
     ]);
+  });
+});
+
+// D55: a tag made in the form is saved with its group, in the recipe's transaction.
+describeEachBackend("createRecipe, new tags' groups", () => {
+  it("gives a new tag its group, leaving an existing group and other tags alone", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    await app.createRecipe(
+      {
+        title: "Shakshuka",
+        tags: ["brunch", "dinner", "weeknight"],
+        ingredients: [{ raw: "6 eggs" }],
+      },
+      bookId,
+      OWNER,
+      { brunch: "meal", dinner: "diet", texan: "cuisine" },
+    );
+
+    const { tagGroups } = await app.getRecipes(bookId, OWNER);
+    expect(tagGroups["brunch"]).toBe("meal");
+    expect(tagGroups["dinner"]).toBe("meal");
+    expect(tagGroups["weeknight"]).toBeUndefined();
+    // Not one of the recipe's tags.
+    expect(tagGroups["texan"]).toBeUndefined();
+  });
+
+  it("adds no group when a viewer's save is turned away", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    await app.join(bookId, PARTNER, "viewer");
+    await expect(
+      app.createRecipe(
+        { title: "x", tags: ["brunch"], ingredients: [{ raw: "1 egg" }] },
+        bookId,
+        PARTNER,
+        { brunch: "meal" },
+      ),
+    ).rejects.toBeInstanceOf(UnauthorizedError);
+
+    const { tagGroups } = await app.getRecipes(bookId, OWNER);
+    expect(tagGroups["brunch"]).toBeUndefined();
   });
 });

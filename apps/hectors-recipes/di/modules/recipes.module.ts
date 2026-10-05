@@ -43,13 +43,22 @@ export function createRecipesModule() {
     DI_SYMBOLS.ILoggerService,
   ];
 
+  // Saving a recipe also gives its new tags their groups.
+  const saveDeps = [
+    DI_SYMBOLS.IRecipesRepository,
+    DI_SYMBOLS.ITagsRepository,
+    DI_SYMBOLS.ISpacesRepository,
+    DI_SYMBOLS.ITransactionManagerService,
+    DI_SYMBOLS.ILoggerService,
+  ];
+
   recipesModule
     .bind(DI_SYMBOLS.ICreateRecipeUseCase)
-    .toHigherOrderFunction(createRecipeUseCase, writeDeps);
+    .toHigherOrderFunction(createRecipeUseCase, saveDeps);
 
   recipesModule
     .bind(DI_SYMBOLS.IUpdateRecipeUseCase)
-    .toHigherOrderFunction(updateRecipeUseCase, writeDeps);
+    .toHigherOrderFunction(updateRecipeUseCase, saveDeps);
 
   recipesModule
     .bind(DI_SYMBOLS.IDeleteRecipeUseCase)

@@ -54,6 +54,14 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await page
     .getByRole("textbox", { name: "Step 1" })
     .fill("Brown the turkey, then simmer.");
+  // D55: a new tag made with its group. New to the shared catalog each run, as the account is.
+  const cuisine = `texmex ${crypto.randomUUID().slice(0, 6)}`;
+  await page.getByRole("button", { name: "New tag" }).click();
+  await page.getByRole("textbox", { name: "New tag" }).fill(cuisine);
+  await page
+    .getByRole("combobox", { name: "New tag's group" })
+    .selectOption("Cuisine");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
 
   await expect(page.getByRole("heading", { name: "Chili" })).toBeVisible();
@@ -119,4 +127,15 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await expect(page.getByRole("link", { name: /Chili/ })).toBeVisible();
   await search.fill("turkey beef");
   await expect(page.getByText("No recipes match")).toBeVisible();
+
+  // D57: grouped by cuisine, it's under the tag made for it.
+  await search.fill("");
+  await page
+    .getByRole("combobox", { name: "Group by" })
+    .selectOption("By cuisine");
+  await expect(
+    page
+      .getByRole("region", { name: cuisine })
+      .getByRole("link", { name: /Chili/ }),
+  ).toBeVisible();
 });

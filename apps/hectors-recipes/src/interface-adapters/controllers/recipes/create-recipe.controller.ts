@@ -9,10 +9,12 @@ import {
   createRecipeSchema,
   type RecipeWithIngredients,
 } from "@/src/entities/models/recipe.model";
+import { tagGroupsSchema } from "@/src/entities/models/tag.model";
 
 const inputSchema = z.object({
   spaceId: z.uuid(),
   data: createRecipeSchema,
+  tagGroups: tagGroupsSchema.optional(),
 });
 
 export type ICreateRecipeController = ReturnType<typeof createRecipeController>;
@@ -44,6 +46,6 @@ export const createRecipeController = (
       throw new InputParseError("Invalid recipe data", { cause: parseError });
     }
 
-    return createRecipeUseCase(data.data, data.spaceId, userId);
+    return createRecipeUseCase(data.data, data.spaceId, userId, data.tagGroups);
   };
 };

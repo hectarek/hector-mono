@@ -169,11 +169,11 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     updateMemberRole: updateMemberRoleUseCase(spaces, transactions, log),
     removeMember: removeMemberUseCase(spaces, transactions, log),
 
-    createRecipe: createRecipeUseCase(recipes, spaces, transactions, log),
+    createRecipe: createRecipeUseCase(recipes, tags, spaces, transactions, log),
     getRecipe: getRecipeUseCase(recipes, spaces, log),
     getRecipes: getRecipesUseCase(recipes, tags, spaces, log),
     getAllRecipes: getAllRecipesUseCase(recipes, tags, spaces, log),
-    updateRecipe: updateRecipeUseCase(recipes, spaces, transactions, log),
+    updateRecipe: updateRecipeUseCase(recipes, tags, spaces, transactions, log),
     deleteRecipe: deleteRecipeUseCase(recipes, spaces, transactions, log),
     adoptRecipes: adoptRecipesUseCase(recipes, spaces, transactions, log),
 

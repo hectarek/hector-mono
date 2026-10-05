@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1, P18.3 and P18.4 done, P18.2 waiting on production. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P18.5 (a new tag gets its group). P18.2's check once Hector has run H26 and H27 on production. |
+| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1, P18.3, P18.4 and P18.5 done, P18.2 waiting on production. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | P18.2's check once Hector has run H26 and H27 on production, then the phase's PR. |
 | Waiting on Hector | Running migration 0013 (H26), then the tagging pass's SQL (H27), on production: both approved, but Claude Code's permission check blocks Claude's writes to production; real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
@@ -1801,9 +1801,25 @@ One commit per task; the PR when the phase is done.
       - The Recipes page's screen test groups by meal, then searches while grouped (the address is `?q=rice&group=meal`), then goes back to Not grouped. It also checks that a tag chip keeps the grouping.
       - Mutations caught: meals not in a day's order, cuisines in the starting list's order, a recipe under only its first tag, Other first, chips dropping the grouping, the address not updated, grouping ignoring the search, and the page not passing the groups.
     - Screenshots at 375 px on the test project: by meal (server-rendered from `?group=meal`), by cuisine (picked) and not grouped. Taken with a throwaway flow, deleted after.
-- [ ] **P18.5** A new tag gets its group — C · D55
+- [x] **P18.5** A new tag gets its group — C · D55
   - Do: the recipe form's tag picker shows the tags under their groups (Meal, Cuisine, Diet, Other). Making a new tag asks its group (or none), and it's saved with the recipe.
   - Verify: a screen test where a new tag made with a group is saved with it.
+  - Evidence (2026-10-04):
+    - `TagPicker` puts the chips under Meal, Cuisine, Diet and Other (`groupTagChoices`), from the catalog's groups that the form now gets with the library view. New tag has a group picker beside the box (No group, Meal, Cuisine, Diet), and an added tag goes under it straight away (`withNewTag`). It fits on one row at 375 px.
+    - On Save the form sends `tagGroups` (JSON) for its tags the catalog doesn't group. The controllers check it (`tagGroupsSchema`), and `createRecipe` / `updateRecipe` add them through `ITagsRepository.addGroups` in the recipe's transaction, after the access check. Only the recipe's own tags are added, and a tag's existing group never changes (Postgres: `on conflict do nothing`).
+    - The test database: `resetDatabase` now keeps only the migration's rows in `tags`, deleting any a test added.
+    - Tests:
+      - Unit tests for `groupTagChoices` and `withNewTag`.
+      - Controller tests: a group is passed on, and one that isn't a group is turned away.
+      - On both backends:
+        - A new tag gets its group, an existing group stays, and a tag the recipe doesn't have gets nothing.
+        - A viewer's save adds nothing.
+        - An edit's new tag gets its group.
+      - The action test: create and edit save their new tags' groups, and unreadable groups are explained under Tags.
+      - The form's screen test: chips under their groups, a new tag under the group picked, and one with no group under Other.
+      - Saving itself is checked in the browser flow, because a screen test can't follow the save's redirect. The flow makes a cuisine tag new to the catalog each run, saves, and finds Chili under it with Recipes grouped by cuisine.
+      - Mutations caught: create or edit skipping the groups, groups for tags the recipe doesn't have, the mock overwriting a group, Postgres without `on conflict`, the test reset keeping tests' tags, the picker ignoring groups, New tag's group dropped, and either action dropping the groups. In the flow: the form not sending them.
+    - All tests and both flows pass.
 
 ## Phase 19 (planned): Groceries by recipe, like items together, and more units
 
@@ -2125,3 +2141,4 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - P18.3 done: search reads titles, tags and ingredient names (see its Evidence).
   - Next: P18.4; P18.2's check once H26 and H27 are run.
   - P18.4 done: Group by (see its Evidence). Next: P18.5.
+  - P18.5 done: the tag picker's groups, and a new tag's group saved with the recipe (see its Evidence). Phase 18's code is done; its PR waits on P18.2's production writes (H26, H27), since the Recipes page reads `tags`.

@@ -10,18 +10,20 @@ describe("createRecipeController", () => {
       spaceId: ID,
       data: {
         title: " Chili ",
-        tags: ["Dinner", " dinner "],
+        tags: ["Dinner", " dinner ", "texan"],
         ingredients: [{ raw: "1 lb beans" }],
       },
+      tagGroups: { texan: "cuisine" },
     },
     calledWith: [
       {
         title: "Chili",
-        tags: ["dinner"],
+        tags: ["dinner", "texan"],
         ingredients: [{ raw: "1 lb beans" }],
       },
       ID,
       OWNER,
+      { texan: "cuisine" },
     ],
     invalid: {
       "a missing title": {
@@ -36,6 +38,11 @@ describe("createRecipeController", () => {
       "zero servings": {
         spaceId: ID,
         data: { title: "x", yieldServings: 0, ingredients: [{ raw: "x" }] },
+      },
+      "a group that isn't one": {
+        spaceId: ID,
+        data: { title: "x", ingredients: [{ raw: "x" }] },
+        tagGroups: { texan: "regional" },
       },
     },
   });
