@@ -33,6 +33,22 @@ describeEachBackend("getRecipes", () => {
     ]);
   });
 
+  // D55: each grouped tag's group comes with the library, for grouping and the tag picker.
+  it("gives each grouped tag's group, and none for a tag without one", async () => {
+    const app = makeApp();
+    const bookId = await app.newSpace("recipe-book");
+    await app.newRecipe(bookId, {
+      title: "Pesto Pasta",
+      tags: ["dinner", "italian", "vegetarian", "weeknight"],
+    });
+
+    const { tagGroups } = await app.getRecipes(bookId, OWNER);
+    expect(tagGroups["dinner"]).toBe("meal");
+    expect(tagGroups["italian"]).toBe("cuisine");
+    expect(tagGroups["vegetarian"]).toBe("diet");
+    expect(tagGroups["weeknight"]).toBeUndefined();
+  });
+
   it("rejects listing a space as the wrong type", async () => {
     const app = makeApp();
     const planId = await app.newSpace("meal-plan");

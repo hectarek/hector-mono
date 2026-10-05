@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
-| Next task | P18.1. |
-| Waiting on Hector | real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 18 (finding recipes: tag groups, a tagging pass, search, grouping) on `feat/recipes-p18-finding-recipes`: P18.1 done. Phases 1–17 merged (17: hectarek/hector-mono#21). Planned after it: 19 (groceries by recipe, units), 20 (measuring AI reads). |
+| Next task | H26 (production's migration), then P18.2. |
+| Waiting on Hector | OK to apply migration 0013 to production (H26); real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-04 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -1743,12 +1743,23 @@ Starting point, 2026-10-04, read-only on production:
 
 One commit per task; the PR when the phase is done.
 
-- [ ] **P18.1** The tag catalog — C+H · D55
+- [x] **P18.1** The tag catalog — C+H · D55
   - Do:
     - An additive migration adds `tags`: `name` (the key, as recipes store it), `category` (`meal`, `cuisine`, `diet`, or null, checked) and `created_at`. It fills in the 19 existing tags with their groups, and adds dairy-free and high-protein (D58).
     - Saving a recipe adds any tag the catalog doesn't have, without a group, in the same transaction.
     - Recipes and the library get each tag's group.
   - Verify: repository and use-case tests on both backends, and a test of the migration's tags. Applied to the test project by Claude, and to production with Hector's OK at that moment (H26).
+  - Evidence (2026-10-04):
+    - Migration 0013 (`tags`: `name` the key, `category` checked to `meal`/`cuisine`/`diet`, `created_at`) adds the 21 starting tags. `STARTING_TAGS` in `src/entities/models/tag.model.ts` lists the same ones, in each group's order, and `TAG_CATEGORY_LABELS` names the groups.
+    - `ITagsRepository.listGroups` reads it, with a Postgres version and an in-memory stand-in that starts with `STARTING_TAGS`. `getRecipes` and `getAllRecipes` pass it to `buildLibraryView`, whose view gains `tagGroups`.
+    - Simpler than planned: only a tag with a group has a row, so saving a recipe adds nothing to the catalog. A tag without a row has no group. That leaves every path that saves a recipe's tags untouched, and the catalog only gets a row when a group is given: in the migration, the tagging pass (P18.2) and the tag picker (P18.5).
+    - Tests:
+      - On Postgres, the migration's tags equal `STARTING_TAGS`. With dinner's group changed in the migration, that test fails.
+      - On both backends, the library gives dinner, italian and vegetarian their groups and "weeknight" none.
+      - `resetDatabase` leaves `tags` alone, so the migration's rows stay (noted in AGENTS.md).
+    - Applied to the test project by Claude, with Drizzle's record of it (14 migrations; 7 meal, 9 cuisine and 5 diet tags), and the browser flows pass on it.
+    - Production waits on H26. The Recipes page reads `tags`, so it must be applied before this deploys, and Vercel's previews use production too.
+    - All 993 + 34 tests pass.
 - [ ] **P18.2** The tagging pass — C+H · D58, D31
   - Do:
     - Claude reads every recipe in the session: its title, lines and steps. For each it proposes a meal tag (every recipe gets one), and cuisine and diet tags where they're clear.

@@ -22,6 +22,10 @@ import type {
   SpaceRole,
   SpaceType,
 } from "@/src/entities/models/space.model";
+import {
+  TAG_CATEGORIES,
+  type TagCategory,
+} from "@/src/entities/models/tag.model";
 
 const createdAt = () =>
   timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
@@ -302,6 +306,23 @@ export const recipeReads = pgTable(
     index("recipe_reads_user_id_created_at_idx").on(
       table.userId,
       table.createdAt,
+    ),
+  ],
+);
+
+// Each grouped tag's group (docs/ux-plan.md D55), for grouping recipes and the tag picker. Only
+// a tag with a group has a row; recipes keep their tags by name (`recipes.tags`).
+export const tags = pgTable(
+  "tags",
+  {
+    name: text("name").primaryKey(),
+    category: text("category").$type<TagCategory>().notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    check(
+      "tags_category_check",
+      sql`${table.category} in (${sql.raw(TAG_CATEGORIES.map((category) => `'${category}'`).join(", "))})`,
     ),
   ],
 );

@@ -1,4 +1,5 @@
 import type { Recipe } from "./models/recipe.model";
+import type { TagGroups } from "./models/tag.model";
 
 export type LibraryFilter = {
   search?: string;
@@ -8,6 +9,8 @@ export type LibraryFilter = {
 export type LibraryView = {
   recipes: Recipe[];
   tags: string[];
+  // Every grouped tag's group (D55), for grouping and the tag picker.
+  tagGroups: TagGroups;
 };
 
 // Tags come from the whole book so the chips don't disappear as you filter. Most-used
@@ -15,6 +18,7 @@ export type LibraryView = {
 export function buildLibraryView(
   recipes: Recipe[],
   filter: LibraryFilter,
+  tagGroups: TagGroups = {},
 ): LibraryView {
   const tag = filter.tag?.trim().toLowerCase();
 
@@ -31,7 +35,7 @@ export function buildLibraryView(
       (!tag || recipe.tags.includes(tag)),
   );
 
-  return { recipes: matching, tags };
+  return { recipes: matching, tags, tagGroups };
 }
 
 // The library's search: its text anywhere in the title, ignoring case. The server filters
