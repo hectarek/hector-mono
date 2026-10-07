@@ -101,9 +101,9 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
   - Add to list: servings, the list picker; then Open list. "It's already on this list" asks before adding again (D45).
   - Copy: the book to copy into.
 - **Bold:** the produce tile when there's no photo.
-- **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done.
+- **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done, or a link to it.
 - **Leads to:** Cook mode, Edit, Plan, Groceries, the library.
-- **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to list or Add to plan.
+- **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to list or Add to plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or Copy it into their own book, but there's no button to share the link.
 - **Room:** the busiest screen: one filled button and four secondary ones, plus the stepper and chips, and no ⋯. A new action here needs a ⋯ (as the tabs have), or one of these moved into it.
 
 ### Plan — `/plan`

@@ -11,7 +11,7 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 | | |
 |---|---|
 | Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`, in review as hectarek/hector-mono#31: P22.1 and P22.2 done, P22.3 waiting on the feedback. Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
-| Next task | P22.3 once Hector has shared the testers' feedback (H30); Hector reviews hectarek/hector-mono#31. |
+| Next task | Hector's calls on P22.3's placement, and which drafts make the next phase; Hector reviews hectarek/hector-mono#31. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -2098,9 +2098,13 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
     - The definition of done has a 7th item: placed on the map first, and the map updated in the same commit by a change that adds, moves or removes a screen, an action, a sheet or a way between screens.
     - AGENTS.md's UI Rules open with the same rule and the link. Its design-system line now says the canvas's mockups date from 2026-09-24 and the map is the record of what's built. Its "Make default" is now "Make my default plan", the button's words (found in P22.1).
     - The three say the same thing in the same words: placed first, and updated by a change that adds, moves or removes a screen, an action, a sheet or a way between screens.
-- [ ] **P22.3** Testers' feedback placed on the map — C · D70 · needs H30
+- [~] **P22.3** Testers' feedback placed on the map — C · D70 · needs H30
   - Do: each item, clustered by job, with its screen, the pattern that would carry it, its cost to the other flows, and a proposal: change an existing screen, a new pattern, a new job, or park it.
   - Verify: Hector reviews the placement; what he decides becomes D-numbers and tasks in a later phase.
+  - Evidence (2026-10-07):
+    - Hector shared 23 items (H30). Each is placed by the map's four questions in a private doc on Hector's machine, grouped by job, with drafts in Hector's private tracker, labelled as follow-ups: 22 in all, 20 for the 23 items (a few share one), one for the recipe page's room and one for the map's 12 disagreements.
+    - What placing them showed, without the testers' words: most fit today's screens and patterns; four want room on the recipe page, which has none (no ⋯); two already exist but weren't found (the share sheet, and opening a recipe from its link, now on the map); three reopen decisions (D34, D53, and the design system's still bold moments); and the largest are two new jobs.
+    - Waiting on Hector: the decisions the doc lists, and which drafts go into the next phase.
 
 ## Later (to-dos, not scheduled)
 
@@ -2196,7 +2200,7 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
 | H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
-| H30 | Share the testers' feedback (raw is fine). It stays on Hector's machine, outside this repo. | P22.3 | open |
+| H30 | Share the testers' feedback (raw is fine). It stays on Hector's machine, outside this repo. | P22.3 | done 2026-10-07: 23 items |
 
 ## Risks and how they're handled
 
@@ -2431,3 +2435,5 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
   - P21.5 and P21.6 done (see their Evidence), pushed to hectarek/hector-mono#30. Next: Hector's review and merge; the phone check (H5); then Phase 20's discussion.
 - **2026-10-07 (bh)** — Hector merged Phase 21 (hectarek/hector-mono#30). Testers sent a lot of feedback, and Hector asked how to take it in without cluttering the app. Phase 22 planned (D70): a map of the app first, then the feedback placed on it; the as-built screens on the canvas later (L9).
   - P22.1 (the map) and P22.2 (placing a change on it) done; PR hectarek/hector-mono#31. Next: the feedback (H30), then P22.3.
+- **2026-10-07 (bi)** — Hector shared the testers' feedback (H30, 23 items). P22.3: each placed on the map in a private doc, with a draft per piece of work in his tracker. Placing them found that any signed-in person can already open a recipe from its link, now on the map.
+  - Next: Hector's calls on the placement and the next phase.
