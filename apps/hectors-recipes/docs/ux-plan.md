@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`, in review as hectarek/hector-mono#30: P21.1–P21.4 done, P21.5–P21.6 added after a review of how steps find their ingredients. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
-| Next task | P21.6 (dismiss the screen-lock warning). |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`, in review as hectarek/hector-mono#30: done, with P21.5–P21.6 added after a review of how steps find their ingredients. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | Hector reviews and merges hectarek/hector-mono#30; then Phase 20's discussion. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -132,7 +132,7 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D66 | Running timers are pinned above the step on every screen. Tapping one goes to its step; one that ends rings and says Time's up. | Same. |
 | D67 | Not in Phase 21: marking the meal cooked from Done (it would tie cook mode to the plan), and a tablet layout with the step and ingredients side by side (the layout leaves room for it). | Same. |
 | D68 | A step's ingredients stay matched by name, not stored. Four changes to the matching: lines that share the word a step uses are all shown when the step says it in the plural ("the beans") or they're one ingredient listed twice, in place of none (D24 had it guess nothing); a name's first word, past words like "large" or "fresh", counts when no other line has it ("the chicken"); a name with "or" matches either side; and "sauce", "peel", "stem", "leaf" and "seed" don't match on their own. | Hector, 2026-10-07: "i dont want to store links unless we have to but do a review first"; after the review (P21.5's Found), "go ahead with both". |
-| D69 | The warning that the screen can't stay on can be dismissed, and stays dismissed on that device. A dimmed sun takes its place in the top bar, and tapping it shows the warning again. | Hector, 2026-10-07: "can we make that dismissable"; Claude's recommendation (on the device, not per cook); "go ahead with both". |
+| D69 | The warning that the screen can't stay on can be dismissed, and stays dismissed on that device. A sun on the warning's yellow takes its place in the top bar (proposed as a dimmed sun, which looked like the sun of a screen staying on), and tapping it shows the warning again. | Hector, 2026-10-07: "can we make that dismissable"; Claude's recommendation (on the device, not per cook); "go ahead with both". |
 
 ---
 
@@ -2055,9 +2055,15 @@ One commit per task; the PR when the phase is done.
       - The first run found new wrong matches from words a step uses for something else ("cooking" oil, "baking" powder, "all"-purpose flour, "vegetable" oil, "water" chestnuts, "heavy" cream) and "pepper" in "red pepper flakes". Those words are passed over now, and a name inside another line's whole name is left out.
     - Tests: one per change, with lines each could be mistaken for. Mutations caught: the plural, one ingredient twice, the naming word, "or" sides, loose endings, the whole-name masking, and "baking" passed over. The first "or" test missed its mutation, since the naming word found the line too; it now has a second soy sauce beside it.
     - All 1065 + 49 tests pass.
-- [ ] **P21.6** Dismiss the screen-lock warning — C · D69
-  - Do: an X on the warning. Dismissed, it's kept in `localStorage` (as the install hint is), and a dimmed sun in the top bar brings it back.
-  - Verify: screen tests (dismissing hides it, it stays hidden when cook mode opens again, the dimmed sun shows it again), and a screenshot at 375 px.
+- [x] **P21.6** Dismiss the screen-lock warning — C · D69
+  - Do: an X on the warning. Dismissed, it's kept in `localStorage` (as the install hint is), and a sun in the top bar brings it back.
+  - Verify: screen tests (dismissing hides it, it stays hidden when cook mode opens again, the sun shows it again), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - The warning has an X (Dismiss, `ghost`, so it keeps the warning's colour). Dismissed, it's kept in `localStorage` and read after mount. The top bar then has the sun on the warning's yellow (`bg-warning`), which shows the warning again and forgets the dismissal.
+    - The sun was going to be dimmed, but a grey sun with dotted rays looked like the grey sun of a screen staying on. The warning's own colours are clear in light and dark; the warning colour on the page alone was too faint in light.
+    - Screen test: dismissing hides it, it stays hidden when cook mode opens again, and the sun brings it back. Mutations caught: the dismissal not kept, the X doing nothing, the sun not bringing it back, and no sun once dismissed.
+    - Checked at 375 px in the Claude browser pane on the dev server, which refuses the wake lock: the warning with its X, then after Dismiss and a reload the sun in the top bar, light and dark; tapping it brought the warning back. No console errors.
+    - All 1065 + 50 tests pass.
 
 ## Later (to-dos, not scheduled)
 
@@ -2381,3 +2387,4 @@ One commit per task; the PR when the phase is done.
   - Next: Phase 21's PR; Hector's phone check (H5); then Phase 20's discussion.
 - **2026-10-07 (bg)** — Phase 21's PR opened (hectarek/hector-mono#30). Hector asked how a step's ingredients are found and to make the screen-lock warning dismissable. A read-only review of production's recipes found matching covers most steps (P21.5's Found); Hector chose to keep it unstored and widen it (D68), and the warning can be dismissed (D69). The warning he saw was the Claude browser pane, which refuses the wake lock.
   - Next: P21.5, then P21.6, on the same PR.
+  - P21.5 and P21.6 done (see their Evidence), pushed to hectarek/hector-mono#30. Next: Hector's review and merge; the phone check (H5); then Phase 20's discussion.

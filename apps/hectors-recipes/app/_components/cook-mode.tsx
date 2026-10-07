@@ -74,9 +74,16 @@ const WAKE_LOCK_TEXT: Record<WakeLockStatus, string> = {
     "This browser didn't allow keeping the screen on. Turn off auto-lock while cooking.",
 };
 
-// Whether the screen stays on (D63): an icon in the top bar while it does, and a warning
-// above the screen when the browser can't keep it on.
-function WakeLockNotice({ status }: { status: WakeLockStatus }) {
+// Whether the screen stays on (D63, D69): a sun in the top bar while it does, and a warning
+// above the screen when the browser can't keep it on. A dismissed warning stays away on this
+// device, and a dimmed sun in the top bar brings it back.
+function WakeLockIcon({
+  status,
+  onShowWarning,
+}: {
+  status: WakeLockStatus;
+  onShowWarning: () => void;
+}) {
   if (status === "on" || status === "pending") {
     return (
       <p role="status" className="text-muted-foreground">
@@ -85,15 +92,69 @@ function WakeLockNotice({ status }: { status: WakeLockStatus }) {
       </p>
     );
   }
+  // In the warning's own colours, so it can't be taken for the sun of a screen staying on.
   return (
-    <p
+    <button
+      type="button"
+      aria-label="The screen may lock. Show why"
+      onClick={onShowWarning}
+      className="bg-warning text-warning-foreground flex size-9 shrink-0 items-center justify-center rounded-full"
+    >
+      <SunDim className="size-5" aria-hidden />
+    </button>
+  );
+}
+
+function WakeLockWarning({
+  status,
+  onDismiss,
+}: {
+  status: WakeLockStatus;
+  onDismiss: () => void;
+}) {
+  return (
+    <div
       role="status"
-      className="bg-warning text-warning-foreground flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs"
+      className="bg-warning text-warning-foreground flex items-center gap-1.5 rounded-lg py-1 ps-3 pe-1 text-xs"
     >
       <SunDim className="size-3.5 shrink-0" aria-hidden />
-      {WAKE_LOCK_TEXT[status]}
-    </p>
+      <p className="flex-1">{WAKE_LOCK_TEXT[status]}</p>
+      {/* Ghost keeps the warning's own colour; quiet would mute it on the yellow. */}
+      <Button
+        variant="ghost"
+        size="icon-lg"
+        aria-label="Dismiss"
+        onClick={onDismiss}
+      >
+        <X />
+      </Button>
+    </div>
   );
+}
+
+const WARNING_DISMISSED_KEY = "cook-screen-warning-dismissed";
+
+// Whether the screen-lock warning was dismissed on this device (D69). Read after mount, as the
+// install hint's is, so the server's render and the first one agree.
+function useWarningDismissed() {
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => {
+    try {
+      setDismissed(localStorage.getItem(WARNING_DISMISSED_KEY) === "1");
+    } catch {
+      // Storage blocked (private mode): the warning shows.
+    }
+  }, []);
+  const change = (value: boolean) => {
+    setDismissed(value);
+    try {
+      if (value) localStorage.setItem(WARNING_DISMISSED_KEY, "1");
+      else localStorage.removeItem(WARNING_DISMISSED_KEY);
+    } catch {
+      // Nothing to keep it in: it stays as chosen until the page reloads.
+    }
+  };
+  return [dismissed, change] as const;
 }
 
 // Opens at the servings chosen on the recipe page (?servings=), kept in the URL as they
@@ -313,6 +374,7 @@ function CookModeContent({
   const swipe = useSwipe(go);
   const wakeLock = useWakeLock();
   const screenOk = wakeLock === "on" || wakeLock === "pending";
+  const [warningDismissed, setWarningDismissed] = useWarningDismissed();
   // A new screen slides in from the side it came from, as the week does (D54).
   const order =
     screen === "gather" ? -1 : screen === "done" ? steps.length : index;
@@ -362,7 +424,12 @@ function CookModeContent({
             />
           )}
           <div className="flex items-center gap-3">
-            {screenOk && <WakeLockNotice status={wakeLock} />}
+            {(screenOk || warningDismissed) && (
+              <WakeLockIcon
+                status={wakeLock}
+                onShowWarning={() => setWarningDismissed(false)}
+              />
+            )}
             <Button
               variant="secondary"
               size="lg"
@@ -413,7 +480,12 @@ function CookModeContent({
         )}
       >
         <div className="flex flex-col gap-2">
-          {!screenOk && <WakeLockNotice status={wakeLock} />}
+          {!screenOk && !warningDismissed && (
+            <WakeLockWarning
+              status={wakeLock}
+              onDismiss={() => setWarningDismissed(true)}
+            />
+          )}
           {progress.resumed && (
             <div className="text-muted-foreground flex items-center justify-between gap-3 text-sm">
               <span>Picked up where you left off.</span>

@@ -57,6 +57,7 @@ describe("CookMode", () => {
 
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     // As after a reload: no tap has started the sound.
     quietAlarm();
   });
@@ -78,6 +79,7 @@ describe("CookMode", () => {
     view.getByRole("button", { name });
   const pressed = (view: ReturnType<typeof cook>, name: string | RegExp) =>
     button(view, name).getAttribute("aria-pressed");
+  const warning = /Turn off auto-lock/;
   const save = (progress: object) =>
     sessionStorage.setItem(
       cookProgressKey(RECIPE_ID),
@@ -230,7 +232,6 @@ describe("CookMode", () => {
 
   // D63: an icon while the screen stays on; the warning only when it can't.
   it("shows the screen staying on as an icon, and warns when it can't", async () => {
-    const warning = /Turn off auto-lock/;
     const unsupported = cook();
     await unsupported.findByText(warning);
     unsupported.unmount();
@@ -252,6 +253,24 @@ describe("CookMode", () => {
     } finally {
       Reflect.deleteProperty(navigator, "wakeLock");
     }
+  });
+
+  // D69: dismissed, the warning stays away on this device; the dimmed sun brings it back.
+  it("dismisses the screen-lock warning for good, and brings it back from the top bar", async () => {
+    const user = userEvent.setup();
+    const view = cook();
+    await view.findByText(warning);
+    await user.click(button(view, "Dismiss"));
+    expect(view.queryByText(warning)).toBe(null);
+    view.unmount();
+
+    const again = cook();
+    const why = await again.findByRole("button", {
+      name: "The screen may lock. Show why",
+    });
+    expect(again.queryByText(warning)).toBe(null);
+    await user.click(why);
+    await again.findByText(warning);
   });
 
   it("starts over from Done: nothing ticked, back on Gather", async () => {
