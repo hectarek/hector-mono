@@ -11,7 +11,7 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 | | |
 |---|---|
 | Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`: in progress. Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
-| Next task | P22.1, the map; then P22.3 once Hector has shared the testers' feedback (H30). |
+| Next task | P22.1 and P22.2 done (the map, and the rule for placing a change on it); their PR. Then P22.3 once Hector has shared the testers' feedback (H30). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -57,6 +57,7 @@ PR numbers, branch names and commits in this plan are from the earlier private r
 4. Reduced motion is respected for any new animation.
 5. `bun check`, `bun ts` and the app's tests pass (Conventions).
 6. The design lint stays clean: tokens and variants, not raw colours or arbitrary values (`packages/ui/AGENTS.md`).
+7. The change was placed on [ux-map.md](./ux-map.md) before it was designed, and a change that adds, moves or removes a screen, an action, a sheet or a way between screens updates the map in the same commit (D70).
 
 ## Decisions
 
@@ -2089,9 +2090,14 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
     - The three browser flows follow the jobs table: `plan-and-shop` (add manually, Add to plan, the week swipe, the grocery button, check off, Got it, Clear list, search, Group by), `cook` (Gather, swipe, a timer, the steps sheet, a reload, Finish) and `add-recipe` (Add by photo or file, then Add manually instead).
     - The 12 disagreements aren't fixed here: they're placed with the testers' feedback in P22.3.
     - Not changed: the design system, the canvas, and AGENTS.md (P22.2 links the map).
-- [ ] **P22.2** The placement rule — C · D70
+- [x] **P22.2** The placement rule — C · D70
   - Do: the questions a change answers before it's designed, in the map. A line in this plan's UI definition of done: a change that adds or moves a screen, an action or a sheet updates the map. The app's AGENTS.md points to the map.
   - Verify: AGENTS.md, the definition of done and the map agree.
+  - Evidence (2026-10-07):
+    - The map opens with "Placing a change": the job it serves, the screen and its Room, the pattern that carries it, and what it costs the other jobs, answered in the decision that adopts it. A mockup only when a change moves things around on a screen.
+    - The definition of done has a 7th item: placed on the map first, and the map updated in the same commit by a change that adds, moves or removes a screen, an action, a sheet or a way between screens.
+    - AGENTS.md's UI Rules open with the same rule and the link. Its design-system line now says the canvas's mockups date from 2026-09-24 and the map is the record of what's built. Its "Make default" is now "Make my default plan", the button's words (found in P22.1).
+    - The three say the same thing in the same words: placed first, and updated by a change that adds, moves or removes a screen, an action, a sheet or a way between screens.
 - [ ] **P22.3** Testers' feedback placed on the map — C · D70 · needs H30
   - Do: each item, clustered by job, with its screen, the pattern that would carry it, its cost to the other flows, and a proposal: change an existing screen, a new pattern, a new job, or park it.
   - Verify: Hector reviews the placement; what he decides becomes D-numbers and tasks in a later phase.

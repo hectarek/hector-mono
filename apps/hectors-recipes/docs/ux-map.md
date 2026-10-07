@@ -10,6 +10,19 @@ It sits beside three other sources, and doesn't repeat them:
 
 Read from the code on 2026-10-07. Routes are from `app/`.
 
+## Placing a change
+
+A new feature, a change to a screen, or a tester's request answers these four questions on this map before it's designed. The answers go in the decision that adopts it (a D-number in ux-plan.md).
+
+1. **Which job does it serve?** One of the six below. If none, it's a new job: Hector's call, and it may need a screen of its own.
+2. **Which screen does it go on, and is there room?** Read the screen's **Room**. A screen has one main action (D32), so a second one means one of them gives way. Other actions go in the title's ⋯ (D42) or a row's sheet. At most one bold moment is in view.
+3. **Which pattern carries it?** One from the patterns table. If none fits, the new pattern is written down where its kind of rule lives (AGENTS.md's UI Rules, or the design system) before a screen uses it.
+4. **What does it cost the other jobs?** A tap added to a job's path, a new way in to a screen, something moved behind a ⋯, or a screen getting busier. The decision names it.
+
+A mockup goes on the Claude Design canvas only when a change moves things around on a screen. The code and this map are the record of what's built.
+
+A change that adds, moves or removes a screen, an action, a sheet or a way between screens updates this map in the same commit (ux-plan.md's definition of done for a UI task). A new pattern gets a row in the patterns table.
+
 ## The jobs
 
 The app is phone-first, built for people who share a recipe book and a plan. Six jobs cover what people come to it for (Claude's grouping).
@@ -246,7 +259,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 2. Groceries' Add button is the default size (40 px), not `lg` (D32).
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent.
 4. Two filled buttons on one screen: Add by link once pasting (Read recipe and Read text), and cook mode while a timer is up (Time's up · Dismiss beside Next).
-5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). AGENTS.md calls Plan's ⋯ item "Make default"; the button says "Make my default plan".
+5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading).
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all.
 7. The ways out after a failed read differ: Add by link offers the pasted text, photo or file, and manually; Add by photo or file offers only manually.
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.
