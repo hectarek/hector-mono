@@ -82,7 +82,7 @@ When a session uncovers something non-obvious (a tricky bug root cause, a framew
 
 ## Work that spans sessions: the plan doc
 
-Work that takes more than one session (a feature pass, a migration, a review's fixes) runs from one plan doc in the app's `docs/`, so any agent can pick it up in a fresh context window. [`apps/hectors-recipes/docs/ux-plan.md`](../../apps/hectors-recipes/docs/ux-plan.md) is the reference. Its parts, in order:
+Work that takes more than one session (a feature pass, a migration, a review's fixes) runs from one plan doc in the app's `docs/`, so any agent can pick it up in a fresh context window. The doc is the plan of record: a task in Hector's private tracker links to it and never copies its steps. [`apps/hectors-recipes/docs/ux-plan.md`](../../apps/hectors-recipes/docs/ux-plan.md) is the reference. Its parts, in order:
 
 1. **Status**: a small table at the top with the phase, the next task, what's waiting on Hector, and the date. Updated at the end of every session.
 2. **How to resume**: what a new session does first: read Status, find the first open task (a `grep` command), read the AGENTS.md files and the docs the task needs, and check the branch and recent commits match the log.

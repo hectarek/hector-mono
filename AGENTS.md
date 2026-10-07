@@ -19,6 +19,7 @@ Context is part of the deliverable — keep it lean, layered, and current. See [
 - Fix or remove any stale reference you touch — stale context misleads more than missing context.
 - Commit `AGENTS.md` / `.claude/` / `docs/` updates alongside the code they describe.
 - Big reference material → a kebab-case doc under `docs/` (global) or `apps/<app>/docs/` (app-specific), linked from `AGENTS.md` — don't inline it here.
+- Work that spans sessions runs from a plan doc in the app's `docs/`, and that doc is the plan of record ([playbook](docs/development/agent-context-playbook.md#work-that-spans-sessions-the-plan-doc)). A task in Hector's private tracker only links to it: never copy the plan's steps into a task.
 
 ## Do
 - use `bun` for everything (never npm/yarn)
