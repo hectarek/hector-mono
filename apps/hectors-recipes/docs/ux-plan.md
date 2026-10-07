@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: all five tasks done, the PR next. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | Phase 19's PR; then Phase 20, starting with the discussion on measuring AI reads. |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: planned, P21.1 next. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | P21.1 (one step at a time). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-05 |
+| Last updated | 2026-10-07 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -126,6 +126,11 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D60 | Groceries can be shown By aisle (the default) or By recipe, kept in the address (`?group=recipe`). By recipe, recipes come in the order they were added, each with its items at that recipe's amounts. Hand-typed items come last, under "Added by hand", and checked items go to Got it as now. | Claude's defaults; Hector, 2026-10-05: "your defaults". |
 | D61 | Within an aisle, items of the same catalog ingredient sit together, in the order the first of them was added. They stay separate rows ("2 cloves garlic", "1 tbsp garlic"), never one combined row. | Claude's default; Hector, 2026-10-05: "your defaults". |
 | D62 | Units: `c.` reads as cup and `tin` as can. New units `stalk` (and `rib`), `sprig` and `pint`. "Whole" comes off a name, like size words. Jar, box, bottle and carton are left out (one or two lines each). Existing lines and stray catalog entries are then fixed once, from a list Hector sees and a dry run, and Hector runs the write. | Hector, 2026-10-04: "a pass data wise on the units… more options (not too many)"; 2026-10-05: "your defaults". From a read-only look at production's 1,007 lines (2026-10-05). |
+| D63 | Cook mode shows one screen at a time: Gather, then each step, then Done. Back and Next sit at the bottom, a swipe does the same, and "Step 3 of 8" opens the list of steps to jump to one. The wake-lock notice is an icon in the top bar, and a warning only when the screen can't stay on. | Hector, 2026-10-07: "make the cook mode much more useful and good ux experience on mobile… do step by step and make better use of the space"; of Claude's flow, "go with your recommendations". One step per screen rather than folding the others away, which would keep the scroll. |
+| D64 | Cook mode opens on Gather: the ingredients to tick off as you get them out, servings, Add to list, and Start cooking. Coming back mid-recipe opens on the step you were on. From any step, the full list is a sheet. | Claude's recommendation; Hector, 2026-10-07: "go with your recommendations". |
+| D65 | A step shows the ingredients it uses, at the servings chosen. Ticking one there ticks it in the full list: one set of ticks. | Same. |
+| D66 | Running timers are pinned above the step on every screen. Tapping one goes to its step; one that ends rings and says Time's up. | Same. |
+| D67 | Not in Phase 21: marking the meal cooked from Done (it would tie cook mode to the plan), and a tablet layout with the step and ingredients side by side (the layout leaves room for it). | Same. |
 
 ---
 
@@ -1963,6 +1968,42 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 - **Links first.** Photos can't be tuned the same way.
 - **First case:** <https://www.thedoctorskitchen.com/recipes/test-rupy-s-overnight-oats> comes back with nothing filled in. Find out why first: no recipe data in the page, a blocked fetch, or text the reader misses.
 
+## Phase 21: Cook mode, one step at a time
+
+Branch `feat/recipes-p21-cook-step-by-step`, in its own worktree. Hector, 2026-10-07: "make the cook mode much more useful and good ux experience on mobile. We need to make it so that we can do step by step and make better use of the space"; then "go with your recommendations, do 21 first", so it comes before Phase 20. Decided: one screen at a time (D63), Gather first (D64), a step's own ingredients (D65), timers that follow you (D66), and what waits (D67).
+
+Starting point, 2026-10-07:
+- Cook mode is one long page: the wake-lock notice, every ingredient, every step, then Add to list. "Current step" is a highlight you tap, and nothing moves you on. A timer sits in its own step, so it scrolls away once you move on.
+- Read-only on production's 81 recipes:
+  - Steps: a median of 6 (the most is 18). A median step is 140 characters and 9 in 10 are under 360, so almost every step fits one phone screen at a large size; the longest, 845, scrolls.
+  - Ingredients: a median of 12 lines (the most is 26), too many to sit beside a step.
+  - Timers: 50 recipes have one; the most in one recipe is 7.
+  - Sections: 9 recipes have step sections.
+
+One commit per task; the PR when the phase is done.
+
+- [ ] **P21.1** One step at a time — C · D63, D65
+  - Do:
+    - Cook progress keeps the screen you're on (`at`: `gather`, a step's position, or `done`) in place of the highlighted step. A step screen has "Step 3 of 8" (and its section, if any), a progress bar, the step in large type, the ingredients it uses at your servings (tap to tick, the same ticks as the full list), and its timer.
+    - Back and Next sit at the bottom, 45 px and full width between them, Next filled. On the last step, Next is Finish.
+  - Verify: screen tests (Next and Back move, a tick on a step shows in the list, a reload returns to the step), and a screenshot at 375 px.
+- [ ] **P21.2** Gather, the full list, and Done — C · D64
+  - Do:
+    - Gather: the ingredients with their sections, the servings stepper, Add to list, and Start cooking (filled).
+    - Opening cook mode with saved progress goes to that step, with "Picked up where you left off" and Start over.
+    - From a step, the list button opens the full list in a sheet, with the stepper.
+    - Done: back to the recipe, or start over.
+  - Verify: screen tests (Gather to step 1, resuming on a saved step, the sheet's ticks, Done), and a screenshot at 375 px.
+- [ ] **P21.3** Timers follow you — C · D66
+  - Do: a strip above the step lists each running timer (its step and time left). Tapping one goes to its step. One that ends rings, as now, and reads "Time's up · Dismiss". The note about a tap turning the sound back on moves to the strip.
+  - Verify: screen tests (a timer started on one step shows on the next, tapping it goes back, an ended one says Time's up), and a screenshot at 375 px.
+- [ ] **P21.4** Getting around — C · D63
+  - Do:
+    - A swipe left or right moves a screen (`swipeDirection`, as the week does), with the week's slide-in, none with reduced motion.
+    - "Step 3 of 8" opens a sheet of every step (its first words, under its section), to jump to one; Start over is there too.
+    - The wake-lock notice is an icon in the top bar, and the warning only when the screen can't stay on.
+  - Verify: screen tests (a swipe moves, the sheet jumps), a browser flow through a recipe at 375 px, and the real-phone check added to H5.
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -2279,3 +2320,5 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Next: Hector checks the list (H29) and runs both migrations (H28), then the fix; Claude checks it read-only; the PR.
 - **2026-10-05 (bd)** — Hector ran migrations 0014 and 0015 (H28) and approved the units fix (H29), which Claude ran at his "run it" and checked read-only. Phase 19 done.
   - Next: Phase 19's PR.
+- **2026-10-07 (be)** — Hector merged Phase 19 (hectarek/hector-mono#24). Phase 20 began with a first discussion of how to measure an AI feature (its questions are still open). Then Hector asked for a better cook mode on a phone, one step at a time: Phase 21, decided (D63–D67) and planned, to come first.
+  - Next: P21.1.
