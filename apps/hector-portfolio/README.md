@@ -34,4 +34,4 @@ bun check --filter=hector-portfolio && bun ts --filter=hector-portfolio && bun r
 
 - [Spec](./docs/spec.md) · [Design](./docs/design.md)
 - [SEO](./docs/seo.md) · [Lighthouse](./docs/lighthouse.md)
-- Personal docs are kept in the repo's root `docs/private/`, which is gitignored and never committed.
+- Personal docs live outside this repo and are never committed.

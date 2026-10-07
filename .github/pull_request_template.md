@@ -10,4 +10,4 @@
 
 <!-- AGENTS.md or docs changed in this PR, or "none needed". -->
 
-<!-- This repo is public: no personal details or anything from docs/private/ in this description. -->
+<!-- This repo is public: no personal details or anything from Hector's private docs in this description. -->

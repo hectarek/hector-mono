@@ -34,7 +34,7 @@ tests/                 # Tests
 
 ## Docs
 - `docs/spec.md`, `docs/design.md`, `docs/seo.md` and `docs/lighthouse.md` are the site's own docs.
-- Hector's personal docs live in the repo's root `docs/private/` (`../../docs/private/`), which is gitignored: they exist only on his machine and never reach the repo (see [docs/public-repo.md](../../docs/public-repo.md)). Its `about.md`, the dossier, is the source of truth for facts about Hector; portfolio copy is derived from it, so change facts there first. Nothing from it goes into `src/data/` or a rendered page unless it's already public on the site.
+- Hector's personal docs live outside this repo, in `~/Base/docs/` on his machine, and never reach the repo (see [docs/public-repo.md](../../docs/public-repo.md)). Their `about.md`, the dossier, is the source of truth for facts about Hector; portfolio copy is derived from it, so change facts there first. Nothing from it goes into `src/data/` or a rendered page unless it's already public on the site.
 
 ## Data
 - All data lives in `src/data/*.json`

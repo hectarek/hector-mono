@@ -51,7 +51,8 @@ Context is part of the deliverable — keep it lean, layered, and current. See [
 - loosen a check to make it pass: no disabling or downgrading lint rules (Biome, Oxlint), no relaxing `tsconfig` flags, no `biome-ignore` / `@ts-ignore` / `@ts-expect-error`, no skipping or weakening tests, and no per-folder overrides that do the same. Fix the code. If a rule genuinely blocks (e.g. unmodified third-party code can't satisfy it), stop and raise it with the options instead of changing the rule
 - push to main directly
 - commit .env, secrets, or credentials
-- commit personal information or personal docs: the repo is public. They go in the gitignored root `docs/private/` folder (see [docs/public-repo.md](docs/public-repo.md)). Commit messages, PR titles and descriptions, and review comments are public too: nothing from `docs/private/` in them either
+- commit personal information or personal docs: the repo is public. Hector's personal docs live outside this repo, on his machine only (see [docs/public-repo.md](docs/public-repo.md)). Commit messages, PR titles and descriptions, and review comments are public too: nothing from his personal docs in them either
+- open GitHub issues for follow-ups or deferred review findings: the repo is public. They go in Hector's private task tracker (Backlog.md), outside this repo
 - finish without running the checks in **After Changes**
 - run `npm` or `yarn`
 - switch branches, stash, reset or clean in the main checkout: it's Hector's. Branch work happens in your own worktree (see **Working in parallel**)

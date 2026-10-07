@@ -46,5 +46,6 @@ promptfoo/
 .claude/worktrees/
 CLAUDE.local.md
 
-# Personal docs: kept on Hector's machine only, never committed (docs/public-repo.md)
+# Old home of Hector's personal docs, which now live outside this repo. Still
+# ignored so nothing left there gets committed (docs/public-repo.md)
 /docs/private/
