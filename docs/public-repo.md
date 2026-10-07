@@ -8,7 +8,7 @@ This monorepo is public. Everything tracked in git is readable by anyone, includ
 |---|---|---|
 | Secrets (database URLs, API keys, auth secrets) | Each app's `.env`, which is gitignored. Its `.env.example` lists the names with no values. The root `.worktreeinclude` copies the `.env` files into each new Claude Code worktree, under the gitignored `.claude/worktrees/`. | Credentials. |
 | Hector's personal docs (the portfolio's dossier, résumé, LinkedIn copy and other working notes) | Outside this repo, on Hector's machine only. `docs/private/`, their old home at the root, stays gitignored. | Personal information. |
-| Personal agent settings and worktrees (`.claude/settings.local.json`, `CLAUDE.local.md`, `.claude/worktrees/`) | Gitignored. The shared `.claude/settings.json` is tracked. | Personal approvals and local paths. |
+| Personal agent settings, scratch and worktrees (`.claude/settings.local.json`, `CLAUDE.local.md`, `.claude/worktrees/`, Compound Engineering's `.compound-engineering/*.local.yaml` and `.context/compound-engineering/`) | Gitignored. The shared `.claude/settings.json` and `.compound-engineering/config.example.yaml` are tracked. | Personal approvals, local paths and working notes. |
 | Local data snapshots and one-off data scripts | Gitignored folders such as `apps/hectors-recipes/.reread/`. | Real user data. |
 
 The portfolio site's content (`apps/hector-portfolio/src/data/*.json`) is tracked: it's what the public site shows.
