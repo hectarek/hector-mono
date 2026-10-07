@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
+import { Progress } from "@repo/ui/components/progress";
 import { cn } from "@repo/ui/lib/utils";
-import { Minus, Plus, Sun, SunDim, Timer } from "lucide-react";
+import { Minus, Plus, Sun, SunDim, Timer, X } from "lucide-react";
+import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { LineText } from "@/app/_components/line-text";
 import { InlineMarkdown } from "@/app/_components/markdown";
@@ -18,7 +20,9 @@ import {
 } from "@/app/_lib/alarm";
 import {
   type CookProgress,
+  type CookScreen,
   cookProgressKey,
+  moveScreen,
   NO_PROGRESS,
   parseCookProgress,
   shouldRing,
@@ -29,7 +33,6 @@ import type { RecipeIngredient } from "@/src/entities/models/recipe-ingredient.m
 import type { RecipeStep } from "@/src/entities/models/recipe-step.model";
 import { showLine } from "@/src/entities/scaling";
 import { stepIngredients } from "@/src/entities/step-ingredients";
-import { stepGroups } from "@/src/entities/step-text";
 
 type Line = Pick<
   RecipeIngredient,
@@ -81,6 +84,9 @@ export function CookMode({
   ...content
 }: {
   recipeId: string;
+  title: string;
+  // Where Done goes: the recipe.
+  recipeHref: string;
   lines: Line[];
   steps: Step[];
   yieldServings: number | null;
@@ -137,10 +143,10 @@ function useCookProgress(recipeId: string) {
     }
   }, [recipeId, loaded, progress]);
 
-  const { used, step, timers } = progress;
+  const { used, at, timers } = progress;
   return {
     used: new Set(used),
-    step,
+    at,
     timers,
     // Shown only when the page opened on saved progress, so crossed-off lines make sense.
     resumed: resumed && hasProgress(progress),
@@ -151,11 +157,8 @@ function useCookProgress(recipeId: string) {
           ? current.used.filter((value) => value !== position)
           : [...current.used, position],
       })),
-    toggleStep: (position: number) =>
-      setProgress((current) => ({
-        ...current,
-        step: current.step === position ? null : position,
-      })),
+    goTo: (screen: CookScreen) =>
+      setProgress((current) => ({ ...current, at: screen })),
     startTimer: (position: number, minutes: number) =>
       setProgress((current) => ({
         ...current,
@@ -180,8 +183,8 @@ function useCookProgress(recipeId: string) {
   };
 }
 
-function hasProgress({ used, step, timers }: CookProgress): boolean {
-  return used.length > 0 || step !== null || Object.keys(timers).length > 0;
+function hasProgress({ used, at, timers }: CookProgress): boolean {
+  return used.length > 0 || at !== "gather" || Object.keys(timers).length > 0;
 }
 
 // The time now, ticking each second while a timer runs, and ringing each timer that ends.
@@ -253,213 +256,292 @@ function useSoundNeedsTap(running: boolean): boolean {
 
 function CookModeContent({
   recipeId,
+  title,
+  recipeHref,
   lines,
   steps,
   addToList,
 }: {
   recipeId: string;
+  title: string;
+  recipeHref: string;
   lines: Line[];
   steps: Step[];
   addToList: ReactNode;
 }) {
-  const { servings, setServings, yieldServings } = useRecipeServings();
+  const { yieldServings, servings } = useRecipeServings();
   const progress = useCookProgress(recipeId);
   const now = useTimerClock(progress.timers);
   const soundNeedsTap = useSoundNeedsTap(
     Object.keys(progress.timers).length > 0,
   );
   const factor = yieldServings ? servings / yieldServings : 1;
+  // A saved step that's gone (the recipe was edited since) shows Gather.
+  const index = steps.findIndex((step) => step.position === progress.at);
+  const step = steps[index];
+  const screen: CookScreen = step
+    ? step.position
+    : progress.at === "done"
+      ? "done"
+      : "gather";
+
+  function go(by: 1 | -1) {
+    progress.goTo(moveScreen(screen, by, steps));
+    window.scrollTo?.({ top: 0 });
+  }
+
+  const ingredient = (line: Line) => (
+    <IngredientRow
+      line={line}
+      factor={factor}
+      used={progress.used.has(line.position)}
+      onToggle={() => progress.toggleUsed(line.position)}
+    />
+  );
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <WakeLockNotice />
-        {progress.resumed && (
-          <div className="text-muted-foreground flex items-center justify-between gap-3 text-sm">
-            <span>Picked up where you left off.</span>
-            <Button variant="secondary" size="lg" onClick={progress.startOver}>
-              Start over
-            </Button>
-          </div>
+    <div className="flex flex-1 flex-col">
+      <div className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky top-0 z-10 -mx-5 flex flex-col gap-2 px-5 py-2 backdrop-blur">
+        <div className="flex items-center justify-between gap-3">
+          <h1
+            className={cn("font-heading truncate text-2xl", step && "sr-only")}
+          >
+            {title}
+          </h1>
+          {step && (
+            <p aria-live="polite" className="text-lg font-medium">
+              Step {index + 1} of {steps.length}
+            </p>
+          )}
+          <Button
+            variant="secondary"
+            size="lg"
+            nativeButton={false}
+            render={<Link href={recipeHref} />}
+          >
+            <X data-icon="inline-start" />
+            Done
+          </Button>
+        </div>
+        {step && (
+          <Progress
+            value={((index + 1) / steps.length) * 100}
+            aria-label="Steps done"
+          />
         )}
       </div>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-xl">Ingredients</h2>
-          {yieldServings !== null && (
-            <fieldset className="flex items-center gap-1" aria-label="Servings">
+      <div className="flex flex-1 flex-col gap-6 py-4">
+        <div className="flex flex-col gap-2">
+          <WakeLockNotice />
+          {progress.resumed && (
+            <div className="text-muted-foreground flex items-center justify-between gap-3 text-sm">
+              <span>Picked up where you left off.</span>
               <Button
                 variant="secondary"
-                size="icon-lg"
-                aria-label="Fewer servings"
-                disabled={servings <= 1}
-                onClick={() => setServings((value) => value - 1)}
+                size="lg"
+                onClick={progress.startOver}
               >
-                <Minus />
+                Start over
               </Button>
-              <span
-                className="min-w-12 text-center text-lg tabular-nums"
-                aria-live="polite"
-              >
-                {servings}
-              </span>
-              <Button
-                variant="secondary"
-                size="icon-lg"
-                aria-label="More servings"
-                onClick={() => setServings((value) => value + 1)}
-              >
-                <Plus />
-              </Button>
-            </fieldset>
+            </div>
           )}
         </div>
-        <ul className="flex flex-col">
-          {lines.map((line, index) => {
-            const startsSection =
-              line.section && line.section !== lines[index - 1]?.section;
-            const isUsed = progress.used.has(line.position);
-            return (
-              <li key={line.position} className="flex flex-col">
-                {startsSection && (
-                  <span className="text-muted-foreground mt-4 mb-1 text-sm font-semibold tracking-wide uppercase">
-                    {line.section}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => progress.toggleUsed(line.position)}
-                  aria-pressed={isUsed}
-                  className={cn(
-                    "border-b py-3 text-left text-lg leading-snug",
-                    isUsed && "text-muted-foreground line-through",
-                  )}
-                >
-                  <LineText line={showLine(line, factor)} />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="text-muted-foreground text-xs">
-          Tap an ingredient to cross it off as you use it.
-        </p>
-      </section>
 
-      {steps.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h2 className="font-heading text-xl">Method</h2>
-          {stepGroups(steps).map((group) => (
-            <div key={group.first} className="flex flex-col gap-2">
-              {group.section && (
-                <h3 className="text-muted-foreground mt-4 mb-1 text-sm font-semibold tracking-wide uppercase">
-                  {group.section}
-                </h3>
-              )}
-              <ol className="flex flex-col gap-2">
-                {group.steps.map((step, index) => (
-                  <StepItem
-                    key={step.position}
-                    number={group.first + index}
-                    step={step}
-                    current={progress.step === step.position}
-                    onToggle={() => progress.toggleStep(step.position)}
-                    uses={stepIngredients(step.text, lines).map(
-                      (line) => showLine(line, factor).text,
-                    )}
-                    timerEndsAt={progress.timers[step.position]}
-                    now={now}
-                    soundNeedsTap={soundNeedsTap}
-                    onStartTimer={(minutes) => {
-                      primeAlarm();
-                      progress.startTimer(step.position, minutes);
-                    }}
-                    onStopTimer={() => progress.stopTimer(step.position)}
-                  />
-                ))}
-              </ol>
-            </div>
-          ))}
-        </section>
-      )}
+        {step ? (
+          <StepScreen
+            step={step}
+            uses={stepIngredients(step.text, lines).map((line) => (
+              <li key={line.position}>{ingredient(line)}</li>
+            ))}
+            timer={
+              step.timerMinutes !== null && (
+                <StepTimer
+                  minutes={step.timerMinutes}
+                  endsAt={progress.timers[step.position]}
+                  now={now}
+                  soundNeedsTap={soundNeedsTap}
+                  onStart={() => {
+                    primeAlarm();
+                    progress.startTimer(step.position, step.timerMinutes ?? 0);
+                  }}
+                  onStop={() => progress.stopTimer(step.position)}
+                />
+              )
+            }
+          />
+        ) : screen === "done" ? (
+          <section className="flex flex-col gap-2">
+            <h2 className="font-heading text-xl">That&apos;s the last step</h2>
+            <p className="text-muted-foreground text-lg">Enjoy it.</p>
+          </section>
+        ) : (
+          <GatherScreen
+            lines={lines}
+            ingredient={ingredient}
+            addToList={addToList}
+          />
+        )}
+      </div>
 
-      <div>{addToList}</div>
+      <div className="bg-background sticky bottom-0 -mx-5 flex gap-2 border-t px-5 pt-3 pb-safe-3">
+        {screen === "gather" ? (
+          steps.length > 0 && (
+            <Button size="lg" className="flex-1" onClick={() => go(1)}>
+              Start cooking
+            </Button>
+          )
+        ) : (
+          <>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              onClick={() => go(-1)}
+            >
+              Back
+            </Button>
+            {screen === "done" ? (
+              <Button
+                size="lg"
+                className="flex-1"
+                nativeButton={false}
+                render={<Link href={recipeHref} />}
+              >
+                Back to the recipe
+              </Button>
+            ) : (
+              <Button size="lg" className="flex-1" onClick={() => go(1)}>
+                {index === steps.length - 1 ? "Finish" : "Next"}
+              </Button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-// A step is a large tap target that marks where you are. That button sits behind the
-// step's content rather than around it, so the content can hold links and the timer button
-// (neither is valid inside a button).
-function StepItem({
-  number,
-  step,
-  current,
+// An ingredient at the servings chosen, tapped to cross it off: the same ticks wherever it
+// shows, on Gather or under a step (D65).
+function IngredientRow({
+  line,
+  factor,
+  used,
   onToggle,
-  uses,
-  timerEndsAt,
-  now,
-  soundNeedsTap,
-  onStartTimer,
-  onStopTimer,
 }: {
-  number: number;
-  step: Step;
-  current: boolean;
+  line: Line;
+  factor: number;
+  used: boolean;
   onToggle: () => void;
-  uses: string[];
-  timerEndsAt: number | undefined;
-  now: number;
-  soundNeedsTap: boolean;
-  onStartTimer: (minutes: number) => void;
-  onStopTimer: () => void;
 }) {
   return (
-    <li className="relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-pressed={current}
-        aria-label={
-          current ? `Step ${number}, current` : `Mark step ${number} as current`
-        }
-        className={cn(
-          "absolute inset-0 rounded-xl border transition-colors",
-          current ? "border-foreground bg-muted" : "border-transparent",
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={used}
+      className={cn(
+        "w-full border-b py-3 text-left text-lg leading-snug",
+        used && "text-muted-foreground line-through",
+      )}
+    >
+      <LineText line={showLine(line, factor)} />
+    </button>
+  );
+}
+
+// Gather (D64): every ingredient to get out, under its section, at the servings set here.
+function GatherScreen({
+  lines,
+  ingredient,
+  addToList,
+}: {
+  lines: Line[];
+  ingredient: (line: Line) => ReactNode;
+  addToList: ReactNode;
+}) {
+  const { servings, setServings, yieldServings } = useRecipeServings();
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-heading text-xl">Ingredients</h2>
+        {yieldServings !== null && (
+          <fieldset className="flex items-center gap-1" aria-label="Servings">
+            <Button
+              variant="secondary"
+              size="icon-lg"
+              aria-label="Fewer servings"
+              disabled={servings <= 1}
+              onClick={() => setServings((value) => value - 1)}
+            >
+              <Minus />
+            </Button>
+            <span
+              className="min-w-12 text-center text-lg tabular-nums"
+              aria-live="polite"
+            >
+              {servings}
+            </span>
+            <Button
+              variant="secondary"
+              size="icon-lg"
+              aria-label="More servings"
+              onClick={() => setServings((value) => value + 1)}
+            >
+              <Plus />
+            </Button>
+          </fieldset>
         )}
-      />
-      <div className="pointer-events-none relative flex gap-3 px-3 py-2.5">
-        <span
-          aria-hidden
-          className="font-heading text-primary w-6 shrink-0 text-2xl leading-snug"
-        >
-          {number}
-        </span>
-        <div className="flex min-w-0 flex-col gap-2">
-          <p className="text-xl leading-relaxed [&_a]:pointer-events-auto">
-            <InlineMarkdown>{step.text}</InlineMarkdown>
-          </p>
-          {uses.length > 0 && (
-            <p className="text-muted-foreground text-base">
-              {uses.join(" · ")}
-            </p>
-          )}
-          {step.timerMinutes !== null && (
-            <div className="pointer-events-auto">
-              <StepTimer
-                minutes={step.timerMinutes}
-                endsAt={timerEndsAt}
-                now={now}
-                soundNeedsTap={soundNeedsTap}
-                onStart={() => onStartTimer(step.timerMinutes ?? 0)}
-                onStop={onStopTimer}
-              />
-            </div>
-          )}
-        </div>
       </div>
-    </li>
+      <ul className="flex flex-col">
+        {lines.map((line, index) => (
+          <li key={line.position} className="flex flex-col">
+            {line.section && line.section !== lines[index - 1]?.section && (
+              <span className="text-muted-foreground mt-4 mb-1 text-sm font-semibold tracking-wide uppercase">
+                {line.section}
+              </span>
+            )}
+            {ingredient(line)}
+          </li>
+        ))}
+      </ul>
+      <p className="text-muted-foreground text-xs">
+        Tap an ingredient to cross it off as you get it out.
+      </p>
+      {addToList && <div>{addToList}</div>}
+    </section>
+  );
+}
+
+// One step, filling the screen (D63): its section, its words in large type, the ingredients
+// it uses (D65), and its timer.
+function StepScreen({
+  step,
+  uses,
+  timer,
+}: {
+  step: Step;
+  uses: ReactNode[];
+  timer: ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-5">
+      {step.section && (
+        <p className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
+          {step.section}
+        </p>
+      )}
+      <p className="text-2xl leading-relaxed">
+        <InlineMarkdown>{step.text}</InlineMarkdown>
+      </p>
+      {uses.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <h2 className="text-muted-foreground text-sm">This step uses</h2>
+          <ul className="flex flex-col">{uses}</ul>
+        </div>
+      )}
+      {timer}
+    </section>
   );
 }
 

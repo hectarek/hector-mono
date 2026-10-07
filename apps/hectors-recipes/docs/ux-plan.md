@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: planned, P21.1 next. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
-| Next task | P21.1 (one step at a time). |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: P21.1 done. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | P21.2 (Gather, the full list, and Done). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -1982,11 +1982,23 @@ Starting point, 2026-10-07:
 
 One commit per task; the PR when the phase is done.
 
-- [ ] **P21.1** One step at a time — C · D63, D65
+- [x] **P21.1** One step at a time — C · D63, D65
   - Do:
     - Cook progress keeps the screen you're on (`at`: `gather`, a step's position, or `done`) in place of the highlighted step. A step screen has "Step 3 of 8" (and its section, if any), a progress bar, the step in large type, the ingredients it uses at your servings (tap to tick, the same ticks as the full list), and its timer.
     - Back and Next sit at the bottom, 45 px and full width between them, Next filled. On the last step, Next is Finish.
   - Verify: screen tests (Next and Back move, a tick on a step shows in the list, a reload returns to the step), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - Cook progress saves `at` (`gather`, a step's position, or `done`) in place of `step`, and `moveScreen` gives the order. Progress saved the old way keeps its ticks and timers and opens on Gather. A saved step that's no longer in the recipe opens on Gather.
+    - The page's header moved into `CookMode`. The top bar has the recipe's name on Gather and Done, and "Step 3 of 8" (read out when it changes) with the shared `Progress` bar on a step; the name stays as the `h1`, visually hidden. Done is still there.
+    - A step screen has its section, its words at `text-2xl` (was `text-xl` in the list), "This step uses" with the same tappable rows as Gather, and its timer.
+    - A bar at the bottom: Start cooking on Gather; Back and Next (Finish on the last step) on a step; Back and Back to the recipe on Done.
+    - Ahead of P21.2, so the pager has both ends: a plain Gather (the ingredients and their sections, servings, Add to list, which moved here from the end of the page) and a plain Done.
+    - Tests:
+      - `moveScreen` and reading saved progress, the old shape included.
+      - Cook mode's screen tests rewritten for screens: Gather to Done and back, a step's tick shown on Gather, the timer on its step, a reload returning to the step (and the timer's sound), ticks kept, and a step that's gone opening on Gather.
+      - Mutations caught: no Finish, a step's ticks not shared, a gone step opening on Done, and the screen alone not kept.
+    - Screenshots at 375 px on the test project (Gather, step 2 of 3 with garlic ticked, Done), from a throwaway flow, deleted.
+    - All 1060 + 42 tests pass.
 - [ ] **P21.2** Gather, the full list, and Done — C · D64
   - Do:
     - Gather: the ingredients with their sections, the servings stepper, Add to list, and Start cooking (filled).

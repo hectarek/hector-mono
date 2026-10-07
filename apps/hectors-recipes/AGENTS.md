@@ -30,7 +30,7 @@ app/
     plan/              # Week view: ?week= (any date → its Monday), ?plan=; cook and eat rows (PlanWeek), then the grocery box (D50)
     groceries/         # A plan's grocery list: ?plan=, ?group=recipe (By recipe, D60), add box, "Got it" section, clear checked, Clear list in the ⋯ sheet (D52); live (LiveList), refresh every 60s as a safety net
     account/[path]/    # Neon Auth account views; settings adds our Appearance card (light/dark/system)
-  (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), large type, wake lock
+  (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), one screen at a time (Gather, each step, Done; D63), large type, wake lock
   (form)/recipes/new    # How to add one (docs/ux-plan.md D34): by link (new/link), by photo or file (new/photo, D53), or manually (new/manual, the form)
   (form)/recipes/new/manual, (form)/recipes/[id]/edit  # Add/edit a recipe: full-screen, with `TopBar` (Cancel, title, Save)
   _components/         # header, bottom-nav, recipe-card, recipe-form (+ ingredient-rows, step-rows, row-sheet),
@@ -156,7 +156,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 ## UI Rules
 - Design system: "Hector's Recipes" in Claude Design (tokens, type, patterns, logo: https://claude.ai/artifact/LjXi5gzWvjsaw1w1vKcNQn; screen mockups: https://claude.ai/artifact/DbiC7qhnhsWqXaQtyLF9Lw). In code it is `packages/ui/src/styles/themes/recipes.css` with `data-theme="recipes"` on `<html>`; fonts are Figtree (`--font-sans`) and Young Serif (`--font-heading`).
 - Surfaces: library, plan and groceries use the base (Market); the recipe page sets `data-surface="reading"` on its `<article>`, and the `(cook)` layout sets `data-surface="cook"`.
-- Type roles: a recipe's own words are `font-heading` (its name wherever it appears, the Ingredients and Method headings); everything else is the sans. Reading text is `text-lg`, cook steps `text-xl`, and step numbers are `marker:` utilities (serif, `primary`).
+- Type roles: a recipe's own words are `font-heading` (its name wherever it appears, the Ingredients and Method headings); everything else is the sans. Reading text is `text-lg`, a cook-mode step (one per screen) `text-2xl`, and step numbers are `marker:` utilities (serif, `primary`).
 - Bold moments: `ProduceTile` (`app/_components/produce-tile.tsx`, colour by `produceFor(id)`) for recipes without a photo and for empty-state icons; the plan's lemon Today sticker; the tab bar's active pill; the welcome screen's produce row (`ProduceArt`, `app/_components/produce-art.tsx`: the system's produce drawings in theme colours, so they work in dark mode). At most one in view, except the library grid.
 - The design lint's rules are errors here: fix with tokens, variants (`quiet` for muted actions), `InputGroup`, `Drawer` (bottom sheets), `no-scrollbar` and the safe-area utilities (`pb-safe-20` under the tab bar).
 - Logo and icons: `app/_components/logo.tsx` (generated from the system's logo; theme colours), `app/icon.svg` (favicon), `app/_lib/app-icon.tsx` (the PNG icons, drawn with `<img>` of the SVG so no inline styles are needed).
