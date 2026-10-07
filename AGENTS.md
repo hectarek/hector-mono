@@ -11,8 +11,6 @@
 ## Communication
 - No sycophancy — skip praise, get to the point
 - High-level overviews; assume competence with the stack
-- Always show proper error handling at boundaries
-- Minimal comments — explain non-obvious intent only, never narrate the code
 
 ## Maintaining Agent Context (every task)
 Context is part of the deliverable — keep it lean, layered, and current. See [docs/development/agent-context-playbook.md](docs/development/agent-context-playbook.md).
@@ -39,7 +37,7 @@ Context is part of the deliverable — keep it lean, layered, and current. See [
 ## Don't
 - don't use `any` — find the correct type, use `unknown` with type guards if truly needed
 - don't use `_unused` variables — fix the root cause
-- don't use ESLint or Prettier — Biome handles linting and formatting, Oxlint only runs the shadcn design-system and clean-architecture rules (see **Design-System Lint** and **Architecture Lint**)
+- don't use ESLint or Prettier — Biome handles linting and formatting, Oxlint only runs the shadcn design-system and clean-architecture rules (see **Lint and Dead Code**)
 - don't use barrel files (index files solely for re-exporting)
 - don't use class components — functional only
 - don't abstract until 3 duplications exist
@@ -78,43 +76,16 @@ Scope checks to the app you touched (faster, less noise) before finishing any ta
 bun check --filter=<app-name> && bun ts --filter=<app-name>
 ```
 Use the unscoped `bun check && bun ts` only when changes span multiple apps or shared packages.
-Then run `bun run dead-code` (Fallow, whole repo, under a second): it fails on an unused file, export, type or dependency your change left behind (see **Dead Code**).
+Then run `bun run dead-code` (Fallow, whole repo, under a second): it fails on an unused file, export, type or dependency your change left behind (see **Lint and Dead Code**).
 If you touched tests, also run them from the app: `cd apps/<app> && bun test tests/path/to/affected.test.ts`.
 Claude Code's `PostToolUse` hook (`.claude/hooks/lint-on-edit.sh`) already runs each edited file through its package's linters, Biome with `--write` and then Oxlint, and reports what's left; fix it before moving on. Typecheck and tests aren't in the hook, so the checks above still apply.
 
 CI (`.github/workflows/ci.yml`) runs lint, typecheck and tests for every package a PR affects, using Turbo's `--filter='...[origin/main]'`, and the dead-code check on the whole repo. Lint fails if `biome check --write` would change a file, or on any warning (every `lint` script runs `biome check --error-on-warnings` and `oxlint --deny-warnings`), so run `bun check` before pushing. Builds are left to Vercel's per-PR deploys. An app with tests needs a `test` script in its `package.json` for Turbo to pick it up.
 
-## Biome
-- `@repo/biome-config` runs Biome's full recommended set. The one rule off is `useLiteralKeys`: the portfolio typechecks with `noPropertyAccessFromIndexSignature`, which requires `process.env["X"]`, the opposite of what the rule asks.
-- Warnings fail like errors: the recommended set reports some rules only as warnings (`noExplicitAny`, for one), so every `lint` script runs `biome check --write --error-on-warnings`.
-- The root `biome.json` exempts two things that can't satisfy specific rules, each listed by rule: shadcn registry source in `packages/ui/src/components/` (not the hand-written `file-drop-zone` and `theme-provider`), which an update would overwrite, and `next/og` image files (`apps/hectors-recipes/app/_lib/app-icon.tsx`), which can only draw a plain `<img>`.
-- Remote images go through `next/image` with `unoptimized` when they can come from any site (recipe photos): it serves them as they are, needs no `remotePatterns`, and uses no image-optimization quota.
-
-## Design-System Lint
-`@shadcn/lint` runs on [Oxlint](https://oxc.rs/docs/guide/usage/linter/js-plugins.html) to check how apps consume `@repo/ui`. Biome still owns everything else; Oxlint's own rule categories are off and it runs only the rules listed in its config (these and the **Architecture Lint** ones), so the two never report the same thing.
-- Config: root `.oxlintrc.json`. Every rule is listed there on purpose — relax from the full set, don't add rules back one at a time.
-- Each app's `lint` script is `biome check --write --error-on-warnings && oxlint --deny-warnings .`, so Turbo filtering and CI cover it. Oxlint finds the root config from any app directory.
-- Rules: `no-restyle` (restyling `@repo/ui` components through `className`), `no-raw-colors`, `no-unknown-classes`, `require-static-classes`, `no-inline-styles`, `no-arbitrary-values`.
-- Rules are `warn` at the root and `error` in an `overrides` entry listing every app, which keeps each rule's options (`no-restyle` keeps `allow: ["layout"]`). `--deny-warnings` makes a warning fail too, so a design-lint finding fails the app's `lint` script, `bun check` and CI either way (the build doesn't run Oxlint).
-- Deliberate relaxations, both in `overrides`: all rules off for `packages/ui/src/components/**` (shadcn registry source; the two hand-written files there, `file-drop-zone` and `theme-provider`, pass the rules without it), and `no-arbitrary-values` off for `hector-portfolio` (its custom type scale; that override comes after the apps' `error` one, so it still wins). Tests are in `ignorePatterns` — `cn()` tests use fake class names.
-- Prefer the fix the error suggests (a variant or size prop, a theme token). For a real exception: `// oxlint-disable-next-line shadcn/<rule> -- reason`.
-- Loosening a rule for a component is a design-system decision: use `contracts` in `.oxlintrc.json` rather than scattering disable comments.
-
-## Architecture Lint
-Oxlint enforces the complex apps' layer rules ([docs/clean-architecture.md §5](docs/clean-architecture.md#5-layer--import-rules)) with `no-restricted-imports`, one `.oxlintrc.json` override per layer listing `stash`, `hectors-recipes` and `hectors-tools`. A new complex app adds its paths to every layer entry (the `new-app` skill).
-- Entities, application and interface-adapters are allow-lists: only `zod`, the layer itself and the layers inside it. Infrastructure and `app/` are deny-lists, since they also use vendor SDKs and the framework.
-- `app/` (with `proxy.ts`) is strict: it imports entities, `@/di` and other `app/` files, never `src/application`, `src/interface-adapters`, `src/infrastructure`, `db/` or `drizzle-orm`. Root `lib/` is allowed only in the auth route and auth page, through the last override.
-- A violation is a design problem: declare an interface in application and implement it in infrastructure, or call a controller through `getInjection`. Never widen a pattern to make it pass.
-- `import/no-cycle` runs for every app. `plugins: ["import"]` replaces Oxlint's default plugin set, which costs nothing since every rule is listed explicitly.
-- Writing patterns: keep each layer to one `group` with the relative escapes (`../**/infrastructure/**`) at the end, re-banning what `!../**` allowed. Oxlint leaks a `!` negation into the rule's other pattern objects. `@/src/*` doesn't match nested paths (write `**`), and regex lookahead isn't supported. A later override replaces a rule's options rather than merging them.
-
-## Dead Code
-[Fallow](https://fallow.tools/docs/) (root devDependency, pinned: it releases often) builds the whole repo's import graph to find what nothing uses, which Biome and tsc can't see one file at a time. `bun run dead-code` runs it, and so does CI.
-- Config: root `.fallowrc.json`. It fails on unused files, exports, types, enum and class members and dependencies, unlisted or misplaced dependencies, Next.js server/client mistakes (a `"use client"` file exporting `metadata`, a misplaced directive, a route collision), CSS drift, and a `fallow-ignore` without a reason. Import cycles are off here because Oxlint owns them (**Architecture Lint**).
-- An export used only in its own file is a finding: drop the `export`. If the code is then unused, delete it, unless it's a feature that was never wired up: then wire it or ask. Check for one before deleting: a doc that says it isn't applied yet, a comment saying what should call it, or a UI field nothing reads.
-- There's no baseline: the repo is at zero findings, and any finding fails.
-- Config exceptions, each for a file Fallow can't see being used: `apps/hectors-recipes/scripts/*.ts` is an entry point (Playwright runs one and the other runs by hand), `@repo/biome-config` is resolved by Biome's `extends`, and `generateStaticParams` in a route handler is called by Next.js.
-- Before deleting something Fallow reports, confirm it: `bunx fallow dead-code --trace <file>:<export>`.
+## Lint and Dead Code
+Biome lints and formats; Oxlint runs only the shadcn design-system rules and the complex apps' architecture rules; Fallow finds dead code. Config, rule lists, exemptions and gotchas: [docs/lint-and-dead-code.md](docs/lint-and-dead-code.md).
+- A design-lint or architecture-lint finding is a design problem: use the fix the error suggests (a variant, a theme token), or declare an interface in application and implement it in infrastructure. Never widen a rule or pattern to make it pass.
+- There's no dead-code baseline: the repo is at zero findings, and any finding fails. Before deleting something Fallow reports, confirm it: `bunx fallow dead-code --trace <file>:<export>`.
 
 ## Commits, branches and pull requests
 When asked to commit:
@@ -135,7 +106,6 @@ Hector runs several Claude Code sessions at once, so each agent does its branch 
 - Start one with `claude --worktree <name>` (or `-w`), the desktop app's worktree option, or by asking Claude to "work in a worktree". It's created at `.claude/worktrees/<name>/` (gitignored) from `origin/main`, on a new branch `worktree-<name>` (CLI and subagents) or `claude/<name>` (desktop app).
 - A worktree is a fresh checkout: run `bun install` in it first. The root `.worktreeinclude` copies the apps' gitignored `.env` files into each new worktree.
 - Rename the branch to the convention before pushing: `git branch -m <type/short-topic>`.
-- Never switch branches, stash, reset or clean the main checkout: Hector stages his own work there. Claude Code blocks a worktree session from editing it. Anything committed in the main checkout is committed by path (above).
 - One topic per worktree: start another worktree for another PR rather than switching this one's branch, so a branch with an open PR stays checked out where its session can find it.
 - `.claude/launch.json` gives each app a fixed port, so only one session at a time can preview a given app.
 - A PR stacked on another branch gets CI when GitHub retargets it to `main` (the workflow listens for that base change).
@@ -169,7 +139,7 @@ Choose the simplest pattern that solves the problem.
 - Server Components for static data
 
 **Complex apps (stash, hectors-recipes, hectors-tools, future apps with backend/auth/database)**:
-- Typed domain errors, caught at the server-action boundary (see **Error Handling**)
+- Typed domain errors, caught at the server-action boundary (see **Complex Apps**)
 - DI containers for dependency injection (`@evyweb/ioctopus`)
 - Repository/Use Case/Controller layers
 - Server actions for mutations
@@ -179,7 +149,7 @@ Choose the simplest pattern that solves the problem.
 
 ## Shared Packages
 - **`@repo/ui`**: shadcn/ui components — always check here before creating new components
-- **`@repo/biome-config`**: Shared Biome config; the root `biome.json` extends it and adds per-path overrides (see **Biome**)
+- **`@repo/biome-config`**: Shared Biome config; the root `biome.json` extends it and adds per-path overrides (see [docs/lint-and-dead-code.md](docs/lint-and-dead-code.md#biome))
 - **`@repo/typescript-config`**: Base tsconfig presets
 
 ## React & Next.js Patterns
@@ -188,58 +158,16 @@ Choose the simplest pattern that solves the problem.
 - Colocate components near their routes (`app/_components/`)
 - Providers live in `app/_providers/`
 
-## Data Flow (Complex Apps)
-```
-Reads:  Page (Server) → Controller (via getInjection) → Use Case → Repository
-              ↓
-        Client Components (receive data via props)
-
-Writes: form / Client Component → Server Action (app/actions/<domain>.ts)
-        → Controller → Use Case → Repository, then revalidatePath (or redirect)
-```
-
-## Error Handling (complex apps only)
-Both `stash` and `hectors-recipes` throw typed errors below the server action and catch them in it. Neither uses a `Result<T>` return type.
-- Errors are the classes in `src/entities/errors/common.ts`: `InputParseError`, `UnauthenticatedError`, `UnauthorizedError`, `NotFoundError`, `DatabaseOperationError`. An app may add errors that carry a `reason` the action turns into a message (recipes: `RecipeReadError`, `PageFetchError`, mapped in `toActionError`).
-- Controllers throw `UnauthenticatedError` / `InputParseError` (Zod error as `cause`); use cases throw `NotFoundError` / `UnauthorizedError`; repositories wrap driver errors as `DatabaseOperationError` via `BaseRepository.handleError`.
-- Server actions catch, log, and turn the error into state the UI shows (e.g. `{ error: string }`). Only unexpected errors fall back to a generic message.
-```typescript
-try {
-  await getInjection("ICreateThingController")(input, userId);
-} catch (err) {
-  // Both apps centralize this mapping in app/actions/shared.ts; hectors-recipes' is the reference.
-  return toActionError(err, logger, "Couldn't save it.");
-}
-```
-- A transaction manager that wraps errors must rethrow domain errors unchanged, or a denial inside a transaction surfaces as "Transaction failed".
-
-Full pattern: [docs/clean-architecture.md §3.5](docs/clean-architecture.md#35-app-layer-app-proxyts).
-
-## Layer Rules (complex apps only)
-Full reference: [docs/clean-architecture.md](docs/clean-architecture.md). `hectors-recipes` is the reference implementation; `stash` was the first example of the pattern and isn't authoritative where they differ.
-- **Entities** (`src/entities/`) → pure domain logic (Zod schemas), no dependencies
-- **Application** (`src/application/`) → use cases + interfaces, imports only entities
-- **Interface Adapters** (`src/interface-adapters/`) → controllers/DTOs, imports application + entities
-- **Infrastructure** (`src/infrastructure/`) → implements interfaces from entities, interfaces, `db/`, `lib/` and vendor SDKs; never use cases, controllers, DI, `app/` or the framework
-- Oxlint enforces these (see **Architecture Lint**)
-- **DI** (`di/`) → wires everything together
-
-## Feature Implementation Order (complex apps)
-Inward-out, starting with the Zod schema and ending with the server action and UI: the steps, with their paths, are in [docs/clean-architecture.md §9](docs/clean-architecture.md#9-adding-a-feature-order).
+## Complex Apps
+`stash`, `hectors-recipes` and `hectors-tools` follow [docs/clean-architecture.md](docs/clean-architecture.md). `hectors-recipes` is the reference implementation; `stash` was the first example of the pattern and isn't authoritative where they differ.
+- Layers: entities (Zod schemas, no dependencies), application (use cases and interfaces), interface adapters (controllers), infrastructure (implements the interfaces with `db/`, `lib/` and vendor SDKs), and `di/`, which wires them. Each imports only inward, and Oxlint enforces it ([§5](docs/clean-architecture.md#5-layer--import-rules)).
+- Reads go page → controller (through `getInjection`) → use case → repository. Writes go through a server action in `app/actions/<domain>.ts`, then `revalidatePath` or `redirect` ([§3](docs/clean-architecture.md#3-layers-in-detail) has the diagram).
+- Errors are typed classes thrown below the server action and caught in it with `toActionError`, never returned as a `Result<T>` ([§3.5](docs/clean-architecture.md#35-app-layer-app-proxyts)). A transaction manager rethrows domain errors unchanged ([§7](docs/clean-architecture.md#transactions)).
+- Build a feature inward-out, from the Zod schema to the server action and UI ([§9](docs/clean-architecture.md#9-adding-a-feature-order)).
 
 ## Hook Placement (apps with client state)
 - **Container components** (`*-container.tsx`, e.g. relationship-meter's `relationship-meter-container.tsx`): Call domain hooks, orchestrate logic
 - **Leaf components**: Receive plain functions as props, only use local state hooks
-
-## Task Approach
-- **Bug fixes**: Minimize blast radius, reproduce first, don't refactor unrelated code
-- **New features**: Follow feature implementation order, start with Zod schema
-- **Refactors**: Preserve existing behavior, run checks frequently
-
-## When Stuck
-- Ask a clarifying question
-- Propose a plan
-- Don't push speculative changes
 
 <!-- BEGIN:turborepo-agent-rules -->
 
