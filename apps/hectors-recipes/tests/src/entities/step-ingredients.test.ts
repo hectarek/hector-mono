@@ -44,4 +44,19 @@ describe("stepIngredients", () => {
   it("matches whole words only", () => {
     expect(used("Bring salted water to a boil.")).toEqual([]);
   });
+
+  // Found in Phase 21's screenshots: "slice the green onions" listed the onion too.
+  it("doesn't find a name that's only part of a longer line's name", () => {
+    const onions = [{ name: "onion" }, { name: "green onions" }];
+    const usedOf = (step: string) =>
+      stepIngredients(step, onions).map((line) => line.name);
+    expect(usedOf("Slice the green onions for serving.")).toEqual([
+      "green onions",
+    ]);
+    expect(usedOf("Add the onion, then the green onions.")).toEqual([
+      "onion",
+      "green onions",
+    ]);
+    expect(usedOf("Dice the onion.")).toEqual(["onion"]);
+  });
 });

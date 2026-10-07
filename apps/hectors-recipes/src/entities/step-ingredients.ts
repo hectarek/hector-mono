@@ -14,6 +14,18 @@ export function stepIngredients<L extends { name: string | null }>(
   );
   const endsWith = (phrase: string[], ending: string[]) =>
     phrase.slice(-ending.length).join(" ") === ending.join(" ");
+  // The text without other lines' longer names that end in these words, so "onion" isn't
+  // found in "slice the green onions".
+  const without = (ending: string[], index: number) =>
+    phrases.reduce(
+      (rest, other, otherIndex) =>
+        otherIndex !== index &&
+        other.length > ending.length &&
+        endsWith(other, ending)
+          ? rest.replaceAll(` ${other.join(" ")} `, " | ")
+          : rest,
+      text,
+    );
 
   const used: L[] = [];
   lines.forEach((line, index) => {
@@ -23,7 +35,7 @@ export function stepIngredients<L extends { name: string | null }>(
       const shared = phrases.filter((other) => endsWith(other, ending)).length;
       if (
         (start === 0 || shared === 1) &&
-        text.includes(` ${ending.join(" ")} `)
+        without(ending, index).includes(` ${ending.join(" ")} `)
       ) {
         used.push(line);
         return;
