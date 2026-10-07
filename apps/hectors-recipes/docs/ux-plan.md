@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`: in progress. Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
-| Next task | P22.1 and P22.2 done (the map, and the rule for placing a change on it); their PR. Then P22.3 once Hector has shared the testers' feedback (H30). |
+| Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`, in review as hectarek/hector-mono#31: P22.1 and P22.2 done, P22.3 waiting on the feedback. Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
+| Next task | P22.3 once Hector has shared the testers' feedback (H30); Hector reviews hectarek/hector-mono#31. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -2430,4 +2430,4 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
   - Next: P21.5, then P21.6, on the same PR.
   - P21.5 and P21.6 done (see their Evidence), pushed to hectarek/hector-mono#30. Next: Hector's review and merge; the phone check (H5); then Phase 20's discussion.
 - **2026-10-07 (bh)** — Hector merged Phase 21 (hectarek/hector-mono#30). Testers sent a lot of feedback, and Hector asked how to take it in without cluttering the app. Phase 22 planned (D70): a map of the app first, then the feedback placed on it; the as-built screens on the canvas later (L9).
-  - Next: P22.1; the feedback (H30).
+  - P22.1 (the map) and P22.2 (placing a change on it) done; PR hectarek/hector-mono#31. Next: the feedback (H30), then P22.3.
