@@ -150,6 +150,39 @@ describe("CookMode", () => {
     view.getByRole("button", { name: /^1¼ lb ground turkey/ });
   });
 
+  // D66: a timer follows you to other steps, and takes you back to its own.
+  it("pins a running timer above other steps, and goes back to its step", async () => {
+    const user = userEvent.setup();
+    save({ used: [], at: 2, timers: {} });
+    const view = cook();
+    await view.findByText("Step 2 of 2");
+    await user.click(button(view, "Start 20-minute timer"));
+    expect(view.queryByRole("list", { name: "Timers" })).toBe(null);
+
+    await user.click(button(view, "Back"));
+    view.getByText("Step 1 of 2");
+    const timers = view.getByRole("list", { name: "Timers" });
+    expect(timers.textContent).toMatch(/^Step 2 · (20:00|19:5\d)$/);
+
+    await user.click(within(timers).getByRole("button"));
+    view.getByText("Step 2 of 2");
+    view.getByRole("timer");
+  });
+
+  it("says when another step's timer is up, and dismisses it", async () => {
+    const user = userEvent.setup();
+    save({ used: [], at: 1, timers: { 2: Date.now() - 60_000 } });
+    const view = cook();
+    await view.findByText("Step 1 of 2");
+
+    const up = await view.findByRole("alert");
+    expect(up.textContent).toBe("Step 2: time's up · Dismiss");
+    await user.click(up);
+    expect(view.queryByRole("list", { name: "Timers" })).toBe(null);
+    await user.click(button(view, "Next"));
+    button(view, "Start 20-minute timer");
+  });
+
   it("starts over from Done: nothing ticked, back on Gather", async () => {
     const user = userEvent.setup();
     const view = cook();
@@ -173,9 +206,9 @@ describe("CookMode", () => {
     await user.click(button(view, "Start 20-minute timer"));
     expect(view.getByRole("timer").textContent).toMatch(/^(20:00|19:5\d)$/);
     expect(isAlarmPrimed()).toBe(true);
-    expect(view.queryByText("Tap anywhere to turn its sound back on.")).toBe(
-      null,
-    );
+    expect(
+      view.queryByText("Tap anywhere to turn the timer's sound back on."),
+    ).toBe(null);
 
     await user.click(button(view, /Stop/));
     button(view, "Start 20-minute timer");
@@ -191,14 +224,14 @@ describe("CookMode", () => {
     await view.findByText("Picked up where you left off.");
     view.getByText("Step 2 of 2");
     view.getByRole("timer");
-    await view.findByText("Tap anywhere to turn its sound back on.");
+    await view.findByText("Tap anywhere to turn the timer's sound back on.");
     expect(isAlarmPrimed()).toBe(false);
 
     await user.click(view.getByText("Picked up where you left off."));
     expect(isAlarmPrimed()).toBe(true);
-    expect(view.queryByText("Tap anywhere to turn its sound back on.")).toBe(
-      null,
-    );
+    expect(
+      view.queryByText("Tap anywhere to turn the timer's sound back on."),
+    ).toBe(null);
   });
 
   it("keeps what's crossed off for the session", async () => {

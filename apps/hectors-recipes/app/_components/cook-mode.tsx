@@ -291,10 +291,18 @@ function CookModeContent({
       ? "done"
       : "gather";
 
-  function go(by: 1 | -1) {
-    progress.goTo(moveScreen(screen, by, steps));
+  function show(to: CookScreen) {
+    progress.goTo(to);
     window.scrollTo?.({ top: 0 });
   }
+  const go = (by: 1 | -1) => show(moveScreen(screen, by, steps));
+  // Timers running for other steps follow you (D66); a step shows its own.
+  const otherTimers = steps.flatMap((other, number) => {
+    const endsAt = progress.timers[other.position];
+    return endsAt !== undefined && other !== step
+      ? [{ position: other.position, number: number + 1, endsAt }]
+      : [];
+  });
 
   const ingredient = (line: Line) => (
     <IngredientRow
@@ -335,6 +343,25 @@ function CookModeContent({
             aria-label="Steps done"
           />
         )}
+        {otherTimers.length > 0 && (
+          <ul aria-label="Timers" className="flex flex-wrap gap-2">
+            {otherTimers.map((timer) => (
+              <li key={timer.position}>
+                <FollowingTimer
+                  {...timer}
+                  now={now}
+                  onShow={() => show(timer.position)}
+                  onDismiss={() => progress.stopTimer(timer.position)}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+        {soundNeedsTap && (
+          <p className="text-muted-foreground text-sm">
+            Tap anywhere to turn the timer&apos;s sound back on.
+          </p>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-6 py-4">
@@ -366,7 +393,6 @@ function CookModeContent({
                   minutes={step.timerMinutes}
                   endsAt={progress.timers[step.position]}
                   now={now}
-                  soundNeedsTap={soundNeedsTap}
                   onStart={() => {
                     primeAlarm();
                     progress.startTimer(step.position, step.timerMinutes ?? 0);
@@ -616,18 +642,53 @@ function StepScreen({
   );
 }
 
+// Another step's timer, pinned above the step you're on (D66): tap it to go back to its step,
+// or, once it's up, to dismiss it.
+function FollowingTimer({
+  number,
+  endsAt,
+  now,
+  onShow,
+  onDismiss,
+}: {
+  number: number;
+  endsAt: number;
+  now: number;
+  onShow: () => void;
+  onDismiss: () => void;
+}) {
+  if (endsAt <= now) {
+    return (
+      <Button size="lg" onClick={onDismiss} role="alert">
+        <Timer data-icon="inline-start" />
+        Step {number}: time&apos;s up · Dismiss
+      </Button>
+    );
+  }
+  return (
+    <Button
+      variant="secondary"
+      size="lg"
+      onClick={onShow}
+      aria-label={`Step ${number} timer, ${timeLeft(endsAt, now)} left. Go to step ${number}`}
+    >
+      <Timer data-icon="inline-start" />
+      Step {number} ·{" "}
+      <span className="tabular-nums">{timeLeft(endsAt, now)}</span>
+    </Button>
+  );
+}
+
 function StepTimer({
   minutes,
   endsAt,
   now,
-  soundNeedsTap,
   onStart,
   onStop,
 }: {
   minutes: number;
   endsAt: number | undefined;
   now: number;
-  soundNeedsTap: boolean;
   onStart: () => void;
   onStop: () => void;
 }) {
@@ -648,19 +709,12 @@ function StepTimer({
     );
   }
   return (
-    <div className="flex flex-col items-start gap-1">
-      <Button variant="secondary" size="lg" onClick={onStop}>
-        <Timer data-icon="inline-start" />
-        <span role="timer" className="tabular-nums">
-          {timeLeft(endsAt, now)}
-        </span>
-        · Stop
-      </Button>
-      {soundNeedsTap && (
-        <p className="text-muted-foreground text-sm">
-          Tap anywhere to turn its sound back on.
-        </p>
-      )}
-    </div>
+    <Button variant="secondary" size="lg" onClick={onStop}>
+      <Timer data-icon="inline-start" />
+      <span role="timer" className="tabular-nums">
+        {timeLeft(endsAt, now)}
+      </span>
+      · Stop
+    </Button>
   );
 }

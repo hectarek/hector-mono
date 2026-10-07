@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: P21.1 and P21.2 done. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
-| Next task | P21.3 (timers follow you). |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: P21.1–P21.3 done. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | P21.4 (getting around). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -2013,9 +2013,16 @@ One commit per task; the PR when the phase is done.
     - Tests: the sheet ticks the onion and steps the servings up, and both show on Gather (1 lb becomes 1¼ lb at 5 of 4); Start over from Done clears the ticks and the saved progress. Mutations caught: no sheet, and Start over doing nothing.
     - Screenshots at 375 px on the test project: the sheet over step 1, and Done.
     - All 1060 + 44 tests pass.
-- [ ] **P21.3** Timers follow you — C · D66
+- [x] **P21.3** Timers follow you — C · D66
   - Do: a strip above the step lists each running timer (its step and time left). Tapping one goes to its step. One that ends rings, as now, and reads "Time's up · Dismiss". The note about a tap turning the sound back on moves to the strip.
   - Verify: screen tests (a timer started on one step shows on the next, tapping it goes back, an ended one says Time's up), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - The top bar, which stays at the top as a long step scrolls, lists every running timer but the current step's own (`FollowingTimer`): "Step 2 · 19:40", tapping it goes to step 2. One that's up reads "Step 2: time's up · Dismiss", and tapping stops it. Ringing is unchanged.
+    - The note that a tap turns the timer's sound back on moved from the step's timer to the top bar, once.
+    - Tests: a timer started on step 2 isn't pinned on step 2, is on step 1, and takes you back to step 2; one that's up on another step says so and Dismiss stops it. Mutations caught: timers not following, tapping not going back, and Dismiss not stopping it.
+    - Screenshot at 375 px on the test project: step 3 with step 2's timer pinned.
+    - All 1060 + 46 tests pass.
+    - Found in that screenshot: step 3, "slice the green onions", listed "1 onion" too, since the matcher found "onion" inside "green onions". The long page had it as well; one step per screen made it plain. Fixed in its own commit (below).
 - [ ] **P21.4** Getting around — C · D63
   - Do:
     - A swipe left or right moves a screen (`swipeDirection`, as the week does), with the week's slide-in, none with reduced motion.
