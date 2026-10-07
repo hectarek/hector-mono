@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: done, its PR next. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
-| Next task | Phase 21's PR, then Phase 20's discussion. |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`, in review as hectarek/hector-mono#30: P21.1–P21.4 done, P21.5–P21.6 added after a review of how steps find their ingredients. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | P21.5 (a step's ingredients, matched more widely), then P21.6. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -131,6 +131,8 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D65 | A step shows the ingredients it uses, at the servings chosen. Ticking one there ticks it in the full list: one set of ticks. | Same. |
 | D66 | Running timers are pinned above the step on every screen. Tapping one goes to its step; one that ends rings and says Time's up. | Same. |
 | D67 | Not in Phase 21: marking the meal cooked from Done (it would tie cook mode to the plan), and a tablet layout with the step and ingredients side by side (the layout leaves room for it). | Same. |
+| D68 | A step's ingredients stay matched by name, not stored. Four changes to the matching: lines that share the word a step uses are all shown when the step says it in the plural ("the beans") or they're one ingredient listed twice, in place of none (D24 had it guess nothing); a name's first word, past words like "large" or "fresh", counts when no other line has it ("the chicken"); a name with "or" matches either side; and "sauce", "peel", "stem", "leaf" and "seed" don't match on their own. | Hector, 2026-10-07: "i dont want to store links unless we have to but do a review first"; after the review (P21.5's Found), "go ahead with both". |
+| D69 | The warning that the screen can't stay on can be dismissed, and stays dismissed on that device. A dimmed sun takes its place in the top bar, and tapping it shows the warning again. | Hector, 2026-10-07: "can we make that dismissable"; Claude's recommendation (on the device, not per cook); "go ahead with both". |
 
 ---
 
@@ -2037,6 +2039,17 @@ One commit per task; the PR when the phase is done.
     - A browser flow, `tests/flows/cook.flow.ts`, at 375 px with real touches: tick an ingredient on Gather, Start cooking, swipe to step 2 and start its timer, swipe back with the timer pinned, jump from the steps sheet, reload back onto the same step with its timer, then Finish and Back to the recipe. The week flow's `swipe` moved to `tests/flows/touch.ts`, shared by both.
     - Screenshots at 375 px from that flow: step 1 with step 2's timer pinned, and the steps sheet. Headless Chromium refuses the wake lock, so both show the warning; the icon waits for the phone check (H5).
     - All 1061 + 49 tests and the three flows pass.
+- [ ] **P21.5** A step's ingredients, matched more widely — C · D68
+  - Found (2026-10-07, read-only, the real `stepIngredients` over production's 81 recipes, every miss and suspect match read):
+    - Steps: 126 of 510 find no line. About 100 of those use none (preheat, bake, rest, serve, store); about 25 that use something show nothing.
+    - Lines: 831 of 1007 (83%) are found by some step. Of the 176 that aren't, about 80 are never named by a step ("add the spices", "the dry ingredients", garnishes), which no matching can fix. About 50 share the word the step uses ("add the beans" with four cans, "the bell peppers" in three colours, butter listed twice). About 25 are named by a first or middle word ("the chicken" for boneless skinless chicken breasts). About 6 are "X or Y" names, and about 8 are names the itemizer got wrong ("Salt, More").
+    - Wrong matches: about 15 of the 495 made by a name's ending. About 8 are "the sauce" meaning one the recipe makes, matched to its soy, fish or hot sauce; the rest are "milk" inside "coconut milk", and "leaf", "stem" and "peel" meaning something else.
+    - Sections don't settle a doubled ingredient yet: of the 9 recipes with step sections, one names its lines' sections the same way.
+  - Do: the four changes in `stepIngredients` (D68).
+  - Verify: tests for each change; the review run again before and after on production's recipes, read-only, with every match gained or lost read for wrong ones.
+- [ ] **P21.6** Dismiss the screen-lock warning — C · D69
+  - Do: an X on the warning. Dismissed, it's kept in `localStorage` (as the install hint is), and a dimmed sun in the top bar brings it back.
+  - Verify: screen tests (dismissing hides it, it stays hidden when cook mode opens again, the dimmed sun shows it again), and a screenshot at 375 px.
 
 ## Later (to-dos, not scheduled)
 
@@ -2358,3 +2371,5 @@ One commit per task; the PR when the phase is done.
   - Next: P21.1.
 - **2026-10-07 (bf)** — P21.1–P21.4 done (see each task's Evidence), and the step ingredients fix found in P21.3's screenshot. Phase 21 done.
   - Next: Phase 21's PR; Hector's phone check (H5); then Phase 20's discussion.
+- **2026-10-07 (bg)** — Phase 21's PR opened (hectarek/hector-mono#30). Hector asked how a step's ingredients are found and to make the screen-lock warning dismissable. A read-only review of production's recipes found matching covers most steps (P21.5's Found); Hector chose to keep it unstored and widen it (D68), and the warning can be dismissed (D69). The warning he saw was the Claude browser pane, which refuses the wake lock.
+  - Next: P21.5, then P21.6, on the same PR.
