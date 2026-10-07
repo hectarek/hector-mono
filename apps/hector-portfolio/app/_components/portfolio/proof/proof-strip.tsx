@@ -34,7 +34,7 @@ const PROOF_ITEMS: ProofItem[] = [
   {
     value: "100+",
     label: "Graduates placed",
-    hint: "From the first two cohorts I taught",
+    hint: "Of the roughly 130 career changers I taught",
   },
 ];
 
