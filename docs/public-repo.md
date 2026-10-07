@@ -7,7 +7,7 @@ This monorepo is public. Everything tracked in git is readable by anyone, includ
 | What | Where | Why |
 |---|---|---|
 | Secrets (database URLs, API keys, auth secrets) | Each app's `.env`, which is gitignored. Its `.env.example` lists the names with no values. The root `.worktreeinclude` copies the `.env` files into each new Claude Code worktree, under the gitignored `.claude/worktrees/`. | Credentials. |
-| Hector's personal docs (the portfolio's dossier, résumé, LinkedIn copy and other working notes) | `docs/private/` at the root, which is gitignored. They exist only on Hector's machine. | Personal information. |
+| Hector's personal docs (the portfolio's dossier, résumé, LinkedIn copy and other working notes) | Outside this repo, on Hector's machine only. `docs/private/`, their old home at the root, stays gitignored. | Personal information. |
 | Personal agent settings and worktrees (`.claude/settings.local.json`, `CLAUDE.local.md`, `.claude/worktrees/`) | Gitignored. The shared `.claude/settings.json` is tracked. | Personal approvals and local paths. |
 | Local data snapshots and one-off data scripts | Gitignored folders such as `apps/hectors-recipes/.reread/`. | Real user data. |
 
@@ -15,7 +15,7 @@ The portfolio site's content (`apps/hector-portfolio/src/data/*.json`) is tracke
 
 ## Rules
 
-- A new personal doc goes in `docs/private/` from the start. Moving it there later doesn't help: once committed, it stays in history.
+- A new personal doc goes outside this repo from the start. Moving it out later doesn't help: once committed, it stays in history.
 - No personal contact details (phone, private email, address) in tracked files.
 - Commits are authored with the GitHub noreply address, not a work or personal email.
 - Commit messages, pull request titles and descriptions, and review comments are public too, and GitHub keeps a pull request's text after its branch is deleted: no personal details or private-doc content in them.

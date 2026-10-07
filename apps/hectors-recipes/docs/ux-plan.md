@@ -1768,11 +1768,11 @@ One commit per task; the PR when the phase is done.
   - Do:
     - Claude reads every recipe in the session: its title, lines and steps. For each it proposes a meal tag (every recipe gets one), and cuisine and diet tags where they're clear.
     - Any diet tag Claude is unsure of is flagged, such as gluten in soy sauce or dairy in butter.
-    - The proposals go to Hector as a list of each recipe's tags now and proposed (H27). The list is kept in the gitignored `docs/private/`: it's his recipes.
+    - The proposals go to Hector as a list of each recipe's tags now and proposed (H27). The list is kept in the gitignored `apps/hectors-recipes/.reread/`: it's his recipes.
     - Once he's checked it, it's written to production with his OK at that moment, with any new cuisine added to the catalog with its group.
   - Verify: a dry run first. After writing, a read-only query shows every recipe's tags as approved, and every recipe has a meal tag.
   - Evidence so far (2026-10-04):
-    - Hector approved the whole list (H27). It's written as one transaction in the gitignored `docs/private/tagging-pass-2026-10-04.sql`: the 4 new cuisines (british, caribbean, french, polish) into the catalog, then the 74 recipes whose tags change, matched by title.
+    - Hector approved the whole list (H27). It's written as one transaction in the gitignored `apps/hectors-recipes/.reread/tagging-pass-2026-10-04.sql`: the 4 new cuisines (british, caribbean, french, polish) into the catalog, then the 74 recipes whose tags change, matched by title.
     - Dry run, in an in-memory Postgres with every migration and the 81 recipes' tags as they are today: 4 tags added, 74 recipes changed. Afterwards all 81 have the approved tags and a meal tag, and every tag in use has a group.
     - Claude's write to production was blocked by Claude Code's permission check, so Hector ran it after migration 0013 (H26), on 2026-10-05.
     - Read-only check on production afterwards (2026-10-05):
@@ -1931,7 +1931,7 @@ One commit per task; the PR when the phase is done.
 - [x] **P19.5** The units fix on existing lines — C+H · D62, D31
   - Do:
     - Claude reads every line the new rules change, and every stray catalog entry, and proposes each fix: the line's new unit and name, and the catalog ingredient it should link to.
-    - The list goes to Hector in the gitignored `docs/private/` (H29), with a dry run.
+    - The list goes to Hector in the gitignored `apps/hectors-recipes/.reread/` (H29), with a dry run.
     - He runs the write.
   - Verify: a read-only check afterwards that every line and link is as approved.
   - Evidence so far (2026-10-05):
@@ -1941,7 +1941,7 @@ One commit per task; the PR when the phase is done.
     - Four lines are marked for Hector to check:
       - "2 tins of chopped tomatoes" linked to diced tomato.
       - Three "minced garlic" lines linked to garlic, unless they mean a jar.
-    - The list and the SQL are in the gitignored `docs/private/units-fix-2026-10-05.{md,sql}`.
+    - The list and the SQL are in the gitignored `apps/hectors-recipes/.reread/units-fix-2026-10-05.{md,sql}`.
     - The SQL is one transaction. Each line is matched by its recipe, position and exact text, and it stops if the count isn't 32 or a catalog name is missing.
     - Dry run in an in-memory Postgres with every migration and the 32 lines as they are:
       - All 32 come out as proposed, the 23 strays go, and a target another line uses stays.
