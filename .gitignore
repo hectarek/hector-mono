@@ -41,10 +41,12 @@ yarn-error.log*
 # PromptFoo
 promptfoo/
 
-# Personal agent settings and worktrees (the shared settings are .claude/settings.json)
+# Personal agent settings, scratch and worktrees (the shared settings are .claude/settings.json)
 .claude/settings.local.json
 .claude/worktrees/
 CLAUDE.local.md
+.compound-engineering/*.local.yaml
+.context/compound-engineering/
 
 # Old home of Hector's personal docs, which now live outside this repo. Still
 # ignored so nothing left there gets committed (docs/public-repo.md)
