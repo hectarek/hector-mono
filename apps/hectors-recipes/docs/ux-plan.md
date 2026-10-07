@@ -11,7 +11,7 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 | | |
 |---|---|
 | Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`, in review as hectarek/hector-mono#30: P21.1–P21.4 done, P21.5–P21.6 added after a review of how steps find their ingredients. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
-| Next task | P21.5 (a step's ingredients, matched more widely), then P21.6. |
+| Next task | P21.6 (dismiss the screen-lock warning). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -2039,7 +2039,7 @@ One commit per task; the PR when the phase is done.
     - A browser flow, `tests/flows/cook.flow.ts`, at 375 px with real touches: tick an ingredient on Gather, Start cooking, swipe to step 2 and start its timer, swipe back with the timer pinned, jump from the steps sheet, reload back onto the same step with its timer, then Finish and Back to the recipe. The week flow's `swipe` moved to `tests/flows/touch.ts`, shared by both.
     - Screenshots at 375 px from that flow: step 1 with step 2's timer pinned, and the steps sheet. Headless Chromium refuses the wake lock, so both show the warning; the icon waits for the phone check (H5).
     - All 1061 + 49 tests and the three flows pass.
-- [ ] **P21.5** A step's ingredients, matched more widely — C · D68
+- [x] **P21.5** A step's ingredients, matched more widely — C · D68
   - Found (2026-10-07, read-only, the real `stepIngredients` over production's 81 recipes, every miss and suspect match read):
     - Steps: 126 of 510 find no line. About 100 of those use none (preheat, bake, rest, serve, store); about 25 that use something show nothing.
     - Lines: 831 of 1007 (83%) are found by some step. Of the 176 that aren't, about 80 are never named by a step ("add the spices", "the dry ingredients", garnishes), which no matching can fix. About 50 share the word the step uses ("add the beans" with four cans, "the bell peppers" in three colours, butter listed twice). About 25 are named by a first or middle word ("the chicken" for boneless skinless chicken breasts). About 6 are "X or Y" names, and about 8 are names the itemizer got wrong ("Salt, More").
@@ -2047,6 +2047,14 @@ One commit per task; the PR when the phase is done.
     - Sections don't settle a doubled ingredient yet: of the 9 recipes with step sections, one names its lines' sections the same way.
   - Do: the four changes in `stepIngredients` (D68).
   - Verify: tests for each change; the review run again before and after on production's recipes, read-only, with every match gained or lost read for wrong ones.
+  - Evidence (2026-10-07):
+    - `stepIngredients` has the four changes. A one-word side of an "or" takes the last side's last word ("brown or white rice" is brown rice and white rice). A name is also left out where it sits anywhere inside another line's whole name ("pepper" in "red pepper flakes"), not only at its end.
+    - Before and after on production's recipes, read-only: lines found by some step went from 831 to 885 of 1007, and steps finding no line from 126 to 117 of 510. 120 matches were gained and 24 lost; every one was read.
+      - Gained, right: the chicken, beef, broccoli, vanilla and mozzarella by the word that names them; "the beans" and "the bell peppers" across their lines; butter, eggs, cocoa, sea salt and oregano listed twice; soy sauce and balsamic from "or" names. About 5 are wrong, such as "coconut rice" finding the coconut milk and "your curry is too salty" finding the curry paste.
+      - Lost: about 18 were wrong, mostly "the sauce" for one the recipe makes, and "rice" in "rice vinegar", "chicken" in "chicken broth", "garlic" in "garlic powder". About 6 were right, such as "toasted seeds" and "the peels of lemons".
+      - The first run found new wrong matches from words a step uses for something else ("cooking" oil, "baking" powder, "all"-purpose flour, "vegetable" oil, "water" chestnuts, "heavy" cream) and "pepper" in "red pepper flakes". Those words are passed over now, and a name inside another line's whole name is left out.
+    - Tests: one per change, with lines each could be mistaken for. Mutations caught: the plural, one ingredient twice, the naming word, "or" sides, loose endings, the whole-name masking, and "baking" passed over. The first "or" test missed its mutation, since the naming word found the line too; it now has a second soy sauce beside it.
+    - All 1065 + 49 tests pass.
 - [ ] **P21.6** Dismiss the screen-lock warning — C · D69
   - Do: an X on the warning. Dismissed, it's kept in `localStorage` (as the install hint is), and a dimmed sun in the top bar brings it back.
   - Verify: screen tests (dismissing hides it, it stays hidden when cook mode opens again, the dimmed sun shows it again), and a screenshot at 375 px.
