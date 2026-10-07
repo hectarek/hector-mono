@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: P21.1 done. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
-| Next task | P21.2 (Gather, the full list, and Done). |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`: P21.1 and P21.2 done. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | P21.3 (timers follow you). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -1999,13 +1999,20 @@ One commit per task; the PR when the phase is done.
       - Mutations caught: no Finish, a step's ticks not shared, a gone step opening on Done, and the screen alone not kept.
     - Screenshots at 375 px on the test project (Gather, step 2 of 3 with garlic ticked, Done), from a throwaway flow, deleted.
     - All 1060 + 42 tests pass.
-- [ ] **P21.2** Gather, the full list, and Done — C · D64
+- [x] **P21.2** Gather, the full list, and Done — C · D64
   - Do:
     - Gather: the ingredients with their sections, the servings stepper, Add to list, and Start cooking (filled).
     - Opening cook mode with saved progress goes to that step, with "Picked up where you left off" and Start over.
     - From a step, the list button opens the full list in a sheet, with the stepper.
     - Done: back to the recipe, or start over.
   - Verify: screen tests (Gather to step 1, resuming on a saved step, the sheet's ticks, Done), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - Gather, resuming on a saved step and its notice came with P21.1.
+    - `IngredientList` (the stepper beside a heading, and the rows under their sections) is shared by Gather and `IngredientsSheet`, a bottom sheet opened by the list button (All ingredients) at the left of a step's bar. The list scrolls inside the sheet, which clips anything taller. The sheet's title keeps the sheet's own type: the design lint stops a restyle of `DrawerTitle`.
+    - Done has Start over, which clears the ticks, timers and screen.
+    - Tests: the sheet ticks the onion and steps the servings up, and both show on Gather (1 lb becomes 1¼ lb at 5 of 4); Start over from Done clears the ticks and the saved progress. Mutations caught: no sheet, and Start over doing nothing.
+    - Screenshots at 375 px on the test project: the sheet over step 1, and Done.
+    - All 1060 + 44 tests pass.
 - [ ] **P21.3** Timers follow you — C · D66
   - Do: a strip above the step lists each running timer (its step and time left). Tapping one goes to its step. One that ends rings, as now, and reads "Time's up · Dismiss". The note about a tap turning the sound back on moves to the strip.
   - Verify: screen tests (a timer started on one step shows on the next, tapping it goes back, an ended one says Time's up), and a screenshot at 375 px.

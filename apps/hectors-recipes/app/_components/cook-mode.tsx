@@ -1,9 +1,15 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@repo/ui/components/drawer";
 import { Progress } from "@repo/ui/components/progress";
 import { cn } from "@repo/ui/lib/utils";
-import { Minus, Plus, Sun, SunDim, Timer, X } from "lucide-react";
+import { List, Minus, Plus, Sun, SunDim, Timer, X } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { LineText } from "@/app/_components/line-text";
@@ -371,9 +377,17 @@ function CookModeContent({
             }
           />
         ) : screen === "done" ? (
-          <section className="flex flex-col gap-2">
+          <section className="flex flex-col items-start gap-2">
             <h2 className="font-heading text-xl">That&apos;s the last step</h2>
             <p className="text-muted-foreground text-lg">Enjoy it.</p>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="mt-4"
+              onClick={progress.startOver}
+            >
+              Start over
+            </Button>
           </section>
         ) : (
           <GatherScreen
@@ -393,6 +407,7 @@ function CookModeContent({
           )
         ) : (
           <>
+            {step && <IngredientsSheet lines={lines} ingredient={ingredient} />}
             <Button
               variant="secondary"
               size="lg"
@@ -450,21 +465,22 @@ function IngredientRow({
   );
 }
 
-// Gather (D64): every ingredient to get out, under its section, at the servings set here.
-function GatherScreen({
+// Every ingredient under its section, at the servings set by the stepper beside the heading:
+// on Gather, and in the sheet from a step (D64).
+function IngredientList({
+  heading,
   lines,
   ingredient,
-  addToList,
 }: {
+  heading: ReactNode;
   lines: Line[];
   ingredient: (line: Line) => ReactNode;
-  addToList: ReactNode;
 }) {
   const { servings, setServings, yieldServings } = useRecipeServings();
   return (
-    <section className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-heading text-xl">Ingredients</h2>
+        {heading}
         {yieldServings !== null && (
           <fieldset className="flex items-center gap-1" aria-label="Servings">
             <Button
@@ -505,11 +521,66 @@ function GatherScreen({
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// Gather (D64): the ingredients to get out, and Add to list.
+function GatherScreen({
+  lines,
+  ingredient,
+  addToList,
+}: {
+  lines: Line[];
+  ingredient: (line: Line) => ReactNode;
+  addToList: ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <IngredientList
+        heading={<h2 className="font-heading text-xl">Ingredients</h2>}
+        lines={lines}
+        ingredient={ingredient}
+      />
       <p className="text-muted-foreground text-xs">
         Tap an ingredient to cross it off as you get it out.
       </p>
       {addToList && <div>{addToList}</div>}
     </section>
+  );
+}
+
+// From a step, the whole list in a sheet (D64), with the same ticks and servings.
+function IngredientsSheet({
+  lines,
+  ingredient,
+}: {
+  lines: Line[];
+  ingredient: (line: Line) => ReactNode;
+}) {
+  return (
+    <Drawer showSwipeHandle>
+      <DrawerTrigger
+        render={
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            aria-label="All ingredients"
+          />
+        }
+      >
+        <List />
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="pb-safe-4 min-h-0 flex-1 overflow-y-auto px-4 pt-4">
+          <IngredientList
+            heading={<DrawerTitle>Ingredients</DrawerTitle>}
+            lines={lines}
+            ingredient={ingredient}
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
 

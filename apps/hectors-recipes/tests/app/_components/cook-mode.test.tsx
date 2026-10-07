@@ -6,7 +6,7 @@ import {
   expect,
   it,
 } from "bun:test";
-import { render } from "@testing-library/react";
+import { render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CookMode } from "@/app/_components/cook-mode";
 import { isAlarmPrimed, quietAlarm } from "@/app/_lib/alarm";
@@ -127,6 +127,41 @@ describe("CookMode", () => {
     await user.click(button(view, "Back"));
     expect(pressed(view, "1 lb ground turkey")).toBe("true");
     expect(pressed(view, /onion/)).toBe("false");
+  });
+
+  // D64: from a step, the whole list in a sheet, with the same ticks and servings.
+  it("opens every ingredient from a step, with the same ticks and servings", async () => {
+    const user = userEvent.setup();
+    const view = cook();
+    await user.click(button(view, "Start cooking"));
+
+    await user.click(button(view, "All ingredients"));
+    const sheet = await view.findByRole("dialog", { name: "Ingredients" });
+    await user.click(within(sheet).getByRole("button", { name: /onion/ }));
+    await user.click(
+      within(sheet).getByRole("button", { name: "More servings" }),
+    );
+    within(sheet).getByRole("button", { name: /^1¼ lb ground turkey/ });
+    await user.keyboard("{Escape}");
+
+    view.getByText("Step 1 of 2");
+    await user.click(button(view, "Back"));
+    expect(pressed(view, /onion/)).toBe("true");
+    view.getByRole("button", { name: /^1¼ lb ground turkey/ });
+  });
+
+  it("starts over from Done: nothing ticked, back on Gather", async () => {
+    const user = userEvent.setup();
+    const view = cook();
+    await user.click(button(view, /onion/));
+    await user.click(button(view, "Start cooking"));
+    await user.click(button(view, "Next"));
+    await user.click(button(view, "Finish"));
+
+    await user.click(button(view, "Start over"));
+    view.getByRole("heading", { name: "Ingredients" });
+    expect(pressed(view, /onion/)).toBe("false");
+    expect(sessionStorage.getItem(cookProgressKey(RECIPE_ID))).toBe(null);
   });
 
   it("runs a step's timer from its button, and stops it", async () => {
