@@ -9,7 +9,16 @@ import {
 } from "@repo/ui/components/drawer";
 import { Progress } from "@repo/ui/components/progress";
 import { cn } from "@repo/ui/lib/utils";
-import { List, Minus, Plus, Sun, SunDim, Timer, X } from "lucide-react";
+import {
+  ChevronDown,
+  List,
+  Minus,
+  Plus,
+  Sun,
+  SunDim,
+  Timer,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { LineText } from "@/app/_components/line-text";
@@ -34,11 +43,14 @@ import {
   shouldRing,
   timeLeft,
 } from "@/app/_lib/cook-progress";
+import { useSwipe } from "@/app/_lib/use-swipe";
 import { useWakeLock, type WakeLockStatus } from "@/app/_lib/use-wake-lock";
+import { stripMarkdown } from "@/src/entities/ingredient-line";
 import type { RecipeIngredient } from "@/src/entities/models/recipe-ingredient.model";
 import type { RecipeStep } from "@/src/entities/models/recipe-step.model";
 import { showLine } from "@/src/entities/scaling";
 import { stepIngredients } from "@/src/entities/step-ingredients";
+import { stepGroups } from "@/src/entities/step-text";
 
 type Line = Pick<
   RecipeIngredient,
@@ -62,21 +74,23 @@ const WAKE_LOCK_TEXT: Record<WakeLockStatus, string> = {
     "This browser didn't allow keeping the screen on. Turn off auto-lock while cooking.",
 };
 
-function WakeLockNotice() {
-  const status = useWakeLock();
-  const ok = status === "on" || status === "pending";
-  const Icon = ok ? Sun : SunDim;
+// Whether the screen stays on (D63): an icon in the top bar while it does, and a warning
+// above the screen when the browser can't keep it on.
+function WakeLockNotice({ status }: { status: WakeLockStatus }) {
+  if (status === "on" || status === "pending") {
+    return (
+      <p role="status" className="text-muted-foreground">
+        <Sun className="size-5" aria-hidden />
+        <span className="sr-only">{WAKE_LOCK_TEXT[status]}</span>
+      </p>
+    );
+  }
   return (
     <p
       role="status"
-      className={cn(
-        "flex items-center gap-1.5 text-xs",
-        ok
-          ? "text-muted-foreground"
-          : "bg-warning text-warning-foreground rounded-lg px-3 py-2",
-      )}
+      className="bg-warning text-warning-foreground flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs"
     >
-      <Icon className="size-3.5 shrink-0" aria-hidden />
+      <SunDim className="size-3.5 shrink-0" aria-hidden />
       {WAKE_LOCK_TEXT[status]}
     </p>
   );
@@ -296,6 +310,22 @@ function CookModeContent({
     window.scrollTo?.({ top: 0 });
   }
   const go = (by: 1 | -1) => show(moveScreen(screen, by, steps));
+  const swipe = useSwipe(go);
+  const wakeLock = useWakeLock();
+  const screenOk = wakeLock === "on" || wakeLock === "pending";
+  // A new screen slides in from the side it came from, as the week does (D54).
+  const order =
+    screen === "gather" ? -1 : screen === "done" ? steps.length : index;
+  const shownOrder = useRef(order);
+  const slideFrom =
+    shownOrder.current === order
+      ? null
+      : order > shownOrder.current
+        ? "right"
+        : "left";
+  useEffect(() => {
+    shownOrder.current = order;
+  }, [order]);
   // Timers running for other steps follow you (D66); a step shows its own.
   const otherTimers = steps.flatMap((other, number) => {
     const endsAt = progress.timers[other.position];
@@ -323,19 +353,26 @@ function CookModeContent({
             {title}
           </h1>
           {step && (
-            <p aria-live="polite" className="text-lg font-medium">
-              Step {index + 1} of {steps.length}
-            </p>
+            <StepsSheet
+              steps={steps}
+              current={step.position}
+              label={`Step ${index + 1} of ${steps.length}`}
+              onShow={show}
+              onStartOver={progress.startOver}
+            />
           )}
-          <Button
-            variant="secondary"
-            size="lg"
-            nativeButton={false}
-            render={<Link href={recipeHref} />}
-          >
-            <X data-icon="inline-start" />
-            Done
-          </Button>
+          <div className="flex items-center gap-3">
+            {screenOk && <WakeLockNotice status={wakeLock} />}
+            <Button
+              variant="secondary"
+              size="lg"
+              nativeButton={false}
+              render={<Link href={recipeHref} />}
+            >
+              <X data-icon="inline-start" />
+              Done
+            </Button>
+          </div>
         </div>
         {step && (
           <Progress
@@ -364,9 +401,19 @@ function CookModeContent({
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-6 py-4">
+      <div
+        key={String(screen)}
+        {...swipe}
+        className={cn(
+          "flex flex-1 touch-pan-y touch-pinch-zoom flex-col gap-6 py-4",
+          slideFrom &&
+            "animate-in fade-in duration-200 motion-reduce:animate-none",
+          slideFrom === "right" && "slide-in-from-right-6",
+          slideFrom === "left" && "slide-in-from-left-6",
+        )}
+      >
         <div className="flex flex-col gap-2">
-          <WakeLockNotice />
+          {!screenOk && <WakeLockNotice status={wakeLock} />}
           {progress.resumed && (
             <div className="text-muted-foreground flex items-center justify-between gap-3 text-sm">
               <span>Picked up where you left off.</span>
@@ -573,6 +620,83 @@ function GatherScreen({
       </p>
       {addToList && <div>{addToList}</div>}
     </section>
+  );
+}
+
+// "Step 3 of 8", which opens every step to jump to one (D63), and Start over.
+function StepsSheet({
+  steps,
+  current,
+  label,
+  onShow,
+  onStartOver,
+}: {
+  steps: Step[];
+  current: number;
+  label: string;
+  onShow: (position: number) => void;
+  onStartOver: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
+      <DrawerTrigger render={<Button variant="quiet" size="lg" />}>
+        <span aria-live="polite">{label}</span>
+        <ChevronDown data-icon="inline-end" />
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="pb-safe-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-4">
+          <DrawerTitle>Steps</DrawerTitle>
+          {stepGroups(steps).map((group) => (
+            <div key={group.first} className="flex flex-col">
+              {group.section && (
+                <h3 className="text-muted-foreground mt-2 mb-1 text-sm font-semibold tracking-wide uppercase">
+                  {group.section}
+                </h3>
+              )}
+              <ol className="flex flex-col">
+                {group.steps.map((step, offset) => (
+                  <li key={step.position}>
+                    <button
+                      type="button"
+                      aria-current={
+                        step.position === current ? "step" : undefined
+                      }
+                      onClick={() => {
+                        onShow(step.position);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full gap-3 border-b py-3 text-left",
+                        step.position === current && "font-semibold",
+                      )}
+                    >
+                      <span className="text-primary font-heading w-6 shrink-0">
+                        {group.first + offset}
+                      </span>
+                      <span className="line-clamp-2">
+                        {stripMarkdown(step.text)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+          <Button
+            variant="secondary"
+            size="lg"
+            className="self-start"
+            onClick={() => {
+              onStartOver();
+              setOpen(false);
+            }}
+          >
+            Start over
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
 

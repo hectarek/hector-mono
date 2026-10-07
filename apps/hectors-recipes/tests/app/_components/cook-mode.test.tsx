@@ -6,7 +6,7 @@ import {
   expect,
   it,
 } from "bun:test";
-import { render, within } from "@testing-library/react";
+import { fireEvent, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CookMode } from "@/app/_components/cook-mode";
 import { isAlarmPrimed, quietAlarm } from "@/app/_lib/alarm";
@@ -181,6 +181,77 @@ describe("CookMode", () => {
     expect(view.queryByRole("list", { name: "Timers" })).toBe(null);
     await user.click(button(view, "Next"));
     button(view, "Start 20-minute timer");
+  });
+
+  // D63: a swipe left for the next screen, right for the one before, as the week does.
+  it("moves a screen with a swipe", async () => {
+    const view = cook();
+    const swipe = (on: HTMLElement, from: number, to: number) => {
+      fireEvent.touchStart(on, { touches: [{ clientX: from, clientY: 300 }] });
+      fireEvent.touchEnd(on, {
+        changedTouches: [{ clientX: to, clientY: 310 }],
+      });
+    };
+
+    swipe(view.getByRole("heading", { name: "Ingredients" }), 300, 120);
+    await view.findByText("Step 1 of 2");
+    swipe(view.getByText("Brown the turkey."), 300, 120);
+    await view.findByText("Step 2 of 2");
+    swipe(view.getByText("Simmer for 20 minutes."), 120, 300);
+    await view.findByText("Step 1 of 2");
+    // Up and down is scrolling, not a swipe.
+    swipe(view.getByText("Brown the turkey."), 300, 290);
+    view.getByText("Step 1 of 2");
+  });
+
+  // D63: "Step 1 of 2" opens every step, to jump to one, or to start over.
+  it("jumps to a step from the list of steps, or starts over", async () => {
+    const user = userEvent.setup();
+    const view = cook();
+    await user.click(button(view, /onion/));
+    await user.click(button(view, "Start cooking"));
+
+    await user.click(button(view, "Step 1 of 2"));
+    let sheet = await view.findByRole("dialog", { name: "Steps" });
+    expect(
+      within(sheet)
+        .getByRole("button", { name: /Brown the turkey/ })
+        .getAttribute("aria-current"),
+    ).toBe("step");
+    await user.click(within(sheet).getByRole("button", { name: /Simmer/ }));
+    await view.findByText("Step 2 of 2");
+
+    await user.click(button(view, "Step 2 of 2"));
+    sheet = await view.findByRole("dialog", { name: "Steps" });
+    await user.click(within(sheet).getByRole("button", { name: "Start over" }));
+    await view.findByRole("heading", { name: "Ingredients" });
+    expect(pressed(view, /onion/)).toBe("false");
+  });
+
+  // D63: an icon while the screen stays on; the warning only when it can't.
+  it("shows the screen staying on as an icon, and warns when it can't", async () => {
+    const warning = /Turn off auto-lock/;
+    const unsupported = cook();
+    await unsupported.findByText(warning);
+    unsupported.unmount();
+
+    Object.defineProperty(navigator, "wakeLock", {
+      configurable: true,
+      value: {
+        request: async () => ({
+          released: false,
+          release: async () => {},
+          addEventListener: () => {},
+        }),
+      },
+    });
+    try {
+      const on = cook();
+      await on.findByText("Screen stays on");
+      expect(on.queryByText(warning)).toBe(null);
+    } finally {
+      Reflect.deleteProperty(navigator, "wakeLock");
+    }
   });
 
   it("starts over from Done: nothing ticked, back on Gather", async () => {
