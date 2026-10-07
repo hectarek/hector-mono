@@ -86,6 +86,17 @@ bunfig.toml                   # [test] preload = tests/_support/preload.ts
 
 ## 3. Layers in detail
 
+Data flow through the layers:
+
+```
+Reads:  Page (Server) → Controller (via getInjection) → Use Case → Repository
+              ↓
+        Client Components (receive data via props)
+
+Writes: form / Client Component → Server Action (app/actions/<domain>.ts)
+        → Controller → Use Case → Repository, then revalidatePath (or redirect)
+```
+
 ### 3.1 Entities (`src/entities/`)
 
 Pure domain types, errors and functions (recipes keeps its pure functions, such as `scaling.ts` and `week.ts`, directly in `src/entities/`). Only dependency allowed: `zod`.
@@ -380,7 +391,7 @@ export function createStashItemsModule() {
 | **App (`app/`)** | Entities (models, pure functions, errors), `di` (`getInjection`), other `app/` files; root `lib/` only in the auth route handler and auth page (`lib/auth/server.ts`, `lib/logger.ts`) |
 | **DI (`di/`)** | Everything — it is the composition root |
 
-**Oxlint enforces this table.** `no-restricted-imports` has one `.oxlintrc.json` override per layer, so an import that breaks it fails the app's `lint` script, `bun check`, CI and Claude Code's edit hook. How the rules are written, and their gotchas, are under "Architecture Lint" in the root [AGENTS.md](../AGENTS.md#architecture-lint). Lint sees imports, not intent, so reviewers still look for:
+**Oxlint enforces this table.** `no-restricted-imports` has one `.oxlintrc.json` override per layer, so an import that breaks it fails the app's `lint` script, `bun check`, CI and Claude Code's edit hook. How the rules are written, and their gotchas, are under "Architecture Lint" in [lint-and-dead-code.md](lint-and-dead-code.md#architecture-lint). Lint sees imports, not intent, so reviewers still look for:
 
 - A use case that does a controller's job (parsing input, checking auth) or a controller that holds business logic.
 - An interface shaped around one implementation (a repository method that leaks Drizzle types or SQL concepts).

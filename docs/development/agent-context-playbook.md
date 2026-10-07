@@ -98,7 +98,7 @@ One plan per stream of work: update it rather than starting a parallel doc, and 
 
 ## Where docs live
 
-- **Global** (`docs/`): monorepo-wide references — `monorepo-guide.md`, `clean-architecture.md` (the canonical guide for complex apps), `ui-package.md`, shared research like `proxy-auth-research.md`, and this playbook.
+- **Global** (`docs/`): monorepo-wide references — `monorepo-guide.md`, `clean-architecture.md` (the canonical guide for complex apps), `ui-package.md`, `lint-and-dead-code.md`, shared research like `proxy-auth-research.md`, and this playbook.
 - **App-specific** (`apps/<app>/docs/`): anything that pertains to exactly one app — specs, design notes, app SEO/perf.
 - **Naming:** all docs are lower **kebab-case** (`my-doc.md`), like the repo's other files (the exceptions, such as `AGENTS.md` and `README.md`, are listed in the root `AGENTS.md`).
 - A doc is "global" only if 2+ apps use it. When in doubt, colocate it with the app.
