@@ -275,7 +275,7 @@
       "id": "ctac-program",
       "slug": "ctac-program",
       "title": "CTAC — Careers in Technology Cohort",
-      "description": "Ran a software-careers program for adults: wrote the curriculum, taught it daily, and placed 100+ graduates of my first two cohorts in full-time roles.",
+      "description": "Ran a software-careers program for adults: wrote the curriculum and taught about 130 career changers, over 100 of whom were placed in full-time roles.",
       "longDescription": "CTAC was an intensive careers-in-technology program for adults moving into software. I went through the program as a student, then came back as a co-founder and its Director of Curriculum and Programming. I wrote the curriculum, taught it daily as the sole instructor for two years, supervised a third, and worked with corporate sponsors so each cohort learned what their hiring pipelines needed.",
       "technologies": [
         "Curriculum design",
@@ -295,8 +295,8 @@
           "value": "100+"
         },
         {
-          "label": "Adults trained",
-          "value": "~200"
+          "label": "Adults taught",
+          "value": "~130"
         },
         {
           "label": "Years running",
@@ -308,8 +308,8 @@
         }
       ],
       "highlights": [
-        "100+ graduates of the first two cohorts I taught were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
-        "Had a direct hand in training ~200 adults pursuing software careers across three years of cohorts.",
+        "Over 100 of the roughly 130 career changers I taught were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
+        "Taught about 130 of the program's ~200 graduates across three years of cohorts: two teaching daily, one supervising.",
         "Led a four-person curriculum team on a contracted cohort build for an external client.",
         "Worked with corporate sponsors so cohorts launched with the curriculum their hiring pipelines needed."
       ]

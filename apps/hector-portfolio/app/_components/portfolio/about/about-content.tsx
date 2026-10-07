@@ -130,10 +130,10 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
               curriculum for a new tech cohort. That contract turned into
               co-founding Stiegler EdTech, where I ran the CTAC program as
               Director of Curriculum and Programming &mdash; writing the
-              curriculum and teaching it daily. More than 100 graduates of my
-              first two cohorts were placed in full-time roles at Charlotte
-              employers like Bank of America, Wells Fargo, Lowe&apos;s, and
-              Truist.
+              curriculum and teaching it daily. I taught about 130 career
+              changers, and more than 100 of them were placed in full-time roles
+              at Charlotte employers like Bank of America, Wells Fargo,
+              Lowe&apos;s, and Truist.
             </p>
             <p>
               As the company grew, I moved into the CTO role. I co-architected
