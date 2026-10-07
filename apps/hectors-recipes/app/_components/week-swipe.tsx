@@ -2,8 +2,8 @@
 
 import { cn } from "@repo/ui/lib/utils";
 import { useRouter } from "next/navigation";
-import { type ReactNode, type TouchEvent, useEffect, useRef } from "react";
-import { type Point, swipeDirection } from "@/app/_lib/swipe";
+import { type ReactNode, useEffect } from "react";
+import { useSwipe } from "@/app/_lib/use-swipe";
 
 // The week Plan last showed. Kept outside the component because the loading screen between
 // weeks unmounts it, and a new week slides in from the side it came from (D54).
@@ -25,8 +25,9 @@ export function WeekSwipe({
   children: ReactNode;
 }) {
   const router = useRouter();
-  // Where the one finger on the week went down; null once a second one joins (a pinch).
-  const start = useRef<Point | null>(null);
+  const swipe = useSwipe((by) =>
+    router.push(by === 1 ? nextHref : previousHref),
+  );
   const slideFrom =
     shownWeek === undefined || shownWeek === week
       ? null
@@ -37,36 +38,8 @@ export function WeekSwipe({
     shownWeek = week;
   }, [week]);
 
-  function begin(event: TouchEvent) {
-    const touch = event.touches[0];
-    start.current =
-      event.touches.length === 1 && touch
-        ? { x: touch.clientX, y: touch.clientY }
-        : null;
-  }
-
-  function end(event: TouchEvent) {
-    const from = start.current;
-    const touch = event.changedTouches[0];
-    start.current = null;
-    if (!from || !touch) return;
-    const direction = swipeDirection(
-      from,
-      { x: touch.clientX, y: touch.clientY },
-      window.innerWidth,
-    );
-    if (direction) router.push(direction === "next" ? nextHref : previousHref);
-  }
-
   return (
-    <div
-      className="touch-pan-y touch-pinch-zoom"
-      onTouchStart={begin}
-      onTouchEnd={end}
-      onTouchCancel={() => {
-        start.current = null;
-      }}
-    >
+    <div className="touch-pan-y touch-pinch-zoom" {...swipe}>
       {/* Keyed by week, so the slide plays even when the page isn't remounted. */}
       <div
         key={week}

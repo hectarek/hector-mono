@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 19 (groceries by recipe, like items together, more units) on `feat/recipes-p19-groceries-by-recipe`: all five tasks done, the PR next. Phases 1–18 merged (18: hectarek/hector-mono#23). Planned after it: 20 (measuring AI reads). |
-| Next task | Phase 19's PR; then Phase 20, starting with the discussion on measuring AI reads. |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-05 |
+| Phase | 21 (cook mode, one step at a time) on `feat/recipes-p21-cook-step-by-step`, in review as hectarek/hector-mono#30: done, with P21.5–P21.6 added after a review of how steps find their ingredients. Phases 1–19 merged (19: hectarek/hector-mono#24). Phase 20 (measuring AI reads) comes after it, starting with a discussion. |
+| Next task | Hector reviews and merges hectarek/hector-mono#30; then Phase 20's discussion. |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-07 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -126,6 +126,13 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D60 | Groceries can be shown By aisle (the default) or By recipe, kept in the address (`?group=recipe`). By recipe, recipes come in the order they were added, each with its items at that recipe's amounts. Hand-typed items come last, under "Added by hand", and checked items go to Got it as now. | Claude's defaults; Hector, 2026-10-05: "your defaults". |
 | D61 | Within an aisle, items of the same catalog ingredient sit together, in the order the first of them was added. They stay separate rows ("2 cloves garlic", "1 tbsp garlic"), never one combined row. | Claude's default; Hector, 2026-10-05: "your defaults". |
 | D62 | Units: `c.` reads as cup and `tin` as can. New units `stalk` (and `rib`), `sprig` and `pint`. "Whole" comes off a name, like size words. Jar, box, bottle and carton are left out (one or two lines each). Existing lines and stray catalog entries are then fixed once, from a list Hector sees and a dry run, and Hector runs the write. | Hector, 2026-10-04: "a pass data wise on the units… more options (not too many)"; 2026-10-05: "your defaults". From a read-only look at production's 1,007 lines (2026-10-05). |
+| D63 | Cook mode shows one screen at a time: Gather, then each step, then Done. Back and Next sit at the bottom, a swipe does the same, and "Step 3 of 8" opens the list of steps to jump to one. The wake-lock notice is an icon in the top bar, and a warning only when the screen can't stay on. | Hector, 2026-10-07: "make the cook mode much more useful and good ux experience on mobile… do step by step and make better use of the space"; of Claude's flow, "go with your recommendations". One step per screen rather than folding the others away, which would keep the scroll. |
+| D64 | Cook mode opens on Gather: the ingredients to tick off as you get them out, servings, Add to list, and Start cooking. Coming back mid-recipe opens on the step you were on. From any step, the full list is a sheet. | Claude's recommendation; Hector, 2026-10-07: "go with your recommendations". |
+| D65 | A step shows the ingredients it uses, at the servings chosen. Ticking one there ticks it in the full list: one set of ticks. | Same. |
+| D66 | Running timers are pinned above the step on every screen. Tapping one goes to its step; one that ends rings and says Time's up. | Same. |
+| D67 | Not in Phase 21: marking the meal cooked from Done (it would tie cook mode to the plan), and a tablet layout with the step and ingredients side by side (the layout leaves room for it). | Same. |
+| D68 | A step's ingredients stay matched by name, not stored. Four changes to the matching: lines that share the word a step uses are all shown when the step says it in the plural ("the beans") or they're one ingredient listed twice, in place of none (D24 had it guess nothing); a name's first word, past words like "large" or "fresh", counts when no other line has it ("the chicken"); a name with "or" matches either side; and "sauce", "peel", "stem", "leaf" and "seed" don't match on their own. | Hector, 2026-10-07: "i dont want to store links unless we have to but do a review first"; after the review (P21.5's Found), "go ahead with both". |
+| D69 | The warning that the screen can't stay on can be dismissed, and stays dismissed on that device. A sun on the warning's yellow takes its place in the top bar (proposed as a dimmed sun, which looked like the sun of a screen staying on), and tapping it shows the warning again. | Hector, 2026-10-07: "can we make that dismissable"; Claude's recommendation (on the device, not per cook); "go ahead with both". |
 
 ---
 
@@ -1963,6 +1970,101 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 - **Links first.** Photos can't be tuned the same way.
 - **First case:** <https://www.thedoctorskitchen.com/recipes/test-rupy-s-overnight-oats> comes back with nothing filled in. Find out why first: no recipe data in the page, a blocked fetch, or text the reader misses.
 
+## Phase 21: Cook mode, one step at a time
+
+Branch `feat/recipes-p21-cook-step-by-step`, in its own worktree. Hector, 2026-10-07: "make the cook mode much more useful and good ux experience on mobile. We need to make it so that we can do step by step and make better use of the space"; then "go with your recommendations, do 21 first", so it comes before Phase 20. Decided: one screen at a time (D63), Gather first (D64), a step's own ingredients (D65), timers that follow you (D66), and what waits (D67).
+
+Starting point, 2026-10-07:
+- Cook mode is one long page: the wake-lock notice, every ingredient, every step, then Add to list. "Current step" is a highlight you tap, and nothing moves you on. A timer sits in its own step, so it scrolls away once you move on.
+- Read-only on production's 81 recipes:
+  - Steps: a median of 6 (the most is 18). A median step is 140 characters and 9 in 10 are under 360, so almost every step fits one phone screen at a large size; the longest, 845, scrolls.
+  - Ingredients: a median of 12 lines (the most is 26), too many to sit beside a step.
+  - Timers: 50 recipes have one; the most in one recipe is 7.
+  - Sections: 9 recipes have step sections.
+
+One commit per task; the PR when the phase is done.
+
+- [x] **P21.1** One step at a time — C · D63, D65
+  - Do:
+    - Cook progress keeps the screen you're on (`at`: `gather`, a step's position, or `done`) in place of the highlighted step. A step screen has "Step 3 of 8" (and its section, if any), a progress bar, the step in large type, the ingredients it uses at your servings (tap to tick, the same ticks as the full list), and its timer.
+    - Back and Next sit at the bottom, 45 px and full width between them, Next filled. On the last step, Next is Finish.
+  - Verify: screen tests (Next and Back move, a tick on a step shows in the list, a reload returns to the step), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - Cook progress saves `at` (`gather`, a step's position, or `done`) in place of `step`, and `moveScreen` gives the order. Progress saved the old way keeps its ticks and timers and opens on Gather. A saved step that's no longer in the recipe opens on Gather.
+    - The page's header moved into `CookMode`. The top bar has the recipe's name on Gather and Done, and "Step 3 of 8" (read out when it changes) with the shared `Progress` bar on a step; the name stays as the `h1`, visually hidden. Done is still there.
+    - A step screen has its section, its words at `text-2xl` (was `text-xl` in the list), "This step uses" with the same tappable rows as Gather, and its timer.
+    - A bar at the bottom: Start cooking on Gather; Back and Next (Finish on the last step) on a step; Back and Back to the recipe on Done.
+    - Ahead of P21.2, so the pager has both ends: a plain Gather (the ingredients and their sections, servings, Add to list, which moved here from the end of the page) and a plain Done.
+    - Tests:
+      - `moveScreen` and reading saved progress, the old shape included.
+      - Cook mode's screen tests rewritten for screens: Gather to Done and back, a step's tick shown on Gather, the timer on its step, a reload returning to the step (and the timer's sound), ticks kept, and a step that's gone opening on Gather.
+      - Mutations caught: no Finish, a step's ticks not shared, a gone step opening on Done, and the screen alone not kept.
+    - Screenshots at 375 px on the test project (Gather, step 2 of 3 with garlic ticked, Done), from a throwaway flow, deleted.
+    - All 1060 + 42 tests pass.
+- [x] **P21.2** Gather, the full list, and Done — C · D64
+  - Do:
+    - Gather: the ingredients with their sections, the servings stepper, Add to list, and Start cooking (filled).
+    - Opening cook mode with saved progress goes to that step, with "Picked up where you left off" and Start over.
+    - From a step, the list button opens the full list in a sheet, with the stepper.
+    - Done: back to the recipe, or start over.
+  - Verify: screen tests (Gather to step 1, resuming on a saved step, the sheet's ticks, Done), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - Gather, resuming on a saved step and its notice came with P21.1.
+    - `IngredientList` (the stepper beside a heading, and the rows under their sections) is shared by Gather and `IngredientsSheet`, a bottom sheet opened by the list button (All ingredients) at the left of a step's bar. The list scrolls inside the sheet, which clips anything taller. The sheet's title keeps the sheet's own type: the design lint stops a restyle of `DrawerTitle`.
+    - Done has Start over, which clears the ticks, timers and screen.
+    - Tests: the sheet ticks the onion and steps the servings up, and both show on Gather (1 lb becomes 1¼ lb at 5 of 4); Start over from Done clears the ticks and the saved progress. Mutations caught: no sheet, and Start over doing nothing.
+    - Screenshots at 375 px on the test project: the sheet over step 1, and Done.
+    - All 1060 + 44 tests pass.
+- [x] **P21.3** Timers follow you — C · D66
+  - Do: a strip above the step lists each running timer (its step and time left). Tapping one goes to its step. One that ends rings, as now, and reads "Time's up · Dismiss". The note about a tap turning the sound back on moves to the strip.
+  - Verify: screen tests (a timer started on one step shows on the next, tapping it goes back, an ended one says Time's up), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - The top bar, which stays at the top as a long step scrolls, lists every running timer but the current step's own (`FollowingTimer`): "Step 2 · 19:40", tapping it goes to step 2. One that's up reads "Step 2: time's up · Dismiss", and tapping stops it. Ringing is unchanged.
+    - The note that a tap turns the timer's sound back on moved from the step's timer to the top bar, once.
+    - Tests: a timer started on step 2 isn't pinned on step 2, is on step 1, and takes you back to step 2; one that's up on another step says so and Dismiss stops it. Mutations caught: timers not following, tapping not going back, and Dismiss not stopping it.
+    - Screenshot at 375 px on the test project: step 3 with step 2's timer pinned.
+    - All 1060 + 46 tests pass.
+    - Found in that screenshot: step 3, "slice the green onions", listed "1 onion" too, since the matcher found "onion" inside "green onions". The long page had it as well; one step per screen made it plain. Fixed in its own commit (below).
+- [x] **P21.4** Getting around — C · D63
+  - Do:
+    - A swipe left or right moves a screen (`swipeDirection`, as the week does), with the week's slide-in, none with reduced motion.
+    - "Step 3 of 8" opens a sheet of every step (its first words, under its section), to jump to one; Start over is there too.
+    - The wake-lock notice is an icon in the top bar, and the warning only when the screen can't stay on.
+  - Verify: screen tests (a swipe moves, the sheet jumps), a browser flow through a recipe at 375 px, and the real-phone check added to H5.
+  - Evidence (2026-10-07):
+    - A swipe left or right moves a screen. The week's touch handlers moved into `useSwipe` (`app/_lib/use-swipe.ts`), which both use, so one that starts at the screen's edge is left to the browser's back swipe here too. Up and down still scroll, and a pinch still zooms. The new screen slides in from the side it came from, and doesn't move with reduced motion.
+    - "Step 3 of 8" opens `StepsSheet`: every step under its section, its first two lines, the current one in bold. Tapping one goes there; Start over is at the end.
+    - The wake lock is a sun icon in the top bar while the screen stays on, its words for screen readers only. The warning shows above the screen only when the browser can't keep it on, or refused.
+    - Screen tests: a swipe left goes on and right goes back, while up and down doesn't move; the steps sheet marks the current step, jumps to another, and starts over; the icon and no warning when the screen stays on, the warning when it can't. Mutations caught: swipes going the wrong way, the sheet not jumping, and the warning always shown.
+    - A browser flow, `tests/flows/cook.flow.ts`, at 375 px with real touches: tick an ingredient on Gather, Start cooking, swipe to step 2 and start its timer, swipe back with the timer pinned, jump from the steps sheet, reload back onto the same step with its timer, then Finish and Back to the recipe. The week flow's `swipe` moved to `tests/flows/touch.ts`, shared by both.
+    - Screenshots at 375 px from that flow: step 1 with step 2's timer pinned, and the steps sheet. Headless Chromium refuses the wake lock, so both show the warning; the icon waits for the phone check (H5).
+    - All 1061 + 49 tests and the three flows pass.
+- [x] **P21.5** A step's ingredients, matched more widely — C · D68
+  - Found (2026-10-07, read-only, the real `stepIngredients` over production's 81 recipes, every miss and suspect match read):
+    - Steps: 126 of 510 find no line. About 100 of those use none (preheat, bake, rest, serve, store); about 25 that use something show nothing.
+    - Lines: 831 of 1007 (83%) are found by some step. Of the 176 that aren't, about 80 are never named by a step ("add the spices", "the dry ingredients", garnishes), which no matching can fix. About 50 share the word the step uses ("add the beans" with four cans, "the bell peppers" in three colours, butter listed twice). About 25 are named by a first or middle word ("the chicken" for boneless skinless chicken breasts). About 6 are "X or Y" names, and about 8 are names the itemizer got wrong ("Salt, More").
+    - Wrong matches: about 15 of the 495 made by a name's ending. About 8 are "the sauce" meaning one the recipe makes, matched to its soy, fish or hot sauce; the rest are "milk" inside "coconut milk", and "leaf", "stem" and "peel" meaning something else.
+    - Sections don't settle a doubled ingredient yet: of the 9 recipes with step sections, one names its lines' sections the same way.
+  - Do: the four changes in `stepIngredients` (D68).
+  - Verify: tests for each change; the review run again before and after on production's recipes, read-only, with every match gained or lost read for wrong ones.
+  - Evidence (2026-10-07):
+    - `stepIngredients` has the four changes. A one-word side of an "or" takes the last side's last word ("brown or white rice" is brown rice and white rice). A name is also left out where it sits anywhere inside another line's whole name ("pepper" in "red pepper flakes"), not only at its end.
+    - Before and after on production's recipes, read-only: lines found by some step went from 831 to 885 of 1007, and steps finding no line from 126 to 117 of 510. 120 matches were gained and 24 lost; every one was read.
+      - Gained, right: the chicken, beef, broccoli, vanilla and mozzarella by the word that names them; "the beans" and "the bell peppers" across their lines; butter, eggs, cocoa, sea salt and oregano listed twice; soy sauce and balsamic from "or" names. About 5 are wrong, such as "coconut rice" finding the coconut milk and "your curry is too salty" finding the curry paste.
+      - Lost: about 18 were wrong, mostly "the sauce" for one the recipe makes, and "rice" in "rice vinegar", "chicken" in "chicken broth", "garlic" in "garlic powder". About 6 were right, such as "toasted seeds" and "the peels of lemons".
+      - The first run found new wrong matches from words a step uses for something else ("cooking" oil, "baking" powder, "all"-purpose flour, "vegetable" oil, "water" chestnuts, "heavy" cream) and "pepper" in "red pepper flakes". Those words are passed over now, and a name inside another line's whole name is left out.
+    - Tests: one per change, with lines each could be mistaken for. Mutations caught: the plural, one ingredient twice, the naming word, "or" sides, loose endings, the whole-name masking, and "baking" passed over. The first "or" test missed its mutation, since the naming word found the line too; it now has a second soy sauce beside it.
+    - All 1065 + 49 tests pass.
+- [x] **P21.6** Dismiss the screen-lock warning — C · D69
+  - Do: an X on the warning. Dismissed, it's kept in `localStorage` (as the install hint is), and a sun in the top bar brings it back.
+  - Verify: screen tests (dismissing hides it, it stays hidden when cook mode opens again, the sun shows it again), and a screenshot at 375 px.
+  - Evidence (2026-10-07):
+    - The warning has an X (Dismiss, `ghost`, so it keeps the warning's colour). Dismissed, it's kept in `localStorage` and read after mount. The top bar then has the sun on the warning's yellow (`bg-warning`), which shows the warning again and forgets the dismissal.
+    - The sun was going to be dimmed, but a grey sun with dotted rays looked like the grey sun of a screen staying on. The warning's own colours are clear in light and dark; the warning colour on the page alone was too faint in light.
+    - Screen test: dismissing hides it, it stays hidden when cook mode opens again, and the sun brings it back. Mutations caught: the dismissal not kept, the X doing nothing, the sun not bringing it back, and no sun once dismissed.
+    - Checked at 375 px in the Claude browser pane on the dev server, which refuses the wake lock: the warning with its X, then after Dismiss and a reload the sun in the top bar, light and dark; tapping it brought the warning back. No console errors.
+    - All 1065 + 50 tests pass.
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -2029,7 +2131,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 | H2 | Sign in as Tester in the browser pane when asked | P1.1, and P1.2's invite check | 2026-09-24: Hector isn't using the app yet, so both accounts are fair game for testing. Claude doesn't type passwords, so Hector signs in as Tester when a check needs it; P1.1 is checked with a read-only query instead. |
 | H3 | Which database production uses, and whether the local `.env` points at it. P2.4's migration has to be applied there before its PR merges. | P2.4 | done 2026-09-24: there is one database, the one in `.env`. Writing to it is fine; test data gets cleaned up later. |
 | H4 | Approve the welcome screen's line of copy (Claude drafts it) | P1.2 | done 2026-09-24: Claude writes it; Hector may change it later |
-| H5 | Real-phone checks after each merge (2026-09-30: Add by photo checked on Hector's phone, "looks good"; the step timer counted down but made no sound, fixed in PR #29 for the silent switch, to check again; after Phase 14: Add by photo with a long scrolling screenshot (P14.11), a timer's sound after the page reloads (P14.4), and whether a running timer pauses another app's music for the whole bake): offline check-off (P2.5), typing in the full-screen form (P5.1), the Invite sheet's share sheet (P7.6), live updates between two phones, including after locking one and coming back (P8.3), and in cook mode that a step timer beeps on the phone and the ⋯ sheets' buttons work with a finger (P9.4, P9.5), and Add by photo from the camera and the photo library, including a HEIC photo (P10.2) | P2.5, P5.1, P7.6, P8.3, P9.4, P9.5, P10.2 | partly done 2026-09-25 in the iOS Simulator (iPhone 18 Pro, Safari, on the live site): the Invite sheet opens the real share sheet; form fields scroll above the keyboard, and the pinned Cancel/Save bar is off screen while the keyboard is up for a lower field (iOS behaviour) and back when it closes; the back swipe finding went to D22. Still open for a real phone: offline check-off (the simulator has no airplane mode), and whether the Save bar ever stays hidden after the keyboard closes (seen once, not reproduced). After L5 (2026-10-01), signed in, light and dark: each screen has one filled button, the rest `secondary`, all 45 px: Recipes (New; the ⋯ sheet's Invite, Members, All books; Clear filters on an empty search), a recipe (Cook; Add to list and Add to plan and their dialogs; the servings stepper), cook mode (Done, the stepper, a timer), Plan (the week arrows, a meal's ⋯ sheet and Change days, the day pickers' chosen and unchosen days, Open list, the ⋯ sheet's Make default or Start my own plan), Groceries (an item's ⋯ sheet and Edit), the Invite sheet (Can edit, View only, Back), Members (Rename, New link, Share link, the role buttons, Delete's dialog), the recipe form (Add ingredient, Add step, a row's ⋯ sheet, Discard's dialog), an inactive invite link and a recipe you can't edit. |
+| H5 | Real-phone checks after each merge (2026-09-30: Add by photo checked on Hector's phone, "looks good"; the step timer counted down but made no sound, fixed in PR #29 for the silent switch, to check again; after Phase 14: Add by photo with a long scrolling screenshot (P14.11), a timer's sound after the page reloads (P14.4), and whether a running timer pauses another app's music for the whole bake; after Phase 21: cook mode one screen at a time with a finger, meaning a swipe between screens that doesn't set off the browser's back swipe, the steps and ingredients sheets, a timer pinned on another step and its ring there, and the sun icon while the screen stays on): offline check-off (P2.5), typing in the full-screen form (P5.1), the Invite sheet's share sheet (P7.6), live updates between two phones, including after locking one and coming back (P8.3), and in cook mode that a step timer beeps on the phone and the ⋯ sheets' buttons work with a finger (P9.4, P9.5), and Add by photo from the camera and the photo library, including a HEIC photo (P10.2) | P2.5, P5.1, P7.6, P8.3, P9.4, P9.5, P10.2, P21.4 | partly done 2026-09-25 in the iOS Simulator (iPhone 18 Pro, Safari, on the live site): the Invite sheet opens the real share sheet; form fields scroll above the keyboard, and the pinned Cancel/Save bar is off screen while the keyboard is up for a lower field (iOS behaviour) and back when it closes; the back swipe finding went to D22. Still open for a real phone: offline check-off (the simulator has no airplane mode), and whether the Save bar ever stays hidden after the keyboard closes (seen once, not reproduced). After L5 (2026-10-01), signed in, light and dark: each screen has one filled button, the rest `secondary`, all 45 px: Recipes (New; the ⋯ sheet's Invite, Members, All books; Clear filters on an empty search), a recipe (Cook; Add to list and Add to plan and their dialogs; the servings stepper), cook mode (Done, the stepper, a timer), Plan (the week arrows, a meal's ⋯ sheet and Change days, the day pickers' chosen and unchosen days, Open list, the ⋯ sheet's Make default or Start my own plan), Groceries (an item's ⋯ sheet and Edit), the Invite sheet (Can edit, View only, Back), Members (Rename, New link, Share link, the role buttons, Delete's dialog), the recipe form (Add ingredient, Add step, a row's ⋯ sheet, Discard's dialog), an inactive invite link and a recipe you can't edit. |
 | H6 | Merge each phase's PR | each phase | done 2026-10-01: all 14 phases merged (Phase 14 was PR #33) |
 | H7 | The iOS back swipe leaves the recipe form without the unsaved-changes warning (a page can't block it). Fallback: keep a draft of the form for the session and offer it back ("Restore what you were typing?") when the form reopens. Build it, or accept the gap? | P5.2 | done 2026-09-25: accepted (D22) |
 | H8 | OK to apply this phase's migrations to the one database: P7.1's (moves the list's items onto the plan, then deletes the list), P7.2's renames, P7.4's settings table. From P7.1's until this phase merges, the deployed app's Groceries tab doesn't work, because `main`'s code still expects separate lists. | P7.1, P7.2, P7.4 | done 2026-09-25: "yes, go ahead and apply all of them"; 0003–0005 applied |
@@ -2279,3 +2381,10 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
   - Next: Hector checks the list (H29) and runs both migrations (H28), then the fix; Claude checks it read-only; the PR.
 - **2026-10-05 (bd)** — Hector ran migrations 0014 and 0015 (H28) and approved the units fix (H29), which Claude ran at his "run it" and checked read-only. Phase 19 done.
   - Next: Phase 19's PR.
+- **2026-10-07 (be)** — Hector merged Phase 19 (hectarek/hector-mono#24). Phase 20 began with a first discussion of how to measure an AI feature (its questions are still open). Then Hector asked for a better cook mode on a phone, one step at a time: Phase 21, decided (D63–D67) and planned, to come first.
+  - Next: P21.1.
+- **2026-10-07 (bf)** — P21.1–P21.4 done (see each task's Evidence), and the step ingredients fix found in P21.3's screenshot. Phase 21 done.
+  - Next: Phase 21's PR; Hector's phone check (H5); then Phase 20's discussion.
+- **2026-10-07 (bg)** — Phase 21's PR opened (hectarek/hector-mono#30). Hector asked how a step's ingredients are found and to make the screen-lock warning dismissable. A read-only review of production's recipes found matching covers most steps (P21.5's Found); Hector chose to keep it unstored and widen it (D68), and the warning can be dismissed (D69). The warning he saw was the Claude browser pane, which refuses the wake lock.
+  - Next: P21.5, then P21.6, on the same PR.
+  - P21.5 and P21.6 done (see their Evidence), pushed to hectarek/hector-mono#30. Next: Hector's review and merge; the phone check (H5); then Phase 20's discussion.

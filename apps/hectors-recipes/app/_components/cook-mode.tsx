@@ -1,8 +1,25 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@repo/ui/components/drawer";
+import { Progress } from "@repo/ui/components/progress";
 import { cn } from "@repo/ui/lib/utils";
-import { Minus, Plus, Sun, SunDim, Timer } from "lucide-react";
+import {
+  ChevronDown,
+  List,
+  Minus,
+  Plus,
+  Sun,
+  SunDim,
+  Timer,
+  X,
+} from "lucide-react";
+import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { LineText } from "@/app/_components/line-text";
 import { InlineMarkdown } from "@/app/_components/markdown";
@@ -18,13 +35,17 @@ import {
 } from "@/app/_lib/alarm";
 import {
   type CookProgress,
+  type CookScreen,
   cookProgressKey,
+  moveScreen,
   NO_PROGRESS,
   parseCookProgress,
   shouldRing,
   timeLeft,
 } from "@/app/_lib/cook-progress";
+import { useSwipe } from "@/app/_lib/use-swipe";
 import { useWakeLock, type WakeLockStatus } from "@/app/_lib/use-wake-lock";
+import { stripMarkdown } from "@/src/entities/ingredient-line";
 import type { RecipeIngredient } from "@/src/entities/models/recipe-ingredient.model";
 import type { RecipeStep } from "@/src/entities/models/recipe-step.model";
 import { showLine } from "@/src/entities/scaling";
@@ -53,24 +74,87 @@ const WAKE_LOCK_TEXT: Record<WakeLockStatus, string> = {
     "This browser didn't allow keeping the screen on. Turn off auto-lock while cooking.",
 };
 
-function WakeLockNotice() {
-  const status = useWakeLock();
-  const ok = status === "on" || status === "pending";
-  const Icon = ok ? Sun : SunDim;
+// Whether the screen stays on (D63, D69): a sun in the top bar while it does, and a warning
+// above the screen when the browser can't keep it on. A dismissed warning stays away on this
+// device, and a dimmed sun in the top bar brings it back.
+function WakeLockIcon({
+  status,
+  onShowWarning,
+}: {
+  status: WakeLockStatus;
+  onShowWarning: () => void;
+}) {
+  if (status === "on" || status === "pending") {
+    return (
+      <p role="status" className="text-muted-foreground">
+        <Sun className="size-5" aria-hidden />
+        <span className="sr-only">{WAKE_LOCK_TEXT[status]}</span>
+      </p>
+    );
+  }
+  // In the warning's own colours, so it can't be taken for the sun of a screen staying on.
   return (
-    <p
-      role="status"
-      className={cn(
-        "flex items-center gap-1.5 text-xs",
-        ok
-          ? "text-muted-foreground"
-          : "bg-warning text-warning-foreground rounded-lg px-3 py-2",
-      )}
+    <button
+      type="button"
+      aria-label="The screen may lock. Show why"
+      onClick={onShowWarning}
+      className="bg-warning text-warning-foreground flex size-9 shrink-0 items-center justify-center rounded-full"
     >
-      <Icon className="size-3.5 shrink-0" aria-hidden />
-      {WAKE_LOCK_TEXT[status]}
-    </p>
+      <SunDim className="size-5" aria-hidden />
+    </button>
   );
+}
+
+function WakeLockWarning({
+  status,
+  onDismiss,
+}: {
+  status: WakeLockStatus;
+  onDismiss: () => void;
+}) {
+  return (
+    <div
+      role="status"
+      className="bg-warning text-warning-foreground flex items-center gap-1.5 rounded-lg py-1 ps-3 pe-1 text-xs"
+    >
+      <SunDim className="size-3.5 shrink-0" aria-hidden />
+      <p className="flex-1">{WAKE_LOCK_TEXT[status]}</p>
+      {/* Ghost keeps the warning's own colour; quiet would mute it on the yellow. */}
+      <Button
+        variant="ghost"
+        size="icon-lg"
+        aria-label="Dismiss"
+        onClick={onDismiss}
+      >
+        <X />
+      </Button>
+    </div>
+  );
+}
+
+const WARNING_DISMISSED_KEY = "cook-screen-warning-dismissed";
+
+// Whether the screen-lock warning was dismissed on this device (D69). Read after mount, as the
+// install hint's is, so the server's render and the first one agree.
+function useWarningDismissed() {
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => {
+    try {
+      setDismissed(localStorage.getItem(WARNING_DISMISSED_KEY) === "1");
+    } catch {
+      // Storage blocked (private mode): the warning shows.
+    }
+  }, []);
+  const change = (value: boolean) => {
+    setDismissed(value);
+    try {
+      if (value) localStorage.setItem(WARNING_DISMISSED_KEY, "1");
+      else localStorage.removeItem(WARNING_DISMISSED_KEY);
+    } catch {
+      // Nothing to keep it in: it stays as chosen until the page reloads.
+    }
+  };
+  return [dismissed, change] as const;
 }
 
 // Opens at the servings chosen on the recipe page (?servings=), kept in the URL as they
@@ -81,6 +165,9 @@ export function CookMode({
   ...content
 }: {
   recipeId: string;
+  title: string;
+  // Where Done goes: the recipe.
+  recipeHref: string;
   lines: Line[];
   steps: Step[];
   yieldServings: number | null;
@@ -137,10 +224,10 @@ function useCookProgress(recipeId: string) {
     }
   }, [recipeId, loaded, progress]);
 
-  const { used, step, timers } = progress;
+  const { used, at, timers } = progress;
   return {
     used: new Set(used),
-    step,
+    at,
     timers,
     // Shown only when the page opened on saved progress, so crossed-off lines make sense.
     resumed: resumed && hasProgress(progress),
@@ -151,11 +238,8 @@ function useCookProgress(recipeId: string) {
           ? current.used.filter((value) => value !== position)
           : [...current.used, position],
       })),
-    toggleStep: (position: number) =>
-      setProgress((current) => ({
-        ...current,
-        step: current.step === position ? null : position,
-      })),
+    goTo: (screen: CookScreen) =>
+      setProgress((current) => ({ ...current, at: screen })),
     startTimer: (position: number, minutes: number) =>
       setProgress((current) => ({
         ...current,
@@ -180,8 +264,8 @@ function useCookProgress(recipeId: string) {
   };
 }
 
-function hasProgress({ used, step, timers }: CookProgress): boolean {
-  return used.length > 0 || step !== null || Object.keys(timers).length > 0;
+function hasProgress({ used, at, timers }: CookProgress): boolean {
+  return used.length > 0 || at !== "gather" || Object.keys(timers).length > 0;
 }
 
 // The time now, ticking each second while a timer runs, and ringing each timer that ends.
@@ -253,213 +337,541 @@ function useSoundNeedsTap(running: boolean): boolean {
 
 function CookModeContent({
   recipeId,
+  title,
+  recipeHref,
   lines,
   steps,
   addToList,
 }: {
   recipeId: string;
+  title: string;
+  recipeHref: string;
   lines: Line[];
   steps: Step[];
   addToList: ReactNode;
 }) {
-  const { servings, setServings, yieldServings } = useRecipeServings();
+  const { yieldServings, servings } = useRecipeServings();
   const progress = useCookProgress(recipeId);
   const now = useTimerClock(progress.timers);
   const soundNeedsTap = useSoundNeedsTap(
     Object.keys(progress.timers).length > 0,
   );
   const factor = yieldServings ? servings / yieldServings : 1;
+  // A saved step that's gone (the recipe was edited since) shows Gather.
+  const index = steps.findIndex((step) => step.position === progress.at);
+  const step = steps[index];
+  const screen: CookScreen = step
+    ? step.position
+    : progress.at === "done"
+      ? "done"
+      : "gather";
+
+  function show(to: CookScreen) {
+    progress.goTo(to);
+    window.scrollTo?.({ top: 0 });
+  }
+  const go = (by: 1 | -1) => show(moveScreen(screen, by, steps));
+  const swipe = useSwipe(go);
+  const wakeLock = useWakeLock();
+  const screenOk = wakeLock === "on" || wakeLock === "pending";
+  const [warningDismissed, setWarningDismissed] = useWarningDismissed();
+  // A new screen slides in from the side it came from, as the week does (D54).
+  const order =
+    screen === "gather" ? -1 : screen === "done" ? steps.length : index;
+  const shownOrder = useRef(order);
+  const slideFrom =
+    shownOrder.current === order
+      ? null
+      : order > shownOrder.current
+        ? "right"
+        : "left";
+  useEffect(() => {
+    shownOrder.current = order;
+  }, [order]);
+  // Timers running for other steps follow you (D66); a step shows its own.
+  const otherTimers = steps.flatMap((other, number) => {
+    const endsAt = progress.timers[other.position];
+    return endsAt !== undefined && other !== step
+      ? [{ position: other.position, number: number + 1, endsAt }]
+      : [];
+  });
+
+  const ingredient = (line: Line) => (
+    <IngredientRow
+      line={line}
+      factor={factor}
+      used={progress.used.has(line.position)}
+      onToggle={() => progress.toggleUsed(line.position)}
+    />
+  );
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <WakeLockNotice />
-        {progress.resumed && (
-          <div className="text-muted-foreground flex items-center justify-between gap-3 text-sm">
-            <span>Picked up where you left off.</span>
-            <Button variant="secondary" size="lg" onClick={progress.startOver}>
-              Start over
+    <div className="flex flex-1 flex-col">
+      <div className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky top-0 z-10 -mx-5 flex flex-col gap-2 px-5 py-2 backdrop-blur">
+        <div className="flex items-center justify-between gap-3">
+          <h1
+            className={cn("font-heading truncate text-2xl", step && "sr-only")}
+          >
+            {title}
+          </h1>
+          {step && (
+            <StepsSheet
+              steps={steps}
+              current={step.position}
+              label={`Step ${index + 1} of ${steps.length}`}
+              onShow={show}
+              onStartOver={progress.startOver}
+            />
+          )}
+          <div className="flex items-center gap-3">
+            {(screenOk || warningDismissed) && (
+              <WakeLockIcon
+                status={wakeLock}
+                onShowWarning={() => setWarningDismissed(false)}
+              />
+            )}
+            <Button
+              variant="secondary"
+              size="lg"
+              nativeButton={false}
+              render={<Link href={recipeHref} />}
+            >
+              <X data-icon="inline-start" />
+              Done
             </Button>
           </div>
+        </div>
+        {step && (
+          <Progress
+            value={((index + 1) / steps.length) * 100}
+            aria-label="Steps done"
+          />
+        )}
+        {otherTimers.length > 0 && (
+          <ul aria-label="Timers" className="flex flex-wrap gap-2">
+            {otherTimers.map((timer) => (
+              <li key={timer.position}>
+                <FollowingTimer
+                  {...timer}
+                  now={now}
+                  onShow={() => show(timer.position)}
+                  onDismiss={() => progress.stopTimer(timer.position)}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+        {soundNeedsTap && (
+          <p className="text-muted-foreground text-sm">
+            Tap anywhere to turn the timer&apos;s sound back on.
+          </p>
         )}
       </div>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-xl">Ingredients</h2>
-          {yieldServings !== null && (
-            <fieldset className="flex items-center gap-1" aria-label="Servings">
+      <div
+        key={String(screen)}
+        {...swipe}
+        className={cn(
+          "flex flex-1 touch-pan-y touch-pinch-zoom flex-col gap-6 py-4",
+          slideFrom &&
+            "animate-in fade-in duration-200 motion-reduce:animate-none",
+          slideFrom === "right" && "slide-in-from-right-6",
+          slideFrom === "left" && "slide-in-from-left-6",
+        )}
+      >
+        <div className="flex flex-col gap-2">
+          {!screenOk && !warningDismissed && (
+            <WakeLockWarning
+              status={wakeLock}
+              onDismiss={() => setWarningDismissed(true)}
+            />
+          )}
+          {progress.resumed && (
+            <div className="text-muted-foreground flex items-center justify-between gap-3 text-sm">
+              <span>Picked up where you left off.</span>
               <Button
                 variant="secondary"
-                size="icon-lg"
-                aria-label="Fewer servings"
-                disabled={servings <= 1}
-                onClick={() => setServings((value) => value - 1)}
+                size="lg"
+                onClick={progress.startOver}
               >
-                <Minus />
+                Start over
               </Button>
-              <span
-                className="min-w-12 text-center text-lg tabular-nums"
-                aria-live="polite"
-              >
-                {servings}
-              </span>
-              <Button
-                variant="secondary"
-                size="icon-lg"
-                aria-label="More servings"
-                onClick={() => setServings((value) => value + 1)}
-              >
-                <Plus />
-              </Button>
-            </fieldset>
+            </div>
           )}
         </div>
-        <ul className="flex flex-col">
-          {lines.map((line, index) => {
-            const startsSection =
-              line.section && line.section !== lines[index - 1]?.section;
-            const isUsed = progress.used.has(line.position);
-            return (
-              <li key={line.position} className="flex flex-col">
-                {startsSection && (
-                  <span className="text-muted-foreground mt-4 mb-1 text-sm font-semibold tracking-wide uppercase">
-                    {line.section}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => progress.toggleUsed(line.position)}
-                  aria-pressed={isUsed}
-                  className={cn(
-                    "border-b py-3 text-left text-lg leading-snug",
-                    isUsed && "text-muted-foreground line-through",
-                  )}
-                >
-                  <LineText line={showLine(line, factor)} />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="text-muted-foreground text-xs">
-          Tap an ingredient to cross it off as you use it.
-        </p>
-      </section>
 
-      {steps.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h2 className="font-heading text-xl">Method</h2>
-          {stepGroups(steps).map((group) => (
-            <div key={group.first} className="flex flex-col gap-2">
-              {group.section && (
-                <h3 className="text-muted-foreground mt-4 mb-1 text-sm font-semibold tracking-wide uppercase">
-                  {group.section}
-                </h3>
-              )}
-              <ol className="flex flex-col gap-2">
-                {group.steps.map((step, index) => (
-                  <StepItem
-                    key={step.position}
-                    number={group.first + index}
-                    step={step}
-                    current={progress.step === step.position}
-                    onToggle={() => progress.toggleStep(step.position)}
-                    uses={stepIngredients(step.text, lines).map(
-                      (line) => showLine(line, factor).text,
-                    )}
-                    timerEndsAt={progress.timers[step.position]}
-                    now={now}
-                    soundNeedsTap={soundNeedsTap}
-                    onStartTimer={(minutes) => {
-                      primeAlarm();
-                      progress.startTimer(step.position, minutes);
-                    }}
-                    onStopTimer={() => progress.stopTimer(step.position)}
-                  />
-                ))}
-              </ol>
-            </div>
-          ))}
-        </section>
-      )}
+        {step ? (
+          <StepScreen
+            step={step}
+            uses={stepIngredients(step.text, lines).map((line) => (
+              <li key={line.position}>{ingredient(line)}</li>
+            ))}
+            timer={
+              step.timerMinutes !== null && (
+                <StepTimer
+                  minutes={step.timerMinutes}
+                  endsAt={progress.timers[step.position]}
+                  now={now}
+                  onStart={() => {
+                    primeAlarm();
+                    progress.startTimer(step.position, step.timerMinutes ?? 0);
+                  }}
+                  onStop={() => progress.stopTimer(step.position)}
+                />
+              )
+            }
+          />
+        ) : screen === "done" ? (
+          <section className="flex flex-col items-start gap-2">
+            <h2 className="font-heading text-xl">That&apos;s the last step</h2>
+            <p className="text-muted-foreground text-lg">Enjoy it.</p>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="mt-4"
+              onClick={progress.startOver}
+            >
+              Start over
+            </Button>
+          </section>
+        ) : (
+          <GatherScreen
+            lines={lines}
+            ingredient={ingredient}
+            addToList={addToList}
+          />
+        )}
+      </div>
 
-      <div>{addToList}</div>
+      <div className="bg-background sticky bottom-0 -mx-5 flex gap-2 border-t px-5 pt-3 pb-safe-3">
+        {screen === "gather" ? (
+          steps.length > 0 && (
+            <Button size="lg" className="flex-1" onClick={() => go(1)}>
+              Start cooking
+            </Button>
+          )
+        ) : (
+          <>
+            {step && <IngredientsSheet lines={lines} ingredient={ingredient} />}
+            <Button
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              onClick={() => go(-1)}
+            >
+              Back
+            </Button>
+            {screen === "done" ? (
+              <Button
+                size="lg"
+                className="flex-1"
+                nativeButton={false}
+                render={<Link href={recipeHref} />}
+              >
+                Back to the recipe
+              </Button>
+            ) : (
+              <Button size="lg" className="flex-1" onClick={() => go(1)}>
+                {index === steps.length - 1 ? "Finish" : "Next"}
+              </Button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-// A step is a large tap target that marks where you are. That button sits behind the
-// step's content rather than around it, so the content can hold links and the timer button
-// (neither is valid inside a button).
-function StepItem({
-  number,
-  step,
-  current,
+// An ingredient at the servings chosen, tapped to cross it off: the same ticks wherever it
+// shows, on Gather or under a step (D65).
+function IngredientRow({
+  line,
+  factor,
+  used,
   onToggle,
-  uses,
-  timerEndsAt,
-  now,
-  soundNeedsTap,
-  onStartTimer,
-  onStopTimer,
 }: {
-  number: number;
-  step: Step;
-  current: boolean;
+  line: Line;
+  factor: number;
+  used: boolean;
   onToggle: () => void;
-  uses: string[];
-  timerEndsAt: number | undefined;
-  now: number;
-  soundNeedsTap: boolean;
-  onStartTimer: (minutes: number) => void;
-  onStopTimer: () => void;
 }) {
   return (
-    <li className="relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-pressed={current}
-        aria-label={
-          current ? `Step ${number}, current` : `Mark step ${number} as current`
-        }
-        className={cn(
-          "absolute inset-0 rounded-xl border transition-colors",
-          current ? "border-foreground bg-muted" : "border-transparent",
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={used}
+      className={cn(
+        "w-full border-b py-3 text-left text-lg leading-snug",
+        used && "text-muted-foreground line-through",
+      )}
+    >
+      <LineText line={showLine(line, factor)} />
+    </button>
+  );
+}
+
+// Every ingredient under its section, at the servings set by the stepper beside the heading:
+// on Gather, and in the sheet from a step (D64).
+function IngredientList({
+  heading,
+  lines,
+  ingredient,
+}: {
+  heading: ReactNode;
+  lines: Line[];
+  ingredient: (line: Line) => ReactNode;
+}) {
+  const { servings, setServings, yieldServings } = useRecipeServings();
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        {heading}
+        {yieldServings !== null && (
+          <fieldset className="flex items-center gap-1" aria-label="Servings">
+            <Button
+              variant="secondary"
+              size="icon-lg"
+              aria-label="Fewer servings"
+              disabled={servings <= 1}
+              onClick={() => setServings((value) => value - 1)}
+            >
+              <Minus />
+            </Button>
+            <span
+              className="min-w-12 text-center text-lg tabular-nums"
+              aria-live="polite"
+            >
+              {servings}
+            </span>
+            <Button
+              variant="secondary"
+              size="icon-lg"
+              aria-label="More servings"
+              onClick={() => setServings((value) => value + 1)}
+            >
+              <Plus />
+            </Button>
+          </fieldset>
         )}
-      />
-      <div className="pointer-events-none relative flex gap-3 px-3 py-2.5">
-        <span
-          aria-hidden
-          className="font-heading text-primary w-6 shrink-0 text-2xl leading-snug"
-        >
-          {number}
-        </span>
-        <div className="flex min-w-0 flex-col gap-2">
-          <p className="text-xl leading-relaxed [&_a]:pointer-events-auto">
-            <InlineMarkdown>{step.text}</InlineMarkdown>
-          </p>
-          {uses.length > 0 && (
-            <p className="text-muted-foreground text-base">
-              {uses.join(" · ")}
-            </p>
-          )}
-          {step.timerMinutes !== null && (
-            <div className="pointer-events-auto">
-              <StepTimer
-                minutes={step.timerMinutes}
-                endsAt={timerEndsAt}
-                now={now}
-                soundNeedsTap={soundNeedsTap}
-                onStart={() => onStartTimer(step.timerMinutes ?? 0)}
-                onStop={onStopTimer}
-              />
-            </div>
-          )}
-        </div>
       </div>
-    </li>
+      <ul className="flex flex-col">
+        {lines.map((line, index) => (
+          <li key={line.position} className="flex flex-col">
+            {line.section && line.section !== lines[index - 1]?.section && (
+              <span className="text-muted-foreground mt-4 mb-1 text-sm font-semibold tracking-wide uppercase">
+                {line.section}
+              </span>
+            )}
+            {ingredient(line)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// Gather (D64): the ingredients to get out, and Add to list.
+function GatherScreen({
+  lines,
+  ingredient,
+  addToList,
+}: {
+  lines: Line[];
+  ingredient: (line: Line) => ReactNode;
+  addToList: ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <IngredientList
+        heading={<h2 className="font-heading text-xl">Ingredients</h2>}
+        lines={lines}
+        ingredient={ingredient}
+      />
+      <p className="text-muted-foreground text-xs">
+        Tap an ingredient to cross it off as you get it out.
+      </p>
+      {addToList && <div>{addToList}</div>}
+    </section>
+  );
+}
+
+// "Step 3 of 8", which opens every step to jump to one (D63), and Start over.
+function StepsSheet({
+  steps,
+  current,
+  label,
+  onShow,
+  onStartOver,
+}: {
+  steps: Step[];
+  current: number;
+  label: string;
+  onShow: (position: number) => void;
+  onStartOver: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
+      <DrawerTrigger render={<Button variant="quiet" size="lg" />}>
+        <span aria-live="polite">{label}</span>
+        <ChevronDown data-icon="inline-end" />
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="pb-safe-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-4">
+          <DrawerTitle>Steps</DrawerTitle>
+          {stepGroups(steps).map((group) => (
+            <div key={group.first} className="flex flex-col">
+              {group.section && (
+                <h3 className="text-muted-foreground mt-2 mb-1 text-sm font-semibold tracking-wide uppercase">
+                  {group.section}
+                </h3>
+              )}
+              <ol className="flex flex-col">
+                {group.steps.map((step, offset) => (
+                  <li key={step.position}>
+                    <button
+                      type="button"
+                      aria-current={
+                        step.position === current ? "step" : undefined
+                      }
+                      onClick={() => {
+                        onShow(step.position);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full gap-3 border-b py-3 text-left",
+                        step.position === current && "font-semibold",
+                      )}
+                    >
+                      <span className="text-primary font-heading w-6 shrink-0">
+                        {group.first + offset}
+                      </span>
+                      <span className="line-clamp-2">
+                        {stripMarkdown(step.text)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+          <Button
+            variant="secondary"
+            size="lg"
+            className="self-start"
+            onClick={() => {
+              onStartOver();
+              setOpen(false);
+            }}
+          >
+            Start over
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// From a step, the whole list in a sheet (D64), with the same ticks and servings.
+function IngredientsSheet({
+  lines,
+  ingredient,
+}: {
+  lines: Line[];
+  ingredient: (line: Line) => ReactNode;
+}) {
+  return (
+    <Drawer showSwipeHandle>
+      <DrawerTrigger
+        render={
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            aria-label="All ingredients"
+          />
+        }
+      >
+        <List />
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="pb-safe-4 min-h-0 flex-1 overflow-y-auto px-4 pt-4">
+          <IngredientList
+            heading={<DrawerTitle>Ingredients</DrawerTitle>}
+            lines={lines}
+            ingredient={ingredient}
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// One step, filling the screen (D63): its section, its words in large type, the ingredients
+// it uses (D65), and its timer.
+function StepScreen({
+  step,
+  uses,
+  timer,
+}: {
+  step: Step;
+  uses: ReactNode[];
+  timer: ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-5">
+      {step.section && (
+        <p className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
+          {step.section}
+        </p>
+      )}
+      <p className="text-2xl leading-relaxed">
+        <InlineMarkdown>{step.text}</InlineMarkdown>
+      </p>
+      {uses.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <h2 className="text-muted-foreground text-sm">This step uses</h2>
+          <ul className="flex flex-col">{uses}</ul>
+        </div>
+      )}
+      {timer}
+    </section>
+  );
+}
+
+// Another step's timer, pinned above the step you're on (D66): tap it to go back to its step,
+// or, once it's up, to dismiss it.
+function FollowingTimer({
+  number,
+  endsAt,
+  now,
+  onShow,
+  onDismiss,
+}: {
+  number: number;
+  endsAt: number;
+  now: number;
+  onShow: () => void;
+  onDismiss: () => void;
+}) {
+  if (endsAt <= now) {
+    return (
+      <Button size="lg" onClick={onDismiss} role="alert">
+        <Timer data-icon="inline-start" />
+        Step {number}: time&apos;s up · Dismiss
+      </Button>
+    );
+  }
+  return (
+    <Button
+      variant="secondary"
+      size="lg"
+      onClick={onShow}
+      aria-label={`Step ${number} timer, ${timeLeft(endsAt, now)} left. Go to step ${number}`}
+    >
+      <Timer data-icon="inline-start" />
+      Step {number} ·{" "}
+      <span className="tabular-nums">{timeLeft(endsAt, now)}</span>
+    </Button>
   );
 }
 
@@ -467,14 +879,12 @@ function StepTimer({
   minutes,
   endsAt,
   now,
-  soundNeedsTap,
   onStart,
   onStop,
 }: {
   minutes: number;
   endsAt: number | undefined;
   now: number;
-  soundNeedsTap: boolean;
   onStart: () => void;
   onStop: () => void;
 }) {
@@ -495,19 +905,12 @@ function StepTimer({
     );
   }
   return (
-    <div className="flex flex-col items-start gap-1">
-      <Button variant="secondary" size="lg" onClick={onStop}>
-        <Timer data-icon="inline-start" />
-        <span role="timer" className="tabular-nums">
-          {timeLeft(endsAt, now)}
-        </span>
-        · Stop
-      </Button>
-      {soundNeedsTap && (
-        <p className="text-muted-foreground text-sm">
-          Tap anywhere to turn its sound back on.
-        </p>
-      )}
-    </div>
+    <Button variant="secondary" size="lg" onClick={onStop}>
+      <Timer data-icon="inline-start" />
+      <span role="timer" className="tabular-nums">
+        {timeLeft(endsAt, now)}
+      </span>
+      · Stop
+    </Button>
   );
 }

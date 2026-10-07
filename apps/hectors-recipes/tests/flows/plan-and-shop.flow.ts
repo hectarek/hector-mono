@@ -1,33 +1,6 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { signUp } from "@/tests/flows/sign-up";
-
-// A one-finger swipe across the middle of the week's first day, as touch events from the
-// screen (Chromium's DevTools protocol): Playwright's own touchscreen only taps.
-async function swipe(page: Page, direction: "left" | "right") {
-  const day = await page
-    .getByRole("heading", { level: 2 })
-    .first()
-    .boundingBox();
-  if (!day) throw new Error("No day to swipe on");
-  const y = day.y + day.height / 2;
-  const middle = day.x + day.width / 2;
-  const [from, to] =
-    direction === "left"
-      ? [middle + 75, middle - 75]
-      : [middle - 75, middle + 75];
-  const screen = await page.context().newCDPSession(page);
-  const touch = (type: "touchStart" | "touchMove" | "touchEnd", x?: number) =>
-    screen.send("Input.dispatchTouchEvent", {
-      type,
-      touchPoints: x === undefined ? [] : [{ x, y }],
-    });
-  await touch("touchStart", from);
-  for (let step = 1; step <= 5; step++) {
-    await touch("touchMove", from + ((to - from) * step) / 5);
-  }
-  await touch("touchEnd");
-  await screen.detach();
-}
+import { swipe } from "@/tests/flows/touch";
 
 // P15.7: the week's loop as a person does it, in a real browser, against the test project
 // (playwright.config.ts). Each run signs up a new account, so runs never share data.
@@ -75,9 +48,10 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   // D51: a swipe across the week, with real touches, goes to the next week and back.
   const week = page.getByRole("navigation", { name: "Week" });
   await expect(week).toContainText("This week");
-  await swipe(page, "left");
+  const firstDay = page.getByRole("heading", { level: 2 }).first();
+  await swipe(page, firstDay, "left");
   await expect(week).not.toContainText("This week");
-  await swipe(page, "right");
+  await swipe(page, firstDay, "right");
   await expect(week).toContainText("This week");
 
   await page
