@@ -14,7 +14,7 @@ export async function requireEntryEditor(
 ): Promise<PlanEntry> {
   const entry = await planEntriesRepository.getById(entryId, tx);
   if (!entry) {
-    throw new NotFoundError("That meal is no longer on the plan");
+    throw new NotFoundError("That meal is no longer in the meal plan");
   }
   await requireSpaceRole(
     spacesRepository,

@@ -78,7 +78,7 @@ export default async function PlanPage({
         {plans.length > 1 &&
           (current.isDefault ? (
             <p className="text-muted-foreground text-center text-sm">
-              Your default plan: Plan and Groceries open to it.
+              Your default meal plan: Meal plan and Groceries open to it.
             </p>
           ) : (
             <MakeDefaultButton type="meal-plan" spaceId={current.id} />
@@ -151,7 +151,7 @@ export default async function PlanPage({
       {entries.length === 0 && (
         <p className="text-muted-foreground text-center text-sm">
           {canEdit
-            ? "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan."
+            ? "Nothing planned this week. To plan a meal, open a recipe and tap Add to meal plan."
             : "Nothing planned this week."}
         </p>
       )}

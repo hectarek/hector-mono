@@ -330,7 +330,7 @@ function LineItem({
             autoComplete="off"
           />
           <FieldDescription>
-            Shown on the recipe, left off the grocery list.
+            Shown on the recipe, left off groceries.
           </FieldDescription>
         </Field>
         <FieldLabel htmlFor={optionalId}>
@@ -342,7 +342,7 @@ function LineItem({
             />
             <FieldContent>
               <FieldTitle>Optional</FieldTitle>
-              <FieldDescription>Left off the grocery list.</FieldDescription>
+              <FieldDescription>Left off groceries.</FieldDescription>
             </FieldContent>
           </Field>
         </FieldLabel>

@@ -128,7 +128,7 @@ export async function clearCheckedItems(spaceId: string): Promise<ActionState> {
     return toActionError(
       err,
       actionLogger("clearCheckedItems"),
-      "Couldn't clear the list.",
+      "Couldn't clear groceries.",
     );
   }
   revalidatePath("/groceries");
@@ -146,7 +146,7 @@ export async function clearGroceryList(spaceId: string): Promise<ActionState> {
     return toActionError(
       err,
       actionLogger("clearGroceryList"),
-      "Couldn't clear the list.",
+      "Couldn't clear groceries.",
     );
   }
   revalidatePath("/groceries");
@@ -177,9 +177,12 @@ export async function addRecipeToList(input: {
     const state = toActionError(
       err,
       actionLogger("addRecipeToList"),
-      "Couldn't add it to the list.",
+      "Couldn't add it to groceries.",
     );
-    return { ok: false, error: state?.error ?? "Couldn't add it to the list." };
+    return {
+      ok: false,
+      error: state?.error ?? "Couldn't add it to groceries.",
+    };
   }
 }
 
@@ -202,8 +205,11 @@ export async function addPlanToList(input: {
     const state = toActionError(
       err,
       actionLogger("addPlanToList"),
-      "Couldn't add it to the list.",
+      "Couldn't add it to groceries.",
     );
-    return { ok: false, error: state?.error ?? "Couldn't add it to the list." };
+    return {
+      ok: false,
+      error: state?.error ?? "Couldn't add it to groceries.",
+    };
   }
 }

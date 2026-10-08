@@ -23,8 +23,10 @@ describe("the recipe page's sheets", () => {
       />,
     );
 
-    await user.click(view.getByRole("button", { name: "Add to plan" }));
-    const sheet = within(view.getByRole("dialog", { name: "Add to plan" }));
+    await user.click(view.getByRole("button", { name: "Add to meal plan" }));
+    const sheet = within(
+      view.getByRole("dialog", { name: "Add to meal plan" }),
+    );
     const actions = sheet
       .getAllByRole("button")
       .filter((button) => ["Add", "Cancel"].includes(button.textContent ?? ""));
@@ -36,7 +38,7 @@ describe("the recipe page's sheets", () => {
     await user.click(sheet.getByRole("button", { name: "Add" }));
     expect(await sheet.findByText(/^Planned: /)).toBeTruthy();
     expect(
-      sheet.getByRole("button", { name: "Open plan" }).closest("a")?.href,
+      sheet.getByRole("button", { name: "Open meal plan" }).closest("a")?.href,
     ).toContain(`/plan?week=${today}&plan=${fixture.planId}`);
     expect((await fixture.meals(today)).map((meal) => meal.title)).toEqual([
       "Chili",
@@ -57,9 +59,9 @@ describe("the recipe page's sheets", () => {
       </RecipeServings>,
     );
 
-    await user.click(view.getByRole("button", { name: "Add to list" }));
+    await user.click(view.getByRole("button", { name: "Add to groceries" }));
     const sheet = within(
-      view.getByRole("dialog", { name: "Add ingredients to your list" }),
+      view.getByRole("dialog", { name: "Add to groceries" }),
     );
     await user.click(sheet.getByRole("button", { name: "Add" }));
     expect(await sheet.findByText("1 added.")).toBeTruthy();

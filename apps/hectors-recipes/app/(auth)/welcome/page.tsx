@@ -70,7 +70,7 @@ export default async function WelcomePage({
             <Logo className="h-6 w-auto" />
           </h1>
           <p className="text-muted-foreground max-w-xs text-lg text-balance">
-            Your recipes, the week&apos;s plan and one shared grocery list.
+            Your recipes, the week&apos;s meal plan and shared groceries.
           </p>
         </div>
       </div>

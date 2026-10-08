@@ -24,5 +24,5 @@ export const SPACE_TYPE_LABELS: Record<Space["type"], string> = {
 // What joining or deleting one covers, for sentences: a plan's grocery list comes with it.
 export const SPACE_TYPE_CONTENTS: Record<Space["type"], string> = {
   "recipe-book": "recipe book",
-  "meal-plan": "meal plan (with its grocery list)",
+  "meal-plan": "meal plan (with its groceries)",
 };

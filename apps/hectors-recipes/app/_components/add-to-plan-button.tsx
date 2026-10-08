@@ -19,7 +19,7 @@ import { callAction } from "@/app/_lib/call-action";
 import { addPlanEntry } from "@/app/actions/plan";
 import { type MealDays, mealDaysText } from "@/src/entities/meal-days";
 
-// Add to plan on the recipe page: a bottom sheet (the design system's pattern for adding to
+// Add to meal plan on the recipe page: a bottom sheet (the design system's pattern for adding to
 // the plan) with the cook and eat days and, in two or more plans, which plan.
 export function AddToPlanButton({
   recipeId,
@@ -68,11 +68,11 @@ export function AddToPlanButton({
     >
       <DrawerTrigger render={<Button variant="secondary" size="lg" />}>
         <CalendarPlus data-icon="inline-start" />
-        Add to plan
+        Add to meal plan
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Add to plan</DrawerTitle>
+          <DrawerTitle>Add to meal plan</DrawerTitle>
           <DrawerDescription>&ldquo;{title}&rdquo;</DrawerDescription>
         </DrawerHeader>
 
@@ -89,7 +89,7 @@ export function AddToPlanButton({
                   />
                 }
               >
-                Open plan
+                Open meal plan
               </Button>
               <DrawerClose render={<Button variant="secondary" size="lg" />}>
                 Done
@@ -99,7 +99,7 @@ export function AddToPlanButton({
             <form onSubmit={submit} className="flex flex-col gap-3">
               <MealDaysPicker today={today} value={days} onChange={setDays} />
               <SpacePicker
-                label="Plan"
+                label="Meal plan"
                 spaces={plans}
                 value={planId}
                 onChange={setPlanId}

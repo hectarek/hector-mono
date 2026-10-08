@@ -17,7 +17,7 @@ const youngSerif = Young_Serif({
 
 export const metadata: Metadata = {
   title: "Hector's Recipes",
-  description: "Shared recipe books, a weekly meal plan, and one grocery list.",
+  description: "Shared recipe books, a weekly meal plan, and shared groceries.",
   // iOS home-screen app: launches full screen with this name.
   appleWebApp: { capable: true, title: "Recipes", statusBarStyle: "default" },
 };

@@ -20,7 +20,7 @@ type Line = Pick<
 >;
 
 export function ScaledIngredients({ lines }: { lines: Line[] }) {
-  // Shared with Add to list and the Cook link (RecipeServings).
+  // Shared with Add to groceries and the Cook link (RecipeServings).
   const { servings, setServings, yieldServings } = useRecipeServings();
   const factor = yieldServings ? servings / yieldServings : 1;
 

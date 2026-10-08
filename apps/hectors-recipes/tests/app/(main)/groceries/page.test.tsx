@@ -86,7 +86,7 @@ describe("Groceries", () => {
     );
 
     const view = render(await page(plan));
-    view.getByText("Nothing on the list yet.");
+    view.getByText("Nothing in groceries yet.");
     expect(view.queryByRole("textbox", { name: "Add an item" })).toBe(null);
   });
 
@@ -123,7 +123,7 @@ describe("Groceries", () => {
     await waitFor(async () => expect(await items()).toEqual([]));
     view.rerender(await page(ownPlan));
     view.getByText(
-      "The list is empty. Add items above, or add a recipe or your planned meals.",
+      "Nothing in groceries yet. Add items above, or add a recipe or your planned meals.",
     );
     expect(view.queryByText(/Got it/)).toBe(null);
   });
@@ -139,19 +139,21 @@ describe("Groceries", () => {
     }
     const view = render(await page(ownPlan));
     const question = () =>
-      view.getByRole("group", { name: "Clear the whole list?" });
+      view.getByRole("group", { name: "Clear all groceries?" });
 
     await user.click(view.getByRole("button", { name: /^More for / }));
-    await user.click(await view.findByRole("button", { name: "Clear list" }));
+    await user.click(
+      await view.findByRole("button", { name: "Clear groceries" }),
+    );
     within(question()).getByText(/all 2 items, checked or not/);
     await user.click(
       within(question()).getByRole("button", { name: "Cancel" }),
     );
     expect(await items()).toHaveLength(2);
 
-    await user.click(view.getByRole("button", { name: "Clear list" }));
+    await user.click(view.getByRole("button", { name: "Clear groceries" }));
     await user.click(
-      within(question()).getByRole("button", { name: "Clear list" }),
+      within(question()).getByRole("button", { name: "Clear groceries" }),
     );
     await waitFor(async () => expect(await items()).toEqual([]));
     view.rerender(await page(ownPlan));

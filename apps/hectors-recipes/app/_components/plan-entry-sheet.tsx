@@ -30,7 +30,7 @@ import type { PlanEntry } from "@/src/entities/models/plan-entry.model";
 import { shortDay } from "@/src/entities/week";
 
 // A planned meal's actions, as a bottom sheet like the grocery list's: Change days (the same
-// picker as Add to plan: cook day and eat days, D38), its ingredients onto the list (again,
+// picker as Add to meal plan: cook day and eat days, D38), its ingredients onto the list (again,
 // once they're there: a second batch, D41), on a leftovers day taking that day off it (D43),
 // and Remove meal.
 export function PlanEntrySheet({
@@ -178,8 +178,8 @@ export function PlanEntrySheet({
                   {isPending
                     ? "Adding…"
                     : entry.addedToListAt
-                      ? "Add to list again"
-                      : "Add to grocery list"}
+                      ? "Add to groceries again"
+                      : "Add to groceries"}
                 </Button>
               )}
               {listed && (

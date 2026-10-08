@@ -19,7 +19,7 @@ export async function addPlanEntry(input: {
 }): Promise<ActionState> {
   try {
     const userId = await getCurrentUserId();
-    // No plan chosen (e.g. "Add to plan" before ever opening the Plan tab): use their own.
+    // No plan chosen (e.g. "Add to meal plan" before ever opening the Meal plan tab): use their own.
     const spaceId =
       input.spaceId ??
       (

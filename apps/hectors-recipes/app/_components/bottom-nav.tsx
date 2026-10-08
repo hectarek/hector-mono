@@ -12,7 +12,7 @@ const TABS = [
     tab: "recipes",
     match: ["/", "/recipes", "/books"],
   },
-  { href: "/plan", label: "Plan", tab: "plan", match: ["/plan"] },
+  { href: "/plan", label: "Meal plan", tab: "plan", match: ["/plan"] },
   {
     href: "/groceries",
     label: "Groceries",

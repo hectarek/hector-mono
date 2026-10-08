@@ -2281,9 +2281,17 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
 
 Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second testers' round ([feedback](./feedback/2026-10-08-desktop-tester.md)), a tester on a desktop in a book Hector shares with him.
 
-- [ ] **P26.1** Groceries and Meal plan, and a Words section — C · D84, F4 (round 2)
+- [x] **P26.1** Groceries and Meal plan, and a Words section — C · D84, F4 (round 2)
   - Do: "list" and "plan" become Groceries and Meal plan wherever they name the list and the plan (buttons, sheets, the tab, messages). The map gets a Words section.
   - Verify: screen tests' and flows' names updated; the recipe page's two buttons side by side at 375 px; `grep` finds no "Add to list" or "Add to plan" left.
+  - Evidence (2026-10-08):
+    - Buttons and sheets: Add to groceries (again), Add to meal plan, Open groceries, Open meal plan, Clear groceries ("Clear all groceries?"), Remove from groceries, "Add N meals to groceries", Make my default meal plan, Start my own meal plan; the pickers are labelled Meal plan and Groceries.
+    - The tab is Meal plan, and Groceries' label over the plan's name is Groceries.
+    - Messages: "Nothing in groceries yet.", "already in groceries", "That item is no longer in groceries", "That meal is no longer in the meal plan", "Couldn't add it to groceries.", the optional line's "Left off groceries.", and the welcome, sign-in and app descriptions.
+    - Join's "already in your list" (meaning your books or plans) reads "It's already one of your meal plans." now.
+    - Plans keep their names ("Hector's Plan"): renaming them would change people's data, which D84 doesn't ask for.
+    - The map's Words section names each thing once (recipe book, meal plan, groceries, meal, cook day, eat days, item, members) with the words not to use. AGENTS.md's UI rules point to it, and the map's screens and jobs use the new names. Code names (`plan`, `AddToListButton`) are unchanged.
+    - Tests: the screen tests and the `plan-and-shop` flow look for the new names; `grep` finds no "Add to list" or "Add to plan" in `app/` or `src/`, comments included. The 375 px check of the two buttons side by side runs with the flows, once the worktree has its `.env` files.
 - [ ] **P26.2** Whose book — C · D82, F1 (round 2)
   - Do: your own book first in the pills after All recipes, a people icon on books shared with you; a recipe's back link names its book in two or more books.
   - Verify: screen tests for the pills' order and icon and the back link's name; 375 px.

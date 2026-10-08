@@ -84,7 +84,7 @@ export default async function JoinPage({
           </EmptyTitle>
           <EmptyDescription>
             {invite.alreadyMember
-              ? `This ${typeLabel} is already in your list.`
+              ? `It's already one of your ${typeLabel}s.`
               : `You've been invited to a shared ${SPACE_TYPE_CONTENTS[invite.spaceType]}. You'll be able to ${
                   invite.role === "editor" ? "view and edit" : "view"
                 } it.`}

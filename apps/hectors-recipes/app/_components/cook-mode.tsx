@@ -159,7 +159,7 @@ function useWarningDismissed() {
 }
 
 // Opens at the servings chosen on the recipe page (?servings=), kept in the URL as they
-// change; Add to list (passed in as addToList) reads the same number.
+// change; Add to groceries (passed in as addToList) reads the same number.
 export function CookMode({
   yieldServings,
   initialServings,
@@ -676,7 +676,7 @@ function IngredientList({
   );
 }
 
-// Gather (D64): the ingredients to get out, and Add to list.
+// Gather (D64): the ingredients to get out, and Add to groceries.
 function GatherScreen({
   lines,
   ingredient,

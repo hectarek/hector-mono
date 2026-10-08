@@ -140,7 +140,7 @@ function MealRow({
             {cooks && entry.addedToListAt && (
               <>
                 <ShoppingCart className="ml-1 size-3.5" aria-hidden />
-                <span className="sr-only">, on the grocery list</span>
+                <span className="sr-only">, in groceries</span>
               </>
             )}
           </span>

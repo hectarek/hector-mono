@@ -211,7 +211,7 @@ export async function startOwnPlan(): Promise<ActionState> {
     return toActionError(
       err,
       actionLogger("startOwnPlan"),
-      "Couldn't start your plan.",
+      "Couldn't start your meal plan.",
     );
   }
   revalidatePath("/", "layout");

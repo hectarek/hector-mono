@@ -31,8 +31,8 @@ The app is phone-first, built for people who share a recipe book and a plan. Six
 |---|---|---|---|
 | Find something to cook | Recipes tab | Library → Recipe | `plan-and-shop` (search, Sort and group) |
 | Add a recipe | Library's Add recipe | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe | `plan-and-shop` (manually), `add-recipe` (photo or file) |
-| Plan the week | A recipe's Add to plan | Recipe (Add to plan) → Plan | `plan-and-shop` |
-| Shop | Plan's grocery button, or a recipe's Add to list | Plan → Groceries | `plan-and-shop` (check off, Got it, Clear list) |
+| Plan the week | A recipe's Add to meal plan | Recipe (Add to meal plan) → Meal plan | `plan-and-shop` |
+| Shop | Meal plan's grocery button, or a recipe's Add to groceries | Meal plan → Groceries | `plan-and-shop` (check off, Got it, Clear groceries) |
 | Cook | A recipe's Cook | Recipe → Cook mode (Gather → each step → Done) → Recipe | `cook` |
 | Share a book or plan | A tab's ⋯ → Invite | ⋯ → the phone's share sheet; the person invited: Welcome → Create account → Join → the book or plan | none |
 
@@ -51,8 +51,8 @@ Signed in: header and tab bar
       Recipe                       /recipes/[id]     back link; the Recipes tab stays lit
       Books                        /books            back link
         Copy recipes               /books/[id]/copy  back link
-  Plan tab
-    Plan                           /plan
+  Meal plan tab
+    Meal plan                      /plan
   Groceries tab
     Groceries                      /groceries
   Not under a tab
@@ -68,7 +68,7 @@ Full-screen tasks: no header or tab bar, their own way out
 Error, Not found                   any route
 ```
 
-The header has the logo (to the library) and the account button. Plan and Groceries open the default plan (D14); a tab doesn't carry the plan you were looking at.
+The header has the logo (to the library) and the account button. Meal plan and Groceries open the default plan (D14); a tab doesn't carry the plan you were looking at.
 
 ## Screens
 
@@ -95,46 +95,46 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
-- **Also on it:** Add to list and Add to plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
+- **Also on it:** Add to groceries and Add to meal plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
 - **Opens:** bottom sheets.
-  - Add to plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open plan.
-  - Add to list: servings, the list picker; then Open list. "It's already on this list" asks before adding again (D45).
+  - Add to meal plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open meal plan.
+  - Add to groceries: servings, the groceries picker; then Open groceries. "It's already in groceries" asks before adding again (D45).
 - **Bold:** the produce tile when there's no photo.
 - **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done, or a link to it.
-- **Leads to:** Cook mode, Edit, Plan, Groceries, the library.
-- **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to list or Add to plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
-- **Room:** Cook, Add to list and Add to plan stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
+- **Leads to:** Cook mode, Edit, Meal plan, Groceries, the library.
+- **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to groceries or Add to meal plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
+- **Room:** Cook, Add to groceries and Add to meal plan stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
 
-### Plan — `/plan`
+### Meal plan — `/plan`
 
 - **Job:** see the week: what's cooked and eaten each day. Start the shop.
 - **Surface:** Market. Tab page.
 - **Title:** the plan's name over "Meal plan", with a role badge. Plan pills above it in two or more plans.
-- **Main action:** "Add N meals to the grocery list", in the grocery box under the week (editors, when there's something to add; D41, D44, D50).
-- **⋯:** Invite (owner), Members, Make my default plan (two or more plans; a line instead when it is), Start my own plan (when you own none).
-- **Also on it:** the week's arrows and range, Back to this week, seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open list.
-- **Opens:** a meal's sheet: Change days, Add to grocery list (or Add to list again), Not eating it on Mon 5 (from a leftovers day, D43), Remove meal.
+- **Main action:** "Add N meals to groceries", in the grocery box under the week (editors, when there's something to add; D41, D44, D50).
+- **⋯:** Invite (owner), Members, Make my default meal plan (two or more plans; a line instead when it is), Start my own meal plan (when you own none).
+- **Also on it:** the week's arrows and range, Back to this week, seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open groceries.
+- **Opens:** a meal's sheet: Change days, Add to groceries (or Add to groceries again), Not eating it on Mon 5 (from a leftovers day, D43), Remove meal.
 - **Gestures:** a sideways swipe changes the week (D51), sliding in (D54).
-- **Empty:** "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan." Viewers see "Nothing planned this week."
+- **Empty:** "Nothing planned this week. To plan a meal, open a recipe and tap Add to meal plan." Viewers see "Nothing planned this week."
 - **Bold:** the Today sticker.
-- **Reached from:** the Plan tab, Add to plan's Open plan, Join (a plan), Start my own plan, after leaving or deleting a plan.
-- **Leads to:** Recipe (a meal's title), Groceries (Open list), Members.
+- **Reached from:** the Meal plan tab, Add to meal plan's Open meal plan, Join (a plan), Start my own meal plan, after leaving or deleting a plan.
+- **Leads to:** Recipe (a meal's title), Groceries (Open groceries), Members.
 - **Room:** no title-row action: planning starts on a recipe (D40). The week fills the screen, with the grocery box under it (D50). An action on one meal goes in the meal's sheet.
 
 ### Groceries — `/groceries`
 
 - **Job:** shop: check items off in the store, and add the odd item by hand.
 - **Surface:** Market. Tab page.
-- **Title:** "Grocery list" over the plan's name, with a role badge. Plan pills above it in two or more plans.
+- **Title:** "Groceries" over the plan's name, with a role badge. Plan pills above it in two or more plans.
 - **Main action:** Add, beside the add box (editors).
-- **⋯:** Invite (owner), Members, Clear list (editors, when the list has items; asks first, D52).
+- **⋯:** Invite (owner), Members, Clear groceries (editors, when the list has items; asks first, D52).
 - **Also on it:** the add box; Group by, By aisle or By recipe (D60; shown when items came from recipes); the list under aisle or recipe headings; Got it (closed until tapped), holding the checked items and Clear checked.
-- **Rows:** tap to check off (the whole row; it folds into Got it); "for" its recipes; "Not saved yet" when offline; a ⋯ (editors) opening Edit and Remove from list.
+- **Rows:** tap to check off (the whole row; it folds into Got it); "for" its recipes; "Not saved yet" when offline; a ⋯ (editors) opening Edit and Remove from groceries.
 - **Live:** other people's changes appear as they're made (D21), with a refresh every 60 s. Check-offs made with no signal are kept and sent later (D8).
-- **Empty:** "Everything's in the cart.", or "The list is empty. Add items above, or add a recipe or your planned meals." (viewers: "Nothing on the list yet."). No button.
+- **Empty:** "Everything's in the cart.", or "Nothing in groceries yet. Add items above, or add a recipe or your planned meals." (viewers: "Nothing in groceries yet."). No button.
 - **Bold:** none.
-- **Reached from:** the Groceries tab; Open list from a recipe's Add to list, Plan's grocery box, or cook mode's Add to list.
-- **Leads to:** Members. Nothing links to recipes or Plan.
+- **Reached from:** the Groceries tab; Open groceries from a recipe's Add to groceries, Meal plan's grocery box, or cook mode's Add to groceries.
+- **Leads to:** Members. Nothing links to recipes or Meal plan.
 - **Room:** used one-handed, in a store, often with bad signal. Keep it to the list: anything else goes behind the ⋯ or the row's ⋯.
 
 ### Books — `/books`
@@ -158,12 +158,12 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 ### Members — `/spaces/[id]/settings`
 
 - **Job:** who's in a book or plan, its invite links, leaving, deleting.
-- **Surface:** Market. Back link: the book's or plan's name (a plan's goes to Plan, even when you came from Groceries).
+- **Surface:** Market. Back link: the book's or plan's name (a plan's goes to Meal plan, even when you came from Groceries).
 - **Main action:** New link: can edit (owner).
 - **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off, which asks first; New link: view only); Members, each with Make view only or Allow editing, and Remove, which asks first; Delete, which asks first.
 - **Everyone else:** Members, and Leave on their own row, which asks first.
 - **Reached from:** a tab's ⋯ → Members; Books' Members.
-- **Leads to:** the book or plan; Books or Plan after leaving or deleting.
+- **Leads to:** the book or plan; Books or Meal plan after leaving or deleting.
 
 ### Join — `/join/[token]`
 
@@ -219,9 +219,9 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** cook from a phone at arm's length, one screen at a time (D63–D66).
 - **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next.
-- **Screens:** Gather (tick ingredients as you get them out, servings, Add to list, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
+- **Screens:** Gather (tick ingredients as you get them out, servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
-- **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to list's Open list.
+- **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to groceries's Open groceries.
 - **Room:** a step screen holds one step on purpose. Anything that isn't about the step in front of you goes on Gather, Done or a sheet.
 
 ### Welcome — `/welcome`, and Sign in or Create account — `/auth/[path]`
@@ -235,22 +235,39 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - Error: "Something went wrong", Try again (main) and Recipes. Not found: Go to recipes (main).
 
+## Words
+
+One word for each thing (D84), so a new screen names it as the rest of the app does. Button and sheet names use these words: "Add to groceries", "Open meal plan".
+
+| Thing | Say | Not |
+|---|---|---|
+| A shared set of recipes | recipe book (on a pill or a heading: the book's name) | collection, cookbook |
+| The week's cooking, shared | meal plan (the tab: Meal plan) | plan, calendar, schedule |
+| What to buy, one per meal plan | groceries (the tab: Groceries) | list, grocery list, shopping list |
+| One recipe on the meal plan | meal | entry, item |
+| The day it's cooked | cook day | |
+| The days it's eaten | eat days (leftovers are eat days after the cook day) | |
+| A line in groceries | item | |
+| The people in a book or meal plan | members (the page: Members) | people, sharing |
+
+Code keeps its own names (`plan`, `grocery_items`, `AddToListButton`); only the words on screen follow this table.
+
 ## Patterns: where each rule lives, and where it's used
 
 | Pattern | The rule | Used on |
 |---|---|---|
-| Page title with the main action and a ⋯ | AGENTS.md UI Rules (D42) | Library, Plan, Groceries |
+| Page title with the main action and a ⋯ | AGENTS.md UI Rules (D42) | Library, Meal plan, Groceries |
 | Back link | AGENTS.md UI Rules | Recipe, Books, Copy recipes, Members, Join, Account, Sign in |
 | Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
-| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to plan and Add to list |
+| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to meal plan and Add to groceries |
 | Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
 | List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
-| Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Plan and Groceries have the sentence only |
+| Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Meal plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); no written rule for the pills | Pills on the three tabs; pickers in dialogs and the form |
-| Sideways swipe | D51, D54, D63 | Plan's week, cook mode |
-| A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Plan's meals and its grocery button, Groceries, a recipe's Add to plan and Add to list (cook mode's too) |
-| Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Plan's Today sticker, the active tab, Welcome's produce row |
+| Sideways swipe | D51, D54, D63 | Meal plan's week, cook mode |
+| A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Meal plan's meals and its grocery button, Groceries, a recipe's Add to meal plan and Add to groceries (cook mode's too) |
+| Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Meal plan's Today sticker, the active tab, Welcome's produce row |
 | Waiting on the AI: the produce row in a wave | D75; AGENTS.md UI Rules | Add by link or text, Add by photo or file |
 
 ## Where the app and its rules disagree

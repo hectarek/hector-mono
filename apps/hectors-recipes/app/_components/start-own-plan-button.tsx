@@ -17,7 +17,7 @@ export function StartOwnPlanButton() {
           disabled={isPending}
         >
           <CalendarPlus data-icon="inline-start" />
-          {isPending ? "Starting…" : "Start my own plan"}
+          {isPending ? "Starting…" : "Start my own meal plan"}
         </Button>
       )}
     </ActionForm>

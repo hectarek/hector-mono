@@ -38,11 +38,11 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await page.getByRole("button", { name: "Save" }).click();
 
   await expect(page.getByRole("heading", { name: "Chili" })).toBeVisible();
-  await page.getByRole("button", { name: "Add to plan" }).click();
-  const dialog = page.getByRole("dialog", { name: "Add to plan" });
+  await page.getByRole("button", { name: "Add to meal plan" }).click();
+  const dialog = page.getByRole("dialog", { name: "Add to meal plan" });
   await dialog.getByRole("button", { name: "Add", exact: true }).click();
   await expect(dialog.getByText(/^Planned: /)).toBeVisible();
-  await dialog.getByRole("button", { name: "Open plan" }).click();
+  await dialog.getByRole("button", { name: "Open meal plan" }).click();
   await page.waitForURL(/\/plan/);
 
   // D51: a swipe across the week, with real touches, goes to the next week and back.
@@ -54,12 +54,10 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await swipe(page, firstDay, "right");
   await expect(week).toContainText("This week");
 
-  await page
-    .getByRole("button", { name: "Add 1 meal to the grocery list" })
-    .click();
+  await page.getByRole("button", { name: "Add 1 meal to groceries" }).click();
   // Items, not meals: the turkey and the onion.
   await expect(page.getByRole("status")).toHaveText("2 added.");
-  await page.getByRole("button", { name: "Open list" }).click();
+  await page.getByRole("button", { name: "Open groceries" }).click();
   await page.waitForURL(/\/groceries/);
 
   // A row is a label around a hidden checkbox (the design system's pattern): tap its words.
@@ -82,16 +80,16 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
 
   // D52: start the list over from the ⋯ sheet, after it asks, and Plan can add the meal again.
   await page.getByRole("button", { name: /^More for / }).click();
-  await page.getByRole("button", { name: "Clear list" }).click();
-  const question = page.getByRole("group", { name: "Clear the whole list?" });
+  await page.getByRole("button", { name: "Clear groceries" }).click();
+  const question = page.getByRole("group", { name: "Clear all groceries?" });
   await expect(question).toContainText("all 2 items");
-  await question.getByRole("button", { name: "Clear list" }).click();
+  await question.getByRole("button", { name: "Clear groceries" }).click();
   await expect(page.getByText("List cleared.")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByText(/^The list is empty/)).toBeVisible();
-  await page.getByRole("link", { name: "Plan" }).click();
+  await page.getByRole("link", { name: "Meal plan" }).click();
   await expect(
-    page.getByRole("button", { name: "Add 1 meal to the grocery list" }),
+    page.getByRole("button", { name: "Add 1 meal to groceries" }),
   ).toBeVisible();
 
   // D56, on Neon: Recipes finds the recipe by an ingredient, and every word typed counts.
