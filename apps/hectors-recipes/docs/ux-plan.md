@@ -2177,9 +2177,13 @@ One commit per task; the PR when the phase is done.
     - The picker takes `.docx` by type or extension; the older `.doc` isn't taken. The help text, the chooser ("a PDF, Word or text file") and the not-taken message name Word; the form's note says "Read from your Word document."
     - Tests: paragraphs, runs, tabs, breaks and entities; a file that isn't a zip, and a zip without a document, give nothing. Screen tests: a .docx is read as its text; a broken one says "Couldn't open that Word document. Save it again, or save it as a PDF."; a .doc isn't taken.
     - The `add-recipe` flow chooses `tests/_support/files/chili.docx` (made with `tests/_support/docx.ts`), and its text reaches the reader.
-- [ ] **P23.8** A friendlier wait while the AI reads — C · D75, F12
+- [x] **P23.8** A friendlier wait while the AI reads — C · D75, F12
   - Do: the reading screens show the produce drawings moving gently while the AI reads, and still with reduced motion; the words stay.
   - Verify: a screen test for reduced motion; screenshots at 375 px, light and dark.
+  - Evidence (2026-10-08):
+    - `ReadingWait` replaces the spinner on both reading screens: the welcome screen's five produce drawings hop in a wave (each 140 ms after the one before, a hop then a rest, every 1.6 s), over the same words. With reduced motion they stand still. The animation runs through the Web Animations API, as the grocery list's fold does, since the design lint allows no arbitrary values or inline styles.
+    - Screen tests: the five hops start in turn and stop when the wait goes; with reduced motion none start. happy-dom runs animations, and cancelling one rejects its `finished` promise, so the wait marks it handled (AGENTS.md's testing note said happy-dom had none; corrected).
+    - At 375 px on the test project, with a slow network to hold the wait open: the row mid-wave in light and dark, the drawings' leaves visible on both.
 
 ## Phase 24: Bookmarks, recently viewed, a video, suggested tags
 

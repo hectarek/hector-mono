@@ -191,7 +191,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by link or text".
 - **On it:** one box for a recipe's link or all its text (D73): a lone web address is read as its page, anything else as text.
 - **Main action:** Read recipe. After a failed link: a line saying the page's text can be pasted in its place (the link stays the recipe's source), Add by photo or file, Add manually.
-- **While reading:** "Reading the page. This can take up to a minute."
+- **While reading:** the produce row hopping in a wave over "Reading the page. This can take up to a minute." (`ReadingWait`, D75; still with reduced motion).
 - **Leads to:** the recipe form, filled in, with "Read from <site>. Check it before saving."
 
 ### Add by photo or file — `/recipes/new/photo`
@@ -250,6 +250,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 | Sideways swipe | D51, D54, D63 | Plan's week, cook mode |
 | A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Plan's meals, Groceries |
 | Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Plan's Today sticker, the active tab, Welcome's produce row |
+| Waiting on the AI: the produce row in a wave | D75; AGENTS.md UI Rules | Add by link or text, Add by photo or file |
 
 ## Where the app and its rules disagree
 

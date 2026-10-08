@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Camera, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type ChangeEvent, useRef, useState } from "react";
+import { ReadingWait } from "@/app/_components/reading-wait";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { TopBar } from "@/app/_components/top-bar";
 import { draftFormValues } from "@/app/_lib/draft-form-values";
@@ -226,10 +226,9 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
               {stage.fileName}
             </p>
           )}
-          <p className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Spinner />
+          <ReadingWait>
             Reading the recipe. This can take up to a minute.
-          </p>
+          </ReadingWait>
         </div>
       ) : (
         <div className="flex flex-col gap-4">

@@ -2,10 +2,10 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Field, FieldDescription, FieldLabel } from "@repo/ui/components/field";
-import { Spinner } from "@repo/ui/components/spinner";
 import { Textarea } from "@repo/ui/components/textarea";
 import Link from "next/link";
 import { type FormEvent, useId, useState } from "react";
+import { ReadingWait } from "@/app/_components/reading-wait";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { TopBar } from "@/app/_components/top-bar";
 import { draftFormValues } from "@/app/_lib/draft-form-values";
@@ -120,13 +120,7 @@ export function LinkImport({
       />
 
       {stage.kind === "reading" ? (
-        <p
-          className="text-muted-foreground flex items-center justify-center gap-2 py-8 text-sm"
-          aria-live="polite"
-        >
-          <Spinner />
-          {stage.what}. This can take up to a minute.
-        </p>
+        <ReadingWait>{stage.what}. This can take up to a minute.</ReadingWait>
       ) : (
         <div className="flex flex-col gap-6">
           <form onSubmit={submit} className="flex flex-col gap-4">
