@@ -76,6 +76,26 @@ describe("SpacesRepository (Postgres)", () => {
     expect(await app.listMySpaces(OWNER, "meal-plan")).toHaveLength(1);
   });
 
+  // P26.3, D83: every read shows an automatic name as the owner's current one. getById reads
+  // one table, where Drizzle leaves columns unqualified; Neon Auth's user table has a role.
+  it("shows a personal space under its owner's current name in every read", async () => {
+    await addAuthUser(OWNER, "Hector Gonzalez", "hector@example.com");
+    const book = await app.ensurePersonalSpace(OWNER, "recipe-book");
+    await app.newSpace("recipe-book", OWNER, "Weeknights");
+    await addAuthUser(OWNER, "Héctor Gonzalez", "hector@example.com");
+
+    const repository = postgresRepositories().spaces;
+    expect((await repository.getById(book.id))?.name).toBe("Héctor's Recipes");
+    expect((await repository.findOwned(OWNER, "recipe-book"))?.name).toBe(
+      "Héctor's Recipes",
+    );
+    expect(
+      (await repository.listForUser(OWNER, "recipe-book")).map(
+        (space) => space.name,
+      ),
+    ).toEqual(["Héctor's Recipes", "Weeknights"]);
+  });
+
   it("wraps database failures in DatabaseOperationError", async () => {
     await expect(
       app.repos.spaces.create(

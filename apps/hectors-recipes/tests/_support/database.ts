@@ -14,10 +14,16 @@ let migrated: Promise<void> | undefined;
 
 function migrateOnce(): Promise<void> {
   migrated ??= (async () => {
-    // Neon Auth owns this table in production; the app only reads it for member names.
+    // Neon Auth owns this table in production; the app only reads it for member names. Its
+    // columns as Neon has them (2026-10-08), so a query naming one, such as role, without its
+    // table fails here as it would there.
     await client.exec(`
       create schema neon_auth;
-      create table neon_auth."user" (id uuid primary key, name text, email text, image text);
+      create table neon_auth."user" (
+        id uuid primary key, name text, email text, "emailVerified" boolean, image text,
+        "createdAt" timestamptz, "updatedAt" timestamptz, role text, banned boolean,
+        "banReason" text, "banExpires" timestamptz
+      );
     `);
     await migrate(testDb, {
       migrationsFolder: `${import.meta.dir}/../../db/migrations`,

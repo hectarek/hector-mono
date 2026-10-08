@@ -34,12 +34,13 @@ const DEFAULT_COLUMN = {
   "recipe-book": "defaultBookId",
 } as const satisfies Record<SpaceType, keyof typeof userSettings.$inferInsert>;
 
-// The owner's account name, for a space still carrying its automatic name (D83). Inside it,
-// space_members is the subquery's own, even where the query around it joins the table too.
+// The owner's account name, for a space still carrying its automatic name (D83). Written out
+// with aliases: Drizzle leaves columns unqualified in a one-table query, where "id" would
+// mean the subquery's own, and Neon Auth's user table has a "role" of its own too.
 const OWNER_NAME = sql<string | null>`(
-  select ${neonAuthUsers.name} from ${spaceMembers}
-  join ${neonAuthUsers} on ${neonAuthUsers.id} = ${spaceMembers.userId}
-  where ${spaceMembers.spaceId} = ${spaces.id} and ${spaceMembers.role} = 'owner'
+  select owner_account.name from space_members owner_member
+  join neon_auth."user" owner_account on owner_account.id = owner_member.user_id
+  where owner_member.space_id = "spaces"."id" and owner_member.role = 'owner'
   limit 1
 )`;
 
