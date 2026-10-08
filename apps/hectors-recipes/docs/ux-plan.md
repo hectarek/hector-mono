@@ -2332,9 +2332,10 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
   - Do: a saved recipe's card carries a filled bookmark, so the grid shows which are saved at a glance.
   - Verify: a screen test; 375 px.
   - Evidence (2026-10-08): `RecipeCard` takes `saved` and puts a filled bookmark on a `bg-background/90` disc in the picture's top-right corner, which reads on a photo and on every produce tile; screen readers hear "Saved" (`role="img"`). `LibraryResults` passes it from the saved ids it already has. The library's saved-first test finds the mark on Stock's card and not on the next. 375 px with the flows.
-- [ ] **P27.2** The recipe page's buttons in the tab bar's order — C
+- [x] **P27.2** The recipe page's buttons in the tab bar's order — C
   - Do: Add to meal plan, then Add to groceries, as Meal plan comes before Groceries in the tab bar.
   - Verify: a screen test; 375 px.
+  - Evidence (2026-10-08): the two swapped under Cook; a screen test renders the recipe page and finds Add to meal plan first. The map's recipe page and Wide screens row say them in that order. 375 px with the flows.
 - [ ] **P27.3** Cook mode's ingredients as a checklist — C
   - Do: Gather's hint above the list, and each ingredient a row you check off as on Groceries (the same component), on Gather, under a step and in the ingredients sheet.
   - Verify: screen tests; the `cook` flow; 375 px.

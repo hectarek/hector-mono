@@ -95,7 +95,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
-- **Also on it:** Add to groceries and Add to meal plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
+- **Also on it:** Add to meal plan and Add to groceries, in the tab bar's order (when you can plan; P27.2); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
 - **Opens:** bottom sheets.
   - Add to meal plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open meal plan.
   - Add to groceries: servings, the groceries picker; then Open groceries. "It's already in groceries" asks before adding again (D45).
@@ -103,7 +103,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done, or a link to it.
 - **Leads to:** Cook mode, Edit, Meal plan, Groceries, the library.
 - **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to groceries or Add to meal plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
-- **Room:** Cook, Add to groceries and Add to meal plan stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
+- **Room:** Cook, Add to meal plan and Add to groceries stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
 
 ### Meal plan — `/plan`
 
@@ -260,7 +260,7 @@ The app is a phone design; on a wider screen it stays one (D85). Every style tha
 |---|---|---|---|
 | `app/_components/library-results.tsx` | `sm:grid-cols-3` | Three recipe cards a row from 640 px, two on a phone. | Fitted: the same design, more room |
 | `app/(main)/(library)/loading.tsx` | `sm:grid-cols-3` | The library's loading cards, matching the cards. | Fitted |
-| `app/(main)/recipes/[id]/page.tsx` | `sm:flex` | Cook, Add to groceries and Add to meal plan in one row from 640 px; on a phone Cook takes its own row. | Fitted |
+| `app/(main)/recipes/[id]/page.tsx` | `sm:flex` | Cook, Add to meal plan and Add to groceries in one row from 640 px; on a phone Cook takes its own row. | Fitted |
 | `app/(main)/account/[path]/page.tsx` | `md:gap-6`, `md:gap-12`, `md:block`, `lg:w-60` | The Appearance card lines up under Neon Auth's account cards, whose nav column appears at md and widens at lg. | A different design: Neon's own |
 
 Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`'s Drawer (`--drawer-max-width`), so on a desktop it's no wider than the page (D85). The pages themselves are `max-w-3xl` (tabs) or `max-w-2xl` (full-screen tasks, cook mode), centred.
