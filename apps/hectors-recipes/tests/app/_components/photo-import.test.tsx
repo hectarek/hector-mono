@@ -77,7 +77,10 @@ describe("PhotoImport", () => {
 
     const title = await view.findByRole("textbox", { name: "Title" });
     expect((title as HTMLInputElement).value).toBe("Chili");
-    view.getByText("Read from your file. Check it before saving.");
+    // P25.1, fix 11: with one book, it still says where the recipe is saved.
+    view.getByText(
+      "Read from your file. Check it before saving. Saving to My Recipes.",
+    );
     expect(reader.sources.slice(before)).toEqual([
       { kind: "text", text: markdown },
     ]);
@@ -113,7 +116,9 @@ describe("PhotoImport", () => {
       input(),
       new File([pdf], "chili.pdf", { type: "application/pdf" }),
     );
-    await view.findByText("Read from your PDF. Check it before saving.");
+    await view.findByText(
+      "Read from your PDF. Check it before saving. Saving to My Recipes.",
+    );
     expect(reader.sources.slice(before)).toEqual([{ kind: "document", pdf }]);
   });
 
@@ -158,7 +163,7 @@ describe("PhotoImport", () => {
     );
 
     await view.findByText(
-      "Read from your Word document. Check it before saving.",
+      "Read from your Word document. Check it before saving. Saving to My Recipes.",
     );
     expect(reader.sources.slice(before)).toEqual([
       { kind: "text", text: "Chili\n1 lb beans\nSimmer." },

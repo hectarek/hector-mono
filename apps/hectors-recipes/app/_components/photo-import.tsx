@@ -183,7 +183,13 @@ export function PhotoImport({
         {...form}
         values={values}
         review={review}
-        note={`Read from your ${stage.from}. Check it before saving.`}
+        // With one book, still where it's saved (form.note, "Saving to …").
+        note={[
+          `Read from your ${stage.from}. Check it before saving.`,
+          form.note && `${form.note}.`,
+        ]
+          .filter(Boolean)
+          .join(" ")}
       />
     );
   }

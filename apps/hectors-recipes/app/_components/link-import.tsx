@@ -99,7 +99,13 @@ export function LinkImport({
         {...form}
         values={values}
         review={review}
-        note={`Read from ${sourceUrl ? hostOf(sourceUrl) : "your text"}. Check it before saving.`}
+        // With one book, still where it's saved (form.note, "Saving to …").
+        note={[
+          `Read from ${sourceUrl ? hostOf(sourceUrl) : "your text"}. Check it before saving.`,
+          form.note && `${form.note}.`,
+        ]
+          .filter(Boolean)
+          .join(" ")}
       />
     );
   }

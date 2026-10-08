@@ -74,7 +74,9 @@ describe("LinkImport", () => {
 
     await read("example.com/toast");
     expect(await title(view)).toBe("Toast");
-    view.getByText("Read from example.com. Check it before saving.");
+    view.getByText(
+      "Read from example.com. Check it before saving. Saving to My Recipes.",
+    );
   });
 
   it("reads anything else as the recipe's text", async () => {
@@ -84,7 +86,9 @@ describe("LinkImport", () => {
 
     await read(text);
     expect(await title(view)).toBe("Chili");
-    view.getByText("Read from your text. Check it before saving.");
+    view.getByText(
+      "Read from your text. Check it before saving. Saving to My Recipes.",
+    );
     expect(reader().sources.slice(before)).toEqual([{ kind: "text", text }]);
   });
 
@@ -100,7 +104,9 @@ describe("LinkImport", () => {
 
     await read("Chili\n\n1 lb beans\n\nSimmer.");
     expect(await title(view)).toBe("Chili");
-    view.getByText("Read from example.com. Check it before saving.");
+    view.getByText(
+      "Read from example.com. Check it before saving. Saving to My Recipes.",
+    );
     expect(
       (view.getByRole("textbox", { name: "Source link" }) as HTMLInputElement)
         .value,
