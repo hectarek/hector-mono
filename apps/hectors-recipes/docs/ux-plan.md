@@ -2324,6 +2324,24 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview, which is behind Vercel's login: in Hector's review.
     - Measured on the test project: at 1280 px a sheet is 672 px wide (42rem) from x 304, centred; at 375 px it's the full 375.
 
+## Phase 27: From Hector's look at Phases 24 to 26
+
+Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10-08, each small enough to build without a decision of its own.
+
+- [x] **P27.1** Saved recipes marked on the library's cards — C
+  - Do: a saved recipe's card carries a filled bookmark, so the grid shows which are saved at a glance.
+  - Verify: a screen test; 375 px.
+  - Evidence (2026-10-08): `RecipeCard` takes `saved` and puts a filled bookmark on a `bg-background/90` disc in the picture's top-right corner, which reads on a photo and on every produce tile; screen readers hear "Saved" (`role="img"`). `LibraryResults` passes it from the saved ids it already has. The library's saved-first test finds the mark on Stock's card and not on the next. 375 px with the flows.
+- [ ] **P27.2** The recipe page's buttons in the tab bar's order — C
+  - Do: Add to meal plan, then Add to groceries, as Meal plan comes before Groceries in the tab bar.
+  - Verify: a screen test; 375 px.
+- [ ] **P27.3** Cook mode's ingredients as a checklist — C
+  - Do: Gather's hint above the list, and each ingredient a row you check off as on Groceries (the same component), on Gather, under a step and in the ingredients sheet.
+  - Verify: screen tests; the `cook` flow; 375 px.
+- [ ] **P27.4** The carrot's greens and the basil's top leaf — C
+  - Do: the carrot's greens grow from the middle of its top, turned with it; the basil's stem ends in its top leaf.
+  - Verify: the welcome screen at 375 px.
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11

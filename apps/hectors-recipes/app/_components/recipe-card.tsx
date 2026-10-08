@@ -1,4 +1,4 @@
-import { Clock, Users } from "lucide-react";
+import { Bookmark, Clock, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
@@ -7,16 +7,28 @@ import type { Recipe } from "@/src/entities/models/recipe.model";
 export function RecipeCard({
   recipe,
   bookName,
+  saved = false,
 }: {
   recipe: Recipe;
   // Which book it's in, when the grid mixes books (All recipes).
   bookName?: string;
+  // This person saved it (D77): a filled bookmark on the picture, as beside the recipe's name.
+  saved?: boolean;
 }) {
   return (
     <Link
       href={`/recipes/${recipe.id}`}
-      className="bg-card text-card-foreground ring-border hover:bg-muted/50 flex h-full flex-col overflow-hidden rounded-xl ring-1 transition-colors"
+      className="bg-card text-card-foreground ring-border hover:bg-muted/50 relative flex h-full flex-col overflow-hidden rounded-xl ring-1 transition-colors"
     >
+      {saved && (
+        <span
+          role="img"
+          aria-label="Saved"
+          className="bg-background/90 text-foreground absolute top-2 right-2 flex size-7 items-center justify-center rounded-full"
+        >
+          <Bookmark className="size-3.5 fill-current" aria-hidden />
+        </span>
+      )}
       {recipe.imageUrl ? (
         // Unoptimized: photos come from any recipe site, served as they are (no remotePatterns,
         // no image-optimization quota).
