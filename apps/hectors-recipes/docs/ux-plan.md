@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built and tested; migration 0019 (H34), the flows and 375 px not yet run. Phase 25 is in review as hectarek/hector-mono#35, Phase 24 as #33 (its migrations on production too). Phases 22 and 23 (#31, #32) are merged. Phase 20 (measuring AI reads) is still to come. |
-| Next task | Migration 0019 on the test project and production (H34), then Phase 26's flows and 375 px, with sheets at a desktop width. Needs the app's `.env` files in Phase 26's worktree. Hector reviews #33 and #35. |
+| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), in review as hectarek/hector-mono#37; production's migration not yet run (H34). Phase 25 is in review as #35, Phase 24 as #33. Phases 22 and 23 (#31, #32) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector runs migration 0019 on production (H34) before #37 merges, and reviews #33, #35 and #37. The portfolio's `/ui` Drawer on #37's Vercel preview. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2291,7 +2291,8 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Join's "already in your list" (meaning your books or plans) reads "It's already one of your meal plans." now.
     - Plans keep their names ("Hector's Plan"): renaming them would change people's data, which D84 doesn't ask for.
     - The map's Words section names each thing once (recipe book, meal plan, groceries, meal, cook day, eat days, item, members) with the words not to use. AGENTS.md's UI rules point to it, and the map's screens and jobs use the new names. Code names (`plan`, `AddToListButton`) are unchanged.
-    - Tests: the screen tests and the `plan-and-shop` flow look for the new names; `grep` finds no "Add to list" or "Add to plan" in `app/` or `src/`, comments included. The 375 px check of the two buttons side by side runs with the flows, once the worktree has its `.env` files.
+    - Tests: the screen tests and the `plan-and-shop` flow look for the new names; `grep` finds no "Add to list" or "Add to plan" in `app/` or `src/`, comments included.
+    - At 375 px (a throwaway flow on the test project): Add to groceries and Add to meal plan fit side by side under Cook, and the tab reads Meal plan. The `plan-and-shop` flow's empty-groceries check was a regex the renaming missed; it's fixed, and all three flows pass.
 - [x] **P26.2** Whose book — C · D82, F1 (round 2)
   - Do: your own book first in the pills after All recipes, a people icon on books shared with you; a recipe's back link names its book in two or more books.
   - Verify: screen tests for the pills' order and icon and the back link's name; 375 px.
@@ -2299,7 +2300,8 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - The library's pills are All recipes, the books you own, then the ones shared with you. `SpaceSwitcher` takes `shared` and shows a people icon (`Users`), with ", shared with you" for screen readers.
     - The plan pills use the same component, unmarked: D82 names the book pills, so they're left for Hector to ask for.
     - A recipe's back link names its book when you're in two or more, and still says Recipes with one, or for a recipe from a book you're not in.
-    - Screen tests: the pills' order and icon with a book shared with you, the back link's name in two books, and Recipes in one. 375 px runs with the flows, once the worktree has its `.env` files.
+    - Screen tests: the pills' order and icon with a book shared with you, the back link's name in two books, and Recipes in one.
+    - At 375 px, with a second account joining the first's book: All recipes, the guest's own book, then the host's with its people icon (the row scrolls, as it did); the recipe's back link reads "Hector's Recipes".
 - [x] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · H34
   - Do: a flag on books still carrying their automatic name (a migration, with existing books matched by name); the name shown follows the owner's current first name while the flag is set; renaming clears it. Rename in a book's ⋯ for its owner.
   - Verify: use-case tests on both backends (follows a name change, stops after a rename, only the owner's own book); a migration test; a screen test for Rename in the ⋯.
@@ -2309,7 +2311,9 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Plans too: the flag is on spaces, and a personal plan ("Hector's Plan") is named the same way. D83 names books, but leaving plans out would take a special case for the same problem. Claude's call, one condition to undo.
     - Rename is a step in the ⋯ for owners (books and plans, as the ⋯ is the same), with Back; `RenameSpaceForm` now submits through a transition, so a refused name stays (the rule fix 12 applied to Create).
     - Tests: on both backends, a name change followed (for a member too), a rename ending it, and a book made with a name keeping it; the migration from the schema before it (marked by name, nameless accounts' "My Recipes", and names chosen or no longer matching left alone); a screen test renaming from the ⋯, and an editor without Rename.
-    - The migration on the test project and production waits on the worktree's `.env` files; production's is Hector's to run, as auto mode stopped Phase 24's.
+    - Migration 0019 on the test project (2026-10-08): 154 of its 158 spaces follow their owner's name, as nearly all are flows' personal books and plans. Production's is Hector's to run, as auto mode stopped Phase 24's.
+    - Found on the test project, not by the tests: `OWNER_NAME` failed on Neon, since Drizzle left `"id"` unqualified in `getById`'s one-table query and Neon Auth's user table has a `role` of its own. The subquery now aliases its tables. The test database's copy of the table has Neon's columns, and a repository test reads a personal space through `getById`, `findOwned` and `listForUser`; with the old query it, and the delete test, fail.
+    - At 375 px: Rename is a step in the ⋯ sheet, with the name in its box and Back.
 - [x] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
   - Do: bottom sheets no wider than the page, centred, in `@repo/ui`'s Drawer. The map's Wide screens section, and a test listing every `sm:`, `md:`, `lg:`, `xl:` style in the app against it.
   - Verify: the test fails on an unlisted style; sheets at 375 px unchanged and at a desktop width capped; the other apps' sheets checked.
@@ -2318,7 +2322,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - The map's Wide screens section lists the app's 8 width-specific classes in 4 files: the library's three cards a row (and its loading cards), the recipe page's one-row buttons, and the account page lining up with Neon Auth's columns. Each says whether it's a fitted version of the same design or a different one (only the account page's, Neon's).
     - `tests/app/wide-screens.test.ts` compares the app's width-specific classes with the table. It failed on a `md:p-4` added to a throwaway file, and fails on a row whose class is gone.
     - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview.
-    - Sheets at 375 px and a desktop width run with the flows, once the worktree has its `.env` files.
+    - Measured on the test project: at 1280 px a sheet is 672 px wide (42rem) from x 304, centred; at 375 px it's the full 375.
 
 ## Later (to-dos, not scheduled)
 
@@ -2678,3 +2682,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Phase 26.
 - **2026-10-08 (bt)** — Phase 26 built: P26.1 Groceries and Meal plan on screen and the map's Words section, P26.2 whose book in the pills and the back link, P26.3 a personal book or plan following its owner's name (migration 0019) with Rename in the ⋯, P26.4 sheets capped at the page in `@repo/ui`'s Drawer and the map's Wide screens record with its test. Plans follow their owner's name too (Claude's call). Lint, types and tests pass in every app.
   - Next: migration 0019 (H34), the flows and 375 px; Hector's review of #33, #35 and Phase 26's PR.
+- **2026-10-08 (bu)** — Phase 26 checked on the test project: migration 0019, the flows, and its screens at 375 px and 1280 px. The check found `OWNER_NAME` failing on Neon (an unqualified column, and Neon Auth's own `role`), fixed with a test that now catches it.
+  - Next: production's migration 0019 (Hector); the reviews.
