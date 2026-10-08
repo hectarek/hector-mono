@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 27 (from Hector's look at Phases 24 to 26: saved marks on cards, the recipe page's button order, cook mode's checklist, the carrot and basil drawings) on `feat/recipes-p27-polish`: built and checked (the flows, 375 px). Phases 22 to 26 (hectarek/hector-mono#31, #32, #33, #35, #37) are merged. Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews Phase 27's PR. Then Phase 20, or the drafts in Hector's tracker. |
+| Phase | 20 (measuring AI reads), next, in Hector's own session for it. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
+| Next task | Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2722,3 +2722,8 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
   - Next: Hector's reviews of #33, #35 and #37.
 - **2026-10-08 (by)** — #37 merged, so Phases 22 to 26 are all in. Phase 27 built from Hector's notes: a saved recipe's card carries a bookmark, the recipe page puts Add to meal plan before Add to groceries, cook mode's ingredients are rows you check off as on Groceries (`CheckRow`, shared), and the carrot's greens and the basil's stem are fixed (the design system's own drawings had both slips). The feedback files mark every Phase 23 to 26 item Built.
   - Next: Hector's review of Phase 27; the worktrees and branches of merged phases cleaned up.
+- **2026-10-08 (bz)** — #41 merged, so Phases 22 to 27 are all in. The design system matched to Phase 27: its carrot and basil drawings fixed as the app's were, and RecipeCard (the saved bookmark), IngredientList and GroceryItem (cook mode's checklist rows) say what the app does. What Phase 20 starts from, as built today:
+  - `recipe_reads` keeps who read, the kind (`image`, `text`, `document`) and when, for the daily limit (D48). Nothing keeps what was sent, the draft or what was saved, and the instructions carry no version. Tokens are only in the adapter's `info` log line.
+  - A link is read without AI when its page has schema.org recipe data (`readBy: "page-data"`), and such a read isn't recorded at all. Only a page without that data goes to the model, as its text. So measuring links covers both paths, and the first case (the overnight oats page) may fail in either, or in the fetch.
+  - No Gateway budget: the account's credit (about $18) is the limit (D86). The reader takes a 402 as spent credit (`budget-paused`); no read has run out yet, so that status is still unconfirmed.
+  - Next: Phase 20, in Hector's session for it.
