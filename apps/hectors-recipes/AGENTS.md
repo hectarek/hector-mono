@@ -99,7 +99,7 @@ proxy.ts
 
 Full rationale in the spec. Summary:
 
-- **`spaces`**: anything shareable. `type` is `'recipe-book' | 'meal-plan'`. There's no separate grocery list: a plan's list is part of the plan and shares its members (`docs/ux-plan.md` D13; migration 0003 moved the old lists' items onto their owners' plans).
+- **`spaces`**: anything shareable. `type` is `'recipe-book' | 'meal-plan'`. There's no separate grocery list: a plan's list is part of the plan and shares its members (`docs/ux-plan.md` D13; migration 0003 moved the old lists' items onto their owners' plans). `auto_name` (migration 0019, docs/ux-plan.md D83) marks a personal book or plan still carrying the name it got at sign-up: every read in `SpacesRepository` shows it as `personalSpaceName` of its owner's current name (`OWNER_NAME`, from `neon_auth.user`), and `rename` clears it. The stored `name` is the fallback.
 - **`space_members`**: `(space_id, user_id)` with `role` `'owner' | 'editor' | 'viewer'`. Exactly one owner per space (partial unique index).
 - **`space_invites`**: link tokens carrying a role (used from increment 5).
 - **`recipes`**: live in a `recipe-book` space. `created_by` is the author only; access comes from the space. `tags text[]`, optional `time_minutes` / `yield_servings`, `external_ref` for imports, and an optional `video_url` (migration 0017, docs/ux-plan.md D81), shown in the photo's place.

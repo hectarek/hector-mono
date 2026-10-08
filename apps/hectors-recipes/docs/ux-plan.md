@@ -2300,9 +2300,16 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - The plan pills use the same component, unmarked: D82 names the book pills, so they're left for Hector to ask for.
     - A recipe's back link names its book when you're in two or more, and still says Recipes with one, or for a recipe from a book you're not in.
     - Screen tests: the pills' order and icon with a book shared with you, the back link's name in two books, and Recipes in one. 375 px runs with the flows, once the worktree has its `.env` files.
-- [ ] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · needs H34
+- [x] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · H34
   - Do: a flag on books still carrying their automatic name (a migration, with existing books matched by name); the name shown follows the owner's current first name while the flag is set; renaming clears it. Rename in a book's ⋯ for its owner.
   - Verify: use-case tests on both backends (follows a name change, stops after a rename, only the owner's own book); a migration test; a screen test for Rename in the ⋯.
+  - Evidence (2026-10-08):
+    - Migration 0019 adds `spaces.auto_name` and sets it where a space's name is what `personalSpaceName` would make from its owner's name today. A book whose owner has already changed their name (the tester's) doesn't match, so it keeps its name until renamed.
+    - `ensurePersonalSpace` creates with `autoName`. `SpacesRepository` shows such a space as `personalSpaceName` of its owner's current name in every read (`getById`, `findOwned`, `listForUser`); `rename` clears the flag. The mock does the same with its stand-in names.
+    - Plans too: the flag is on spaces, and a personal plan ("Hector's Plan") is named the same way. D83 names books, but leaving plans out would take a special case for the same problem. Claude's call, one condition to undo.
+    - Rename is a step in the ⋯ for owners (books and plans, as the ⋯ is the same), with Back; `RenameSpaceForm` now submits through a transition, so a refused name stays (the rule fix 12 applied to Create).
+    - Tests: on both backends, a name change followed (for a member too), a rename ending it, and a book made with a name keeping it; the migration from the schema before it (marked by name, nameless accounts' "My Recipes", and names chosen or no longer matching left alone); a screen test renaming from the ⋯, and an editor without Rename.
+    - The migration on the test project and production waits on the worktree's `.env` files; production's is Hector's to run, as auto mode stopped Phase 24's.
 - [ ] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
   - Do: bottom sheets no wider than the page, centred, in `@repo/ui`'s Drawer. The map's Wide screens section, and a test listing every `sm:`, `md:`, `lg:`, `xl:` style in the app against it.
   - Verify: the test fails on an unlisted style; sheets at 375 px unchanged and at a desktop width capped; the other apps' sheets checked.
@@ -2405,7 +2412,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
-| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | OK'd 2026-10-08: "Yep 34 is ok" |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | OK'd 2026-10-08: "Yep 34 is ok"; migration 0019 |
 | H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | done 2026-10-08: no budget, only the account's credit; when it's spent, the message asks people to let Hector know (D86) |
 
 ## Risks and how they're handled

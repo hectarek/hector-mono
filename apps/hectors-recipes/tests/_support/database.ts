@@ -40,14 +40,16 @@ export async function resetDatabase(): Promise<void> {
   ]);
 }
 
-// A Neon Auth user, so member lists can show a name.
+// A Neon Auth user, so member lists can show a name. Again for the same id renames them, as
+// changing an account's name does.
 export async function addAuthUser(
   id: string,
   name: string,
   email: string,
 ): Promise<void> {
   await client.query(
-    `insert into neon_auth."user" (id, name, email) values ($1, $2, $3)`,
+    `insert into neon_auth."user" (id, name, email) values ($1, $2, $3)
+     on conflict (id) do update set name = excluded.name, email = excluded.email`,
     [id, name, email],
   );
 }

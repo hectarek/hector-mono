@@ -1,20 +1,22 @@
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
-import type {
-  CreateSpaceInput,
-  InviteRole,
-  Space,
-  SpaceAccess,
-  SpaceInvite,
-  SpaceMember,
-  SpaceRole,
-  SpaceType,
-  SpaceWithRole,
+import {
+  type CreateSpaceInput,
+  type InviteRole,
+  personalSpaceName,
+  type Space,
+  type SpaceAccess,
+  type SpaceInvite,
+  type SpaceMember,
+  type SpaceRole,
+  type SpaceType,
+  type SpaceWithRole,
 } from "@/src/entities/models/space.model";
 
 type Member = { spaceId: string; userId: string; role: SpaceRole };
+type StoredSpace = Space & { autoName: boolean };
 
 export class MockSpacesRepository implements ISpacesRepository {
-  private spaces: Space[] = [];
+  private spaces: StoredSpace[] = [];
   private members: Member[] = [];
   private invites: SpaceInvite[] = [];
   private revokedInviteIds = new Set<string>();
@@ -22,7 +24,10 @@ export class MockSpacesRepository implements ISpacesRepository {
   readonly userNames = new Map<string, string>();
   private defaults = new Map<string, Partial<Record<SpaceType, string>>>();
 
-  async create(input: CreateSpaceInput, ownerId: string): Promise<Space> {
+  async create(
+    input: CreateSpaceInput & { autoName?: boolean },
+    ownerId: string,
+  ): Promise<Space> {
     const now = new Date();
     const space: Space = {
       id: crypto.randomUUID(),
@@ -33,13 +38,24 @@ export class MockSpacesRepository implements ISpacesRepository {
       updatedAt: now,
     };
 
-    this.spaces.push(space);
+    this.spaces.push({ ...space, autoName: input.autoName ?? false });
     this.members.push({ spaceId: space.id, userId: ownerId, role: "owner" });
     return space;
   }
 
+  // As the real repository shows it: an automatic name follows its owner's (D83).
+  private shown({ autoName, ...space }: StoredSpace): Space {
+    if (!autoName) return space;
+    const owner = this.members.find(
+      (member) => member.spaceId === space.id && member.role === "owner",
+    );
+    const ownerName = owner ? (this.userNames.get(owner.userId) ?? null) : null;
+    return { ...space, name: personalSpaceName(space.type, ownerName) };
+  }
+
   async getById(spaceId: string): Promise<Space | undefined> {
-    return this.spaces.find((space) => space.id === spaceId);
+    const space = this.spaces.find((candidate) => candidate.id === spaceId);
+    return space && this.shown(space);
   }
 
   async getAccess(
@@ -57,7 +73,7 @@ export class MockSpacesRepository implements ISpacesRepository {
   }
 
   async findOwned(userId: string, type: SpaceType): Promise<Space | undefined> {
-    return this.spaces.find(
+    const owned = this.spaces.find(
       (space) =>
         space.type === type &&
         this.members.some(
@@ -67,6 +83,7 @@ export class MockSpacesRepository implements ISpacesRepository {
             member.role === "owner",
         ),
     );
+    return owned && this.shown(owned);
   }
 
   async listForUser(userId: string, type: SpaceType): Promise<SpaceWithRole[]> {
@@ -78,7 +95,9 @@ export class MockSpacesRepository implements ISpacesRepository {
             candidate.id === member.spaceId && candidate.type === type,
         );
         const isDefault = this.defaults.get(userId)?.[type] === space?.id;
-        return space ? [{ ...space, role: member.role, isDefault }] : [];
+        return space
+          ? [{ ...this.shown(space), role: member.role, isDefault }]
+          : [];
       });
   }
 
@@ -95,7 +114,9 @@ export class MockSpacesRepository implements ISpacesRepository {
 
   async rename(spaceId: string, name: string): Promise<void> {
     this.spaces = this.spaces.map((space) =>
-      space.id === spaceId ? { ...space, name, updatedAt: new Date() } : space,
+      space.id === spaceId
+        ? { ...space, name, autoName: false, updatedAt: new Date() }
+        : space,
     );
   }
 

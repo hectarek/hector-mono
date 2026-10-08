@@ -80,7 +80,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Tab page.
 - **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books: All recipes, your own books, then those shared with you, each with a people icon (D82).
 - **Main action:** Add recipe, beside the title (editors) → Add a recipe.
-- **⋯:** Invite (owner), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
+- **⋯:** Invite (owner), Rename (owner, a step in the sheet, D83), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
 - **Also on it:** search (narrows as you type, D56); Sort and group (Saved first, Recently viewed, A to Z; by meal, cuisine or diet; D57, D80); the Saved chip first among the tag chips (D77); the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
 - **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment.
@@ -111,7 +111,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Tab page.
 - **Title:** the plan's name over "Meal plan", with a role badge. Plan pills above it in two or more plans.
 - **Main action:** "Add N meals to groceries", in the grocery box under the week (editors, when there's something to add; D41, D44, D50).
-- **⋯:** Invite (owner), Members, Make my default meal plan (two or more plans; a line instead when it is), Start my own meal plan (when you own none).
+- **⋯:** Invite (owner), Rename (owner), Members, Make my default meal plan (two or more plans; a line instead when it is), Start my own meal plan (when you own none).
 - **Also on it:** the week's arrows and range, Back to this week, seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open groceries.
 - **Opens:** a meal's sheet: Change days, Add to groceries (or Add to groceries again), Not eating it on Mon 5 (from a leftovers day, D43), Remove meal.
 - **Gestures:** a sideways swipe changes the week (D51), sliding in (D54).
@@ -127,7 +127,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Tab page.
 - **Title:** "Groceries" over the plan's name, with a role badge. Plan pills above it in two or more plans.
 - **Main action:** Add, beside the add box (editors).
-- **⋯:** Invite (owner), Members, Clear groceries (editors, when the list has items; asks first, D52).
+- **⋯:** Invite (owner), Rename (owner), Members, Clear groceries (editors, when the list has items; asks first, D52).
 - **Also on it:** the add box; Group by, By aisle or By recipe (D60; shown when items came from recipes); the list under aisle or recipe headings; Got it (closed until tapped), holding the checked items and Clear checked.
 - **Rows:** tap to check off (the whole row; it folds into Got it); "for" its recipes; "Not saved yet" when offline; a ⋯ (editors) opening Edit and Remove from groceries.
 - **Live:** other people's changes appear as they're made (D21), with a refresh every 60 s. Check-offs made with no signal are kept and sent later (D8).
@@ -145,7 +145,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
 - **Leads to:** the library (a book), Members, Join.
-- **Names:** a personal book is named at sign-up from its owner's first name ("Hector's Recipes", D19) and keeps that name when the account's name changes; its owner can rename it on Members.
+- **Names:** a personal book is named at sign-up from its owner's first name ("Hector's Recipes", D19), and follows that name when the account's name changes until its owner renames it, in its ⋯ or on Members (D83).
 
 ### Copy recipes — `/books/[id]/copy`
 

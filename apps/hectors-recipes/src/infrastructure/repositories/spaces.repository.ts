@@ -4,16 +4,17 @@ import { spaceInvites, spaceMembers, spaces, userSettings } from "@/db/schema";
 import type { ISpacesRepository } from "@/src/application/repositories/spaces.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import { DatabaseOperationError } from "@/src/entities/errors/common";
-import type {
-  CreateSpaceInput,
-  InviteRole,
-  Space,
-  SpaceAccess,
-  SpaceInvite,
-  SpaceMember,
-  SpaceRole,
-  SpaceType,
-  SpaceWithRole,
+import {
+  type CreateSpaceInput,
+  type InviteRole,
+  personalSpaceName,
+  type Space,
+  type SpaceAccess,
+  type SpaceInvite,
+  type SpaceMember,
+  type SpaceRole,
+  type SpaceType,
+  type SpaceWithRole,
 } from "@/src/entities/models/space.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
@@ -33,6 +34,30 @@ const DEFAULT_COLUMN = {
   "recipe-book": "defaultBookId",
 } as const satisfies Record<SpaceType, keyof typeof userSettings.$inferInsert>;
 
+// The owner's account name, for a space still carrying its automatic name (D83). Inside it,
+// space_members is the subquery's own, even where the query around it joins the table too.
+const OWNER_NAME = sql<string | null>`(
+  select ${neonAuthUsers.name} from ${spaceMembers}
+  join ${neonAuthUsers} on ${neonAuthUsers.id} = ${spaceMembers.userId}
+  where ${spaceMembers.spaceId} = ${spaces.id} and ${spaceMembers.role} = 'owner'
+  limit 1
+)`;
+
+type SpaceRow = typeof spaces.$inferSelect;
+
+// A space as the app shows it: one still carrying its automatic name takes its owner's
+// current one ("Hector's Recipes" follows Hector renaming his account).
+function toSpace(row: SpaceRow, ownerName: string | null): Space {
+  return {
+    id: row.id,
+    type: row.type,
+    name: row.autoName ? personalSpaceName(row.type, ownerName) : row.name,
+    description: row.description,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 // Owner first, then editors, then viewers.
 const ROLE_ORDER = sql`case ${spaceMembers.role} when 'owner' then 0 when 'editor' then 1 else 2 end`;
 
@@ -45,7 +70,7 @@ export class SpacesRepository
   }
 
   async create(
-    input: CreateSpaceInput,
+    input: CreateSpaceInput & { autoName?: boolean },
     ownerId: string,
     tx?: ITransaction,
   ): Promise<Space> {
@@ -57,6 +82,7 @@ export class SpacesRepository
         .values({
           type: input.type,
           name: input.name,
+          autoName: input.autoName ?? false,
           description: input.description ?? null,
         })
         .returning();
@@ -74,7 +100,8 @@ export class SpacesRepository
         type: created.type,
         ownerId,
       });
-      return created;
+      // Just made, so an automatic name is the owner's current one.
+      return toSpace({ ...created, autoName: false }, null);
     } catch (err) {
       this.handleError(err, "create", { ownerId, type: input.type });
     }
@@ -86,10 +113,10 @@ export class SpacesRepository
   ): Promise<Space | undefined> {
     try {
       const [row] = await this.getDbContext(tx)
-        .select()
+        .select({ space: spaces, ownerName: OWNER_NAME })
         .from(spaces)
         .where(eq(spaces.id, spaceId));
-      return row;
+      return row && toSpace(row.space, row.ownerName);
     } catch (err) {
       this.handleError(err, "getById", { spaceId });
     }
@@ -130,7 +157,7 @@ export class SpacesRepository
 
     try {
       const [row] = await executor
-        .select({ space: spaces })
+        .select({ space: spaces, ownerName: OWNER_NAME })
         .from(spaces)
         .innerJoin(spaceMembers, eq(spaceMembers.spaceId, spaces.id))
         .where(
@@ -143,7 +170,7 @@ export class SpacesRepository
         .orderBy(asc(spaces.createdAt))
         .limit(1);
 
-      return row?.space;
+      return row && toSpace(row.space, row.ownerName);
     } catch (err) {
       this.handleError(err, "findOwned", { userId, type });
     }
@@ -154,6 +181,7 @@ export class SpacesRepository
       const rows = await this.getDbContext()
         .select({
           space: spaces,
+          ownerName: OWNER_NAME,
           role: spaceMembers.role,
           defaultId: userSettings[DEFAULT_COLUMN[type]],
         })
@@ -164,7 +192,7 @@ export class SpacesRepository
         .orderBy(asc(spaces.createdAt));
 
       return rows.map((row) => ({
-        ...row.space,
+        ...toSpace(row.space, row.ownerName),
         role: row.role,
         isDefault: row.defaultId === row.space.id,
       }));
@@ -198,7 +226,7 @@ export class SpacesRepository
     try {
       await this.getDbContext(tx)
         .update(spaces)
-        .set({ name, updatedAt: new Date() })
+        .set({ name, autoName: false, updatedAt: new Date() })
         .where(eq(spaces.id, spaceId));
     } catch (err) {
       this.handleError(err, "rename", { spaceId });

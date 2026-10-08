@@ -13,8 +13,10 @@ import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 export interface ISpacesRepository {
   // Inserts the space and its owner membership; pass a transaction so both land together.
+  // `autoName` marks a name made from the owner's (a personal space): it then shows their
+  // current name until it's renamed (D83). Every read returns the name to show.
   create(
-    input: CreateSpaceInput,
+    input: CreateSpaceInput & { autoName?: boolean },
     ownerId: string,
     tx?: ITransaction,
   ): Promise<Space>;
@@ -38,6 +40,7 @@ export interface ISpacesRepository {
     spaceId: string | null,
     tx?: ITransaction,
   ): Promise<void>;
+  // Ends `autoName`: a name someone chose stays as it is.
   rename(spaceId: string, name: string, tx?: ITransaction): Promise<void>;
   delete(spaceId: string, tx?: ITransaction): Promise<void>;
   // Serializes concurrent "create my personal space" calls for the same user and type.
