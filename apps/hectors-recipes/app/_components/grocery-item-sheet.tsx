@@ -18,6 +18,7 @@ import {
   useTransition,
 } from "react";
 import { callAction } from "@/app/_lib/call-action";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 import { updateGroceryItem } from "@/app/actions/grocery";
 import { recipeTitles } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
@@ -52,6 +53,9 @@ export function GroceryItemSheet({
       setError(undefined);
     }
   }
+  useClosesWhenHidden(() => {
+    if (open) changeOpen(false);
+  });
 
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

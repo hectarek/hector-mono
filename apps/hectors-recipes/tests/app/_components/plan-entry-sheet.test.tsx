@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Activity, useState } from "react";
 import { PlanEntrySheet } from "@/app/_components/plan-entry-sheet";
 import type { PlanEntry } from "@/src/entities/models/plan-entry.model";
 import { planScreenFixture } from "@/tests/_support/plan-screens";
@@ -119,5 +120,40 @@ describe("PlanEntrySheet", () => {
     await waitFor(async () =>
       expect(await fixture.groceries()).toEqual(["2 lb ground turkey"]),
     );
+  });
+
+  // D88: Next.js keeps the plan alive but hidden when you leave it; a meal's sheet left open
+  // (the row owns its open state) is closed, and back at its first step, when you return.
+  it("is closed when you come back to the plan", async () => {
+    const user = userEvent.setup();
+    const meal = await fixture.planChili({
+      cookDate: TODAY,
+      eatDates: [TODAY],
+    });
+    function Row({ mode }: { mode: "visible" | "hidden" }) {
+      const [open, setOpen] = useState(true);
+      return (
+        <Activity mode={mode}>
+          <PlanEntrySheet
+            entry={meal}
+            date={TODAY}
+            today={TODAY}
+            open={open}
+            onOpenChange={setOpen}
+            onRemove={() => {}}
+          />
+        </Activity>
+      );
+    }
+    const view = render(<Row mode="visible" />);
+    await user.click(view.getByRole("button", { name: "Change days" }));
+    await view.findByRole("button", { name: "Save days" });
+
+    view.rerender(<Row mode="hidden" />);
+    view.rerender(<Row mode="visible" />);
+    await waitFor(() =>
+      expect(view.queryByRole("button", { name: "Save days" })).toBe(null),
+    );
+    expect(view.queryByRole("button", { name: "Change days" })).toBe(null);
   });
 });

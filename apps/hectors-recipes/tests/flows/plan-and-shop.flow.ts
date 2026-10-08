@@ -110,4 +110,18 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
       .getByRole("region", { name: cuisine })
       .getByRole("link", { name: /Chili/ }),
   ).toBeVisible();
+
+  // D88: Next.js keeps the pages you leave. Back to Meal plan and Forward again finds Recipes
+  // as it was left, grouped by cuisine, but with the ⋯ sheet left open closed.
+  await page.getByRole("button", { name: /^More for / }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.goBack();
+  await page.waitForURL(/\/plan/);
+  await page.goForward();
+  await expect(
+    page
+      .getByRole("region", { name: cuisine })
+      .getByRole("link", { name: /Chili/ }),
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });

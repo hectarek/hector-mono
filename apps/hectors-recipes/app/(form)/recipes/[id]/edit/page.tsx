@@ -7,6 +7,7 @@ import {
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import Link from "next/link";
+import { FreshEachVisit } from "@/app/_components/fresh-each-visit";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadRecipe } from "@/app/_lib/load-recipe";
@@ -52,25 +53,28 @@ export default async function EditRecipePage({
     await getCurrentUserId(),
   );
 
+  // A fresh visit shows the recipe as saved; Back brings back what was being typed.
   return (
-    <RecipeForm
-      mode="edit"
-      heading="Edit recipe"
-      suggestedTags={suggestedTags(tags)}
-      tagGroups={tagGroups}
-      recipeId={recipe.id}
-      values={{
-        title: recipe.title,
-        description: recipe.description ?? "",
-        ingredients: rowsFromLines(recipe.ingredients),
-        steps: stepRowsFrom(recipe.steps),
-        yieldServings: recipe.yieldServings?.toString() ?? "",
-        timeMinutes: recipe.timeMinutes?.toString() ?? "",
-        tags: recipe.tags,
-        sourceUrl: recipe.sourceUrl ?? "",
-        imageUrl: recipe.imageUrl ?? "",
-        videoUrl: recipe.videoUrl ?? "",
-      }}
-    />
+    <FreshEachVisit>
+      <RecipeForm
+        mode="edit"
+        heading="Edit recipe"
+        suggestedTags={suggestedTags(tags)}
+        tagGroups={tagGroups}
+        recipeId={recipe.id}
+        values={{
+          title: recipe.title,
+          description: recipe.description ?? "",
+          ingredients: rowsFromLines(recipe.ingredients),
+          steps: stepRowsFrom(recipe.steps),
+          yieldServings: recipe.yieldServings?.toString() ?? "",
+          timeMinutes: recipe.timeMinutes?.toString() ?? "",
+          tags: recipe.tags,
+          sourceUrl: recipe.sourceUrl ?? "",
+          imageUrl: recipe.imageUrl ?? "",
+          videoUrl: recipe.videoUrl ?? "",
+        }}
+      />
+    </FreshEachVisit>
   );
 }

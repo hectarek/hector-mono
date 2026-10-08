@@ -16,6 +16,7 @@ import { useState, useTransition } from "react";
 import { MealDaysPicker } from "@/app/_components/meal-days-picker";
 import { SpacePicker } from "@/app/_components/space-picker";
 import { callAction } from "@/app/_lib/call-action";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 import { addPlanEntry } from "@/app/actions/plan";
 import { type MealDays, mealDaysText } from "@/src/entities/meal-days";
 
@@ -57,15 +58,14 @@ export function AddToPlanButton({
     });
   }
 
+  const changeOpen = (next: boolean) => {
+    setOpen(next);
+    if (!next) setAdded(undefined);
+  };
+  useClosesWhenHidden(() => changeOpen(false));
+
   return (
-    <Drawer
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) setAdded(undefined);
-      }}
-      showSwipeHandle
-    >
+    <Drawer open={open} onOpenChange={changeOpen} showSwipeHandle>
       <DrawerTrigger render={<Button variant="secondary" size="lg" />}>
         <CalendarPlus data-icon="inline-start" />
         Add to meal plan

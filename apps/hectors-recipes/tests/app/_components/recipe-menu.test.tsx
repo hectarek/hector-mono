@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Activity } from "react";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
 import { signInAsNewUser } from "@/tests/_support/next";
 
@@ -74,5 +75,30 @@ describe("RecipeMenu", () => {
 
     await user.click(view.getByRole("button", { name: "Back" }));
     await view.findByRole("button", { name: "Share recipe" });
+  });
+
+  // D88: Next.js keeps the page you leave alive but hidden, so its ⋯ must not still be open
+  // when you come back to it.
+  it("is closed when you come back to the page", async () => {
+    const user = userEvent.setup();
+    const page = (mode: "visible" | "hidden") => (
+      <Activity mode={mode}>
+        <RecipeMenu
+          recipeId="recipe-1"
+          title="Chili"
+          canEdit={false}
+          copyTargets={[]}
+        />
+      </Activity>
+    );
+    const view = render(page("visible"));
+    await user.click(view.getByRole("button", { name: "More for Chili" }));
+    await view.findByRole("button", { name: "Share recipe" });
+
+    view.rerender(page("hidden"));
+    view.rerender(page("visible"));
+    await waitFor(() =>
+      expect(view.queryByRole("button", { name: "Share recipe" })).toBe(null),
+    );
   });
 });

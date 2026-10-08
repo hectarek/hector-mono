@@ -1,3 +1,4 @@
+import { FreshEachVisit } from "@/app/_components/fresh-each-visit";
 import { LinkImport } from "@/app/_components/link-import";
 import { loadNewRecipe } from "@/app/_lib/new-recipe";
 
@@ -8,5 +9,9 @@ export default async function NewRecipeLinkPage({
   searchParams: Promise<{ book?: string }>;
 }) {
   const { book } = await searchParams;
-  return <LinkImport {...(await loadNewRecipe(book))} />;
+  return (
+    <FreshEachVisit>
+      <LinkImport {...(await loadNewRecipe(book))} />
+    </FreshEachVisit>
+  );
 }

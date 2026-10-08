@@ -18,6 +18,7 @@ import { useState, useTransition } from "react";
 import { describePlanResult } from "@/app/_components/add-plan-to-list-button";
 import { MealDaysPicker } from "@/app/_components/meal-days-picker";
 import { callAction, callResultAction } from "@/app/_lib/call-action";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 import { addPlanToList } from "@/app/actions/grocery";
 import { changeEntryDays } from "@/app/actions/plan";
 import {
@@ -65,6 +66,9 @@ export function PlanEntrySheet({
       setListed(undefined);
     }
   }
+  useClosesWhenHidden(() => {
+    if (open) changeOpen(false);
+  });
 
   function addToList() {
     startTransition(async () => {

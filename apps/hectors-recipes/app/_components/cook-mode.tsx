@@ -45,6 +45,7 @@ import {
   shouldRing,
   timeLeft,
 } from "@/app/_lib/cook-progress";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 import { useSwipe } from "@/app/_lib/use-swipe";
 import { useWakeLock, type WakeLockStatus } from "@/app/_lib/use-wake-lock";
 import { stripMarkdown } from "@/src/entities/ingredient-line";
@@ -725,6 +726,7 @@ function StepsSheet({
   onStartOver: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  useClosesWhenHidden(() => setOpen(false));
   return (
     <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
       <DrawerTrigger render={<Button variant="quiet" size="lg" />}>
@@ -795,8 +797,11 @@ function IngredientsSheet({
   lines: Line[];
   ingredient: (line: Line) => ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  useClosesWhenHidden(() => setOpen(false));
+
   return (
-    <Drawer showSwipeHandle>
+    <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
       <DrawerTrigger
         render={
           <Button

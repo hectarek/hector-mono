@@ -42,6 +42,9 @@ const router = {
   forward: () => {},
   refresh: () => {},
   prefetch: () => {},
+  get bfcacheId() {
+    return nextState.visit;
+  },
 };
 const searchParams = new URLSearchParams();
 

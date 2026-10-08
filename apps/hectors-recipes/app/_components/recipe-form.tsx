@@ -43,6 +43,7 @@ import { StepRows } from "@/app/_components/step-rows";
 import { TagPicker } from "@/app/_components/tag-picker";
 import { TopBar } from "@/app/_components/top-bar";
 import { type NewTag, withNewTag } from "@/app/_lib/tag-choices";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 import { createRecipe, updateRecipe } from "@/app/actions/recipes";
 import type { ActionState } from "@/app/actions/shared";
 import {
@@ -158,6 +159,7 @@ export function RecipeForm(props: Props) {
     props.mode === "create" && props.values !== undefined,
   );
   const [confirmLeave, setConfirmLeave] = useState(false);
+  useClosesWhenHidden(() => setConfirmLeave(false));
 
   // The rows' own inputs, to put the cursor in a new row or on a row with a problem.
   const rowInputs = useRef(

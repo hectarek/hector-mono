@@ -10,7 +10,8 @@ import {
   DrawerTrigger,
 } from "@repo/ui/components/drawer";
 import { Ellipsis } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 
 // The ⋯ beside a tab's title (docs/ux-plan.md D42): a bottom sheet with what you can do with
 // what the tab shows (invite, members, defaults), kept out of the tab's way.
@@ -28,8 +29,18 @@ export function TitleMenu({
   onOpenChange?: (open: boolean) => void;
   children: ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  const changeOpen = (next: boolean) => {
+    setOpen(next);
+    onOpenChange?.(next);
+  };
+  // Closed when you come back to the page, steps and all (the menus reset on close).
+  useClosesWhenHidden(() => {
+    if (open) changeOpen(false);
+  });
+
   return (
-    <Drawer onOpenChange={onOpenChange} showSwipeHandle>
+    <Drawer open={open} onOpenChange={changeOpen} showSwipeHandle>
       <DrawerTrigger
         render={
           <Button

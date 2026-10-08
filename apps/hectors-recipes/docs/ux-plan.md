@@ -2446,11 +2446,25 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - `bun check`, `bun ts` and 1114 + 87 tests pass.
     - AGENTS.md has a Cache Components section.
     - **Left:** dev validation on the signed-in pages, the 404s, the proxy's session refresh, the three flows and 375 px. They need this worktree's `.env` and `.env.test` (the session can't copy them), and the flows sign up accounts, which Claude doesn't do in this session: Hector runs `bun run test:flows`.
-- [ ] **P28.2** What stays and what resets — C · D88
+- [~] **P28.2** What stays and what resets — C · D88
   - Do: the resets D88 lists, each in the component that holds the state. Sheets and dialogs close in a `useLayoutEffect` cleanup or the link's `onNavigate`. The forms and imports reset after a save or a discard. `RecipeVideo` stops playing. Check that Neon's sign-out reloads the page (its default navigation sets `window.location.href`), and that the week's slide-in still comes from the right side (`week-swipe.tsx` keeps the last week in a module variable).
   - Verify:
     - Screen tests hide and show a component inside React's `<Activity>`: a sheet closes, a saved form is empty, the video stops, and Groceries' live updates reconnect.
     - The flows go to a page and back.
+  - Evidence (2026-10-08, on `feat/recipes-p28-cache-components`):
+    - Sheets, dialogs and ⋯ menus close when their page is hidden. `useClosesWhenHidden` (`app/_lib/use-closes-when-hidden.ts`) closes them in a `useLayoutEffect` cleanup, as Next.js's "Preserving UI state" guide does. Twelve components use it: `TitleMenu` (every ⋯, `RecipeMenu` among them), `ConfirmActionButton`, `DeleteSpaceButton`, `DeleteRecipeButton`, `AddToListButton`, `AddToPlanButton`, cook mode's Steps and Ingredients sheets, `GroceryItemSheet`, `PlanEntrySheet`, `RowSheet`, Clear groceries' question, and the recipe form's leave question. A sheet whose parent holds its open state closes through `onOpenChange(false)`. The menu, the three dialogs and Add to groceries let Base UI hold their open state before; they hold it themselves now, so they can close it. No link needed `onNavigate`.
+    - The recipe form, Add by link and Add by photo start over on a fresh arrival. Their pages wrap them in `FreshEachVisit` (`app/_components/fresh-each-visit.tsx`), which keys them on `useRouter().bfcacheId`. That id changes on a link or a redirect, and stays the same for Back, Forward and a refresh. Saving redirects and Cancel leaves, so the next Add recipe or Edit starts over, while Back still finds what you were typing. Next.js's guide calls `bfcacheId` mainly a migration tool, and prefers resetting each piece of state where it changes. Here the form's fields, rows and photo, and each import's read, would each need one, and the only ways out of these screens are Save, Cancel and Back. One key covers D88 exactly.
+    - A playing video stops. `RecipeVideo` goes back to the photo when its page is hidden, so the player is gone: a hidden page is only `display: none`, which doesn't stop an iframe.
+    - Needed no change, checked in the code:
+      - Signing out: Neon's UI sets `window.location.href`, a full page load, which drops every page Next.js kept (found in stash's move).
+      - Groceries' live updates: `LiveList` holds the connection in a `useEffect`. React runs its cleanup when a page is hidden and runs it again when the page is shown, so it lets go and reconnects.
+      - The week's slide-in: `WeekSwipe` writes `shownWeek` in an effect, which runs only on a page that's showing, so a kept Plan neither sets nor clears it. A new week still slides in from its side.
+      - Kept, as D88 wants: where you scrolled, and the library's search, chips and Sort and group. Nothing resets them.
+    - Screen tests: `useClosesWhenHidden` on its own; `FreshEachVisit` (a new visit clears a typed field, the same visit keeps it; the test router's `bfcacheId` is `nextState.visit`); and inside React's `<Activity>`, the ⋯ menu, a confirmation, a meal's sheet (back at its first step), the video and `LiveList` (stops, then listens again). With the hook made to do nothing, five fail. The new tests pass 10 runs in a row (`--rerun-each 10`).
+    - `plan-and-shop.flow.ts` ends with the library's ⋯ left open, Back to Meal plan and Forward again: the sheet is closed and the grouping kept.
+    - `bun check`, `bun ts`, 1114 + 94 tests and the dead-code check pass.
+    - AGENTS.md's Cache Components section has the rules, and features.md's recipe form section says when the form starts over.
+    - **Left:** running the flows (`bun run test:flows`, Hector's to run: they sign up accounts on the test project). The new step is written but not run. A look in the browser pane needs this worktree's `.env`.
 - [ ] **P28.3** Ready the moment you tap — C · D87
   - Do:
     - The library, Books and a recipe's page (D87) read through `'use cache: private'` with a 5-minute `stale`, in their page helpers (`load-books.ts`, `load-recipe.ts`), so the session is also read once per request.

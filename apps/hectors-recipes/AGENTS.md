@@ -130,6 +130,10 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
 - The clock (`new Date()`, `Date.now()`) and `crypto.randomUUID()` fail the build if they run while a page prerenders. Each page reads the session first, which ends its prerender, so `todayIn` and the editor's row keys run at request time; keep that order.
 - `experimental.hideLogsAfterAbort` keeps `NeonAuthService`'s `catch` (and Neon's own) from logging the end of a prerender as a failed sign-in during `next build`. Request-time logs are unchanged.
 - `next build` needs the auth env vars present (`lib/auth/server.ts` throws at import without them), but nothing at build time reaches Neon or the database, so placeholder values build.
+- Next.js keeps the last three pages you left alive but hidden (React's `<Activity>`), so Back finds them as you left them (docs/ux-plan.md D88). Scroll, the library's search and the grouping stay; anything you open goes:
+  - A sheet, dialog or ⋯ that holds its own open state holds it in `useState` (not Base UI's) and calls `useClosesWhenHidden` (`app/_lib/use-closes-when-hidden.ts`) to close it. A sheet whose parent holds the state calls it with `onOpenChange(false)`. A new one does the same, with a screen test inside `<Activity>`.
+  - The recipe form and the two imports sit in `FreshEachVisit` (`app/_components/fresh-each-visit.tsx`, keyed on `useRouter().bfcacheId`): a link or a redirect starts them over, and Back keeps what was typed. In tests, `nextState.visit` is that id; set a new one for a fresh arrival.
+  - Effects need nothing: React runs their cleanups when it hides a page and runs them again when it shows it (`LiveList` reconnects). Something that keeps going while hidden, like a playing video, stops in `useClosesWhenHidden`.
 
 ## Feature Rules
 How each feature works, and what to keep true when changing it, is in [docs/features.md](docs/features.md). When a feature's behaviour or rules change, update its section there in the same change; only rules every change follows go here. Before changing a feature, read its section:

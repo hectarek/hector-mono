@@ -17,6 +17,7 @@ import { useId, useState, useTransition } from "react";
 import { useRecipeServings } from "@/app/_components/recipe-servings";
 import { SpacePicker } from "@/app/_components/space-picker";
 import { callResultAction } from "@/app/_lib/call-action";
+import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
 import { type AddToListState, addRecipeToList } from "@/app/actions/grocery";
 import type { AddToListResult } from "@/src/entities/models/grocery-item.model";
 
@@ -82,14 +83,16 @@ export function AddToListButton({
 
   const done = result?.ok ? result.result : null;
 
+  const [open, setOpen] = useState(false);
+  const changeOpen = (next: boolean) => {
+    setOpen(next);
+    if (next) setServings(String(shared.servings));
+    else setResult(null);
+  };
+  useClosesWhenHidden(() => changeOpen(false));
+
   return (
-    <Drawer
-      onOpenChange={(open) => {
-        if (open) setServings(String(shared.servings));
-        else setResult(null);
-      }}
-      showSwipeHandle
-    >
+    <Drawer open={open} onOpenChange={changeOpen} showSwipeHandle>
       <DrawerTrigger render={<Button variant="secondary" size="lg" />}>
         <ShoppingCart data-icon="inline-start" />
         Add to groceries

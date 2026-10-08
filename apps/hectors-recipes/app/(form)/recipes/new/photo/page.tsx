@@ -1,3 +1,4 @@
+import { FreshEachVisit } from "@/app/_components/fresh-each-visit";
 import { PhotoImport } from "@/app/_components/photo-import";
 import { loadNewRecipe } from "@/app/_lib/new-recipe";
 
@@ -8,5 +9,9 @@ export default async function NewRecipePhotoPage({
   searchParams: Promise<{ book?: string }>;
 }) {
   const { book } = await searchParams;
-  return <PhotoImport {...(await loadNewRecipe(book))} />;
+  return (
+    <FreshEachVisit>
+      <PhotoImport {...(await loadNewRecipe(book))} />
+    </FreshEachVisit>
+  );
 }
