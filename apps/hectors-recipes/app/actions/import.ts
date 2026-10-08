@@ -84,7 +84,7 @@ export async function readRecipeFromDocument(
   }
 }
 
-// Add by link (P10.3): the page's own recipe data, or its text read by the recipe reader.
+// Add by link or text, given a link (P10.3, D73): the page's own recipe data, or its text read by the recipe reader.
 export async function readRecipeFromLink(
   formData: FormData,
 ): Promise<ReadRecipeResult> {

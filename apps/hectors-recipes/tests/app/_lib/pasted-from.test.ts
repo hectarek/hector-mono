@@ -1,5 +1,22 @@
 import { describe, expect, it } from "bun:test";
-import { pastedFrom } from "@/app/_lib/pasted-from";
+import { loneLink, pastedFrom } from "@/app/_lib/pasted-from";
+
+// D73: one box for a link or a recipe's text; only a lone web address is read as a page.
+describe("loneLink", () => {
+  it.each([
+    ["nytimes.com/recipes/1234", "https://nytimes.com/recipes/1234"],
+    [
+      "  https://www.bonappetit.com/recipe/x\n",
+      "https://www.bonappetit.com/recipe/x",
+    ],
+    ["Chili\n\n1 lb beans\n\nSimmer.", undefined],
+    ["https://example.com/chili and some notes", undefined],
+    ["Chili", undefined],
+    ["", undefined],
+  ])("%j is %j", (box, expected) => {
+    expect(loneLink(box)).toBe(expected);
+  });
+});
 
 // Text pasted after a link keeps that link as its source only when it's a web page's address
 // (P14.11): a link the importer refused isn't one.

@@ -121,7 +121,7 @@ const READ_FAILURES: Record<RecipeReadFailure, string> = {
     "Couldn't open that PDF. Try saving it again, or screenshot it.",
 };
 
-// What Add by link says when the page can't be fetched (P10.3). The screen offers pasting the
+// What Add by link or text says when the page can't be fetched (P10.3). The screen offers pasting the
 // text, a photo, or adding it by hand beside it.
 const FETCH_FAILURES: Record<PageFetchFailure, string> = {
   "not-allowed": "That isn't a public web page.",

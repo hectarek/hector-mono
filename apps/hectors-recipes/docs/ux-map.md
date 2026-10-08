@@ -182,14 +182,15 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** choose how to add a recipe (D34).
 - **Surface:** Market. Full-screen: Cancel, "New recipe".
-- **On it:** three rows, Add by link, Add by photo or file, Add manually. No filled button.
+- **On it:** three rows, Add by link or text, Add by photo or file, Add manually, whose words say which are read into the form for you and which you type (D73). No filled button.
 - **Reached from:** the library's Add recipe, and its empty state's Add a recipe. **Leads to:** the three ways in; Cancel → the library.
 
-### Add by link — `/recipes/new/link`
+### Add by link or text — `/recipes/new/link`
 
 - **Job:** read a recipe from a web page. The page's own recipe data is read first, without AI (D29).
-- **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by link".
-- **Main action:** Read recipe. After a failure: Paste the recipe's text instead (then Read text), Add by photo or file, Add manually.
+- **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by link or text".
+- **On it:** one box for a recipe's link or all its text (D73): a lone web address is read as its page, anything else as text.
+- **Main action:** Read recipe. After a failed link: a line saying the page's text can be pasted in its place (the link stays the recipe's source), Add by photo or file, Add manually.
 - **While reading:** "Reading the page. This can take up to a minute."
 - **Leads to:** the recipe form, filled in, with "Read from <site>. Check it before saving."
 
@@ -257,10 +258,10 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason).
 2. Groceries' Add button is the default size (40 px), not `lg` (D32).
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent.
-4. Two filled buttons on one screen: Add by link once pasting (Read recipe and Read text), and cook mode while a timer is up (Time's up · Dismiss beside Next).
+4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6).
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading).
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all.
-7. The ways out after a failed read differ: Add by link offers the pasted text, photo or file, and manually; Add by photo or file offers only manually.
+7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually.
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does.
 10. Cook mode's Done goes back to the recipe without the servings chosen there.

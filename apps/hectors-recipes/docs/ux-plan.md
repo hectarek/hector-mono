@@ -2161,9 +2161,14 @@ One commit per task; the PR when the phase is done.
     - `ShareLinkButton` shares any path (`path`, `title`, `label`), not only an invite; `BookSelect` moved to its own file for Copy recipes and the sheet.
     - Screen tests: a viewer gets Share recipe only, and it shares `/recipes/<id>` under the recipe's name; an editor gets Edit (to the form) and Copy to another book, whose step shows the books, Copy and Back.
     - On the test project at 375 px: the top row, the sheet, and Copy to another book for real: it landed on the Baking book showing Chili and "1 recipe".
-- [ ] **P23.6** Add by link or text — C · D73, F11
+- [x] **P23.6** Add by link or text — C · D73, F11
   - Do: the chooser's first row is "Add by link or text", and its words say how it differs from Add manually. Its screen has one box for a link or a recipe's text, and one Read button: a lone web address is read as a page, anything else as text.
   - Verify: a test for telling a link from text; screen tests for both reads and for a failed link; the chooser at 375 px.
+  - Evidence (2026-10-08):
+    - The chooser: "Add by link or text: Paste a recipe's link, or all of its text, and it's read into the form for you." and "Add manually: Type it in yourself. A list you paste is split into rows, not read." The first row's icon is a clipboard.
+    - The screen, "Add by link or text", has one box ("The recipe's link, or its text") and one Read recipe. `loneLink` reads a lone web address as its page, anything with a space or line break, or a word, as text (tests). After a failed link, a line says the page's text can be pasted in its place, and that text keeps the link as the recipe's source. The second filled button (Read text) is gone, and with it half of the map's fourth disagreement.
+    - Screen tests: a lone link fills the form from its page ("Read from example.com"); text goes to the reader as text ("Read from your text"); text pasted after a blocked link keeps "https://example.com/chili" as the source. Mutation caught: the failed link not kept.
+    - At 375 px on the test project: the chooser's three rows, light and dark, and the screen after a link that couldn't be reached, with its line about pasting the text and the two other ways in.
 - [ ] **P23.7** Word documents — C · D74, F8
   - Do: Add by photo or file takes .docx: the server turns it into text, then reads it as it reads a text file. The help text and the picker's types say so; a document it can't open says so.
   - Verify: tests with a small .docx made for them (a recipe, an empty one, a broken one); the `add-recipe` flow picks one.

@@ -1,8 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { Field, FieldLabel } from "@repo/ui/components/field";
-import { Input } from "@repo/ui/components/input";
+import { Field, FieldDescription, FieldLabel } from "@repo/ui/components/field";
 import { Spinner } from "@repo/ui/components/spinner";
 import { Textarea } from "@repo/ui/components/textarea";
 import Link from "next/link";
@@ -11,7 +10,7 @@ import { RecipeForm } from "@/app/_components/recipe-form";
 import { TopBar } from "@/app/_components/top-bar";
 import { draftFormValues } from "@/app/_lib/draft-form-values";
 import type { loadNewRecipe } from "@/app/_lib/new-recipe";
-import { pastedFrom } from "@/app/_lib/pasted-from";
+import { loneLink, pastedFrom } from "@/app/_lib/pasted-from";
 import {
   type ReadRecipeResult,
   readRecipeFromLink,
@@ -20,31 +19,32 @@ import {
 
 type Read = Extract<ReadRecipeResult, { draft: unknown }>;
 type Stage =
-  | { kind: "enter"; error?: string; pasting: boolean }
+  | { kind: "enter"; error?: string; linkFailed?: boolean }
   | { kind: "reading"; what: string }
   | { kind: "read"; result: Read };
 
-// Add by link (ux-plan P10.3): the page's own recipe data, or its text read by the recipe
-// reader, fills the new-recipe form to check. A site that won't be read gets its text pasted
-// instead (D34), a photo or file, or the form by hand.
+// Add by link or text (ux-plan P10.3, D73): one box for a recipe's link or its whole text. A
+// lone web address is read as a page (its own recipe data, else its text by the recipe
+// reader); anything else goes to the reader as text. Either fills the new-recipe form to
+// check. A page that won't be read can have its text pasted in its place, keeping the link as
+// the recipe's source; a photo or file, or the form by hand, are a tap away.
 export function LinkImport({
   form,
   choiceHref,
   manualHref,
   photoHref,
 }: Awaited<ReturnType<typeof loadNewRecipe>>) {
-  const [stage, setStage] = useState<Stage>({ kind: "enter", pasting: false });
-  const [url, setUrl] = useState("");
-  const [pasted, setPasted] = useState("");
-  const urlId = useId();
-  const textId = useId();
+  const [stage, setStage] = useState<Stage>({ kind: "enter" });
+  const [box, setBox] = useState("");
+  // The last link read, so text pasted after it still names its page.
+  const [lastLink, setLastLink] = useState("");
+  const boxId = useId();
 
-  // `sourceUrl` is for text pasted from a page: it still came from there.
   async function read(
     what: string,
     action: (data: FormData) => Promise<ReadRecipeResult>,
     data: FormData,
-    pasting: boolean,
+    isLink: boolean,
     sourceUrl?: string,
   ) {
     setStage({ kind: "reading", what });
@@ -56,36 +56,36 @@ export function LinkImport({
               kind: "read",
               result: sourceUrl ? { ...result, sourceUrl } : result,
             }
-          : { kind: "enter", error: result.error, pasting },
+          : { kind: "enter", error: result.error, linkFailed: isLink },
       );
     } catch {
       setStage({
         kind: "enter",
         error:
           "Couldn't reach the server. Check your connection and try again.",
-        pasting,
+        linkFailed: isLink,
       });
     }
   }
 
-  function readLink(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData();
-    data.set("url", url);
-    void read("Reading the page", readRecipeFromLink, data, false);
-  }
-
-  function readText(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData();
-    data.set("text", pasted);
-    void read(
-      "Reading the recipe",
-      readRecipeFromText,
-      data,
-      true,
-      pastedFrom(url),
-    );
+    const link = loneLink(box);
+    if (link) {
+      setLastLink(link);
+      data.set("url", box);
+      void read("Reading the page", readRecipeFromLink, data, true);
+    } else {
+      data.set("text", box);
+      void read(
+        "Reading the recipe",
+        readRecipeFromText,
+        data,
+        false,
+        pastedFrom(lastLink),
+      );
+    }
   }
 
   if (stage.kind === "read") {
@@ -116,7 +116,7 @@ export function LinkImport({
             Cancel
           </Button>
         }
-        title="Add by link"
+        title="Add by link or text"
       />
 
       {stage.kind === "reading" ? (
@@ -129,21 +129,24 @@ export function LinkImport({
         </p>
       ) : (
         <div className="flex flex-col gap-6">
-          {/* No browser check: "budgetbytes.com/…" without https:// is fine here. */}
-          <form onSubmit={readLink} noValidate className="flex flex-col gap-4">
+          <form onSubmit={submit} className="flex flex-col gap-4">
             <Field>
-              <FieldLabel htmlFor={urlId}>Link to the recipe</FieldLabel>
-              <Input
-                id={urlId}
-                type="url"
-                inputMode="url"
-                value={url}
-                onChange={(event) => setUrl(event.target.value)}
-                placeholder="https://"
+              <FieldLabel htmlFor={boxId}>
+                The recipe&apos;s link, or its text
+              </FieldLabel>
+              <Textarea
+                id={boxId}
+                value={box}
+                onChange={(event) => setBox(event.target.value)}
+                rows={6}
+                placeholder="https://… or its name, ingredients and method"
                 autoComplete="off"
               />
+              <FieldDescription>
+                It&apos;s read into the form for you to check before saving.
+              </FieldDescription>
             </Field>
-            <Button type="submit" size="lg" disabled={!url.trim()}>
+            <Button type="submit" size="lg" disabled={!box.trim()}>
               Read recipe
             </Button>
           </form>
@@ -153,14 +156,11 @@ export function LinkImport({
               <p role="alert" className="text-destructive text-sm">
                 {stage.error}
               </p>
-              {stage.pasting ? null : (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={() => setStage({ ...stage, pasting: true })}
-                >
-                  Paste the recipe&apos;s text instead
-                </Button>
+              {stage.linkFailed && (
+                <p className="text-muted-foreground text-sm">
+                  You can copy the recipe&apos;s text from the page and paste it
+                  above in place of the link.
+                </p>
               )}
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -181,24 +181,6 @@ export function LinkImport({
                 </Button>
               </div>
             </div>
-          )}
-
-          {stage.pasting && (
-            <form onSubmit={readText} className="flex flex-col gap-4">
-              <Field>
-                <FieldLabel htmlFor={textId}>The recipe&apos;s text</FieldLabel>
-                <Textarea
-                  id={textId}
-                  value={pasted}
-                  onChange={(event) => setPasted(event.target.value)}
-                  rows={8}
-                  placeholder="Its name, ingredients and method, copied from the page."
-                />
-              </Field>
-              <Button type="submit" size="lg" disabled={!pasted.trim()}>
-                Read text
-              </Button>
-            </form>
           )}
         </div>
       )}
