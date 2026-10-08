@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`, in review as hectarek/hector-mono#31: done. Phase 23 (clearer, and small things testers asked for) next, stacked on it; then 24 (bookmarks, recently viewed, a video, suggested tags) and 25 (the map's 12 fixes). Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
-| Next task | P23.1. Hector reviews hectarek/hector-mono#31. |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-07 |
+| Phase | 23 (clearer, and small things testers asked for) on `feat/recipes-p23-clearer`, stacked on Phase 22's branch: done, in review. Phase 22 (the UX map) is in review as hectarek/hector-mono#31. Then 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#31, then Phase 23's PR; then Phase 24 (H31 before its PR merges). |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-08 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -2557,3 +2557,5 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
   - Next: Hector's calls on the placement and the next phase.
 - **2026-10-08 (bj)** — Hector answered P22.3 (D71–D79). The round moved into the repo as `feedback/2026-10-07-first-testers.md`, with a README for future rounds. Planned Phase 23 (clearer, and small), 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). The larger ideas stay as drafts (D79).
   - Next: P23.1, on a branch stacked on Phase 22's.
+- **2026-10-08 (bk)** — Phase 23 done on `feat/recipes-p23-clearer` (see each task's Evidence): Add recipe, recipe counts, share buttons that say they share, joining by a pasted link, the recipe page's ⋯ with Share, Add by link or text, Word documents, and the produce row's wave while the AI reads. A tab's title now takes two lines (P23.1). 1078 + 63 tests and the three browser flows pass.
+  - Next: Phase 23's PR, stacked on hectarek/hector-mono#31; Hector's phone checks (H5).
