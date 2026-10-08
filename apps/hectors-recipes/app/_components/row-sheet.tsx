@@ -9,6 +9,7 @@ import {
 } from "@repo/ui/components/drawer";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 
 // A row's ⋯ sheet in the recipe editor: its own fields (if any), then move and remove.
 // Changes apply as they're made, so Done only closes it; the sheet stays open while a row is
@@ -32,8 +33,17 @@ export function RowSheet({
   onRemove: () => void;
   children?: ReactNode;
 }) {
+  const sheetKey = useClosesOnLeave(() => {
+    if (open) onOpenChange(false);
+  });
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} showSwipeHandle>
+    <Drawer
+      key={sheetKey}
+      open={open}
+      onOpenChange={onOpenChange}
+      showSwipeHandle
+    >
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>

@@ -4,6 +4,7 @@ import { Button } from "@repo/ui/components/button";
 import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { callAction } from "@/app/_lib/call-action";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { clearGroceryList } from "@/app/actions/grocery";
 
 // Clear list, in Groceries' ⋯ sheet (docs/ux-plan.md D52). It asks first in the sheet itself,
@@ -20,6 +21,11 @@ export function ClearListButton({
   const [cleared, setCleared] = useState(false);
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
+  // Asking again when you come back to Groceries, not still mid-question.
+  useClosesOnLeave(() => {
+    setAsking(false);
+    setError(undefined);
+  });
 
   function clear() {
     startTransition(async () => {

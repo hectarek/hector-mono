@@ -1,7 +1,6 @@
+import { FreshEachVisit } from "@/app/_components/fresh-each-visit";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { loadNewRecipe } from "@/app/_lib/new-recipe";
-
-export const dynamic = "force-dynamic";
 
 // Add manually (ux-plan P10.1): the form, empty.
 export default async function NewRecipeManualPage({
@@ -11,5 +10,9 @@ export default async function NewRecipeManualPage({
 }) {
   const { book } = await searchParams;
   const { form } = await loadNewRecipe(book);
-  return <RecipeForm mode="create" {...form} />;
+  return (
+    <FreshEachVisit>
+      <RecipeForm mode="create" {...form} />
+    </FreshEachVisit>
+  );
 }

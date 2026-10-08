@@ -1,5 +1,6 @@
 import { badgeVariants } from "@repo/ui/components/badge";
 import { Clock, ExternalLink, Users } from "lucide-react";
+import { cacheLife } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { AddToListButton } from "@/app/_components/add-to-list-button";
@@ -7,8 +8,10 @@ import { AddToPlanButton } from "@/app/_components/add-to-plan-button";
 import { BackLink } from "@/app/_components/back-link";
 import { BookmarkButton } from "@/app/_components/bookmark-button";
 import { InlineMarkdown } from "@/app/_components/markdown";
+import { PageMotion } from "@/app/_components/page-motion";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
+import { RecipePicture } from "@/app/_components/recipe-picture";
 import { CookLink, RecipeServings } from "@/app/_components/recipe-servings";
 import { RecipeVideo } from "@/app/_components/recipe-video";
 import { RememberView } from "@/app/_components/remember-view";
@@ -21,8 +24,6 @@ import { getInjection } from "@/di/container";
 import { editableSpaces, hasRole } from "@/src/entities/models/space.model";
 import { stepGroups } from "@/src/entities/step-text";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
-
-export const dynamic = "force-dynamic";
 
 function sourceHost(url: string): string {
   try {
@@ -42,13 +43,8 @@ export default async function RecipePage({
   const { id } = await params;
   // From cook mode's Done, when its servings were changed; kept in the URL as they change.
   const initialServings = servingsParam((await searchParams).servings);
-  const { recipe, canEdit } = await loadRecipe(id);
-  const userId = await getCurrentUserId();
-  const [books, plans, bookmarks] = await Promise.all([
-    getInjection("IListMySpacesController")({ type: "recipe-book" }, userId),
-    getInjection("IListMySpacesController")({ type: "meal-plan" }, userId),
-    getInjection("IGetBookmarksController")(userId),
-  ]);
+  const { recipe, canEdit, books, plans, bookmarks, today } =
+    await loadRecipePage(id);
   // A plan's grocery list is part of the plan, so whoever can plan can add to a list. In no
   // plan yet: adding creates their own.
   const planTargets = editableSpaces(plans);
@@ -63,156 +59,190 @@ export default async function RecipePage({
       (book) => book.id !== recipe.spaceId && hasRole(book.role, "editor"),
     )
     .map(({ id: bookId, name }) => ({ id: bookId, name }));
-  const picture = recipe.imageUrl ? (
-    <Image
-      src={recipe.imageUrl}
-      alt=""
-      width={1280}
-      height={720}
-      unoptimized
-      loading="eager"
-      className="bg-muted aspect-video h-auto w-full rounded-xl object-cover"
-    />
-  ) : (
-    <ProduceTile
-      produce={produceFor(recipe.id)}
-      className="font-heading aspect-video items-end rounded-xl p-5 text-8xl leading-none"
-    >
-      {recipe.title.charAt(0).toUpperCase()}
-    </ProduceTile>
+  const picture = (
+    <RecipePicture recipeId={recipe.id}>
+      {recipe.imageUrl ? (
+        <Image
+          src={recipe.imageUrl}
+          alt=""
+          width={1280}
+          height={720}
+          unoptimized
+          loading="eager"
+          className="bg-muted aspect-video h-auto w-full rounded-xl object-cover"
+        />
+      ) : (
+        <ProduceTile
+          produce={produceFor(recipe.id)}
+          className="font-heading aspect-video items-end rounded-xl p-5 text-8xl leading-none"
+        >
+          {recipe.title.charAt(0).toUpperCase()}
+        </ProduceTile>
+      )}
+    </RecipePicture>
   );
 
   return (
-    <article data-surface="reading">
-      <RememberView recipeId={recipe.id} />
-      <RecipeServings
-        yieldServings={recipe.yieldServings}
-        initial={initialServings}
-        inUrl
-      >
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-2">
-            <BackLink
-              href={libraryHref({ book: libraryBook })}
-              label={backLabel}
-            />
-            <RecipeMenu
-              recipeId={recipe.id}
-              title={recipe.title}
-              canEdit={canEdit}
-              copyTargets={copyTargets}
-            />
-          </div>
-
-          <header className="flex flex-col gap-3">
-            {recipe.videoUrl ? (
-              <RecipeVideo link={recipe.videoUrl} title={recipe.title}>
-                {picture}
-              </RecipeVideo>
-            ) : (
-              picture
-            )}
-            <div className="flex items-start justify-between gap-2">
-              <h1 className="font-heading text-3xl text-balance">
-                {recipe.title}
-              </h1>
-              <BookmarkButton
+    <PageMotion>
+      <article data-surface="reading">
+        <RememberView recipeId={recipe.id} />
+        <RecipeServings
+          yieldServings={recipe.yieldServings}
+          initial={initialServings}
+          inUrl
+        >
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between gap-2">
+              <BackLink
+                href={libraryHref({ book: libraryBook })}
+                label={backLabel}
+              />
+              <RecipeMenu
                 recipeId={recipe.id}
-                saved={bookmarks.includes(recipe.id)}
+                title={recipe.title}
+                canEdit={canEdit}
+                copyTargets={copyTargets}
               />
             </div>
-            {recipe.description && (
-              <p className="text-muted-foreground">{recipe.description}</p>
-            )}
-            <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              {recipe.timeMinutes !== null && (
-                <span className="flex items-center gap-1.5">
-                  <Clock className="size-4" aria-hidden />
-                  {recipe.timeMinutes} min
-                </span>
+
+            <header className="flex flex-col gap-3">
+              {recipe.videoUrl ? (
+                <RecipeVideo link={recipe.videoUrl} title={recipe.title}>
+                  {picture}
+                </RecipeVideo>
+              ) : (
+                picture
               )}
-              {recipe.yieldServings !== null && (
-                <span className="flex items-center gap-1.5">
-                  <Users className="size-4" aria-hidden />
-                  Serves {recipe.yieldServings}
-                </span>
-              )}
-              {recipe.sourceUrl && (
-                <a
-                  href={recipe.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-foreground flex items-center gap-1.5 underline-offset-2 hover:underline"
-                >
-                  <ExternalLink className="size-4" aria-hidden />
-                  {sourceHost(recipe.sourceUrl)}
-                </a>
-              )}
-            </div>
-            {/* On a phone Cook takes the row, and the other two share one under it, in the
-                tab bar's order: Meal plan, then Groceries (P27.2). */}
-            <div className="grid grid-cols-2 gap-2 sm:flex">
-              <CookLink recipeId={recipe.id} className="col-span-2" />
-              {canPlan && (
-                <AddToPlanButton
+              <div className="flex items-start justify-between gap-2">
+                <h1 className="font-heading text-3xl text-balance">
+                  {recipe.title}
+                </h1>
+                <BookmarkButton
                   recipeId={recipe.id}
-                  title={recipe.title}
-                  today={todayIn(PLAN_TIME_ZONE)}
-                  plans={planTargets}
+                  saved={bookmarks.includes(recipe.id)}
                 />
-              )}
-              {canPlan && (
-                <AddToListButton
-                  recipeId={recipe.id}
-                  title={recipe.title}
-                  yieldServings={recipe.yieldServings}
-                  plans={planTargets}
-                />
-              )}
-            </div>
-            {recipe.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {recipe.tags.map((tag) => (
-                  <Link
-                    key={tag}
-                    href={libraryHref({ book: libraryBook, tag })}
-                    className={badgeVariants({ variant: "secondary" })}
-                  >
-                    {tag}
-                  </Link>
-                ))}
               </div>
-            )}
-          </header>
-
-          <ScaledIngredients lines={recipe.ingredients} />
-
-          {recipe.steps.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <h2 className="font-heading text-xl">Method</h2>
-              {stepGroups(recipe.steps).map((group) => (
-                <div key={group.first} className="flex flex-col gap-3">
-                  {group.section && (
-                    <h3 className="text-muted-foreground mt-3 text-xs font-semibold tracking-wide uppercase">
-                      {group.section}
-                    </h3>
-                  )}
-                  <ol
-                    start={group.first}
-                    className="marker:font-heading marker:text-primary flex list-decimal flex-col gap-3 pl-7 text-lg marker:text-xl"
+              {recipe.description && (
+                <p className="text-muted-foreground">{recipe.description}</p>
+              )}
+              <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                {recipe.timeMinutes !== null && (
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="size-4" aria-hidden />
+                    {recipe.timeMinutes} min
+                  </span>
+                )}
+                {recipe.yieldServings !== null && (
+                  <span className="flex items-center gap-1.5">
+                    <Users className="size-4" aria-hidden />
+                    Serves {recipe.yieldServings}
+                  </span>
+                )}
+                {recipe.sourceUrl && (
+                  <a
+                    href={recipe.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-foreground flex items-center gap-1.5 underline-offset-2 hover:underline"
                   >
-                    {group.steps.map((step) => (
-                      <li key={step.position} className="pl-1 leading-relaxed">
-                        <InlineMarkdown>{step.text}</InlineMarkdown>
-                      </li>
-                    ))}
-                  </ol>
+                    <ExternalLink className="size-4" aria-hidden />
+                    {sourceHost(recipe.sourceUrl)}
+                  </a>
+                )}
+              </div>
+              {/* On a phone Cook takes the row, and the other two share one under it, in the
+                tab bar's order: Meal plan, then Groceries (P27.2). */}
+              <div className="grid grid-cols-2 gap-2 sm:flex">
+                <CookLink recipeId={recipe.id} className="col-span-2" />
+                {canPlan && (
+                  <AddToPlanButton
+                    recipeId={recipe.id}
+                    title={recipe.title}
+                    today={today}
+                    plans={planTargets}
+                  />
+                )}
+                {canPlan && (
+                  <AddToListButton
+                    recipeId={recipe.id}
+                    title={recipe.title}
+                    yieldServings={recipe.yieldServings}
+                    plans={planTargets}
+                  />
+                )}
+              </div>
+              {recipe.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {recipe.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={libraryHref({ book: libraryBook, tag })}
+                      className={badgeVariants({ variant: "secondary" })}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
                 </div>
-              ))}
-            </section>
-          )}
-        </div>
-      </RecipeServings>
-    </article>
+              )}
+            </header>
+
+            <ScaledIngredients lines={recipe.ingredients} />
+
+            {recipe.steps.length > 0 && (
+              <section className="flex flex-col gap-3">
+                <h2 className="font-heading text-xl">Method</h2>
+                {stepGroups(recipe.steps).map((group) => (
+                  <div key={group.first} className="flex flex-col gap-3">
+                    {group.section && (
+                      <h3 className="text-muted-foreground mt-3 text-xs font-semibold tracking-wide uppercase">
+                        {group.section}
+                      </h3>
+                    )}
+                    <ol
+                      start={group.first}
+                      className="marker:font-heading marker:text-primary flex list-decimal flex-col gap-3 pl-7 text-lg marker:text-xl"
+                    >
+                      {group.steps.map((step) => (
+                        <li
+                          key={step.position}
+                          className="pl-1 leading-relaxed"
+                        >
+                          <InlineMarkdown>{step.text}</InlineMarkdown>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ))}
+              </section>
+            )}
+          </div>
+        </RecipeServings>
+      </article>
+    </PageMotion>
   );
+}
+
+// D87: kept in the phone's memory for 5 minutes, never on the server, so opening the recipe
+// again shows it at once. Any save clears it; someone else's change can take up to 5 minutes
+// to show. Everything the page reads is in here, today included (up to 5 minutes behind just
+// after midnight): a read outside it would load after the tap.
+async function loadRecipePage(recipeId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300 });
+
+  const userId = await getCurrentUserId();
+  const { recipe, canEdit } = await loadRecipe(recipeId, userId);
+  const [books, plans, bookmarks] = await Promise.all([
+    getInjection("IListMySpacesController")({ type: "recipe-book" }, userId),
+    getInjection("IListMySpacesController")({ type: "meal-plan" }, userId),
+    getInjection("IGetBookmarksController")(userId),
+  ]);
+  return {
+    recipe,
+    canEdit,
+    books,
+    plans,
+    bookmarks,
+    today: todayIn(PLAN_TIME_ZONE),
+  };
 }

@@ -14,3 +14,170 @@
 :root {
   --neon-radius: var(--radius);
 }
+
+/* Motion between screens (docs/ux-plan.md D89; AGENTS.md's UI Rules). React's <ViewTransition>
+   gives each moving part a class (`PageMotion`, `RecipePicture`, `SkeletonMotion`); these say
+   how it moves. Every move is under 400 ms. */
+
+/* Only the parts D89 moves take part in a move. Left to the browser, <html> would too (as
+   `root`), crossfading everything else and, while it did, ignoring every tap. Without it, and
+   with the overlay letting taps through, a tap reaches anything that isn't moving: a page
+   under its fading skeleton, for one. What is moving (a page sliding in, cook mode rising,
+   the header and tab bar) ignores taps until its move ends. */
+:root {
+  view-transition-name: none;
+}
+::view-transition {
+  pointer-events: none;
+}
+
+/* The header and the tab bar stay still, above the page as it moves. Cook mode, which has
+   neither, rises over them. */
+[data-motion-name="site-header"] {
+  view-transition-name: site-header;
+}
+[data-motion-name="tab-bar"] {
+  view-transition-name: tab-bar;
+}
+::view-transition-group(site-header),
+::view-transition-group(tab-bar) {
+  animation: none;
+  z-index: 50;
+}
+::view-transition-old(site-header),
+::view-transition-new(site-header),
+::view-transition-old(tab-bar),
+::view-transition-new(tab-bar) {
+  animation: none;
+}
+
+/* Deeper and back: in from the right, out by the back link to the right. */
+::view-transition-old(.go-deeper) {
+  animation:
+    120ms ease-in both motion-fade-out,
+    300ms ease-in-out both motion-to-left;
+}
+::view-transition-new(.go-deeper) {
+  animation:
+    180ms ease-out 100ms both motion-fade-in,
+    300ms ease-in-out both motion-from-right;
+}
+::view-transition-old(.go-back) {
+  animation:
+    120ms ease-in both motion-fade-out,
+    300ms ease-in-out both motion-to-right;
+}
+::view-transition-new(.go-back) {
+  animation:
+    180ms ease-out 100ms both motion-fade-in,
+    300ms ease-in-out both motion-from-left;
+}
+
+/* Tabs crossfade, the quickest move. */
+::view-transition-old(.switch-tab) {
+  animation: 150ms ease-out both motion-fade-out;
+}
+::view-transition-new(.switch-tab) {
+  animation: 150ms ease-in both motion-fade-in;
+}
+
+/* Cook mode rises over the recipe, and Done lowers it; the recipe stays still under it. */
+::view-transition-group(.cook-rise),
+::view-transition-group(.cook-lower) {
+  z-index: 60;
+}
+::view-transition-new(.cook-rise) {
+  animation: 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both motion-rise;
+}
+::view-transition-old(.cook-lower) {
+  animation: 280ms cubic-bezier(0.4, 0, 1, 1) both motion-lower;
+}
+::view-transition-old(.cook-under),
+::view-transition-new(.cook-under) {
+  animation: 340ms both motion-stay;
+}
+
+/* A card's picture grows into its recipe's, cropped rather than stretched between shapes. */
+::view-transition-group(.grow) {
+  animation-duration: 340ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+::view-transition-old(.grow),
+::view-transition-new(.grow) {
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A skeleton fades into its page. */
+::view-transition-old(.skeleton-out) {
+  animation: 200ms ease-out both motion-fade-out;
+}
+
+/* Reduced motion moves nothing (D89): each screen simply replaces the last. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.go-deeper),
+  ::view-transition-new(.go-deeper),
+  ::view-transition-old(.go-back),
+  ::view-transition-new(.go-back),
+  ::view-transition-old(.switch-tab),
+  ::view-transition-new(.switch-tab),
+  ::view-transition-new(.cook-rise),
+  ::view-transition-old(.cook-lower),
+  ::view-transition-old(.cook-under),
+  ::view-transition-new(.cook-under),
+  ::view-transition-group(.grow),
+  ::view-transition-old(.grow),
+  ::view-transition-new(.grow),
+  ::view-transition-old(.skeleton-out) {
+    animation: none;
+  }
+}
+
+@keyframes motion-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes motion-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes motion-to-left {
+  to {
+    translate: -60px 0;
+  }
+}
+@keyframes motion-from-right {
+  from {
+    translate: 60px 0;
+  }
+}
+@keyframes motion-to-right {
+  to {
+    translate: 60px 0;
+  }
+}
+@keyframes motion-from-left {
+  from {
+    translate: -60px 0;
+  }
+}
+@keyframes motion-rise {
+  from {
+    translate: 0 100vh;
+  }
+}
+@keyframes motion-lower {
+  to {
+    translate: 0 100vh;
+  }
+}
+@keyframes motion-stay {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}

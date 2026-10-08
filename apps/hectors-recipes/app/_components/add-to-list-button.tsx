@@ -17,6 +17,7 @@ import { useId, useState, useTransition } from "react";
 import { useRecipeServings } from "@/app/_components/recipe-servings";
 import { SpacePicker } from "@/app/_components/space-picker";
 import { callResultAction } from "@/app/_lib/call-action";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { type AddToListState, addRecipeToList } from "@/app/actions/grocery";
 import type { AddToListResult } from "@/src/entities/models/grocery-item.model";
 
@@ -82,12 +83,19 @@ export function AddToListButton({
 
   const done = result?.ok ? result.result : null;
 
+  const [open, setOpen] = useState(false);
+  const changeOpen = (next: boolean) => {
+    setOpen(next);
+    if (next) setServings(String(shared.servings));
+    else setResult(null);
+  };
+  const sheetKey = useClosesOnLeave(() => changeOpen(false));
+
   return (
     <Drawer
-      onOpenChange={(open) => {
-        if (open) setServings(String(shared.servings));
-        else setResult(null);
-      }}
+      key={sheetKey}
+      open={open}
+      onOpenChange={changeOpen}
       showSwipeHandle
     >
       <DrawerTrigger render={<Button variant="secondary" size="lg" />}>
@@ -121,7 +129,12 @@ export function AddToListButton({
               <Button
                 size="lg"
                 nativeButton={false}
-                render={<Link href={`/groceries?plan=${done.planId}`} />}
+                render={
+                  <Link
+                    href={`/groceries?plan=${done.planId}`}
+                    transitionTypes={["switch-tab"]}
+                  />
+                }
               >
                 Open groceries
               </Button>

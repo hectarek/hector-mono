@@ -43,6 +43,13 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
+    // A tap waiting for something that never comes fails here, with a trace, rather than
+    // waiting out the test's 3 minutes and looking hung.
+    actionTimeout: 30_000,
+    // With reduced motion nothing moves between screens (D89). Otherwise the page moving in
+    // ignores taps until its move ends, and a flow taps faster than a person would. The moves
+    // themselves are checked by hand (docs/ux-plan.md P28.5).
+    reducedMotion: "reduce",
   },
   projects: [{ name: "phone", use: { ...devices["Pixel 7"] } }],
   webServer: {

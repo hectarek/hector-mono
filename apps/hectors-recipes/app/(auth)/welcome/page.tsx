@@ -1,7 +1,9 @@
 import { authViewPaths } from "@neondatabase/auth/react/ui/server";
 import { Button } from "@repo/ui/components/button";
+import { Skeleton } from "@repo/ui/components/skeleton";
 import { cn } from "@repo/ui/lib/utils";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Logo } from "@/app/_components/logo";
 import { ProduceArt } from "@/app/_components/produce-art";
 import type { Produce } from "@/app/_components/produce-tile";
@@ -10,8 +12,6 @@ import { SPACE_TYPE_CONTENTS } from "@/app/_lib/space-href";
 import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import type { InvitePreview } from "@/src/entities/models/space.model";
-
-export const dynamic = "force-dynamic";
 
 // The screen's one bold moment: the produce row, each drawing tilted a few degrees.
 const PRODUCE_ROW: { produce: Produce; tilt: string }[] = [
@@ -41,18 +41,15 @@ async function invitedTo(redirectTo: string): Promise<InvitePreview | null> {
   }
 }
 
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 // Signed-out visitors start here (proxy.ts): the app's name and what it's for, then
 // straight on to creating an account or signing in, wherever they were headed.
-export default async function WelcomePage({
+export default function WelcomePage({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: SearchParams;
 }) {
-  const redirectTo = safeRedirect((await searchParams).redirectTo);
-  const invite = await invitedTo(redirectTo);
-  const query =
-    redirectTo === "/" ? "" : `?${new URLSearchParams({ redirectTo })}`;
-
   return (
     <main className="pt-safe-10 pb-safe-6 mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4">
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
@@ -75,6 +72,23 @@ export default async function WelcomePage({
         </div>
       </div>
 
+      <Suspense fallback={<WaysInPlaceholder />}>
+        <WaysIn searchParams={searchParams} />
+      </Suspense>
+    </main>
+  );
+}
+
+// Where someone was headed (?redirectTo=) and what an invite link is for are only known at
+// request time; the rest of the screen is the same for everyone, so it's prerendered.
+async function WaysIn({ searchParams }: { searchParams: SearchParams }) {
+  const redirectTo = safeRedirect((await searchParams).redirectTo);
+  const invite = await invitedTo(redirectTo);
+  const query =
+    redirectTo === "/" ? "" : `?${new URLSearchParams({ redirectTo })}`;
+
+  return (
+    <>
       {invite && (
         <div
           role="note"
@@ -107,6 +121,16 @@ export default async function WelcomePage({
           Sign in
         </Button>
       </div>
-    </main>
+    </>
+  );
+}
+
+function WaysInPlaceholder() {
+  return (
+    <div role="status" aria-busy="true" className="flex flex-col gap-3">
+      <span className="sr-only">Loading</span>
+      <Skeleton className="h-11 w-full" />
+      <Skeleton className="h-11 w-full" />
+    </div>
   );
 }

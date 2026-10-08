@@ -11,7 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@repo/ui/components/dialog";
+import { useState } from "react";
 import { ActionForm } from "@/app/_components/action-form";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import type { ActionState } from "@/app/actions/shared";
 
 // A button whose action asks first (Remove, Leave, Turn off; docs/ux-map.md), in the same
@@ -32,8 +34,11 @@ export function ConfirmActionButton({
   // Layout only: where the button sits in its row.
   className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const dialogKey = useClosesOnLeave(() => setOpen(false));
+
   return (
-    <Dialog>
+    <Dialog key={dialogKey} open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={<Button variant="secondary" size="lg" className={className} />}
       >

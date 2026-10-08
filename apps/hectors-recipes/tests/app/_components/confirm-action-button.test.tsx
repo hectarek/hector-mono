@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Activity } from "react";
+import { ConfirmActionButton } from "@/app/_components/confirm-action-button";
 import { InviteLinks } from "@/app/_components/invite-links";
 import { MemberList } from "@/app/_components/member-list";
 import { getInjection } from "@/di/container";
@@ -96,5 +98,30 @@ describe("the members page's confirmations", () => {
     await waitFor(async () =>
       expect((await settings()).invites).toHaveLength(invites.length - 1),
     );
+  });
+});
+
+// D88: a confirmation left open on a page you leave is closed when you come back to it.
+describe("ConfirmActionButton", () => {
+  it("is closed when you come back to the page", async () => {
+    const user = userEvent.setup();
+    const page = (mode: "visible" | "hidden") => (
+      <Activity mode={mode}>
+        <ConfirmActionButton
+          label="Remove"
+          title="Remove Sam?"
+          description="Sam won't see the book any more."
+          action={async () => null}
+          fields={{}}
+        />
+      </Activity>
+    );
+    const view = render(page("visible"));
+    await user.click(view.getByRole("button", { name: "Remove" }));
+    await view.findByRole("dialog");
+
+    view.rerender(page("hidden"));
+    view.rerender(page("visible"));
+    await waitFor(() => expect(view.queryByRole("dialog")).toBe(null));
   });
 });

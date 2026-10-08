@@ -27,6 +27,8 @@ mock.module("next/cache", () => ({
   revalidatePath: (path: string) => {
     nextState.revalidated.push(path);
   },
+  // Only the browser keeps what a page's private cache returns (D87); a test reads afresh.
+  cacheLife: () => {},
 }));
 
 // For the screen tests: a router that records where it was sent. One object, as Next's
@@ -42,6 +44,9 @@ const router = {
   forward: () => {},
   refresh: () => {},
   prefetch: () => {},
+  get bfcacheId() {
+    return nextState.visit;
+  },
 };
 const searchParams = new URLSearchParams();
 

@@ -138,7 +138,12 @@ export function SpaceMenu({
             variant="secondary"
             size="lg"
             nativeButton={false}
-            render={<Link href={`/spaces/${space.id}/settings`} />}
+            render={
+              <Link
+                href={`/spaces/${space.id}/settings`}
+                transitionTypes={["go-deeper"]}
+              />
+            }
           >
             <Users data-icon="inline-start" />
             Members

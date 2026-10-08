@@ -116,6 +116,7 @@ function MealRow({
           {entry.recipeId ? (
             <Link
               href={`/recipes/${entry.recipeId}`}
+              transitionTypes={["go-deeper"]}
               className={cn(
                 "font-heading truncate underline-offset-2 hover:underline",
                 (!cooks || cooked || past) && "text-muted-foreground",

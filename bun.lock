@@ -65,6 +65,7 @@
       "devDependencies": {
         "@electric-sql/pglite": "^0.5.8",
         "@happy-dom/global-registrator": "^20.14.5",
+        "@next/playwright": "16.4.0",
         "@playwright/test": "^1.64.0",
         "@repo/biome-config": "workspace:*",
         "@repo/typescript-config": "workspace:*",
@@ -534,6 +535,8 @@
     "@neondatabase/serverless": ["@neondatabase/serverless@1.2.0", "", {}, "sha512-tnaqgixUengZQNd9ZrS3ytQfamJzLKY8QxgqWQTNHHtB+KrFQWk77JTbbpg4RD+J3qE4eO2lVytvGDX5Kj6FdQ=="],
 
     "@next/env": ["@next/env@16.4.0", "", {}, "sha512-pyLlT5oafGlX8X7xjgGNXz5dNIDSxREm+qD6i9VLSZiZFopA/XWl8NM/KPmLx/8EG/++c49iid3gNWSQW1+2dQ=="],
+
+    "@next/playwright": ["@next/playwright@16.4.0", "", { "peerDependencies": { "@playwright/test": ">=1.0.0" }, "optionalPeers": ["@playwright/test"] }, "sha512-qK4XHmthlrjZJd6mR5LXgsnwaAM7ZEV1hEt6/l+fRWb43izQEAvR4h1BIgWapFnqm3JVinNAih3G1iBafPWs/Q=="],
 
     "@next/swc-darwin-arm64": ["@next/swc-darwin-arm64@16.4.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-yyZ+9MgViAKLLb5l1gPBGjRwnq3teNLb5Zx6JEw8LzNSTjlsnp+baUHFxTgl7PpjCmKf48VQfyipG1eBflb48Q=="],
 

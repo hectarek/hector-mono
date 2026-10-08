@@ -74,6 +74,8 @@ The header has the logo (to the library) and the account button. Meal plan and G
 
 Each screen lists its main action (the one filled button, D32), what its ⋯ holds (D42), the rest of what's on it, and how you get there and on. **Room** says what more the screen can take under those rules and the one-bold-moment limit. It's Claude's reading, for Hector to overrule.
 
+**Motion** says what moves into and out of a screen (D89; how, in AGENTS.md's UI Rules). Every page with a loading screen also fades its skeleton into the page when the page arrives; the Motion lines leave that out. Built in P28.5 (ux-plan.md); until its check by eye and on an iPhone, how each move looks may still change.
+
 ### Library — `/`
 
 - **Job:** find something to cook. Also the way in to adding a recipe.
@@ -87,6 +89,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Reached from:** the Recipes tab, the logo, a recipe's back link and tag chips, Books, Join, Copy recipes, and after deleting or copying a recipe.
 - **Leads to:** Recipe, Add a recipe, Books, Members, Copy recipes.
 - **Room:** the title row is full (Add recipe and ⋯). Search, Sort and group and the chips already sit above the grid: a new order or grouping belongs in Sort and group, a new filter among the chips, and a new book-wide action in the ⋯.
+- **Motion (D89):** crossfades in from the other tabs or the logo. Slides back in from the left when a back link returns to it. A card's picture grows into its recipe's, and comes back into the card by the recipe's back link.
 
 ### Recipe — `/recipes/[id]`
 
@@ -104,6 +107,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Leads to:** Cook mode, Edit, Meal plan, Groceries, the library.
 - **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to groceries or Add to meal plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
 - **Room:** Cook, Add to meal plan and Add to groceries stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
+- **Motion (D89):** slides in from the right from a card or a meal's title. From a card, when the recipe is ready at the tap (D87), the card's picture grows into its own; otherwise the page fades up. The back link slides it out to the right. Cook mode rises over it, and lowers back onto it.
 
 ### Meal plan — `/plan`
 
@@ -120,6 +124,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Reached from:** the Meal plan tab, Add to meal plan's Open meal plan, Join (a plan), Start my own meal plan, after leaving or deleting a plan.
 - **Leads to:** Recipe (a meal's title), Groceries (Open groceries), Members.
 - **Room:** no title-row action: planning starts on a recipe (D40). The week fills the screen, with the grocery box under it (D50). An action on one meal goes in the meal's sheet.
+- **Motion (D89):** crossfades in from the other tabs or Open meal plan. A new week still slides in from its side (D54), with no view transition.
 
 ### Groceries — `/groceries`
 
@@ -136,6 +141,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Reached from:** the Groceries tab; Open groceries from a recipe's Add to groceries, Meal plan's grocery box, or cook mode's Add to groceries.
 - **Leads to:** Members. Nothing links to recipes or Meal plan.
 - **Room:** used one-handed, in a store, often with bad signal. Keep it to the list: anything else goes behind the ⋯ or the row's ⋯.
+- **Motion (D89):** crossfades in from the other tabs or Open groceries. Live updates and the 60 s refresh move nothing.
 
 ### Books — `/books`
 
@@ -146,6 +152,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
 - **Leads to:** the library (a book), Members, Join.
 - **Names:** a personal book is named at sign-up from its owner's first name ("Hector's Recipes", D19), and follows that name when the account's name changes until its owner renames it, in its ⋯ or on Members (D83).
+- **Motion (D89):** slides in from the right from All books, and out to the right by its back link.
 
 ### Copy recipes — `/books/[id]/copy`
 
@@ -154,6 +161,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Main action:** Copy N recipes. Also: Select all or none, a checkbox per recipe, and "Copy into" in a footer that stays on screen.
 - **Empty:** "No book to copy into" with Go to books.
 - **Reached from:** the library's "Copy recipes to another book". **Leads to:** the library (the target book).
+- **Motion (D89):** slides in from the right, and out to the right by its back link.
 
 ### Members — `/spaces/[id]/settings`
 
@@ -164,6 +172,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Everyone else:** Members, and Leave on their own row, which asks first.
 - **Reached from:** a tab's ⋯ → Members; Books' Members.
 - **Leads to:** the book or plan; Books or Meal plan after leaving or deleting.
+- **Motion (D89):** slides in from the right from a ⋯'s Members or Books, and out to the right by its back link.
 
 ### Join — `/join/[token]`
 
@@ -172,12 +181,14 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Main action:** Join recipe book or Join meal plan; Open it when you're already in. "Make it my default plan" (checked) when joining a plan while your own is in use (D15).
 - **Inactive link:** "This invite link isn't active", with Go to recipes.
 - **Reached from:** an invite link, through Welcome and Create account when signed out (D3), or pasted on Books (P23.4). **Leads to:** the book or plan.
+- **Motion (D89):** slides in from the right when pasted on Books, and out to the right by its back link. An invite link opens it as a whole page, with no move.
 
 ### Account — `/account/[path]`
 
 - **Job:** the account itself (Neon's own views) and Appearance: light, dark or match the device.
 - **Surface:** Market. Back link "Recipes".
 - **Reached from:** the header's account button (Neon's menu).
+- **Motion:** none. Neon's links load the whole page.
 
 ### Add a recipe — `/recipes/new`
 
@@ -185,6 +196,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Full-screen: Cancel, "New recipe".
 - **On it:** three rows, Add by link or text, Add by photo or file, Add manually, whose words say which are read into the form for you and which you type (D73). No filled button.
 - **Reached from:** the library's Add recipe, and its empty state's Add a recipe. **Leads to:** the three ways in; Cancel → the library.
+- **Motion (D89):** none. The full-screen tasks have no move of their own: this screen, its three ways in and the recipe form.
 
 ### Add by link or text — `/recipes/new/link`
 
@@ -194,6 +206,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Main action:** Read recipe. After a failed link: a line saying the page's text can be pasted in its place (the link stays the recipe's source), Add by photo or file, Add manually.
 - **While reading:** the produce row hopping in a wave over "Reading the page. This can take up to a minute." (`ReadingWait`, D75; still with reduced motion).
 - **Leads to:** the recipe form, filled in, with "Read from <site>. Check it before saving."
+- **Motion (D89):** none.
 
 ### Add by photo or file — `/recipes/new/photo`
 
@@ -201,6 +214,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by photo or file".
 - **Main action:** Choose a photo or file. After a failure: Add by link or text, Add manually. With no AI reads left today (D48), it says so in place of the picker, with the same two.
 - **Leads to:** the recipe form, filled in, with "Read from your photos. Check it before saving." (or photo, PDF or file), then "Saving to <book>." for someone with one book.
+- **Motion (D89):** none.
 
 ### Recipe form — `/recipes/new/manual`, `/recipes/[id]/edit`, and after a read
 
@@ -214,6 +228,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Leaving:** Cancel with changes asks "Discard your changes?".
 - **Reached from:** Add manually, a finished read, a recipe's Edit. **Leads to:** the recipe on Save; Cancel → the library (new) or the recipe (edit); Delete → the library.
 - **Room:** a long form already. A new field goes in a row's sheet when it belongs to one line or step, and among the fields at the top only when it belongs to the whole recipe.
+- **Motion (D89):** none: Save and Cancel move nothing.
 
 ### Cook mode — `/recipes/[id]/cook`
 
@@ -223,6 +238,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
 - **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to groceries's Open groceries.
 - **Room:** a step screen holds one step on purpose. Anything that isn't about the step in front of you goes on Gather, Done or a sheet.
+- **Motion (D89):** rises over the recipe from Cook, and Done or Back to the recipe lowers it. Its screens move as they already do (D63).
 
 ### Welcome — `/welcome`, and Sign in or Create account — `/auth/[path]`
 
@@ -230,10 +246,12 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Sign in and Create account:** Neon's forms, with the app's wording; back link "Welcome".
 - **Bold:** Welcome's produce row.
 - **Leads to:** where you were going, or the library.
+- **Motion:** none.
 
 ### Error and Not found
 
 - Error: "Something went wrong", Try again (main) and Recipes. Not found: Go to recipes (main).
+- **Motion:** none.
 
 ## Words
 
@@ -282,6 +300,7 @@ Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`
 | A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Meal plan's meals and its grocery button, Groceries, a recipe's Add to meal plan and Add to groceries (cook mode's too) |
 | Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Meal plan's Today sticker, the active tab, Welcome's produce row |
 | Waiting on the AI: the produce row in a wave | D75; AGENTS.md UI Rules | Add by link or text, Add by photo or file |
+| Motion between screens: a card grows into its recipe, deeper and back, tabs crossfade, cook mode rises, a skeleton fades into its page | AGENTS.md UI Rules (D89) | A library card into Recipe (grows); Recipe, Books, Copy recipes, Members, Join (deeper and back); the three tabs (crossfade); Cook mode (rises); every page with a loading screen (fades). Each screen's **Motion** says which |
 
 ## Where the app and its rules disagree
 

@@ -45,6 +45,7 @@ import {
   shouldRing,
   timeLeft,
 } from "@/app/_lib/cook-progress";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { useSwipe } from "@/app/_lib/use-swipe";
 import { useWakeLock, type WakeLockStatus } from "@/app/_lib/use-wake-lock";
 import { stripMarkdown } from "@/src/entities/ingredient-line";
@@ -441,7 +442,9 @@ function CookModeContent({
               variant="secondary"
               size="lg"
               nativeButton={false}
-              render={<Link href={backHref} />}
+              render={
+                <Link href={backHref} transitionTypes={["close-cook-mode"]} />
+              }
             >
               <X data-icon="inline-start" />
               Done
@@ -573,7 +576,9 @@ function CookModeContent({
                 size="lg"
                 className="flex-1"
                 nativeButton={false}
-                render={<Link href={backHref} />}
+                render={
+                  <Link href={backHref} transitionTypes={["close-cook-mode"]} />
+                }
               >
                 Back to the recipe
               </Button>
@@ -725,8 +730,9 @@ function StepsSheet({
   onStartOver: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const sheetKey = useClosesOnLeave(() => setOpen(false));
   return (
-    <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
+    <Drawer key={sheetKey} open={open} onOpenChange={setOpen} showSwipeHandle>
       <DrawerTrigger render={<Button variant="quiet" size="lg" />}>
         <span aria-live="polite">{label}</span>
         <ChevronDown data-icon="inline-end" />
@@ -795,8 +801,11 @@ function IngredientsSheet({
   lines: Line[];
   ingredient: (line: Line) => ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  const sheetKey = useClosesOnLeave(() => setOpen(false));
+
   return (
-    <Drawer showSwipeHandle>
+    <Drawer key={sheetKey} open={open} onOpenChange={setOpen} showSwipeHandle>
       <DrawerTrigger
         render={
           <Button

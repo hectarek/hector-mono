@@ -11,7 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@repo/ui/components/dialog";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { deleteSpace } from "@/app/actions/spaces";
 
 export function DeleteSpaceButton({
@@ -27,9 +28,11 @@ export function DeleteSpaceButton({
   contents: string;
 }) {
   const [state, formAction, isPending] = useActionState(deleteSpace, null);
+  const [open, setOpen] = useState(false);
+  const dialogKey = useClosesOnLeave(() => setOpen(false));
 
   return (
-    <Dialog>
+    <Dialog key={dialogKey} open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button variant="destructive" size="lg" />}>
         Delete {typeLabel}
       </DialogTrigger>

@@ -21,12 +21,15 @@ export const nextState = {
   revalidated: [] as string[],
   // Where a screen's router.push() went (screen tests).
   pushed: [] as string[],
+  // The router's bfcacheId: a new value is a fresh arrival at the page (a link, a redirect).
+  visit: "visit-1",
 };
 
 export function resetNextState(): void {
   nextState.userId = USER_ID;
   nextState.revalidated = [];
   nextState.pushed = [];
+  nextState.visit = "visit-1";
 }
 
 // Signs in as a brand-new user. The DI container's mock repositories live for the whole

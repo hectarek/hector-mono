@@ -2,22 +2,48 @@ import { Bookmark, Clock, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
+import { RecipePicture } from "@/app/_components/recipe-picture";
 import type { Recipe } from "@/src/entities/models/recipe.model";
 
 export function RecipeCard({
   recipe,
   bookName,
   saved = false,
+  grows = true,
 }: {
   recipe: Recipe;
   // Which book it's in, when the grid mixes books (All recipes).
   bookName?: string;
   // This person saved it (D77): a filled bookmark on the picture, as beside the recipe's name.
   saved?: boolean;
+  // Its picture grows into the recipe's (D89). Off for a second card of the same recipe on
+  // the page, since two pictures can't share the name.
+  grows?: boolean;
 }) {
+  const picture = recipe.imageUrl ? (
+    // Unoptimized: photos come from any recipe site, served as they are (no remotePatterns,
+    // no image-optimization quota).
+    <Image
+      src={recipe.imageUrl}
+      alt=""
+      width={400}
+      height={300}
+      unoptimized
+      className="bg-muted aspect-4/3 h-auto w-full object-cover"
+    />
+  ) : (
+    <ProduceTile
+      produce={produceFor(recipe.id)}
+      className="font-heading aspect-4/3 items-end p-3 text-5xl leading-none"
+    >
+      {recipe.title.charAt(0).toUpperCase()}
+    </ProduceTile>
+  );
+
   return (
     <Link
       href={`/recipes/${recipe.id}`}
+      transitionTypes={["go-deeper"]}
       className="bg-card text-card-foreground ring-border hover:bg-muted/50 relative flex h-full flex-col overflow-hidden rounded-xl ring-1 transition-colors"
     >
       {saved && (
@@ -29,24 +55,10 @@ export function RecipeCard({
           <Bookmark className="size-3.5 fill-current" aria-hidden />
         </span>
       )}
-      {recipe.imageUrl ? (
-        // Unoptimized: photos come from any recipe site, served as they are (no remotePatterns,
-        // no image-optimization quota).
-        <Image
-          src={recipe.imageUrl}
-          alt=""
-          width={400}
-          height={300}
-          unoptimized
-          className="bg-muted aspect-4/3 h-auto w-full object-cover"
-        />
+      {grows ? (
+        <RecipePicture recipeId={recipe.id}>{picture}</RecipePicture>
       ) : (
-        <ProduceTile
-          produce={produceFor(recipe.id)}
-          className="font-heading aspect-4/3 items-end p-3 text-5xl leading-none"
-        >
-          {recipe.title.charAt(0).toUpperCase()}
-        </ProduceTile>
+        picture
       )}
 
       <div className="flex min-w-0 flex-col gap-1 p-3">
