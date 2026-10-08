@@ -252,6 +252,19 @@ One word for each thing (D84), so a new screen names it as the rest of the app d
 
 Code keeps its own names (`plan`, `grocery_items`, `AddToListButton`); only the words on screen follow this table.
 
+## Wide screens
+
+The app is a phone design; on a wider screen it stays one (D85). Every style that changes with the screen's width is listed here, with why, so a responsive change is a choice someone made, not drift. `tests/app/wide-screens.test.ts` fails on a width-specific class (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`) in `app/` that isn't in this table, and on a row whose class is gone.
+
+| File | Classes | What it does | Kind |
+|---|---|---|---|
+| `app/_components/library-results.tsx` | `sm:grid-cols-3` | Three recipe cards a row from 640 px, two on a phone. | Fitted: the same design, more room |
+| `app/(main)/(library)/loading.tsx` | `sm:grid-cols-3` | The library's loading cards, matching the cards. | Fitted |
+| `app/(main)/recipes/[id]/page.tsx` | `sm:flex` | Cook, Add to groceries and Add to meal plan in one row from 640 px; on a phone Cook takes its own row. | Fitted |
+| `app/(main)/account/[path]/page.tsx` | `md:gap-6`, `md:gap-12`, `md:block`, `lg:w-60` | The Appearance card lines up under Neon Auth's account cards, whose nav column appears at md and widens at lg. | A different design: Neon's own |
+
+Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`'s Drawer (`--drawer-max-width`), so on a desktop it's no wider than the page (D85). The pages themselves are `max-w-3xl` (tabs) or `max-w-2xl` (full-screen tasks, cook mode), centred.
+
 ## Patterns: where each rule lives, and where it's used
 
 | Pattern | The rule | Used on |

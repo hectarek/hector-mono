@@ -39,6 +39,7 @@ bunx --bun shadcn@latest add <component> --diff src/components/<component>.tsx  
   - `field.tsx`: `==` → `===`
   - `sidebar.tsx`: `setOpenMobile` (a stable state setter) listed as a hook dependency twice
   - `calendar.tsx`: `modifiers.x` → `modifiers["x"]` (the portfolio sets `noPropertyAccessFromIndexSignature`, and apps typecheck this package's source)
+  - `drawer.tsx`: a bottom or top sheet is capped at `--drawer-max-width` (42rem unless an app sets it) and centred, so on a wide screen it's no wider than the page (hectors-recipes D85). The overwrite drops it; add it back.
   - `button.tsx`: our `quiet` variant (low-emphasis actions in `muted-foreground`, e.g. "Clear checked") and `label` size (mono, uppercase, letter-spaced, 40px: the portfolio's buttons; colours come from the variant). The overwrite drops both; add them back.
 - Components here are registry code plus only the lint/type fixes above, so an update is an overwrite followed by re-applying what the checks flag. `file-drop-zone` and `theme-provider` are ours, not registry components; never overwrite them.
 - Packages an app also imports directly must resolve to ONE version repo-wide. `recharts` is the known one: an app's `BarChart` inside `ChartContainer` from a different copy renders nothing, with no error. Pin it in every app that imports it to exactly this package's `recharts` version.

@@ -2310,9 +2310,15 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Rename is a step in the ⋯ for owners (books and plans, as the ⋯ is the same), with Back; `RenameSpaceForm` now submits through a transition, so a refused name stays (the rule fix 12 applied to Create).
     - Tests: on both backends, a name change followed (for a member too), a rename ending it, and a book made with a name keeping it; the migration from the schema before it (marked by name, nameless accounts' "My Recipes", and names chosen or no longer matching left alone); a screen test renaming from the ⋯, and an editor without Rename.
     - The migration on the test project and production waits on the worktree's `.env` files; production's is Hector's to run, as auto mode stopped Phase 24's.
-- [ ] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
+- [x] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
   - Do: bottom sheets no wider than the page, centred, in `@repo/ui`'s Drawer. The map's Wide screens section, and a test listing every `sm:`, `md:`, `lg:`, `xl:` style in the app against it.
   - Verify: the test fails on an unlisted style; sheets at 375 px unchanged and at a desktop width capped; the other apps' sheets checked.
+  - Evidence (2026-10-08):
+    - `@repo/ui`'s Drawer caps a bottom or top sheet at `--drawer-max-width` (42rem unless an app sets it) and centres it. The recipes app's pages are 42 to 48rem, so its sheets are never wider than the page. The package's AGENTS.md lists it with the other local changes a shadcn update must re-apply.
+    - The map's Wide screens section lists the app's 8 width-specific classes in 4 files: the library's three cards a row (and its loading cards), the recipe page's one-row buttons, and the account page lining up with Neon Auth's columns. Each says whether it's a fitted version of the same design or a different one (only the account page's, Neon's).
+    - `tests/app/wide-screens.test.ts` compares the app's width-specific classes with the table. It failed on a `md:p-4` added to a throwaway file, and fails on a row whose class is gone.
+    - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview.
+    - Sheets at 375 px and a desktop width run with the flows, once the worktree has its `.env` files.
 
 ## Later (to-dos, not scheduled)
 
