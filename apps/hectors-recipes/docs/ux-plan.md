@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 24 (bookmarks, recently viewed, a video, suggested tags) on `feat/recipes-p24-saved-video-tags`, stacked on Phase 23's branch: built, tested, and checked on the test project (its migrations, the flows, 375 px); production's migrations not yet run (H31). In review as hectarek/hector-mono#33, a draft until they are. Phase 23 is in review as #32; Phase 22 (#31) is merged. Then 25 (#35) and 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Phase 24's migrations on production (H31; the test project's are done), before hectarek/hector-mono#33 merges. Phase 25's flows and 375 px, once its worktree has the `.env` files. Then Phase 26. |
+| Phase | 24 (bookmarks, recently viewed, a video, suggested tags) on `feat/recipes-p24-saved-video-tags`, stacked on Phase 23's branch: built, tested, and checked on the test project (its migrations, the flows, 375 px); its migrations are on production too (H31). In review as hectarek/hector-mono#33. Phases 22 and 23 (#31, #32) are merged. Then 25 (#35) and 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#33, then #35 (Phase 25). Then Phase 26 (H34 before P26.3). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2233,7 +2233,7 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
     - Migration 0018 inserts "meal prep" under meal, leaving it alone if someone already grouped it; `STARTING_TAGS` lists it last among meals, so By meal puts its heading after Drink.
     - Tests: `suggestedTags`' order; `loadNewRecipe` gives a new account the catalog's tags with their groups, and puts a cook's own first; the catalog test on Postgres finds "meal prep" under meal. A loader test stands in for the screen test: the picker already has screen tests for grouping the chips it's given.
     - At 375 px: a new account's form offers the starting tags under Meal, Cuisine and Diet, with "meal prep" last under Meal. The test project's catalog has gained a random "texmex …" cuisine from every `plan-and-shop` run, which the form rightly leaves out.
-    - H31: migrations 0016–0018 applied to the test project on 2026-10-08 (checked: the table, the column, and "meal prep" under meal). Production's run was stopped by Claude Code's auto-mode check, so it's Hector's to run or approve.
+    - H31: migrations 0016–0018 applied to the test project on 2026-10-08 (checked: the table, the column, and "meal prep" under meal). Production's run was stopped by Claude Code's auto-mode check, so Hector ran it the same day; Claude checked production has the same three.
 
 ## Phase 25: Where the app breaks its own rules
 
@@ -2367,7 +2367,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
 | H30 | Share the testers' feedback (raw is fine). | P22.3 | done 2026-10-07: 23 items; filed in feedback/ (D71) |
-| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | OK'd 2026-10-08: "run migration yourself if possible" |
+| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
 | H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
@@ -2619,3 +2619,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Phase 24's migrations (H31), flows and 375 px; its PR; Phase 25.
 - **2026-10-08 (bp)** — Phase 24 checked: migrations 0016–0018 on the test project, the three flows passing, and its screens at 375 px, which cut the library's search placeholder to "Search". Production's migrations were stopped by the auto-mode check: Hector's to run or approve before hectarek/hector-mono#33 merges.
   - Next: production's migrations; Phase 25's flows and 375 px once its worktree has the `.env` files.
+- **2026-10-08 (br)** — Hector applied migrations 0016–0018 to production (H31), and Claude checked the table, the column and "meal prep" are there. hectarek/hector-mono#33 is ready for review.
+  - Next: Hector's review of #33 and #35; Phase 26.
