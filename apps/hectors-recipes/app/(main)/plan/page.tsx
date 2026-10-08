@@ -24,8 +24,6 @@ import {
   weekDates,
 } from "@/src/entities/week";
 
-export const dynamic = "force-dynamic";
-
 export default async function PlanPage({
   searchParams,
 }: {

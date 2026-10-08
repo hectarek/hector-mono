@@ -11,8 +11,6 @@ import { loadBooks } from "@/app/_lib/load-books";
 import { getInjection } from "@/di/container";
 import { recipeCountText } from "@/src/entities/library";
 
-export const dynamic = "force-dynamic";
-
 export default async function BooksPage() {
   const userId = await getCurrentUserId();
   const { books } = await loadBooks(userId, undefined);

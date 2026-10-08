@@ -6,8 +6,6 @@ import { type SearchParams, servingsParam } from "@/app/_lib/search-params";
 import { getInjection } from "@/di/container";
 import { editableSpaces } from "@/src/entities/models/space.model";
 
-export const dynamic = "force-dynamic";
-
 export default async function CookPage({
   params,
   searchParams,

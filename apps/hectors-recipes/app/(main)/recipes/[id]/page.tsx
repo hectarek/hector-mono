@@ -22,8 +22,6 @@ import { editableSpaces, hasRole } from "@/src/entities/models/space.model";
 import { stepGroups } from "@/src/entities/step-text";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
-export const dynamic = "force-dynamic";
-
 function sourceHost(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, "");

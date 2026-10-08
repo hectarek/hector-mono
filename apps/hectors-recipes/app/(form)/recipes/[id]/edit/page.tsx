@@ -14,8 +14,6 @@ import { suggestedTags } from "@/app/_lib/tag-choices";
 import { getInjection } from "@/di/container";
 import { rowsFromLines, stepRowsFrom } from "@/src/entities/editor-rows";
 
-export const dynamic = "force-dynamic";
-
 export default async function EditRecipePage({
   params,
 }: {

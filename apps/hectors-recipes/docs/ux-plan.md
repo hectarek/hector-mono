@@ -2423,7 +2423,7 @@ Each is placed on [ux-map.md](./ux-map.md) by its four questions. Hector took th
 
 One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cache-components`, in its own worktree.
 
-- [ ] **P28.1** Turn on Cache Components — C · D90 · after stash's move
+- [~] **P28.1** Turn on Cache Components — C · D90 · after stash's move
   - Do:
     - `cacheComponents` and `partialPrefetching` in `next.config.ts`, and the 15 `force-dynamic` exports removed.
     - In place of `dynamicParams = false`: `account/[path]` and `auth/[path]` call `notFound()` for a path not in Neon's `accountViewPaths` or `authViewPaths`, and `pwa-icon/[size]` answers 404 for a size it doesn't draw.
@@ -2435,6 +2435,17 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - An unknown account, sign-in or icon path is a 404.
     - The proxy's session refresh still works: a flow with the session-cache cookie removed.
     - The tests and the three flows pass.
+  - Evidence (2026-10-08, on `feat/recipes-p28-cache-components`):
+    - `next.config.ts` turns on `cacheComponents` and `partialPrefetching`, plus `experimental.hideLogsAfterAbort` (see "What stash's move found"). All 15 `force-dynamic` exports are gone.
+    - `account/[path]` and `auth/[path]` prerender Neon's view paths (`AUTH_PATHS`, `ACCOUNT_PATHS` in `app/_lib/auth-paths.ts`, tested), and any other path is `notFound()`. `pwa-icon/[size]` already answered 404 for another size; it only loses `dynamicParams`.
+    - Sign in: `?redirectTo=` and the "already signed in" check are read inside `<Suspense>`, with the back link, logo and form after them, so the form never shows before the redirect.
+    - Welcome: the produce row, logo and line are the prerendered shell; the invite note and the two buttons (they carry `?redirectTo=`) stream in behind two button-shaped placeholders.
+    - Cook mode: a `loading.tsx` in its shape (top bar, Gather's rows, the bottom bar).
+    - The build found one thing: the tab bar's `usePathname()` blocked the prerender of pages with `[id]` or `[token]` in their address. `BottomNav` now reads it inside `<Suspense>`, with the same bar, no tab lit, as the fallback. No route opts out (`instant = false`).
+    - `next build` passes with placeholder auth and database values. Every signed-in page is `◐`: the layout and skeleton are prerendered, and the page streams in. The account settings and security pages are `○`, the icons `●`. Nothing failed in the build's log.
+    - `bun check`, `bun ts` and 1114 + 87 tests pass.
+    - AGENTS.md has a Cache Components section.
+    - **Left:** dev validation on the signed-in pages, the 404s, the proxy's session refresh, the three flows and 375 px. They need this worktree's `.env` and `.env.test` (the session can't copy them), and the flows sign up accounts, which Claude doesn't do in this session: Hector runs `bun run test:flows`.
 - [ ] **P28.2** What stays and what resets — C · D88
   - Do: the resets D88 lists, each in the component that holds the state. Sheets and dialogs close in a `useLayoutEffect` cleanup or the link's `onNavigate`. The forms and imports reset after a save or a discard. `RecipeVideo` stops playing. Check that Neon's sign-out reloads the page (its default navigation sets `window.location.href`), and that the week's slide-in still comes from the right side (`week-swipe.tsx` keeps the last week in a module variable).
   - Verify:

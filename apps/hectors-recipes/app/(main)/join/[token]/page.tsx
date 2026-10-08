@@ -19,8 +19,6 @@ import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import type { InvitePreview } from "@/src/entities/models/space.model";
 
-export const dynamic = "force-dynamic";
-
 async function loadInvite(token: string): Promise<InvitePreview | null> {
   try {
     return await getInjection("IPreviewInviteController")(

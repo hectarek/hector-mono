@@ -14,8 +14,6 @@ import { loadBooks } from "@/app/_lib/load-books";
 import { getInjection } from "@/di/container";
 import { hasRole } from "@/src/entities/models/space.model";
 
-export const dynamic = "force-dynamic";
-
 // Copying a whole book (or part of one) into another is how two books get merged.
 export default async function CopyRecipesPage({
   params,

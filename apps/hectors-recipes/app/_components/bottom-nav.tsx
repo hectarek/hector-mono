@@ -3,6 +3,7 @@
 import { cn } from "@repo/ui/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { NavIcon } from "@/app/_components/nav-icon";
 
 const TABS = [
@@ -21,15 +22,30 @@ const TABS = [
   },
 ] as const;
 
-function isActive(pathname: string, match: readonly string[]): boolean {
+function isActive(pathname: string | null, match: readonly string[]): boolean {
+  if (pathname === null) {
+    return false;
+  }
   return match.some((prefix) =>
     prefix === "/" ? pathname === "/" : pathname.startsWith(prefix),
   );
 }
 
+// The prerendered page doesn't know the address of a recipe or an invite (`[id]`,
+// `[token]`), so the bar starts with no tab lit and lights its tab once the address is known.
 export function BottomNav() {
-  const pathname = usePathname();
+  return (
+    <Suspense fallback={<TabBar pathname={null} />}>
+      <CurrentTabBar />
+    </Suspense>
+  );
+}
 
+function CurrentTabBar() {
+  return <TabBar pathname={usePathname()} />;
+}
+
+function TabBar({ pathname }: { pathname: string | null }) {
   return (
     <nav
       aria-label="Main"

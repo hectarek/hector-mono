@@ -1,13 +1,15 @@
 import { AuthView } from "@neondatabase/auth/react";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { BackLink } from "@/app/_components/back-link";
 import { Logo } from "@/app/_components/logo";
-import { skipsWhenSignedIn } from "@/app/_lib/auth-paths";
+import { AUTH_PATHS, skipsWhenSignedIn } from "@/app/_lib/auth-paths";
 import { safeRedirect } from "@/app/_lib/safe-redirect";
 import { auth } from "@/lib/auth/server";
 
-export const dynamic = "force-dynamic";
-export const dynamicParams = false;
+export function generateStaticParams() {
+  return AUTH_PATHS.map((path) => ({ path }));
+}
 
 // Neon's wording, in the app's voice ("Sign in", not "Login").
 const LOCALIZATION = {
@@ -28,14 +30,39 @@ const CLASS_NAMES = {
   footer: "px-0",
 };
 
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 export default async function AuthPage({
   params,
   searchParams,
 }: {
   params: Promise<{ path: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: SearchParams;
 }) {
   const { path } = await params;
+  if (!AUTH_PATHS.includes(path)) {
+    notFound();
+  }
+
+  return (
+    <main className="pt-safe-2 pb-safe-6 mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4">
+      <Suspense>
+        <AuthForm path={path} searchParams={searchParams} />
+      </Suspense>
+    </main>
+  );
+}
+
+// Where to go afterwards (?redirectTo=) and whether someone's already signed in are only
+// known at request time, so the screen waits for them: someone signed in goes on without
+// the form showing first.
+async function AuthForm({
+  path,
+  searchParams,
+}: {
+  path: string;
+  searchParams: SearchParams;
+}) {
   const redirectTo = safeRedirect((await searchParams).redirectTo);
   if (skipsWhenSignedIn(path)) {
     const { data: session } = await auth.getSession();
@@ -49,7 +76,7 @@ export default async function AuthPage({
       : `/welcome?${new URLSearchParams({ redirectTo })}`;
 
   return (
-    <main className="pt-safe-2 pb-safe-6 mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4">
+    <>
       <BackLink href={welcomeHref} label="Welcome" />
       <Logo className="h-5 w-auto self-start" />
       {/* The prop overrides the raw ?redirectTo= that AuthView would otherwise trust. */}
@@ -60,6 +87,6 @@ export default async function AuthPage({
         classNames={CLASS_NAMES}
         className="max-w-none"
       />
-    </main>
+    </>
   );
 }

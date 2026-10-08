@@ -39,7 +39,7 @@ app/
   _lib/                # auth client, current-user, load-recipe (404 on unknown ids), load-books, load-plans (Plan and Groceries),
                        # use-wake-lock, use-swipe (a sideways swipe, for the week and cook mode), space-href, app-icon (drawing for all generated icons)
   manifest.ts, apple-icon.tsx, pwa-icon/[size]/  # install to home screen; paths bypass auth in proxy.ts
-  error.tsx, not-found.tsx; loading.tsx per page shape: (main)/ is the general one, (library)/, plan/, groceries/, recipes/[id]/ have their own
+  error.tsx, not-found.tsx; loading.tsx per page shape: (main)/ is the general one, (library)/, plan/, groceries/, recipes/[id]/ have their own; (form)/ and cook mode have theirs
   _providers/          # Providers: @repo/ui ThemeProvider around AuthProvider
   actions/             # Server actions per domain: grocery, import, plan, recipes, spaces; shared.ts holds their helpers (not "use server")
 
@@ -120,6 +120,16 @@ Stored enum-like values are readable on their own (`recipe-book`, not `book`); k
 ## Data Flow
 1. **Read**: `page.tsx` -> `IEnsurePersonalSpaceController` -> `IGetRecipesController` -> use case -> repository -> DB
 2. **Write**: form action -> `app/actions/<domain>.ts` -> controller -> use case (in a transaction) -> repository -> DB -> `revalidatePath` (and `redirect` when the action leaves the page, as a recipe's create, update and delete do)
+
+## Cache Components
+Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `next.config.ts`; docs/ux-plan.md Phase 28).
+- `export const dynamic`, `revalidate` and `dynamicParams` fail the build. A page that reads the session in its body sits under a `loading.tsx` (every page under `(main)`, `(form)` and cook mode has one), so the prerendered shell is the layout and the skeleton, and the page streams in after.
+- A page without a `loading.tsx` puts what it reads at request time (the session, `searchParams`, the database) inside `<Suspense>`: Welcome's invite note and buttons, the auth pages' form.
+- The auth and account pages prerender Neon's view paths (`AUTH_PATHS`, `ACCOUNT_PATHS` in `app/_lib/auth-paths.ts`), and any other path is `notFound()`, a real 404.
+- A component in a layout that reads the address (`usePathname`) sits inside `<Suspense>`, as pages with `[id]` or `[token]` don't know it while prerendering: `BottomNav` starts with no tab lit.
+- The clock (`new Date()`, `Date.now()`) and `crypto.randomUUID()` fail the build if they run while a page prerenders. Each page reads the session first, which ends its prerender, so `todayIn` and the editor's row keys run at request time; keep that order.
+- `experimental.hideLogsAfterAbort` keeps `NeonAuthService`'s `catch` (and Neon's own) from logging the end of a prerender as a failed sign-in during `next build`. Request-time logs are unchanged.
+- `next build` needs the auth env vars present (`lib/auth/server.ts` throws at import without them), but nothing at build time reaches Neon or the database, so placeholder values build.
 
 ## Feature Rules
 How each feature works, and what to keep true when changing it, is in [docs/features.md](docs/features.md). When a feature's behaviour or rules change, update its section there in the same change; only rules every change follows go here. Before changing a feature, read its section:

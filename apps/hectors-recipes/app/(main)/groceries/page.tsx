@@ -10,8 +10,6 @@ import { firstParam, type SearchParams } from "@/app/_lib/search-params";
 import { getInjection } from "@/di/container";
 import { hasRole } from "@/src/entities/models/space.model";
 
-export const dynamic = "force-dynamic";
-
 // A plan's grocery list: the list is part of the plan and shares its people.
 export default async function GroceriesPage({
   searchParams,

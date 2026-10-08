@@ -19,8 +19,6 @@ import {
   UnauthorizedError,
 } from "@/src/entities/errors/common";
 
-export const dynamic = "force-dynamic";
-
 async function loadSettings(spaceId: string, userId: string | undefined) {
   try {
     return await getInjection("IGetSpaceSettingsController")(
