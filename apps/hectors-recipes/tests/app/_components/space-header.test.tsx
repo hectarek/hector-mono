@@ -44,17 +44,18 @@ describe("SpaceHeader", () => {
     return `http://localhost:3000/join/${links.editor.token}`;
   };
 
-  // Opens the ⋯ sheet, then Invite, and shares the Can edit link once it's there.
+  // Opens the ⋯ sheet, then Invite, and taps the link to edit once it's there.
   const shareEditorLink = async (
     view: ReturnType<typeof render>,
     book: Book,
+    name = "Share a link to edit",
   ) => {
     const user = userEvent.setup();
     await user.click(
       view.getByRole("button", { name: `More for ${book.name}` }),
     );
     await user.click(await view.findByRole("button", { name: "Invite" }));
-    const canEdit = await view.findByRole("button", { name: "Can edit" });
+    const canEdit = await view.findByRole("button", { name });
     await waitFor(() => expect(canEdit.hasAttribute("disabled")).toBe(false));
     await user.click(canEdit);
   };
@@ -71,6 +72,24 @@ describe("SpaceHeader", () => {
     await shareEditorLink(view, bakes);
 
     expect(shared).toEqual([await editorLink(soups), await editorLink(bakes)]);
+  });
+
+  // P23.3: the buttons say they share a link, and which role it gives; without a share sheet,
+  // that they copy it.
+  it("says it shares, or copies where there's no share sheet", async () => {
+    const book = await newBook("Soups");
+    const view = render(<SpaceHeader space={book} />);
+    await shareEditorLink(view, book);
+    await view.findByRole("button", { name: "Share a view-only link" });
+    view.unmount();
+
+    // user-event puts its own clipboard on the page, so the copy is read back from it.
+    Reflect.deleteProperty(navigator, "share");
+    const again = render(<SpaceHeader space={book} />);
+    await shareEditorLink(again, book, "Copy a link to edit");
+    await again.findByRole("button", { name: "Copied" });
+    await again.findByRole("button", { name: "Copy a view-only link" });
+    expect(await navigator.clipboard.readText()).toBe(await editorLink(book));
   });
 
   it("offers Invite only to the owner, and Members to everyone", async () => {

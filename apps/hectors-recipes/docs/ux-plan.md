@@ -2138,9 +2138,13 @@ One commit per task; the PR when the phase is done.
     - `buildLibraryView` returns `total`, and `recipeCountText` says "1 recipe", "24 recipes" or "3 of 24 recipes" (tests). Books counts each book from All recipes' list.
     - Screen tests: the library shows "4 recipes", then "2 of 4 recipes" as you type; Books shows "2 recipes" on one book and "0 recipes" on an empty one.
     - At 375 px on the test project: "2 recipes" over the cards, "1 of 2 recipes" after searching, and "Owner · 2 recipes" on Books, light and dark.
-- [ ] **P23.3** Invite buttons that say they share — C · F15
+- [x] **P23.3** Invite buttons that say they share — C · F15
   - Do: the Invite sheet's two buttons and the members page's Share link say what they do: share a link where the browser has a share sheet, copy it where it doesn't, and which role it gives.
   - Verify: screen tests with the share sheet there and absent.
+  - Evidence (2026-10-08):
+    - Invite's buttons read "Share a link to edit" and "Share a view-only link" (were "Can edit" and "View only"), and a link's row on the members page "Share link". Where the browser has no share sheet they read "Copy …" with a copy icon, and tapping one says "Copied".
+    - The server can't tell whether there's a share sheet, so it renders Share; the browser's answer comes after load.
+    - Screen test: with a share sheet, the link to edit is shared and the view-only button is there; without one, the buttons say Copy, and the link to edit lands on the clipboard. Mutation caught: the label always saying Share.
 - [ ] **P23.4** Join by pasting a link — C · F16
   - Do: Books gets a Join field: paste a book's or plan's invite link and Join opens its Join page. A link that isn't an invite says so.
   - Verify: a test for reading the invite from a pasted link (the whole address, the path alone, other text); a screen test.

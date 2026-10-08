@@ -62,13 +62,16 @@ export function SpaceMenu({
           <ShareLinkButton
             token={tokens?.editor}
             spaceName={space.name}
+            gives="editor"
+            pending={isPending}
             variant="default"
-          >
-            {isPending ? "Getting a link…" : "Can edit"}
-          </ShareLinkButton>
-          <ShareLinkButton token={tokens?.viewer} spaceName={space.name}>
-            {isPending ? "Getting a link…" : "View only"}
-          </ShareLinkButton>
+          />
+          <ShareLinkButton
+            token={tokens?.viewer}
+            spaceName={space.name}
+            gives="viewer"
+            pending={isPending}
+          />
           {links && !links.ok && (
             <p role="alert" className="text-destructive text-sm">
               {links.error}

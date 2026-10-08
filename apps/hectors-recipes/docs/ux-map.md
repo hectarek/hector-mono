@@ -80,7 +80,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Tab page.
 - **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books.
 - **Main action:** Add recipe, beside the title (editors) → Add a recipe.
-- **⋯:** Invite (owner), Members, All books. In All recipes: All books only.
+- **⋯:** Invite (owner), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
 - **Also on it:** search (narrows as you type, D56); Group by (meal, cuisine or diet, D57); tag chips; the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
 - **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment.
@@ -160,7 +160,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** who's in a book or plan, its invite links, leaving, deleting.
 - **Surface:** Market. Back link: the book's or plan's name (a plan's goes to Plan, even when you came from Groceries).
 - **Main action:** New link: can edit (owner).
-- **Owner:** Rename; Invite links (Share link, Turn off, New link: view only); People, each with Make view only or Allow editing, and Remove; Delete, which asks first.
+- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off; New link: view only); People, each with Make view only or Allow editing, and Remove; Delete, which asks first.
 - **Everyone else:** People, and Leave on their own row.
 - **Reached from:** a tab's ⋯ → Members; Books' Share or Members.
 - **Leads to:** the book or plan; Books or Plan after leaving or deleting.
