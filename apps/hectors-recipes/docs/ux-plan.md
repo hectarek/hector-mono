@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), with 0019 on production too (H34); in review as hectarek/hector-mono#37. Phases 22 to 25 (#31, #32, #33, #35) are merged. Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#37, with the portfolio's `/ui` Drawer on its preview. Then Phase 20, or the drafts in Hector's tracker. |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Phase | 27 (from Hector's look at Phases 24 to 26: saved marks on cards, the recipe page's button order, cook mode's checklist, the carrot and basil drawings) on `feat/recipes-p27-polish`: built and checked (the flows, 375 px). Phases 22 to 26 (hectarek/hector-mono#31, #32, #33, #35, #37) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews Phase 27's PR. Then Phase 20, or the drafts in Hector's tracker. |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -2324,6 +2324,36 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview, which is behind Vercel's login: in Hector's review.
     - Measured on the test project: at 1280 px a sheet is 672 px wide (42rem) from x 304, centred; at 375 px it's the full 375.
 
+## Phase 27: From Hector's look at Phases 24 to 26
+
+Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10-08, each small enough to build without a decision of its own.
+
+- [x] **P27.1** Saved recipes marked on the library's cards — C
+  - Do: a saved recipe's card carries a filled bookmark, so the grid shows which are saved at a glance.
+  - Verify: a screen test; 375 px.
+  - Evidence (2026-10-08): `RecipeCard` takes `saved` and puts a filled bookmark on a `bg-background/90` disc in the picture's top-right corner, which reads on a photo and on every produce tile; screen readers hear "Saved" (`role="img"`). `LibraryResults` passes it from the saved ids it already has. The library's saved-first test finds the mark on Stock's card and not on the next. At 375 px the dark bookmark on its light disc reads on a carrot-orange tile.
+- [x] **P27.2** The recipe page's buttons in the tab bar's order — C
+  - Do: Add to meal plan, then Add to groceries, as Meal plan comes before Groceries in the tab bar.
+  - Verify: a screen test; 375 px.
+  - Evidence (2026-10-08): the two swapped under Cook; a screen test renders the recipe page and finds Add to meal plan first. The map's recipe page and Wide screens row say them in that order. At 375 px both fit side by side under Cook.
+- [x] **P27.3** Cook mode's ingredients as a checklist — C
+  - Do: Gather's hint above the list, and each ingredient a row you check off as on Groceries (the same component), on Gather, under a step and in the ingredients sheet.
+  - Verify: screen tests; the `cook` flow; 375 px.
+  - Evidence (2026-10-08):
+    - `CheckRow` (`app/_components/check-row.tsx`) is the design system's checklist row taken out of Groceries: a label around a hidden checkbox, the drawn box, then the words. Groceries' items and cook mode's ingredients both use it, so they look and work the same. A second use, not a third, but it's the system's named pattern, kept in one place so the two lists can't drift.
+    - Cook mode's `IngredientRow` is a `CheckRow`: on Gather, under a step ("This step uses") and in the ingredients sheet, with one set of ticks (D65). A ticked line is struck through and muted, fading as on Groceries.
+    - Gather's hint is "Check off each ingredient as you get it out.", under the Ingredients heading and above the list.
+    - Tests: cook mode's screen tests find ingredients as checkboxes (one new: the hint comes before the first ingredient), and Groceries' pass unchanged. The `cook` flow taps the onion by its words once cook mode is open; it had tapped the recipe page's own "1 onion" before cook mode loaded. All three flows pass.
+    - At 375 px: the hint under Ingredients, then the rows, a ticked one struck through beside a filled box.
+- [x] **P27.4** The carrot's greens and the basil's top leaf — C
+  - Do: the carrot's greens grow from the middle of its top, turned with it; the basil's stem ends in its top leaf.
+  - Verify: the welcome screen at 375 px.
+  - Evidence (2026-10-08):
+    - The design system's own Produce drawings have both slips, so `ProduceArt` was a faithful copy: the carrot's leaves were placed for an upright carrot while only its body was turned 28°, so they sprouted about 10 px left of its top; the basil's stem ran on past its top leaf to a bare tip at (56, 22).
+    - The carrot's leaves now turn with its body, their stems meeting at the middle of its top, and the drawing is moved (−4, 2) to sit in the middle of its box. The basil's stem ends inside its top leaf (`M30 84 Q42 59 55 41`).
+    - Compared side by side before the change, then on the welcome screen at 375 px. The same drawings hop while the AI reads a recipe (`ReadingWait`).
+    - The design system's Produce assets still have the old drawings; updating them is Hector's call.
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -2690,3 +2720,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Hector's reviews of #33, #35 and #37; his account name, then his two spaces flagged if he wants them to follow.
 - **2026-10-08 (bx)** — D83 revised: every automatic-looking name follows its owner, not only those matching the owner's current name. Hector flagged his own book and plan on production (2 rows), so all six there follow; with #37 deployed his read "Hectarek's Recipes" and "Hectarek's Plan".
   - Next: Hector's reviews of #33, #35 and #37.
+- **2026-10-08 (by)** — #37 merged, so Phases 22 to 26 are all in. Phase 27 built from Hector's notes: a saved recipe's card carries a bookmark, the recipe page puts Add to meal plan before Add to groceries, cook mode's ingredients are rows you check off as on Groceries (`CheckRow`, shared), and the carrot's greens and the basil's stem are fixed (the design system's own drawings had both slips). The feedback files mark every Phase 23 to 26 item Built.
+  - Next: Hector's review of Phase 27; the worktrees and branches of merged phases cleaned up.

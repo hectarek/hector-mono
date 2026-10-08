@@ -149,22 +149,23 @@ export default async function RecipePage({
                 </a>
               )}
             </div>
-            {/* On a phone Cook takes the row, and the other two share one under it. */}
+            {/* On a phone Cook takes the row, and the other two share one under it, in the
+                tab bar's order: Meal plan, then Groceries (P27.2). */}
             <div className="grid grid-cols-2 gap-2 sm:flex">
               <CookLink recipeId={recipe.id} className="col-span-2" />
-              {canPlan && (
-                <AddToListButton
-                  recipeId={recipe.id}
-                  title={recipe.title}
-                  yieldServings={recipe.yieldServings}
-                  plans={planTargets}
-                />
-              )}
               {canPlan && (
                 <AddToPlanButton
                   recipeId={recipe.id}
                   title={recipe.title}
                   today={todayIn(PLAN_TIME_ZONE)}
+                  plans={planTargets}
+                />
+              )}
+              {canPlan && (
+                <AddToListButton
+                  recipeId={recipe.id}
+                  title={recipe.title}
+                  yieldServings={recipe.yieldServings}
                   plans={planTargets}
                 />
               )}

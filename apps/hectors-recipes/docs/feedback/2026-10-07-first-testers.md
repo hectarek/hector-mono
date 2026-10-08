@@ -36,19 +36,19 @@ Hector's summary, numbered in order, with spelling tidied:
 
 ### Find something to cook
 
-- **F9 Bookmarks, shown first.** Planned for Phase 24 (P24.1, P24.2; D72, D77, D80).
+- **F9 Bookmarks, shown first.** Built in Phase 24 (P24.1, P24.2; D72, D77, D80; hectarek/hector-mono#33).
   - Library and recipe page. A bookmark is per person (D77), so it needs a new table.
   - The recipe page had no room for the toggle (no ⋯), and library cards carry no actions (D32). Hector placed it as an icon to the right of the recipe's name (D72). In the library: Saved first, and a Saved chip.
   - Cost: the grid's order changes, so it sits with search's ranking (D56) and Group by.
-- **F10 Recently viewed first.** Planned for Phase 24 (P24.2; D76, D80).
+- **F10 Recently viewed first.** Built in Phase 24 (P24.2; D76, D80; hectarek/hector-mono#33).
   - Library. Kept on the device, not in the database (D76), which answers the worry about storing every view.
   - A sort would be a fourth control above the grid, so it joins Group by in one control.
-- **F17 The recipe count.** Planned for Phase 23 (P23.2).
+- **F17 The recipe count.** Built in Phase 23 (P23.2; hectarek/hector-mono#32).
   - The library's label over the title, and Books' rows; both have room.
-- **F14 and F19 Suggested tags, and meal prep.** Planned for Phase 24 (P24.4; D78).
+- **F14 and F19 Suggested tags, and meal prep.** Built in Phase 24 (P24.4; D78; hectarek/hector-mono#33).
   - The tag picker offered only tags already on recipes in your books, so a new account saw none, though the shared tag catalog (migration 0013) holds the starting tags under meal, cuisine and diet.
   - Tags were never copied per person: they're text on each recipe, and the catalog has one row per tag for everyone. Near-duplicates ("meal prep", "meal-prep") are the risk.
-- **F20 A video.** Planned for Phase 24 (P24.3; D72, D81).
+- **F20 A video.** Built in Phase 24 (P24.3; D72, D81; hectarek/hector-mono#33).
   - The recipe page's photo and the form. A video takes the photo's place; its link sits under Photo link.
   - Embedding works differently per host, and some refuse it, so the photo stays as the fallback.
 - **F7 Variations.** Needs scoping (D79).
@@ -56,13 +56,13 @@ Hector's summary, numbered in order, with spelling tidied:
 
 ### Add a recipe
 
-- **F1 The New button.** Planned for Phase 23 (P23.1).
+- **F1 The New button.** Built in Phase 23 (P23.1; hectarek/hector-mono#32).
   - The library's main action. The voice says what happens ("Add to list"), and the chooser's rows read "Add by …": "Add recipe".
-- **F11 Pasting a whole recipe.** Planned for Phase 23 (P23.6; D73).
+- **F11 Pasting a whole recipe.** Built in Phase 23 (P23.6; D73; hectarek/hector-mono#32).
   - Half there: the manual form splits a pasted list into rows and says so, and Add by link read pasted text with AI, but only after a link failed. A clarity problem.
-- **F8 Word documents.** Planned for Phase 23 (P23.7; D74).
+- **F8 Word documents.** Built in Phase 23 (P23.7; D74; hectarek/hector-mono#32).
   - Add by photo or file, read like a text file. Reverses D53.
-- **F12 A friendlier wait.** Planned for Phase 23 (P23.8; D75).
+- **F12 A friendlier wait.** Built in Phase 23 (P23.8; D75; hectarek/hector-mono#32).
   - The two reading screens showed a spinner.
 
 ### Cook
@@ -74,11 +74,11 @@ Hector's summary, numbered in order, with spelling tidied:
 
 ### Share a book or plan
 
-- **F15 The phone's share sheet.** Planned for Phase 23 (P23.3).
+- **F15 The phone's share sheet.** Built in Phase 23 (P23.3; hectarek/hector-mono#32).
   - Already there: Invite and Share link opened the share sheet where the browser has one, and copied the link where it doesn't. The buttons named the role (Can edit, View only), not the sharing. A clarity problem.
-- **F16 Joining by pasting a link.** Planned for Phase 23 (P23.4).
+- **F16 Joining by pasting a link.** Built in Phase 23 (P23.4; hectarek/hector-mono#32).
   - A Join field on Books. Books has room.
-- **F18 Sharing one recipe.** Planned for Phase 23 (P23.5; D72).
+- **F18 Sharing one recipe.** Built in Phase 23 (P23.5; D72; hectarek/hector-mono#32).
   - Already worked by link for anyone signed in (`get-recipe.use-case.ts`), who can Copy it into their own book, but nothing showed it. A clarity problem: a Share in the recipe page's ⋯.
 
 ### A possible new job: learning while you cook

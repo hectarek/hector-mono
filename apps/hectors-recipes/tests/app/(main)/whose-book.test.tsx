@@ -82,6 +82,23 @@ describe("whose book", () => {
     );
   });
 
+  // P27.2: Add to meal plan, then Add to groceries, as the tab bar has them.
+  it("puts Add to meal plan before Add to groceries, in the tab bar's order", async () => {
+    const view = render(
+      await RecipePage({
+        params: Promise.resolve({ id: sharedRecipe }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+    const names = view
+      .getAllByRole("button")
+      .map((button) => button.textContent)
+      .filter(
+        (name) => name === "Add to meal plan" || name === "Add to groceries",
+      );
+    expect(names).toEqual(["Add to meal plan", "Add to groceries"]);
+  });
+
   it("says Recipes on the way back with one book", async () => {
     const loner = signInAsNewUser();
     const book = await getInjection("IEnsurePersonalSpaceController")(

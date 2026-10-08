@@ -19,11 +19,11 @@ Hector's summary, numbered in order, with spelling tidied. His notes are in brac
 
 ### Find something to cook
 
-- **F1 Getting back to your own book.** Planned for Phase 26 (P26.2; D82).
+- **F1 Getting back to your own book.** Built in Phase 26 (P26.2; D82; hectarek/hector-mono#37).
   - Library: the book pills show names only, and two books can share one: a personal book is named "{first name}'s Recipes" at sign-up (D19). Whose book it is shows only after you pick it (the role badge on the title, for books that aren't yours). The app's wordmark reads "Hector's Recipes" too, and goes to your default view.
   - Proposal: the pills say whose a book is: your own first after All recipes, and a small people icon on books shared with you. A recipe's back link names its book ("Hector's Recipes") rather than "Recipes" when you're in two or more.
   - Cost: the pills get a little wider; no new control.
-- **F5 A name change that "didn't update".** Checked on the test project, 2026-10-08: the account's name does change. It's saved, the header's initials follow, and member lists show the new name. The book's name doesn't, because it's set once at sign-up from the first name (D19). Planned for Phase 26 (P26.3; D83, option c).
+- **F5 A name change that "didn't update".** Checked on the test project, 2026-10-08: the account's name does change. It's saved, the header's initials follow, and member lists show the new name. The book's name doesn't, because it's set once at sign-up from the first name (D19). Built in Phase 26 (P26.3; D83, option c; hectarek/hector-mono#37).
   - Options: (a) a book named automatically follows its owner's name until someone renames it, which needs a flag on the book (a migration); (b) keep names fixed, and put Rename where an owner looks for it (the book's ⋯, not only the members page); (c) both.
   - Claude's recommendation: (c), with F1's marks, since two people can share a first name whatever the book is called.
 
@@ -41,13 +41,13 @@ Hector's summary, numbered in order, with spelling tidied. His notes are in brac
 
 ### All jobs: words
 
-- **F4 "What is list and what is plan?"** Planned for Phase 26 (P26.1; D84): the list is **groceries** and the plan is **meal plan**.
+- **F4 "What is list and what is plan?"** Built in Phase 26 (P26.1; D84; hectarek/hector-mono#37): the list is **groceries** and the plan is **meal plan**.
   - Where the words appear: the recipe page's Add to list and Add to plan, cook mode's Add to list, a meal's Add to grocery list, Open list and Open plan, the Plan tab, and Groceries' "Grocery list" label.
   - Proposal: a Words section on the map naming each thing once (recipe book, meal plan, groceries, meal, cook day, eat days), so new screens use the same words. "Add to groceries" and "Add to meal plan" side by side need a check at 375 px.
 
 ### Wide screens
 
-- **F6 A desktop without a desktop design.** Planned for Phase 26 (P26.4; D85).
+- **F6 A desktop without a desktop design.** Built in Phase 26 (P26.4; D85; hectarek/hector-mono#37).
   - The app is designed at 375 px. On a wide screen the page stops at 768 px wide (`max-w-3xl`), but bottom sheets span the whole screen. Width-specific styles today: 8, in 4 files (the library's grid at 3 columns, the recipe page's facts, Neon's account page, the library's loading shapes).
   - Easy candidates: (1) sheets no wider than the page, centred, which is one change in `@repo/ui`'s Drawer for every sheet in every app; (2) F2's drop zone.
   - Tracking: a Wide screens section on the map, listing every width-specific change and why, and a test that fails when an `sm:`, `md:`, `lg:` or `xl:` style appears in the app without a row there. That tells a responsive adaptation (the same design, fitted) from a design choice (a different design on desktop).

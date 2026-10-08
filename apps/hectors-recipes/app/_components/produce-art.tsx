@@ -89,8 +89,10 @@ const DRAWINGS: Record<Produce, ReactNode> = {
       />
     </>
   ),
+  // The greens turn with the carrot, from the middle of its top (P27.4: drawn upright, they
+  // sprouted off its corner), and the whole is nudged back to the middle of the box.
   carrot: (
-    <>
+    <g transform="translate(-4 2)">
       <g transform="rotate(28 48 52)">
         <path
           d="M33 34 Q48 28 63 34 L50 88 Q48 92 46 88 Z"
@@ -114,23 +116,23 @@ const DRAWINGS: Record<Produce, ReactNode> = {
             className="stroke-chart-foreground/20"
           />
         ))}
+        {[
+          [35.29, 20.81, -130],
+          [45.92, 18.18, -100],
+          [57.1, 18.72, -70],
+        ].map(([x = 0, y = 0, angle = 0]) => (
+          <Leaf
+            key={angle}
+            x={x}
+            y={y}
+            angle={angle}
+            size={11}
+            colour="light"
+            stem
+          />
+        ))}
       </g>
-      {[
-        [32.29, 20.81, -130],
-        [42.92, 18.18, -100],
-        [54.1, 18.72, -70],
-      ].map(([x = 0, y = 0, angle = 0]) => (
-        <Leaf
-          key={angle}
-          x={x}
-          y={y}
-          angle={angle}
-          size={11}
-          colour="light"
-          stem
-        />
-      ))}
-    </>
+    </g>
   ),
   lemon: (
     <>
@@ -151,10 +153,11 @@ const DRAWINGS: Record<Produce, ReactNode> = {
       />
     </>
   ),
+  // The stem ends inside the top leaf (P27.4: it ran on past it to a bare tip).
   basil: (
     <>
       <path
-        d="M30 84 Q44 60 56 22"
+        d="M30 84 Q42 59 55 41"
         fill="none"
         strokeWidth={3.2}
         strokeLinecap="round"

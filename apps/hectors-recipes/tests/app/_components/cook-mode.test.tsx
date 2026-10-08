@@ -77,8 +77,11 @@ describe("CookMode", () => {
     );
   const button = (view: ReturnType<typeof cook>, name: string | RegExp) =>
     view.getByRole("button", { name });
-  const pressed = (view: ReturnType<typeof cook>, name: string | RegExp) =>
-    button(view, name).getAttribute("aria-pressed");
+  // An ingredient is a row you check off, as on Groceries (P27.3).
+  const box = (view: ReturnType<typeof cook>, name: string | RegExp) =>
+    view.getByRole("checkbox", { name }) as HTMLInputElement;
+  const ticked = (view: ReturnType<typeof cook>, name: string | RegExp) =>
+    box(view, name).checked;
   const warning = /Turn off auto-lock/;
   const save = (progress: object) =>
     sessionStorage.setItem(
@@ -117,6 +120,17 @@ describe("CookMode", () => {
     view.getByRole("heading", { name: "Ingredients" });
   });
 
+  // P27.3: Gather says how before the list, and each ingredient is a checkbox.
+  it("says to check off ingredients before the list of them", async () => {
+    const view = cook();
+    const hint = view.getByText("Check off each ingredient as you get it out.");
+    const first = box(view, "1 lb ground turkey");
+    expect(
+      hint.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(first.checked).toBe(false);
+  });
+
   // D65: one set of ticks, under a step or on Gather.
   it("shows a step's ingredients, ticked as on Gather", async () => {
     const user = userEvent.setup();
@@ -125,10 +139,10 @@ describe("CookMode", () => {
 
     const uses = view.getByRole("heading", { name: "This step uses" });
     expect(uses.nextElementSibling?.textContent).toBe("1 lb ground turkey");
-    await user.click(button(view, "1 lb ground turkey"));
+    await user.click(box(view, "1 lb ground turkey"));
     await user.click(button(view, "Back"));
-    expect(pressed(view, "1 lb ground turkey")).toBe("true");
-    expect(pressed(view, /onion/)).toBe("false");
+    expect(ticked(view, "1 lb ground turkey")).toBe(true);
+    expect(ticked(view, /onion/)).toBe(false);
   });
 
   // D64: from a step, the whole list in a sheet, with the same ticks and servings.
@@ -139,17 +153,17 @@ describe("CookMode", () => {
 
     await user.click(button(view, "All ingredients"));
     const sheet = await view.findByRole("dialog", { name: "Ingredients" });
-    await user.click(within(sheet).getByRole("button", { name: /onion/ }));
+    await user.click(within(sheet).getByRole("checkbox", { name: /onion/ }));
     await user.click(
       within(sheet).getByRole("button", { name: "More servings" }),
     );
-    within(sheet).getByRole("button", { name: /^1¼ lb ground turkey/ });
+    within(sheet).getByRole("checkbox", { name: /^1¼ lb ground turkey/ });
     await user.keyboard("{Escape}");
 
     view.getByText("Step 1 of 2");
     await user.click(button(view, "Back"));
-    expect(pressed(view, /onion/)).toBe("true");
-    view.getByRole("button", { name: /^1¼ lb ground turkey/ });
+    expect(ticked(view, /onion/)).toBe(true);
+    view.getByRole("checkbox", { name: /^1¼ lb ground turkey/ });
   });
 
   // D66: a timer follows you to other steps, and takes you back to its own.
@@ -246,7 +260,7 @@ describe("CookMode", () => {
   it("jumps to a step from the list of steps, or starts over", async () => {
     const user = userEvent.setup();
     const view = cook();
-    await user.click(button(view, /onion/));
+    await user.click(box(view, /onion/));
     await user.click(button(view, "Start cooking"));
 
     await user.click(button(view, "Step 1 of 2"));
@@ -263,7 +277,7 @@ describe("CookMode", () => {
     sheet = await view.findByRole("dialog", { name: "Steps" });
     await user.click(within(sheet).getByRole("button", { name: "Start over" }));
     await view.findByRole("heading", { name: "Ingredients" });
-    expect(pressed(view, /onion/)).toBe("false");
+    expect(ticked(view, /onion/)).toBe(false);
   });
 
   // D63: an icon while the screen stays on; the warning only when it can't.
@@ -312,14 +326,14 @@ describe("CookMode", () => {
   it("starts over from Done: nothing ticked, back on Gather", async () => {
     const user = userEvent.setup();
     const view = cook();
-    await user.click(button(view, /onion/));
+    await user.click(box(view, /onion/));
     await user.click(button(view, "Start cooking"));
     await user.click(button(view, "Next"));
     await user.click(button(view, "Finish"));
 
     await user.click(button(view, "Start over"));
     view.getByRole("heading", { name: "Ingredients" });
-    expect(pressed(view, /onion/)).toBe("false");
+    expect(ticked(view, /onion/)).toBe(false);
     expect(sessionStorage.getItem(cookProgressKey(RECIPE_ID))).toBe(null);
   });
 
@@ -364,11 +378,11 @@ describe("CookMode", () => {
     const user = userEvent.setup();
     const view = cook();
 
-    await user.click(button(view, /onion/));
+    await user.click(box(view, /onion/));
     view.unmount();
     const again = cook();
     await again.findByText("Picked up where you left off.");
-    expect(pressed(again, /onion/)).toBe("true");
+    expect(ticked(again, /onion/)).toBe(true);
   });
 
   // The recipe was edited since, and the saved step is gone.

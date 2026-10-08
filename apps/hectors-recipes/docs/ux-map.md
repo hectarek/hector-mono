@@ -81,9 +81,9 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books: All recipes, your own books, then those shared with you, each with a people icon (D82).
 - **Main action:** Add recipe, beside the title (editors) → Add a recipe.
 - **⋯:** Invite (owner), Rename (owner, a step in the sheet, D83), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
-- **Also on it:** search (narrows as you type, D56); Sort and group (Saved first, Recently viewed, A to Z; by meal, cuisine or diet; D57, D80); the Saved chip first among the tag chips (D77); the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
+- **Also on it:** search (narrows as you type, D56); Sort and group (Saved first, Recently viewed, A to Z; by meal, cuisine or diet; D57, D80); the Saved chip first among the tag chips (D77); the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe; a saved one carries a filled bookmark in its picture's corner, P27.1); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
-- **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment.
+- **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment. A saved card's bookmark sits on a light disc, so it never competes with the tile.
 - **Reached from:** the Recipes tab, the logo, a recipe's back link and tag chips, Books, Join, Copy recipes, and after deleting or copying a recipe.
 - **Leads to:** Recipe, Add a recipe, Books, Members, Copy recipes.
 - **Room:** the title row is full (Add recipe and ⋯). Search, Sort and group and the chips already sit above the grid: a new order or grouping belongs in Sort and group, a new filter among the chips, and a new book-wide action in the ⋯.
@@ -95,7 +95,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
-- **Also on it:** Add to groceries and Add to meal plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
+- **Also on it:** Add to meal plan and Add to groceries, in the tab bar's order (when you can plan; P27.2); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
 - **Opens:** bottom sheets.
   - Add to meal plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open meal plan.
   - Add to groceries: servings, the groceries picker; then Open groceries. "It's already in groceries" asks before adding again (D45).
@@ -103,7 +103,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done, or a link to it.
 - **Leads to:** Cook mode, Edit, Meal plan, Groceries, the library.
 - **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to groceries or Add to meal plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
-- **Room:** Cook, Add to groceries and Add to meal plan stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
+- **Room:** Cook, Add to meal plan and Add to groceries stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
 
 ### Meal plan — `/plan`
 
@@ -219,7 +219,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** cook from a phone at arm's length, one screen at a time (D63–D66).
 - **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next.
-- **Screens:** Gather (tick ingredients as you get them out, servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
+- **Screens:** Gather ("Check off each ingredient as you get it out." above the list, the ingredients as rows you check off as on Groceries (P27.3), servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
 - **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to groceries's Open groceries.
 - **Room:** a step screen holds one step on purpose. Anything that isn't about the step in front of you goes on Gather, Done or a sheet.
@@ -260,7 +260,7 @@ The app is a phone design; on a wider screen it stays one (D85). Every style tha
 |---|---|---|---|
 | `app/_components/library-results.tsx` | `sm:grid-cols-3` | Three recipe cards a row from 640 px, two on a phone. | Fitted: the same design, more room |
 | `app/(main)/(library)/loading.tsx` | `sm:grid-cols-3` | The library's loading cards, matching the cards. | Fitted |
-| `app/(main)/recipes/[id]/page.tsx` | `sm:flex` | Cook, Add to groceries and Add to meal plan in one row from 640 px; on a phone Cook takes its own row. | Fitted |
+| `app/(main)/recipes/[id]/page.tsx` | `sm:flex` | Cook, Add to meal plan and Add to groceries in one row from 640 px; on a phone Cook takes its own row. | Fitted |
 | `app/(main)/account/[path]/page.tsx` | `md:gap-6`, `md:gap-12`, `md:block`, `lg:w-60` | The Appearance card lines up under Neon Auth's account cards, whose nav column appears at md and widens at lg. | A different design: Neon's own |
 
 Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`'s Drawer (`--drawer-max-width`), so on a desktop it's no wider than the page (D85). The pages themselves are `max-w-3xl` (tabs) or `max-w-2xl` (full-screen tasks, cook mode), centred.
@@ -275,7 +275,7 @@ Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
 | Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to meal plan and Add to groceries |
 | Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
-| List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
+| List you check off | The design system's Patterns; AGENTS.md UI Rules (`CheckRow`) | Groceries and cook mode's ingredients (P27.3). Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Meal plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); D82 for the book pills (yours first, a people icon on shared ones) | Pills on the three tabs; pickers in dialogs and the form |
 | Sideways swipe | D51, D54, D63 | Meal plan's week, cook mode |

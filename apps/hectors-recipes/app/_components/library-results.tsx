@@ -120,11 +120,16 @@ export function LibraryResults({
     replaceAddress(search, next);
   }
 
+  const savedIds = new Set(saved);
   const cards = (list: ListedRecipe[]) => (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {list.map((recipe) => (
         <li key={recipe.id}>
-          <RecipeCard recipe={recipe} bookName={bookNames?.[recipe.spaceId]} />
+          <RecipeCard
+            recipe={recipe}
+            bookName={bookNames?.[recipe.spaceId]}
+            saved={savedIds.has(recipe.id)}
+          />
         </li>
       ))}
     </ul>

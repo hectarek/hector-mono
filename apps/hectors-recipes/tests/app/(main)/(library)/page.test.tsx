@@ -151,6 +151,14 @@ describe("Recipes", () => {
 
     const view = render(await page());
     expect(cards(view.getByRole("list"))[0]).toContain("Stock");
+    // P27.1: its card carries the Saved mark; the others don't.
+    const [first, second] = within(view.getByRole("list")).getAllByRole("link");
+    expect(
+      first && within(first).queryByRole("img", { name: "Saved" }),
+    ).not.toBe(null);
+    expect(second && within(second).queryByRole("img", { name: "Saved" })).toBe(
+      null,
+    );
     expect(view.getByRole("link", { name: "Saved" }).getAttribute("href")).toBe(
       "/?saved=1",
     );
