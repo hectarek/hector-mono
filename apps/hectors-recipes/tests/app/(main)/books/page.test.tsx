@@ -37,6 +37,14 @@ describe("Books", () => {
     expect(view.getAllByText("2 recipes")).toHaveLength(1);
   });
 
+  // P25.1, fix 5: the members page has one name, Members, for owners too.
+  it("calls each book's members page Members", async () => {
+    const view = render(await BooksPage());
+    const members = view.getAllByRole("button", { name: "Members" });
+    expect(members).toHaveLength(2);
+    expect(view.queryByRole("button", { name: "Share" })).toBe(null);
+  });
+
   // P23.4: a pasted invite link opens its Join page, which asks before joining.
   it("opens a pasted invite link's Join page, and says when it isn't one", async () => {
     const user = userEvent.setup();

@@ -142,7 +142,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** manage recipe books: the default book, joining someone's book, a new book, a book's members.
 - **Surface:** Market. Back link "Recipes"; the Recipes tab stays lit. A plain title, "Recipe books", with no ⋯.
 - **Main action:** Create, in the New book form at the bottom.
-- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Share (owner) or Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
+- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
 - **Leads to:** the library (a book), Members, Join.
 - **Names:** a personal book is named at sign-up from its owner's first name ("Hector's Recipes", D19) and keeps that name when the account's name changes; its owner can rename it on Members.
@@ -160,9 +160,9 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** who's in a book or plan, its invite links, leaving, deleting.
 - **Surface:** Market. Back link: the book's or plan's name (a plan's goes to Plan, even when you came from Groceries).
 - **Main action:** New link: can edit (owner).
-- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off; New link: view only); People, each with Make view only or Allow editing, and Remove; Delete, which asks first.
-- **Everyone else:** People, and Leave on their own row.
-- **Reached from:** a tab's ⋯ → Members; Books' Share or Members.
+- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off; New link: view only); Members, each with Make view only or Allow editing, and Remove; Delete, which asks first.
+- **Everyone else:** Members, and Leave on their own row.
+- **Reached from:** a tab's ⋯ → Members; Books' Members.
 - **Leads to:** the book or plan; Books or Plan after leaving or deleting.
 
 ### Join — `/join/[token]`
@@ -261,7 +261,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 2. Groceries' Add button is the default size (40 px), not `lg` (D32). **Fixed in P25.1: it's `lg`.**
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent. **Fixed in P25.1: Add to plan goes through `callAction`, and the two that say what they added through `callResultAction`.**
 4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6). **Fixed in P25.1: a timer that's up is `secondary`, with a ringing bell.**
-5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading).
+5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). **Fixed in P25.1: Members on all three; Books' intro says invites are in a book's Members.**
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all.
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually.
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.

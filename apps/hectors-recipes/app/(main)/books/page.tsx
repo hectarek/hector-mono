@@ -1,5 +1,5 @@
 import { Button } from "@repo/ui/components/button";
-import { UserPlus, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import Link from "next/link";
 import { BackLink } from "@/app/_components/back-link";
 import { DefaultBookPicker } from "@/app/_components/default-book-picker";
@@ -32,8 +32,9 @@ export default async function BooksPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Recipe books</h1>
         <p className="text-muted-foreground text-sm">
-          Share a book to cook from the same recipes. Everyone in a book sees
-          the same recipes; editors can change them.
+          Invite people from a book&apos;s Members to cook from the same
+          recipes. Everyone in a book sees the same recipes; editors can change
+          them.
         </p>
       </div>
 
@@ -63,17 +64,8 @@ export default async function BooksPage() {
               nativeButton={false}
               render={<Link href={`/spaces/${book.id}/settings`} />}
             >
-              {book.role === "owner" ? (
-                <>
-                  <UserPlus data-icon="inline-start" />
-                  Share
-                </>
-              ) : (
-                <>
-                  <Users data-icon="inline-start" />
-                  Members
-                </>
-              )}
+              <Users data-icon="inline-start" />
+              Members
             </Button>
           </li>
         ))}
