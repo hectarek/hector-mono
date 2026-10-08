@@ -94,17 +94,16 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Reading. Back link "Recipes" (to its book); the Recipes tab stays lit.
 - **Title:** photo or produce tile, the name, description, time, servings, a link to the source.
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
-- **⋯:** none. Copy (when you can edit another book) and Edit (editors) sit beside the back link.
+- **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
 - **Also on it:** Add to list and Add to plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
 - **Opens:**
   - Add to plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open plan.
   - Add to list: servings, the list picker; then Open list. "It's already on this list" asks before adding again (D45).
-  - Copy: the book to copy into.
 - **Bold:** the produce tile when there's no photo.
 - **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done, or a link to it.
 - **Leads to:** Cook mode, Edit, Plan, Groceries, the library.
-- **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to list or Add to plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or Copy it into their own book, but there's no button to share the link.
-- **Room:** the busiest screen: one filled button and four secondary ones, plus the stepper and chips, and no ⋯. A new action here needs a ⋯ (as the tabs have), or one of these moved into it.
+- **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to list or Add to plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
+- **Room:** Cook, Add to list and Add to plan stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
 
 ### Plan — `/plan`
 
@@ -242,8 +241,8 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 | Back link | AGENTS.md UI Rules | Recipe, Books, Copy recipes, Members, Join, Account, Sign in |
 | Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
-| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯, a meal, a grocery item, a form row, cook mode's steps and ingredients |
-| Dialog | No written rule | Confirmations (discard changes, delete a recipe or a space), and the recipe page's Add to plan, Add to list and Copy |
+| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients |
+| Dialog | No written rule | Confirmations (discard changes, delete a recipe or a space), and the recipe page's Add to plan and Add to list |
 | List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); no written rule for the pills | Pills on the three tabs; pickers in dialogs and the form |
@@ -255,7 +254,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there.
 
-1. The recipe page's Add to plan, Add to list and Copy open centred dialogs. The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason).
+1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason).
 2. Groceries' Add button is the default size (40 px), not `lg` (D32).
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent.
 4. Two filled buttons on one screen: Add by link once pasting (Read recipe and Read text), and cook mode while a timer is up (Time's up · Dismiss beside Next).

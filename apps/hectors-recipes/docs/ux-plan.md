@@ -2153,9 +2153,14 @@ One commit per task; the PR when the phase is done.
     - `inviteTokenFrom` reads the token after `/join/` from a whole link (any host, with a query) or the path alone, and finds none in a bare token, another page's link, a short token or anything after it (tests).
     - Screen test: "https://example.test/books" says "That isn't an invite link. Copy the whole link they sent." and goes nowhere; an invite link goes to its Join page.
     - At 375 px on the test project: the section and its message, light.
-- [ ] **P23.5** The recipe page's ⋯, with Share — C · D72, F18
+- [x] **P23.5** The recipe page's ⋯, with Share — C · D72, F18
   - Do: Copy and Edit leave the top row for a ⋯ (`TitleMenu`) beside the back link, holding Edit (editors), Copy (when you can edit another book; its book picker becomes a step in the sheet, as Invite's is) and Share (everyone: the share sheet, or the link copied).
   - Verify: screen tests (a viewer gets Share only; an editor gets Edit, Copy and Share; Copy copies); 375 px, light and dark.
+  - Evidence (2026-10-08):
+    - The top row is the back link and a ⋯ (`RecipeMenu`). Its sheet: Edit (editors), Share recipe (everyone; "Copy recipe link" without a share sheet), and "Copy to another book", renamed from Copy so it isn't read as copying the link. Copy's dialog is gone: its book picker is a step in the sheet with Copy and Back, so the map's first disagreement is down to Add to plan and Add to list.
+    - `ShareLinkButton` shares any path (`path`, `title`, `label`), not only an invite; `BookSelect` moved to its own file for Copy recipes and the sheet.
+    - Screen tests: a viewer gets Share recipe only, and it shares `/recipes/<id>` under the recipe's name; an editor gets Edit (to the form) and Copy to another book, whose step shows the books, Copy and Back.
+    - On the test project at 375 px: the top row, the sheet, and Copy to another book for real: it landed on the Baking book showing Chili and "1 recipe".
 - [ ] **P23.6** Add by link or text — C · D73, F11
   - Do: the chooser's first row is "Add by link or text", and its words say how it differs from Add manually. Its screen has one box for a link or a recipe's text, and one Read button: a lone web address is read as a page, anything else as text.
   - Verify: a test for telling a link from text; screen tests for both reads and for a failed link; the chooser at 375 px.

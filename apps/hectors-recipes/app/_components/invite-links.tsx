@@ -44,7 +44,10 @@ export function InviteLinks({
                   year: "numeric",
                 })}
               </span>
-              <ShareLinkButton token={invite.token} spaceName={spaceName} />
+              <ShareLinkButton
+                path={`/join/${invite.token}`}
+                title={`Join ${spaceName}`}
+              />
               <ActionForm
                 action={revokeInvite}
                 fields={{ inviteId: invite.id }}

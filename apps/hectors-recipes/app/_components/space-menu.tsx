@@ -60,16 +60,22 @@ export function SpaceMenu({
       {inviting ? (
         <>
           <ShareLinkButton
-            token={tokens?.editor}
-            spaceName={space.name}
-            gives="editor"
+            path={tokens && `/join/${tokens.editor}`}
+            title={`Join ${space.name}`}
+            label={{
+              share: "Share a link to edit",
+              copy: "Copy a link to edit",
+            }}
             pending={isPending}
             variant="default"
           />
           <ShareLinkButton
-            token={tokens?.viewer}
-            spaceName={space.name}
-            gives="viewer"
+            path={tokens && `/join/${tokens.viewer}`}
+            title={`Join ${space.name}`}
+            label={{
+              share: "Share a view-only link",
+              copy: "Copy a view-only link",
+            }}
             pending={isPending}
           />
           {links && !links.ok && (
