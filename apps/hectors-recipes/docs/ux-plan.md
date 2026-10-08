@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), with 0019 on production too (H34); in review as hectarek/hector-mono#37. Phase 25 is in review as #35, Phase 24 as #33. Phases 22 and 23 (#31, #32) are merged. Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#33, #35 and #37, in that order, with the portfolio's `/ui` Drawer on #37's preview. Then Phase 20, or the drafts in Hector's tracker. |
+| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), with 0019 on production too (H34); in review as hectarek/hector-mono#37. Phase 25 is in review as #35. Phases 22 to 24 (#31, #32, #33) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#35, then #37, with the portfolio's `/ui` Drawer on #37's preview. Then Phase 20, or the drafts in Hector's tracker. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
