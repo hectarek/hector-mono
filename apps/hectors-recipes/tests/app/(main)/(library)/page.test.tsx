@@ -45,6 +45,13 @@ describe("Recipes", () => {
       .getAllByRole("link")
       .map((card) => card.textContent);
 
+  // P23.1: the main action says what it adds.
+  it("offers Add recipe, which opens the ways to add one", async () => {
+    const view = render(await page());
+    const add = view.getByRole("button", { name: "Add recipe" });
+    expect(add.closest("a")?.getAttribute("href")).toStartWith("/recipes/new");
+  });
+
   it("finds recipes by ingredient and tag as you type, title matches first", async () => {
     const user = userEvent.setup();
     const view = render(await page());

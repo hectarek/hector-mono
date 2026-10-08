@@ -16,7 +16,7 @@ export function SpaceHeader({
   space: { id: string; name: string; type: SpaceType; role: SpaceRole };
   // What the page shows of the space, when it isn't the space itself (a plan's grocery list).
   label?: string;
-  // The page's main action, beside the title (the library's New).
+  // The page's main action, beside the title (the library's Add recipe).
   action?: ReactNode;
   // The page's own actions, in the ⋯ sheet after Members.
   children?: ReactNode;

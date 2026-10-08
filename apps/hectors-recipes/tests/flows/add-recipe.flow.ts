@@ -20,7 +20,7 @@ test("Add by photo or file refuses a long PDF, and sends a file to the reader", 
   page,
 }) => {
   await signUp(page);
-  await page.getByRole("button", { name: "New" }).click();
+  await page.getByRole("button", { name: "Add recipe" }).click();
   await page.getByRole("link", { name: /Add by photo or file/ }).click();
   await expect(
     page.getByRole("heading", { name: "Add by photo or file" }),

@@ -30,7 +30,7 @@ The app is phone-first, built for people who share a recipe book and a plan. Six
 | Job | Starts at | Screens, in order | Browser flow |
 |---|---|---|---|
 | Find something to cook | Recipes tab | Library → Recipe | `plan-and-shop` (search, Group by) |
-| Add a recipe | Library's New | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe | `plan-and-shop` (manually), `add-recipe` (photo or file) |
+| Add a recipe | Library's Add recipe | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe | `plan-and-shop` (manually), `add-recipe` (photo or file) |
 | Plan the week | A recipe's Add to plan | Recipe (Add to plan) → Plan | `plan-and-shop` |
 | Shop | Plan's grocery button, or a recipe's Add to list | Plan → Groceries | `plan-and-shop` (check off, Got it, Clear list) |
 | Cook | A recipe's Cook | Recipe → Cook mode (Gather → each step → Done) → Recipe | `cook` |
@@ -79,7 +79,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** find something to cook. Also the way in to adding a recipe.
 - **Surface:** Market. Tab page.
 - **Title:** the book's name over "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books.
-- **Main action:** New, beside the title (editors) → Add a recipe.
+- **Main action:** Add recipe, beside the title (editors) → Add a recipe.
 - **⋯:** Invite (owner), Members, All books. In All recipes: All books only.
 - **Also on it:** search (narrows as you type, D56); Group by (meal, cuisine or diet, D57); tag chips; the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
@@ -184,7 +184,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** choose how to add a recipe (D34).
 - **Surface:** Market. Full-screen: Cancel, "New recipe".
 - **On it:** three rows, Add by link, Add by photo or file, Add manually. No filled button.
-- **Reached from:** the library's New, and its empty state's Add a recipe. **Leads to:** the three ways in; Cancel → the library.
+- **Reached from:** the library's Add recipe, and its empty state's Add a recipe. **Leads to:** the three ways in; Cancel → the library.
 
 ### Add by link — `/recipes/new/link`
 
