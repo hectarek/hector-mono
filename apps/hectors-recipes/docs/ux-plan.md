@@ -2485,15 +2485,19 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - Not in `load-books.ts` and `load-recipe.ts`, as the Do line has it. `loadBooks` also serves Copy recipes and the new recipe form, and `loadRecipe` the edit form and cook mode. Cached there, the edit form could open up to 5 minutes old, and saving it would undo someone's newer edit.
     - The session is read once per request on a recipe's page, the edit form and cook mode: `loadRecipe` takes the user id the page read.
     - Today on a recipe's page (Add to meal plan's first day) is read inside the cache, so just after midnight it can be up to 5 minutes behind.
-    - The Recipes tab's link has `prefetch={true}`; Meal plan and Groceries keep the plain prefetch. Books needs none: a page that reads the session through a private cache gets an App Shell of its own per person, which a plain link loads (Next.js's "Optimizing prefetching" guide).
+    - The Recipes tab's link has `prefetch={true}`; Meal plan and Groceries keep the plain prefetch. Books gets nothing ahead of its first open (All books is inside the ⋯, and nothing prefetched it there), so the first open shows its skeleton. D87 promises only the return within 5 minutes.
     - Nothing is stored on the server: the three private loaders are the app's only cache directives.
     - A save clears it. Next.js empties the browser's whole cache when a Server Action calls `revalidatePath` (`cacheLife`'s docs, "Client cache behavior"). Every action that changes what these pages show calls it. The four that don't are the three AI reads and `inviteLinks`, and they change nothing these pages show. Recently viewed is kept on the phone, so opening a recipe changes nothing on the server.
     - `next build` passes with placeholder values, and nothing failed in its log.
     - `tests/flows/instant.flow.ts`, with `@next/playwright` 16.4.0 (a new dev dependency): the Recipes tab from Meal plan, a recipe opened a moment ago, and Books from the library's ⋯, each tapped inside `instant()`; then a recipe you add is in the library straight away.
     - `bun check`, `bun ts`, 1114 + 94 tests and the dead-code check pass. The test preload stubs `cacheLife`.
     - Found on the way: `bookmarks [postgres] > saves and unsaves, newest first` failed once in a full run and passed 120 runs on its own. Saved recipes sort by `createdAt` alone, so two saves in the same instant can come back in either order. It's in Hector's tracker.
+    - Later, with `.env`, on a production build (`next start`, port 3205) signed in as Hector, reading only; prefetching runs only in production builds, so dev can't show it:
+      - The Recipes tab from Meal plan: all 81 cards on screen 50 ms after the tap, and no request after it.
+      - A recipe opened a moment ago: on screen at 50 ms, no request. Its first open shows the skeleton, as D87 chose (no prefetch per card).
+      - Books: the first open from the ⋯ fetched it; opened again, its count showed at 50 ms with no request. The same held after four other pages in between, by which time Next.js no longer keeps Books alive, so the private cache is what serves it.
     - **Left**, all for Hector, as they need the test project and sign up accounts:
-      - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the change.
+      - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the change. Its Books step was first written for a first open, which doesn't show at once; it now opens Books twice.
       - Check that a second account's change to a shared book shows within 5 minutes.
 - [x] **P28.4** Motion between screens, written down first — C · D89, D70
   - Do: the pattern in AGENTS.md's UI Rules (what moves, reduced motion, the anchored header and tab bar) and the map's patterns table. Each screen on the map says what moves into and out of it.

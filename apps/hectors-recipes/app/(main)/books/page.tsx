@@ -78,7 +78,7 @@ export default async function BooksPage() {
 }
 
 // D87: kept in the phone's memory for 5 minutes, never on the server, so Books shows at once
-// when you come back to it, or once a link to it has been on screen. Any save clears it.
+// when you come back to it within them. Any save clears it.
 async function loadBookList() {
   "use cache: private";
   cacheLife({ stale: 300 });

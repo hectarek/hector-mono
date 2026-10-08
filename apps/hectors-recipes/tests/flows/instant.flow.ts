@@ -39,14 +39,23 @@ test("the library, Books and a recipe you opened show at once", async ({
     await expect(page.getByRole("heading", { name: "Chili" })).toBeVisible();
   });
 
-  // Books, once its link has been on screen (in the library's ⋯).
+  // Books, opened a moment ago (from the library's ⋯).
+  const openBooks = async () => {
+    await page.getByRole("button", { name: /^More for / }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "All books" })
+      .click();
+    await page.waitForURL(/\/books$/);
+  };
   await tabs.getByRole("link", { name: "Recipes" }).click();
   await page.waitForURL((url) => url.pathname === "/");
-  await page.getByRole("button", { name: /^More for / }).click();
-  await page.waitForLoadState("networkidle");
+  await openBooks();
+  await expect(page.getByText("1 recipe")).toBeVisible();
+  await tabs.getByRole("link", { name: "Recipes" }).click();
+  await page.waitForURL((url) => url.pathname === "/");
   await instant(page, async () => {
-    await page.getByRole("button", { name: "All books" }).click();
-    await page.waitForURL(/\/books$/);
+    await openBooks();
     await expect(page.getByText("1 recipe")).toBeVisible();
   });
 
