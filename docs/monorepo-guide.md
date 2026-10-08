@@ -229,6 +229,20 @@ Because the build runs through Turborepo, its strict env mode applies: an env va
 
 `apps/hector-portfolio/vercel.json` overrides the build command with `bun run build` (the app's own `next build`, without Turborepo), and sets its install command and a few env flags.
 
+### Building only the apps that changed
+
+Every push to a pull request, and every merge, starts a deploy in each Vercel project. On 2026-10-08 that hit the Hobby plan's daily deployment limit ("Deployment rate limited — retry in 24 hours"), and merges to `main` didn't reach production. So each deployed app's `vercel.json` has an `ignoreCommand` that skips the build when nothing the app uses changed:
+
+```json
+"ignoreCommand": "bunx turbo@2 query affected --packages hectors-recipes --base \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD~1}\" --exit-code"
+```
+
+- `turbo query affected` compares the commit with the app's last successful deploy (`VERCEL_GIT_PREVIOUS_SHA`), or with the commit before when Vercel gives none. It counts a change in the app's folder, in a workspace package it uses (`@repo/ui`), in its dependencies in `bun.lock`, or in `turbo.json`.
+- Vercel skips the build on exit 0 and builds on anything else. `--exit-code` exits 1 when the app is affected, and 1 too when the earlier commit isn't in Vercel's clone (`GitRefNotFound`), so a doubtful case builds.
+- It runs before `bun install`, so `bunx` fetches `turbo` (the 2.x line, as the root's). Vercel's build image has Bun before the install (its install step runs `bun install` without fetching Bun). If `bunx` were ever missing, the command would fail, and a failed command builds.
+- Checked on 2026-10-08 against commits that changed only `@repo/ui` (every app builds), only one app's code or Markdown (that app builds), and only the repo's own `docs/` and `AGENTS.md` (none builds).
+- A Markdown-only change inside an app still builds that app. Excluding `*.md` from the `build` task's `inputs` doesn't help: in Turborepo 2.11.7, `--tasks build` reports a task "package is affected" for any file in its package.
+
 ### Vercel project settings
 
 - **Root directory**: the app's folder (e.g. `apps/hectors-recipes`)
