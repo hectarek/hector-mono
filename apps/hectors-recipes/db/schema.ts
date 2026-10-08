@@ -38,6 +38,9 @@ export const spaces = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     type: text("type").$type<SpaceType>().notNull(),
     name: text("name").notNull(),
+    // Still the name it was given at sign-up ("Hector's Recipes"), so it shows its owner's
+    // current name until someone renames it (docs/ux-plan.md D83).
+    autoName: boolean("auto_name").notNull().default(false),
     description: text("description"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

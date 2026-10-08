@@ -6,7 +6,7 @@ import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { planScreenFixture } from "@/tests/_support/plan-screens";
 
 const EMPTY_WEEK =
-  "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan.";
+  "Nothing planned this week. To plan a meal, open a recipe and tap Add to meal plan.";
 
 // The Plan page as the server renders it (D50: the week first).
 describe("Plan", () => {
@@ -36,7 +36,7 @@ describe("Plan", () => {
       (lastDay?.compareDocumentPosition(groceryBox) ?? 0) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    view.getByRole("button", { name: "Add 1 meal to the grocery list" });
+    view.getByRole("button", { name: "Add 1 meal to groceries" });
     expect(view.queryByText(EMPTY_WEEK)).toBe(null);
   });
 

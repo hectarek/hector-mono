@@ -21,11 +21,11 @@ describe("AddPlanToListButton", () => {
     const view = render(box(["2026-10-05", "2026-10-09", "2026-10-16"]));
     const range = view.getByLabelText("Shopping for");
 
-    view.getByRole("button", { name: "Add 2 meals to the grocery list" });
+    view.getByRole("button", { name: "Add 2 meals to groceries" });
     await user.selectOptions(range, "next-3-days");
-    view.getByRole("button", { name: "Add 1 meal to the grocery list" });
+    view.getByRole("button", { name: "Add 1 meal to groceries" });
     await user.selectOptions(range, "all-upcoming");
-    view.getByRole("button", { name: "Add 3 meals to the grocery list" });
+    view.getByRole("button", { name: "Add 3 meals to groceries" });
   });
 
   it("says when there's nothing to add in the range", async () => {
@@ -42,7 +42,7 @@ describe("AddPlanToListButton", () => {
       view.getByLabelText("Shopping for"),
       "all-upcoming",
     );
-    view.getByRole("button", { name: "Add 1 meal to the grocery list" });
+    view.getByRole("button", { name: "Add 1 meal to groceries" });
   });
 
   // The action's range starts from the server's today, so the meal is planned from it too.
@@ -58,7 +58,7 @@ describe("AddPlanToListButton", () => {
     );
 
     await user.click(
-      view.getByRole("button", { name: "Add 1 meal to the grocery list" }),
+      view.getByRole("button", { name: "Add 1 meal to groceries" }),
     );
     expect((await view.findByRole("status")).textContent).toBe("1 added.");
     expect(await fixture.groceries()).toEqual(["1 lb ground turkey"]);
@@ -66,8 +66,8 @@ describe("AddPlanToListButton", () => {
     // Plan comes back with nothing left to add.
     view.rerender(<AddPlanToListButton {...props} cookDays={[]} />);
     await waitFor(() => expect(focused()).toBe("1 added."));
-    expect(view.getByText("Open list").closest("a")?.getAttribute("href")).toBe(
-      `/groceries?plan=${fixture.planId}`,
-    );
+    expect(
+      view.getByText("Open groceries").closest("a")?.getAttribute("href"),
+    ).toBe(`/groceries?plan=${fixture.planId}`);
   });
 });

@@ -28,13 +28,14 @@ export function changedList(result: AddToListResult): boolean {
 export function describeAddResult(result: AddToListResult): string {
   const parts = [
     result.added && `${result.added} added`,
-    result.merged && `${result.merged} combined with items already on the list`,
+    result.merged &&
+      `${result.merged} combined with items already in groceries`,
     result.skipped && `${result.skipped} already there`,
   ].filter(Boolean);
   return parts.length ? `${parts.join(", ")}.` : "Nothing new to add.";
 }
 
-// Add to list on the recipe page and in cook mode: a bottom sheet with the servings and, in
+// Add to groceries on the recipe page and in cook mode: a bottom sheet with the servings and, in
 // two or more plans, whose list.
 export function AddToListButton({
   recipeId,
@@ -91,11 +92,11 @@ export function AddToListButton({
     >
       <DrawerTrigger render={<Button variant="secondary" size="lg" />}>
         <ShoppingCart data-icon="inline-start" />
-        Add to list
+        Add to groceries
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Add ingredients to your list</DrawerTitle>
+          <DrawerTitle>Add to groceries</DrawerTitle>
           <DrawerDescription>&ldquo;{title}&rdquo;</DrawerDescription>
         </DrawerHeader>
 
@@ -104,7 +105,7 @@ export function AddToListButton({
             // Its items are still unchecked on the list: adding again sums into them.
             <>
               <p className="text-sm">
-                It&apos;s already on this list. Adding it again doubles its
+                It&apos;s already in groceries. Adding it again doubles its
                 amounts.
               </p>
               <Button size="lg" disabled={isPending} onClick={() => send(true)}>
@@ -122,7 +123,7 @@ export function AddToListButton({
                 nativeButton={false}
                 render={<Link href={`/groceries?plan=${done.planId}`} />}
               >
-                Open list
+                Open groceries
               </Button>
               <DrawerClose render={<Button variant="secondary" size="lg" />}>
                 Done
@@ -146,7 +147,7 @@ export function AddToListButton({
                 </div>
               )}
               <SpacePicker
-                label="List"
+                label="Groceries"
                 spaces={plans}
                 value={planId}
                 onChange={setPlanId}

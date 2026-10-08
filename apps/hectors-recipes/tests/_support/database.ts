@@ -14,10 +14,16 @@ let migrated: Promise<void> | undefined;
 
 function migrateOnce(): Promise<void> {
   migrated ??= (async () => {
-    // Neon Auth owns this table in production; the app only reads it for member names.
+    // Neon Auth owns this table in production; the app only reads it for member names. Its
+    // columns as Neon has them (2026-10-08), so a query naming one, such as role, without its
+    // table fails here as it would there.
     await client.exec(`
       create schema neon_auth;
-      create table neon_auth."user" (id uuid primary key, name text, email text, image text);
+      create table neon_auth."user" (
+        id uuid primary key, name text, email text, "emailVerified" boolean, image text,
+        "createdAt" timestamptz, "updatedAt" timestamptz, role text, banned boolean,
+        "banReason" text, "banExpires" timestamptz
+      );
     `);
     await migrate(testDb, {
       migrationsFolder: `${import.meta.dir}/../../db/migrations`,
@@ -40,14 +46,16 @@ export async function resetDatabase(): Promise<void> {
   ]);
 }
 
-// A Neon Auth user, so member lists can show a name.
+// A Neon Auth user, so member lists can show a name. Again for the same id renames them, as
+// changing an account's name does.
 export async function addAuthUser(
   id: string,
   name: string,
   email: string,
 ): Promise<void> {
   await client.query(
-    `insert into neon_auth."user" (id, name, email) values ($1, $2, $3)`,
+    `insert into neon_auth."user" (id, name, email) values ($1, $2, $3)
+     on conflict (id) do update set name = excluded.name, email = excluded.email`,
     [id, name, email],
   );
 }

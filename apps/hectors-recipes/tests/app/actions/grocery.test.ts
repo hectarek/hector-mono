@@ -116,7 +116,7 @@ describe("grocery actions", () => {
 
   it("reports why a tap didn't work instead of throwing", async () => {
     expect(await setGroceryItemChecked(crypto.randomUUID(), true)).toEqual({
-      error: "That item is no longer on the list",
+      error: "That item is no longer in groceries",
     });
     expect(
       await addGroceryItem(
@@ -201,7 +201,7 @@ describe("grocery actions", () => {
       await addPlanToList({ planId: plan.id, entryId: crypto.randomUUID() }),
     ).toEqual({
       ok: false,
-      error: "That meal is no longer on the plan",
+      error: "That meal is no longer in the meal plan",
     });
   });
 });

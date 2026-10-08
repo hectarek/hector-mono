@@ -14,7 +14,7 @@ export async function requireItemEditor(
 ): Promise<GroceryItem> {
   const item = await groceryItemsRepository.getById(itemId, tx);
   if (!item) {
-    throw new NotFoundError("That item is no longer on the list");
+    throw new NotFoundError("That item is no longer in groceries");
   }
   await requireSpaceRole(
     spacesRepository,

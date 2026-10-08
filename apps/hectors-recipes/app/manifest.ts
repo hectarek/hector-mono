@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Hector's Recipes",
     short_name: "Recipes",
     description:
-      "Shared recipe books, a weekly meal plan, and one grocery list.",
+      "Shared recipe books, a weekly meal plan, and shared groceries.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

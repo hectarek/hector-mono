@@ -53,9 +53,11 @@ export default async function RecipePage({
   // plan yet: adding creates their own.
   const planTargets = editableSpaces(plans);
   const canPlan = planTargets.length > 0 || plans.length === 0;
-  const inOwnBook = books.some((book) => book.id === recipe.spaceId);
-  // Back to the recipe's own book when you're in it; otherwise your default one.
-  const libraryBook = inOwnBook ? recipe.spaceId : undefined;
+  const ownBook = books.find((book) => book.id === recipe.spaceId);
+  // Back to the recipe's own book when you're in it; otherwise your default one. In two or
+  // more books, the link names it (D82).
+  const libraryBook = ownBook?.id;
+  const backLabel = ownBook && books.length > 1 ? ownBook.name : "Recipes";
   const copyTargets = books
     .filter(
       (book) => book.id !== recipe.spaceId && hasRole(book.role, "editor"),
@@ -92,7 +94,7 @@ export default async function RecipePage({
           <div className="flex items-center justify-between gap-2">
             <BackLink
               href={libraryHref({ book: libraryBook })}
-              label="Recipes"
+              label={backLabel}
             />
             <RecipeMenu
               recipeId={recipe.id}

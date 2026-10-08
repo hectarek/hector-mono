@@ -33,9 +33,9 @@ export function JoinButton({
           <Field orientation="horizontal">
             <Checkbox id={id} name="makeDefault" defaultChecked />
             <FieldContent>
-              <FieldTitle>Make it my default plan</FieldTitle>
+              <FieldTitle>Make it my default meal plan</FieldTitle>
               <FieldDescription>
-                Plan and Groceries open to it. Your own plan stays one tap away.
+                Meal plan and Groceries open to it. Your own stays one tap away.
               </FieldDescription>
             </FieldContent>
           </Field>

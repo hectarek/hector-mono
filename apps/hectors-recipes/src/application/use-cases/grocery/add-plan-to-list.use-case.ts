@@ -26,9 +26,9 @@ export type IAddPlanToListUseCase = ReturnType<typeof addPlanToListUseCase>;
 // Without a meal: the meals cooking in the range from today (D44) not on the list yet,
 // leaving out cooked ones (they were shopped for). With a meal: that one, whatever its day:
 // "Add to grocery list" the first time, which does nothing if it's on the list by then (a
-// sheet that's out of date, or two presses at once), and "Add to list again" (`again`) after.
+// sheet that's out of date, or two presses at once), and "Add to groceries again" (`again`) after.
 //
-// A recipe still unchecked on the list from its own Add to list covers one planned meal of
+// A recipe still unchecked on the list from its own Add to groceries covers one planned meal of
 // it, the earliest, which is marked as on the list rather than added again. While a planned
 // meal of it that's added and still to cook exists, the items are that meal's, and the next
 // is a second batch (D45). Every meal handled is marked, and adds to a list take turns (the
@@ -99,7 +99,7 @@ export const addPlanToListUseCase = (
           ? await planEntriesRepository.getById(entryId, tx)
           : undefined;
         if (entryId && (!one || one.spaceId !== planId)) {
-          throw new NotFoundError("That meal is no longer on the plan");
+          throw new NotFoundError("That meal is no longer in the meal plan");
         }
         if (one?.addedToListAt && !again) {
           return { planId, added: 0, merged: 0, skipped: 0, alreadyAdded: 1 };

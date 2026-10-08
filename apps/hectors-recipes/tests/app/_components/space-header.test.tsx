@@ -102,5 +102,27 @@ describe("SpaceHeader", () => {
       (await view.findByText("Members")).closest("a")?.getAttribute("href"),
     ).toBe(`/spaces/${book.id}/settings`);
     expect(view.queryByRole("button", { name: "Invite" })).toBe(null);
+    expect(view.queryByRole("button", { name: "Rename" })).toBe(null);
+  });
+
+  // P26.3, D83: the owner renames from the ⋯, and the name stays theirs from then on.
+  it("renames the book from its ⋯, for its owner", async () => {
+    const user = userEvent.setup();
+    const book = await newBook("Soups");
+    const view = render(<SpaceHeader space={book} />);
+
+    await user.click(view.getByRole("button", { name: "More for Soups" }));
+    await user.click(await view.findByRole("button", { name: "Rename" }));
+    const name = await view.findByRole("textbox", { name: "Name" });
+    await user.clear(name);
+    await user.type(name, "Weeknight soups");
+    await user.click(view.getByRole("button", { name: "Rename" }));
+
+    await view.findByText("Saved");
+    const [renamed] = await getInjection("IListMySpacesController")(
+      { type: "recipe-book" },
+      userId,
+    );
+    expect(renamed?.name).toBe("Weeknight soups");
   });
 });

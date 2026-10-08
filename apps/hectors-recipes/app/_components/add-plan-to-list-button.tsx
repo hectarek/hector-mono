@@ -40,7 +40,7 @@ function rangeText(range: GroceryRange): string {
 export function describePlanResult(result: AddToListResult): string {
   const already = result.alreadyAdded;
   const note = already
-    ? `${already === 1 ? "1 meal was" : `${already} meals were`} already on the list.`
+    ? `${already === 1 ? "1 meal was" : `${already} meals were`} already in groceries.`
     : "";
   if (!changedList(result)) return note || "Nothing new to add.";
   return note
@@ -109,7 +109,7 @@ export function AddPlanToListButton({
           <ShoppingCart data-icon="inline-start" />
           {isPending
             ? "Adding…"
-            : `Add ${count} ${count === 1 ? "meal" : "meals"} to the grocery list`}
+            : `Add ${count} ${count === 1 ? "meal" : "meals"} to groceries`}
         </Button>
       ) : (
         !result && (
@@ -141,7 +141,7 @@ export function AddPlanToListButton({
           nativeButton={false}
           render={<Link href={`/groceries?plan=${planId}`} />}
         >
-          Open list
+          Open groceries
         </Button>
       )}
     </div>

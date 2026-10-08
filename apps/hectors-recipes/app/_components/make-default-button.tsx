@@ -24,7 +24,7 @@ export function MakeDefaultButton({
           disabled={isPending}
         >
           <Star data-icon="inline-start" />
-          {isPending ? "Saving…" : "Make my default plan"}
+          {isPending ? "Saving…" : "Make my default meal plan"}
         </Button>
       )}
     </ActionForm>

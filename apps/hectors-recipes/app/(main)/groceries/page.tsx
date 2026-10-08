@@ -40,7 +40,7 @@ export default async function GroceriesPage({
         hrefFor={(id) => `/groceries?plan=${id}`}
       />
 
-      <SpaceHeader space={current} label="Grocery list">
+      <SpaceHeader space={current} label="Groceries">
         {/* Starting the list over (D52), keyed by plan like the list. */}
         {canEdit && (
           <ClearListButton

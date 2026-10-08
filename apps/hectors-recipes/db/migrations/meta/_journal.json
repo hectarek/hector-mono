@@ -134,6 +134,13 @@
       "when": 1791460519230,
       "tag": "0018_tag_meal_prep",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791463952289,
+      "tag": "0019_space_auto_name",
+      "breakpoints": true
     }
   ]
 }

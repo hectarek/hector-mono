@@ -16,8 +16,7 @@ const LOCALIZATION = {
   SIGN_IN_DESCRIPTION: "Welcome back.",
   SIGN_UP: "Create account",
   SIGN_UP_ACTION: "Create account",
-  SIGN_UP_DESCRIPTION:
-    "Keep your recipes, plan the week and share a grocery list.",
+  SIGN_UP_DESCRIPTION: "Keep your recipes, plan the week and share groceries.",
 };
 
 // Full-screen like the welcome screen it comes from, not a card on a page. Neon's view

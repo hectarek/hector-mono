@@ -128,7 +128,7 @@ export function GroceryItemSheet({
                 }}
               >
                 <Trash2 data-icon="inline-start" />
-                Remove from list
+                Remove from groceries
               </Button>
             </>
           )}

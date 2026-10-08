@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, rebased on main: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33) is merged, its migrations on production. Phases 22 and 23 (#31, #32) are merged. Then 26 (#37: words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#35, then #37 (Phase 26). |
+| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), with 0019 on production too (H34); in review as hectarek/hector-mono#37. Phases 22 to 25 (#31, #32, #33, #35) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#37, with the portfolio's `/ui` Drawer on its preview. Then Phase 20, or the drafts in Hector's tracker. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -147,7 +147,7 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D80 | The library's order and grouping are one control, **Sort and group**: Saved first (the default), Recently viewed, A to Z, then By meal, By cuisine, By diet. A **Saved** chip comes first among the tag chips. | Claude's proposal for P24.2; Hector, 2026-10-08: "the recommendations are fine". |
 | D81 | A recipe's video takes the photo's place as the photo with a play button, and loads only when tapped. YouTube and Vimeo play in place; a host that won't play inside another site (Instagram, TikTok) opens the video's own page. | Same. Loading on tap keeps the recipe page as fast as it is, and a host that refuses embedding still has its link. |
 | D82 | Whose book: the book pills put your own book first after All recipes, and mark books shared with you with a people icon. A recipe's back link names its book when you're in two or more. | Second testers' round (F1); Claude's recommendation, Hector, 2026-10-08: "go with what is recommended". A tester's own book and Hector's were both "Hector's Recipes", as is the app's wordmark. |
-| D83 | A personal book named for its owner ("Hector's Recipes") follows the owner's name when it changes, until someone renames the book; a flag on the book says it still carries its automatic name. Rename also sits in the book's ⋯, for owners. Refines D19, which named it once. | Same round (F5): the tester changed his account's name and his book kept the old one. Checked on the test project: the name change works; only the book's name doesn't follow. |
+| D83 | A personal book named for its owner ("Hector's Recipes") follows the owner's name when it changes, until someone renames the book; a flag on the book says it still carries its automatic name. Rename also sits in the book's ⋯, for owners. Refines D19, which named it once. Revised the same day: an existing book or plan with an automatic-looking name ("<name>'s Recipes", "My Plan") follows too, even if its owner has renamed their account since; only a name someone typed keeps itself, and renaming stops following. | Same round (F5): the tester changed his account's name and his book kept the old one. Checked on the test project: the name change works; only the book's name doesn't follow. Revision: Hector, 2026-10-08: "I wanted it to follow that convention", after renaming his account to Hectarek and expecting his book to follow. |
 | D84 | One word for each thing: the grocery list is **Groceries** ("Add to groceries", "Open groceries") and the plan is **Meal plan** ("Add to meal plan", the Meal plan tab). The map gets a Words section naming each thing once, which new screens use. | Same round (F4); Hector, 2026-10-08: "instead of list we should call it groceries, and instead of plan we should call it meal plan". The Words section is Claude's recommendation. |
 | D85 | Wide screens: the app stays a phone design. Bottom sheets are no wider than the page and centred (in `@repo/ui`'s Drawer, so every app's). The map's Wide screens section lists every width-specific style and why, a fitted version of the same design or a different design, and a test fails on one that isn't listed. | Same round (F6); Hector: no desktop design, but "we arent able to track what is supposed to be responsive vs what is a design choice. We should probably track that somewhere." |
 | D86 | No spending cap on the AI Gateway: the account's credit is the limit. When it runs out, the Gateway refuses reads (a 402), and the app says reading is paused and asks people to let Hector know so he can add more. Nothing checks ahead of a read. Revises D27's $10 monthly budget and its "paused until next month". | Hector, 2026-10-08 (H35): he removed the budget, with about $18 in the account; "we need some kind of copy that lets them know to let me know". A spent key budget was seen as a 402 in P9.3; spent credit arriving as a 402 too is Claude's best guess, unseen. |
@@ -2281,18 +2281,48 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
 
 Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second testers' round ([feedback](./feedback/2026-10-08-desktop-tester.md)), a tester on a desktop in a book Hector shares with him.
 
-- [ ] **P26.1** Groceries and Meal plan, and a Words section — C · D84, F4 (round 2)
+- [x] **P26.1** Groceries and Meal plan, and a Words section — C · D84, F4 (round 2)
   - Do: "list" and "plan" become Groceries and Meal plan wherever they name the list and the plan (buttons, sheets, the tab, messages). The map gets a Words section.
   - Verify: screen tests' and flows' names updated; the recipe page's two buttons side by side at 375 px; `grep` finds no "Add to list" or "Add to plan" left.
-- [ ] **P26.2** Whose book — C · D82, F1 (round 2)
+  - Evidence (2026-10-08):
+    - Buttons and sheets: Add to groceries (again), Add to meal plan, Open groceries, Open meal plan, Clear groceries ("Clear all groceries?"), Remove from groceries, "Add N meals to groceries", Make my default meal plan, Start my own meal plan; the pickers are labelled Meal plan and Groceries.
+    - The tab is Meal plan, and Groceries' label over the plan's name is Groceries.
+    - Messages: "Nothing in groceries yet.", "already in groceries", "That item is no longer in groceries", "That meal is no longer in the meal plan", "Couldn't add it to groceries.", the optional line's "Left off groceries.", and the welcome, sign-in and app descriptions.
+    - Join's "already in your list" (meaning your books or plans) reads "It's already one of your meal plans." now.
+    - Plans keep their names ("Hector's Plan"): renaming them would change people's data, which D84 doesn't ask for.
+    - The map's Words section names each thing once (recipe book, meal plan, groceries, meal, cook day, eat days, item, members) with the words not to use. AGENTS.md's UI rules point to it, and the map's screens and jobs use the new names. Code names (`plan`, `AddToListButton`) are unchanged.
+    - Tests: the screen tests and the `plan-and-shop` flow look for the new names; `grep` finds no "Add to list" or "Add to plan" in `app/` or `src/`, comments included.
+    - At 375 px (a throwaway flow on the test project): Add to groceries and Add to meal plan fit side by side under Cook, and the tab reads Meal plan. The `plan-and-shop` flow's empty-groceries check was a regex the renaming missed; it's fixed, and all three flows pass.
+- [x] **P26.2** Whose book — C · D82, F1 (round 2)
   - Do: your own book first in the pills after All recipes, a people icon on books shared with you; a recipe's back link names its book in two or more books.
   - Verify: screen tests for the pills' order and icon and the back link's name; 375 px.
-- [ ] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · needs H34
+  - Evidence (2026-10-08):
+    - The library's pills are All recipes, the books you own, then the ones shared with you. `SpaceSwitcher` takes `shared` and shows a people icon (`Users`), with ", shared with you" for screen readers.
+    - The plan pills use the same component, unmarked: D82 names the book pills, so they're left for Hector to ask for.
+    - A recipe's back link names its book when you're in two or more, and still says Recipes with one, or for a recipe from a book you're not in.
+    - Screen tests: the pills' order and icon with a book shared with you, the back link's name in two books, and Recipes in one.
+    - At 375 px, with a second account joining the first's book: All recipes, the guest's own book, then the host's with its people icon (the row scrolls, as it did); the recipe's back link reads "Hector's Recipes".
+- [x] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · H34
   - Do: a flag on books still carrying their automatic name (a migration, with existing books matched by name); the name shown follows the owner's current first name while the flag is set; renaming clears it. Rename in a book's ⋯ for its owner.
   - Verify: use-case tests on both backends (follows a name change, stops after a rename, only the owner's own book); a migration test; a screen test for Rename in the ⋯.
-- [ ] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
+  - Evidence (2026-10-08):
+    - Migration 0019 adds `spaces.auto_name` and sets it where a space's name is what `personalSpaceName` would make from its owner's name today. A book whose owner has already changed their name (the tester's) doesn't match, so it keeps its name until renamed.
+    - `ensurePersonalSpace` creates with `autoName`. `SpacesRepository` shows such a space as `personalSpaceName` of its owner's current name in every read (`getById`, `findOwned`, `listForUser`); `rename` clears the flag. The mock does the same with its stand-in names.
+    - Plans too: the flag is on spaces, and a personal plan ("Hector's Plan") is named the same way. D83 names books, but leaving plans out would take a special case for the same problem. Claude's call, one condition to undo.
+    - Rename is a step in the ⋯ for owners (books and plans, as the ⋯ is the same), with Back; `RenameSpaceForm` now submits through a transition, so a refused name stays (the rule fix 12 applied to Create).
+    - Tests: on both backends, a name change followed (for a member too), a rename ending it, and a book made with a name keeping it; the migration from the schema before it (marked by name, nameless accounts' "My Recipes", and names chosen or no longer matching left alone); a screen test renaming from the ⋯, and an editor without Rename.
+    - Migration 0019 on the test project (2026-10-08): 154 of its 158 spaces follow their owner's name, as nearly all are flows' personal books and plans. Production's, run by Hector the same day: 2 of its 6 spaces follow, a tester's book and plan. Hector's own keep their names, as his account's name starts "Hectarek" (had they matched, they'd now read "Hectarek's Recipes"). The tester who renamed his account (now Taro) had a book and plan still named "Hector's"; Hector flagged those two the same day, so with #37 deployed they read "Taro's Recipes" and "Taro's Plan". Hector's own were flagged by hand too, once he said every automatic name should follow (D83's revision): migration 0019 matched names against the owner's current one, so it missed both accounts renamed before it. All six spaces on production now follow.
+    - Found on the test project, not by the tests: `OWNER_NAME` failed on Neon, since Drizzle left `"id"` unqualified in `getById`'s one-table query and Neon Auth's user table has a `role` of its own. The subquery now aliases its tables. The test database's copy of the table has Neon's columns, and a repository test reads a personal space through `getById`, `findOwned` and `listForUser`; with the old query it, and the delete test, fail.
+    - At 375 px: Rename is a step in the ⋯ sheet, with the name in its box and Back.
+- [x] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
   - Do: bottom sheets no wider than the page, centred, in `@repo/ui`'s Drawer. The map's Wide screens section, and a test listing every `sm:`, `md:`, `lg:`, `xl:` style in the app against it.
   - Verify: the test fails on an unlisted style; sheets at 375 px unchanged and at a desktop width capped; the other apps' sheets checked.
+  - Evidence (2026-10-08):
+    - `@repo/ui`'s Drawer caps a bottom or top sheet at `--drawer-max-width` (42rem unless an app sets it) and centres it. The recipes app's pages are 42 to 48rem, so its sheets are never wider than the page. The package's AGENTS.md lists it with the other local changes a shadcn update must re-apply.
+    - The map's Wide screens section lists the app's 8 width-specific classes in 4 files: the library's three cards a row (and its loading cards), the recipe page's one-row buttons, and the account page lining up with Neon Auth's columns. Each says whether it's a fitted version of the same design or a different one (only the account page's, Neon's).
+    - `tests/app/wide-screens.test.ts` compares the app's width-specific classes with the table. It failed on a `md:p-4` added to a throwaway file, and fails on a row whose class is gone.
+    - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview, which is behind Vercel's login: in Hector's review.
+    - Measured on the test project: at 1280 px a sheet is 672 px wide (42rem) from x 304, centred; at 375 px it's the full 375.
 
 ## Later (to-dos, not scheduled)
 
@@ -2392,7 +2422,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
-| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | OK'd 2026-10-08: "Yep 34 is ok" |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | done 2026-10-08: migration 0019, the test project by Claude, production by Hector |
 | H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | done 2026-10-08: no budget, only the account's credit; when it's spent, the message asks people to let Hector know (D86) |
 
 ## Risks and how they're handled
@@ -2650,3 +2680,13 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Hector's review of #33 and #35; Phase 26.
 - **2026-10-08 (bs)** — Hector answered H34 (OK) and H35: no Gateway budget, only the account's credit (about $18), and when it runs out the message asks people to let him know (D86). The message changed with it.
   - Next: Phase 26.
+- **2026-10-08 (bt)** — Phase 26 built: P26.1 Groceries and Meal plan on screen and the map's Words section, P26.2 whose book in the pills and the back link, P26.3 a personal book or plan following its owner's name (migration 0019) with Rename in the ⋯, P26.4 sheets capped at the page in `@repo/ui`'s Drawer and the map's Wide screens record with its test. Plans follow their owner's name too (Claude's call). Lint, types and tests pass in every app.
+  - Next: migration 0019 (H34), the flows and 375 px; Hector's review of #33, #35 and Phase 26's PR.
+- **2026-10-08 (bu)** — Phase 26 checked on the test project: migration 0019, the flows, and its screens at 375 px and 1280 px. The check found `OWNER_NAME` failing on Neon (an unqualified column, and Neon Auth's own `role`), fixed with a test that now catches it.
+  - Next: production's migration 0019 (Hector); the reviews.
+- **2026-10-08 (bv)** — Hector applied migration 0019 to production (H34). Claude checked it: 2 of 6 spaces follow, a tester's; Hector's own keep their names, as his account's first word is "Hectarek". #37 is ready for review.
+  - Next: Hector's reviews of #33, #35 and #37.
+- **2026-10-08 (bw)** — Hector flagged the tester's book and plan on production (2 rows), so they follow his name, Taro, once #37 deploys. Hector's own wait on his account's name.
+  - Next: Hector's reviews of #33, #35 and #37; his account name, then his two spaces flagged if he wants them to follow.
+- **2026-10-08 (bx)** — D83 revised: every automatic-looking name follows its owner, not only those matching the owner's current name. Hector flagged his own book and plan on production (2 rows), so all six there follow; with #37 deployed his read "Hectarek's Recipes" and "Hectarek's Plan".
+  - Next: Hector's reviews of #33, #35 and #37.

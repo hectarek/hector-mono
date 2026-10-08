@@ -2,9 +2,11 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
-import { useActionState } from "react";
+import { type FormEvent, useActionState, useTransition } from "react";
 import { renameSpace } from "@/app/actions/spaces";
 
+// A book's or plan's name, for its owner: on Members, and as a step in its ⋯ (D83). A name
+// chosen here stays, even when it was the one made from the owner's.
 export function RenameSpaceForm({
   spaceId,
   name,
@@ -13,9 +15,17 @@ export function RenameSpaceForm({
   name: string;
 }) {
   const [state, formAction, isPending] = useActionState(renameSpace, null);
+  const [, startTransition] = useTransition();
+
+  // Through a transition, not <form action>, so a refused name stays in the box to fix.
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(() => formAction(formData));
+  }
 
   return (
-    <form action={formAction} className="flex flex-col gap-1">
+    <form onSubmit={submit} className="flex flex-col gap-1">
       <input type="hidden" name="spaceId" value={spaceId} />
       <div className="flex gap-2">
         <Input
@@ -36,7 +46,9 @@ export function RenameSpaceForm({
         </Button>
       </div>
       {state?.error && (
-        <p className="text-destructive text-sm">{state.error}</p>
+        <p role="alert" className="text-destructive text-sm">
+          {state.error}
+        </p>
       )}
       {state?.message && (
         <p className="text-muted-foreground text-sm">{state.message}</p>

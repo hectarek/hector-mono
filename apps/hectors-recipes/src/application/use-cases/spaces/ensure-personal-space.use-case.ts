@@ -38,8 +38,9 @@ export const ensurePersonalSpaceUseCase = (
 
       logger.info("Creating personal space", { userId, type });
       const ownerName = await spacesRepository.getUserName(userId, tx);
+      // Named for its owner, and following their name from now on (D83).
       return spacesRepository.create(
-        { type, name: personalSpaceName(type, ownerName) },
+        { type, name: personalSpaceName(type, ownerName), autoName: true },
         userId,
         tx,
       );

@@ -44,7 +44,7 @@ export function ClearListButton({
     return (
       <Button variant="destructive" size="lg" onClick={() => setAsking(true)}>
         <Trash2 data-icon="inline-start" />
-        Clear list
+        Clear groceries
       </Button>
     );
   }
@@ -53,11 +53,11 @@ export function ClearListButton({
     // The border is on a wrapper: a legend is drawn into its own fieldset's border.
     <div className="rounded-xl border p-3">
       <fieldset className="flex flex-col gap-3">
-        <legend className="mb-3 font-medium">Clear the whole list?</legend>
+        <legend className="mb-3 font-medium">Clear all groceries?</legend>
         <p className="text-muted-foreground text-sm">
           This removes {count === 1 ? "the 1 item" : `all ${count} items`},
           checked or not, for everyone in the plan. Planned meals can be added
-          again from Plan.
+          again from Meal plan.
         </p>
         {error && (
           <p role="alert" className="text-destructive text-sm">
@@ -81,7 +81,7 @@ export function ClearListButton({
             disabled={isPending}
             onClick={clear}
           >
-            {isPending ? "Clearing…" : "Clear list"}
+            {isPending ? "Clearing…" : "Clear groceries"}
           </Button>
         </div>
       </fieldset>

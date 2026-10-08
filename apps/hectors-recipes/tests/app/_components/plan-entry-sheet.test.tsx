@@ -100,20 +100,22 @@ describe("PlanEntrySheet", () => {
     });
     const view = render(sheet(meal));
 
-    await user.click(view.getByRole("button", { name: "Add to grocery list" }));
+    await user.click(view.getByRole("button", { name: "Add to groceries" }));
     await view.findByText("1 added.");
     expect(await fixture.groceries()).toEqual(["1 lb ground turkey"]);
 
     // Still showing the meal as it was before it went on the list.
     await user.click(
-      await view.findByRole("button", { name: "Add to grocery list" }),
+      await view.findByRole("button", { name: "Add to groceries" }),
     );
-    await view.findByText("1 meal was already on the list.");
+    await view.findByText("1 meal was already in groceries.");
     expect(await fixture.groceries()).toEqual(["1 lb ground turkey"]);
 
     const [added] = await fixture.meals(TODAY);
     view.rerender(sheet(added ?? meal));
-    await user.click(view.getByRole("button", { name: "Add to list again" }));
+    await user.click(
+      view.getByRole("button", { name: "Add to groceries again" }),
+    );
     await waitFor(async () =>
       expect(await fixture.groceries()).toEqual(["2 lb ground turkey"]),
     );

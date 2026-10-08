@@ -21,7 +21,7 @@ type RecipeServingsValue = {
 
 const RecipeServingsContext = createContext<RecipeServingsValue | null>(null);
 
-// One servings number for a recipe screen. The stepper sets it; Add to list and the Cook
+// One servings number for a recipe screen. The stepper sets it; Add to groceries and the Cook
 // link read it, so scaling to 6 on the page means 6 on the list and 6 in cook mode. Cook
 // mode also keeps it in the URL (?servings=), so a reload doesn't lose it.
 export function RecipeServings({

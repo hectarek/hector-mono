@@ -104,7 +104,7 @@ describe("plan actions", () => {
       fields: { eatDates: "A meal can't be eaten before it's cooked" },
     });
     expect(await setEntryCooked(crypto.randomUUID(), true)).toEqual({
-      error: "That meal is no longer on the plan",
+      error: "That meal is no longer in the meal plan",
     });
     nextState.userId = undefined;
     expect(await removePlanEntry(crypto.randomUUID())).toEqual({

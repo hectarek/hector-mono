@@ -433,8 +433,8 @@ export function GroceryList({
           {got.length
             ? "Everything's in the cart."
             : canEdit
-              ? "The list is empty. Add items above, or add a recipe or your planned meals."
-              : "Nothing on the list yet."}
+              ? "Nothing in groceries yet. Add items above, or add a recipe or your planned meals."
+              : "Nothing in groceries yet."}
         </p>
       )}
 
