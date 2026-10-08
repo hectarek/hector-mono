@@ -120,7 +120,12 @@ async function readFileText(text: string): Promise<ReadRecipeResult> {
 // Add by photo (ux-plan P10.2) or file (D53): a cookbook page, a screenshot, or a text or
 // Markdown file, read by the recipe reader, then the new-recipe form filled in to check.
 // Nothing is saved until Save, and the photo or file itself isn't kept.
-export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
+export function PhotoImport({
+  form,
+  choiceHref,
+  manualHref,
+  linkHref,
+}: NewRecipe) {
   const [stage, setStage] = useState<Stage>({ kind: "choose" });
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -257,14 +262,25 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
               <p role="alert" className="text-destructive text-sm">
                 {stage.error}
               </p>
-              <Button
-                variant="secondary"
-                size="lg"
-                nativeButton={false}
-                render={<Link href={manualHref} />}
-              >
-                Add manually instead
-              </Button>
+              {/* The other two ways in, as Add by link or text offers after a failed read. */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={linkHref} />}
+                >
+                  Add by link or text
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={manualHref} />}
+                >
+                  Add manually
+                </Button>
+              </div>
             </div>
           )}
         </div>

@@ -76,6 +76,11 @@ describe("PhotoImport", () => {
       "That PDF is over 4 MB. Screenshot the recipe's pages instead.",
     );
     expect(reader.sources.length).toBe(before);
+    // P25.1, fix 7: the same ways out as Add by link or text.
+    const wayOut = (name: string) =>
+      view.getByRole("button", { name }).closest("a")?.getAttribute("href");
+    expect(wayOut("Add by link or text")).toBe("/recipes/new/link");
+    expect(wayOut("Add manually")).toBe("/recipes/new/manual");
 
     await user.upload(
       input(),

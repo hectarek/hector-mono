@@ -199,7 +199,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** read a recipe from up to three photos, a PDF, a Word document or a text file (D53, D74).
 - **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by photo or file".
-- **Main action:** Choose a photo or file. After a failure: Add manually instead.
+- **Main action:** Choose a photo or file. After a failure: Add by link or text, Add manually.
 - **Leads to:** the recipe form, filled in, with "Read from your photos. Check it before saving." (or photo, PDF or file)
 
 ### Recipe form — `/recipes/new/manual`, `/recipes/[id]/edit`, and after a read
@@ -263,7 +263,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6). **Fixed in P25.1: a timer that's up is `secondary`, with a ringing bell.**
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). **Fixed in P25.1: Members on all three; Books' intro says invites are in a book's Members.**
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all. **Fixed in P25.1: viewers get "Nothing on the list yet." and "Nothing planned this week."**
-7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually.
+7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually. **Fixed in P25.1: Add by photo or file offers Add by link or text and Add manually.**
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does.
 10. Cook mode's Done goes back to the recipe without the servings chosen there.

@@ -42,5 +42,6 @@ export async function loadNewRecipe(requested: string | undefined) {
     choiceHref: `/recipes/new${query}`,
     manualHref: `/recipes/new/manual${query}`,
     photoHref: `/recipes/new/photo${query}`,
+    linkHref: `/recipes/new/link${query}`,
   };
 }
