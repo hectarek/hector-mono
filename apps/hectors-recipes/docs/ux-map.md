@@ -255,7 +255,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 ## Where the app and its rules disagree
 
-Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there. Phase 25 fixed all 12 (P25.1), except the budget half of 8, which waits on H35.
+Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there. Phase 25 fixed all 12 (P25.1); for 8, spent AI credit is still said after a read, by Hector's choice (H35, D86).
 
 1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason). **Fixed in P25.1: both are bottom sheets.**
 2. Groceries' Add button is the default size (40 px), not `lg` (D32). **Fixed in P25.1: it's `lg`.**
@@ -264,7 +264,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). **Fixed in P25.1: Members on all three; Books' intro says invites are in a book's Members.**
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all. **Fixed in P25.1: viewers get "Nothing on the list yet." and "Nothing planned this week."**
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually. **Fixed in P25.1: Add by photo or file offers Add by link or text and Add manually.**
-8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails. **Half fixed in P25.1: the daily limit shows before a read (Add by photo or file in place of its picker; Add by link or text in its note, keeping the box for links). The budget's pause still shows only after a read: the app can't know it before without remembering a refused read, which needs a table (H35).**
+8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails. **Half fixed in P25.1: the daily limit shows before a read (Add by photo or file in place of its picker; Add by link or text in its note, keeping the box for links). Spent AI credit still shows only after a read, and the message asks people to let Hector know (H35, D86).**
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does. **Fixed in P25.1: all three ask first (`ConfirmActionButton`).**
 10. Cook mode's Done goes back to the recipe without the servings chosen there. **Fixed in P25.1: Done and Back to the recipe carry `?servings=`, which the recipe page takes.**
 11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved. **Fixed in P25.1: the note keeps "Saving to <book>." after the read's sentence.**

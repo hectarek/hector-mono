@@ -70,7 +70,7 @@ describe("toActionError", () => {
       ),
     ).toEqual({
       error:
-        "Import is paused until next month: this month's reading budget is used up.",
+        "Reading recipes with AI is paused: the app has run out of AI credit. Let Hector know so he can add more. You can still add this one by hand.",
     });
   });
 

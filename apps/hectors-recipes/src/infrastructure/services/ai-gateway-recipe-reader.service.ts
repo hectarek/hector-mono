@@ -213,9 +213,9 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
         cause: err,
       });
     }
-    // The Gateway answers 402 when the project's budget or the account's credit is spent.
+    // The Gateway answers 402 when a key's budget or the account's credit is spent (D86).
     if (GatewayError.isInstance(err) && err.statusCode === 402) {
-      this.logger.warn("AI Gateway budget reached", describe(err));
+      this.logger.warn("AI Gateway credit or budget spent", describe(err));
       return new RecipeReadError("budget-paused", "AI budget reached", {
         cause: err,
       });

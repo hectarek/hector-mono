@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, stacked on Phase 24's branch: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33, a draft) is checked on the test project (its migrations, the flows, 375 px); production's migrations not yet run (H31). Phases 22 and 23 (#31, #32) are merged. Then 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Phase 24's migrations on production (H31; the test project's are done), before hectarek/hector-mono#33 merges. Then Phase 26 (H34 before P26.3). |
+| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, stacked on Phase 24's branch: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33) is checked on the test project and its migrations are on production too (H31). Phases 22 and 23 (#31, #32) are merged. Then 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#33, then #35 (Phase 25). Then Phase 26, its migration OK'd (H34). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -150,6 +150,7 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D83 | A personal book named for its owner ("Hector's Recipes") follows the owner's name when it changes, until someone renames the book; a flag on the book says it still carries its automatic name. Rename also sits in the book's ⋯, for owners. Refines D19, which named it once. | Same round (F5): the tester changed his account's name and his book kept the old one. Checked on the test project: the name change works; only the book's name doesn't follow. |
 | D84 | One word for each thing: the grocery list is **Groceries** ("Add to groceries", "Open groceries") and the plan is **Meal plan** ("Add to meal plan", the Meal plan tab). The map gets a Words section naming each thing once, which new screens use. | Same round (F4); Hector, 2026-10-08: "instead of list we should call it groceries, and instead of plan we should call it meal plan". The Words section is Claude's recommendation. |
 | D85 | Wide screens: the app stays a phone design. Bottom sheets are no wider than the page and centred (in `@repo/ui`'s Drawer, so every app's). The map's Wide screens section lists every width-specific style and why, a fitted version of the same design or a different design, and a test fails on one that isn't listed. | Same round (F6); Hector: no desktop design, but "we arent able to track what is supposed to be responsive vs what is a design choice. We should probably track that somewhere." |
+| D86 | No spending cap on the AI Gateway: the account's credit is the limit. When it runs out, the Gateway refuses reads (a 402), and the app says reading is paused and asks people to let Hector know so he can add more. Nothing checks ahead of a read. Revises D27's $10 monthly budget and its "paused until next month". | Hector, 2026-10-08 (H35): he removed the budget, with about $18 in the account; "we need some kind of copy that lets them know to let me know". A spent key budget was seen as a 402 in P9.3; spent credit arriving as a 402 too is Claude's best guess, unseen. |
 
 ---
 
@@ -2391,8 +2392,8 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
-| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
-| H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | open |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | OK'd 2026-10-08: "Yep 34 is ok" |
+| H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | done 2026-10-08: no budget, only the account's credit; when it's spent, the message asks people to let Hector know (D86) |
 
 ## Risks and how they're handled
 
@@ -2647,3 +2648,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Hector's review of #33 and #35; Phase 26.
 - **2026-10-08 (bq)** — Phase 25 checked: the flows pass on the test project, and fixes 1, 4, 5, 7 and 9 are checked at 375 px. A finished timer is now quieter than the yellow screen-lock warning beside it, noted for Hector. GitHub rebased Phase 24 onto main once #31 and #32 merged; Phase 25 is rebased onto it.
   - Next: production's migrations (H31) before #33 merges; Phase 26.
+- **2026-10-08 (bs)** — Hector answered H34 (OK) and H35: no Gateway budget, only the account's credit (about $18), and when it runs out the message asks people to let him know (D86). The message changed with it.
+  - Next: Phase 26.
