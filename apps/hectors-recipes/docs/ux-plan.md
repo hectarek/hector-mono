@@ -2195,9 +2195,15 @@ One commit per task; the PR when the phase is done.
 
 Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations are applied together (H31). From the first testers' round: F9, F10, F14, F19, F20.
 
-- [ ] **P24.1** Bookmarks — C+H · D72, D77, F9 · needs H31
+- [x] **P24.1** Bookmarks — C+H · D72, D77, F9 · H31
   - Do: a table of bookmarks (person, recipe), removed with the recipe. A bookmark icon to the right of the recipe's name, filled when saved.
   - Verify: use-case tests on both backends (save, unsave, only yours, gone with the recipe); a screen test; 375 px.
+  - Evidence (2026-10-08):
+    - Migration 0016 adds `recipe_bookmarks` (person and recipe, the recipe's delete cascading). `IBookmarksRepository` and its mock, `setBookmark` and `getBookmarks` use cases and controllers, and the `setBookmark` action.
+    - Anyone who can open a recipe can save it (a recipe opens with a session alone), so saving checks only that the recipe exists, inside the write's transaction.
+    - The recipe page has `BookmarkButton` to the right of the name: `quiet`, `icon-lg`, "Save recipe" with `aria-pressed`, filled when saved. It changes at once and goes back with a message if the save fails (`callAction`).
+    - Tests: on both backends, saving and unsaving newest first, saving twice keeping one, each person's own (a viewer, and someone outside the book), a missing recipe refused, and a deleted recipe's bookmark gone; the controller's basics; a screen test that saves and unsaves through the real action.
+    - Checked at 375 px with P24.2 (below).
 - [ ] **P24.2** The library's order: saved first, and recently viewed — C · D76, D77, F9, F10
   - Do: bookmarked recipes first by default and a Saved chip. Recipes you open are remembered on the device (D76), and the library can order by them, from one control with Group by (placed on the map when the phase starts).
   - Verify: tests for the ordering with search and Group by; screen tests; the `plan-and-shop` flow still finds its recipe.

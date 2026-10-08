@@ -172,3 +172,26 @@ export async function deleteRecipe(
   revalidatePath("/");
   redirect(`/?book=${bookId}`);
 }
+
+// Saves a recipe for this person, or no longer (docs/ux-plan.md D77): the bookmark beside a
+// recipe's name. The library puts saved recipes first.
+export async function setBookmark(
+  recipeId: string,
+  saved: boolean,
+): Promise<ActionState> {
+  try {
+    await getInjection("ISetBookmarkController")(
+      { recipeId, saved },
+      await getCurrentUserId(),
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("setBookmark"),
+      saved ? "Couldn't save that recipe." : "Couldn't unsave that recipe.",
+    );
+  }
+  revalidatePath("/");
+  revalidatePath(`/recipes/${recipeId}`);
+  return null;
+}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AddToListButton } from "@/app/_components/add-to-list-button";
 import { AddToPlanButton } from "@/app/_components/add-to-plan-button";
 import { BackLink } from "@/app/_components/back-link";
+import { BookmarkButton } from "@/app/_components/bookmark-button";
 import { InlineMarkdown } from "@/app/_components/markdown";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
@@ -36,9 +37,10 @@ export default async function RecipePage({
   const { id } = await params;
   const { recipe, canEdit } = await loadRecipe(id);
   const userId = await getCurrentUserId();
-  const [books, plans] = await Promise.all([
+  const [books, plans, bookmarks] = await Promise.all([
     getInjection("IListMySpacesController")({ type: "recipe-book" }, userId),
     getInjection("IListMySpacesController")({ type: "meal-plan" }, userId),
+    getInjection("IGetBookmarksController")(userId),
   ]);
   // A plan's grocery list is part of the plan, so whoever can plan can add to a list. In no
   // plan yet: adding creates their own.
@@ -89,9 +91,15 @@ export default async function RecipePage({
                 {recipe.title.charAt(0).toUpperCase()}
               </ProduceTile>
             )}
-            <h1 className="font-heading text-3xl text-balance">
-              {recipe.title}
-            </h1>
+            <div className="flex items-start justify-between gap-2">
+              <h1 className="font-heading text-3xl text-balance">
+                {recipe.title}
+              </h1>
+              <BookmarkButton
+                recipeId={recipe.id}
+                saved={bookmarks.includes(recipe.id)}
+              />
+            </div>
             {recipe.description && (
               <p className="text-muted-foreground">{recipe.description}</p>
             )}

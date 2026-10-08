@@ -335,6 +335,23 @@ export const recipeReads = pgTable(
   ],
 );
 
+// A person's saved recipes (docs/ux-plan.md D77): their own, whatever book a recipe is in, so
+// a phone and a laptop agree. Gone with the recipe.
+export const recipeBookmarks = pgTable(
+  "recipe_bookmarks",
+  {
+    userId: uuid("user_id").notNull(),
+    recipeId: uuid("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.recipeId] }),
+    index("recipe_bookmarks_recipe_idx").on(table.recipeId),
+  ],
+);
+
 // Each grouped tag's group (docs/ux-plan.md D55), for grouping recipes and the tag picker. Only
 // a tag with a group has a row; recipes keep their tags by name (`recipes.tags`).
 export const tags = pgTable(

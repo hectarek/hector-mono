@@ -1,3 +1,4 @@
+import type { IBookmarksRepository } from "@/src/application/repositories/bookmarks.repository.interface";
 import type { IGroceryItemsRepository } from "@/src/application/repositories/grocery-items.repository.interface";
 import type { IPlanEntriesRepository } from "@/src/application/repositories/plan-entries.repository.interface";
 import type { IRecipeReadsRepository } from "@/src/application/repositories/recipe-reads.repository.interface";
@@ -30,10 +31,12 @@ import type { IAdoptRecipesUseCase } from "@/src/application/use-cases/recipes/a
 import type { ICreateRecipeUseCase } from "@/src/application/use-cases/recipes/create-recipe.use-case";
 import type { IDeleteRecipeUseCase } from "@/src/application/use-cases/recipes/delete-recipe.use-case";
 import type { IGetAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-all-recipes.use-case";
+import type { IGetBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
 import type { IGetRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import type { IGetRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
 import type { IReadRecipeUseCase } from "@/src/application/use-cases/recipes/read-recipe.use-case";
 import type { IReadRecipeFromLinkUseCase } from "@/src/application/use-cases/recipes/read-recipe-from-link.use-case";
+import type { ISetBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
 import type { IUpdateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
 import type { IAcceptInviteUseCase } from "@/src/application/use-cases/spaces/accept-invite.use-case";
 import type { ICreateInviteUseCase } from "@/src/application/use-cases/spaces/create-invite.use-case";
@@ -69,10 +72,12 @@ import type { IAdoptRecipesController } from "@/src/interface-adapters/controlle
 import type { ICreateRecipeController } from "@/src/interface-adapters/controllers/recipes/create-recipe.controller";
 import type { IDeleteRecipeController } from "@/src/interface-adapters/controllers/recipes/delete-recipe.controller";
 import type { IGetAllRecipesController } from "@/src/interface-adapters/controllers/recipes/get-all-recipes.controller";
+import type { IGetBookmarksController } from "@/src/interface-adapters/controllers/recipes/get-bookmarks.controller";
 import type { IGetRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import type { IGetRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
 import type { IReadRecipeController } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
 import type { IReadRecipeFromLinkController } from "@/src/interface-adapters/controllers/recipes/read-recipe-from-link.controller";
+import type { ISetBookmarkController } from "@/src/interface-adapters/controllers/recipes/set-bookmark.controller";
 import type { IUpdateRecipeController } from "@/src/interface-adapters/controllers/recipes/update-recipe.controller";
 import type { IAcceptInviteController } from "@/src/interface-adapters/controllers/spaces/accept-invite.controller";
 import type { ICreateInviteController } from "@/src/interface-adapters/controllers/spaces/create-invite.controller";
@@ -95,6 +100,7 @@ export const DI_SYMBOLS = {
   IRealtimeService: Symbol.for("IRealtimeService"),
   IRecipeReaderService: Symbol.for("IRecipeReaderService"),
   IRecipeReadsRepository: Symbol.for("IRecipeReadsRepository"),
+  IBookmarksRepository: Symbol.for("IBookmarksRepository"),
   IRecipePageFetcherService: Symbol.for("IRecipePageFetcherService"),
   IGrantPlanSubscriptionUseCase: Symbol.for("IGrantPlanSubscriptionUseCase"),
   IGrantPlanSubscriptionController: Symbol.for(
@@ -146,6 +152,8 @@ export const DI_SYMBOLS = {
   IUpdateMemberRoleUseCase: Symbol.for("IUpdateMemberRoleUseCase"),
   IRemoveMemberUseCase: Symbol.for("IRemoveMemberUseCase"),
   IAdoptRecipesUseCase: Symbol.for("IAdoptRecipesUseCase"),
+  ISetBookmarkUseCase: Symbol.for("ISetBookmarkUseCase"),
+  IGetBookmarksUseCase: Symbol.for("IGetBookmarksUseCase"),
 
   IEnsurePersonalSpaceController: Symbol.for("IEnsurePersonalSpaceController"),
   ICreateRecipeController: Symbol.for("ICreateRecipeController"),
@@ -187,6 +195,8 @@ export const DI_SYMBOLS = {
   IUpdateMemberRoleController: Symbol.for("IUpdateMemberRoleController"),
   IRemoveMemberController: Symbol.for("IRemoveMemberController"),
   IAdoptRecipesController: Symbol.for("IAdoptRecipesController"),
+  ISetBookmarkController: Symbol.for("ISetBookmarkController"),
+  IGetBookmarksController: Symbol.for("IGetBookmarksController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -195,6 +205,7 @@ export interface DI_RETURN_TYPES {
   IRealtimeService: IRealtimeService;
   IRecipeReaderService: IRecipeReaderService;
   IRecipeReadsRepository: IRecipeReadsRepository;
+  IBookmarksRepository: IBookmarksRepository;
   IRecipePageFetcherService: IRecipePageFetcherService;
   IGrantPlanSubscriptionUseCase: IGrantPlanSubscriptionUseCase;
   IGrantPlanSubscriptionController: IGrantPlanSubscriptionController;
@@ -244,6 +255,8 @@ export interface DI_RETURN_TYPES {
   IUpdateMemberRoleUseCase: IUpdateMemberRoleUseCase;
   IRemoveMemberUseCase: IRemoveMemberUseCase;
   IAdoptRecipesUseCase: IAdoptRecipesUseCase;
+  ISetBookmarkUseCase: ISetBookmarkUseCase;
+  IGetBookmarksUseCase: IGetBookmarksUseCase;
 
   IEnsurePersonalSpaceController: IEnsurePersonalSpaceController;
   ICreateRecipeController: ICreateRecipeController;
@@ -283,4 +296,6 @@ export interface DI_RETURN_TYPES {
   IUpdateMemberRoleController: IUpdateMemberRoleController;
   IRemoveMemberController: IRemoveMemberController;
   IAdoptRecipesController: IAdoptRecipesController;
+  ISetBookmarkController: ISetBookmarkController;
+  IGetBookmarksController: IGetBookmarksController;
 }

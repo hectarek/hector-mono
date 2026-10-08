@@ -4,9 +4,13 @@ import { adoptRecipesUseCase } from "@/src/application/use-cases/recipes/adopt-r
 import { createRecipeUseCase } from "@/src/application/use-cases/recipes/create-recipe.use-case";
 import { deleteRecipeUseCase } from "@/src/application/use-cases/recipes/delete-recipe.use-case";
 import { getAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-all-recipes.use-case";
+import { getBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
 import { getRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import { getRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
+import { setBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
 import { updateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
+import { BookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository";
+import { MockBookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository.mock";
 import { RecipesRepository } from "@/src/infrastructure/repositories/recipes.repository";
 import { MockRecipesRepository } from "@/src/infrastructure/repositories/recipes.repository.mock";
 import { TagsRepository } from "@/src/infrastructure/repositories/tags.repository";
@@ -15,8 +19,10 @@ import { adoptRecipesController } from "@/src/interface-adapters/controllers/rec
 import { createRecipeController } from "@/src/interface-adapters/controllers/recipes/create-recipe.controller";
 import { deleteRecipeController } from "@/src/interface-adapters/controllers/recipes/delete-recipe.controller";
 import { getAllRecipesController } from "@/src/interface-adapters/controllers/recipes/get-all-recipes.controller";
+import { getBookmarksController } from "@/src/interface-adapters/controllers/recipes/get-bookmarks.controller";
 import { getRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import { getRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
+import { setBookmarkController } from "@/src/interface-adapters/controllers/recipes/set-bookmark.controller";
 import { updateRecipeController } from "@/src/interface-adapters/controllers/recipes/update-recipe.controller";
 
 export function createRecipesModule() {
@@ -27,6 +33,9 @@ export function createRecipesModule() {
       .bind(DI_SYMBOLS.IRecipesRepository)
       .toClass(MockRecipesRepository);
     recipesModule.bind(DI_SYMBOLS.ITagsRepository).toClass(MockTagsRepository);
+    recipesModule
+      .bind(DI_SYMBOLS.IBookmarksRepository)
+      .toClass(MockBookmarksRepository);
   } else {
     recipesModule
       .bind(DI_SYMBOLS.IRecipesRepository)
@@ -34,6 +43,9 @@ export function createRecipesModule() {
     recipesModule
       .bind(DI_SYMBOLS.ITagsRepository)
       .toClass(TagsRepository, [DI_SYMBOLS.ILoggerService]);
+    recipesModule
+      .bind(DI_SYMBOLS.IBookmarksRepository)
+      .toClass(BookmarksRepository, [DI_SYMBOLS.ILoggerService]);
   }
 
   const writeDeps = [
@@ -139,6 +151,34 @@ export function createRecipesModule() {
     .bind(DI_SYMBOLS.IAdoptRecipesController)
     .toHigherOrderFunction(adoptRecipesController, [
       DI_SYMBOLS.IAdoptRecipesUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+
+  // Saved recipes (docs/ux-plan.md D77).
+  recipesModule
+    .bind(DI_SYMBOLS.ISetBookmarkUseCase)
+    .toHigherOrderFunction(setBookmarkUseCase, [
+      DI_SYMBOLS.IBookmarksRepository,
+      DI_SYMBOLS.IRecipesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipesModule
+    .bind(DI_SYMBOLS.ISetBookmarkController)
+    .toHigherOrderFunction(setBookmarkController, [
+      DI_SYMBOLS.ISetBookmarkUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipesModule
+    .bind(DI_SYMBOLS.IGetBookmarksUseCase)
+    .toHigherOrderFunction(getBookmarksUseCase, [
+      DI_SYMBOLS.IBookmarksRepository,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipesModule
+    .bind(DI_SYMBOLS.IGetBookmarksController)
+    .toHigherOrderFunction(getBookmarksController, [
+      DI_SYMBOLS.IGetBookmarksUseCase,
       DI_SYMBOLS.ILoggerService,
     ]);
 

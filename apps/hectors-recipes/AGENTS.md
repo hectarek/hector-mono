@@ -65,7 +65,7 @@ src/
     realtime.ts        # planChannel: a plan's live-updates channel
     recipe-page.ts     # recipeFromPage: a page's schema.org Recipe data -> draft, without AI
   application/
-    repositories/      # interfaces: spaces, recipes, plan-entries, grocery-items, recipe-reads
+    repositories/      # interfaces: spaces, recipes, plan-entries, grocery-items, recipe-reads, bookmarks
     services/          # interfaces: authentication, logger, transaction-manager, realtime, recipe-reader, recipe-page-fetcher
     use-cases/         # by domain: spaces/ (with the access helpers require-space-role, require-owner), recipes/, plan/, grocery/, realtime/
   interface-adapters/
@@ -108,6 +108,7 @@ Full rationale in the spec. Summary:
 - **`ingredients`**: global catalog, unique name, and an `aisle` from the fixed list in `src/entities/aisles.ts` (D25).
 - **`plan_entries`** / **`grocery_items`**: both in `meal-plan` spaces; a plan's `grocery_items` are its grocery list. A plan entry is a meal (docs/ux-plan.md D38): one cooking of a recipe, with its cook day (the column is still called `date`; `cookDate` in code), its eat days (`eat_dates`, sorted, at least one (a check since 0010), none before the cook day) and `cooked` (D39).
 - **`grocery_item_recipes`**: which recipes a grocery item is for (migration 0014, docs/ux-plan.md D59), keyed by `(item_id, recipe_id)`, with `quantity`, that recipe's share of the item's amount, and `link_order` (an identity, migration 0015), the order links were made in. Both keys cascade, so deleting a recipe keeps its items. `grocery_items.source_note` is no longer read or written, and is dropped later (L8).
+- **`recipe_bookmarks`**: a person's saved recipes (migration 0016, docs/ux-plan.md D77), keyed by `(user_id, recipe_id)`, gone with the recipe. Anyone who can open a recipe can save it, so the use case checks only that the recipe exists. Saving twice keeps the first save's time.
 - **`user_settings`**: one row per person, `default_plan_id` / `default_book_id` (FKs to `spaces`, set null when the space is deleted). No default book means All recipes.
 - **`recipe_reads`**: one row per AI read of a recipe (migration 0012): `user_id`, `kind` (`'image' | 'text' | 'document'`) and `created_at`, indexed on `(user_id, created_at)`, for the daily limit (`DAILY_RECIPE_READS`, docs/ux-plan.md D48). No space columns: the limit is per person.
 - **`tags`**: the tag catalog (migration 0013, docs/ux-plan.md D55): `name` (the key, as `recipes.tags` stores it) and `category` (`'meal' | 'cuisine' | 'diet'`). Only a tag with a group has a row, so there's no row to add when a recipe gets a tag without one; saving a recipe adds one for a new tag given a group in the form (`addGroups`, which never changes a tag's existing group). Shared by everyone, like `ingredients`. The migration fills it with `STARTING_TAGS` (`src/entities/models/tag.model.ts`), and a test checks the two agree.
