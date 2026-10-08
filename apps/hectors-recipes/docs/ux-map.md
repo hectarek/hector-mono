@@ -208,7 +208,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Full-screen: Cancel, "New recipe" or "Edit recipe", Save (the main action).
 - **Fields:** Book (new, when you can edit two or more), Title, Description, Servings, Time, Source link, Photo link, Video link (which says where it plays).
 - **Ingredients and Method:** rows and sections. A row's ⋯ opens its sheet: a line's note and Optional, a step's timer, Move up, Move down, Remove, Done. Pasting several lines into a row makes a row for each.
-- **Tags:** chips under their groups, and New tag (D33, D55).
+- **Tags:** chips under their groups, your tags first and then the catalog's (so a new account has some, D78), and New tag (D33, D55).
 - **Edit only:** Delete recipe at the bottom, which asks first.
 - **Imports:** "Check before saving" lists the lines the reader was unsure of.
 - **Leaving:** Cancel with changes asks "Discard your changes?".

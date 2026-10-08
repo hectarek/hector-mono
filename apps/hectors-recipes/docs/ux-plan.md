@@ -2223,9 +2223,14 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
     - `RecipeVideo` keeps the photo, or the produce tile, with a button in its middle: Play video swaps in the player (nothing loads before the tap), and Watch video opens another host's page in a new tab.
     - Tests: each host's links and the ones refused; a screen test that plays a YouTube video only after the tap, and one that sends Instagram to its own page.
     - 375 px is checked with the flows, once the migrations are on the test project (H31).
-- [ ] **P24.4** Suggested tags, and meal prep — C+H · D78, F14, F19 · needs H31
+- [x] **P24.4** Suggested tags, and meal prep — C+H · D78, F14, F19 · H31
   - Do: the tag picker offers the catalog's tags under their groups, beside your own; a migration adds "meal prep" under meal, and `STARTING_TAGS` with it.
   - Verify: a new account's picker shows the catalog's tags (a screen test); the catalog test still agrees with `STARTING_TAGS`.
+  - Evidence (2026-10-08):
+    - `suggestedTags` gives the form your tags (most used first), then the starting tags you don't use, each once; `TagPicker` puts them under their groups as before. New and Edit both use it.
+    - It offers `STARTING_TAGS`, not every row in `tags`: a tag anyone gives a group joins the shared catalog, and one household's tags shouldn't show in another's form. Claude's call, within D78.
+    - Migration 0018 inserts "meal prep" under meal, leaving it alone if someone already grouped it; `STARTING_TAGS` lists it last among meals, so By meal puts its heading after Drink.
+    - Tests: `suggestedTags`' order; `loadNewRecipe` gives a new account the catalog's tags with their groups, and puts a cook's own first; the catalog test on Postgres finds "meal prep" under meal. A loader test stands in for the screen test: the picker already has screen tests for grouping the chips it's given.
 
 ## Phase 25: Where the app breaks its own rules
 

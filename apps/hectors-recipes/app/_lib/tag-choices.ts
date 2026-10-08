@@ -2,6 +2,7 @@
 // added with New tag. Saved tags are trimmed and lowercased (the recipe schema), so typed ones
 // are tidied the same way here, and one that matches a chip picks that chip.
 import {
+  STARTING_TAGS,
   TAG_CATEGORIES,
   type TagCategory,
   type TagGroups,
@@ -9,6 +10,16 @@ import {
 
 // What's in the New tag box while it's open: the text, and the group picked for it (D55).
 export type NewTag = { text: string; group: TagCategory | undefined };
+
+// The chips the form offers (D78): the tags in their books, then the catalog's starting ones
+// they don't use yet, so a new account has some to pick. Only the starting ones: a tag someone
+// gives a group joins the shared catalog, and it isn't for everyone's form.
+export function suggestedTags(own: string[]): string[] {
+  const starting = TAG_CATEGORIES.flatMap(
+    (category) => STARTING_TAGS[category],
+  );
+  return [...own, ...starting.filter((tag) => !own.includes(tag))];
+}
 
 export function tagChoices(suggested: string[], chosen: string[]): string[] {
   return [...suggested, ...chosen.filter((tag) => !suggested.includes(tag))];

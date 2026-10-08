@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadBooks } from "@/app/_lib/load-books";
+import { suggestedTags } from "@/app/_lib/tag-choices";
 import { getInjection } from "@/di/container";
 import { hasRole } from "@/src/entities/models/space.model";
 
@@ -32,7 +33,7 @@ export async function loadNewRecipe(requested: string | undefined) {
       spaceId: book.id,
       books: editable,
       cancelHref: requested ? `/?book=${requested}` : "/",
-      suggestedTags: tags,
+      suggestedTags: suggestedTags(tags),
       tagGroups,
       heading: "New recipe",
       note: editable.length > 1 ? undefined : `Saving to ${book.name}`,
