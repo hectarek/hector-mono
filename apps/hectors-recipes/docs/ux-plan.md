@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 27 (from Hector's look at Phases 24 to 26: saved marks on cards, the recipe page's button order, cook mode's checklist, the carrot and basil drawings) on `feat/recipes-p27-polish`: built and checked (the flows, 375 px). Phases 22 to 26 (hectarek/hector-mono#31, #32, #33, #35, #37) are merged. Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews Phase 27's PR. Then Phase 20, or the drafts in Hector's tracker. |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
+| Phase | 28 (planned: Cache Components, and moving between screens) drafted on `docs/recipes-p28-cache-components`, waiting on H36. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector answers H36. Then stash's move and Phase 28; or Phase 20, or the drafts in Hector's tracker. |
+| Waiting on Hector | H36 (Phase 28's proposals). Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -2354,6 +2354,103 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
     - Compared side by side before the change, then on the welcome screen at 375 px. The same drawings hop while the AI reads a recipe (`ReadingWait`).
     - The design system's Produce assets still have the old drawings; updating them is Hector's call.
 
+## Phase 28 (planned): Cache Components, and moving between screens
+
+Not started: Hector answers H36 first. From the Next.js 16.4 upgrade (hectarek/hector-mono#38 to #40). Hector, 2026-10-08: "yes, draft the recipes phase in the ux-plan".
+
+Why now: Next.js 16.4 recommends Cache Components for every app, and Next.js 17 turns it on for every app, so the app moves either way. With it on, `export const dynamic` fails the build. The portfolio moved in hectarek/hector-mono#39. React 19.3's view transitions are stable, and Next.js 16.4 needs no setting for them. Both are in one phase because the best transition here, a recipe card growing into its page, only plays when the page is ready at the tap. Cache Components' caching is what makes it ready.
+
+Starting point, 2026-10-08, read from the code:
+- **Pages.** 15 of the 17 pages export `dynamic = "force-dynamic"`, Welcome and Sign in among them, and the signed-in ones read the session in their body. `account/[path]`, `auth/[path]` and `pwa-icon/[size]` set `dynamicParams = false`, which Cache Components refuses at build.
+- **Loading states.** No page uses `<Suspense>`: the six `loading.tsx` files are the only loading states. They cover every page under `(main)` and `(form)`, but not cook mode, Welcome or Sign in.
+- **Layouts.** No layout reads the session, cookies or the clock. The header, the tab bar (`usePathname`) and the install hint can be prerendered as they are.
+- **A tab today.** Each tap shows the tab's skeleton until the server answers, every time.
+- **The session.** It isn't remembered within a request: the recipe, cook and edit pages read it twice, once in `loadRecipe` and once in the page. Neon's `getSession()` reads cookies, headers and the clock.
+- **Refreshing.** Saves refresh pages through `revalidatePath` alone (31 calls in `app/actions/`). `router.refresh()` runs in three places: live updates, the 60 s refresh, and the offline queue's flush.
+- **Tests.** The preload stubs `next/cache` with `revalidatePath` alone. Five page tests render a page by awaiting it, which keeps working while a page stays an async function under a `loading.tsx`.
+
+**Stash first.** Stash moves before P28.1, in its own small PR. It has the same Neon Auth and proxy, 2 `force-dynamic` exports and 2 `dynamicParams`, so it's a cheap rehearsal of P28.1 and P28.2. Hector's tracker has the task; he can drop it (H36).
+
+### Proposals (H36)
+
+Each is placed on [ux-map.md](./ux-map.md) by its four questions. What Hector decides becomes D-numbers, and the map and AGENTS.md change with the tasks.
+
+**A. What's ready the moment you tap.**
+- **Placed.** Jobs: all six, most of all Find something to cook. Screens: the three tabs and a recipe's page. Pattern: none on screen; it changes how soon a screen appears. Cost: a change someone else makes can show up late on a screen kept in the phone's memory. Your own changes always show at once, because any save clears that memory.
+- **Option 1: nothing kept.** Each tap still shows the skeleton, then the page, as today.
+- **Option 2, recommended.** The library, Books and the recipe pages you open are kept in the phone's memory for 5 minutes (`'use cache: private'`, never stored on the server):
+  - Once you've seen the library or a recipe, coming back to it within 5 minutes shows it at once.
+  - The three tab links also get their page ready in the background (`<Link prefetch>`, one request per tab), so even the first switch to the Recipes tab shows the library at once. The library reads its book and search from the address, which the plain prefetch leaves out.
+  - A change someone else makes to a shared book can take up to 5 minutes to show.
+  - Meal plan and Groceries load fresh on every visit: two people plan and shop together, and Groceries is live (D21).
+- **Option 3.** Option 2 plus Meal plan, so all three tabs switch at once. Someone else's meal can then take up to 5 minutes to show.
+- **Not recommended: getting every recipe card ready before it's tapped** (`<Link prefetch>` on each card). It would make a card's first tap instant, at one server request per card on screen.
+
+**B. Coming back to a page.** With Cache Components, Next.js keeps the last three pages you left alive but hidden, so Back returns to them as you left them. Proposed:
+- **Placed.** Jobs: Find something to cook, Add a recipe, Cook. Screens: the library, the recipe form and the two ways to add a recipe by reading one, a recipe's page, every screen with a sheet. Pattern: none on screen. Cost: none in taps. A few screens need a reset, or they'd show something stale.
+- **Kept:** where you scrolled, and the library's search, chips and Sort and group.
+- **Reset:**
+  - A sheet or dialog left open closes when you leave its page.
+  - A recipe form you saved or discarded starts empty or from the saved recipe next time.
+  - Add by link or photo starts at its box or picker, not the last read.
+  - A playing recipe video stops.
+  - Signing out reloads the app, so nothing one person typed stays for the next on a shared phone.
+- **Groceries** reconnects to live updates when you come back, as it does after the phone sleeps today.
+
+**C. Moving between screens.** Proposed for Hector's "room to play" (D75):
+- **Placed.** Jobs: Find something to cook (card to recipe), Cook (recipe to cook mode), every tab switch. Screens: no screen gets busier and there's nothing new to tap. Pattern: new, Motion between screens, written into AGENTS.md's UI Rules and the map's patterns table before a screen uses it. Cost: none in taps. Safari may play some transitions differently (Next.js's guide), so they're checked on an iPhone. Motion isn't a bold moment (D75). With reduced motion, nothing moves; at most a fade.
+- **Recommended, five moves:**
+  1. **A card grows into its recipe.** The photo or produce tile moves and resizes into the page's, the same colour (`produceFor`). It plays when the page is ready at the tap (one you opened in the last 5 minutes, under A2). Otherwise the page fades up.
+  2. **Deeper and back.** A page you go into (a recipe, Books, Members) slides in from the right, and its back link slides it out the other way. The header and the tab bar stay still. The browser's Back and the iPhone's back swipe carry no direction, so they get no slide, and Safari animates the swipe itself.
+  3. **Tabs crossfade**, quickly and with no direction. Tabs sit side by side, not deeper.
+  4. **Cook mode rises** over the recipe, and Done lowers it, as a full-screen task does.
+  5. **A skeleton fades into its page** when the page arrives.
+- **Unchanged:** the week's slide-in (D54) and cook mode's screens (D63), which already move.
+- **Smaller option:** only 1 and 5.
+
+### Tasks
+
+One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cache-components`, in its own worktree.
+
+- [ ] **P28.1** Turn on Cache Components — C · needs H36
+  - Do:
+    - `cacheComponents` and `partialPrefetching` in `next.config.ts`, and the 15 `force-dynamic` exports removed.
+    - In place of `dynamicParams = false`: `account/[path]` and `auth/[path]` call `notFound()` for a path not in Neon's `accountViewPaths` or `authViewPaths`, and `pwa-icon/[size]` answers 404 for a size it doesn't draw.
+    - Loading screens for cook mode, Welcome and Sign in.
+    - What the build and the dev validation flag is fixed. A route opts out (`instant = false`) only with its reason written here.
+  - Verify:
+    - `bun run build` passes.
+    - Dev validation is clean on each route, on a page load and on a tap from each tab.
+    - An unknown account, sign-in or icon path is a 404.
+    - The proxy's session refresh still works: a flow with the session-cache cookie removed.
+    - The tests and the three flows pass.
+- [ ] **P28.2** What stays and what resets — C · H36 (B)
+  - Do: the resets B lists, each in the component that holds the state. Sheets and dialogs close in a `useLayoutEffect` cleanup or the link's `onNavigate`. The forms and imports reset after a save or a discard. `RecipeVideo` stops playing. Check that Neon's sign-out reloads the page (its default navigation sets `window.location.href`), and that the week's slide-in still comes from the right side (`week-swipe.tsx` keeps the last week in a module variable).
+  - Verify:
+    - Screen tests hide and show a component inside React's `<Activity>`: a sheet closes, a saved form is empty, the video stops, and Groceries' live updates reconnect.
+    - The flows go to a page and back.
+- [ ] **P28.3** Ready the moment you tap — C · H36 (A)
+  - Do:
+    - The screens A picks read through `'use cache: private'` with a 5-minute `stale`, in their page helpers (`load-books.ts`, `load-recipe.ts`), so the session is also read once per request.
+    - The tab bar's links to those screens get `prefetch`.
+    - Nothing per person is stored on the server, and no `'use cache'` (server-stored) wraps anything that depends on who's signed in.
+  - Verify:
+    - The flows get an `instant()` test per chosen screen (`@next/playwright`, a new dev dependency), failing before the change.
+    - A save shows at once on the screen it changed.
+    - On the test project, a second account's change shows within 5 minutes.
+- [ ] **P28.4** Motion between screens, written down first — C · H36 (C) · D70
+  - Do: the pattern in AGENTS.md's UI Rules (what moves, reduced motion, the anchored header and tab bar) and the map's patterns table. Each screen on the map says what moves into and out of it.
+  - Verify: AGENTS.md and the map agree, and every move C lists is on the map.
+- [ ] **P28.5** The moves — C · H36 (C)
+  - Do:
+    - What C picks, with `<ViewTransition>` and `<Link transitionTypes>`, with the keyframes in `app/globals.css`.
+    - The header and the tab bar get names of their own, so they stay still.
+    - `::view-transition { pointer-events: none }`, so a tap during a move isn't lost.
+    - Every move is under 400 ms.
+  - Verify:
+    - In the browser pane at 375 px, light and dark: each move, and none with reduced motion.
+    - On an iPhone, on the preview (H5).
+
 ## Later (to-dos, not scheduled)
 
 - [x] **L1** Clean up the book's data — H · D11
@@ -2454,6 +2551,7 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
 | H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | done 2026-10-08: migration 0019, the test project by Claude, production by Hector |
 | H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | done 2026-10-08: no budget, only the account's credit; when it's spent, the message asks people to let Hector know (D86) |
+| H36 | Answer Phase 28's proposals. A: what's ready the moment you tap (nothing kept; the library, Books and recipes kept for 5 minutes, recommended; or Meal plan too). B: what stays and what resets when you come back. C: which moves between screens (the five, recommended, or only a card growing into its recipe and a skeleton fading). And whether stash moves first. | Phase 28 | open |
 
 ## Risks and how they're handled
 
@@ -2471,6 +2569,9 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
 | The deployed app's Groceries tab breaks between applying P7.1's migration and the merge | Hector isn't using the app yet; the gap is one phase. |
 | Replacing an untouched plan on join deletes something someone meant to keep | Only when it has no entries, no grocery items, no other members and no live links, checked in the join's own transaction. |
 | iOS refuses the share sheet when it isn't called straight from a tap (P7.6) | The links exist before the tap, so the tap only shares. Checked on a real phone. |
+| A screen kept in the phone's memory shows someone else's change late (Phase 28) | Only the screens H36 picks, for 5 minutes at most. Your own saves clear it at once. Groceries is never kept, and nothing per person is stored on the server. |
+| A page kept alive after you leave it shows a stale sheet, form or video, or one person's typing to the next (Phase 28) | P28.2 resets each, with a screen test per reset. Signing out reloads the app. |
+| Safari plays a move between screens differently, or a move gets in the way of a tap (Phase 28) | Moves are under 400 ms, taps pass through during a move, and reduced motion moves nothing. Checked on an iPhone (H5). |
 
 ## Session log
 
@@ -2722,3 +2823,5 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
   - Next: Hector's reviews of #33, #35 and #37.
 - **2026-10-08 (by)** — #37 merged, so Phases 22 to 26 are all in. Phase 27 built from Hector's notes: a saved recipe's card carries a bookmark, the recipe page puts Add to meal plan before Add to groceries, cook mode's ingredients are rows you check off as on Groceries (`CheckRow`, shared), and the carrot's greens and the basil's stem are fixed (the design system's own drawings had both slips). The feedback files mark every Phase 23 to 26 item Built.
   - Next: Hector's review of Phase 27; the worktrees and branches of merged phases cleaned up.
+- **2026-10-08 (bz)** — Phase 27 merged (hectarek/hector-mono#41). The repo is on Next.js 16.4 (hectarek/hector-mono#38), and its React Compiler runs in Turbopack (hectarek/hector-mono#40). Phase 28 is drafted on `docs/recipes-p28-cache-components`: Cache Components, and moving between screens. It has three proposals for Hector (H36), placed on the map, and five tasks that wait on them. Nothing built.
+  - Next: Hector's answers to H36; stash's move first if he keeps it.
