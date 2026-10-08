@@ -115,7 +115,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also on it:** the week's arrows and range, Back to this week, seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open list.
 - **Opens:** a meal's sheet: Change days, Add to grocery list (or Add to list again), Not eating it on Mon 5 (from a leftovers day, D43), Remove meal.
 - **Gestures:** a sideways swipe changes the week (D51), sliding in (D54).
-- **Empty:** "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan." Viewers see no text.
+- **Empty:** "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan." Viewers see "Nothing planned this week."
 - **Bold:** the Today sticker.
 - **Reached from:** the Plan tab, Add to plan's Open plan, Join (a plan), Start my own plan, after leaving or deleting a plan.
 - **Leads to:** Recipe (a meal's title), Groceries (Open list), Members.
@@ -131,7 +131,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also on it:** the add box; Group by, By aisle or By recipe (D60; shown when items came from recipes); the list under aisle or recipe headings; Got it (closed until tapped), holding the checked items and Clear checked.
 - **Rows:** tap to check off (the whole row; it folds into Got it); "for" its recipes; "Not saved yet" when offline; a ⋯ (editors) opening Edit and Remove from list.
 - **Live:** other people's changes appear as they're made (D21), with a refresh every 60 s. Check-offs made with no signal are kept and sent later (D8).
-- **Empty:** "Everything's in the cart.", or "The list is empty. Add items above, or add a recipe or your planned meals." No button.
+- **Empty:** "Everything's in the cart.", or "The list is empty. Add items above, or add a recipe or your planned meals." (viewers: "Nothing on the list yet."). No button.
 - **Bold:** none.
 - **Reached from:** the Groceries tab; Open list from a recipe's Add to list, Plan's grocery box, or cook mode's Add to list.
 - **Leads to:** Members. Nothing links to recipes or Plan.
@@ -262,7 +262,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent. **Fixed in P25.1: Add to plan goes through `callAction`, and the two that say what they added through `callResultAction`.**
 4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6). **Fixed in P25.1: a timer that's up is `secondary`, with a ringing bell.**
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). **Fixed in P25.1: Members on all three; Books' intro says invites are in a book's Members.**
-6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all.
+6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all. **Fixed in P25.1: viewers get "Nothing on the list yet." and "Nothing planned this week."**
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually.
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does.

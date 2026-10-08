@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { render } from "@testing-library/react";
 import PlanPage from "@/app/(main)/plan/page";
+import { getInjection } from "@/di/container";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { planScreenFixture } from "@/tests/_support/plan-screens";
 
@@ -15,8 +16,13 @@ describe("Plan", () => {
     fixture = await planScreenFixture();
   });
 
-  const page = async (week?: string) =>
-    PlanPage({ searchParams: Promise.resolve(week ? { week } : {}) });
+  const page = async (week?: string, plan?: string) =>
+    PlanPage({
+      searchParams: Promise.resolve({
+        ...(week ? { week } : {}),
+        ...(plan ? { plan } : {}),
+      }),
+    });
 
   it("shows the week first, with the grocery box under the days and no Plan a meal", async () => {
     const today = todayIn(PLAN_TIME_ZONE);
@@ -37,5 +43,26 @@ describe("Plan", () => {
   it("says how to plan a meal on a week with nothing planned", async () => {
     const view = render(await page(addDays(todayIn(PLAN_TIME_ZONE), 21)));
     view.getByText(EMPTY_WEEK);
+  });
+
+  // P25.1, fix 6: a viewer can't plan, so their empty week says only that it's empty.
+  it("tells a viewer the week is empty, without how to plan", async () => {
+    const owner = crypto.randomUUID();
+    const plan = await getInjection("IEnsurePersonalSpaceController")(
+      "meal-plan",
+      owner,
+    );
+    const links = await getInjection("IEnsureInviteLinksController")(
+      { spaceId: plan.id },
+      owner,
+    );
+    await getInjection("IAcceptInviteController")(
+      { token: links.viewer.token },
+      fixture.userId,
+    );
+
+    const view = render(await page(undefined, plan.id));
+    view.getByText("Nothing planned this week.");
+    expect(view.queryByText(EMPTY_WEEK)).toBe(null);
   });
 });
