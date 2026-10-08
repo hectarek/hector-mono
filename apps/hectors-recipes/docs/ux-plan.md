@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), in review as hectarek/hector-mono#37; production's migration not yet run (H34). Phase 25 is in review as #35, Phase 24 as #33. Phases 22 and 23 (#31, #32) are merged. Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector runs migration 0019 on production (H34) before #37 merges, and reviews #33, #35 and #37. The portfolio's `/ui` Drawer on #37's Vercel preview. |
+| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built, tested and checked on the test project (migration 0019, the flows, 375 px and a desktop width), with 0019 on production too (H34); in review as hectarek/hector-mono#37. Phase 25 is in review as #35, Phase 24 as #33. Phases 22 and 23 (#31, #32) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#33, #35 and #37, in that order, with the portfolio's `/ui` Drawer on #37's preview. Then Phase 20, or the drafts in Hector's tracker. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2311,7 +2311,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Plans too: the flag is on spaces, and a personal plan ("Hector's Plan") is named the same way. D83 names books, but leaving plans out would take a special case for the same problem. Claude's call, one condition to undo.
     - Rename is a step in the ⋯ for owners (books and plans, as the ⋯ is the same), with Back; `RenameSpaceForm` now submits through a transition, so a refused name stays (the rule fix 12 applied to Create).
     - Tests: on both backends, a name change followed (for a member too), a rename ending it, and a book made with a name keeping it; the migration from the schema before it (marked by name, nameless accounts' "My Recipes", and names chosen or no longer matching left alone); a screen test renaming from the ⋯, and an editor without Rename.
-    - Migration 0019 on the test project (2026-10-08): 154 of its 158 spaces follow their owner's name, as nearly all are flows' personal books and plans. Production's is Hector's to run, as auto mode stopped Phase 24's.
+    - Migration 0019 on the test project (2026-10-08): 154 of its 158 spaces follow their owner's name, as nearly all are flows' personal books and plans. Production's, run by Hector the same day: 2 of its 6 spaces follow, a tester's book and plan. Hector's own keep their names, as his account's name starts "Hectarek" (had they matched, they'd now read "Hectarek's Recipes"). The tester who renamed his account still has a book named "Hector's Recipes"; he renames it from the ⋯, or Claude flags it with Hector's OK.
     - Found on the test project, not by the tests: `OWNER_NAME` failed on Neon, since Drizzle left `"id"` unqualified in `getById`'s one-table query and Neon Auth's user table has a `role` of its own. The subquery now aliases its tables. The test database's copy of the table has Neon's columns, and a repository test reads a personal space through `getById`, `findOwned` and `listForUser`; with the old query it, and the delete test, fail.
     - At 375 px: Rename is a step in the ⋯ sheet, with the name in its box and Back.
 - [x] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
@@ -2321,7 +2321,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - `@repo/ui`'s Drawer caps a bottom or top sheet at `--drawer-max-width` (42rem unless an app sets it) and centres it. The recipes app's pages are 42 to 48rem, so its sheets are never wider than the page. The package's AGENTS.md lists it with the other local changes a shadcn update must re-apply.
     - The map's Wide screens section lists the app's 8 width-specific classes in 4 files: the library's three cards a row (and its loading cards), the recipe page's one-row buttons, and the account page lining up with Neon Auth's columns. Each says whether it's a fitted version of the same design or a different one (only the account page's, Neon's).
     - `tests/app/wide-screens.test.ts` compares the app's width-specific classes with the table. It failed on a `md:p-4` added to a throwaway file, and fails on a row whose class is gone.
-    - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview.
+    - Every app that uses `@repo/ui` passes lint, types and tests. The portfolio's `/ui` page shows the Drawer; it couldn't be built here (the sandbox blocks Google Fonts), so it's checked on the PR's Vercel preview, which is behind Vercel's login: in Hector's review.
     - Measured on the test project: at 1280 px a sheet is 672 px wide (42rem) from x 304, centred; at 375 px it's the full 375.
 
 ## Later (to-dos, not scheduled)
@@ -2422,7 +2422,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
-| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | OK'd 2026-10-08: "Yep 34 is ok"; migration 0019 |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | done 2026-10-08: migration 0019, the test project by Claude, production by Hector |
 | H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | done 2026-10-08: no budget, only the account's credit; when it's spent, the message asks people to let Hector know (D86) |
 
 ## Risks and how they're handled
@@ -2684,3 +2684,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: migration 0019 (H34), the flows and 375 px; Hector's review of #33, #35 and Phase 26's PR.
 - **2026-10-08 (bu)** — Phase 26 checked on the test project: migration 0019, the flows, and its screens at 375 px and 1280 px. The check found `OWNER_NAME` failing on Neon (an unqualified column, and Neon Auth's own `role`), fixed with a test that now catches it.
   - Next: production's migration 0019 (Hector); the reviews.
+- **2026-10-08 (bv)** — Hector applied migration 0019 to production (H34). Claude checked it: 2 of 6 spaces follow, a tester's; Hector's own keep their names, as his account's first word is "Hectarek". #37 is ready for review.
+  - Next: Hector's reviews of #33, #35 and #37.
