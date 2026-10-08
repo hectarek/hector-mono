@@ -300,7 +300,7 @@ export function GroceryList({
 }) {
   const [isClearing, startClearing] = useTransition();
   const [clearError, setClearError] = useState<string>();
-  // By aisle or by recipe (D60), kept in the address in place, as the library's Group by is.
+  // By aisle or by recipe (D60), kept in the address in place, as the library's Sort and group is.
   const searchParams = useSearchParams();
   const [byRecipe, setByRecipe] = useState(
     searchParams.get("group") === "recipe",

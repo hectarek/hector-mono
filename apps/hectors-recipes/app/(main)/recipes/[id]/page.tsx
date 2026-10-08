@@ -10,6 +10,7 @@ import { InlineMarkdown } from "@/app/_components/markdown";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
 import { CookLink, RecipeServings } from "@/app/_components/recipe-servings";
+import { RememberView } from "@/app/_components/remember-view";
 import { ScaledIngredients } from "@/app/_components/scaled-ingredients";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { libraryHref } from "@/app/_lib/library-href";
@@ -57,6 +58,7 @@ export default async function RecipePage({
 
   return (
     <article data-surface="reading">
+      <RememberView recipeId={recipe.id} />
       <RecipeServings yieldServings={recipe.yieldServings}>
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-2">

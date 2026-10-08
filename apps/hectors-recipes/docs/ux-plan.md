@@ -2204,9 +2204,15 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
     - The recipe page has `BookmarkButton` to the right of the name: `quiet`, `icon-lg`, "Save recipe" with `aria-pressed`, filled when saved. It changes at once and goes back with a message if the save fails (`callAction`).
     - Tests: on both backends, saving and unsaving newest first, saving twice keeping one, each person's own (a viewer, and someone outside the book), a missing recipe refused, and a deleted recipe's bookmark gone; the controller's basics; a screen test that saves and unsaves through the real action.
     - Checked at 375 px with P24.2 (below).
-- [ ] **P24.2** The library's order: saved first, and recently viewed — C · D76, D77, F9, F10
+- [x] **P24.2** The library's order: saved first, and recently viewed — C · D76, D77, D80, F9, F10
   - Do: bookmarked recipes first by default and a Saved chip. Recipes you open are remembered on the device (D76), and the library can order by them, from one control with Group by (placed on the map when the phase starts).
   - Verify: tests for the ordering with search and Group by; screen tests; the `plan-and-shop` flow still finds its recipe.
+  - Evidence (2026-10-08):
+    - Group by became Sort and group (D80): Sort holds Saved first (the default), Recently viewed (`?sort=recent`) and A to Z (`?sort=az`); Group holds By meal, cuisine and diet (`?group=`), each with the default order inside its headings. `orderRecipes` orders before search, so search's title-first ranking holds, and grouping comes after.
+    - The Saved chip leads the chips when you've saved any (`?saved=1`, filtered on the server); Clear filters drops it.
+    - Recently viewed: `RememberView` on the recipe page notes when it was opened, in local storage (the newest 200; D76), and the library orders by it once loaded. Nothing is stored in the database.
+    - Tests: `orderRecipes` (saved first, last opened first, A to Z as it comes); screen tests for saved first by default, the Saved chip's link and filter ("1 of 4 recipes"), Recently viewed from local storage with `?sort=recent`, and the grouping test with the renamed control.
+    - The `plan-and-shop` flow's grouping step names the new control; the flows and 375 px checks run with Phase 24's migrations on the test project (H31).
 - [ ] **P24.3** A video in place of the photo — C+H · D72, F20 · needs H31
   - Do: a video link column, its field under Photo link, and the recipe page showing the video where the photo was. A host that can't be embedded keeps the photo, with the video as a link.
   - Verify: a test for each host's link; a screen test; 375 px.

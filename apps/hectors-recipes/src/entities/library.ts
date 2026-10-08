@@ -81,6 +81,40 @@ export function searchRecipes(
     .map(({ recipe }) => recipe);
 }
 
+// The library's orders (D80), beside its groupings in one Sort and group control. Saved first
+// is the default, so it never shows in the address.
+const LIBRARY_ORDERS = ["saved", "recent", "az"] as const;
+export type LibraryOrder = (typeof LIBRARY_ORDERS)[number];
+
+export function isLibraryOrder(value: unknown): value is LibraryOrder {
+  return LIBRARY_ORDERS.some((order) => order === value);
+}
+
+// The library in an order, before search and grouping (D80): saved first (D77), the recipes
+// last opened on this device first (D76; `viewedAt` is when, in ms), or A to Z, which is the
+// order recipes arrive in. Recipes not saved, or never opened, keep A to Z after the rest.
+export function orderRecipes(
+  recipes: ListedRecipe[],
+  order: LibraryOrder,
+  { saved, viewedAt }: { saved: string[]; viewedAt: Record<string, number> },
+): ListedRecipe[] {
+  if (order === "az") return recipes;
+  if (order === "saved") {
+    const isSaved = new Set(saved);
+    return [
+      ...recipes.filter((recipe) => isSaved.has(recipe.id)),
+      ...recipes.filter((recipe) => !isSaved.has(recipe.id)),
+    ];
+  }
+  const viewed = recipes
+    .filter((recipe) => viewedAt[recipe.id] !== undefined)
+    .sort((a, b) => (viewedAt[b.id] ?? 0) - (viewedAt[a.id] ?? 0));
+  return [
+    ...viewed,
+    ...recipes.filter((recipe) => viewedAt[recipe.id] === undefined),
+  ];
+}
+
 // One heading's recipes when the library is grouped; `tag` is null for Other.
 export type RecipeGroup = { tag: string | null; recipes: ListedRecipe[] };
 

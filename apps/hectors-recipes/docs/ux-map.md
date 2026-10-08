@@ -29,7 +29,7 @@ The app is phone-first, built for people who share a recipe book and a plan. Six
 
 | Job | Starts at | Screens, in order | Browser flow |
 |---|---|---|---|
-| Find something to cook | Recipes tab | Library → Recipe | `plan-and-shop` (search, Group by) |
+| Find something to cook | Recipes tab | Library → Recipe | `plan-and-shop` (search, Sort and group) |
 | Add a recipe | Library's Add recipe | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe | `plan-and-shop` (manually), `add-recipe` (photo or file) |
 | Plan the week | A recipe's Add to plan | Recipe (Add to plan) → Plan | `plan-and-shop` |
 | Shop | Plan's grocery button, or a recipe's Add to list | Plan → Groceries | `plan-and-shop` (check off, Got it, Clear list) |
@@ -81,12 +81,12 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books.
 - **Main action:** Add recipe, beside the title (editors) → Add a recipe.
 - **⋯:** Invite (owner), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
-- **Also on it:** search (narrows as you type, D56); Group by (meal, cuisine or diet, D57); tag chips; the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
+- **Also on it:** search (narrows as you type, D56); Sort and group (Saved first, Recently viewed, A to Z; by meal, cuisine or diet; D57, D80); the Saved chip first among the tag chips (D77); the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
 - **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment.
 - **Reached from:** the Recipes tab, the logo, a recipe's back link and tag chips, Books, Join, Copy recipes, and after deleting or copying a recipe.
 - **Leads to:** Recipe, Add a recipe, Books, Members, Copy recipes.
-- **Room:** the title row is full (New and ⋯). Search, Group by and the chips already sit above the grid: a new way to narrow the list belongs in Group by or the chips, and a new book-wide action in the ⋯.
+- **Room:** the title row is full (Add recipe and ⋯). Search, Sort and group and the chips already sit above the grid: a new order or grouping belongs in Sort and group, a new filter among the chips, and a new book-wide action in the ⋯.
 
 ### Recipe — `/recipes/[id]`
 
