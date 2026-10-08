@@ -218,7 +218,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 ### Cook mode — `/recipes/[id]/cook`
 
 - **Job:** cook from a phone at arm's length, one screen at a time (D63–D66).
-- **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe). Bottom bar: Back and Next.
+- **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next.
 - **Screens:** Gather (tick ingredients as you get them out, servings, Add to list, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
 - **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to list's Open list.
@@ -266,6 +266,6 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually. **Fixed in P25.1: Add by photo or file offers Add by link or text and Add manually.**
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails. **Half fixed in P25.1: the daily limit shows before a read (Add by photo or file in place of its picker; Add by link or text in its note, keeping the box for links). The budget's pause still shows only after a read: the app can't know it before without remembering a refused read, which needs a table (H35).**
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does. **Fixed in P25.1: all three ask first (`ConfirmActionButton`).**
-10. Cook mode's Done goes back to the recipe without the servings chosen there.
+10. Cook mode's Done goes back to the recipe without the servings chosen there. **Fixed in P25.1: Done and Back to the recipe carry `?servings=`, which the recipe page takes.**
 11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved.
 12. The Books page's Create form submits with a plain `<form action>`, which AGENTS.md says clears the field on a validation error.
