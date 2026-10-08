@@ -60,15 +60,24 @@ export function SpaceMenu({
       {inviting ? (
         <>
           <ShareLinkButton
-            token={tokens?.editor}
-            spaceName={space.name}
+            path={tokens && `/join/${tokens.editor}`}
+            title={`Join ${space.name}`}
+            label={{
+              share: "Share a link to edit",
+              copy: "Copy a link to edit",
+            }}
+            pending={isPending}
             variant="default"
-          >
-            {isPending ? "Getting a link…" : "Can edit"}
-          </ShareLinkButton>
-          <ShareLinkButton token={tokens?.viewer} spaceName={space.name}>
-            {isPending ? "Getting a link…" : "View only"}
-          </ShareLinkButton>
+          />
+          <ShareLinkButton
+            path={tokens && `/join/${tokens.viewer}`}
+            title={`Join ${space.name}`}
+            label={{
+              share: "Share a view-only link",
+              copy: "Copy a view-only link",
+            }}
+            pending={isPending}
+          />
           {links && !links.ok && (
             <p role="alert" className="text-destructive text-sm">
               {links.error}

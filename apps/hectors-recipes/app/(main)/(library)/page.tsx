@@ -52,14 +52,14 @@ export default async function LibraryPage({
         userId,
       );
 
-  // In All recipes, New goes to your own book (the form offers the others).
+  // In All recipes, Add recipe goes to your own book (the form offers the others).
   const canEdit = showAll || hasRole(current.role, "editor");
   const viewId = showAll ? ALL_RECIPES : current.id;
   const newHref = showAll ? "/recipes/new" : `/recipes/new?book=${current.id}`;
   const newButton = canEdit && (
     <Button size="lg" nativeButton={false} render={<Link href={newHref} />}>
       <Plus data-icon="inline-start" />
-      New
+      Add recipe
     </Button>
   );
   // In the ⋯ sheet (D42): the Books page, to add a book or choose the default.
@@ -110,6 +110,7 @@ export default async function LibraryPage({
         tagGroups={library.tagGroups}
         activeTag={tag}
         recipes={library.recipes}
+        total={library.total}
         bookNames={
           showAll
             ? Object.fromEntries(books.map((book) => [book.id, book.name]))

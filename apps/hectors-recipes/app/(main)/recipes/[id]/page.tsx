@@ -1,14 +1,13 @@
 import { badgeVariants } from "@repo/ui/components/badge";
-import { Button } from "@repo/ui/components/button";
-import { Clock, ExternalLink, Pencil, Users } from "lucide-react";
+import { Clock, ExternalLink, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AddToListButton } from "@/app/_components/add-to-list-button";
 import { AddToPlanButton } from "@/app/_components/add-to-plan-button";
 import { BackLink } from "@/app/_components/back-link";
-import { CopyRecipeButton } from "@/app/_components/copy-recipe-button";
 import { InlineMarkdown } from "@/app/_components/markdown";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
+import { RecipeMenu } from "@/app/_components/recipe-menu";
 import { CookLink, RecipeServings } from "@/app/_components/recipe-servings";
 import { ScaledIngredients } from "@/app/_components/scaled-ingredients";
 import { getCurrentUserId } from "@/app/_lib/current-user";
@@ -63,26 +62,12 @@ export default async function RecipePage({
               href={libraryHref({ book: libraryBook })}
               label="Recipes"
             />
-            <div className="flex items-center gap-2">
-              {copyTargets.length > 0 && (
-                <CopyRecipeButton
-                  recipeId={recipe.id}
-                  title={recipe.title}
-                  targets={copyTargets}
-                />
-              )}
-              {canEdit && (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  nativeButton={false}
-                  render={<Link href={`/recipes/${recipe.id}/edit`} />}
-                >
-                  <Pencil data-icon="inline-start" />
-                  Edit
-                </Button>
-              )}
-            </div>
+            <RecipeMenu
+              recipeId={recipe.id}
+              title={recipe.title}
+              canEdit={canEdit}
+              copyTargets={copyTargets}
+            />
           </div>
 
           <header className="flex flex-col gap-3">

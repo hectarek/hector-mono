@@ -7,13 +7,13 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@repo/ui/components/item";
-import { Camera, ChevronRight, Link2, PenLine } from "lucide-react";
+import { Camera, ChevronRight, ClipboardPaste, PenLine } from "lucide-react";
 import Link from "next/link";
 import { TopBar } from "@/app/_components/top-bar";
 
-// Adding a recipe starts with how (ux-plan D34): from a web page, from photos or a file (D53),
-// or by hand.
-// Each keeps the book it was started from (?book=).
+// Adding a recipe starts with how (ux-plan D34): from a link or a recipe's text, read for you
+// (D73); from photos or a file (D53); or by hand. The words say which are read for you and
+// which you type. Each keeps the book it was started from (?book=).
 export default async function NewRecipePage({
   searchParams,
 }: {
@@ -24,21 +24,23 @@ export default async function NewRecipePage({
   const choices = [
     {
       href: `/recipes/new/link${query}`,
-      Icon: Link2,
-      title: "Add by link",
-      description: "A recipe's web page.",
+      Icon: ClipboardPaste,
+      title: "Add by link or text",
+      description:
+        "Paste a recipe's link, or all of its text, and it's read into the form for you.",
     },
     {
       href: `/recipes/new/photo${query}`,
       Icon: Camera,
       title: "Add by photo or file",
-      description: "Cookbook pages, screenshots, or a PDF or text file.",
+      description: "Cookbook pages, screenshots, or a PDF, Word or text file.",
     },
     {
       href: `/recipes/new/manual${query}`,
       Icon: PenLine,
       title: "Add manually",
-      description: "Type it in, or paste a list.",
+      description:
+        "Type it in yourself. A list you paste is split into rows, not read.",
     },
   ];
 

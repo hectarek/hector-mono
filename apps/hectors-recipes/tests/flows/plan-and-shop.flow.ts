@@ -9,7 +9,7 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
 }) => {
   await signUp(page);
 
-  await page.getByRole("button", { name: "New" }).click();
+  await page.getByRole("button", { name: "Add recipe" }).click();
   await page.getByRole("link", { name: /Add manually/ }).click();
   await page.getByRole("textbox", { name: "Title" }).fill("Chili");
   await page.getByRole("textbox", { name: "Amount, ingredient 1" }).fill("1");

@@ -2,7 +2,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import { useActionState, useState } from "react";
-import { BookSelect } from "@/app/_components/copy-recipe-button";
+import { BookSelect } from "@/app/_components/book-select";
 import { adoptRecipes } from "@/app/actions/spaces";
 
 export function BulkCopyForm({

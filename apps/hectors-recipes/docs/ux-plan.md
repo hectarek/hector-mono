@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`, in review as hectarek/hector-mono#31: done. Phase 23 (clearer, and small things testers asked for) next, stacked on it; then 24 (bookmarks, recently viewed, a video, suggested tags) and 25 (the map's 12 fixes). Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
-| Next task | P23.1. Hector reviews hectarek/hector-mono#31. |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-07 |
+| Phase | 23 (clearer, and small things testers asked for) on `feat/recipes-p23-clearer`, stacked on Phase 22's branch: done, in review. Phase 22 (the UX map) is in review as hectarek/hector-mono#31. Then 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#31, then Phase 23's PR; then Phase 24 (H31 before its PR merges). |
+| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-08 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -106,7 +106,7 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D40 | Everything on a plan comes from a recipe. The per-day Add drawer and typed meals go: planning starts from a recipe's Add to plan, and Plan has one "Plan a meal" button that opens Recipes. A meal whose recipe is later deleted keeps its title, as now. | Hector: the drawer "reinvented a view that already exists"; "all items in plan should come from a recipe". No typed meals exist (checked 2026-09-30). |
 | D41 | One grocery button on Plan adds every planned meal that isn't on the list yet, whatever its week or date. A meal is added once, for its cook day, never per eat day. Each added meal is marked on the calendar, and its sheet has "Add to list again". Supersedes D4's "Add this week". Revised by D44: only the meals cooking in a range picked from today. | Hector: "What if I am doing groceries for multiple weeks or we go shopping mid week… just add what is on the plan so far regardless of week"; asked whether it covers only meals cooking from today, "it should [cover] all planned meals" (Claude's reading of "cook" as "cover"). |
 | D42 | Invite, Members and a tab's other space actions (Make default, Start my own plan, All books) move into a sheet opened by a ⋯ button beside the tab's title. | Hector: those buttons "take up some important real estate"; "yep sounds good" to the ⋯. |
-| D34 | Adding a recipe starts with a choice, on its own page before the form: **Add by link**, **Add by photo**, **Add manually**. Pasting a recipe's text isn't a separate choice: the link screen offers it when a site can't be read, and the form already splits a pasted ingredient list into rows (P9.4). Supersedes D29's pasted-text-first order. | Hector, 2026-09-30: "have a pre-step for adding a new recipe with three buttons… That way we arent thrown directly into it." A page rather than a sheet is Claude's call: Back works, and each way in has its own address. |
+| D34 | Adding a recipe starts with a choice, on its own page before the form: **Add by link**, **Add by photo**, **Add manually**. Pasting a recipe's text isn't a separate choice: the link screen offers it when a site can't be read, and the form already splits a pasted ingredient list into rows (P9.4). Supersedes D29's pasted-text-first order. Revised by D73: the first way in is Add by link or text. | Hector, 2026-09-30: "have a pre-step for adding a new recipe with three buttons… That way we arent thrown directly into it." A page rather than a sheet is Claude's call: Back works, and each way in has its own address. |
 | D43 | On a day a meal is only eaten (leftovers), its ⋯ sheet offers **Not eating it on Mon 5**, which takes that one day off the meal. It isn't offered when that's the meal's only eat day. **Remove meal** removes the whole meal: its cook day and every eat day. | Hector, 2026-09-30 (review decision A): "Sounds good". Before, Remove on a leftovers row deleted the whole meal while reading like "remove this day". |
 | D44 | The grocery button adds the meals cooking in a range picked above it: **Next 3 days**, **Next 7 days** (the default), **Next 14 days** or **All upcoming**, counted by cook day from today. Meals cooking before today are left out. Supersedes D41's "whatever its week or date"; D41's once-per-meal, cook-day rule stays. | Hector (B): "Maybe we have a drop down that shows next 3 days, next 7, all days, etc". Meals are seldom ticked cooked (D39), so without a floor past meals were bought again. The 14-day option and the 7-day default are Claude's call. |
 | D45 | A planned meal whose recipe is still unchecked on the list is skipped, and marked as on the list, only when no other planned meal of that recipe put those items there. Then they came from the recipe page's Add to list, which covers one meal (the earliest). Otherwise it's added as a second batch. The meal's sheet uses the same rule for its first add; **Add to list again** always adds. Adds to one list run one at a time. | Hector (C): "Sounds good". When in doubt it adds: a doubled amount shows on the list, a missing one shows at the store (Claude's reasoning). |
@@ -117,7 +117,7 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D50 | Plan shows the week first. There's no Plan a meal button (planning starts from a recipe's Add to plan, D40), and the grocery box sits under the days, filled as Plan's one action. An empty week says how to plan a meal. Revises D40's "one Plan a meal button". | Hector, 2026-10-04: "the main part i want to see is the calendar and i have to scroll to see it. we can probably remove plan a meal and we can move the shopping for under the calendar." The filled button and the empty-week line are Claude's calls. |
 | D51 | On a phone, a sideways swipe across the week changes the week, as the arrows do (which stay). Swipes from the screen's edge are left to the browser. | Hector, 2026-10-04: "a swipe gesture on mobile to go through the each week in addition to the buttons". The edge rule is Claude's call: Safari's back and forward start there (D22). |
 | D52 | Groceries' ⋯ sheet has Clear list. After asking, it removes every item, checked or not, for everyone in the plan, and marks the plan's meals as not on the list, so Plan can add them again. | Hector, 2026-10-04: "no way to easily clear the whole list… in the 3 dots at the top to reset it so that say we mess up and add it to the list too many times, we have an easy way to reset and try again." Unmarking the meals is Claude's reading of "try again". |
-| D53 | Add by photo becomes Add by photo or file: one picker for up to 3 photos of one recipe, one PDF of up to 10 pages, or one text or Markdown file. Word, Pages and the like aren't taken ("save it as a PDF"). Photos and files go only to the reader and aren't kept. | Hector, 2026-10-04: "its fine if photos are just one, but for pdfs and files we can add whatever up to a conservative limit… What recipe would be more than 10 pages long?"; "lets just focus on text, markdown, and pdf… pdf is a find backstop"; "We also dont want to keep photos"; one way in, combined; "maybe we do do multiple images but lets cap it at 3". |
+| D53 | Add by photo becomes Add by photo or file: one picker for up to 3 photos of one recipe, one PDF of up to 10 pages, or one text or Markdown file. Word, Pages and the like aren't taken ("save it as a PDF"). Photos and files go only to the reader and aren't kept. Revised by D74: Word documents are taken. | Hector, 2026-10-04: "its fine if photos are just one, but for pdfs and files we can add whatever up to a conservative limit… What recipe would be more than 10 pages long?"; "lets just focus on text, markdown, and pdf… pdf is a find backstop"; "We also dont want to keep photos"; one way in, combined; "maybe we do do multiple images but lets cap it at 3". |
 | D54 | When the week changes (a swipe or an arrow), the new week slides in briefly from the side it came from, and not at all with reduced motion. The week doesn't follow the finger. | Hector, 2026-10-04: "it would be nice to have an animation for the swipe, but i would prefer usability if this causing issues". The slide-in after the change was Claude's proposal; Hector: "sure". |
 | D55 | A tag has a group (`meal`, `cuisine`, `diet`, or none), kept in a tag catalog (`tags`: a tag's name and group), as ingredients keep their aisle. Recipes keep their list of tag names. A new tag is given its group when it's made, in the recipe form, and groups are shared by everyone using the app. | Hector, 2026-10-04: "we will need to categorize our tags as well which we need to make sure to cleanly account for in our schema"; of a list in code (A) or a catalog table (B), "go with B and your defaults". |
 | D56 | Search matches a recipe's title, tags and ingredient names. Every word typed must match one of them, and title matches come first. | Hector, 2026-10-04: "not just look up by name, but by relevant info like tags for other common search elements". The rules are Claude's defaults; Hector: "your defaults". |
@@ -144,6 +144,12 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D77 | Bookmarks are per person and kept in the database, so a phone and a laptop agree (as D18). Bookmarked recipes come first in the library by default, and a Saved chip shows only them. | Claude's call: Hector placed the icon (D72) and asked for "easy filtering and it goes to the top by default"; a bookmark is a few deliberate rows per person, unlike views. |
 | D78 | Suggested tags come from the tag catalog that already exists (migration 0013): a new account's picker offers its tags under their groups. "meal prep" joins it under meal. The catalog stays one row per tag for everyone, so suggestions add no rows per person. | Hector, 2026-10-08: "we should probably have a tags table or something similar that we can pull from… mindful how we incorporate that so that we dont have a bloat of records". The meal group and the spelling (as "side dish") are Claude's calls. |
 | D79 | The larger ideas stay as drafts in Hector's tracker until the smaller work is done: learning while you cook (an ingredient dictionary, a talking assistant, lessons), after Phase 20; a public page with boards; substitutes; unit conversions; variations; onboarding; and measuring load times. | Hector, 2026-10-08: "it definetly should go after phase 20… lets just keep these as drafts until we are able to come back to them"; "we can just keep this in drafts for a while until all the other easier ones are addressed". |
+| D80 | The library's order and grouping are one control, **Sort and group**: Saved first (the default), Recently viewed, A to Z, then By meal, By cuisine, By diet. A **Saved** chip comes first among the tag chips. | Claude's proposal for P24.2; Hector, 2026-10-08: "the recommendations are fine". |
+| D81 | A recipe's video takes the photo's place as the photo with a play button, and loads only when tapped. YouTube and Vimeo play in place; a host that won't play inside another site (Instagram, TikTok) opens the video's own page. | Same. Loading on tap keeps the recipe page as fast as it is, and a host that refuses embedding still has its link. |
+| D82 | Whose book: the book pills put your own book first after All recipes, and mark books shared with you with a people icon. A recipe's back link names its book when you're in two or more. | Second testers' round (F1); Claude's recommendation, Hector, 2026-10-08: "go with what is recommended". A tester's own book and Hector's were both "Hector's Recipes", as is the app's wordmark. |
+| D83 | A personal book named for its owner ("Hector's Recipes") follows the owner's name when it changes, until someone renames the book; a flag on the book says it still carries its automatic name. Rename also sits in the book's ⋯, for owners. Refines D19, which named it once. | Same round (F5): the tester changed his account's name and his book kept the old one. Checked on the test project: the name change works; only the book's name doesn't follow. |
+| D84 | One word for each thing: the grocery list is **Groceries** ("Add to groceries", "Open groceries") and the plan is **Meal plan** ("Add to meal plan", the Meal plan tab). The map gets a Words section naming each thing once, which new screens use. | Same round (F4); Hector, 2026-10-08: "instead of list we should call it groceries, and instead of plan we should call it meal plan". The Words section is Claude's recommendation. |
+| D85 | Wide screens: the app stays a phone design. Bottom sheets are no wider than the page and centred (in `@repo/ui`'s Drawer, so every app's). The map's Wide screens section lists every width-specific style and why, a fitted version of the same design or a different design, and a test fails on one that isn't listed. | Same round (F6); Hector: no desktop design, but "we arent able to track what is supposed to be responsive vs what is a design choice. We should probably track that somewhere." |
 
 ---
 
@@ -2124,30 +2130,66 @@ Branch `feat/recipes-p23-clearer`, in its own worktree, stacked on Phase 22's. F
 
 One commit per task; the PR when the phase is done.
 
-- [ ] **P23.1** "Add recipe" on the library — C · F1
+- [x] **P23.1** "Add recipe" on the library — C · F1
   - Do: the library's main action reads "Add recipe", with its plus.
   - Verify: a screen test for the label; 375 px with a long book name, light and dark.
-- [ ] **P23.2** A book's recipe count — C · F17
-  - Do: the library's small label shows the book's count ("Recipe book · 24 recipes"; All recipes counts every book's), and each row on Books shows its book's. The book's total, not the filtered grid (Claude's call: the grid already shows what matches).
+  - Evidence (2026-10-08):
+    - The library's main action reads "Add recipe" and goes to Add a recipe (screen test). The two browser flows that tap it name it so; AGENTS.md and the map say it.
+    - At 375 px on the test project, with the book "Maximiliana's Recipes", the wider button cut the title to "Maximiliana's …". `PageTitle`'s title now takes two lines before it clips, on every tab: the whole name shows, light and dark.
+    - The library, Books, Plan and Groceries screen tests pass.
+- [x] **P23.2** A book's recipe count — C · F17
+  - Do: the count sits over the cards: "24 recipes", or "3 of 24 recipes" while a search or tag narrows them (All recipes counts every book's), and each row on Books shows its book's. Changed from the plan's small label over the title, which the wider Add recipe (P23.1) left no room for, and over the cards it can say how many a search leaves.
   - Verify: screen tests (one recipe, several, none); 375 px.
-- [ ] **P23.3** Invite buttons that say they share — C · F15
+  - Evidence (2026-10-08):
+    - `buildLibraryView` returns `total`, and `recipeCountText` says "1 recipe", "24 recipes" or "3 of 24 recipes" (tests). Books counts each book from All recipes' list.
+    - Screen tests: the library shows "4 recipes", then "2 of 4 recipes" as you type; Books shows "2 recipes" on one book and "0 recipes" on an empty one.
+    - At 375 px on the test project: "2 recipes" over the cards, "1 of 2 recipes" after searching, and "Owner · 2 recipes" on Books, light and dark.
+- [x] **P23.3** Invite buttons that say they share — C · F15
   - Do: the Invite sheet's two buttons and the members page's Share link say what they do: share a link where the browser has a share sheet, copy it where it doesn't, and which role it gives.
   - Verify: screen tests with the share sheet there and absent.
-- [ ] **P23.4** Join by pasting a link — C · F16
+  - Evidence (2026-10-08):
+    - Invite's buttons read "Share a link to edit" and "Share a view-only link" (were "Can edit" and "View only"), and a link's row on the members page "Share link". Where the browser has no share sheet they read "Copy …" with a copy icon, and tapping one says "Copied".
+    - The server can't tell whether there's a share sheet, so it renders Share; the browser's answer comes after load.
+    - Screen test: with a share sheet, the link to edit is shared and the view-only button is there; without one, the buttons say Copy, and the link to edit lands on the clipboard. Mutation caught: the label always saying Share.
+- [x] **P23.4** Join by pasting a link — C · F16
   - Do: Books gets a Join field: paste a book's or plan's invite link and Join opens its Join page. A link that isn't an invite says so.
   - Verify: a test for reading the invite from a pasted link (the whole address, the path alone, other text); a screen test.
-- [ ] **P23.5** The recipe page's ⋯, with Share — C · D72, F18
+  - Evidence (2026-10-08):
+    - Books has "Join someone's book" between the books and New book: paste the invite link, and Join (secondary) opens its Join page, which asks before joining as a link opened in a browser does. "A plan's link works here too."
+    - `inviteTokenFrom` reads the token after `/join/` from a whole link (any host, with a query) or the path alone, and finds none in a bare token, another page's link, a short token or anything after it (tests).
+    - Screen test: "https://example.test/books" says "That isn't an invite link. Copy the whole link they sent." and goes nowhere; an invite link goes to its Join page.
+    - At 375 px on the test project: the section and its message, light.
+- [x] **P23.5** The recipe page's ⋯, with Share — C · D72, F18
   - Do: Copy and Edit leave the top row for a ⋯ (`TitleMenu`) beside the back link, holding Edit (editors), Copy (when you can edit another book; its book picker becomes a step in the sheet, as Invite's is) and Share (everyone: the share sheet, or the link copied).
   - Verify: screen tests (a viewer gets Share only; an editor gets Edit, Copy and Share; Copy copies); 375 px, light and dark.
-- [ ] **P23.6** Add by link or text — C · D73, F11
+  - Evidence (2026-10-08):
+    - The top row is the back link and a ⋯ (`RecipeMenu`). Its sheet: Edit (editors), Share recipe (everyone; "Copy recipe link" without a share sheet), and "Copy to another book", renamed from Copy so it isn't read as copying the link. Copy's dialog is gone: its book picker is a step in the sheet with Copy and Back, so the map's first disagreement is down to Add to plan and Add to list.
+    - `ShareLinkButton` shares any path (`path`, `title`, `label`), not only an invite; `BookSelect` moved to its own file for Copy recipes and the sheet.
+    - Screen tests: a viewer gets Share recipe only, and it shares `/recipes/<id>` under the recipe's name; an editor gets Edit (to the form) and Copy to another book, whose step shows the books, Copy and Back.
+    - On the test project at 375 px: the top row, the sheet, and Copy to another book for real: it landed on the Baking book showing Chili and "1 recipe".
+- [x] **P23.6** Add by link or text — C · D73, F11
   - Do: the chooser's first row is "Add by link or text", and its words say how it differs from Add manually. Its screen has one box for a link or a recipe's text, and one Read button: a lone web address is read as a page, anything else as text.
   - Verify: a test for telling a link from text; screen tests for both reads and for a failed link; the chooser at 375 px.
-- [ ] **P23.7** Word documents — C · D74, F8
-  - Do: Add by photo or file takes .docx: the server turns it into text, then reads it as it reads a text file. The help text and the picker's types say so; a document it can't open says so.
+  - Evidence (2026-10-08):
+    - The chooser: "Add by link or text: Paste a recipe's link, or all of its text, and it's read into the form for you." and "Add manually: Type it in yourself. A list you paste is split into rows, not read." The first row's icon is a clipboard.
+    - The screen, "Add by link or text", has one box ("The recipe's link, or its text") and one Read recipe. `loneLink` reads a lone web address as its page, anything with a space or line break, or a word, as text (tests). After a failed link, a line says the page's text can be pasted in its place, and that text keeps the link as the recipe's source. The second filled button (Read text) is gone, and with it half of the map's fourth disagreement.
+    - Screen tests: a lone link fills the form from its page ("Read from example.com"); text goes to the reader as text ("Read from your text"); text pasted after a blocked link keeps "https://example.com/chili" as the source. Mutation caught: the failed link not kept.
+    - At 375 px on the test project: the chooser's three rows, light and dark, and the screen after a link that couldn't be reached, with its line about pasting the text and the two other ways in.
+- [x] **P23.7** Word documents — C · D74, F8
+  - Do: Add by photo or file takes .docx, turned into text and then read as a text file is. The help text and the picker's types say so; a document it can't open says so.
   - Verify: tests with a small .docx made for them (a recipe, an empty one, a broken one); the `add-recipe` flow picks one.
-- [ ] **P23.8** A friendlier wait while the AI reads — C · D75, F12
+  - Evidence (2026-10-08):
+    - The phone turns the .docx into text, not the server as planned: `docxText` takes each paragraph's words as a line (tabs and line breaks kept, entities decoded), and the text goes the way a text file's does, held to its own words and counted as one read. No server code changed. It unzips with `fflate` (a small zip library with no dependencies), loaded only when a Word document is chosen.
+    - The picker takes `.docx` by type or extension; the older `.doc` isn't taken. The help text, the chooser ("a PDF, Word or text file") and the not-taken message name Word; the form's note says "Read from your Word document."
+    - Tests: paragraphs, runs, tabs, breaks and entities; a file that isn't a zip, and a zip without a document, give nothing. Screen tests: a .docx is read as its text; a broken one says "Couldn't open that Word document. Save it again, or save it as a PDF."; a .doc isn't taken.
+    - The `add-recipe` flow chooses `tests/_support/files/chili.docx` (made with `tests/_support/docx.ts`), and its text reaches the reader.
+- [x] **P23.8** A friendlier wait while the AI reads — C · D75, F12
   - Do: the reading screens show the produce drawings moving gently while the AI reads, and still with reduced motion; the words stay.
   - Verify: a screen test for reduced motion; screenshots at 375 px, light and dark.
+  - Evidence (2026-10-08):
+    - `ReadingWait` replaces the spinner on both reading screens: the welcome screen's five produce drawings hop in a wave (each 140 ms after the one before, a hop then a rest, every 1.6 s), over the same words. With reduced motion they stand still. The animation runs through the Web Animations API, as the grocery list's fold does, since the design lint allows no arbitrary values or inline styles.
+    - Screen tests: the five hops start in turn and stop when the wait goes; with reduced motion none start. happy-dom runs animations, and cancelling one rejects its `finished` promise, so the wait marks it handled (AGENTS.md's testing note said happy-dom had none; corrected).
+    - At 375 px on the test project, with a slow network to hold the wait open: the row mid-wave in light and dark, the drawings' leaves visible on both.
 
 ## Phase 24: Bookmarks, recently viewed, a video, suggested tags
 
@@ -2168,9 +2210,9 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
 
 ## Phase 25: Where the app breaks its own rules
 
-Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](./ux-map.md) lists, fixed by changing the code to match the rule, as L5 did. Hector OKs the list first (H32). Each fix updates the map's list.
+Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](./ux-map.md) lists, fixed by changing the code to match the rule, as L5 did. Hector OK'd the list on 2026-10-08 (H32). Each fix updates the map's list.
 
-- [ ] **P25.1** The 12, one commit each — C · needs H32
+- [ ] **P25.1** The 12, one commit each — C · H32
   - Proposed fixes, in the map's order:
     1. Add to plan and Add to list open as bottom sheets (Copy moves into one in P23.5).
     2. Groceries' Add button at `lg`.
@@ -2185,6 +2227,23 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
     11. A read recipe still says which book it will be saved to.
     12. Books' Create form submits as AGENTS.md says forms that can fail must.
   - Verify: each fix's own test or screen test; 375 px for the visible ones.
+
+## Phase 26: Words, whose book, and wide screens
+
+Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second testers' round ([feedback](./feedback/2026-10-08-desktop-tester.md)), a tester on a desktop in a book Hector shares with him.
+
+- [ ] **P26.1** Groceries and Meal plan, and a Words section — C · D84, F4 (round 2)
+  - Do: "list" and "plan" become Groceries and Meal plan wherever they name the list and the plan (buttons, sheets, the tab, messages). The map gets a Words section.
+  - Verify: screen tests' and flows' names updated; the recipe page's two buttons side by side at 375 px; `grep` finds no "Add to list" or "Add to plan" left.
+- [ ] **P26.2** Whose book — C · D82, F1 (round 2)
+  - Do: your own book first in the pills after All recipes, a people icon on books shared with you; a recipe's back link names its book in two or more books.
+  - Verify: screen tests for the pills' order and icon and the back link's name; 375 px.
+- [ ] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · needs H34
+  - Do: a flag on books still carrying their automatic name (a migration, with existing books matched by name); the name shown follows the owner's current first name while the flag is set; renaming clears it. Rename in a book's ⋯ for its owner.
+  - Verify: use-case tests on both backends (follows a name change, stops after a rename, only the owner's own book); a migration test; a screen test for Rename in the ⋯.
+- [ ] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
+  - Do: bottom sheets no wider than the page, centred, in `@repo/ui`'s Drawer. The map's Wide screens section, and a test listing every `sm:`, `md:`, `lg:`, `xl:` style in the app against it.
+  - Verify: the test fails on an unlisted style; sheets at 375 px unchanged and at a desktop width capped; the other apps' sheets checked.
 
 ## Later (to-dos, not scheduled)
 
@@ -2281,8 +2340,10 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
 | H30 | Share the testers' feedback (raw is fine). | P22.3 | done 2026-10-07: 23 items; filed in feedback/ (D71) |
-| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | open |
-| H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | open |
+| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | OK'd 2026-10-08: "run migration yourself if possible" |
+| H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
+| H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
 
 ## Risks and how they're handled
 
@@ -2521,3 +2582,9 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
   - Next: Hector's calls on the placement and the next phase.
 - **2026-10-08 (bj)** — Hector answered P22.3 (D71–D79). The round moved into the repo as `feedback/2026-10-07-first-testers.md`, with a README for future rounds. Planned Phase 23 (clearer, and small), 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). The larger ideas stay as drafts (D79).
   - Next: P23.1, on a branch stacked on Phase 22's.
+- **2026-10-08 (bk)** — Phase 23 done on `feat/recipes-p23-clearer` (see each task's Evidence): Add recipe, recipe counts, share buttons that say they share, joining by a pasted link, the recipe page's ⋯ with Share, Add by link or text, Word documents, and the produce row's wave while the AI reads. A tab's title now takes two lines (P23.1). 1078 + 63 tests and the three browser flows pass.
+  - Next: Phase 23's PR, stacked on hectarek/hector-mono#31; Hector's phone checks (H5).
+- **2026-10-08 (bl)** — A second round of feedback, from a tester on a desktop, filed as `feedback/2026-10-08-desktop-tester.md` and placed on the map. Checked on the test project: an account's name change works; a book's name doesn't follow it (D19). Proposals wait on H33; a photos-and-files pass and recipes from YouTube need scoping.
+  - Next: Hector's answers to H31–H33; his review of hectarek/hector-mono#31 and #32.
+- **2026-10-08 (bm)** — Hector OK'd Phase 25's list (H32) and Phase 24's migrations (H31), and took the recommendations: D80 and D81 for Phase 24, D82–D85 for the second round, planned as Phase 26. Whiteboard is now only for PRs with large backend changes (root AGENTS.md). Sandboxed commands may listen on local ports (Hector's settings).
+  - Next: Phase 24.

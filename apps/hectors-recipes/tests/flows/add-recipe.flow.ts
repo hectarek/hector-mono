@@ -20,7 +20,7 @@ test("Add by photo or file refuses a long PDF, and sends a file to the reader", 
   page,
 }) => {
   await signUp(page);
-  await page.getByRole("button", { name: "New" }).click();
+  await page.getByRole("button", { name: "Add recipe" }).click();
   await page.getByRole("link", { name: /Add by photo or file/ }).click();
   await expect(
     page.getByRole("heading", { name: "Add by photo or file" }),
@@ -36,6 +36,13 @@ test("Add by photo or file refuses a long PDF, and sends a file to the reader", 
 
   // With no AI key the reader can't answer: the file got as far as it.
   await choose(page, "chili.md");
+  await expect(
+    page.getByText("The recipe reader isn't answering. Try again in a minute."),
+  ).toBeVisible();
+
+  // D74: a Word document is opened on the phone, and its text gets as far as the reader too.
+  await choose(page, "chili.docx");
+  await expect(page.getByText("chili.docx")).toBeVisible();
   await expect(
     page.getByText("The recipe reader isn't answering. Try again in a minute."),
   ).toBeVisible();

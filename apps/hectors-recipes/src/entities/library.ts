@@ -12,6 +12,8 @@ export type LibraryFilter = {
 
 export type LibraryView = {
   recipes: ListedRecipe[];
+  // How many recipes the book (or every book) holds, before the tag and search narrow them.
+  total: number;
   tags: string[];
   // Every grouped tag's group (D55), for grouping and the tag picker.
   tagGroups: TagGroups;
@@ -38,7 +40,13 @@ export function buildLibraryView(
     filter.search,
   );
 
-  return { recipes: matching, tags, tagGroups };
+  return { recipes: matching, total: recipes.length, tags, tagGroups };
+}
+
+// A book's count (P23.2): "24 recipes", or "3 of 24 recipes" while a search or tag narrows it.
+export function recipeCountText(shown: number, total = shown): string {
+  const noun = total === 1 ? "recipe" : "recipes";
+  return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
 }
 
 // The library's search (D56): every word typed is in the title, a tag or an ingredient's

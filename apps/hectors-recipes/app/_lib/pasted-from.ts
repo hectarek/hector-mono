@@ -19,3 +19,10 @@ export function pastedFrom(link: string): string | undefined {
     return undefined;
   }
 }
+
+// Add by link or text (D73): the box holds a web page's address and nothing else, so it's read
+// as a page; anything else, a recipe's text included, is read as text.
+export function loneLink(box: string): string | undefined {
+  const typed = box.trim();
+  return /\s/.test(typed) ? undefined : pastedFrom(typed);
+}

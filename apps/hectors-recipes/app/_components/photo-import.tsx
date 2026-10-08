@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Camera, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type ChangeEvent, useRef, useState } from "react";
+import { ReadingWait } from "@/app/_components/reading-wait";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { TopBar } from "@/app/_components/top-bar";
 import { draftFormValues } from "@/app/_lib/draft-form-values";
@@ -38,11 +38,12 @@ type Stage =
 
 type NewRecipe = Awaited<ReturnType<typeof loadNewRecipe>>;
 
-const NOT_TAKEN = `Choose up to ${MAX_PHOTOS} photos, a PDF of up to ${MAX_PDF_PAGES} pages, or a text or Markdown file.`;
+const NOT_TAKEN = `Choose up to ${MAX_PHOTOS} photos, a PDF of up to ${MAX_PDF_PAGES} pages, or a Word, text or Markdown file.`;
 
 // What a read was from, for the form's note ("Read from your photos.").
 function readFrom(kind: RecipeFileKind, files: number): string {
   if (kind === "photo") return files > 1 ? "photos" : "photo";
+  if (kind === "word") return "Word document";
   return kind === "pdf" ? "PDF" : "file";
 }
 
@@ -87,7 +88,24 @@ async function readPhotos(files: File[]): Promise<ReadRecipeResult> {
 // A text or Markdown file, read on the phone and sent as pasted text is (D53), so its draft is
 // held to the file's own words.
 async function readTextFile(file: File): Promise<ReadRecipeResult> {
-  const text = (await file.text()).trim();
+  return readFileText((await file.text()).trim());
+}
+
+// A Word document (D74): its paragraphs, read on the phone, then sent as a text file is. The
+// zip reader loads only when one is chosen.
+async function readWordFile(file: File): Promise<ReadRecipeResult> {
+  const { docxText } = await import("@/app/_lib/docx-text");
+  const text = docxText(new Uint8Array(await file.arrayBuffer()));
+  if (text === null) {
+    return {
+      error:
+        "Couldn't open that Word document. Save it again, or save it as a PDF.",
+    };
+  }
+  return readFileText(text);
+}
+
+async function readFileText(text: string): Promise<ReadRecipeResult> {
   if (!text) {
     return { error: "That file is empty." };
   }
@@ -127,7 +145,9 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
           ? await readPhotos(files)
           : kind === "pdf"
             ? await readPdf(file)
-            : await readTextFile(file);
+            : kind === "word"
+              ? await readWordFile(file)
+              : await readTextFile(file);
       setStage(
         "draft" in result
           ? {
@@ -206,17 +226,17 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
               {stage.fileName}
             </p>
           )}
-          <p className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Spinner />
+          <ReadingWait>
             Reading the recipe. This can take up to a minute.
-          </p>
+          </ReadingWait>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
           <p className="text-muted-foreground text-sm">
             Take or choose up to 3 photos of one recipe, such as cookbook pages
-            or screenshots, or choose a PDF or a text or Markdown file. The
-            recipe is read into the form for you to check before saving.
+            or screenshots, or choose a PDF, a Word document, or a text or
+            Markdown file. The recipe is read into the form for you to check
+            before saving.
           </p>
           {/* Hidden, and opened by the button: an input that's only visually hidden still takes
               keyboard focus, which then lands on nothing you can see. */}
