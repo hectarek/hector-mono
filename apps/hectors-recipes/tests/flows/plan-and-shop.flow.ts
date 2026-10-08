@@ -61,8 +61,11 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await page.waitForURL(/\/groceries/);
 
   // A row is a label around a hidden checkbox (the design system's pattern): tap its words.
-  await page.getByText("1 lb ground turkey", { exact: true }).click();
-  await page.getByText("1 onion", { exact: true }).click();
+  // The recipe page, kept hidden by Next.js (D88), lists the same words, so only what shows.
+  const row = (text: string) =>
+    page.getByText(text, { exact: true }).filter({ visible: true });
+  await row("1 lb ground turkey").click();
+  await row("1 onion").click();
   const gotIt = page.getByRole("group").getByText("Got it (2)");
   await expect(page.getByText("Everything's in the cart.")).toBeVisible();
   await expect(gotIt).toBeVisible();

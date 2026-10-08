@@ -2470,7 +2470,8 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - The screen tests passed with the first version, so they can't catch the sheet left on screen; the browser can. `plan-and-shop.flow.ts` ends with two exits, the library's ⋯ to All books and Back, and the ⋯ left open with Back and Forward. Each time it counts the sheets once, without waiting, as soon as the page is back, and checks the grouping is kept.
     - `bun check`, `bun ts`, 1114 + 96 tests and the dead-code check pass.
     - AGENTS.md's Cache Components section has the rules, and features.md's recipe form section says when the form starts over.
-    - **Left:** running the flows (`bun run test:flows`, Hector's to run: they sign up accounts on the test project). The new steps are written but not run.
+    - Hector's first run of the flows (2026-10-08) found a test-side effect of D88. The recipe page you leave stays in the DOM, hidden. `getByRole` skips it, but `getByText` doesn't, so cook mode's "1 onion" matched twice. The taps and swipes by text whose words are also on the recipe page (cook mode's, Groceries' check-offs) now take only what shows (`.filter({ visible: true })`). AGENTS.md's flow notes say so.
+    - **Left:** running the flows again (`bun run test:flows`, Hector's to run: they sign up accounts on the test project). The first run stopped before `plan-and-shop`'s new steps.
 - [~] **P28.3** Ready the moment you tap — C · D87
   - Do:
     - The library, Books and a recipe's page (D87) read through `'use cache: private'` with a 5-minute `stale`, in their page helpers (`load-books.ts`, `load-recipe.ts`), so the session is also read once per request.
@@ -2489,7 +2490,7 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - Nothing is stored on the server: the three private loaders are the app's only cache directives.
     - A save clears it. Next.js empties the browser's whole cache when a Server Action calls `revalidatePath` (`cacheLife`'s docs, "Client cache behavior"). Every action that changes what these pages show calls it. The four that don't are the three AI reads and `inviteLinks`, and they change nothing these pages show. Recently viewed is kept on the phone, so opening a recipe changes nothing on the server.
     - `next build` passes with placeholder values, and nothing failed in its log.
-    - `tests/flows/instant.flow.ts`, with `@next/playwright` 16.4.0 (a new dev dependency): the Recipes tab from Meal plan, a recipe opened a moment ago, and Books from the library's ⋯, each tapped inside `instant()`; then a recipe you add is in the library straight away.
+    - `tests/flows/instant.flow.ts`, with `@next/playwright` 16.4.0 (a new dev dependency): the Recipes tab from Meal plan, tapped inside `instant()`. Its first version also reopened a recipe and Books inside `instant()`, and the recipe step failed in Hector's run: the flows run on `next dev`, which fetches a reopened page again. Hector chose (2026-10-08) to keep the tab step and check the reopened pages by hand on a production build (below), rather than give the flow a production build of its own.
     - `bun check`, `bun ts`, 1114 + 94 tests and the dead-code check pass. The test preload stubs `cacheLife`.
     - Found on the way: `bookmarks [postgres] > saves and unsaves, newest first` failed once in a full run and passed 120 runs on its own. Saved recipes sort by `createdAt` alone, so two saves in the same instant can come back in either order. It's in Hector's tracker.
     - Later, with `.env`, on a production build (`next start`, port 3205) signed in as Hector, reading only; prefetching runs only in production builds, so dev can't show it:
@@ -2497,7 +2498,7 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
       - A recipe opened a moment ago: on screen at 50 ms, no request. Its first open shows the skeleton, as D87 chose (no prefetch per card).
       - Books: the first open from the ⋯ fetched it; opened again, its count showed at 50 ms with no request. The same held after four other pages in between, by which time Next.js no longer keeps Books alive, so the private cache is what serves it.
     - **Left**, all for Hector, as they need the test project and sign up accounts:
-      - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the change. Its Books step was first written for a first open, which doesn't show at once; it now opens Books twice.
+      - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the Recipes tab's prefetch.
       - Check that a second account's change to a shared book shows within 5 minutes.
 - [x] **P28.4** Motion between screens, written down first — C · D89, D70
   - Do: the pattern in AGENTS.md's UI Rules (what moves, reduced motion, the anchored header and tab bar) and the map's patterns table. Each screen on the map says what moves into and out of it.

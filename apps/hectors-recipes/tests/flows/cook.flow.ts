@@ -41,20 +41,25 @@ test("cook a recipe one step at a time", async ({ page }) => {
   // Gather: what's out gets ticked, then the first step.
   await page.getByRole("button", { name: "Cook" }).click();
   // A row you check off, as on Groceries (P27.3): tap its words; its checkbox is hidden.
-  // Once cook mode is open: the recipe page lists "1 onion" too.
+  // Once cook mode is open: the recipe page lists "1 onion" too, and Next.js keeps it, hidden
+  // (D88), so the text is found on the page that shows.
   await expect(
     page.getByText("Check off each ingredient as you get it out."),
   ).toBeVisible();
-  await page.getByText("1 onion", { exact: true }).click();
+  await page
+    .getByText("1 onion", { exact: true })
+    .filter({ visible: true })
+    .click();
   await expect(page.getByRole("checkbox", { name: "1 onion" })).toBeChecked();
   await page.getByRole("button", { name: "Start cooking" }).click();
   await expect(page.getByText("Step 1 of 2")).toBeVisible();
 
   // A swipe left goes on, and a step's timer follows you back.
-  await swipe(page, page.getByText(/^Brown the ground turkey/), "left");
+  const step = (text: RegExp) => page.getByText(text).filter({ visible: true });
+  await swipe(page, step(/^Brown the ground turkey/), "left");
   await expect(page.getByText("Step 2 of 2")).toBeVisible();
   await page.getByRole("button", { name: "Start 20-minute timer" }).click();
-  await swipe(page, page.getByText(/^Add the onion/), "right");
+  await swipe(page, step(/^Add the onion/), "right");
   await expect(page.getByText("Step 1 of 2")).toBeVisible();
   await expect(page.getByRole("list", { name: "Timers" })).toContainText(
     "Step 2 · ",
