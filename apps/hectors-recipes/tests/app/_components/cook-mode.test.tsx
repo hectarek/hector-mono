@@ -185,6 +185,22 @@ describe("CookMode", () => {
     button(view, "Start 20-minute timer");
   });
 
+  // P25.1, fix 4: a timer that's up isn't a second filled button beside Next (D32).
+  it("keeps the step's main action the one filled button while a timer is up", async () => {
+    save({ used: [], at: 2, timers: { 2: Date.now() - 60_000 } });
+    const view = cook();
+    await view.findByText("Step 2 of 2");
+    expect((await view.findByRole("alert")).textContent).toBe(
+      "Time's up · Dismiss",
+    );
+    const filled = view
+      .getAllByRole("button")
+      .filter((candidate) => candidate.classList.contains("bg-primary"));
+    expect(filled.map((candidate) => candidate.textContent)).toEqual([
+      "Finish",
+    ]);
+  });
+
   // D63: a swipe left for the next screen, right for the one before, as the week does.
   it("moves a screen with a swipe", async () => {
     const view = cook();

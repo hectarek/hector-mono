@@ -260,7 +260,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason). **Fixed in P25.1: both are bottom sheets.**
 2. Groceries' Add button is the default size (40 px), not `lg` (D32). **Fixed in P25.1: it's `lg`.**
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent. **Fixed in P25.1: Add to plan goes through `callAction`, and the two that say what they added through `callResultAction`.**
-4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6).
+4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6). **Fixed in P25.1: a timer that's up is `secondary`, with a ringing bell.**
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading).
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all.
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually.

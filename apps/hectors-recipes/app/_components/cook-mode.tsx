@@ -10,6 +10,7 @@ import {
 import { Progress } from "@repo/ui/components/progress";
 import { cn } from "@repo/ui/lib/utils";
 import {
+  BellRing,
   ChevronDown,
   List,
   Minus,
@@ -855,8 +856,8 @@ function FollowingTimer({
 }) {
   if (endsAt <= now) {
     return (
-      <Button size="lg" onClick={onDismiss} role="alert">
-        <Timer data-icon="inline-start" />
+      <Button variant="secondary" size="lg" onClick={onDismiss} role="alert">
+        <BellRing data-icon="inline-start" />
         Step {number}: time&apos;s up · Dismiss
       </Button>
     );
@@ -896,10 +897,12 @@ function StepTimer({
       </Button>
     );
   }
+  // Up: still secondary, as Next is the screen's one filled button (D32); the ringing bell,
+  // the alert and its sound mark it.
   if (endsAt <= now) {
     return (
-      <Button size="lg" onClick={onStop} role="alert">
-        <Timer data-icon="inline-start" />
+      <Button variant="secondary" size="lg" onClick={onStop} role="alert">
+        <BellRing data-icon="inline-start" />
         Time&apos;s up · Dismiss
       </Button>
     );
