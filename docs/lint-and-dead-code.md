@@ -33,3 +33,4 @@ Oxlint enforces the complex apps' layer rules ([clean-architecture.md §5](clean
 - There's no baseline: the repo is at zero findings, and any finding fails.
 - Config exceptions, each for a file Fallow can't see being used: `apps/hectors-recipes/scripts/*.ts` is an entry point (Playwright runs one and the other runs by hand), `@repo/biome-config` is resolved by Biome's `extends`, and `generateStaticParams` in a route handler is called by Next.js.
 - Before deleting something Fallow reports, confirm it: `bunx fallow dead-code --trace <file>:<export>`.
+- Held at 3.31.0 (2026-10-08): 3.32.0 doesn't count a file passed to `bun test --preload` in a `package.json` script as an entry point, so it reports recipes' screen-test preload (`tests/_support/dom.ts`) as unused. Try each new release with `bun run dead-code` before moving off 3.31.0.

@@ -183,7 +183,7 @@ When multiple workspaces depend on the same package, use the **same version stri
 ### Version ranges in practice
 
 - **`^major.minor.patch`** (e.g. `^4.3.3`, what `bun add` writes): most deps.
-- **Exact** (e.g. `16.3.7`): `next`, `react` and `react-dom` (the same in every app), `recharts` (identical in `packages/ui` and every app that imports it), and a few tools and SDKs (`@biomejs/biome`, `@types/bun`, `babel-plugin-react-compiler`, recipes' `ably`, and `ai` with `@ai-sdk/gateway` in hectors-recipes and hectors-tools, pinned together).
+- **Exact** (e.g. `16.4.0`): `next`, `react` and `react-dom` (the same in every app), `recharts` (identical in `packages/ui` and every app that imports it), and a few tools and SDKs (`@biomejs/biome`, `@types/bun`, `babel-plugin-react-compiler`, recipes' `ably`, and `ai` with `@ai-sdk/gateway` in hectors-recipes and hectors-tools, pinned together).
 - **`workspace:*`**: For internal packages (`@repo/ui`, `@repo/biome-config`). Always use this for cross-workspace references.
 
 ### Updating dependencies
