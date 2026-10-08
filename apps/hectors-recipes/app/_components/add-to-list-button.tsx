@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useId, useState, useTransition } from "react";
 import { useRecipeServings } from "@/app/_components/recipe-servings";
 import { SpacePicker } from "@/app/_components/space-picker";
+import { callResultAction } from "@/app/_lib/call-action";
 import { type AddToListState, addRecipeToList } from "@/app/actions/grocery";
 import type { AddToListResult } from "@/src/entities/models/grocery-item.model";
 
@@ -59,14 +60,16 @@ export function AddToListButton({
   function send(again: boolean) {
     startTransition(async () => {
       setResult(
-        await addRecipeToList({
-          recipeId,
-          planId,
-          servings: yieldServings
-            ? Math.min(100, Math.max(1, Number.parseInt(servings, 10) || 1))
-            : undefined,
-          again,
-        }),
+        await callResultAction(() =>
+          addRecipeToList({
+            recipeId,
+            planId,
+            servings: yieldServings
+              ? Math.min(100, Math.max(1, Number.parseInt(servings, 10) || 1))
+              : undefined,
+            again,
+          }),
+        ),
       );
     });
   }

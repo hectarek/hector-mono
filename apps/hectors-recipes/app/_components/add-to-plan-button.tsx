@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { MealDaysPicker } from "@/app/_components/meal-days-picker";
 import { SpacePicker } from "@/app/_components/space-picker";
+import { callAction } from "@/app/_lib/call-action";
 import { addPlanEntry } from "@/app/actions/plan";
 import { type MealDays, mealDaysText } from "@/src/entities/meal-days";
 
@@ -44,9 +45,11 @@ export function AddToPlanButton({
   function submit(event: React.FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await addPlanEntry({ spaceId: planId, recipeId, ...days });
-      if (result?.error) {
-        setError(result.error);
+      const failed = await callAction(() =>
+        addPlanEntry({ spaceId: planId, recipeId, ...days }),
+      );
+      if (failed) {
+        setError(failed);
         return;
       }
       setError(undefined);
