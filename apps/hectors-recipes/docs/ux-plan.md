@@ -2489,9 +2489,14 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - **Left**, all for Hector, as they need the test project and sign up accounts:
       - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the change.
       - Check that a second account's change to a shared book shows within 5 minutes.
-- [ ] **P28.4** Motion between screens, written down first — C · D89, D70
+- [x] **P28.4** Motion between screens, written down first — C · D89, D70
   - Do: the pattern in AGENTS.md's UI Rules (what moves, reduced motion, the anchored header and tab bar) and the map's patterns table. Each screen on the map says what moves into and out of it.
   - Verify: AGENTS.md and the map agree, and every move C lists is on the map.
+  - Evidence (2026-10-08, on `feat/recipes-p28-cache-components`):
+    - AGENTS.md's UI Rules has "Motion between screens", after Bold moments. It has D89's five moves, each with what starts it: the card and its recipe share `recipe-picture-<id>`. Links carry `go-deeper`, `go-back`, `switch-tab`, `open-cook-mode` or `close-cook-mode`, and any other link carries none.
+    - It also has the rest of D89 and of Next.js's "View transitions" guide: the `<ViewTransition>` in each `page.tsx` (a layout never enters or leaves) with `default="none"`, so refreshes, saves and live updates move nothing. The header and tab bar have names of their own and stay still. Taps reach the page during a move. Each move is under 400 ms. Reduced motion turns each into the crossfade. The week's slide-in and cook mode's screens are unchanged.
+    - The map's patterns table has a row for it. Every screen has a **Motion** line, 16 of 16: none on the full-screen tasks, Account, Welcome and Error. The Screens intro says once that a skeleton fades into its page, and that the moves are planned until P28.5.
+    - Each of C's five moves is on the map: the card on Library and Recipe; deeper and back on Recipe, Books, Copy recipes, Members and Join; the crossfade on the three tabs; the rise on Recipe and Cook mode; the skeleton in the intro and the table. AGENTS.md lists the same pages for each.
 - [ ] **P28.5** The moves — C · D89
   - Do:
     - D89's five moves, with `<ViewTransition>` and `<Link transitionTypes>`, with the keyframes in `app/globals.css`.
