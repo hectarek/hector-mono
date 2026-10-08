@@ -85,7 +85,8 @@ export function LibraryFilters({
               name="q"
               value={search}
               onChange={(event) => onSearch(event.target.value)}
-              placeholder="Search recipes"
+              // Short: beside Sort and group, a longer one is cut off at 375 px.
+              placeholder="Search"
               aria-label="Search recipes"
             />
             <InputGroupAddon>
