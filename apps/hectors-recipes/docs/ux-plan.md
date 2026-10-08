@@ -2375,6 +2375,13 @@ Starting point, 2026-10-08, read from the code:
 
 **Stash first.** Stash moves before P28.1, in its own small PR. It has the same Neon Auth and proxy, 2 `force-dynamic` exports and 2 `dynamicParams`, so it's a cheap rehearsal of P28.1 and P28.2 (D90). Hector's tracker has the task.
 
+**What stash's move found** (hectarek/hector-mono#45, 2026-10-08), for P28.1 and P28.2:
+- **Auth and account pages.** They prerender Neon's view paths through `generateStaticParams` (`Object.values(authViewPaths)`, `accountViewPaths`), and any other path is `notFound()`, a real 404. That replaces `dynamicParams = false`. The "already signed in" check goes inside `<Suspense>` with the form after it, so the form never flashes before the redirect.
+- **Build logs.** A page that reads the session stops prerendering at the read. `NeonAuthService`'s `catch` and Neon's own library then log that stop as a failed sign-in during `next build`. `experimental.hideLogsAfterAbort` hides those logs; request-time logs are unchanged.
+- **Neon's UI does full page loads.** Its default `navigate` sets `window.location.href`, and its links are plain `<a>`. So sign-out already clears every page Next.js keeps alive (D88), with no code. The account button's links reload the app too.
+- **Build env.** `next build` needs the auth env vars present, but nothing at build time reaches Neon, so placeholder values build. A worktree without `.env` can still check the build.
+- **Activity.** Stash has no client navigation besides Neon's full page loads, so it couldn't rehearse what Activity keeps (P28.2). That is checked in recipes itself.
+
 ### Proposals (H36), decided as D87–D90
 
 Each is placed on [ux-map.md](./ux-map.md) by its four questions. Hector took the recommended option of each (A as D87, B as D88, C as D89), and the map and AGENTS.md change with the tasks.
