@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 23 (clearer, and small things testers asked for) on `feat/recipes-p23-clearer`, stacked on Phase 22's branch: done, in review. Phase 22 (the UX map) is in review as hectarek/hector-mono#31. Then 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#31, then Phase 23's PR; then Phase 24 (H31 before its PR merges). |
+| Phase | 24 (bookmarks, recently viewed, a video, suggested tags) on `feat/recipes-p24-saved-video-tags`, stacked on Phase 23's branch: built and tested, its migrations (0016–0018) and the flows not yet run (H31). Phase 23 is in review as hectarek/hector-mono#32, Phase 22 as #31. Then 25 (the map's 12 fixes, H32) and 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Phase 24's migrations on the test project and production (H31), the flows and 375 px; then Phase 25. Needs the app's `.env` and `.env.test` in Phase 24's worktree. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2612,3 +2612,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Hector's answers to H31–H33; his review of hectarek/hector-mono#31 and #32.
 - **2026-10-08 (bm)** — Hector OK'd Phase 25's list (H32) and Phase 24's migrations (H31), and took the recommendations: D80 and D81 for Phase 24, D82–D85 for the second round, planned as Phase 26. Whiteboard is now only for PRs with large backend changes (root AGENTS.md). Sandboxed commands may listen on local ports (Hector's settings).
   - Next: Phase 24.
+- **2026-10-08 (bn)** — Phase 24 built: P24.1 bookmarks, P24.2 Sort and group with Saved first and Recently viewed, P24.3 a video in the photo's place, P24.4 the catalog's tags in the picker and "meal prep" (migrations 0016–0018). Lint, types, dead code and the app's 1,166 tests pass. The migrations, flows and 375 px wait on the worktree's `.env` files, which the session can't copy.
+  - Next: Phase 24's migrations (H31), flows and 375 px; its PR; Phase 25.
