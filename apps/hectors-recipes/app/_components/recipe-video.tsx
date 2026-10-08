@@ -3,7 +3,7 @@
 import { Button } from "@repo/ui/components/button";
 import { ExternalLink, Play } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { videoEmbed } from "@/src/entities/video-link";
 
 // A recipe's video in the photo's place (docs/ux-plan.md D81): the photo, or its tile, with a
@@ -22,7 +22,7 @@ export function RecipeVideo({
   const [playing, setPlaying] = useState(false);
   // A hidden page keeps playing a video (display: none doesn't stop it), so the player
   // goes when you leave and the photo is back when you return.
-  useClosesWhenHidden(() => setPlaying(false));
+  useClosesOnLeave(() => setPlaying(false));
 
   if (playing && embed) {
     return (

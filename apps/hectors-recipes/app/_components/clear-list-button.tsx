@@ -4,7 +4,7 @@ import { Button } from "@repo/ui/components/button";
 import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { callAction } from "@/app/_lib/call-action";
-import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { clearGroceryList } from "@/app/actions/grocery";
 
 // Clear list, in Groceries' ⋯ sheet (docs/ux-plan.md D52). It asks first in the sheet itself,
@@ -22,7 +22,7 @@ export function ClearListButton({
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
   // Asking again when you come back to Groceries, not still mid-question.
-  useClosesWhenHidden(() => {
+  useClosesOnLeave(() => {
     setAsking(false);
     setError(undefined);
   });

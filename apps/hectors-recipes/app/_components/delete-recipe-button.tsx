@@ -13,7 +13,7 @@ import {
 } from "@repo/ui/components/dialog";
 import { Trash2 } from "lucide-react";
 import { useActionState, useState } from "react";
-import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { deleteRecipe } from "@/app/actions/recipes";
 
 export function DeleteRecipeButton({
@@ -25,10 +25,10 @@ export function DeleteRecipeButton({
 }) {
   const [state, formAction, isPending] = useActionState(deleteRecipe, null);
   const [open, setOpen] = useState(false);
-  useClosesWhenHidden(() => setOpen(false));
+  const dialogKey = useClosesOnLeave(() => setOpen(false));
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog key={dialogKey} open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button variant="destructive" size="lg" />}>
         <Trash2 data-icon="inline-start" />
         Delete recipe

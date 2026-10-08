@@ -13,7 +13,7 @@ import {
 } from "@repo/ui/components/dialog";
 import { useState } from "react";
 import { ActionForm } from "@/app/_components/action-form";
-import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import type { ActionState } from "@/app/actions/shared";
 
 // A button whose action asks first (Remove, Leave, Turn off; docs/ux-map.md), in the same
@@ -35,10 +35,10 @@ export function ConfirmActionButton({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  useClosesWhenHidden(() => setOpen(false));
+  const dialogKey = useClosesOnLeave(() => setOpen(false));
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog key={dialogKey} open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={<Button variant="secondary" size="lg" className={className} />}
       >

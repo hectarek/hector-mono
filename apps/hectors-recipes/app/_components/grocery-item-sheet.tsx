@@ -18,7 +18,7 @@ import {
   useTransition,
 } from "react";
 import { callAction } from "@/app/_lib/call-action";
-import { useClosesWhenHidden } from "@/app/_lib/use-closes-when-hidden";
+import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 import { updateGroceryItem } from "@/app/actions/grocery";
 import { recipeTitles } from "@/src/entities/grocery-merge";
 import type { GroceryItem } from "@/src/entities/models/grocery-item.model";
@@ -53,7 +53,7 @@ export function GroceryItemSheet({
       setError(undefined);
     }
   }
-  useClosesWhenHidden(() => {
+  const sheetKey = useClosesOnLeave(() => {
     if (open) changeOpen(false);
   });
 
@@ -76,7 +76,12 @@ export function GroceryItemSheet({
   }
 
   return (
-    <Drawer open={open} onOpenChange={changeOpen} showSwipeHandle>
+    <Drawer
+      key={sheetKey}
+      open={open}
+      onOpenChange={changeOpen}
+      showSwipeHandle
+    >
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{item.text}</DrawerTitle>

@@ -111,17 +111,27 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
       .getByRole("link", { name: /Chili/ }),
   ).toBeVisible();
 
-  // D88: Next.js keeps the pages you leave. Back to Meal plan and Forward again finds Recipes
-  // as it was left, grouped by cuisine, but with the ⋯ sheet left open closed.
+  // D88: Next.js keeps the pages you leave. Coming back finds Recipes as it was left, grouped
+  // by cuisine, with the ⋯ sheet left open already gone: counted once, not waited for, since
+  // a sheet that only closes after you're back is the bug.
+  const grouped = page
+    .getByRole("region", { name: cuisine })
+    .getByRole("link", { name: /Chili/ });
+  await page.getByRole("button", { name: /^More for / }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "All books" })
+    .click();
+  await page.waitForURL(/\/books$/);
+  await page.goBack();
+  await expect(grouped).toBeVisible();
+  expect(await page.getByRole("dialog").count()).toBe(0);
+
   await page.getByRole("button", { name: /^More for / }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.goBack();
   await page.waitForURL(/\/plan/);
   await page.goForward();
-  await expect(
-    page
-      .getByRole("region", { name: cuisine })
-      .getByRole("link", { name: /Chili/ }),
-  ).toBeVisible();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(grouped).toBeVisible();
+  expect(await page.getByRole("dialog").count()).toBe(0);
 });

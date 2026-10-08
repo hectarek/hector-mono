@@ -33,12 +33,13 @@ export default async function PlanPage({
   const requestedWeek = firstParam(params.week);
   const requestedPlan = firstParam(params.plan);
 
+  // The session first: it ends the prefetch, so the clock is read only at request time.
+  const userId = await getCurrentUserId();
   const today = todayIn(PLAN_TIME_ZONE);
   const monday = mondayOf(
     requestedWeek && isIsoDate(requestedWeek) ? requestedWeek : today,
   );
 
-  const userId = await getCurrentUserId();
   const { plans, current } = await loadPlans(userId, requestedPlan);
   const canEdit = hasRole(current.role, "editor");
 
