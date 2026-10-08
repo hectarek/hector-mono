@@ -268,4 +268,4 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does. **Fixed in P25.1: all three ask first (`ConfirmActionButton`).**
 10. Cook mode's Done goes back to the recipe without the servings chosen there. **Fixed in P25.1: Done and Back to the recipe carry `?servings=`, which the recipe page takes.**
 11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved. **Fixed in P25.1: the note keeps "Saving to <book>." after the read's sentence.**
-12. The Books page's Create form submits with a plain `<form action>`, which AGENTS.md says clears the field on a validation error.
+12. The Books page's Create form submits with a plain `<form action>`, which AGENTS.md says clears the field on a validation error. **Fixed in P25.1: it submits through a transition, and a refused name stays.**

@@ -45,6 +45,22 @@ describe("Books", () => {
     expect(view.queryByRole("button", { name: "Share" })).toBe(null);
   });
 
+  // P25.1, fix 12: a refused name stays in the box to fix (AGENTS.md's rule for forms).
+  it("keeps a refused book name in the box", async () => {
+    const user = userEvent.setup();
+    const view = render(await BooksPage());
+    const name = view.getByRole("textbox", {
+      name: "New book name",
+    }) as HTMLInputElement;
+
+    await user.type(name, "   ");
+    await user.click(view.getByRole("button", { name: "Create" }));
+    expect((await view.findByRole("alert")).textContent).toContain(
+      "Name is required",
+    );
+    expect(name.value).toBe("   ");
+  });
+
   // P23.4: a pasted invite link opens its Join page, which asks before joining.
   it("opens a pasted invite link's Join page, and says when it isn't one", async () => {
     const user = userEvent.setup();
