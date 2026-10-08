@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | Two at once. 20 (measuring AI reads), in Hector's own session for it. 28 (planned: Cache Components, and moving between screens), drafted on `docs/recipes-p28-cache-components` and decided (D87–D90), stash moving first (D90). Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
-| Next task | Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Phase 28: stash's move to Cache Components (its own PR), then P28.1. Or the drafts in Hector's tracker. |
-| Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
+| Phase | Two at once. 20 (measuring AI reads), in Hector's own session for it. 28 (Cache Components, and moving between screens), on `feat/recipes-p28-cache-components`: P28.1 to P28.4 built, P28.5 next. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
+| Next task | Phase 28: P28.5, the moves, once its worktree has `.env` (to see them signed in), then the phase's PR. Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
+| Waiting on Hector | Phase 28: `.env` and `.env.test` copied into its worktree; the flows run there (`bun run test:flows`, with the new `instant.flow.ts`, also on P28.2's commit `000f909` to see it fail); a second account's change showing within 5 minutes (P28.3). Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -2358,9 +2358,9 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
     - Compared side by side before the change, then on the welcome screen at 375 px. The same drawings hop while the AI reads a recipe (`ReadingWait`).
     - The design system's Produce assets still have the old drawings; updating them is Hector's call.
 
-## Phase 28 (planned): Cache Components, and moving between screens
+## Phase 28: Cache Components, and moving between screens
 
-Decided 2026-10-08: Hector took the recommendations (H36), as D87–D90. Not started: stash goes first (D90). From the Next.js 16.4 upgrade (hectarek/hector-mono#38 to #40). Hector, 2026-10-08: "yes, draft the recipes phase in the ux-plan".
+Decided 2026-10-08: Hector took the recommendations (H36), as D87–D90. In progress: stash went first (hectarek/hector-mono#45, D90), and P28.1 to P28.4 are built; P28.5 is next. From the Next.js 16.4 upgrade (hectarek/hector-mono#38 to #40). Hector, 2026-10-08: "yes, draft the recipes phase in the ux-plan".
 
 Why now: Next.js 16.4 recommends Cache Components for every app, and Next.js 17 turns it on for every app, so the app moves either way. With it on, `export const dynamic` fails the build. The portfolio moved in hectarek/hector-mono#39. React 19.3's view transitions are stable, and Next.js 16.4 needs no setting for them. Both are in one phase because the best transition here, a recipe card growing into its page, only plays when the page is ready at the tap. Cache Components' caching is what makes it ready.
 
@@ -2888,3 +2888,10 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
   - Next: Hector's answers to H36; stash's move first if he keeps it.
 - **2026-10-08 (cb)** — Hector took the recommendations for Phase 28 (H36), as D87–D90: the library, Books and recipe pages kept in the phone's memory for 5 minutes, what stays and resets when you come back, five moves between screens, and stash first. One change from the proposal as first drafted: only the Recipes tab gets its page ready in the background (D87), since Meal plan and Groceries load fresh and gain nothing from it. Vercel had hit its daily deployment limit, which kept #40 and #41 off production for recipes; hectarek/hector-mono#44 makes each project build only when its own app, or a package it uses, changed.
   - Next: stash's move to Cache Components; then P28.1.
+- **2026-10-08 (cc)** — Stash moved to Cache Components first (hectarek/hector-mono#45). Phase 28 started on `feat/recipes-p28-cache-components`, and four tasks are built:
+  - P28.1: Cache Components on.
+  - P28.2: a page you come back to has its sheets closed, a fresh form and the video stopped.
+  - P28.3: the library, Books and a recipe are kept in the phone for 5 minutes, and the Recipes tab is ready before it's tapped.
+  - P28.4: the moves are written into AGENTS.md and the map.
+  - One change from the plan: P28.3's cache sits on a loader per page, not on the shared helpers, so the edit form never opens stale. The flows and every signed-in check wait on the worktree's `.env` and `.env.test`, which the session can't copy.
+  - Next: Hector copies the env files and runs the flows; P28.5.
