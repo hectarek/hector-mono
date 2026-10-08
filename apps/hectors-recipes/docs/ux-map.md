@@ -145,6 +145,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Share (owner) or Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
 - **Leads to:** the library (a book), Members, Join.
+- **Names:** a personal book is named at sign-up from its owner's first name ("Hector's Recipes", D19) and keeps that name when the account's name changes; its owner can rename it on Members.
 
 ### Copy recipes — `/books/[id]/copy`
 

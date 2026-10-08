@@ -2319,6 +2319,7 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
 | H30 | Share the testers' feedback (raw is fine). | P22.3 | done 2026-10-07: 23 items; filed in feedback/ (D71) |
 | H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | open |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | open |
+| H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | open |
 
 ## Risks and how they're handled
 
@@ -2559,3 +2560,5 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
   - Next: P23.1, on a branch stacked on Phase 22's.
 - **2026-10-08 (bk)** — Phase 23 done on `feat/recipes-p23-clearer` (see each task's Evidence): Add recipe, recipe counts, share buttons that say they share, joining by a pasted link, the recipe page's ⋯ with Share, Add by link or text, Word documents, and the produce row's wave while the AI reads. A tab's title now takes two lines (P23.1). 1078 + 63 tests and the three browser flows pass.
   - Next: Phase 23's PR, stacked on hectarek/hector-mono#31; Hector's phone checks (H5).
+- **2026-10-08 (bl)** — A second round of feedback, from a tester on a desktop, filed as `feedback/2026-10-08-desktop-tester.md` and placed on the map. Checked on the test project: an account's name change works; a book's name doesn't follow it (D19). Proposals wait on H33; a photos-and-files pass and recipes from YouTube need scoping.
+  - Next: Hector's answers to H31–H33; his review of hectarek/hector-mono#31 and #32.
