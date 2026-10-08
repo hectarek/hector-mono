@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, rebased on main: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33) is merged, its migrations on production. Phases 22 and 23 (#31, #32) are merged. Then 26 (#37: words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#35, then #37 (Phase 26). |
+| Phase | 26 (words, whose book, wide screens) on `feat/recipes-p26-words-books-wide`, stacked on Phase 25's branch: built and tested; migration 0019 (H34), the flows and 375 px not yet run. Phase 25 is in review as hectarek/hector-mono#35, Phase 24 as #33 (its migrations on production too). Phases 22 and 23 (#31, #32) are merged. Phase 20 (measuring AI reads) is still to come. |
+| Next task | Migration 0019 on the test project and production (H34), then Phase 26's flows and 375 px, with sheets at a desktop width. Needs the app's `.env` files in Phase 26's worktree. Hector reviews #33 and #35. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2676,3 +2676,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Hector's review of #33 and #35; Phase 26.
 - **2026-10-08 (bs)** — Hector answered H34 (OK) and H35: no Gateway budget, only the account's credit (about $18), and when it runs out the message asks people to let him know (D86). The message changed with it.
   - Next: Phase 26.
+- **2026-10-08 (bt)** — Phase 26 built: P26.1 Groceries and Meal plan on screen and the map's Words section, P26.2 whose book in the pills and the back link, P26.3 a personal book or plan following its owner's name (migration 0019) with Rename in the ⋯, P26.4 sheets capped at the page in `@repo/ui`'s Drawer and the map's Wide screens record with its test. Plans follow their owner's name too (Claude's call). Lint, types and tests pass in every app.
+  - Next: migration 0019 (H34), the flows and 375 px; Hector's review of #33, #35 and Phase 26's PR.
