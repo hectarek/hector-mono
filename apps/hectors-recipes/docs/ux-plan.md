@@ -10,9 +10,9 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | Two at once. 20 (measuring AI reads), in Hector's own session for it. 28 (Cache Components, and moving between screens), on `feat/recipes-p28-cache-components`: P28.1 to P28.4 built, P28.5 next. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
-| Next task | Phase 28: P28.5, the moves, once its worktree has `.env` (to see them signed in), then the phase's PR. Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
-| Waiting on Hector | Phase 28: `.env` and `.env.test` copied into its worktree; the flows run there (`bun run test:flows`, with the new `instant.flow.ts`, also on P28.2's commit `000f909` to see it fail); a second account's change showing within 5 minutes (P28.3). Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
+| Phase | Two at once. 20 (measuring AI reads), in Hector's own session for it. 28 (Cache Components, and moving between screens), on `feat/recipes-p28-cache-components`: all five tasks built and the flows pass; P28.5's moves are not yet checked by eye. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
+| Next task | Phase 28: check P28.5's moves by eye in the Browser pane (it must be open in the app: a hidden pane doesn't paint, and a move waits for a frame), then the phase's PR. Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
+| Waiting on Hector | Phase 28: the Browser pane opened, for P28.5's check; optionally `instant.flow.ts` on P28.2's commit `000f909`, to see it fail; a second account's change showing within 5 minutes (P28.3); stash's sign-out and sign-in (Hector's tracker). Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
@@ -2423,7 +2423,7 @@ Each is placed on [ux-map.md](./ux-map.md) by its four questions. Hector took th
 
 One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cache-components`, in its own worktree.
 
-- [~] **P28.1** Turn on Cache Components — C · D90 · after stash's move
+- [x] **P28.1** Turn on Cache Components — C · D90 · after stash's move
   - Do:
     - `cacheComponents` and `partialPrefetching` in `next.config.ts`, and the 15 `force-dynamic` exports removed.
     - In place of `dynamicParams = false`: `account/[path]` and `auth/[path]` call `notFound()` for a path not in Neon's `accountViewPaths` or `authViewPaths`, and `pwa-icon/[size]` answers 404 for a size it doesn't draw.
@@ -2451,8 +2451,8 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
       - Hector's flows run showed one more: the sign-in pages read their path outside `<Suspense>`, which validation flags. They do it to answer an unknown path with a real 404 before anything streams. So `auth/[path]` opts out, `export const instant = false`, the only route that does: a tap into a sign-in page waits for the server, which has every known path prerendered.
       - The 404s: an unknown sign-in path and an icon size are 404s. An unknown account path shows Not found with a 200 and a `noindex` tag: its skeleton starts the response, which fixes the status (Next.js's `loading.md`, Status codes), as it already did for an unknown recipe id. AGENTS.md says so now.
       - The proxy's session refresh: the first load called `/api/auth/get-session` from the proxy (it does only when the session-cache cookie is missing) and the page came in signed in.
-    - **Left:** the three flows (Hector's to run: they sign up accounts on the test project). 375 px is checked with P28.5's moves.
-- [~] **P28.2** What stays and what resets — C · D88
+    - Hector ran the flows on 2026-10-08, at `7732f2e`: all four pass, in 43 s. 375 px is checked with P28.5's moves.
+- [x] **P28.2** What stays and what resets — C · D88
   - Do: the resets D88 lists, each in the component that holds the state. Sheets and dialogs close in a `useLayoutEffect` cleanup or the link's `onNavigate`. The forms and imports reset after a save or a discard. `RecipeVideo` stops playing. Check that Neon's sign-out reloads the page (its default navigation sets `window.location.href`), and that the week's slide-in still comes from the right side (`week-swipe.tsx` keeps the last week in a module variable).
   - Verify:
     - Screen tests hide and show a component inside React's `<Activity>`: a sheet closes, a saved form is empty, the video stops, and Groceries' live updates reconnect.
@@ -2472,7 +2472,7 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - `bun check`, `bun ts`, 1114 + 96 tests and the dead-code check pass.
     - AGENTS.md's Cache Components section has the rules, and features.md's recipe form section says when the form starts over.
     - Hector's first run of the flows (2026-10-08) found a test-side effect of D88. The recipe page you leave stays in the DOM, hidden. `getByRole` skips it, but `getByText` doesn't, so cook mode's "1 onion" matched twice. The taps and swipes by text whose words are also on the recipe page (cook mode's, Groceries' check-offs) now take only what shows (`.filter({ visible: true })`). AGENTS.md's flow notes say so.
-    - **Left:** running the flows again (`bun run test:flows`, Hector's to run: they sign up accounts on the test project). The first run stopped before `plan-and-shop`'s new steps.
+    - The flows pass (Hector's run at `7732f2e`), `plan-and-shop`'s two exits with a ⋯ open among them. Two runs before that hung at Add to meal plan: the tap was lost to a page transition, fixed in P28.5 (below). With no action timeout, a lost tap waited out the test's 3 minutes, so a tap now gives up after 30 s.
 - [~] **P28.3** Ready the moment you tap — C · D87
   - Do:
     - The library, Books and a recipe's page (D87) read through `'use cache: private'` with a 5-minute `stale`, in their page helpers (`load-books.ts`, `load-recipe.ts`), so the session is also read once per request.
@@ -2498,8 +2498,9 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
       - The Recipes tab from Meal plan: all 81 cards on screen 50 ms after the tap, and no request after it.
       - A recipe opened a moment ago: on screen at 50 ms, no request. Its first open shows the skeleton, as D87 chose (no prefetch per card).
       - Books: the first open from the ⋯ fetched it; opened again, its count showed at 50 ms with no request. The same held after four other pages in between, by which time Next.js no longer keeps Books alive, so the private cache is what serves it.
+    - `instant.flow.ts` passes (Hector's run at `7732f2e`).
     - **Left**, all for Hector, as they need the test project and sign up accounts:
-      - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the Recipes tab's prefetch.
+      - Run `instant.flow.ts` on P28.2's commit (`000f909`) to see it fail without the Recipes tab's prefetch.
       - Check that a second account's change to a shared book shows within 5 minutes.
 - [x] **P28.4** Motion between screens, written down first — C · D89, D70
   - Do: the pattern in AGENTS.md's UI Rules (what moves, reduced motion, the anchored header and tab bar) and the map's patterns table. Each screen on the map says what moves into and out of it.
@@ -2534,7 +2535,8 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
       - The flows run with reduced motion (`playwright.config.ts`), since a flow taps faster than a person.
     - The Browser pane can't show the moves while it's hidden in the app. The page doesn't paint, so a move waits for a frame that doesn't come, and the page holds its skeleton until something repaints it.
     - `bun check`, `bun ts`, 1114 + 96 tests, the dead-code check and `next build` pass.
-    - **Left:** each move by eye at 375 px, light and dark, in a browser that's on screen (the Browser pane, once open); the flows again, with reduced motion; the iPhone (H5).
+    - The flows pass with reduced motion (Hector's run at `7732f2e`), so with the moves in place nothing a flow does is broken.
+    - **Left:** each move by eye at 375 px, light and dark, in a browser that's on screen (the Browser pane, once open); the iPhone (H5).
 
 ## Later (to-dos, not scheduled)
 
