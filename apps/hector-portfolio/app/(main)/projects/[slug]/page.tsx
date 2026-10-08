@@ -8,9 +8,6 @@ interface ProjectPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Only the projects in src/data are pages: any other slug is a real 404, not a 200 "not found".
-export const dynamicParams = false;
-
 export async function generateStaticParams() {
   const slugs = getAllProjectSlugs();
   return slugs.map((slug) => ({ slug }));

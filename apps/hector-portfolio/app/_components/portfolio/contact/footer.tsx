@@ -8,6 +8,7 @@ import { SocialLinks } from "./social-links";
 
 interface FooterProps {
   profile: Profile;
+  year: number;
 }
 
 const FOOTER_LINKS: { href: string; label: string }[] = [
@@ -17,9 +18,7 @@ const FOOTER_LINKS: { href: string; label: string }[] = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function Footer({ profile }: FooterProps) {
-  const currentYear = new Date().getFullYear();
-
+export function Footer({ profile, year }: FooterProps) {
   return (
     <m.footer
       className="border-t border-border bg-muted px-4 py-12"
@@ -39,7 +38,7 @@ export function Footer({ profile }: FooterProps) {
               <span className="text-accent">.</span>
             </p>
             <p className="text-sm text-muted-foreground">
-              © {currentYear}
+              © {year}
               {profile.location ? ` · Built in ${profile.location}` : ""}
             </p>
           </m.div>

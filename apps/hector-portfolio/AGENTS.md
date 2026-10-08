@@ -43,7 +43,10 @@ tests/                 # Tests
 
 ## Patterns
 - Server Components by default — no `"use client"` unless needed for interactivity
-- `generateStaticParams()` for dynamic project routes
+- Cache Components is on (`cacheComponents` and `partialPrefetching` in `next.config.ts`), and the root layout's `ensureStatic = "navigation"` fails the build if any page would render per request. The site stays fully static by construction.
+  - Reading the clock (`new Date()`, `Date.now()`) while prerendering fails the build. Read it inside a `"use cache"` function with `cacheLife("max")`, as the footer's year (`getCurrentYear` in `app/layout.tsx`) and the sitemap's `lastModified` do, or render the component in the browser only with `use(browser())` inside `<Suspense>`, as the `/ui` calendar does.
+  - Check `bun run build --filter=hector-portfolio`: every route should be `○` (or `◐` for `/projects/[slug]`'s fallback shell).
+- `generateStaticParams()` for dynamic project routes. An unknown slug is a real 404 through `notFound()` in the page (`dynamicParams` isn't allowed with Cache Components).
 - Metadata per page through `generateSEOMetadata()` from `src/shared/utils/seo.ts`, with the page's required `path`: it becomes the page's canonical and `og:url`. Every page also gets the share card `public/og-image.png` unless it passes `image`. The root layout sets no URLs (they'd be inherited as the home page's), and a client page puts its metadata in a sibling `layout.tsx` (`app/ui/layout.tsx`). See `docs/seo.md`.
 - The canonical origin is `SITE_URL` in `src/shared/config/site.ts` (`https://www.hectorfgonzalez.com`), used by the SEO utils, `app/sitemap.ts` and `app/robots.ts`. There's no env var for it.
 - Framer Motion for animations: components use `m` from `framer-motion` (see the light-only note below), with shared variants (`fadeInUp`, `heroVariants`/`heroItem`, `viewportOptions`, etc.) from `src/lib/animations.ts`, and `useScrollReveal()` (`src/lib/use-scroll-reveal.ts`) for scroll-in reveals that respect reduced motion

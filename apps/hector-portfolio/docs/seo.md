@@ -81,22 +81,24 @@ Noindex pages (`/reading`, `/ui`) are deliberately not disallowed: a crawler has
 
 ## Sitemap
 
-The `app/sitemap.ts` file generates `sitemap.xml` from the indexable pages and every project page; noindex pages stay out. Add your routes:
+The `app/sitemap.ts` file generates `sitemap.xml` from the indexable pages and every project page; noindex pages stay out. It's prerendered like the pages, so it reads the date through a cached function (`getLastModified`): with Cache Components, a bare `new Date()` makes it render on every request. Add your routes:
 
 ```typescript
 import { SITE_URL } from "@/src/shared/config/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const lastModified = await getLastModified();
+
   return [
     {
       url: SITE_URL,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "daily",
       priority: 1,
     },
     {
       url: `${SITE_URL}/about`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "monthly",
       priority: 0.8,
     },

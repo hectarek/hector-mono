@@ -222,7 +222,8 @@ import {
   Underline,
   User,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, use, useEffect, useRef, useState } from "react";
+import { browser } from "react-dom";
 import {
   Area,
   AreaChart,
@@ -280,15 +281,21 @@ function Subsection({
   );
 }
 
+// The calendar starts on today, and a prerendered page can't read the clock: it renders in
+// the browser only, with a placeholder in the static HTML.
+function CalendarDemo() {
+  use(browser());
+  const [date, setDate] = useState<Date | undefined>(() => new Date());
+
+  return <Calendar mode="single" selected={date} onSelect={setDate} />;
+}
+
 export default function UIPage() {
   const [theme, setTheme] = useState<Theme>("default");
   const [neoColor, setNeoColor] = useState<NeoColor>("blue");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sliderValue, setSliderValue] = useState([50]);
   const [progressValue] = useState(65);
-  const [calendarDate, setCalendarDate] = useState<Date | undefined>(
-    new Date(),
-  );
   const [collapsibleOpen, setCollapsibleOpen] = useState(false);
   const [otpValue, setOtpValue] = useState("");
 
@@ -645,11 +652,9 @@ export default function UIPage() {
       {/* Calendar */}
       <Section title="Calendar">
         <div className="w-fit rounded-md border">
-          <Calendar
-            mode="single"
-            selected={calendarDate}
-            onSelect={setCalendarDate}
-          />
+          <Suspense fallback={<Skeleton className="h-72 w-64" />}>
+            <CalendarDemo />
+          </Suspense>
         </div>
       </Section>
 

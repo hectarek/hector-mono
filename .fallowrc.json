@@ -6,6 +6,10 @@
     {
       "file": "apps/*/app/**/route.{ts,tsx}",
       "exports": ["generateStaticParams"]
+    },
+    {
+      "file": "apps/*/app/**/{layout,page}.tsx",
+      "exports": ["ensureStatic"]
     }
   ],
   "rules": {

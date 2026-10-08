@@ -1,5 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
+import { cacheLife } from "next/cache";
 import {
   Caveat,
   Geist,
@@ -48,6 +49,9 @@ export const metadata: Metadata = {
     "Product-minded full-stack engineer, strongest on the front end, who ships AI features. Co-architect and sole maintainer of The Notwork, a production edtech platform with ~24K users.",
 };
 
+// Every page is prerendered: anything that would render per request fails the build.
+export const ensureStatic = "navigation";
+
 // Light only: the portfolio theme's dark tokens never apply, and form controls and
 // scrollbars stay light whatever the visitor's system setting is.
 export const viewport: Viewport = {
@@ -55,12 +59,21 @@ export const viewport: Viewport = {
   themeColor: "#fbfbfb",
 };
 
-export default function RootLayout({
+// The footer's © year. Reading the clock is only allowed inside a cache, so the pages still
+// prerender; `max` refreshes it at most 30 days into a new year.
+async function getCurrentYear(): Promise<number> {
+  "use cache";
+  cacheLife("max");
+  return new Date().getFullYear();
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const profile = getProfile();
+  const year = await getCurrentYear();
 
   return (
     <html lang="en" data-theme="portfolio" className="h-full">
@@ -79,7 +92,7 @@ export default function RootLayout({
             <main id="main" className="flex flex-1 flex-col">
               {children}
             </main>
-            <Footer profile={profile} />
+            <Footer profile={profile} year={year} />
           </div>
         </MotionProvider>
         {/* The script is served by Vercel, so local builds would only log a 404. */}
