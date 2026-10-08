@@ -58,6 +58,10 @@ function TabBar({ pathname }: { pathname: string | null }) {
             <li key={href}>
               <Link
                 href={href}
+                // D87: the library reads its book and search from the address, which the
+                // plain prefetch leaves out, so the Recipes tab gets it ready in full (one
+                // request). Meal plan and Groceries load fresh on every visit.
+                prefetch={tab === "recipes" ? true : "auto"}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-1 text-xs font-medium transition-colors",

@@ -7,6 +7,7 @@ import {
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import { BookOpen, Copy, Library, Plus } from "lucide-react";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { LibraryResults } from "@/app/_components/library-results";
 import { ProduceTile } from "@/app/_components/produce-tile";
@@ -31,28 +32,10 @@ export default async function LibraryPage({
   const sort = firstParam(params.sort);
   const savedOnly = firstParam(params.saved) === "1";
   const requestedBook = firstParam(params.book);
-
-  const userId = await getCurrentUserId();
-  const { books, current } = await loadBooks(
-    userId,
-    requestedBook === ALL_RECIPES ? undefined : requestedBook,
+  const { books, current, showAll, saved, library } = await loadLibrary(
+    requestedBook,
+    tag,
   );
-  // With no book asked for, their default book; without one, All recipes once they're in
-  // two or more (D17).
-  const showAll =
-    requestedBook === ALL_RECIPES ||
-    (!requestedBook &&
-      books.length > 1 &&
-      !books.some((book) => book.isDefault));
-  // Every card the tag allows: the search narrows them in the page as you type (P10.4).
-  // This person's saved recipes (D77): first by default, and the Saved chip's filter.
-  const saved = await getInjection("IGetBookmarksController")(userId);
-  const library = showAll
-    ? await getInjection("IGetAllRecipesController")({ tag }, userId)
-    : await getInjection("IGetRecipesController")(
-        { spaceId: current.id, tag },
-        userId,
-      );
 
   // In All recipes, Add recipe goes to your own book (the form offers the others).
   const canEdit = showAll || hasRole(current.role, "editor");
@@ -175,4 +158,39 @@ export default async function LibraryPage({
       )}
     </div>
   );
+}
+
+// D87: kept in the phone's memory for 5 minutes, never on the server, so coming back to the
+// library shows it at once, and the Recipes tab gets it ready before it's tapped. Any save
+// clears it; someone else's change can take up to 5 minutes to show. Everything the page
+// reads is in here: a read outside it would load after the tap.
+async function loadLibrary(
+  requestedBook: string | undefined,
+  tag: string | undefined,
+) {
+  "use cache: private";
+  cacheLife({ stale: 300 });
+
+  const userId = await getCurrentUserId();
+  const { books, current } = await loadBooks(
+    userId,
+    requestedBook === ALL_RECIPES ? undefined : requestedBook,
+  );
+  // With no book asked for, their default book; without one, All recipes once they're in
+  // two or more (D17).
+  const showAll =
+    requestedBook === ALL_RECIPES ||
+    (!requestedBook &&
+      books.length > 1 &&
+      !books.some((book) => book.isDefault));
+  // Every card the tag allows: the search narrows them in the page as you type (P10.4).
+  // This person's saved recipes (D77): first by default, and the Saved chip's filter.
+  const saved = await getInjection("IGetBookmarksController")(userId);
+  const library = showAll
+    ? await getInjection("IGetAllRecipesController")({ tag }, userId)
+    : await getInjection("IGetRecipesController")(
+        { spaceId: current.id, tag },
+        userId,
+      );
+  return { books, current, showAll, saved, library };
 }

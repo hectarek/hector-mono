@@ -134,6 +134,11 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
   - A sheet, dialog or ⋯ that holds its own open state holds it in `useState` (not Base UI's) and calls `useClosesWhenHidden` (`app/_lib/use-closes-when-hidden.ts`) to close it. A sheet whose parent holds the state calls it with `onOpenChange(false)`. A new one does the same, with a screen test inside `<Activity>`.
   - The recipe form and the two imports sit in `FreshEachVisit` (`app/_components/fresh-each-visit.tsx`, keyed on `useRouter().bfcacheId`): a link or a redirect starts them over, and Back keeps what was typed. In tests, `nextState.visit` is that id; set a new one for a fresh arrival.
   - Effects need nothing: React runs their cleanups when it hides a page and runs them again when it shows it (`LiveList` reconnects). Something that keeps going while hidden, like a playing video, stops in `useClosesWhenHidden`.
+- The library, Books and a recipe's page are kept in the phone's memory for 5 minutes (docs/ux-plan.md D87). Each reads everything through one loader beside it (`loadLibrary`, `loadBookList`, `loadRecipePage`) with `'use cache: private'` and `cacheLife({ stale: 300 })`. A read outside the loader loads after the tap.
+  - Never on the shared helpers (`loadBooks`, `loadRecipe`): the edit form, Copy recipes and the new recipe form read fresh, so a save can't undo someone's newer edit.
+  - A Server Action that changes what they show calls `revalidatePath`, which empties the browser's cache, so your own change shows at once. Someone else's can take 5 minutes.
+  - No plain `'use cache'` (stored on the server) around anything that depends on who's signed in. Only the Recipes tab's link has `prefetch={true}`: one request per link on screen.
+  - In tests, the preload's `cacheLife` does nothing, so every call reads afresh. `tests/flows/instant.flow.ts` checks each kept screen with `@next/playwright`'s `instant()`.
 
 ## Feature Rules
 How each feature works, and what to keep true when changing it, is in [docs/features.md](docs/features.md). When a feature's behaviour or rules change, update its section there in the same change; only rules every change follows go here. Before changing a feature, read its section:

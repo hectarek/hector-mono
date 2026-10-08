@@ -1,5 +1,6 @@
 import { Button } from "@repo/ui/components/button";
 import { Users } from "lucide-react";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { BackLink } from "@/app/_components/back-link";
 import { DefaultBookPicker } from "@/app/_components/default-book-picker";
@@ -12,17 +13,7 @@ import { getInjection } from "@/di/container";
 import { recipeCountText } from "@/src/entities/library";
 
 export default async function BooksPage() {
-  const userId = await getCurrentUserId();
-  const { books } = await loadBooks(userId, undefined);
-  // Each book's count (P23.2), from the same list All recipes shows.
-  const { recipes } = await getInjection("IGetAllRecipesController")(
-    {},
-    userId,
-  );
-  const counts = new Map<string, number>();
-  for (const recipe of recipes) {
-    counts.set(recipe.spaceId, (counts.get(recipe.spaceId) ?? 0) + 1);
-  }
+  const { books, counts } = await loadBookList();
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,4 +75,24 @@ export default async function BooksPage() {
       </section>
     </div>
   );
+}
+
+// D87: kept in the phone's memory for 5 minutes, never on the server, so Books shows at once
+// when you come back to it, or once a link to it has been on screen. Any save clears it.
+async function loadBookList() {
+  "use cache: private";
+  cacheLife({ stale: 300 });
+
+  const userId = await getCurrentUserId();
+  const { books } = await loadBooks(userId, undefined);
+  // Each book's count (P23.2), from the same list All recipes shows.
+  const { recipes } = await getInjection("IGetAllRecipesController")(
+    {},
+    userId,
+  );
+  const counts = new Map<string, number>();
+  for (const recipe of recipes) {
+    counts.set(recipe.spaceId, (counts.get(recipe.spaceId) ?? 0) + 1);
+  }
+  return { books, counts };
 }

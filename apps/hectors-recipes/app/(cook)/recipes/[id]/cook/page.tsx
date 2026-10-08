@@ -16,11 +16,12 @@ export default async function CookPage({
   const { id } = await params;
   // From the recipe page's Cook link, when its servings were changed.
   const initialServings = servingsParam((await searchParams).servings);
-  const { recipe } = await loadRecipe(id);
+  const userId = await getCurrentUserId();
+  const { recipe } = await loadRecipe(id, userId);
   // Whose grocery list: a plan's list is part of the plan.
   const plans = await getInjection("IListMySpacesController")(
     { type: "meal-plan" },
-    await getCurrentUserId(),
+    userId,
   );
   const planTargets = editableSpaces(plans);
   const canList = planTargets.length > 0 || plans.length === 0;

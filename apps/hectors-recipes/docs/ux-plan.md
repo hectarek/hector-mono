@@ -2465,7 +2465,7 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - `bun check`, `bun ts`, 1114 + 94 tests and the dead-code check pass.
     - AGENTS.md's Cache Components section has the rules, and features.md's recipe form section says when the form starts over.
     - **Left:** running the flows (`bun run test:flows`, Hector's to run: they sign up accounts on the test project). The new step is written but not run. A look in the browser pane needs this worktree's `.env`.
-- [ ] **P28.3** Ready the moment you tap — C · D87
+- [~] **P28.3** Ready the moment you tap — C · D87
   - Do:
     - The library, Books and a recipe's page (D87) read through `'use cache: private'` with a 5-minute `stale`, in their page helpers (`load-books.ts`, `load-recipe.ts`), so the session is also read once per request.
     - The Recipes tab's link gets `prefetch`.
@@ -2474,6 +2474,21 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - The flows get an `instant()` test per chosen screen (`@next/playwright`, a new dev dependency), failing before the change.
     - A save shows at once on the screen it changed.
     - On the test project, a second account's change shows within 5 minutes.
+  - Evidence (2026-10-08, on `feat/recipes-p28-cache-components`):
+    - Each of the three pages reads through one loader of its own, with `'use cache: private'` and `cacheLife({ stale: 300 })`: `loadLibrary`, `loadBookList` and `loadRecipePage`, beside the page. Each holds everything its page reads (the session, the books, the saved recipes and the recipes; on a recipe's page its plans and today too), because a read outside it would still load after the tap. The page itself reads only its address.
+    - Not in `load-books.ts` and `load-recipe.ts`, as the Do line has it. `loadBooks` also serves Copy recipes and the new recipe form, and `loadRecipe` the edit form and cook mode. Cached there, the edit form could open up to 5 minutes old, and saving it would undo someone's newer edit.
+    - The session is read once per request on a recipe's page, the edit form and cook mode: `loadRecipe` takes the user id the page read.
+    - Today on a recipe's page (Add to meal plan's first day) is read inside the cache, so just after midnight it can be up to 5 minutes behind.
+    - The Recipes tab's link has `prefetch={true}`; Meal plan and Groceries keep the plain prefetch. Books needs none: a page that reads the session through a private cache gets an App Shell of its own per person, which a plain link loads (Next.js's "Optimizing prefetching" guide).
+    - Nothing is stored on the server: the three private loaders are the app's only cache directives.
+    - A save clears it. Next.js empties the browser's whole cache when a Server Action calls `revalidatePath` (`cacheLife`'s docs, "Client cache behavior"). Every action that changes what these pages show calls it. The four that don't are the three AI reads and `inviteLinks`, and they change nothing these pages show. Recently viewed is kept on the phone, so opening a recipe changes nothing on the server.
+    - `next build` passes with placeholder values, and nothing failed in its log.
+    - `tests/flows/instant.flow.ts`, with `@next/playwright` 16.4.0 (a new dev dependency): the Recipes tab from Meal plan, a recipe opened a moment ago, and Books from the library's ⋯, each tapped inside `instant()`; then a recipe you add is in the library straight away.
+    - `bun check`, `bun ts`, 1114 + 94 tests and the dead-code check pass. The test preload stubs `cacheLife`.
+    - Found on the way: `bookmarks [postgres] > saves and unsaves, newest first` failed once in a full run and passed 120 runs on its own. Saved recipes sort by `createdAt` alone, so two saves in the same instant can come back in either order. It's in Hector's tracker.
+    - **Left**, all for Hector, as they need the test project and sign up accounts:
+      - Run `instant.flow.ts` on this commit, and on P28.2's (`000f909`) to see it fail without the change.
+      - Check that a second account's change to a shared book shows within 5 minutes.
 - [ ] **P28.4** Motion between screens, written down first — C · D89, D70
   - Do: the pattern in AGENTS.md's UI Rules (what moves, reduced motion, the anchored header and tab bar) and the map's patterns table. Each screen on the map says what moves into and out of it.
   - Verify: AGENTS.md and the map agree, and every move C lists is on the map.

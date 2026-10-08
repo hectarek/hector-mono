@@ -1,5 +1,6 @@
 import { badgeVariants } from "@repo/ui/components/badge";
 import { Clock, ExternalLink, Users } from "lucide-react";
+import { cacheLife } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { AddToListButton } from "@/app/_components/add-to-list-button";
@@ -40,13 +41,8 @@ export default async function RecipePage({
   const { id } = await params;
   // From cook mode's Done, when its servings were changed; kept in the URL as they change.
   const initialServings = servingsParam((await searchParams).servings);
-  const { recipe, canEdit } = await loadRecipe(id);
-  const userId = await getCurrentUserId();
-  const [books, plans, bookmarks] = await Promise.all([
-    getInjection("IListMySpacesController")({ type: "recipe-book" }, userId),
-    getInjection("IListMySpacesController")({ type: "meal-plan" }, userId),
-    getInjection("IGetBookmarksController")(userId),
-  ]);
+  const { recipe, canEdit, books, plans, bookmarks, today } =
+    await loadRecipePage(id);
   // A plan's grocery list is part of the plan, so whoever can plan can add to a list. In no
   // plan yet: adding creates their own.
   const planTargets = editableSpaces(plans);
@@ -155,7 +151,7 @@ export default async function RecipePage({
                 <AddToPlanButton
                   recipeId={recipe.id}
                   title={recipe.title}
-                  today={todayIn(PLAN_TIME_ZONE)}
+                  today={today}
                   plans={planTargets}
                 />
               )}
@@ -213,4 +209,29 @@ export default async function RecipePage({
       </RecipeServings>
     </article>
   );
+}
+
+// D87: kept in the phone's memory for 5 minutes, never on the server, so opening the recipe
+// again shows it at once. Any save clears it; someone else's change can take up to 5 minutes
+// to show. Everything the page reads is in here, today included (up to 5 minutes behind just
+// after midnight): a read outside it would load after the tap.
+async function loadRecipePage(recipeId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300 });
+
+  const userId = await getCurrentUserId();
+  const { recipe, canEdit } = await loadRecipe(recipeId, userId);
+  const [books, plans, bookmarks] = await Promise.all([
+    getInjection("IListMySpacesController")({ type: "recipe-book" }, userId),
+    getInjection("IListMySpacesController")({ type: "meal-plan" }, userId),
+    getInjection("IGetBookmarksController")(userId),
+  ]);
+  return {
+    recipe,
+    canEdit,
+    books,
+    plans,
+    bookmarks,
+    today: todayIn(PLAN_TIME_ZONE),
+  };
 }

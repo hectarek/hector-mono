@@ -21,7 +21,8 @@ export default async function EditRecipePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { recipe, canEdit } = await loadRecipe(id);
+  const userId = await getCurrentUserId();
+  const { recipe, canEdit } = await loadRecipe(id, userId);
 
   if (!canEdit) {
     return (
@@ -50,7 +51,7 @@ export default async function EditRecipePage({
   // to pick one, so a household's books share one set (D33).
   const { tags, tagGroups } = await getInjection("IGetAllRecipesController")(
     {},
-    await getCurrentUserId(),
+    userId,
   );
 
   // A fresh visit shows the recipe as saved; Back brings back what was being typed.
