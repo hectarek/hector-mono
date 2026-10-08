@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`, in review as hectarek/hector-mono#31: P22.1 and P22.2 done, P22.3 waiting on the feedback. Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
-| Next task | Hector's calls on P22.3's placement, and which drafts make the next phase; Hector reviews hectarek/hector-mono#31. |
+| Phase | 22 (a UX map, and testers' feedback placed on it) on `docs/recipes-p22-ux-map`, in review as hectarek/hector-mono#31: done. Phase 23 (clearer, and small things testers asked for) next, stacked on it; then 24 (bookmarks, recently viewed, a video, suggested tags) and 25 (the map's 12 fixes). Phases 1–19 and 21 merged (21: hectarek/hector-mono#30). Phase 20 (measuring AI reads) is still to come, starting with a discussion. |
+| Next task | P23.1. Hector reviews hectarek/hector-mono#31. |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-07 |
 
@@ -135,6 +135,15 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D68 | A step's ingredients stay matched by name, not stored. Four changes to the matching: lines that share the word a step uses are all shown when the step says it in the plural ("the beans") or they're one ingredient listed twice, in place of none (D24 had it guess nothing); a name's first word, past words like "large" or "fresh", counts when no other line has it ("the chicken"); a name with "or" matches either side; and "sauce", "peel", "stem", "leaf" and "seed" don't match on their own. | Hector, 2026-10-07: "i dont want to store links unless we have to but do a review first"; after the review (P21.5's Found), "go ahead with both". |
 | D69 | The warning that the screen can't stay on can be dismissed, and stays dismissed on that device. A sun on the warning's yellow takes its place in the top bar (proposed as a dimmed sun, which looked like the sun of a screen staying on), and tapping it shows the warning again. | Hector, 2026-10-07: "can we make that dismissable"; Claude's recommendation (on the device, not per cook); "go ahead with both". |
 | D70 | A map of the app ([ux-map.md](./ux-map.md)) says what each screen is for, which flows cross it and what fits on it. A new feature or change is placed on the map before it's designed: the job it serves, the screen it goes on and whether it fits there, the pattern that carries it, and what it costs the other flows. Testers' feedback goes through the same placement before anything is built. The map is text in the repo. Pictures of the app as built come later, from the browser flows (L9), and mockups are drawn only for proposals. | Hector, 2026-10-07, after testers sent a lot of feedback: grow the app "incrementally" without "a cluttered and difficult to use app", with each change "considered against our broader design system". He chose to write the map first ("Let's do A"). The screen canvas in Claude Design was drawn by hand on 2026-09-24 and showed none of the later phases' screens, which is why the as-built pictures will come from the app (Claude's reasoning). |
+| D71 | Feedback from people using the app is filed in the repo, in [feedback/](./feedback/README.md): one file per round, with nothing that identifies a person. Each item is placed on the map and given an outcome (planned, decided, needs scoping, or dropped). A request for something that already exists counts as a clarity problem on that screen. | Hector, 2026-10-08: "shouldnt we keep the tester feedback in our repo since its related to that?… Its more of data we should file away", and "establish a place where that can be collected in the future". Claude had filed the first round in Hector's private plans, to keep testers' words out of a public repo; it holds no names, so it moved here. |
+| D72 | The recipe page: a bookmark icon to the right of the recipe's name; every other action that isn't Cook, Add to plan or Add to list goes in a ⋯ beside the back link (Edit, Copy, Share, and what's added later). A video, when a recipe has one, takes the photo's place, and its link sits under Photo link in the form. | Hector, 2026-10-08. Edit and Copy moving into the ⋯ is Claude's reading of "a three dots button for all the others": the top row was the busiest part of the busiest screen (ux-map.md). |
+| D73 | Add by link becomes **Add by link or text**: one box that takes a recipe's link or its whole text, read into the form for you. The chooser says how it differs from Add manually, where you type it in yourself and a pasted list is split into rows. Revises D34. | Hector, 2026-10-08: "change link option to add by link or text just make sure to specify the copy of how its different from the last button"; keep it in the first row "but make it more navigable instead of it being hidden". One box with one Read button is Claude's call: it keeps one main action, which the old paste step broke (ux-map.md, disagreement 4). |
+| D74 | Add by photo or file takes Word documents (.docx), read like a text file. Revises D53. | Hector, 2026-10-08: "i didnt want to do word but i have a user where all of theirs are word". |
+| D75 | A moving wait while the AI reads isn't a bold moment. Hector sees the design system as conservative, with "slight nods to flair" and "a lot of room to play with"; the system stays as it is for now, and this note stands for later. Reduced motion gets a still picture. | Hector, 2026-10-08: "i wouldnt say that is bold at all… Not say we need to change the design system itself right now but we need to take note". |
+| D76 | Recently viewed is kept on the device (local storage), not in the database, for now. | Hector, 2026-10-08: "make sure its all local storage and not something we track in our db yet". |
+| D77 | Bookmarks are per person and kept in the database, so a phone and a laptop agree (as D18). Bookmarked recipes come first in the library by default, and a Saved chip shows only them. | Claude's call: Hector placed the icon (D72) and asked for "easy filtering and it goes to the top by default"; a bookmark is a few deliberate rows per person, unlike views. |
+| D78 | Suggested tags come from the tag catalog that already exists (migration 0013): a new account's picker offers its tags under their groups. "meal prep" joins it under meal. The catalog stays one row per tag for everyone, so suggestions add no rows per person. | Hector, 2026-10-08: "we should probably have a tags table or something similar that we can pull from… mindful how we incorporate that so that we dont have a bloat of records". The meal group and the spelling (as "side dish") are Claude's calls. |
+| D79 | The larger ideas stay as drafts in Hector's tracker until the smaller work is done: learning while you cook (an ingredient dictionary, a talking assistant, lessons), after Phase 20; a public page with boards; substitutes; unit conversions; variations; onboarding; and measuring load times. | Hector, 2026-10-08: "it definetly should go after phase 20… lets just keep these as drafts until we are able to come back to them"; "we can just keep this in drafts for a while until all the other easier ones are addressed". |
 
 ---
 
@@ -2078,7 +2087,7 @@ Starting point, 2026-10-07:
 - Nothing says what each screen is for. `features.md` has each feature's engineering rules; this plan is the tracker.
 - The three browser flows (`tests/flows/`) walk the main journeys: sign up, add, plan, shop and start over; cook; add by photo or file.
 
-One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit here: the testers' words stay outside this public repo, on Hector's machine, and only the decisions that come of them are recorded in this plan.
+One commit per task; the PR when P22.1 and P22.2 are done. P22.3's round is filed in [feedback/](./feedback/README.md) (D71).
 
 - [x] **P22.1** The map — C · D70
   - Do: `docs/ux-map.md`: the jobs the app does; each screen's job, surface, main action, what its ⋯ holds, its sheets and how you get there; the flows across screens; what fits on each screen.
@@ -2098,13 +2107,84 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
     - The definition of done has a 7th item: placed on the map first, and the map updated in the same commit by a change that adds, moves or removes a screen, an action, a sheet or a way between screens.
     - AGENTS.md's UI Rules open with the same rule and the link. Its design-system line now says the canvas's mockups date from 2026-09-24 and the map is the record of what's built. Its "Make default" is now "Make my default plan", the button's words (found in P22.1).
     - The three say the same thing in the same words: placed first, and updated by a change that adds, moves or removes a screen, an action, a sheet or a way between screens.
-- [~] **P22.3** Testers' feedback placed on the map — C · D70 · needs H30
+- [x] **P22.3** Testers' feedback placed on the map — C · D70, D71 · needs H30
   - Do: each item, clustered by job, with its screen, the pattern that would carry it, its cost to the other flows, and a proposal: change an existing screen, a new pattern, a new job, or park it.
   - Verify: Hector reviews the placement; what he decides becomes D-numbers and tasks in a later phase.
   - Evidence (2026-10-07):
     - Hector shared 23 items (H30). Each is placed by the map's four questions in a private doc on Hector's machine, grouped by job, with drafts in Hector's private tracker, labelled as follow-ups: 22 in all, 20 for the 23 items (a few share one), one for the recipe page's room and one for the map's 12 disagreements.
     - What placing them showed, without the testers' words: most fit today's screens and patterns; four want room on the recipe page, which has none (no ⋯); two already exist but weren't found (the share sheet, and opening a recipe from its link, now on the map); three reopen decisions (D34, D53, and the design system's still bold moments); and the largest are two new jobs.
     - Waiting on Hector: the decisions the doc lists, and which drafts go into the next phase.
+  - Evidence (2026-10-08):
+    - Hector's answers are D71–D79. The round moved into the repo as [feedback/2026-10-07-first-testers.md](./feedback/2026-10-07-first-testers.md), beside a [README](./feedback/README.md) for future rounds (D71); the private doc is gone.
+    - Every item has an outcome there: 14 planned in Phases 23 and 24, and 9 needing scoping, kept as drafts (D79). Phase 25 fixes the map's 12 disagreements.
+
+## Phase 23: Clearer, and the small things testers asked for
+
+Branch `feat/recipes-p23-clearer`, in its own worktree, stacked on Phase 22's. From the first testers' round ([feedback](./feedback/2026-10-07-first-testers.md)): three of their requests were for things the app already did but didn't show (F11, F15, F18), and the rest of this phase is small and fits today's screens. No migrations. Each change is placed on [ux-map.md](./ux-map.md) and updates it in the same commit (D70).
+
+One commit per task; the PR when the phase is done.
+
+- [ ] **P23.1** "Add recipe" on the library — C · F1
+  - Do: the library's main action reads "Add recipe", with its plus.
+  - Verify: a screen test for the label; 375 px with a long book name, light and dark.
+- [ ] **P23.2** A book's recipe count — C · F17
+  - Do: the library's small label shows the book's count ("Recipe book · 24 recipes"; All recipes counts every book's), and each row on Books shows its book's. The book's total, not the filtered grid (Claude's call: the grid already shows what matches).
+  - Verify: screen tests (one recipe, several, none); 375 px.
+- [ ] **P23.3** Invite buttons that say they share — C · F15
+  - Do: the Invite sheet's two buttons and the members page's Share link say what they do: share a link where the browser has a share sheet, copy it where it doesn't, and which role it gives.
+  - Verify: screen tests with the share sheet there and absent.
+- [ ] **P23.4** Join by pasting a link — C · F16
+  - Do: Books gets a Join field: paste a book's or plan's invite link and Join opens its Join page. A link that isn't an invite says so.
+  - Verify: a test for reading the invite from a pasted link (the whole address, the path alone, other text); a screen test.
+- [ ] **P23.5** The recipe page's ⋯, with Share — C · D72, F18
+  - Do: Copy and Edit leave the top row for a ⋯ (`TitleMenu`) beside the back link, holding Edit (editors), Copy (when you can edit another book; its book picker becomes a step in the sheet, as Invite's is) and Share (everyone: the share sheet, or the link copied).
+  - Verify: screen tests (a viewer gets Share only; an editor gets Edit, Copy and Share; Copy copies); 375 px, light and dark.
+- [ ] **P23.6** Add by link or text — C · D73, F11
+  - Do: the chooser's first row is "Add by link or text", and its words say how it differs from Add manually. Its screen has one box for a link or a recipe's text, and one Read button: a lone web address is read as a page, anything else as text.
+  - Verify: a test for telling a link from text; screen tests for both reads and for a failed link; the chooser at 375 px.
+- [ ] **P23.7** Word documents — C · D74, F8
+  - Do: Add by photo or file takes .docx: the server turns it into text, then reads it as it reads a text file. The help text and the picker's types say so; a document it can't open says so.
+  - Verify: tests with a small .docx made for them (a recipe, an empty one, a broken one); the `add-recipe` flow picks one.
+- [ ] **P23.8** A friendlier wait while the AI reads — C · D75, F12
+  - Do: the reading screens show the produce drawings moving gently while the AI reads, and still with reduced motion; the words stay.
+  - Verify: a screen test for reduced motion; screenshots at 375 px, light and dark.
+
+## Phase 24: Bookmarks, recently viewed, a video, suggested tags
+
+Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations are applied together (H31). From the first testers' round: F9, F10, F14, F19, F20.
+
+- [ ] **P24.1** Bookmarks — C+H · D72, D77, F9 · needs H31
+  - Do: a table of bookmarks (person, recipe), removed with the recipe. A bookmark icon to the right of the recipe's name, filled when saved.
+  - Verify: use-case tests on both backends (save, unsave, only yours, gone with the recipe); a screen test; 375 px.
+- [ ] **P24.2** The library's order: saved first, and recently viewed — C · D76, D77, F9, F10
+  - Do: bookmarked recipes first by default and a Saved chip. Recipes you open are remembered on the device (D76), and the library can order by them, from one control with Group by (placed on the map when the phase starts).
+  - Verify: tests for the ordering with search and Group by; screen tests; the `plan-and-shop` flow still finds its recipe.
+- [ ] **P24.3** A video in place of the photo — C+H · D72, F20 · needs H31
+  - Do: a video link column, its field under Photo link, and the recipe page showing the video where the photo was. A host that can't be embedded keeps the photo, with the video as a link.
+  - Verify: a test for each host's link; a screen test; 375 px.
+- [ ] **P24.4** Suggested tags, and meal prep — C+H · D78, F14, F19 · needs H31
+  - Do: the tag picker offers the catalog's tags under their groups, beside your own; a migration adds "meal prep" under meal, and `STARTING_TAGS` with it.
+  - Verify: a new account's picker shows the catalog's tags (a screen test); the catalog test still agrees with `STARTING_TAGS`.
+
+## Phase 25: Where the app breaks its own rules
+
+Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](./ux-map.md) lists, fixed by changing the code to match the rule, as L5 did. Hector OKs the list first (H32). Each fix updates the map's list.
+
+- [ ] **P25.1** The 12, one commit each — C · needs H32
+  - Proposed fixes, in the map's order:
+    1. Add to plan and Add to list open as bottom sheets (Copy moves into one in P23.5).
+    2. Groceries' Add button at `lg`.
+    3. Add to list, Add to plan and Plan's grocery button through `callAction`.
+    4. Cook mode's "Time's up · Dismiss" stops being a second filled button (Add by link's is gone in P23.6).
+    5. One name for the members page: Members.
+    6. Viewers get empty texts that fit them, on Groceries and Plan.
+    7. Add by photo or file offers the same ways out after a failed read as Add by link or text.
+    8. A paused or used-up AI read says so before you try.
+    9. Removing a member, leaving and turning off a link ask first.
+    10. Cook mode's Done keeps the servings chosen there.
+    11. A read recipe still says which book it will be saved to.
+    12. Books' Create form submits as AGENTS.md says forms that can fail must.
+  - Verify: each fix's own test or screen test; 375 px for the visible ones.
 
 ## Later (to-dos, not scheduled)
 
@@ -2200,7 +2280,9 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
 | H27 | Check the tagging pass's list (each recipe's tags now and proposed, unsure diet tags flagged) before it's written. | P18.2 | done 2026-10-05: approved 2026-10-04 ("the tags look good please apply all those"); Hector ran the tagging SQL on production after H26, and Claude checked it read-only |
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
-| H30 | Share the testers' feedback (raw is fine). It stays on Hector's machine, outside this repo. | P22.3 | done 2026-10-07: 23 items |
+| H30 | Share the testers' feedback (raw is fine). | P22.3 | done 2026-10-07: 23 items; filed in feedback/ (D71) |
+| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | open |
+| H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | open |
 
 ## Risks and how they're handled
 
@@ -2437,3 +2519,5 @@ One commit per task; the PR when P22.1 and P22.2 are done. P22.3 has no commit h
   - P22.1 (the map) and P22.2 (placing a change on it) done; PR hectarek/hector-mono#31. Next: the feedback (H30), then P22.3.
 - **2026-10-07 (bi)** — Hector shared the testers' feedback (H30, 23 items). P22.3: each placed on the map in a private doc, with a draft per piece of work in his tracker. Placing them found that any signed-in person can already open a recipe from its link, now on the map.
   - Next: Hector's calls on the placement and the next phase.
+- **2026-10-08 (bj)** — Hector answered P22.3 (D71–D79). The round moved into the repo as `feedback/2026-10-07-first-testers.md`, with a README for future rounds. Planned Phase 23 (clearer, and small), 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). The larger ideas stay as drafts (D79).
+  - Next: P23.1, on a branch stacked on Phase 22's.

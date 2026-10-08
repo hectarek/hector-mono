@@ -12,7 +12,7 @@ Read from the code on 2026-10-07. Routes are from `app/`.
 
 ## Placing a change
 
-A new feature, a change to a screen, or a tester's request answers these four questions on this map before it's designed. The answers go in the decision that adopts it (a D-number in ux-plan.md).
+A new feature, a change to a screen, or a tester's request answers these four questions on this map before it's designed. The answers go in the decision that adopts it (a D-number in ux-plan.md). Feedback from people using the app is filed by round in [feedback/](./feedback/README.md) and placed here the same way (D71).
 
 1. **Which job does it serve?** One of the six below. If none, it's a new job: Hector's call, and it may need a screen of its own.
 2. **Which screen does it go on, and is there room?** Read the screen's **Room**. A screen has one main action (D32), so a second one means one of them gives way. Other actions go in the title's ⋯ (D42) or a row's sheet. At most one bold moment is in view.
