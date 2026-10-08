@@ -129,7 +129,12 @@ export function AddToListButton({
               <Button
                 size="lg"
                 nativeButton={false}
-                render={<Link href={`/groceries?plan=${done.planId}`} />}
+                render={
+                  <Link
+                    href={`/groceries?plan=${done.planId}`}
+                    transitionTypes={["switch-tab"]}
+                  />
+                }
               >
                 Open groceries
               </Button>

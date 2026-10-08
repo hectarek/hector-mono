@@ -91,6 +91,7 @@ export function AddToPlanButton({
                 render={
                   <Link
                     href={`/plan?week=${added.cookDate}${planId ? `&plan=${planId}` : ""}`}
+                    transitionTypes={["switch-tab"]}
                   />
                 }
               >

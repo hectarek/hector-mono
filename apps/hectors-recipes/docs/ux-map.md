@@ -74,7 +74,7 @@ The header has the logo (to the library) and the account button. Meal plan and G
 
 Each screen lists its main action (the one filled button, D32), what its ⋯ holds (D42), the rest of what's on it, and how you get there and on. **Room** says what more the screen can take under those rules and the one-bold-moment limit. It's Claude's reading, for Hector to overrule.
 
-**Motion** says what moves into and out of a screen (D89; how, in AGENTS.md's UI Rules). Every page with a loading screen also fades its skeleton into the page when the page arrives; the Motion lines leave that out. Written before the moves are built (ux-plan.md P28.4): until P28.5 lands, they're the plan, not the app.
+**Motion** says what moves into and out of a screen (D89; how, in AGENTS.md's UI Rules). Every page with a loading screen also fades its skeleton into the page when the page arrives; the Motion lines leave that out. Built in P28.5 (ux-plan.md); until its check by eye and on an iPhone, how each move looks may still change.
 
 ### Library — `/`
 

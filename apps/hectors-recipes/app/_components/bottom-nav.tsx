@@ -49,6 +49,8 @@ function TabBar({ pathname }: { pathname: string | null }) {
   return (
     <nav
       aria-label="Main"
+      // Stays still while a page moves (D89; app/globals.css).
+      data-motion-name="tab-bar"
       className="bg-background/95 supports-backdrop-filter:bg-background/80 fixed inset-x-0 bottom-0 z-30 pb-safe border-t backdrop-blur"
     >
       <ul className="mx-auto grid h-16 max-w-3xl grid-cols-3">
@@ -62,6 +64,7 @@ function TabBar({ pathname }: { pathname: string | null }) {
                 // plain prefetch leaves out, so the Recipes tab gets it ready in full (one
                 // request). Meal plan and Groceries load fresh on every visit.
                 prefetch={tab === "recipes" ? true : "auto"}
+                transitionTypes={["switch-tab"]}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-1 text-xs font-medium transition-colors",

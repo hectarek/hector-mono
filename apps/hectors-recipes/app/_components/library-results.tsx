@@ -121,17 +121,24 @@ export function LibraryResults({
   }
 
   const savedIds = new Set(saved);
+  // A recipe under two tags has two cards; only the first grows into its page (D89).
+  const shownCards = new Set<string>();
   const cards = (list: ListedRecipe[]) => (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {list.map((recipe) => (
-        <li key={recipe.id}>
-          <RecipeCard
-            recipe={recipe}
-            bookName={bookNames?.[recipe.spaceId]}
-            saved={savedIds.has(recipe.id)}
-          />
-        </li>
-      ))}
+      {list.map((recipe) => {
+        const first = !shownCards.has(recipe.id);
+        shownCards.add(recipe.id);
+        return (
+          <li key={recipe.id}>
+            <RecipeCard
+              recipe={recipe}
+              bookName={bookNames?.[recipe.spaceId]}
+              saved={savedIds.has(recipe.id)}
+              grows={first}
+            />
+          </li>
+        );
+      })}
     </ul>
   );
 

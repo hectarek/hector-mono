@@ -21,7 +21,7 @@ export function JoinLinkForm() {
       return;
     }
     setError(null);
-    router.push(`/join/${token}`);
+    router.push(`/join/${token}`, { transitionTypes: ["go-deeper"] });
   }
 
   return (

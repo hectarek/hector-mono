@@ -32,6 +32,11 @@ const CLASS_NAMES = {
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+// The path is checked before anything streams, so an unknown one is a real 404. That check
+// reads the address outside <Suspense>, so a tap into a sign-in page waits for the server
+// (every known path is prerendered) instead of showing a placeholder first (ux-plan P28.1).
+export const instant = false;
+
 export default async function AuthPage({
   params,
   searchParams,

@@ -442,7 +442,9 @@ function CookModeContent({
               variant="secondary"
               size="lg"
               nativeButton={false}
-              render={<Link href={backHref} />}
+              render={
+                <Link href={backHref} transitionTypes={["close-cook-mode"]} />
+              }
             >
               <X data-icon="inline-start" />
               Done
@@ -574,7 +576,9 @@ function CookModeContent({
                 size="lg"
                 className="flex-1"
                 nativeButton={false}
-                render={<Link href={backHref} />}
+                render={
+                  <Link href={backHref} transitionTypes={["close-cook-mode"]} />
+                }
               >
                 Back to the recipe
               </Button>

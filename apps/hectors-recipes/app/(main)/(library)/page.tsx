@@ -10,6 +10,7 @@ import { BookOpen, Copy, Library, Plus } from "lucide-react";
 import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { LibraryResults } from "@/app/_components/library-results";
+import { PageMotion } from "@/app/_components/page-motion";
 import { ProduceTile } from "@/app/_components/produce-tile";
 import { PageTitle, SpaceHeader } from "@/app/_components/space-header";
 import { SpaceSwitcher } from "@/app/_components/space-switcher";
@@ -53,7 +54,7 @@ export default async function LibraryPage({
       variant="secondary"
       size="lg"
       nativeButton={false}
-      render={<Link href="/books" />}
+      render={<Link href="/books" transitionTypes={["go-deeper"]} />}
     >
       <Library data-icon="inline-start" />
       All books
@@ -67,96 +68,103 @@ export default async function LibraryPage({
   ].map(({ id, name, role }) => ({ id, name, shared: role !== "owner" }));
 
   return (
-    <div className="flex flex-col gap-4">
-      <SpaceSwitcher
-        spaces={
-          books.length > 1
-            ? [{ id: ALL_RECIPES, name: "All recipes" }, ...pills]
-            : pills
-        }
-        currentId={viewId}
-        label="Recipe books"
-        hrefFor={(id) => `/?book=${id}`}
-      />
-
-      {showAll ? (
-        <PageTitle
+    <PageMotion>
+      <div className="flex flex-col gap-4">
+        <SpaceSwitcher
+          spaces={
+            books.length > 1
+              ? [{ id: ALL_RECIPES, name: "All recipes" }, ...pills]
+              : pills
+          }
+          currentId={viewId}
           label="Recipe books"
-          title="All recipes"
-          action={newButton}
-          menu={<TitleMenu name="All recipes">{allBooks}</TitleMenu>}
+          hrefFor={(id) => `/?book=${id}`}
         />
-      ) : (
-        <SpaceHeader space={current} action={newButton}>
-          {allBooks}
-        </SpaceHeader>
-      )}
 
-      <LibraryResults
-        // A new tag, Saved or address starts from its own search and arrangement; typing and
-        // Sort and group only update ?q=, ?sort= and ?group= in place.
-        key={`${viewId}|${tag ?? ""}|${search ?? ""}|${group ?? ""}|${sort ?? ""}|${savedOnly}`}
-        book={requestedBook}
-        tags={library.tags}
-        tagGroups={library.tagGroups}
-        activeTag={tag}
-        recipes={
-          savedOnly
-            ? library.recipes.filter((recipe) => saved.includes(recipe.id))
-            : library.recipes
-        }
-        saved={saved}
-        savedOnly={savedOnly}
-        total={library.total}
-        bookNames={
-          showAll
-            ? Object.fromEntries(books.map((book) => [book.id, book.name]))
-            : undefined
-        }
-        empty={
-          <Empty className="my-6">
-            <EmptyHeader>
-              <ProduceTile
-                produce="tomato"
-                className="size-12 -rotate-4 items-center justify-center rounded-xl"
-              >
-                <BookOpen className="size-6" />
-              </ProduceTile>
-              <EmptyTitle>No recipes yet</EmptyTitle>
-              <EmptyDescription>
-                {canEdit
-                  ? "Add a recipe, or copy some in from another book."
-                  : "Nothing's been added to this book yet."}
-              </EmptyDescription>
-            </EmptyHeader>
-            {canEdit && (
-              <EmptyContent>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  nativeButton={false}
-                  render={<Link href={newHref} />}
+        {showAll ? (
+          <PageTitle
+            label="Recipe books"
+            title="All recipes"
+            action={newButton}
+            menu={<TitleMenu name="All recipes">{allBooks}</TitleMenu>}
+          />
+        ) : (
+          <SpaceHeader space={current} action={newButton}>
+            {allBooks}
+          </SpaceHeader>
+        )}
+
+        <LibraryResults
+          // A new tag, Saved or address starts from its own search and arrangement; typing and
+          // Sort and group only update ?q=, ?sort= and ?group= in place.
+          key={`${viewId}|${tag ?? ""}|${search ?? ""}|${group ?? ""}|${sort ?? ""}|${savedOnly}`}
+          book={requestedBook}
+          tags={library.tags}
+          tagGroups={library.tagGroups}
+          activeTag={tag}
+          recipes={
+            savedOnly
+              ? library.recipes.filter((recipe) => saved.includes(recipe.id))
+              : library.recipes
+          }
+          saved={saved}
+          savedOnly={savedOnly}
+          total={library.total}
+          bookNames={
+            showAll
+              ? Object.fromEntries(books.map((book) => [book.id, book.name]))
+              : undefined
+          }
+          empty={
+            <Empty className="my-6">
+              <EmptyHeader>
+                <ProduceTile
+                  produce="tomato"
+                  className="size-12 -rotate-4 items-center justify-center rounded-xl"
                 >
-                  Add a recipe
-                </Button>
-              </EmptyContent>
-            )}
-          </Empty>
-        }
-      />
-      {library.recipes.length > 0 && !showAll && books.length > 1 && (
-        <Button
-          variant="secondary"
-          size="lg"
-          nativeButton={false}
-          render={<Link href={`/books/${current.id}/copy`} />}
-          className="self-center"
-        >
-          <Copy data-icon="inline-start" />
-          Copy recipes to another book
-        </Button>
-      )}
-    </div>
+                  <BookOpen className="size-6" />
+                </ProduceTile>
+                <EmptyTitle>No recipes yet</EmptyTitle>
+                <EmptyDescription>
+                  {canEdit
+                    ? "Add a recipe, or copy some in from another book."
+                    : "Nothing's been added to this book yet."}
+                </EmptyDescription>
+              </EmptyHeader>
+              {canEdit && (
+                <EmptyContent>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    nativeButton={false}
+                    render={<Link href={newHref} />}
+                  >
+                    Add a recipe
+                  </Button>
+                </EmptyContent>
+              )}
+            </Empty>
+          }
+        />
+        {library.recipes.length > 0 && !showAll && books.length > 1 && (
+          <Button
+            variant="secondary"
+            size="lg"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/books/${current.id}/copy`}
+                transitionTypes={["go-deeper"]}
+              />
+            }
+            className="self-center"
+          >
+            <Copy data-icon="inline-start" />
+            Copy recipes to another book
+          </Button>
+        )}
+      </div>
+    </PageMotion>
   );
 }
 

@@ -9,7 +9,7 @@ export function BackLink({ href, label }: { href: string; label: string }) {
       variant="ghost"
       size="lg"
       nativeButton={false}
-      render={<Link href={href} />}
+      render={<Link href={href} transitionTypes={["go-back"]} />}
       className="-ml-2 self-start"
     >
       <ChevronLeft data-icon="inline-start" />

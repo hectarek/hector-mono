@@ -2448,6 +2448,7 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - Later, once Hector copied `.env` into the worktree, in the browser pane signed in as Hector (reading only):
       - Dev validation flagged ten pages the build had passed. Nine read the session or their address under the `(main)` or `(form)` skeleton alone: Copy recipes, Members, Join, Account, Edit, Add a recipe and its three ways in. That skeleton covers a page load but not a tap between two pages under the same layout (Next.js's "Instant navigation" guide), so each now has a `loading.tsx` of its own. They share `PageSkeleton` and `FormSkeleton` (`app/_components/page-skeletons.tsx`), which the two general ones use too. Meal plan read the clock before the session, and a prefetch, which knows the address, ran on to it; the session now comes first.
       - After that, every signed-in page loads with no validation message, on a page load and on taps between the tabs and into a recipe, cook mode, Edit, Members and Books.
+      - Hector's flows run showed one more: the sign-in pages read their path outside `<Suspense>`, which validation flags. They do it to answer an unknown path with a real 404 before anything streams. So `auth/[path]` opts out, `export const instant = false`, the only route that does: a tap into a sign-in page waits for the server, which has every known path prerendered.
       - The 404s: an unknown sign-in path and an icon size are 404s. An unknown account path shows Not found with a 200 and a `noindex` tag: its skeleton starts the response, which fixes the status (Next.js's `loading.md`, Status codes), as it already did for an unknown recipe id. AGENTS.md says so now.
       - The proxy's session refresh: the first load called `/api/auth/get-session` from the proxy (it does only when the session-cache cookie is missing) and the page came in signed in.
     - **Left:** the three flows (Hector's to run: they sign up accounts on the test project). 375 px is checked with P28.5's moves.
@@ -2506,9 +2507,10 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
   - Evidence (2026-10-08, on `feat/recipes-p28-cache-components`):
     - AGENTS.md's UI Rules has "Motion between screens", after Bold moments. It has D89's five moves, each with what starts it: the card and its recipe share `recipe-picture-<id>`. Links carry `go-deeper`, `go-back`, `switch-tab`, `open-cook-mode` or `close-cook-mode`, and any other link carries none.
     - It also has the rest of D89 and of Next.js's "View transitions" guide: the `<ViewTransition>` in each `page.tsx` (a layout never enters or leaves) with `default="none"`, so refreshes, saves and live updates move nothing. The header and tab bar have names of their own and stay still. Taps reach the page during a move. Each move is under 400 ms. Reduced motion turns each into the crossfade. The week's slide-in and cook mode's screens are unchanged.
+    - Corrected while building P28.5 (2026-10-08), from a probe in headless Chromium: a tap reaches only what isn't moving, and only once `<html>` takes no part in the move; the page moving in, the header and the tab bar ignore taps until their move ends. And reduced motion moves nothing, as D89 says, not the crossfade written here first. AGENTS.md has both.
     - The map's patterns table has a row for it. Every screen has a **Motion** line, 16 of 16: none on the full-screen tasks, Account, Welcome and Error. The Screens intro says once that a skeleton fades into its page, and that the moves are planned until P28.5.
     - Each of C's five moves is on the map: the card on Library and Recipe; deeper and back on Recipe, Books, Copy recipes, Members and Join; the crossfade on the three tabs; the rise on Recipe and Cook mode; the skeleton in the intro and the table. AGENTS.md lists the same pages for each.
-- [ ] **P28.5** The moves — C · D89
+- [~] **P28.5** The moves — C · D89
   - Do:
     - D89's five moves, with `<ViewTransition>` and `<Link transitionTypes>`, with the keyframes in `app/globals.css`.
     - The header and the tab bar get names of their own, so they stay still.
@@ -2517,6 +2519,22 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
   - Verify:
     - In the browser pane at 375 px, light and dark: each move, and none with reduced motion.
     - On an iPhone, on the preview (H5).
+  - Evidence (2026-10-08, on `feat/recipes-p28-cache-components`):
+    - `PageMotion` (`app/_components/page-motion.tsx`) maps a link's type to the move for the page coming in and the one going out. It wraps the library, Meal plan, Groceries, a recipe, Books, Copy recipes, Members and Join. Cook mode has it in its layout, around a `<main>` that now paints its background, so it rises as a solid sheet.
+    - The links carry their types:
+      - `go-deeper`: a library card, a meal's title, All books, Copy recipes, Members in a ⋯ and on Books, and Join from Books' pasted link (`router.push`).
+      - `go-back`: `BackLink`.
+      - `switch-tab`: the tab bar, the logo, and Open meal plan and Open groceries.
+      - `open-cook-mode` and `close-cook-mode`: Cook, then Done and Back to the recipe.
+    - `RecipePicture` names a card's picture and the recipe page's. In a grouped library only a recipe's first card is named, since a recipe under two tags has two cards. `SkeletonMotion` wraps every loading screen.
+    - The header and tab bar take their names from `data-motion-name`, in `app/globals.css`: the design lint rightly refuses an arbitrary Tailwind value for them. Durations: slides 300 ms, the tab crossfade 150 ms, the rise 340 ms, lowering 280 ms, the card 340 ms, the skeleton 200 ms.
+    - Found while building it, in headless Chromium on a plain test page:
+      - Left to the browser, `<html>` takes part in every move as `root`, and while any move plays, no tap reaches the page. That is why `plan-and-shop`'s tap on Add to meal plan, made as the recipe's skeleton faded, did nothing. `:root { view-transition-name: none }` takes it out, so a tap reaches anything that isn't moving. What is moving (the page sliding in, cook mode, the header and tab bar) still ignores taps until its move ends.
+      - Reduced motion now moves nothing, as D89 says; P28.4 first wrote it as a crossfade.
+      - The flows run with reduced motion (`playwright.config.ts`), since a flow taps faster than a person.
+    - The Browser pane can't show the moves while it's hidden in the app. The page doesn't paint, so a move waits for a frame that doesn't come, and the page holds its skeleton until something repaints it.
+    - `bun check`, `bun ts`, 1114 + 96 tests, the dead-code check and `next build` pass.
+    - **Left:** each move by eye at 375 px, light and dark, in a browser that's on screen (the Browser pane, once open); the flows again, with reduced motion; the iPhone (H5).
 
 ## Later (to-dos, not scheduled)
 
@@ -2638,7 +2656,7 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
 | iOS refuses the share sheet when it isn't called straight from a tap (P7.6) | The links exist before the tap, so the tap only shares. Checked on a real phone. |
 | A screen kept in the phone's memory shows someone else's change late (Phase 28) | Only the screens H36 picks, for 5 minutes at most. Your own saves clear it at once. Groceries is never kept, and nothing per person is stored on the server. |
 | A page kept alive after you leave it shows a stale sheet, form or video, or one person's typing to the next (Phase 28) | P28.2 resets each, with a screen test per reset. Signing out reloads the app. |
-| Safari plays a move between screens differently, or a move gets in the way of a tap (Phase 28) | Moves are under 400 ms, taps pass through during a move, and reduced motion moves nothing. Checked on an iPhone (H5). |
+| Safari plays a move between screens differently, or a move gets in the way of a tap (Phase 28) | Moves are under 400 ms, a tap reaches anything that isn't moving (only the page moving in, the header and the tab bar ignore taps, until their move ends), and reduced motion moves nothing. Checked on an iPhone (H5). |
 
 ## Session log
 

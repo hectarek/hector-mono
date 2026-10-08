@@ -93,7 +93,12 @@ export function CookLink({
     <Button
       size="lg"
       nativeButton={false}
-      render={<Link href={`/recipes/${recipeId}/cook${query}`} />}
+      render={
+        <Link
+          href={`/recipes/${recipeId}/cook${query}`}
+          transitionTypes={["open-cook-mode"]}
+        />
+      }
       className={className}
     >
       <ChefHat data-icon="inline-start" />

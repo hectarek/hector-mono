@@ -9,7 +9,7 @@
     },
     {
       "file": "apps/*/app/**/{layout,page}.tsx",
-      "exports": ["ensureStatic"]
+      "exports": ["ensureStatic", "instant"]
     }
   ],
   "rules": {
