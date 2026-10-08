@@ -86,7 +86,7 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   await question.getByRole("button", { name: "Clear groceries" }).click();
   await expect(page.getByText("List cleared.")).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByText(/^The list is empty/)).toBeVisible();
+  await expect(page.getByText(/^Nothing in groceries yet/)).toBeVisible();
   await page.getByRole("link", { name: "Meal plan" }).click();
   await expect(
     page.getByRole("button", { name: "Add 1 meal to groceries" }),
