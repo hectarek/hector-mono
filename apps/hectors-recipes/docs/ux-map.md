@@ -96,7 +96,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
 - **Also on it:** Add to list and Add to plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
-- **Opens:**
+- **Opens:** bottom sheets.
   - Add to plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open plan.
   - Add to list: servings, the list picker; then Open list. "It's already on this list" asks before adding again (D45).
 - **Bold:** the produce tile when there's no photo.
@@ -243,8 +243,8 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 | Back link | AGENTS.md UI Rules | Recipe, Books, Copy recipes, Members, Join, Account, Sign in |
 | Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
-| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients |
-| Dialog | No written rule | Confirmations (discard changes, delete a recipe or a space), and the recipe page's Add to plan and Add to list |
+| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to plan and Add to list |
+| Dialog | No written rule | Confirmations (discard changes, delete a recipe or a space) |
 | List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); no written rule for the pills | Pills on the three tabs; pickers in dialogs and the form |
@@ -257,7 +257,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there.
 
-1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason).
+1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason). **Fixed in P25.1: both are bottom sheets.**
 2. Groceries' Add button is the default size (40 px), not `lg` (D32).
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent.
 4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6).
