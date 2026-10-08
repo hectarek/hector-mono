@@ -3,6 +3,7 @@ import { UserPlus, Users } from "lucide-react";
 import Link from "next/link";
 import { BackLink } from "@/app/_components/back-link";
 import { DefaultBookPicker } from "@/app/_components/default-book-picker";
+import { JoinLinkForm } from "@/app/_components/join-link-form";
 import { NewBookForm } from "@/app/_components/new-book-form";
 import { RoleBadge } from "@/app/_components/role-badge";
 import { getCurrentUserId } from "@/app/_lib/current-user";
@@ -77,6 +78,15 @@ export default async function BooksPage() {
           </li>
         ))}
       </ul>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-medium">Join someone&apos;s book</h2>
+        <p className="text-muted-foreground text-sm">
+          Paste the invite link they sent you. A plan&apos;s link works here
+          too.
+        </p>
+        <JoinLinkForm />
+      </section>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">New book</h2>

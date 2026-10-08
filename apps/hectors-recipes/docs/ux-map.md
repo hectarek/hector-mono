@@ -140,12 +140,12 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 ### Books — `/books`
 
-- **Job:** manage recipe books: the default book, a new book, a book's members.
+- **Job:** manage recipe books: the default book, joining someone's book, a new book, a book's members.
 - **Surface:** Market. Back link "Recipes"; the Recipes tab stays lit. A plain title, "Recipe books", with no ⋯.
 - **Main action:** Create, in the New book form at the bottom.
-- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Share (owner) or Members (→ Members).
+- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Share (owner) or Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
-- **Leads to:** the library (a book), Members.
+- **Leads to:** the library (a book), Members, Join.
 
 ### Copy recipes — `/books/[id]/copy`
 
@@ -171,7 +171,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Back link "Recipes".
 - **Main action:** Join recipe book or Join meal plan; Open it when you're already in. "Make it my default plan" (checked) when joining a plan while your own is in use (D15).
 - **Inactive link:** "This invite link isn't active", with Go to recipes.
-- **Reached from:** an invite link, through Welcome and Create account when signed out (D3). **Leads to:** the book or plan.
+- **Reached from:** an invite link, through Welcome and Create account when signed out (D3), or pasted on Books (P23.4). **Leads to:** the book or plan.
 
 ### Account — `/account/[path]`
 

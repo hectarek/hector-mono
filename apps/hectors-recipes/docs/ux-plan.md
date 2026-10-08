@@ -2145,9 +2145,14 @@ One commit per task; the PR when the phase is done.
     - Invite's buttons read "Share a link to edit" and "Share a view-only link" (were "Can edit" and "View only"), and a link's row on the members page "Share link". Where the browser has no share sheet they read "Copy …" with a copy icon, and tapping one says "Copied".
     - The server can't tell whether there's a share sheet, so it renders Share; the browser's answer comes after load.
     - Screen test: with a share sheet, the link to edit is shared and the view-only button is there; without one, the buttons say Copy, and the link to edit lands on the clipboard. Mutation caught: the label always saying Share.
-- [ ] **P23.4** Join by pasting a link — C · F16
+- [x] **P23.4** Join by pasting a link — C · F16
   - Do: Books gets a Join field: paste a book's or plan's invite link and Join opens its Join page. A link that isn't an invite says so.
   - Verify: a test for reading the invite from a pasted link (the whole address, the path alone, other text); a screen test.
+  - Evidence (2026-10-08):
+    - Books has "Join someone's book" between the books and New book: paste the invite link, and Join (secondary) opens its Join page, which asks before joining as a link opened in a browser does. "A plan's link works here too."
+    - `inviteTokenFrom` reads the token after `/join/` from a whole link (any host, with a query) or the path alone, and finds none in a bare token, another page's link, a short token or anything after it (tests).
+    - Screen test: "https://example.test/books" says "That isn't an invite link. Copy the whole link they sent." and goes nowhere; an invite link goes to its Join page.
+    - At 375 px on the test project: the section and its message, light.
 - [ ] **P23.5** The recipe page's ⋯, with Share — C · D72, F18
   - Do: Copy and Edit leave the top row for a ⋯ (`TitleMenu`) beside the back link, holding Edit (editors), Copy (when you can edit another book; its book picker becomes a step in the sheet, as Invite's is) and Share (everyone: the share sheet, or the link copied).
   - Verify: screen tests (a viewer gets Share only; an editor gets Edit, Copy and Share; Copy copies); 375 px, light and dark.
