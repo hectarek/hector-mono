@@ -7,6 +7,7 @@ import { loadNewRecipe } from "@/app/_lib/new-recipe";
 import { getInjection } from "@/di/container";
 import { MAX_PHOTO_BYTES } from "@/src/entities/models/recipe-draft.model";
 import { MockRecipeReaderService } from "@/src/infrastructure/services/mock-recipe-reader.service";
+import { docx } from "@/tests/_support/docx";
 import { signInAsNewUser } from "@/tests/_support/next";
 
 // Add by photo or file (docs/ux-plan.md D53), against the test container's stand-in reader.
@@ -93,14 +94,43 @@ describe("PhotoImport", () => {
     await user.upload(input(), new File(["  \n"], "empty.txt", { type: "" }));
     await view.findByText("That file is empty.");
 
+    // D74: a .docx that isn't one says so; the older .doc isn't taken at all.
     await user.upload(
       input(),
       new File(["PK"], "chili.docx", {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }),
     );
+    await view.findByText(
+      "Couldn't open that Word document. Save it again, or save it as a PDF.",
+    );
+    await user.upload(
+      input(),
+      new File(["Chili"], "chili.doc", { type: "application/msword" }),
+    );
     await view.findByText(NOT_TAKEN);
     expect(reader.sources.length).toBe(before);
+  });
+
+  // D74: a Word document is read as its paragraphs' text, as a text file is.
+  it("reads a Word document as its text", async () => {
+    const user = userEvent.setup();
+    const { view, input } = await open();
+    const before = reader.sources.length;
+
+    await user.upload(
+      input(),
+      new File([docx([["Chili"], ["1 lb beans"], ["Simmer."]])], "chili.docx", {
+        type: "",
+      }),
+    );
+
+    await view.findByText(
+      "Read from your Word document. Check it before saving.",
+    );
+    expect(reader.sources.slice(before)).toEqual([
+      { kind: "text", text: "Chili\n1 lb beans\nSimmer." },
+    ]);
   });
 
   // D53: up to 3 photos of one recipe, and never photos with a PDF.
@@ -126,4 +156,4 @@ describe("PhotoImport", () => {
 });
 
 const NOT_TAKEN =
-  "Choose up to 3 photos, a PDF of up to 10 pages, or a text or Markdown file.";
+  "Choose up to 3 photos, a PDF of up to 10 pages, or a Word, text or Markdown file.";

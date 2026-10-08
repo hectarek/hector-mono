@@ -196,7 +196,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 ### Add by photo or file — `/recipes/new/photo`
 
-- **Job:** read a recipe from up to three photos, a PDF or a text file (D53).
+- **Job:** read a recipe from up to three photos, a PDF, a Word document or a text file (D53, D74).
 - **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by photo or file".
 - **Main action:** Choose a photo or file. After a failure: Add manually instead.
 - **Leads to:** the recipe form, filled in, with "Read from your photos. Check it before saving." (or photo, PDF or file)

@@ -2,10 +2,13 @@ import { MAX_PHOTOS } from "@/src/entities/models/recipe-draft.model";
 
 // What a chosen file is read as (docs/ux-plan.md D53). Phones don't always give a file's type
 // (a .md from Files often has none), so its name's extension counts too.
-export type RecipeFileKind = "photo" | "pdf" | "text";
+export type RecipeFileKind = "photo" | "pdf" | "text" | "word";
 
 const TEXT_TYPES = ["text/plain", "text/markdown", "text/x-markdown"];
 const TEXT_EXTENSIONS = [".txt", ".md", ".markdown"];
+// Word's own format since 2007 (D74). The older .doc isn't taken.
+const WORD_TYPE =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 export function recipeFileKind(file: {
   name: string;
@@ -14,6 +17,7 @@ export function recipeFileKind(file: {
   const name = file.name.toLowerCase();
   if (file.type.startsWith("image/")) return "photo";
   if (file.type === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+  if (file.type === WORD_TYPE || name.endsWith(".docx")) return "word";
   if (
     TEXT_TYPES.includes(file.type) ||
     TEXT_EXTENSIONS.some((extension) => name.endsWith(extension))
@@ -41,6 +45,8 @@ export const RECIPE_FILE_ACCEPT = [
   "image/*",
   "application/pdf",
   ".pdf",
+  WORD_TYPE,
+  ".docx",
   ...TEXT_TYPES,
   ...TEXT_EXTENSIONS,
 ].join(",");

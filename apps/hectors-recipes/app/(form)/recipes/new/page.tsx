@@ -33,7 +33,7 @@ export default async function NewRecipePage({
       href: `/recipes/new/photo${query}`,
       Icon: Camera,
       title: "Add by photo or file",
-      description: "Cookbook pages, screenshots, or a PDF or text file.",
+      description: "Cookbook pages, screenshots, or a PDF, Word or text file.",
     },
     {
       href: `/recipes/new/manual${query}`,

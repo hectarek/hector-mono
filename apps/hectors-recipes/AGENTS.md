@@ -31,7 +31,7 @@ app/
     groceries/         # A plan's grocery list: ?plan=, ?group=recipe (By recipe, D60), add box, "Got it" section, clear checked, Clear list in the ⋯ sheet (D52); live (LiveList), refresh every 60s as a safety net
     account/[path]/    # Neon Auth account views; settings adds our Appearance card (light/dark/system)
   (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), one screen at a time (Gather, each step, Done; D63), large type, wake lock
-  (form)/recipes/new    # How to add one (docs/ux-plan.md D34): by link or text (new/link, D73), by photo or file (new/photo, D53), or manually (new/manual, the form)
+  (form)/recipes/new    # How to add one (docs/ux-plan.md D34): by link or text (new/link, D73), by photo or file (new/photo, D53, D74), or manually (new/manual, the form)
   (form)/recipes/new/manual, (form)/recipes/[id]/edit  # Add/edit a recipe: full-screen, with `TopBar` (Cancel, title, Save)
   _components/         # header, bottom-nav, recipe-card, recipe-form (+ ingredient-rows, step-rows, row-sheet),
                        # scaled-ingredients, markdown, delete-recipe-button, library-filters + library-results, appearance-card,

@@ -28,12 +28,20 @@ describe("recipeFileKind", () => {
     );
   });
 
-  it("takes nothing else", () => {
+  // D74: Word's .docx, by type or by extension; the older .doc isn't taken.
+  it("reads a Word document as Word, by type or by extension", () => {
     expect(
       recipeFileKind({
         name: "chili.docx",
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }),
+    ).toBe("word");
+    expect(recipeFileKind({ name: "Chili.DOCX", type: "" })).toBe("word");
+  });
+
+  it("takes nothing else", () => {
+    expect(
+      recipeFileKind({ name: "chili.doc", type: "application/msword" }),
     ).toBeNull();
     expect(
       recipeFileKind({ name: "chili.html", type: "text/html" }),

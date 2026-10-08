@@ -39,6 +39,13 @@ test("Add by photo or file refuses a long PDF, and sends a file to the reader", 
   await expect(
     page.getByText("The recipe reader isn't answering. Try again in a minute."),
   ).toBeVisible();
+
+  // D74: a Word document is opened on the phone, and its text gets as far as the reader too.
+  await choose(page, "chili.docx");
+  await expect(page.getByText("chili.docx")).toBeVisible();
+  await expect(
+    page.getByText("The recipe reader isn't answering. Try again in a minute."),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Add manually instead" }),
   ).toBeVisible();
