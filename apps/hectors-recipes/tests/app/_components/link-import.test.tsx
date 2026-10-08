@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { LinkImport } from "@/app/_components/link-import";
 import { loadNewRecipe } from "@/app/_lib/new-recipe";
 import { getInjection } from "@/di/container";
+import { DAILY_RECIPE_READS } from "@/src/entities/models/recipe-draft.model";
 import type { MockRecipePageFetcherService } from "@/src/infrastructure/services/mock-recipe-page-fetcher.service";
 import type { MockRecipeReaderService } from "@/src/infrastructure/services/mock-recipe-reader.service";
 import { signInAsNewUser } from "@/tests/_support/next";
@@ -15,8 +16,10 @@ const pages = () =>
 
 // Add by link or text (D73): one box, read as a page when it holds only a web address.
 describe("LinkImport", () => {
+  let userId: string;
+
   beforeEach(async () => {
-    const userId = signInAsNewUser();
+    userId = signInAsNewUser();
     await getInjection("IEnsurePersonalSpaceController")("recipe-book", userId);
     reader().failWith = null;
     pages().failWith = null;
@@ -44,6 +47,20 @@ describe("LinkImport", () => {
       })) as HTMLInputElement
     ).value;
 
+  // P25.1, fix 8: with no AI reads left today, the box says so before a read, and stays,
+  // since a page's own recipe data is read without AI.
+  it("says the day's reads are used up, and keeps the box for links", async () => {
+    const reads = getInjection("IRecipeReadsRepository");
+    for (let n = 0; n < DAILY_RECIPE_READS; n++) {
+      await reads.record(userId, "text", {
+        since: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        limit: DAILY_RECIPE_READS,
+      });
+    }
+    const { view } = await open();
+    view.getByText(/^You've read 20 recipes with AI in the last day/);
+    view.getByRole("textbox", { name: "The recipe's link, or its text" });
+  });
   it("reads a lone link as its page", async () => {
     pages().pages.set(
       "https://example.com/toast",
@@ -57,7 +74,9 @@ describe("LinkImport", () => {
 
     await read("example.com/toast");
     expect(await title(view)).toBe("Toast");
-    view.getByText("Read from example.com. Check it before saving.");
+    view.getByText(
+      "Read from example.com. Check it before saving. Saving to My Recipes.",
+    );
   });
 
   it("reads anything else as the recipe's text", async () => {
@@ -67,7 +86,9 @@ describe("LinkImport", () => {
 
     await read(text);
     expect(await title(view)).toBe("Chili");
-    view.getByText("Read from your text. Check it before saving.");
+    view.getByText(
+      "Read from your text. Check it before saving. Saving to My Recipes.",
+    );
     expect(reader().sources.slice(before)).toEqual([{ kind: "text", text }]);
   });
 
@@ -83,7 +104,9 @@ describe("LinkImport", () => {
 
     await read("Chili\n\n1 lb beans\n\nSimmer.");
     expect(await title(view)).toBe("Chili");
-    view.getByText("Read from example.com. Check it before saving.");
+    view.getByText(
+      "Read from example.com. Check it before saving. Saving to My Recipes.",
+    );
     expect(
       (view.getByRole("textbox", { name: "Source link" }) as HTMLInputElement)
         .value,

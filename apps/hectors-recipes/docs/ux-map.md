@@ -96,7 +96,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
 - **Also on it:** Add to list and Add to plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
-- **Opens:**
+- **Opens:** bottom sheets.
   - Add to plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open plan.
   - Add to list: servings, the list picker; then Open list. "It's already on this list" asks before adding again (D45).
 - **Bold:** the produce tile when there's no photo.
@@ -115,7 +115,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also on it:** the week's arrows and range, Back to this week, seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open list.
 - **Opens:** a meal's sheet: Change days, Add to grocery list (or Add to list again), Not eating it on Mon 5 (from a leftovers day, D43), Remove meal.
 - **Gestures:** a sideways swipe changes the week (D51), sliding in (D54).
-- **Empty:** "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan." Viewers see no text.
+- **Empty:** "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan." Viewers see "Nothing planned this week."
 - **Bold:** the Today sticker.
 - **Reached from:** the Plan tab, Add to plan's Open plan, Join (a plan), Start my own plan, after leaving or deleting a plan.
 - **Leads to:** Recipe (a meal's title), Groceries (Open list), Members.
@@ -131,7 +131,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Also on it:** the add box; Group by, By aisle or By recipe (D60; shown when items came from recipes); the list under aisle or recipe headings; Got it (closed until tapped), holding the checked items and Clear checked.
 - **Rows:** tap to check off (the whole row; it folds into Got it); "for" its recipes; "Not saved yet" when offline; a ⋯ (editors) opening Edit and Remove from list.
 - **Live:** other people's changes appear as they're made (D21), with a refresh every 60 s. Check-offs made with no signal are kept and sent later (D8).
-- **Empty:** "Everything's in the cart.", or "The list is empty. Add items above, or add a recipe or your planned meals." No button.
+- **Empty:** "Everything's in the cart.", or "The list is empty. Add items above, or add a recipe or your planned meals." (viewers: "Nothing on the list yet."). No button.
 - **Bold:** none.
 - **Reached from:** the Groceries tab; Open list from a recipe's Add to list, Plan's grocery box, or cook mode's Add to list.
 - **Leads to:** Members. Nothing links to recipes or Plan.
@@ -142,7 +142,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** manage recipe books: the default book, joining someone's book, a new book, a book's members.
 - **Surface:** Market. Back link "Recipes"; the Recipes tab stays lit. A plain title, "Recipe books", with no ⋯.
 - **Main action:** Create, in the New book form at the bottom.
-- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Share (owner) or Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
+- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Members (→ Members); Join someone's book, which takes a pasted invite link to its Join page (P23.4).
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
 - **Leads to:** the library (a book), Members, Join.
 - **Names:** a personal book is named at sign-up from its owner's first name ("Hector's Recipes", D19) and keeps that name when the account's name changes; its owner can rename it on Members.
@@ -160,9 +160,9 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** who's in a book or plan, its invite links, leaving, deleting.
 - **Surface:** Market. Back link: the book's or plan's name (a plan's goes to Plan, even when you came from Groceries).
 - **Main action:** New link: can edit (owner).
-- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off; New link: view only); People, each with Make view only or Allow editing, and Remove; Delete, which asks first.
-- **Everyone else:** People, and Leave on their own row.
-- **Reached from:** a tab's ⋯ → Members; Books' Share or Members.
+- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off, which asks first; New link: view only); Members, each with Make view only or Allow editing, and Remove, which asks first; Delete, which asks first.
+- **Everyone else:** Members, and Leave on their own row, which asks first.
+- **Reached from:** a tab's ⋯ → Members; Books' Members.
 - **Leads to:** the book or plan; Books or Plan after leaving or deleting.
 
 ### Join — `/join/[token]`
@@ -199,8 +199,8 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** read a recipe from up to three photos, a PDF, a Word document or a text file (D53, D74).
 - **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by photo or file".
-- **Main action:** Choose a photo or file. After a failure: Add manually instead.
-- **Leads to:** the recipe form, filled in, with "Read from your photos. Check it before saving." (or photo, PDF or file)
+- **Main action:** Choose a photo or file. After a failure: Add by link or text, Add manually. With no AI reads left today (D48), it says so in place of the picker, with the same two.
+- **Leads to:** the recipe form, filled in, with "Read from your photos. Check it before saving." (or photo, PDF or file), then "Saving to <book>." for someone with one book.
 
 ### Recipe form — `/recipes/new/manual`, `/recipes/[id]/edit`, and after a read
 
@@ -218,7 +218,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 ### Cook mode — `/recipes/[id]/cook`
 
 - **Job:** cook from a phone at arm's length, one screen at a time (D63–D66).
-- **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe). Bottom bar: Back and Next.
+- **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next.
 - **Screens:** Gather (tick ingredients as you get them out, servings, Add to list, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
 - **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to list's Open list.
@@ -243,29 +243,29 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 | Back link | AGENTS.md UI Rules | Recipe, Books, Copy recipes, Members, Join, Account, Sign in |
 | Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
-| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients |
-| Dialog | No written rule | Confirmations (discard changes, delete a recipe or a space), and the recipe page's Add to plan and Add to list |
+| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to plan and Add to list |
+| Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
 | List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); no written rule for the pills | Pills on the three tabs; pickers in dialogs and the form |
 | Sideways swipe | D51, D54, D63 | Plan's week, cook mode |
-| A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Plan's meals, Groceries |
+| A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Plan's meals and its grocery button, Groceries, a recipe's Add to plan and Add to list (cook mode's too) |
 | Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Plan's Today sticker, the active tab, Welcome's produce row |
 | Waiting on the AI: the produce row in a wave | D75; AGENTS.md UI Rules | Add by link or text, Add by photo or file |
 
 ## Where the app and its rules disagree
 
-Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there.
+Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there. Phase 25 fixed all 12 (P25.1); for 8, spent AI credit is still said after a read, by Hector's choice (H35, D86).
 
-1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason).
-2. Groceries' Add button is the default size (40 px), not `lg` (D32).
-3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent.
-4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6).
-5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading).
-6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all.
-7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually.
-8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.
-9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does.
-10. Cook mode's Done goes back to the recipe without the servings chosen there.
-11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved.
-12. The Books page's Create form submits with a plain `<form action>`, which AGENTS.md says clears the field on a validation error.
+1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason). **Fixed in P25.1: both are bottom sheets.**
+2. Groceries' Add button is the default size (40 px), not `lg` (D32). **Fixed in P25.1: it's `lg`.**
+3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent. **Fixed in P25.1: Add to plan goes through `callAction`, and the two that say what they added through `callResultAction`.**
+4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6). **Fixed in P25.1: a timer that's up is `secondary`, with a ringing bell.**
+5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). **Fixed in P25.1: Members on all three; Books' intro says invites are in a book's Members.**
+6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all. **Fixed in P25.1: viewers get "Nothing on the list yet." and "Nothing planned this week."**
+7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually. **Fixed in P25.1: Add by photo or file offers Add by link or text and Add manually.**
+8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails. **Half fixed in P25.1: the daily limit shows before a read (Add by photo or file in place of its picker; Add by link or text in its note, keeping the box for links). Spent AI credit still shows only after a read, and the message asks people to let Hector know (H35, D86).**
+9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does. **Fixed in P25.1: all three ask first (`ConfirmActionButton`).**
+10. Cook mode's Done goes back to the recipe without the servings chosen there. **Fixed in P25.1: Done and Back to the recipe carry `?servings=`, which the recipe page takes.**
+11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved. **Fixed in P25.1: the note keeps "Saving to <book>." after the read's sentence.**
+12. The Books page's Create form submits with a plain `<form action>`, which AGENTS.md says clears the field on a validation error. **Fixed in P25.1: it submits through a transition, and a refused name stays.**

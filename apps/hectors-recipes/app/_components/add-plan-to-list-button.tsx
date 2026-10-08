@@ -12,6 +12,7 @@ import {
   changedList,
   describeAddResult,
 } from "@/app/_components/add-to-list-button";
+import { callResultAction } from "@/app/_lib/call-action";
 import { type AddToListState, addPlanToList } from "@/app/actions/grocery";
 import {
   type AddToListResult,
@@ -75,7 +76,7 @@ export function AddPlanToListButton({
 
   function add() {
     startTransition(async () =>
-      setResult(await addPlanToList({ planId, range })),
+      setResult(await callResultAction(() => addPlanToList({ planId, range }))),
     );
   }
 

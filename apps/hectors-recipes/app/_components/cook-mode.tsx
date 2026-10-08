@@ -10,6 +10,7 @@ import {
 import { Progress } from "@repo/ui/components/progress";
 import { cn } from "@repo/ui/lib/utils";
 import {
+  BellRing,
   ChevronDown,
   List,
   Minus,
@@ -357,6 +358,11 @@ function CookModeContent({
     Object.keys(progress.timers).length > 0,
   );
   const factor = yieldServings ? servings / yieldServings : 1;
+  // Back on the recipe at the servings chosen here, as its Cook link sends them (?servings=).
+  const backHref =
+    yieldServings !== null && servings !== yieldServings
+      ? `${recipeHref}?servings=${servings}`
+      : recipeHref;
   // A saved step that's gone (the recipe was edited since) shows Gather.
   const index = steps.findIndex((step) => step.position === progress.at);
   const step = steps[index];
@@ -434,7 +440,7 @@ function CookModeContent({
               variant="secondary"
               size="lg"
               nativeButton={false}
-              render={<Link href={recipeHref} />}
+              render={<Link href={backHref} />}
             >
               <X data-icon="inline-start" />
               Done
@@ -566,7 +572,7 @@ function CookModeContent({
                 size="lg"
                 className="flex-1"
                 nativeButton={false}
-                render={<Link href={recipeHref} />}
+                render={<Link href={backHref} />}
               >
                 Back to the recipe
               </Button>
@@ -855,8 +861,8 @@ function FollowingTimer({
 }) {
   if (endsAt <= now) {
     return (
-      <Button size="lg" onClick={onDismiss} role="alert">
-        <Timer data-icon="inline-start" />
+      <Button variant="secondary" size="lg" onClick={onDismiss} role="alert">
+        <BellRing data-icon="inline-start" />
         Step {number}: time&apos;s up · Dismiss
       </Button>
     );
@@ -896,10 +902,12 @@ function StepTimer({
       </Button>
     );
   }
+  // Up: still secondary, as Next is the screen's one filled button (D32); the ringing bell,
+  // the alert and its sound mark it.
   if (endsAt <= now) {
     return (
-      <Button size="lg" onClick={onStop} role="alert">
-        <Timer data-icon="inline-start" />
+      <Button variant="secondary" size="lg" onClick={onStop} role="alert">
+        <BellRing data-icon="inline-start" />
         Time&apos;s up · Dismiss
       </Button>
     );

@@ -147,11 +147,12 @@ export default async function PlanPage({
       </WeekSwipe>
 
       {/* Planning starts from a recipe (D40); with no button for it (D50), an empty week
-          says how. */}
-      {canEdit && entries.length === 0 && (
+          says how, to those who can plan. */}
+      {entries.length === 0 && (
         <p className="text-muted-foreground text-center text-sm">
-          Nothing planned this week. To plan a meal, open a recipe and tap Add
-          to plan.
+          {canEdit
+            ? "Nothing planned this week. To plan a meal, open a recipe and tap Add to plan."
+            : "Nothing planned this week."}
         </p>
       )}
 

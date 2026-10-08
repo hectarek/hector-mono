@@ -2,18 +2,21 @@
 
 import { Button } from "@repo/ui/components/button";
 import { ActionForm } from "@/app/_components/action-form";
+import { ConfirmActionButton } from "@/app/_components/confirm-action-button";
 import { RoleBadge } from "@/app/_components/role-badge";
 import { removeMember, setMemberRole } from "@/app/actions/spaces";
 import type { SpaceMember, SpaceRole } from "@/src/entities/models/space.model";
 
 export function MemberList({
   spaceId,
+  spaceName,
   members,
   viewerRole,
   viewerId,
   home,
 }: {
   spaceId: string;
+  spaceName: string;
   members: SpaceMember[];
   viewerRole: SpaceRole;
   viewerId: string;
@@ -71,41 +74,25 @@ export function MemberList({
                     </Button>
                   )}
                 </ActionForm>
-                <ActionForm
+                <ConfirmActionButton
+                  label="Remove"
+                  title={`Remove ${label}?`}
+                  description={`They'll no longer see “${spaceName}”. A new invite link brings them back.`}
                   action={removeMember}
                   fields={{ spaceId, memberId: member.userId }}
-                >
-                  {({ isPending }) => (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      type="submit"
-                      disabled={isPending}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </ActionForm>
+                />
               </div>
             )}
 
             {isSelf && member.role !== "owner" && (
-              <ActionForm
+              <ConfirmActionButton
+                label="Leave"
+                title={`Leave “${spaceName}”?`}
+                description="You'll no longer see it. To come back, you'll need a new invite link."
                 action={removeMember}
                 fields={{ spaceId, memberId: member.userId, home }}
-              >
-                {({ isPending }) => (
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    type="submit"
-                    disabled={isPending}
-                    className="self-start"
-                  >
-                    Leave
-                  </Button>
-                )}
-              </ActionForm>
+                className="self-start"
+              />
             )}
           </li>
         );

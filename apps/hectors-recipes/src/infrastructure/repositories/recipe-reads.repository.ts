@@ -45,6 +45,23 @@ export class RecipeReadsRepository
     }
   }
 
+  async count(userId: string, since: Date): Promise<number> {
+    try {
+      const [made] = await this.getDbContext()
+        .select({ reads: count() })
+        .from(recipeReads)
+        .where(
+          and(
+            eq(recipeReads.userId, userId),
+            gte(recipeReads.createdAt, since),
+          ),
+        );
+      return made?.reads ?? 0;
+    } catch (err) {
+      this.handleError(err, "count", { userId });
+    }
+  }
+
   async remove(id: string): Promise<void> {
     try {
       await this.getDbContext()

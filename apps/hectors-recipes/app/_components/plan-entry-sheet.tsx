@@ -17,7 +17,7 @@ import {
 import { useState, useTransition } from "react";
 import { describePlanResult } from "@/app/_components/add-plan-to-list-button";
 import { MealDaysPicker } from "@/app/_components/meal-days-picker";
-import { callAction } from "@/app/_lib/call-action";
+import { callAction, callResultAction } from "@/app/_lib/call-action";
 import { addPlanToList } from "@/app/actions/grocery";
 import { changeEntryDays } from "@/app/actions/plan";
 import {
@@ -68,25 +68,21 @@ export function PlanEntrySheet({
 
   function addToList() {
     startTransition(async () => {
-      try {
-        // Which button was pressed: a sheet from before someone else's press still says
-        // "Add to grocery list", and the server then adds nothing.
-        const state = await addPlanToList({
+      // Which button was pressed: a sheet from before someone else's press still says
+      // "Add to grocery list", and the server then adds nothing.
+      const state = await callResultAction(() =>
+        addPlanToList({
           planId: entry.spaceId,
           entryId: entry.id,
           again: Boolean(entry.addedToListAt),
-        });
-        if (state && !state.ok) {
-          setError(state.error);
-          return;
-        }
-        setError(undefined);
-        setListed(state?.ok ? describePlanResult(state.result) : undefined);
-      } catch {
-        setError(
-          "Couldn't reach the server. Check your connection and try again.",
-        );
+        }),
+      );
+      if (state && !state.ok) {
+        setError(state.error);
+        return;
       }
+      setError(undefined);
+      setListed(state?.ok ? describePlanResult(state.result) : undefined);
     });
   }
 

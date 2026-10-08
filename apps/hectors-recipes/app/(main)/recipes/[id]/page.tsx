@@ -16,6 +16,7 @@ import { ScaledIngredients } from "@/app/_components/scaled-ingredients";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { libraryHref } from "@/app/_lib/library-href";
 import { loadRecipe } from "@/app/_lib/load-recipe";
+import { type SearchParams, servingsParam } from "@/app/_lib/search-params";
 import { getInjection } from "@/di/container";
 import { editableSpaces, hasRole } from "@/src/entities/models/space.model";
 import { stepGroups } from "@/src/entities/step-text";
@@ -33,10 +34,14 @@ function sourceHost(url: string): string {
 
 export default async function RecipePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: SearchParams;
 }) {
   const { id } = await params;
+  // From cook mode's Done, when its servings were changed; kept in the URL as they change.
+  const initialServings = servingsParam((await searchParams).servings);
   const { recipe, canEdit } = await loadRecipe(id);
   const userId = await getCurrentUserId();
   const [books, plans, bookmarks] = await Promise.all([
@@ -78,7 +83,11 @@ export default async function RecipePage({
   return (
     <article data-surface="reading">
       <RememberView recipeId={recipe.id} />
-      <RecipeServings yieldServings={recipe.yieldServings}>
+      <RecipeServings
+        yieldServings={recipe.yieldServings}
+        initial={initialServings}
+        inUrl
+      >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-2">
             <BackLink

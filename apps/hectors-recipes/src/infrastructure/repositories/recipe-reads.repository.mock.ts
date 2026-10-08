@@ -24,6 +24,12 @@ export class MockRecipeReadsRepository implements IRecipeReadsRepository {
     return id;
   }
 
+  async count(userId: string, since: Date): Promise<number> {
+    return this.reads.filter(
+      (read) => read.userId === userId && read.createdAt >= since,
+    ).length;
+  }
+
   async remove(id: string): Promise<void> {
     const at = this.reads.findIndex((read) => read.id === id);
     if (at >= 0) this.reads.splice(at, 1);

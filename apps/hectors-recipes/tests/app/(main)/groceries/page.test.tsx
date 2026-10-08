@@ -70,6 +70,26 @@ describe("Groceries", () => {
   const items = async () =>
     getInjection("IGetGroceryListController")({ spaceId: ownPlan }, userId);
 
+  // P25.1, fix 6: a viewer has no add box, so the empty list doesn't point at one.
+  it("tells a viewer the list is empty, without pointing at an add box", async () => {
+    const owner = crypto.randomUUID();
+    const plan = (
+      await getInjection("IEnsurePersonalSpaceController")("meal-plan", owner)
+    ).id;
+    const links = await getInjection("IEnsureInviteLinksController")(
+      { spaceId: plan },
+      owner,
+    );
+    await getInjection("IAcceptInviteController")(
+      { token: links.viewer.token },
+      userId,
+    );
+
+    const view = render(await page(plan));
+    view.getByText("Nothing on the list yet.");
+    expect(view.queryByRole("textbox", { name: "Add an item" })).toBe(null);
+  });
+
   // P14 review: the list is keyed by plan, so text typed for one plan isn't added to the
   // next one picked (Next keeps a page's state across ?plan=).
   it("leaves text typed in the add box with the plan it was typed for", async () => {

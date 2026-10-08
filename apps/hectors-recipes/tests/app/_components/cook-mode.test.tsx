@@ -62,7 +62,7 @@ describe("CookMode", () => {
     quietAlarm();
   });
 
-  const cook = () =>
+  const cook = (initialServings = 4) =>
     render(
       <CookMode
         recipeId={RECIPE_ID}
@@ -71,7 +71,7 @@ describe("CookMode", () => {
         lines={lines}
         steps={steps}
         yieldServings={4}
-        initialServings={4}
+        initialServings={initialServings}
         addToList={null}
       />,
     );
@@ -183,6 +183,42 @@ describe("CookMode", () => {
     expect(view.queryByRole("list", { name: "Timers" })).toBe(null);
     await user.click(button(view, "Next"));
     button(view, "Start 20-minute timer");
+  });
+
+  // P25.1, fix 4: a timer that's up isn't a second filled button beside Next (D32).
+  it("keeps the step's main action the one filled button while a timer is up", async () => {
+    save({ used: [], at: 2, timers: { 2: Date.now() - 60_000 } });
+    const view = cook();
+    await view.findByText("Step 2 of 2");
+    expect((await view.findByRole("alert")).textContent).toBe(
+      "Time's up · Dismiss",
+    );
+    const filled = view
+      .getAllByRole("button")
+      .filter((candidate) => candidate.classList.contains("bg-primary"));
+    expect(filled.map((candidate) => candidate.textContent)).toEqual([
+      "Finish",
+    ]);
+  });
+
+  // P25.1, fix 10: Done, and the last screen's way back, keep the servings chosen here.
+  it("goes back to the recipe at the servings chosen in cook mode", async () => {
+    const user = userEvent.setup();
+    save({ used: [], at: "done", timers: {} });
+    const view = cook(6);
+    await view.findByRole("heading", { name: "That's the last step" });
+    const href = (name: string) =>
+      button(view, name).closest("a")?.getAttribute("href");
+    expect(href("Back to the recipe")).toBe(`/recipes/${RECIPE_ID}?servings=6`);
+    expect(href("Done")).toBe(`/recipes/${RECIPE_ID}?servings=6`);
+
+    // Back at the recipe's own servings, the link is the recipe's own.
+    await user.click(button(view, "Back"));
+    await user.click(button(view, "Back"));
+    await user.click(button(view, "Back"));
+    await user.click(button(view, "Fewer servings"));
+    await user.click(button(view, "Fewer servings"));
+    expect(href("Done")).toBe(`/recipes/${RECIPE_ID}`);
   });
 
   // D63: a swipe left for the next screen, right for the one before, as the week does.

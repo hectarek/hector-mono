@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 24 (bookmarks, recently viewed, a video, suggested tags) on `feat/recipes-p24-saved-video-tags`, stacked on Phase 23's branch: built, tested, and checked on the test project (its migrations, the flows, 375 px); its migrations are on production too (H31). In review as hectarek/hector-mono#33. Phases 22 and 23 (#31, #32) are merged. Then 25 (#35) and 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#33, then #35 (Phase 25). Then Phase 26 (H34 before P26.3). |
+| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, rebased on main: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33) is merged, its migrations on production. Phases 22 and 23 (#31, #32) are merged. Then 26 (#37: words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#35, then #37 (Phase 26). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -150,6 +150,7 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D83 | A personal book named for its owner ("Hector's Recipes") follows the owner's name when it changes, until someone renames the book; a flag on the book says it still carries its automatic name. Rename also sits in the book's ⋯, for owners. Refines D19, which named it once. | Same round (F5): the tester changed his account's name and his book kept the old one. Checked on the test project: the name change works; only the book's name doesn't follow. |
 | D84 | One word for each thing: the grocery list is **Groceries** ("Add to groceries", "Open groceries") and the plan is **Meal plan** ("Add to meal plan", the Meal plan tab). The map gets a Words section naming each thing once, which new screens use. | Same round (F4); Hector, 2026-10-08: "instead of list we should call it groceries, and instead of plan we should call it meal plan". The Words section is Claude's recommendation. |
 | D85 | Wide screens: the app stays a phone design. Bottom sheets are no wider than the page and centred (in `@repo/ui`'s Drawer, so every app's). The map's Wide screens section lists every width-specific style and why, a fitted version of the same design or a different design, and a test fails on one that isn't listed. | Same round (F6); Hector: no desktop design, but "we arent able to track what is supposed to be responsive vs what is a design choice. We should probably track that somewhere." |
+| D86 | No spending cap on the AI Gateway: the account's credit is the limit. When it runs out, the Gateway refuses reads (a 402), and the app says reading is paused and asks people to let Hector know so he can add more. Nothing checks ahead of a read. Revises D27's $10 monthly budget and its "paused until next month". | Hector, 2026-10-08 (H35): he removed the budget, with about $18 in the account; "we need some kind of copy that lets them know to let me know". A spent key budget was seen as a 402 in P9.3; spent credit arriving as a 402 too is Claude's best guess, unseen. |
 
 ---
 
@@ -2239,7 +2240,7 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
 
 Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](./ux-map.md) lists, fixed by changing the code to match the rule, as L5 did. Hector OK'd the list on 2026-10-08 (H32). Each fix updates the map's list.
 
-- [ ] **P25.1** The 12, one commit each — C · H32
+- [x] **P25.1** The 12, one commit each — C · H32
   - Proposed fixes, in the map's order:
     1. Add to plan and Add to list open as bottom sheets (Copy moves into one in P23.5).
     2. Groceries' Add button at `lg`.
@@ -2254,6 +2255,27 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
     11. A read recipe still says which book it will be saved to.
     12. Books' Create form submits as AGENTS.md says forms that can fail must.
   - Verify: each fix's own test or screen test; 375 px for the visible ones.
+  - Evidence (2026-10-08), a commit each:
+    1. Add to plan and Add to list are bottom sheets (`Drawer`), the main action first and Cancel or Done under it. Screen test: each adds from its sheet, Add above Cancel.
+    2. Groceries' Add is `lg`. No test of its own: it's a size prop.
+    3. Add to plan goes through `callAction`; Add to list, Plan's grocery button and a meal's sheet (which caught it by hand) through `callResultAction`, its sibling for actions that say what they did. Tests: `callResultAction` gives back the state, or a failed one when the connection drops.
+    4. A timer that's up is `secondary` with a ringing bell (`BellRing`), so Next stays the one filled button; it keeps `role="alert"` and its sound. Screen test: on a step whose timer is up, the only filled button is Finish.
+    5. Members on Books' button (owners' too), the members page's heading, and the ⋯. Books' intro says invites are in a book's Members. Screen test: Books has a Members button per book and no Share.
+    6. Viewers' empty texts: "Nothing on the list yet." and "Nothing planned this week." Screen tests on both pages, as a viewer.
+    7. A failed read on Add by photo or file offers Add by link or text and Add manually. Screen test, and the `add-recipe` flow's last check.
+    8. Half: the daily limit shows before a read. `IGetReadsLeftController` (a `count` on the reads repository, through a use case) gives the reads left; Add by photo or file says so in place of its picker, with the two ways out, and Add by link or text says so in its note, keeping the box for links (a page's recipe data needs no AI). The budget's pause can't be known before a read: the Gateway's `getCredits` gives the team's credit, not the project's budget. H35 asks whether to remember a refusal. Tests: the count on Postgres, the use case and controller, and both screens.
+    9. Remove, Leave and Turn off ask first, in the deletes' dialog (`ConfirmActionButton`). Screen tests: Cancel keeps the member, Remove removes them, Leave asks, Turn off turns the link off.
+    10. Cook mode's Done and Back to the recipe carry `?servings=`, and the recipe page takes it and keeps it in the URL, as cook mode does. Screen test: back at 6 servings, and at the recipe's own servings a plain link.
+    11. The read's note keeps "Saving to <book>." for someone with one book. The import screen tests check the whole note.
+    12. Books' Create submits through a transition. Screen test: a refused name stays in the box (it fails on the old form).
+    - The three flows pass on the test project.
+    - At 375 px (a throwaway flow on the test project):
+      - 1: both sheets rise from the bottom, Add above Cancel.
+      - 4: a pinned "Step 2: time's up · Dismiss" is `secondary` with its bell, and Next is the one filled button. On that screen the yellow screen-lock warning now draws the eye more than the finished timer. Its ring and alert carry it; whether it needs more weight is for Hector.
+      - 5: Books shows Members.
+      - 7: a refused PDF offers Add by link or text and Add manually.
+      - 9: Turn off asks in a dialog, Turn off above Cancel as the deletes have them.
+    - 6 and 8 are covered by their screen tests only. A viewer's screen needs a second account, and the used-up note needs 20 real reads.
 
 ## Phase 26: Words, whose book, and wide screens
 
@@ -2370,7 +2392,8 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
-| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | OK'd 2026-10-08: "Yep 34 is ok" |
+| H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | done 2026-10-08: no budget, only the account's credit; when it's spent, the message asks people to let Hector know (D86) |
 
 ## Risks and how they're handled
 
@@ -2617,7 +2640,13 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Phase 24.
 - **2026-10-08 (bn)** — Phase 24 built: P24.1 bookmarks, P24.2 Sort and group with Saved first and Recently viewed, P24.3 a video in the photo's place, P24.4 the catalog's tags in the picker and "meal prep" (migrations 0016–0018). Lint, types, dead code and the app's 1,166 tests pass. The migrations, flows and 375 px wait on the worktree's `.env` files, which the session can't copy.
   - Next: Phase 24's migrations (H31), flows and 375 px; its PR; Phase 25.
+- **2026-10-08 (bo)** — Phase 25 built: the map's 12 fixes, a commit each, with a test for each but the button size. Fix 8 is half done: the daily limit shows before a read, and the budget's pause can't without remembering a refusal (H35, recommended: leave it). New: `callResultAction`, `ConfirmActionButton`, `IGetReadsLeftController`.
+  - Next: the `.env` files in both worktrees, then Phase 24's migrations (H31), both phases' flows and 375 px; Phase 26.
 - **2026-10-08 (bp)** — Phase 24 checked: migrations 0016–0018 on the test project, the three flows passing, and its screens at 375 px, which cut the library's search placeholder to "Search". Production's migrations were stopped by the auto-mode check: Hector's to run or approve before hectarek/hector-mono#33 merges.
   - Next: production's migrations; Phase 25's flows and 375 px once its worktree has the `.env` files.
+- **2026-10-08 (bq)** — Phase 25 checked: the flows pass on the test project, and fixes 1, 4, 5, 7 and 9 are checked at 375 px. A finished timer is now quieter than the yellow screen-lock warning beside it, noted for Hector. GitHub rebased Phase 24 onto main once #31 and #32 merged; Phase 25 is rebased onto it.
+  - Next: production's migrations (H31) before #33 merges; Phase 26.
 - **2026-10-08 (br)** — Hector applied migrations 0016–0018 to production (H31), and Claude checked the table, the column and "meal prep" are there. hectarek/hector-mono#33 is ready for review.
   - Next: Hector's review of #33 and #35; Phase 26.
+- **2026-10-08 (bs)** — Hector answered H34 (OK) and H35: no Gateway budget, only the account's credit (about $18), and when it runs out the message asks people to let him know (D86). The message changed with it.
+  - Next: Phase 26.

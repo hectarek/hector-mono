@@ -2,23 +2,25 @@
 
 import { Button } from "@repo/ui/components/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@repo/ui/components/dialog";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@repo/ui/components/drawer";
 import { CalendarPlus } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { MealDaysPicker } from "@/app/_components/meal-days-picker";
 import { SpacePicker } from "@/app/_components/space-picker";
+import { callAction } from "@/app/_lib/call-action";
 import { addPlanEntry } from "@/app/actions/plan";
 import { type MealDays, mealDaysText } from "@/src/entities/meal-days";
 
+// Add to plan on the recipe page: a bottom sheet (the design system's pattern for adding to
+// the plan) with the cook and eat days and, in two or more plans, which plan.
 export function AddToPlanButton({
   recipeId,
   title,
@@ -43,9 +45,11 @@ export function AddToPlanButton({
   function submit(event: React.FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await addPlanEntry({ spaceId: planId, recipeId, ...days });
-      if (result?.error) {
-        setError(result.error);
+      const failed = await callAction(() =>
+        addPlanEntry({ spaceId: planId, recipeId, ...days }),
+      );
+      if (failed) {
+        setError(failed);
         return;
       }
       setError(undefined);
@@ -54,32 +58,28 @@ export function AddToPlanButton({
   }
 
   return (
-    <Dialog
+    <Drawer
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
         if (!next) setAdded(undefined);
       }}
+      showSwipeHandle
     >
-      <DialogTrigger render={<Button variant="secondary" size="lg" />}>
+      <DrawerTrigger render={<Button variant="secondary" size="lg" />}>
         <CalendarPlus data-icon="inline-start" />
         Add to plan
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add to plan</DialogTitle>
-          <DialogDescription>&ldquo;{title}&rdquo;</DialogDescription>
-        </DialogHeader>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Add to plan</DrawerTitle>
+          <DrawerDescription>&ldquo;{title}&rdquo;</DrawerDescription>
+        </DrawerHeader>
 
-        {added ? (
-          <div className="flex flex-col gap-4">
-            <p className="text-sm">Planned: {mealDaysText(added, today)}.</p>
-            <DialogFooter>
-              <DialogClose
-                render={<Button variant="secondary" size="lg" type="button" />}
-              >
-                Done
-              </DialogClose>
+        <div className="pb-safe-4 flex flex-col gap-3 overflow-y-auto px-4 pt-4">
+          {added ? (
+            <>
+              <p className="text-sm">Planned: {mealDaysText(added, today)}.</p>
               <Button
                 size="lg"
                 nativeButton={false}
@@ -91,28 +91,24 @@ export function AddToPlanButton({
               >
                 Open plan
               </Button>
-            </DialogFooter>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            <MealDaysPicker today={today} value={days} onChange={setDays} />
-            <SpacePicker
-              label="Plan"
-              spaces={plans}
-              value={planId}
-              onChange={setPlanId}
-            />
-            {error && (
-              <p role="alert" className="text-destructive text-sm">
-                {error}
-              </p>
-            )}
-            <DialogFooter>
-              <DialogClose
-                render={<Button variant="secondary" size="lg" type="button" />}
-              >
-                Cancel
-              </DialogClose>
+              <DrawerClose render={<Button variant="secondary" size="lg" />}>
+                Done
+              </DrawerClose>
+            </>
+          ) : (
+            <form onSubmit={submit} className="flex flex-col gap-3">
+              <MealDaysPicker today={today} value={days} onChange={setDays} />
+              <SpacePicker
+                label="Plan"
+                spaces={plans}
+                value={planId}
+                onChange={setPlanId}
+              />
+              {error && (
+                <p role="alert" className="text-destructive text-sm">
+                  {error}
+                </p>
+              )}
               <Button
                 type="submit"
                 size="lg"
@@ -120,10 +116,15 @@ export function AddToPlanButton({
               >
                 {isPending ? "Adding…" : "Add"}
               </Button>
-            </DialogFooter>
-          </form>
-        )}
-      </DialogContent>
-    </Dialog>
+              <DrawerClose
+                render={<Button variant="secondary" size="lg" type="button" />}
+              >
+                Cancel
+              </DrawerClose>
+            </form>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

@@ -278,7 +278,7 @@ function AddItemForm({ spaceId }: { spaceId: string }) {
           maxLength={200}
           required
         />
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" size="lg" disabled={isPending}>
           Add
         </Button>
       </div>
@@ -432,7 +432,9 @@ export function GroceryList({
         <p className="text-muted-foreground py-6 text-center text-sm">
           {got.length
             ? "Everything's in the cart."
-            : "The list is empty. Add items above, or add a recipe or your planned meals."}
+            : canEdit
+              ? "The list is empty. Add items above, or add a recipe or your planned meals."
+              : "Nothing on the list yet."}
         </p>
       )}
 

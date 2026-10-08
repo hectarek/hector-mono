@@ -30,6 +30,11 @@ export const MAX_RECIPE_TEXT = 50_000;
 // How many AI reads one account gets in 24 hours (docs/ux-plan.md D48).
 export const DAILY_RECIPE_READS = 20;
 
+// Where those 24 hours start.
+export function readWindowStart(now = Date.now()): Date {
+  return new Date(now - 24 * 60 * 60 * 1000);
+}
+
 // A recipe read with AI, itemized, for someone to review before anything is saved
 // (ux-plan D26, D29). Each line keeps the source's words in `raw`, and suggests an aisle
 // for its catalog ingredient. `unsure` lists what the reader couldn't make out.

@@ -109,8 +109,9 @@ function fieldErrors(
 // What import says when reading fails (ux-plan P10.1). The screen offers Add manually beside it.
 const READ_FAILURES: Record<RecipeReadFailure, string> = {
   "no-recipe-found": "No recipe found there. Try another photo, file or link.",
+  // There's no monthly budget, only the account's credit (D86), so it lasts until Hector adds more.
   "budget-paused":
-    "Import is paused until next month: this month's reading budget is used up.",
+    "Reading recipes with AI is paused: the app has run out of AI credit. Let Hector know so he can add more. You can still add this one by hand.",
   "daily-limit": `You've read ${DAILY_RECIPE_READS} recipes in the last day, the most for one day. Try again tomorrow, or add this one by hand.`,
   "service-unavailable":
     "The recipe reader isn't answering. Try again in a minute.",

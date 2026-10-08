@@ -78,9 +78,10 @@ export default async function SpaceSettingsPage({
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold">People ({members.length})</h2>
+        <h2 className="text-base font-semibold">Members ({members.length})</h2>
         <MemberList
           spaceId={space.id}
+          spaceName={space.name}
           members={members}
           viewerRole={role}
           viewerId={userId ?? ""}

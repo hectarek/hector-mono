@@ -8,6 +8,9 @@ export interface IRecipeReadsRepository {
     kind: RecipeSource["kind"],
     window: { since: Date; limit: number },
   ): Promise<string | null>;
+  // How many reads this person has made since `since`, to say the limit is reached before a
+  // read is tried.
+  count(userId: string, since: Date): Promise<number>;
   // Takes back a read that cost nothing (refused before the model saw anything).
   remove(id: string): Promise<void>;
 }

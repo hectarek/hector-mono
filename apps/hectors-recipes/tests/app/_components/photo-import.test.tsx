@@ -5,17 +5,32 @@ import userEvent from "@testing-library/user-event";
 import { PhotoImport } from "@/app/_components/photo-import";
 import { loadNewRecipe } from "@/app/_lib/new-recipe";
 import { getInjection } from "@/di/container";
-import { MAX_PHOTO_BYTES } from "@/src/entities/models/recipe-draft.model";
+import {
+  DAILY_RECIPE_READS,
+  MAX_PHOTO_BYTES,
+} from "@/src/entities/models/recipe-draft.model";
 import { MockRecipeReaderService } from "@/src/infrastructure/services/mock-recipe-reader.service";
 import { docx } from "@/tests/_support/docx";
 import { signInAsNewUser } from "@/tests/_support/next";
 
+// Uses up this person's AI reads for the day (D48).
+async function useUpReads(userId: string) {
+  const reads = getInjection("IRecipeReadsRepository");
+  for (let n = 0; n < DAILY_RECIPE_READS; n++) {
+    await reads.record(userId, "text", {
+      since: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      limit: DAILY_RECIPE_READS,
+    });
+  }
+}
+
 // Add by photo or file (docs/ux-plan.md D53), against the test container's stand-in reader.
 describe("PhotoImport", () => {
   let reader: MockRecipeReaderService;
+  let userId: string;
 
   beforeEach(async () => {
-    const userId = signInAsNewUser();
+    userId = signInAsNewUser();
     await getInjection("IEnsurePersonalSpaceController")("recipe-book", userId);
     const service = getInjection("IRecipeReaderService");
     if (!(service instanceof MockRecipeReaderService)) {
@@ -39,6 +54,18 @@ describe("PhotoImport", () => {
     return { view, input };
   };
 
+  // P25.1, fix 8: with no AI reads left today, it says so before a photo is chosen.
+  it("says the day's reads are used up before anything is chosen", async () => {
+    await useUpReads(userId);
+    const { view } = await open();
+    view.getByText(/^You've read 20 recipes with AI in the last day/);
+    expect(view.queryByRole("button", { name: "Choose a photo or file" })).toBe(
+      null,
+    );
+    view.getByRole("button", { name: "Add by link or text" });
+    view.getByRole("button", { name: "Add manually" });
+  });
+
   it("reads a Markdown file as its text, into the form to check", async () => {
     const user = userEvent.setup();
     const { view, input } = await open();
@@ -50,7 +77,10 @@ describe("PhotoImport", () => {
 
     const title = await view.findByRole("textbox", { name: "Title" });
     expect((title as HTMLInputElement).value).toBe("Chili");
-    view.getByText("Read from your file. Check it before saving.");
+    // P25.1, fix 11: with one book, it still says where the recipe is saved.
+    view.getByText(
+      "Read from your file. Check it before saving. Saving to My Recipes.",
+    );
     expect(reader.sources.slice(before)).toEqual([
       { kind: "text", text: markdown },
     ]);
@@ -76,12 +106,19 @@ describe("PhotoImport", () => {
       "That PDF is over 4 MB. Screenshot the recipe's pages instead.",
     );
     expect(reader.sources.length).toBe(before);
+    // P25.1, fix 7: the same ways out as Add by link or text.
+    const wayOut = (name: string) =>
+      view.getByRole("button", { name }).closest("a")?.getAttribute("href");
+    expect(wayOut("Add by link or text")).toBe("/recipes/new/link");
+    expect(wayOut("Add manually")).toBe("/recipes/new/manual");
 
     await user.upload(
       input(),
       new File([pdf], "chili.pdf", { type: "application/pdf" }),
     );
-    await view.findByText("Read from your PDF. Check it before saving.");
+    await view.findByText(
+      "Read from your PDF. Check it before saving. Saving to My Recipes.",
+    );
     expect(reader.sources.slice(before)).toEqual([{ kind: "document", pdf }]);
   });
 
@@ -126,7 +163,7 @@ describe("PhotoImport", () => {
     );
 
     await view.findByText(
-      "Read from your Word document. Check it before saving.",
+      "Read from your Word document. Check it before saving. Saving to My Recipes.",
     );
     expect(reader.sources.slice(before)).toEqual([
       { kind: "text", text: "Chili\n1 lb beans\nSimmer." },

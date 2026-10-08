@@ -32,6 +32,7 @@ import type { ICreateRecipeUseCase } from "@/src/application/use-cases/recipes/c
 import type { IDeleteRecipeUseCase } from "@/src/application/use-cases/recipes/delete-recipe.use-case";
 import type { IGetAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-all-recipes.use-case";
 import type { IGetBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
+import type { IGetReadsLeftUseCase } from "@/src/application/use-cases/recipes/get-reads-left.use-case";
 import type { IGetRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import type { IGetRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
 import type { IReadRecipeUseCase } from "@/src/application/use-cases/recipes/read-recipe.use-case";
@@ -73,6 +74,7 @@ import type { ICreateRecipeController } from "@/src/interface-adapters/controlle
 import type { IDeleteRecipeController } from "@/src/interface-adapters/controllers/recipes/delete-recipe.controller";
 import type { IGetAllRecipesController } from "@/src/interface-adapters/controllers/recipes/get-all-recipes.controller";
 import type { IGetBookmarksController } from "@/src/interface-adapters/controllers/recipes/get-bookmarks.controller";
+import type { IGetReadsLeftController } from "@/src/interface-adapters/controllers/recipes/get-reads-left.controller";
 import type { IGetRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import type { IGetRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
 import type { IReadRecipeController } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
@@ -123,6 +125,7 @@ export const DI_SYMBOLS = {
   IDeleteRecipeUseCase: Symbol.for("IDeleteRecipeUseCase"),
   IReadRecipeUseCase: Symbol.for("IReadRecipeUseCase"),
   IReadRecipeFromLinkUseCase: Symbol.for("IReadRecipeFromLinkUseCase"),
+  IGetReadsLeftUseCase: Symbol.for("IGetReadsLeftUseCase"),
   IGetGroceryListUseCase: Symbol.for("IGetGroceryListUseCase"),
   IAddGroceryItemUseCase: Symbol.for("IAddGroceryItemUseCase"),
   ISetGroceryItemCheckedUseCase: Symbol.for("ISetGroceryItemCheckedUseCase"),
@@ -164,6 +167,7 @@ export const DI_SYMBOLS = {
   IDeleteRecipeController: Symbol.for("IDeleteRecipeController"),
   IReadRecipeController: Symbol.for("IReadRecipeController"),
   IReadRecipeFromLinkController: Symbol.for("IReadRecipeFromLinkController"),
+  IGetReadsLeftController: Symbol.for("IGetReadsLeftController"),
   IGetGroceryListController: Symbol.for("IGetGroceryListController"),
   IAddGroceryItemController: Symbol.for("IAddGroceryItemController"),
   ISetGroceryItemCheckedController: Symbol.for(
@@ -226,6 +230,7 @@ export interface DI_RETURN_TYPES {
   IDeleteRecipeUseCase: IDeleteRecipeUseCase;
   IReadRecipeUseCase: IReadRecipeUseCase;
   IReadRecipeFromLinkUseCase: IReadRecipeFromLinkUseCase;
+  IGetReadsLeftUseCase: IGetReadsLeftUseCase;
   IGetGroceryListUseCase: IGetGroceryListUseCase;
   IAddGroceryItemUseCase: IAddGroceryItemUseCase;
   ISetGroceryItemCheckedUseCase: ISetGroceryItemCheckedUseCase;
@@ -267,6 +272,7 @@ export interface DI_RETURN_TYPES {
   IDeleteRecipeController: IDeleteRecipeController;
   IReadRecipeController: IReadRecipeController;
   IReadRecipeFromLinkController: IReadRecipeFromLinkController;
+  IGetReadsLeftController: IGetReadsLeftController;
   IGetGroceryListController: IGetGroceryListController;
   IAddGroceryItemController: IAddGroceryItemController;
   ISetGroceryItemCheckedController: ISetGroceryItemCheckedController;

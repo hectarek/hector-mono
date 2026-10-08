@@ -1,5 +1,6 @@
 import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
+import { getReadsLeftUseCase } from "@/src/application/use-cases/recipes/get-reads-left.use-case";
 import { readRecipeUseCase } from "@/src/application/use-cases/recipes/read-recipe.use-case";
 import { readRecipeFromLinkUseCase } from "@/src/application/use-cases/recipes/read-recipe-from-link.use-case";
 import { RecipeReadsRepository } from "@/src/infrastructure/repositories/recipe-reads.repository";
@@ -8,6 +9,7 @@ import { AiGatewayRecipeReaderService } from "@/src/infrastructure/services/ai-g
 import { HttpRecipePageFetcherService } from "@/src/infrastructure/services/http-recipe-page-fetcher.service";
 import { MockRecipePageFetcherService } from "@/src/infrastructure/services/mock-recipe-page-fetcher.service";
 import { MockRecipeReaderService } from "@/src/infrastructure/services/mock-recipe-reader.service";
+import { getReadsLeftController } from "@/src/interface-adapters/controllers/recipes/get-reads-left.controller";
 import { readRecipeController } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
 import { readRecipeFromLinkController } from "@/src/interface-adapters/controllers/recipes/read-recipe-from-link.controller";
 
@@ -62,6 +64,20 @@ export function createRecipeReaderModule() {
     .bind(DI_SYMBOLS.IReadRecipeFromLinkController)
     .toHigherOrderFunction(readRecipeFromLinkController, [
       DI_SYMBOLS.IReadRecipeFromLinkUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+
+  // The reads left today (D48), for the import screens to say so before a read.
+  recipeReaderModule
+    .bind(DI_SYMBOLS.IGetReadsLeftUseCase)
+    .toHigherOrderFunction(getReadsLeftUseCase, [
+      DI_SYMBOLS.IRecipeReadsRepository,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipeReaderModule
+    .bind(DI_SYMBOLS.IGetReadsLeftController)
+    .toHigherOrderFunction(getReadsLeftController, [
+      DI_SYMBOLS.IGetReadsLeftUseCase,
       DI_SYMBOLS.ILoggerService,
     ]);
 

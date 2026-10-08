@@ -25,6 +25,7 @@ import {
 } from "@/app/actions/import";
 import type { CheckedDraft } from "@/src/entities/itemizing-check";
 import {
+  DAILY_RECIPE_READS,
   MAX_PDF_PAGES,
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
@@ -120,7 +121,13 @@ async function readFileText(text: string): Promise<ReadRecipeResult> {
 // Add by photo (ux-plan P10.2) or file (D53): a cookbook page, a screenshot, or a text or
 // Markdown file, read by the recipe reader, then the new-recipe form filled in to check.
 // Nothing is saved until Save, and the photo or file itself isn't kept.
-export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
+export function PhotoImport({
+  form,
+  choiceHref,
+  manualHref,
+  linkHref,
+  readsLeft,
+}: NewRecipe) {
   const [stage, setStage] = useState<Stage>({ kind: "choose" });
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -176,7 +183,13 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
         {...form}
         values={values}
         review={review}
-        note={`Read from your ${stage.from}. Check it before saving.`}
+        // With one book, still where it's saved (form.note, "Saving to …").
+        note={[
+          `Read from your ${stage.from}. Check it before saving.`,
+          form.note && `${form.note}.`,
+        ]
+          .filter(Boolean)
+          .join(" ")}
       />
     );
   }
@@ -232,39 +245,63 @@ export function PhotoImport({ form, choiceHref, manualHref }: NewRecipe) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <p className="text-muted-foreground text-sm">
-            Take or choose up to 3 photos of one recipe, such as cookbook pages
-            or screenshots, or choose a PDF, a Word document, or a text or
-            Markdown file. The recipe is read into the form for you to check
-            before saving.
-          </p>
-          {/* Hidden, and opened by the button: an input that's only visually hidden still takes
-              keyboard focus, which then lands on nothing you can see. */}
-          <input
-            ref={fileInput}
-            type="file"
-            accept={RECIPE_FILE_ACCEPT}
-            multiple
-            onChange={choose}
-            hidden
-          />
-          <Button size="lg" onClick={() => fileInput.current?.click()}>
-            <Camera data-icon="inline-start" />
-            Choose a photo or file
-          </Button>
-          {stage.error && (
-            <div className="flex flex-col gap-3">
-              <p role="alert" className="text-destructive text-sm">
-                {stage.error}
+          {readsLeft === 0 ? (
+            // Every read here is an AI read, so with none left today it says so up front (D48).
+            <p className="text-sm">
+              You&apos;ve read {DAILY_RECIPE_READS} recipes with AI in the last
+              day, the most for one day. Photos and files can be read again
+              tomorrow.
+            </p>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-sm">
+                Take or choose up to 3 photos of one recipe, such as cookbook
+                pages or screenshots, or choose a PDF, a Word document, or a
+                text or Markdown file. The recipe is read into the form for you
+                to check before saving.
               </p>
-              <Button
-                variant="secondary"
-                size="lg"
-                nativeButton={false}
-                render={<Link href={manualHref} />}
-              >
-                Add manually instead
+              {/* Hidden, and opened by the button: an input that's only visually hidden still
+                  takes keyboard focus, which then lands on nothing you can see. */}
+              <input
+                ref={fileInput}
+                type="file"
+                accept={RECIPE_FILE_ACCEPT}
+                multiple
+                onChange={choose}
+                hidden
+              />
+              <Button size="lg" onClick={() => fileInput.current?.click()}>
+                <Camera data-icon="inline-start" />
+                Choose a photo or file
               </Button>
+            </>
+          )}
+          {(stage.error || readsLeft === 0) && (
+            <div className="flex flex-col gap-3">
+              {stage.error && (
+                <p role="alert" className="text-destructive text-sm">
+                  {stage.error}
+                </p>
+              )}
+              {/* The other two ways in, as Add by link or text offers after a failed read. */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={linkHref} />}
+                >
+                  Add by link or text
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={manualHref} />}
+                >
+                  Add manually
+                </Button>
+              </div>
             </div>
           )}
         </div>

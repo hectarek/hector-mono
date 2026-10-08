@@ -47,7 +47,10 @@ test("Add by photo or file refuses a long PDF, and sends a file to the reader", 
     page.getByText("The recipe reader isn't answering. Try again in a minute."),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Add manually instead" }),
+    page.getByRole("button", { name: "Add by link or text" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Add manually" }),
   ).toBeVisible();
 });
 
