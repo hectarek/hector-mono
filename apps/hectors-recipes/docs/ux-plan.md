@@ -144,6 +144,12 @@ Hector's calls from the audit feedback, except where marked. Overrule any of the
 | D77 | Bookmarks are per person and kept in the database, so a phone and a laptop agree (as D18). Bookmarked recipes come first in the library by default, and a Saved chip shows only them. | Claude's call: Hector placed the icon (D72) and asked for "easy filtering and it goes to the top by default"; a bookmark is a few deliberate rows per person, unlike views. |
 | D78 | Suggested tags come from the tag catalog that already exists (migration 0013): a new account's picker offers its tags under their groups. "meal prep" joins it under meal. The catalog stays one row per tag for everyone, so suggestions add no rows per person. | Hector, 2026-10-08: "we should probably have a tags table or something similar that we can pull from… mindful how we incorporate that so that we dont have a bloat of records". The meal group and the spelling (as "side dish") are Claude's calls. |
 | D79 | The larger ideas stay as drafts in Hector's tracker until the smaller work is done: learning while you cook (an ingredient dictionary, a talking assistant, lessons), after Phase 20; a public page with boards; substitutes; unit conversions; variations; onboarding; and measuring load times. | Hector, 2026-10-08: "it definetly should go after phase 20… lets just keep these as drafts until we are able to come back to them"; "we can just keep this in drafts for a while until all the other easier ones are addressed". |
+| D80 | The library's order and grouping are one control, **Sort and group**: Saved first (the default), Recently viewed, A to Z, then By meal, By cuisine, By diet. A **Saved** chip comes first among the tag chips. | Claude's proposal for P24.2; Hector, 2026-10-08: "the recommendations are fine". |
+| D81 | A recipe's video takes the photo's place as the photo with a play button, and loads only when tapped. YouTube and Vimeo play in place; a host that won't play inside another site (Instagram, TikTok) opens the video's own page. | Same. Loading on tap keeps the recipe page as fast as it is, and a host that refuses embedding still has its link. |
+| D82 | Whose book: the book pills put your own book first after All recipes, and mark books shared with you with a people icon. A recipe's back link names its book when you're in two or more. | Second testers' round (F1); Claude's recommendation, Hector, 2026-10-08: "go with what is recommended". A tester's own book and Hector's were both "Hector's Recipes", as is the app's wordmark. |
+| D83 | A personal book named for its owner ("Hector's Recipes") follows the owner's name when it changes, until someone renames the book; a flag on the book says it still carries its automatic name. Rename also sits in the book's ⋯, for owners. Refines D19, which named it once. | Same round (F5): the tester changed his account's name and his book kept the old one. Checked on the test project: the name change works; only the book's name doesn't follow. |
+| D84 | One word for each thing: the grocery list is **Groceries** ("Add to groceries", "Open groceries") and the plan is **Meal plan** ("Add to meal plan", the Meal plan tab). The map gets a Words section naming each thing once, which new screens use. | Same round (F4); Hector, 2026-10-08: "instead of list we should call it groceries, and instead of plan we should call it meal plan". The Words section is Claude's recommendation. |
+| D85 | Wide screens: the app stays a phone design. Bottom sheets are no wider than the page and centred (in `@repo/ui`'s Drawer, so every app's). The map's Wide screens section lists every width-specific style and why, a fitted version of the same design or a different design, and a test fails on one that isn't listed. | Same round (F6); Hector: no desktop design, but "we arent able to track what is supposed to be responsive vs what is a design choice. We should probably track that somewhere." |
 
 ---
 
@@ -2204,9 +2210,9 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
 
 ## Phase 25: Where the app breaks its own rules
 
-Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](./ux-map.md) lists, fixed by changing the code to match the rule, as L5 did. Hector OKs the list first (H32). Each fix updates the map's list.
+Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](./ux-map.md) lists, fixed by changing the code to match the rule, as L5 did. Hector OK'd the list on 2026-10-08 (H32). Each fix updates the map's list.
 
-- [ ] **P25.1** The 12, one commit each — C · needs H32
+- [ ] **P25.1** The 12, one commit each — C · H32
   - Proposed fixes, in the map's order:
     1. Add to plan and Add to list open as bottom sheets (Copy moves into one in P23.5).
     2. Groceries' Add button at `lg`.
@@ -2221,6 +2227,23 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
     11. A read recipe still says which book it will be saved to.
     12. Books' Create form submits as AGENTS.md says forms that can fail must.
   - Verify: each fix's own test or screen test; 375 px for the visible ones.
+
+## Phase 26: Words, whose book, and wide screens
+
+Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second testers' round ([feedback](./feedback/2026-10-08-desktop-tester.md)), a tester on a desktop in a book Hector shares with him.
+
+- [ ] **P26.1** Groceries and Meal plan, and a Words section — C · D84, F4 (round 2)
+  - Do: "list" and "plan" become Groceries and Meal plan wherever they name the list and the plan (buttons, sheets, the tab, messages). The map gets a Words section.
+  - Verify: screen tests' and flows' names updated; the recipe page's two buttons side by side at 375 px; `grep` finds no "Add to list" or "Add to plan" left.
+- [ ] **P26.2** Whose book — C · D82, F1 (round 2)
+  - Do: your own book first in the pills after All recipes, a people icon on books shared with you; a recipe's back link names its book in two or more books.
+  - Verify: screen tests for the pills' order and icon and the back link's name; 375 px.
+- [ ] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · needs H34
+  - Do: a flag on books still carrying their automatic name (a migration, with existing books matched by name); the name shown follows the owner's current first name while the flag is set; renaming clears it. Rename in a book's ⋯ for its owner.
+  - Verify: use-case tests on both backends (follows a name change, stops after a rename, only the owner's own book); a migration test; a screen test for Rename in the ⋯.
+- [ ] **P26.4** Sheets as wide as the page, and a Wide screens record — C · D85, F6 (round 2)
+  - Do: bottom sheets no wider than the page, centred, in `@repo/ui`'s Drawer. The map's Wide screens section, and a test listing every `sm:`, `md:`, `lg:`, `xl:` style in the app against it.
+  - Verify: the test fails on an unlisted style; sheets at 375 px unchanged and at a desktop width capped; the other apps' sheets checked.
 
 ## Later (to-dos, not scheduled)
 
@@ -2317,9 +2340,10 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
 | H30 | Share the testers' feedback (raw is fine). | P22.3 | done 2026-10-07: 23 items; filed in feedback/ (D71) |
-| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | open |
-| H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | open |
-| H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | open |
+| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | OK'd 2026-10-08: "run migration yourself if possible" |
+| H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
+| H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
+| H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
 
 ## Risks and how they're handled
 
@@ -2562,3 +2586,5 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
   - Next: Phase 23's PR, stacked on hectarek/hector-mono#31; Hector's phone checks (H5).
 - **2026-10-08 (bl)** — A second round of feedback, from a tester on a desktop, filed as `feedback/2026-10-08-desktop-tester.md` and placed on the map. Checked on the test project: an account's name change works; a book's name doesn't follow it (D19). Proposals wait on H33; a photos-and-files pass and recipes from YouTube need scoping.
   - Next: Hector's answers to H31–H33; his review of hectarek/hector-mono#31 and #32.
+- **2026-10-08 (bm)** — Hector OK'd Phase 25's list (H32) and Phase 24's migrations (H31), and took the recommendations: D80 and D81 for Phase 24, D82–D85 for the second round, planned as Phase 26. Whiteboard is now only for PRs with large backend changes (root AGENTS.md). Sandboxed commands may listen on local ports (Hector's settings).
+  - Next: Phase 24.

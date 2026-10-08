@@ -36,11 +36,11 @@ Hector's summary, numbered in order, with spelling tidied:
 
 ### Find something to cook
 
-- **F9 Bookmarks, shown first.** Planned for Phase 24 (P24.1, P24.2; D72, D77).
+- **F9 Bookmarks, shown first.** Planned for Phase 24 (P24.1, P24.2; D72, D77, D80).
   - Library and recipe page. A bookmark is per person (D77), so it needs a new table.
   - The recipe page had no room for the toggle (no ⋯), and library cards carry no actions (D32). Hector placed it as an icon to the right of the recipe's name (D72). In the library: Saved first, and a Saved chip.
   - Cost: the grid's order changes, so it sits with search's ranking (D56) and Group by.
-- **F10 Recently viewed first.** Planned for Phase 24 (P24.2; D76).
+- **F10 Recently viewed first.** Planned for Phase 24 (P24.2; D76, D80).
   - Library. Kept on the device, not in the database (D76), which answers the worry about storing every view.
   - A sort would be a fourth control above the grid, so it joins Group by in one control.
 - **F17 The recipe count.** Planned for Phase 23 (P23.2).
@@ -48,7 +48,7 @@ Hector's summary, numbered in order, with spelling tidied:
 - **F14 and F19 Suggested tags, and meal prep.** Planned for Phase 24 (P24.4; D78).
   - The tag picker offered only tags already on recipes in your books, so a new account saw none, though the shared tag catalog (migration 0013) holds the starting tags under meal, cuisine and diet.
   - Tags were never copied per person: they're text on each recipe, and the catalog has one row per tag for everyone. Near-duplicates ("meal prep", "meal-prep") are the risk.
-- **F20 A video.** Planned for Phase 24 (P24.3; D72).
+- **F20 A video.** Planned for Phase 24 (P24.3; D72, D81).
   - The recipe page's photo and the form. A video takes the photo's place; its link sits under Photo link.
   - Embedding works differently per host, and some refuse it, so the photo stays as the fallback.
 - **F7 Variations.** Needs scoping (D79).
