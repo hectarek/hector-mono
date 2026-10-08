@@ -66,7 +66,9 @@ export function PageTitle({
           </p>
           {badge}
         </div>
-        <h1 className="truncate text-xl font-semibold tracking-tight">
+        {/* Two lines before it clips: beside the library's Add recipe, one line cut a book's
+            name to its first word (P23.1). */}
+        <h1 className="line-clamp-2 text-xl font-semibold tracking-tight break-words">
           {title}
         </h1>
       </div>

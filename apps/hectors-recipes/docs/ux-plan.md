@@ -2124,12 +2124,20 @@ Branch `feat/recipes-p23-clearer`, in its own worktree, stacked on Phase 22's. F
 
 One commit per task; the PR when the phase is done.
 
-- [ ] **P23.1** "Add recipe" on the library — C · F1
+- [x] **P23.1** "Add recipe" on the library — C · F1
   - Do: the library's main action reads "Add recipe", with its plus.
   - Verify: a screen test for the label; 375 px with a long book name, light and dark.
-- [ ] **P23.2** A book's recipe count — C · F17
-  - Do: the library's small label shows the book's count ("Recipe book · 24 recipes"; All recipes counts every book's), and each row on Books shows its book's. The book's total, not the filtered grid (Claude's call: the grid already shows what matches).
+  - Evidence (2026-10-08):
+    - The library's main action reads "Add recipe" and goes to Add a recipe (screen test). The two browser flows that tap it name it so; AGENTS.md and the map say it.
+    - At 375 px on the test project, with the book "Maximiliana's Recipes", the wider button cut the title to "Maximiliana's …". `PageTitle`'s title now takes two lines before it clips, on every tab: the whole name shows, light and dark.
+    - The library, Books, Plan and Groceries screen tests pass.
+- [x] **P23.2** A book's recipe count — C · F17
+  - Do: the count sits over the cards: "24 recipes", or "3 of 24 recipes" while a search or tag narrows them (All recipes counts every book's), and each row on Books shows its book's. Changed from the plan's small label over the title, which the wider Add recipe (P23.1) left no room for, and over the cards it can say how many a search leaves.
   - Verify: screen tests (one recipe, several, none); 375 px.
+  - Evidence (2026-10-08):
+    - `buildLibraryView` returns `total`, and `recipeCountText` says "1 recipe", "24 recipes" or "3 of 24 recipes" (tests). Books counts each book from All recipes' list.
+    - Screen tests: the library shows "4 recipes", then "2 of 4 recipes" as you type; Books shows "2 recipes" on one book and "0 recipes" on an empty one.
+    - At 375 px on the test project: "2 recipes" over the cards, "1 of 2 recipes" after searching, and "Owner · 2 recipes" on Books, light and dark.
 - [ ] **P23.3** Invite buttons that say they share — C · F15
   - Do: the Invite sheet's two buttons and the members page's Share link say what they do: share a link where the browser has a share sheet, copy it where it doesn't, and which role it gives.
   - Verify: screen tests with the share sheet there and absent.

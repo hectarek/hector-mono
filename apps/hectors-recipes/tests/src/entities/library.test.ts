@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   buildLibraryView,
   groupRecipes,
+  recipeCountText,
   searchRecipes,
 } from "@/src/entities/library";
 import type { ListedRecipe } from "@/src/entities/models/recipe.model";
@@ -49,10 +50,22 @@ describe("buildLibraryView", () => {
     ]);
   });
 
-  it("filters by search and tag, and keeps every tag while filtering", () => {
+  it("filters by search and tag, and keeps every tag and the book's count while filtering", () => {
     const view = buildLibraryView(book, { search: "ta", tag: "dinner" });
     expect(titles(view.recipes)).toEqual(["Tacos", "Pasta"]);
     expect(view.tags).toHaveLength(4);
+    expect(view.total).toBe(4);
+  });
+});
+
+// P23.2: a book's count, and how many of them a search or tag leaves.
+describe("recipeCountText", () => {
+  it("counts a book, and what's left of it while narrowed", () => {
+    expect(recipeCountText(24)).toBe("24 recipes");
+    expect(recipeCountText(1)).toBe("1 recipe");
+    expect(recipeCountText(0)).toBe("0 recipes");
+    expect(recipeCountText(3, 24)).toBe("3 of 24 recipes");
+    expect(recipeCountText(1, 1)).toBe("1 recipe");
   });
 });
 

@@ -16,7 +16,11 @@ import { LibraryFilters } from "@/app/_components/library-filters";
 import { ProduceTile } from "@/app/_components/produce-tile";
 import { RecipeCard } from "@/app/_components/recipe-card";
 import { libraryHref } from "@/app/_lib/library-href";
-import { groupRecipes, searchRecipes } from "@/src/entities/library";
+import {
+  groupRecipes,
+  recipeCountText,
+  searchRecipes,
+} from "@/src/entities/library";
 import type { ListedRecipe } from "@/src/entities/models/recipe.model";
 import {
   isTagCategory,
@@ -35,6 +39,7 @@ export function LibraryResults({
   tagGroups,
   activeTag,
   recipes,
+  total,
   bookNames,
   empty,
 }: {
@@ -43,6 +48,8 @@ export function LibraryResults({
   tagGroups: TagGroups;
   activeTag: string | undefined;
   recipes: ListedRecipe[];
+  // The book's count before the tag and search narrow it (P23.2).
+  total: number;
   // Each card's book, when the grid mixes books (All recipes).
   bookNames?: Record<string, string>;
   // What a book with no recipes shows: the page knows whether they can add one.
@@ -103,6 +110,11 @@ export function LibraryResults({
         group={group}
         onGroup={changeGroup}
       />
+      {shown.length > 0 && (
+        <p className="text-muted-foreground -mb-2 text-sm">
+          {recipeCountText(shown.length, total)}
+        </p>
+      )}
       {shown.length > 0 && group ? (
         <div className="flex flex-col gap-6">
           {groupRecipes(shown, group, tagGroups).map(

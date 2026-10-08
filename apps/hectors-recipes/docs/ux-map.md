@@ -78,10 +78,10 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** find something to cook. Also the way in to adding a recipe.
 - **Surface:** Market. Tab page.
-- **Title:** the book's name over "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books.
+- **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books.
 - **Main action:** Add recipe, beside the title (editors) → Add a recipe.
 - **⋯:** Invite (owner), Members, All books. In All recipes: All books only.
-- **Also on it:** search (narrows as you type, D56); Group by (meal, cuisine or diet, D57); tag chips; the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
+- **Also on it:** search (narrows as you type, D56); Group by (meal, cuisine or diet, D57); tag chips; the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
 - **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment.
 - **Reached from:** the Recipes tab, the logo, a recipe's back link and tag chips, Books, Join, Copy recipes, and after deleting or copying a recipe.
@@ -143,7 +143,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** manage recipe books: the default book, a new book, a book's members.
 - **Surface:** Market. Back link "Recipes"; the Recipes tab stays lit. A plain title, "Recipe books", with no ⋯.
 - **Main action:** Create, in the New book form at the bottom.
-- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library) and Share (owner) or Members (→ Members).
+- **Also on it:** Default book (two or more books, D17); each book: its row (→ its library, with its role and count, P23.2) and Share (owner) or Members (→ Members).
 - **Reached from:** the library's ⋯ → All books; Copy recipes' Go to books; after leaving or deleting a book.
 - **Leads to:** the library (a book), Members.
 

@@ -52,6 +52,19 @@ describe("Recipes", () => {
     expect(add.closest("a")?.getAttribute("href")).toStartWith("/recipes/new");
   });
 
+  // P23.2: the book's count, and how many a search leaves.
+  it("counts the book's recipes, and what's left as you type", async () => {
+    const user = userEvent.setup();
+    const view = render(await page());
+    view.getByText("4 recipes");
+
+    await user.type(
+      view.getByRole("searchbox", { name: "Search recipes" }),
+      "rice",
+    );
+    view.getByText("2 of 4 recipes");
+  });
+
   it("finds recipes by ingredient and tag as you type, title matches first", async () => {
     const user = userEvent.setup();
     const view = render(await page());

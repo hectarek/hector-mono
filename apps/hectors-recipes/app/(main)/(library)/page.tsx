@@ -110,6 +110,7 @@ export default async function LibraryPage({
         tagGroups={library.tagGroups}
         activeTag={tag}
         recipes={library.recipes}
+        total={library.total}
         bookNames={
           showAll
             ? Object.fromEntries(books.map((book) => [book.id, book.name]))
