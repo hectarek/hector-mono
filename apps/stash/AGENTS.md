@@ -82,6 +82,13 @@ tests/                 # bun:test; mirrors the source tree, shared setup in _sup
 - `revalidatePath("/")` after mutations
 - Forms use `action` prop with server actions, `useActionState` for forms needing state feedback, `useFormStatus` for pending indicators
 
+## Cache Components
+- `cacheComponents` and `partialPrefetching` are on (`next.config.ts`), so `export const dynamic` and `dynamicParams` fail the build. Anything read at request time (the session, cookies) sits inside `<Suspense>`: the home page's header and add form are the prerendered shell, and the list (`UserStash` in `app/page.tsx`) streams in behind its skeleton.
+- The auth and account pages prerender Neon's view paths (`AUTH_PATHS`, `ACCOUNT_PATHS` in `app/_lib/auth-paths.ts`) through `generateStaticParams`, and any other path is `notFound()`, a real 404. The sign-in pages' session check is inside `<Suspense>` with the form after it, so someone already signed in goes home without the form flashing first.
+- A page that reads the session stops prerendering at the read, and the auth service's `catch` (and Neon's own) would log that stop as a failed sign-in. `experimental.hideLogsAfterAbort` hides logs written after the stop; request-time logs are unchanged.
+- Neon's UI moves with full page loads (its default `navigate` sets `window.location.href`, and its links are plain `<a>`), so signing out clears every page Next.js keeps alive.
+- `next build` needs `NEON_AUTH_BASE_URL` and `NEON_AUTH_COOKIE_SECRET` set (`lib/auth/server.ts` throws at import without them). Nothing at build time reaches Neon, so placeholder values build.
+
 ## Database
 - Schema in `db/schema.ts`. Stash has no migrations yet: edit the schema, then `bun run --filter=stash db:push` (applies it straight to stash's database; ask Hector first, it's a real database).
 - Drizzle Kit commands: `db:push`, `db:generate`, `db:studio`
