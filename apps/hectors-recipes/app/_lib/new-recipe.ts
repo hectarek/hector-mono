@@ -7,7 +7,8 @@ import { hasRole } from "@/src/entities/models/space.model";
 
 // What each way of adding a recipe (manually, by photo or file, by link) gives the new-recipe form:
 // the book it goes in (the one it was started from, or from All recipes their own), the books
-// they can pick instead, the tag chips, and where Cancel goes.
+// they can pick instead, the tag chips, and where Cancel goes; and the AI reads left today (D48),
+// so the import screens say the limit is reached before a read is tried.
 export async function loadNewRecipe(requested: string | undefined) {
   const userId = await getCurrentUserId();
   const { books } = await loadBooks(userId, undefined);
@@ -27,6 +28,7 @@ export async function loadNewRecipe(requested: string | undefined) {
     userId,
   );
   const query = requested ? `?book=${encodeURIComponent(requested)}` : "";
+  const readsLeft = await getInjection("IGetReadsLeftController")(userId);
 
   return {
     form: {
@@ -43,5 +45,6 @@ export async function loadNewRecipe(requested: string | undefined) {
     manualHref: `/recipes/new/manual${query}`,
     photoHref: `/recipes/new/photo${query}`,
     linkHref: `/recipes/new/link${query}`,
+    readsLeft,
   };
 }

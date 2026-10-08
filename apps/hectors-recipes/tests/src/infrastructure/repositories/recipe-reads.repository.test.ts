@@ -33,6 +33,17 @@ describe("RecipeReadsRepository [postgres]", () => {
     expect(made.filter(Boolean)).toHaveLength(2);
   });
 
+  it("counts a person's reads since a time", async () => {
+    await sql(
+      `insert into recipe_reads (user_id, kind, created_at) values ($1, 'text', now() - interval '25 hours')`,
+      [OWNER],
+    );
+    await reads.record(OWNER, "image", day());
+    await reads.record(PARTNER, "text", day());
+    expect(await reads.count(OWNER, day().since)).toBe(1);
+    expect(await reads.count(OWNER, new Date(0))).toBe(2);
+  });
+
   it("takes back a read", async () => {
     const id = await reads.record(OWNER, "text", day());
     await reads.record(OWNER, "text", day());

@@ -199,7 +199,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** read a recipe from up to three photos, a PDF, a Word document or a text file (D53, D74).
 - **Surface:** Market. Full-screen: Cancel (→ Add a recipe), "Add by photo or file".
-- **Main action:** Choose a photo or file. After a failure: Add by link or text, Add manually.
+- **Main action:** Choose a photo or file. After a failure: Add by link or text, Add manually. With no AI reads left today (D48), it says so in place of the picker, with the same two.
 - **Leads to:** the recipe form, filled in, with "Read from your photos. Check it before saving." (or photo, PDF or file)
 
 ### Recipe form — `/recipes/new/manual`, `/recipes/[id]/edit`, and after a read
@@ -264,7 +264,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading). **Fixed in P25.1: Members on all three; Books' intro says invites are in a book's Members.**
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all. **Fixed in P25.1: viewers get "Nothing on the list yet." and "Nothing planned this week."**
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually. **Fixed in P25.1: Add by photo or file offers Add by link or text and Add manually.**
-8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails.
+8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails. **Half fixed in P25.1: the daily limit shows before a read (Add by photo or file in place of its picker; Add by link or text in its note, keeping the box for links). The budget's pause still shows only after a read: the app can't know it before without remembering a refused read, which needs a table (H35).**
 9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does.
 10. Cook mode's Done goes back to the recipe without the servings chosen there.
 11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved.

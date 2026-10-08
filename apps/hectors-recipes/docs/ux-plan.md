@@ -2371,6 +2371,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
 | H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
+| H35 | Should a paused budget (D27) show before a read? The Gateway's `getCredits` reports the team's credit, not the project's budget, so the app learns of a pause only from a refused read. Showing it ahead needs a small table remembering the last refusal (a migration), or it stays as it is: said when a read fails, which with 20 reads a day per person (D48) is rare. Claude recommends leaving it. | P25.1 fix 8 | open |
 
 ## Risks and how they're handled
 

@@ -25,6 +25,7 @@ import {
 } from "@/app/actions/import";
 import type { CheckedDraft } from "@/src/entities/itemizing-check";
 import {
+  DAILY_RECIPE_READS,
   MAX_PDF_PAGES,
   MAX_PHOTO_BYTES,
   MAX_PHOTOS,
@@ -125,6 +126,7 @@ export function PhotoImport({
   choiceHref,
   manualHref,
   linkHref,
+  readsLeft,
 }: NewRecipe) {
   const [stage, setStage] = useState<Stage>({ kind: "choose" });
   const fileInput = useRef<HTMLInputElement>(null);
@@ -237,31 +239,44 @@ export function PhotoImport({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <p className="text-muted-foreground text-sm">
-            Take or choose up to 3 photos of one recipe, such as cookbook pages
-            or screenshots, or choose a PDF, a Word document, or a text or
-            Markdown file. The recipe is read into the form for you to check
-            before saving.
-          </p>
-          {/* Hidden, and opened by the button: an input that's only visually hidden still takes
-              keyboard focus, which then lands on nothing you can see. */}
-          <input
-            ref={fileInput}
-            type="file"
-            accept={RECIPE_FILE_ACCEPT}
-            multiple
-            onChange={choose}
-            hidden
-          />
-          <Button size="lg" onClick={() => fileInput.current?.click()}>
-            <Camera data-icon="inline-start" />
-            Choose a photo or file
-          </Button>
-          {stage.error && (
-            <div className="flex flex-col gap-3">
-              <p role="alert" className="text-destructive text-sm">
-                {stage.error}
+          {readsLeft === 0 ? (
+            // Every read here is an AI read, so with none left today it says so up front (D48).
+            <p className="text-sm">
+              You&apos;ve read {DAILY_RECIPE_READS} recipes with AI in the last
+              day, the most for one day. Photos and files can be read again
+              tomorrow.
+            </p>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-sm">
+                Take or choose up to 3 photos of one recipe, such as cookbook
+                pages or screenshots, or choose a PDF, a Word document, or a
+                text or Markdown file. The recipe is read into the form for you
+                to check before saving.
               </p>
+              {/* Hidden, and opened by the button: an input that's only visually hidden still
+                  takes keyboard focus, which then lands on nothing you can see. */}
+              <input
+                ref={fileInput}
+                type="file"
+                accept={RECIPE_FILE_ACCEPT}
+                multiple
+                onChange={choose}
+                hidden
+              />
+              <Button size="lg" onClick={() => fileInput.current?.click()}>
+                <Camera data-icon="inline-start" />
+                Choose a photo or file
+              </Button>
+            </>
+          )}
+          {(stage.error || readsLeft === 0) && (
+            <div className="flex flex-col gap-3">
+              {stage.error && (
+                <p role="alert" className="text-destructive text-sm">
+                  {stage.error}
+                </p>
+              )}
               {/* The other two ways in, as Add by link or text offers after a failed read. */}
               <div className="grid grid-cols-2 gap-2">
                 <Button

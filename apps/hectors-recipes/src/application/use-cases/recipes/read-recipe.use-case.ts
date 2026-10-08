@@ -13,6 +13,7 @@ import {
 import {
   DAILY_RECIPE_READS,
   type RecipeSource,
+  readWindowStart,
 } from "@/src/entities/models/recipe-draft.model";
 
 export type IReadRecipeUseCase = ReturnType<typeof readRecipeUseCase>;
@@ -46,7 +47,7 @@ export const readRecipeUseCase = (
     userId: string,
   ): Promise<CheckedDraft> => {
     const readId = await recipeReadsRepository.record(userId, source.kind, {
-      since: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      since: readWindowStart(),
       limit: DAILY_RECIPE_READS,
     });
     if (!readId) {

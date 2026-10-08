@@ -16,6 +16,7 @@ import {
   readRecipeFromLink,
   readRecipeFromText,
 } from "@/app/actions/import";
+import { DAILY_RECIPE_READS } from "@/src/entities/models/recipe-draft.model";
 
 type Read = Extract<ReadRecipeResult, { draft: unknown }>;
 type Stage =
@@ -33,6 +34,7 @@ export function LinkImport({
   choiceHref,
   manualHref,
   photoHref,
+  readsLeft,
 }: Awaited<ReturnType<typeof loadNewRecipe>>) {
   const [stage, setStage] = useState<Stage>({ kind: "enter" });
   const [box, setBox] = useState("");
@@ -137,7 +139,10 @@ export function LinkImport({
                 autoComplete="off"
               />
               <FieldDescription>
-                It&apos;s read into the form for you to check before saving.
+                {readsLeft === 0
+                  ? // A page's own recipe data is read without AI, so a link may still work (D48).
+                    `You've read ${DAILY_RECIPE_READS} recipes with AI in the last day, the most for one day. A recipe site's link often still works, as its recipe can be read without AI. Pasted text waits until tomorrow.`
+                  : "It's read into the form for you to check before saving."}
               </FieldDescription>
             </Field>
             <Button type="submit" size="lg" disabled={!box.trim()}>
