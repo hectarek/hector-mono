@@ -40,9 +40,13 @@ test("cook a recipe one step at a time", async ({ page }) => {
 
   // Gather: what's out gets ticked, then the first step.
   await page.getByRole("button", { name: "Cook" }).click();
-  const onion = page.getByRole("button", { name: /onion/ });
-  await onion.click();
-  await expect(onion).toHaveAttribute("aria-pressed", "true");
+  // A row you check off, as on Groceries (P27.3): tap its words; its checkbox is hidden.
+  // Once cook mode is open: the recipe page lists "1 onion" too.
+  await expect(
+    page.getByText("Check off each ingredient as you get it out."),
+  ).toBeVisible();
+  await page.getByText("1 onion", { exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: "1 onion" })).toBeChecked();
   await page.getByRole("button", { name: "Start cooking" }).click();
   await expect(page.getByText("Step 1 of 2")).toBeVisible();
 

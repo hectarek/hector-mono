@@ -7,7 +7,7 @@ import {
   NativeSelectOption,
 } from "@repo/ui/components/native-select";
 import { cn } from "@repo/ui/lib/utils";
-import { Check, CloudOff, Ellipsis } from "lucide-react";
+import { CloudOff, Ellipsis } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import {
   type FormEvent,
@@ -18,6 +18,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { CheckRow } from "@/app/_components/check-row";
 import { GroceryItemSheet } from "@/app/_components/grocery-item-sheet";
 import { callAction } from "@/app/_lib/call-action";
 import type { PendingWrite } from "@/app/_lib/pending-writes";
@@ -143,38 +144,13 @@ function ItemRow({
   return (
     <li ref={rowRef} className="flex flex-col overflow-hidden">
       <div className="flex items-center gap-2">
-        {/* The whole row checks the item off (the design system's pattern for lists you
-            check off): a label around a visually hidden checkbox, so it reads and works
-            as a checkbox, and the ⋯ beside it stays a separate target. */}
-        <label
-          className={cn(
-            "flex min-w-0 flex-1 items-center gap-3 py-2 select-none",
-            canEdit && "cursor-pointer",
-          )}
+        {/* The whole row checks the item off, and the ⋯ beside it stays a separate target. */}
+        <CheckRow
+          checked={checked}
+          onChange={toggle}
+          disabled={!canEdit}
+          className="py-2"
         >
-          <input
-            type="checkbox"
-            checked={checked}
-            onChange={toggle}
-            disabled={!canEdit}
-            className="peer sr-only"
-          />
-          <span
-            aria-hidden
-            className={cn(
-              "peer-focus-visible:ring-ring/50 flex size-7 shrink-0 items-center justify-center rounded-md border transition-colors duration-200 peer-focus-visible:ring-3",
-              checked
-                ? "bg-primary text-primary-foreground border-primary"
-                : "border-input",
-            )}
-          >
-            <Check
-              className={cn(
-                "size-4 transition-transform duration-200 motion-reduce:transition-none",
-                checked ? "scale-100" : "scale-0",
-              )}
-            />
-          </span>
           <span className="flex min-w-0 flex-1 flex-col">
             {/* Always struck through; the line fades in and out with its colour, so the
                 text never reflows. */}
@@ -200,7 +176,7 @@ function ItemRow({
               </span>
             )}
           </span>
-        </label>
+        </CheckRow>
         {canEdit && (
           <>
             <Button

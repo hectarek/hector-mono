@@ -2336,9 +2336,14 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
   - Do: Add to meal plan, then Add to groceries, as Meal plan comes before Groceries in the tab bar.
   - Verify: a screen test; 375 px.
   - Evidence (2026-10-08): the two swapped under Cook; a screen test renders the recipe page and finds Add to meal plan first. The map's recipe page and Wide screens row say them in that order. 375 px with the flows.
-- [ ] **P27.3** Cook mode's ingredients as a checklist — C
+- [x] **P27.3** Cook mode's ingredients as a checklist — C
   - Do: Gather's hint above the list, and each ingredient a row you check off as on Groceries (the same component), on Gather, under a step and in the ingredients sheet.
   - Verify: screen tests; the `cook` flow; 375 px.
+  - Evidence (2026-10-08):
+    - `CheckRow` (`app/_components/check-row.tsx`) is the design system's checklist row taken out of Groceries: a label around a hidden checkbox, the drawn box, then the words. Groceries' items and cook mode's ingredients both use it, so they look and work the same. A second use, not a third, but it's the system's named pattern, kept in one place so the two lists can't drift.
+    - Cook mode's `IngredientRow` is a `CheckRow`: on Gather, under a step ("This step uses") and in the ingredients sheet, with one set of ticks (D65). A ticked line is struck through and muted, fading as on Groceries.
+    - Gather's hint is "Check off each ingredient as you get it out.", under the Ingredients heading and above the list.
+    - Tests: cook mode's screen tests find ingredients as checkboxes (one new: the hint comes before the first ingredient), and Groceries' pass unchanged. The `cook` flow taps the onion by its words once cook mode is open; it had tapped the recipe page's own "1 onion" before cook mode loaded.
 - [ ] **P27.4** The carrot's greens and the basil's top leaf — C
   - Do: the carrot's greens grow from the middle of its top, turned with it; the basil's stem ends in its top leaf.
   - Verify: the welcome screen at 375 px.

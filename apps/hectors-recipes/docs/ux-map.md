@@ -219,7 +219,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** cook from a phone at arm's length, one screen at a time (D63–D66).
 - **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next.
-- **Screens:** Gather (tick ingredients as you get them out, servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
+- **Screens:** Gather ("Check off each ingredient as you get it out." above the list, the ingredients as rows you check off as on Groceries (P27.3), servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
 - **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to groceries's Open groceries.
 - **Room:** a step screen holds one step on purpose. Anything that isn't about the step in front of you goes on Gather, Done or a sheet.
@@ -275,7 +275,7 @@ Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
 | Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to meal plan and Add to groceries |
 | Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
-| List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
+| List you check off | The design system's Patterns; AGENTS.md UI Rules (`CheckRow`) | Groceries and cook mode's ingredients (P27.3). Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Meal plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); D82 for the book pills (yours first, a people icon on shared ones) | Pills on the three tabs; pickers in dialogs and the form |
 | Sideways swipe | D51, D54, D63 | Meal plan's week, cook mode |

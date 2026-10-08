@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { CheckRow } from "@/app/_components/check-row";
 import { LineText } from "@/app/_components/line-text";
 import { InlineMarkdown } from "@/app/_components/markdown";
 import {
@@ -588,8 +589,8 @@ function CookModeContent({
   );
 }
 
-// An ingredient at the servings chosen, tapped to cross it off: the same ticks wherever it
-// shows, on Gather or under a step (D65).
+// An ingredient at the servings chosen, checked off as Groceries' items are (P27.3): the same
+// ticks wherever it shows, on Gather, under a step or in the sheet (D65).
 function IngredientRow({
   line,
   factor,
@@ -602,17 +603,19 @@ function IngredientRow({
   onToggle: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={used}
-      className={cn(
-        "w-full border-b py-3 text-left text-lg leading-snug",
-        used && "text-muted-foreground line-through",
-      )}
-    >
-      <LineText line={showLine(line, factor)} />
-    </button>
+    <CheckRow checked={used} onChange={onToggle} className="border-b py-3">
+      {/* Always struck through; the line fades in and out with its colour, as on Groceries. */}
+      <span
+        className={cn(
+          "min-w-0 flex-1 text-lg leading-snug line-through transition-colors duration-300",
+          used
+            ? "text-muted-foreground decoration-muted-foreground"
+            : "decoration-transparent",
+        )}
+      >
+        <LineText line={showLine(line, factor)} />
+      </span>
+    </CheckRow>
   );
 }
 
@@ -620,10 +623,13 @@ function IngredientRow({
 // on Gather, and in the sheet from a step (D64).
 function IngredientList({
   heading,
+  hint,
   lines,
   ingredient,
 }: {
   heading: ReactNode;
+  // Under the heading, before the list (Gather's "Check off…").
+  hint?: ReactNode;
   lines: Line[];
   ingredient: (line: Line) => ReactNode;
 }) {
@@ -660,6 +666,7 @@ function IngredientList({
           </fieldset>
         )}
       </div>
+      {hint}
       <ul className="flex flex-col">
         {lines.map((line, index) => (
           <li key={line.position} className="flex flex-col">
@@ -690,12 +697,14 @@ function GatherScreen({
     <section className="flex flex-col gap-3">
       <IngredientList
         heading={<h2 className="font-heading text-xl">Ingredients</h2>}
+        hint={
+          <p className="text-muted-foreground text-sm">
+            Check off each ingredient as you get it out.
+          </p>
+        }
         lines={lines}
         ingredient={ingredient}
       />
-      <p className="text-muted-foreground text-xs">
-        Tap an ingredient to cross it off as you get it out.
-      </p>
       {addToList && <div>{addToList}</div>}
     </section>
   );
