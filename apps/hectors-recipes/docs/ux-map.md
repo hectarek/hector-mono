@@ -92,7 +92,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** read a recipe and decide what to do with it: cook it, plan it, or shop for it.
 - **Surface:** Reading. Back link "Recipes" (to its book); the Recipes tab stays lit.
-- **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source.
+- **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
 - **Also on it:** Add to list and Add to plan (when you can plan); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
@@ -206,7 +206,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** write or correct a recipe (D7).
 - **Surface:** Market. Full-screen: Cancel, "New recipe" or "Edit recipe", Save (the main action).
-- **Fields:** Book (new, when you can edit two or more), Title, Description, Servings, Time, Source link, Photo link.
+- **Fields:** Book (new, when you can edit two or more), Title, Description, Servings, Time, Source link, Photo link, Video link (which says where it plays).
 - **Ingredients and Method:** rows and sections. A row's ⋯ opens its sheet: a line's note and Optional, a step's timer, Move up, Move down, Remove, Done. Pasting several lines into a row makes a row for each.
 - **Tags:** chips under their groups, and New tag (D33, D55).
 - **Edit only:** Delete recipe at the bottom, which asks first.

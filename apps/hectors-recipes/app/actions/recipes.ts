@@ -94,6 +94,7 @@ function recipeFields(formData: FormData) {
     tags: tags(formData),
     sourceUrl: text(formData, "sourceUrl") ?? null,
     imageUrl: text(formData, "imageUrl") ?? null,
+    videoUrl: text(formData, "videoUrl") ?? null,
     ingredients: ingredients(formData),
     steps: rows(formData, "steps"),
   };

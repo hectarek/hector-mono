@@ -65,6 +65,7 @@ export type RecipeFormValues = {
   tags: string[];
   sourceUrl: string;
   imageUrl: string;
+  videoUrl: string;
 };
 
 const EMPTY: RecipeFormValues = {
@@ -77,6 +78,7 @@ const EMPTY: RecipeFormValues = {
   tags: [],
   sourceUrl: "",
   imageUrl: "",
+  videoUrl: "",
 };
 
 // The form's fields in the order they appear (each field's id is its name).
@@ -88,6 +90,7 @@ const FIELD_ORDER = [
   "timeMinutes",
   "sourceUrl",
   "imageUrl",
+  "videoUrl",
   "ingredients",
   "steps",
   "tags",
@@ -469,6 +472,25 @@ export function RecipeForm(props: Props) {
               placeholder="https://"
             />
             <FieldError>{errors.imageUrl}</FieldError>
+          </Field>
+
+          {/* Shown in the photo's place on the recipe page (D72, D81). */}
+          <Field data-invalid={!!errors.videoUrl}>
+            <FieldLabel htmlFor="videoUrl">Video link</FieldLabel>
+            <Input
+              id="videoUrl"
+              aria-invalid={!!errors.videoUrl}
+              name="videoUrl"
+              type="url"
+              inputMode="url"
+              defaultValue={values.videoUrl}
+              placeholder="https://"
+            />
+            <FieldDescription>
+              YouTube and Vimeo play on the recipe; other sites open their own
+              page.
+            </FieldDescription>
+            <FieldError>{errors.videoUrl}</FieldError>
           </Field>
         </FieldGroup>
 

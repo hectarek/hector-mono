@@ -10,6 +10,7 @@ import { InlineMarkdown } from "@/app/_components/markdown";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
 import { CookLink, RecipeServings } from "@/app/_components/recipe-servings";
+import { RecipeVideo } from "@/app/_components/recipe-video";
 import { RememberView } from "@/app/_components/remember-view";
 import { ScaledIngredients } from "@/app/_components/scaled-ingredients";
 import { getCurrentUserId } from "@/app/_lib/current-user";
@@ -55,6 +56,24 @@ export default async function RecipePage({
       (book) => book.id !== recipe.spaceId && hasRole(book.role, "editor"),
     )
     .map(({ id: bookId, name }) => ({ id: bookId, name }));
+  const picture = recipe.imageUrl ? (
+    <Image
+      src={recipe.imageUrl}
+      alt=""
+      width={1280}
+      height={720}
+      unoptimized
+      loading="eager"
+      className="bg-muted aspect-video h-auto w-full rounded-xl object-cover"
+    />
+  ) : (
+    <ProduceTile
+      produce={produceFor(recipe.id)}
+      className="font-heading aspect-video items-end rounded-xl p-5 text-8xl leading-none"
+    >
+      {recipe.title.charAt(0).toUpperCase()}
+    </ProduceTile>
+  );
 
   return (
     <article data-surface="reading">
@@ -75,23 +94,12 @@ export default async function RecipePage({
           </div>
 
           <header className="flex flex-col gap-3">
-            {recipe.imageUrl ? (
-              <Image
-                src={recipe.imageUrl}
-                alt=""
-                width={1280}
-                height={720}
-                unoptimized
-                loading="eager"
-                className="bg-muted aspect-video h-auto w-full rounded-xl object-cover"
-              />
+            {recipe.videoUrl ? (
+              <RecipeVideo link={recipe.videoUrl} title={recipe.title}>
+                {picture}
+              </RecipeVideo>
             ) : (
-              <ProduceTile
-                produce={produceFor(recipe.id)}
-                className="font-heading aspect-video items-end rounded-xl p-5 text-8xl leading-none"
-              >
-                {recipe.title.charAt(0).toUpperCase()}
-              </ProduceTile>
+              picture
             )}
             <div className="flex items-start justify-between gap-2">
               <h1 className="font-heading text-3xl text-balance">

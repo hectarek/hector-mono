@@ -33,6 +33,7 @@ const recipeColumns = {
   tags: recipes.tags,
   sourceUrl: recipes.sourceUrl,
   imageUrl: recipes.imageUrl,
+  videoUrl: recipes.videoUrl,
   copiedFromRecipeId: recipes.copiedFromRecipeId,
   externalRef: recipes.externalRef,
   createdAt: recipes.createdAt,
@@ -247,6 +248,7 @@ export class RecipesRepository
       tags: input.tags ?? [],
       sourceUrl: input.sourceUrl ?? null,
       imageUrl: input.imageUrl ?? null,
+      videoUrl: input.videoUrl ?? null,
       externalRef: input.externalRef ?? null,
       copiedFromRecipeId: input.copiedFromRecipeId ?? null,
     }));

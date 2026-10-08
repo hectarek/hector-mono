@@ -70,6 +70,7 @@ export default async function EditRecipePage({
         tags: recipe.tags,
         sourceUrl: recipe.sourceUrl ?? "",
         imageUrl: recipe.imageUrl ?? "",
+        videoUrl: recipe.videoUrl ?? "",
       }}
     />
   );

@@ -2213,9 +2213,16 @@ Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations
     - Recently viewed: `RememberView` on the recipe page notes when it was opened, in local storage (the newest 200; D76), and the library orders by it once loaded. Nothing is stored in the database.
     - Tests: `orderRecipes` (saved first, last opened first, A to Z as it comes); screen tests for saved first by default, the Saved chip's link and filter ("1 of 4 recipes"), Recently viewed from local storage with `?sort=recent`, and the grouping test with the renamed control.
     - The `plan-and-shop` flow's grouping step names the new control; the flows and 375 px checks run with Phase 24's migrations on the test project (H31).
-- [ ] **P24.3** A video in place of the photo — C+H · D72, F20 · needs H31
+- [x] **P24.3** A video in place of the photo — C+H · D72, D81, F20 · H31
   - Do: a video link column, its field under Photo link, and the recipe page showing the video where the photo was. A host that can't be embedded keeps the photo, with the video as a link.
   - Verify: a test for each host's link; a screen test; 375 px.
+  - Evidence (2026-10-08):
+    - Migration 0017 adds `recipes.video_url`. It's read, created, updated and copied with a recipe (Copy to another book); a read draft starts without one.
+    - The form's Video link sits under Photo link, with "YouTube and Vimeo play on the recipe; other sites open their own page."
+    - `videoEmbed` takes YouTube's watch, youtu.be, Shorts, embed and live links to its cookie-less player (`youtube-nocookie.com`), and Vimeo's to `player.vimeo.com`, both set to play. Anything else, such as Instagram, TikTok or a channel page, gets null.
+    - `RecipeVideo` keeps the photo, or the produce tile, with a button in its middle: Play video swaps in the player (nothing loads before the tap), and Watch video opens another host's page in a new tab.
+    - Tests: each host's links and the ones refused; a screen test that plays a YouTube video only after the tap, and one that sends Instagram to its own page.
+    - 375 px is checked with the flows, once the migrations are on the test project (H31).
 - [ ] **P24.4** Suggested tags, and meal prep — C+H · D78, F14, F19 · needs H31
   - Do: the tag picker offers the catalog's tags under their groups, beside your own; a migration adds "meal prep" under meal, and `STARTING_TAGS` with it.
   - Verify: a new account's picker shows the catalog's tags (a screen test); the catalog test still agrees with `STARTING_TAGS`.

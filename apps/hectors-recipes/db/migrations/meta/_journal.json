@@ -120,6 +120,13 @@
       "when": 1791459634917,
       "tag": "0016_recipe_bookmarks",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791460128090,
+      "tag": "0017_recipe_video",
+      "breakpoints": true
     }
   ]
 }

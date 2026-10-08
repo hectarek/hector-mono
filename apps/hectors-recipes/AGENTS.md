@@ -102,7 +102,7 @@ Full rationale in the spec. Summary:
 - **`spaces`**: anything shareable. `type` is `'recipe-book' | 'meal-plan'`. There's no separate grocery list: a plan's list is part of the plan and shares its members (`docs/ux-plan.md` D13; migration 0003 moved the old lists' items onto their owners' plans).
 - **`space_members`**: `(space_id, user_id)` with `role` `'owner' | 'editor' | 'viewer'`. Exactly one owner per space (partial unique index).
 - **`space_invites`**: link tokens carrying a role (used from increment 5).
-- **`recipes`**: live in a `recipe-book` space. `created_by` is the author only; access comes from the space. `tags text[]`, optional `time_minutes` / `yield_servings`, `external_ref` for imports.
+- **`recipes`**: live in a `recipe-book` space. `created_by` is the author only; access comes from the space. `tags text[]`, optional `time_minutes` / `yield_servings`, `external_ref` for imports, and an optional `video_url` (migration 0017, docs/ux-plan.md D81), shown in the photo's place.
 - **`recipe_ingredients`**: PK `(recipe_id, position)`. Itemized (ux-plan D23): `quantity`, `unit`, `name` as written, `note` (prep or a swap; shown on the recipe, left off the grocery list), `optional`, and `ingredient_id` into the catalog. `raw` keeps the original line for reference. Any of the itemized fields may be null.
 - **`recipe_steps`**: PK `(recipe_id, position)`, `text`, an optional `timer_minutes` (D24), and an optional `section`, the heading over it and the steps after it that share it (D35, migration 0008). Saving replaces a recipe's steps. They replaced the markdown `instructions` column (migration 0007).
 - **`ingredients`**: global catalog, unique name, and an `aisle` from the fixed list in `src/entities/aisles.ts` (D25).

@@ -42,6 +42,7 @@ export class MockRecipesRepository implements IRecipesRepository {
       tags: input.tags ?? [],
       sourceUrl: input.sourceUrl ?? null,
       imageUrl: input.imageUrl ?? null,
+      videoUrl: input.videoUrl ?? null,
       copiedFromRecipeId: input.copiedFromRecipeId ?? null,
       externalRef: input.externalRef ?? null,
       createdAt: now,

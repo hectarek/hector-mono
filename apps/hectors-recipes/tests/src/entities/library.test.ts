@@ -24,6 +24,7 @@ const recipe = (
   tags,
   sourceUrl: null,
   imageUrl: null,
+  videoUrl: null,
   copiedFromRecipeId: null,
   externalRef: null,
   createdAt: new Date(),

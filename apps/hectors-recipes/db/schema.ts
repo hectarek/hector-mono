@@ -129,6 +129,8 @@ export const recipes = pgTable(
     tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
     sourceUrl: text("source_url"),
     imageUrl: text("image_url"),
+    // A video of the recipe, shown in the photo's place (docs/ux-plan.md D72, D81).
+    videoUrl: text("video_url"),
     copiedFromRecipeId: uuid("copied_from_recipe_id").references(
       (): AnyPgColumn => recipes.id,
       { onDelete: "set null" },
