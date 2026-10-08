@@ -258,7 +258,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is placed with the testers' feedback (P22.3) and decided there.
 
 1. The recipe page's Add to plan and Add to list open centred dialogs (Copy moved into a sheet in P23.5). The design system's bottom-sheet pattern names "adding to the plan" (and D10 chose a sheet for row actions for the same reason). **Fixed in P25.1: both are bottom sheets.**
-2. Groceries' Add button is the default size (40 px), not `lg` (D32).
+2. Groceries' Add button is the default size (40 px), not `lg` (D32). **Fixed in P25.1: it's `lg`.**
 3. Add to list (on the recipe page and in cook mode), Add to plan and Plan's grocery button call their actions without `callAction`. With no signal they likely land on the error page, which the rule exists to prevent.
 4. Two filled buttons on one screen: cook mode while a timer is up (Time's up · Dismiss beside Next). Add by link's pair went with its one box (P23.6).
 5. The members page has three names: Members (the ⋯), Share (Books, for owners) and People (its heading).

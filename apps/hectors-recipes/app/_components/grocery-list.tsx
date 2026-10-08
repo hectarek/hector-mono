@@ -278,7 +278,7 @@ function AddItemForm({ spaceId }: { spaceId: string }) {
           maxLength={200}
           required
         />
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" size="lg" disabled={isPending}>
           Add
         </Button>
       </div>
