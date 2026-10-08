@@ -3,6 +3,7 @@
 import { Button } from "@repo/ui/components/button";
 import { Link2 } from "lucide-react";
 import { ActionForm } from "@/app/_components/action-form";
+import { ConfirmActionButton } from "@/app/_components/confirm-action-button";
 import { RoleBadge } from "@/app/_components/role-badge";
 import { ShareLinkButton } from "@/app/_components/share-link-button";
 import { createInvite, revokeInvite } from "@/app/actions/spaces";
@@ -48,21 +49,13 @@ export function InviteLinks({
                 path={`/join/${invite.token}`}
                 title={`Join ${spaceName}`}
               />
-              <ActionForm
+              <ConfirmActionButton
+                label="Turn off"
+                title="Turn off this link?"
+                description="No one new can join with it. People already in stay in."
                 action={revokeInvite}
                 fields={{ inviteId: invite.id }}
-              >
-                {({ isPending }) => (
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    type="submit"
-                    disabled={isPending}
-                  >
-                    Turn off
-                  </Button>
-                )}
-              </ActionForm>
+              />
             </li>
           ))}
         </ul>

@@ -160,8 +160,8 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Job:** who's in a book or plan, its invite links, leaving, deleting.
 - **Surface:** Market. Back link: the book's or plan's name (a plan's goes to Plan, even when you came from Groceries).
 - **Main action:** New link: can edit (owner).
-- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off; New link: view only); Members, each with Make view only or Allow editing, and Remove; Delete, which asks first.
-- **Everyone else:** Members, and Leave on their own row.
+- **Owner:** Rename; Invite links (Share link, or Copy link where the browser has no share sheet; Turn off, which asks first; New link: view only); Members, each with Make view only or Allow editing, and Remove, which asks first; Delete, which asks first.
+- **Everyone else:** Members, and Leave on their own row, which asks first.
 - **Reached from:** a tab's ⋯ → Members; Books' Members.
 - **Leads to:** the book or plan; Books or Plan after leaving or deleting.
 
@@ -244,7 +244,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 | Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
 | Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to plan and Add to list |
-| Dialog | No written rule | Confirmations (discard changes, delete a recipe or a space) |
+| Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
 | List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Plan and Groceries have the sentence only |
 | Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); no written rule for the pills | Pills on the three tabs; pickers in dialogs and the form |
@@ -265,7 +265,7 @@ Found while writing this map, on 2026-10-07. None is fixed in Phase 22; each is 
 6. Groceries' empty text tells viewers to "Add items above", but viewers have no add box. Plan shows viewers no empty text at all. **Fixed in P25.1: viewers get "Nothing on the list yet." and "Nothing planned this week."**
 7. The ways out after a failed read differ: Add by link or text offers pasting the text, photo or file, and manually; Add by photo or file offers only manually. **Fixed in P25.1: Add by photo or file offers Add by link or text and Add manually.**
 8. Reading with AI being paused (D27's budget) or at its daily limit (D48) shows only after a read fails. **Half fixed in P25.1: the daily limit shows before a read (Add by photo or file in place of its picker; Add by link or text in its note, keeping the box for links). The budget's pause still shows only after a read: the app can't know it before without remembering a refused read, which needs a table (H35).**
-9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does.
+9. Removing a member, leaving a book or plan, and turning off a link don't ask first. Deleting a recipe or a space does. **Fixed in P25.1: all three ask first (`ConfirmActionButton`).**
 10. Cook mode's Done goes back to the recipe without the servings chosen there.
 11. A read recipe's "Read from …" note replaces "Saving to <book>", so someone with one book isn't told where it will be saved.
 12. The Books page's Create form submits with a plain `<form action>`, which AGENTS.md says clears the field on a validation error.
