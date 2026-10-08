@@ -79,13 +79,19 @@ export default async function LibraryPage({
     </Button>
   );
 
+  // Whose book (D82): your own first, then the ones shared with you, marked as such.
+  const pills = [
+    ...books.filter((book) => book.role === "owner"),
+    ...books.filter((book) => book.role !== "owner"),
+  ].map(({ id, name, role }) => ({ id, name, shared: role !== "owner" }));
+
   return (
     <div className="flex flex-col gap-4">
       <SpaceSwitcher
         spaces={
           books.length > 1
-            ? [{ id: ALL_RECIPES, name: "All recipes" }, ...books]
-            : books
+            ? [{ id: ALL_RECIPES, name: "All recipes" }, ...pills]
+            : pills
         }
         currentId={viewId}
         label="Recipe books"

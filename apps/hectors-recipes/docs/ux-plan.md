@@ -2292,9 +2292,14 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
     - Plans keep their names ("Hector's Plan"): renaming them would change people's data, which D84 doesn't ask for.
     - The map's Words section names each thing once (recipe book, meal plan, groceries, meal, cook day, eat days, item, members) with the words not to use. AGENTS.md's UI rules point to it, and the map's screens and jobs use the new names. Code names (`plan`, `AddToListButton`) are unchanged.
     - Tests: the screen tests and the `plan-and-shop` flow look for the new names; `grep` finds no "Add to list" or "Add to plan" in `app/` or `src/`, comments included. The 375 px check of the two buttons side by side runs with the flows, once the worktree has its `.env` files.
-- [ ] **P26.2** Whose book — C · D82, F1 (round 2)
+- [x] **P26.2** Whose book — C · D82, F1 (round 2)
   - Do: your own book first in the pills after All recipes, a people icon on books shared with you; a recipe's back link names its book in two or more books.
   - Verify: screen tests for the pills' order and icon and the back link's name; 375 px.
+  - Evidence (2026-10-08):
+    - The library's pills are All recipes, the books you own, then the ones shared with you. `SpaceSwitcher` takes `shared` and shows a people icon (`Users`), with ", shared with you" for screen readers.
+    - The plan pills use the same component, unmarked: D82 names the book pills, so they're left for Hector to ask for.
+    - A recipe's back link names its book when you're in two or more, and still says Recipes with one, or for a recipe from a book you're not in.
+    - Screen tests: the pills' order and icon with a book shared with you, the back link's name in two books, and Recipes in one. 375 px runs with the flows, once the worktree has its `.env` files.
 - [ ] **P26.3** A book named for its owner follows their name — C+H · D83, F5 (round 2) · needs H34
   - Do: a flag on books still carrying their automatic name (a migration, with existing books matched by name); the name shown follows the owner's current first name while the flag is set; renaming clears it. Rename in a book's ⋯ for its owner.
   - Verify: use-case tests on both backends (follows a name change, stops after a rename, only the owner's own book); a migration test; a screen test for Rename in the ⋯.

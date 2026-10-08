@@ -78,7 +78,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** find something to cook. Also the way in to adding a recipe.
 - **Surface:** Market. Tab page.
-- **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books.
+- **Title:** the book's name (two lines before it clips) under "Recipe book", or "All recipes" (D17), with a role badge when the book isn't yours. A row of book pills above it in two or more books: All recipes, your own books, then those shared with you, each with a people icon (D82).
 - **Main action:** Add recipe, beside the title (editors) → Add a recipe.
 - **⋯:** Invite (owner), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
 - **Also on it:** search (narrows as you type, D56); Sort and group (Saved first, Recently viewed, A to Z; by meal, cuisine or diet; D57, D80); the Saved chip first among the tag chips (D77); the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
@@ -91,7 +91,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 ### Recipe — `/recipes/[id]`
 
 - **Job:** read a recipe and decide what to do with it: cook it, plan it, or shop for it.
-- **Surface:** Reading. Back link "Recipes" (to its book); the Recipes tab stays lit.
+- **Surface:** Reading. Back link to its book: named for the book when you're in two or more (D82), else "Recipes"; the Recipes tab stays lit.
 - **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
@@ -264,7 +264,7 @@ Code keeps its own names (`plan`, `grocery_items`, `AddToListButton`); only the 
 | Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
 | List you check off | The design system's Patterns; AGENTS.md UI Rules | Groceries. Cook mode's ingredients are toggle buttons; Copy recipes uses plain checkboxes |
 | Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Meal plan and Groceries have the sentence only |
-| Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); no written rule for the pills | Pills on the three tabs; pickers in dialogs and the form |
+| Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); D82 for the book pills (yours first, a people icon on shared ones) | Pills on the three tabs; pickers in dialogs and the form |
 | Sideways swipe | D51, D54, D63 | Meal plan's week, cook mode |
 | A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Meal plan's meals and its grocery button, Groceries, a recipe's Add to meal plan and Add to groceries (cook mode's too) |
 | Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Meal plan's Today sticker, the active tab, Welcome's produce row |
