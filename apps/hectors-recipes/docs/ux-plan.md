@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, stacked on Phase 24's branch: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33) is checked on the test project and its migrations are on production too (H31). Phases 22 and 23 (#31, #32) are merged. Then 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#33, then #35 (Phase 25). Then Phase 26, its migration OK'd (H34). |
+| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, rebased on main: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33) is merged, its migrations on production. Phases 22 and 23 (#31, #32) are merged. Then 26 (#37: words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#35, then #37 (Phase 26). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2644,9 +2644,9 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: the `.env` files in both worktrees, then Phase 24's migrations (H31), both phases' flows and 375 px; Phase 26.
 - **2026-10-08 (bp)** — Phase 24 checked: migrations 0016–0018 on the test project, the three flows passing, and its screens at 375 px, which cut the library's search placeholder to "Search". Production's migrations were stopped by the auto-mode check: Hector's to run or approve before hectarek/hector-mono#33 merges.
   - Next: production's migrations; Phase 25's flows and 375 px once its worktree has the `.env` files.
-- **2026-10-08 (br)** — Hector applied migrations 0016–0018 to production (H31), and Claude checked the table, the column and "meal prep" are there. hectarek/hector-mono#33 is ready for review.
-  - Next: Hector's review of #33 and #35; Phase 26.
 - **2026-10-08 (bq)** — Phase 25 checked: the flows pass on the test project, and fixes 1, 4, 5, 7 and 9 are checked at 375 px. A finished timer is now quieter than the yellow screen-lock warning beside it, noted for Hector. GitHub rebased Phase 24 onto main once #31 and #32 merged; Phase 25 is rebased onto it.
   - Next: production's migrations (H31) before #33 merges; Phase 26.
+- **2026-10-08 (br)** — Hector applied migrations 0016–0018 to production (H31), and Claude checked the table, the column and "meal prep" are there. hectarek/hector-mono#33 is ready for review.
+  - Next: Hector's review of #33 and #35; Phase 26.
 - **2026-10-08 (bs)** — Hector answered H34 (OK) and H35: no Gateway budget, only the account's credit (about $18), and when it runs out the message asks people to let him know (D86). The message changed with it.
   - Next: Phase 26.
