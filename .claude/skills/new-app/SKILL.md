@@ -92,6 +92,8 @@ If `next build` needs env vars (a module that reads one at import, a page render
 
 Keep secrets in a gitignored `.env` with a tracked `.env.example` listing the names. The root `.worktreeinclude` already copies `apps/*/.env` into new Claude Code worktrees.
 
+If the app deploys to Vercel, give it `apps/<app>/vercel.json` with the `ignoreCommand` the other deployed apps have, naming its own package, so Vercel builds it only when it changed ([docs/monorepo-guide.md](../../../docs/monorepo-guide.md#building-only-the-apps-that-changed)). Copy `apps/hectors-recipes/vercel.json`.
+
 ## 6. Tests
 
 For an app with tests (as `hectors-recipes`, `stash` and `hector-portfolio` have):
