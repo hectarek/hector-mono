@@ -10,6 +10,7 @@ import Link from "next/link";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadRecipe } from "@/app/_lib/load-recipe";
+import { suggestedTags } from "@/app/_lib/tag-choices";
 import { getInjection } from "@/di/container";
 import { rowsFromLines, stepRowsFrom } from "@/src/entities/editor-rows";
 
@@ -57,7 +58,7 @@ export default async function EditRecipePage({
     <RecipeForm
       mode="edit"
       heading="Edit recipe"
-      suggestedTags={tags}
+      suggestedTags={suggestedTags(tags)}
       tagGroups={tagGroups}
       recipeId={recipe.id}
       values={{
@@ -70,6 +71,7 @@ export default async function EditRecipePage({
         tags: recipe.tags,
         sourceUrl: recipe.sourceUrl ?? "",
         imageUrl: recipe.imageUrl ?? "",
+        videoUrl: recipe.videoUrl ?? "",
       }}
     />
   );

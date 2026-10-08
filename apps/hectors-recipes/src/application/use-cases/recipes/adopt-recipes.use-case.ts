@@ -49,6 +49,7 @@ export const adoptRecipesUseCase = (
             tags: source.tags,
             sourceUrl: source.sourceUrl,
             imageUrl: source.imageUrl,
+            videoUrl: source.videoUrl,
             copiedFromRecipeId: source.id,
             // Copied as stored, not re-split, so a careful (AI) itemizing carries over.
             ingredients: source.ingredients.map((line) => ({

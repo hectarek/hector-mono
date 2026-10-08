@@ -25,6 +25,7 @@ const recipeSchema = z.object({
   tags: z.array(z.string()),
   sourceUrl: z.string().nullable(),
   imageUrl: z.string().nullable(),
+  videoUrl: z.string().nullable(),
   copiedFromRecipeId: z.uuid().nullable(),
   externalRef: z.string().nullable(),
   createdAt: z.date(),
@@ -52,6 +53,7 @@ export const createRecipeSchema = z.object({
   tags: tagsSchema.optional(),
   sourceUrl: z.url().nullable().optional(),
   imageUrl: z.url().nullable().optional(),
+  videoUrl: z.url().nullable().optional(),
   ingredients: z.array(recipeIngredientInputSchema).min(1),
   steps: z.array(recipeStepInputSchema).optional(),
 });

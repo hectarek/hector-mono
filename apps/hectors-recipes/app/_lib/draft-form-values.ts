@@ -23,6 +23,7 @@ export function draftFormValues(
       tags: [],
       sourceUrl: from.sourceUrl ?? "",
       imageUrl: from.imageUrl ?? "",
+      videoUrl: "",
     },
     review: { unsure: draft.unsure, flagged: draft.flagged },
   };

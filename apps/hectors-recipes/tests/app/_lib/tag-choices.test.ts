@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   addTags,
   groupTagChoices,
+  suggestedTags,
   tagChoices,
   toggleTag,
   withNewTag,
@@ -14,6 +15,13 @@ describe("tag choices", () => {
       "vegan",
       "lunch",
     ]);
+  });
+
+  it("suggests their own tags, then the catalog's starting ones they don't use", () => {
+    const suggested = suggestedTags(["weeknight", "dinner"]);
+    expect(suggested.slice(0, 3)).toEqual(["weeknight", "dinner", "breakfast"]);
+    expect(suggested.filter((tag) => tag === "dinner")).toHaveLength(1);
+    expect(suggested).toContain("meal prep");
   });
 
   it("toggles a chip", () => {

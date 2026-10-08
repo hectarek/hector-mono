@@ -11,13 +11,17 @@ import {
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { LibraryFilters } from "@/app/_components/library-filters";
 import { ProduceTile } from "@/app/_components/produce-tile";
 import { RecipeCard } from "@/app/_components/recipe-card";
 import { libraryHref } from "@/app/_lib/library-href";
+import { viewedAt as readViewedAt } from "@/app/_lib/recently-viewed";
 import {
   groupRecipes,
+  isLibraryOrder,
+  type LibraryOrder,
+  orderRecipes,
   recipeCountText,
   searchRecipes,
 } from "@/src/entities/library";
@@ -28,11 +32,13 @@ import {
   type TagGroups,
 } from "@/src/entities/models/tag.model";
 
-// The library's search, Group by, tag chips and cards (ux-plan P10.4, D57). The page sends
-// every card the tag allows; the search narrows them here as you type, by the same rule the
-// server uses, and Group by puts them under headings. Both keep the address (?q=, ?group=)
-// up to date, replaced rather than added to history, so Back and shared links still work.
-// Server-rendered from the address, the first view is already filtered and grouped.
+// The library's search, Sort and group, chips and cards (ux-plan P10.4, D57, D80). The page
+// sends every card the tag (and the Saved chip) allows; here they're put in order (saved first
+// by default, D77), narrowed as you type by the same rule the server uses, and grouped under
+// headings. The address (?q=, ?sort=, ?group=) is kept up to date, replaced rather than added
+// to history, so Back and shared links still work. Server-rendered from the address, the first
+// view is already filtered and grouped; Recently viewed, kept on the device (D76), orders once
+// the page has loaded.
 export function LibraryResults({
   book,
   tags,
@@ -40,6 +46,8 @@ export function LibraryResults({
   activeTag,
   recipes,
   total,
+  saved,
+  savedOnly,
   bookNames,
   empty,
 }: {
@@ -50,6 +58,10 @@ export function LibraryResults({
   recipes: ListedRecipe[];
   // The book's count before the tag and search narrow it (P23.2).
   total: number;
+  // This person's saved recipes (D77).
+  saved: string[];
+  // Only saved recipes are shown (?saved=1).
+  savedOnly: boolean;
   // Each card's book, when the grid mixes books (All recipes).
   bookNames?: Record<string, string>;
   // What a book with no recipes shows: the page knows whether they can add one.
@@ -63,9 +75,22 @@ export function LibraryResults({
     const value = searchParams.get("group");
     return isTagCategory(value) ? value : undefined;
   });
-  const shown = searchRecipes(recipes, search);
+  const [order, setOrder] = useState<LibraryOrder>(() => {
+    const value = searchParams.get("sort");
+    return isLibraryOrder(value) ? value : "saved";
+  });
+  const [viewedAt, setViewedAt] = useState<Record<string, number>>({});
+  useEffect(() => setViewedAt(readViewedAt()), []);
 
-  function replaceAddress(text: string, nextGroup: TagCategory | undefined) {
+  const shown = searchRecipes(
+    orderRecipes(recipes, order, { saved, viewedAt }),
+    search,
+  );
+
+  function replaceAddress(
+    text: string,
+    next: { order: LibraryOrder; group: TagCategory | undefined },
+  ) {
     window.history.replaceState(
       null,
       "",
@@ -73,20 +98,26 @@ export function LibraryResults({
         book,
         search: text.trim() || undefined,
         tag: activeTag,
-        group: nextGroup,
+        saved: savedOnly,
+        sort: next.order === "saved" ? undefined : next.order,
+        group: next.group,
       }),
     );
   }
 
   function changeSearch(text: string) {
     setSearch(text);
-    replaceAddress(text, group);
+    replaceAddress(text, { order, group });
   }
 
-  function changeGroup(value: string) {
-    const nextGroup = isTagCategory(value) ? value : undefined;
-    setGroup(nextGroup);
-    replaceAddress(search, nextGroup);
+  // One control for both (D80): a grouping keeps the default order inside its headings.
+  function changeArrangement(value: string) {
+    const next = isTagCategory(value)
+      ? { order: "saved" as const, group: value }
+      : { order: isLibraryOrder(value) ? value : "saved", group: undefined };
+    setOrder(next.order);
+    setGroup(next.group);
+    replaceAddress(search, next);
   }
 
   const cards = (list: ListedRecipe[]) => (
@@ -107,8 +138,11 @@ export function LibraryResults({
         activeTag={activeTag}
         search={search}
         onSearch={changeSearch}
+        order={order}
         group={group}
-        onGroup={changeGroup}
+        onArrange={changeArrangement}
+        savedOnly={savedOnly}
+        showSaved={saved.length > 0 || savedOnly}
       />
       {shown.length > 0 && (
         <p className="text-muted-foreground -mb-2 text-sm">
@@ -134,7 +168,7 @@ export function LibraryResults({
         </div>
       ) : shown.length > 0 ? (
         cards(shown)
-      ) : recipes.length === 0 && !activeTag ? (
+      ) : recipes.length === 0 && !activeTag && !savedOnly ? (
         empty
       ) : (
         <Empty className="my-6">
@@ -147,7 +181,7 @@ export function LibraryResults({
             </ProduceTile>
             <EmptyTitle>No recipes match</EmptyTitle>
             <EmptyDescription>
-              Try a different search or clear the tag.
+              Try a different search, or clear the tag or Saved.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
@@ -157,7 +191,11 @@ export function LibraryResults({
               nativeButton={false}
               render={
                 <Link
-                  href={libraryHref({ book, group })}
+                  href={libraryHref({
+                    book,
+                    sort: order === "saved" ? undefined : order,
+                    group,
+                  })}
                   onClick={() => setSearch("")}
                 />
               }

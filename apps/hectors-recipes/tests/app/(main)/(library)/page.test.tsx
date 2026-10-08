@@ -3,7 +3,9 @@ import { render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LibraryPage from "@/app/(main)/(library)/page";
 import { getInjection } from "@/di/container";
-import { signInAsNewUser } from "@/tests/_support/next";
+import { nextState, signInAsNewUser } from "@/tests/_support/next";
+
+const nextStateUser = () => nextState.userId ?? "";
 
 // The Recipes page as the server renders it, searched as you type (D56).
 describe("Recipes", () => {
@@ -90,7 +92,7 @@ describe("Recipes", () => {
   it("groups by meal under headings, with search and the address kept", async () => {
     const user = userEvent.setup();
     const view = render(await page());
-    const groupBy = view.getByRole("combobox", { name: "Group by" });
+    const groupBy = view.getByRole("combobox", { name: "Sort and group" });
     const groups = () =>
       view
         .getAllByRole("region")
@@ -131,9 +133,63 @@ describe("Recipes", () => {
     ]);
     expect(window.location.search).toBe("?q=rice&group=meal");
 
-    await user.selectOptions(groupBy, "Not grouped");
+    await user.selectOptions(groupBy, "Saved first");
     expect(view.queryAllByRole("region")).toEqual([]);
     expect(cards(view.getByRole("list"))).toHaveLength(2);
     expect(window.location.search).toBe("?q=rice");
+  });
+
+  // D77, D80: saved recipes first by default, and the Saved chip shows only them.
+  it("puts saved recipes first, and the Saved chip shows only them", async () => {
+    const userId = nextStateUser();
+    const all = await getInjection("IGetAllRecipesController")({}, userId);
+    const stock = all.recipes.find((recipe) => recipe.title === "Stock");
+    await getInjection("ISetBookmarkController")(
+      { recipeId: stock?.id, saved: true },
+      userId,
+    );
+
+    const view = render(await page());
+    expect(cards(view.getByRole("list"))[0]).toContain("Stock");
+    expect(view.getByRole("link", { name: "Saved" }).getAttribute("href")).toBe(
+      "/?saved=1",
+    );
+
+    view.unmount();
+    const saved = render(
+      await LibraryPage({ searchParams: Promise.resolve({ saved: "1" }) }),
+    );
+    expect(cards(saved.getByRole("list"))).toEqual([
+      expect.stringContaining("Stock"),
+    ]);
+    saved.getByText("1 of 4 recipes");
+  });
+
+  // D76, D80: Recently viewed orders by what was opened on this device.
+  it("orders by what was opened last on this device", async () => {
+    const userId = nextStateUser();
+    const all = await getInjection("IGetAllRecipesController")({}, userId);
+    const id = (title: string) =>
+      all.recipes.find((recipe) => recipe.title === title)?.id ?? "";
+    localStorage.setItem(
+      "recently-viewed",
+      JSON.stringify({
+        [id("Chicken and Rice")]: 100,
+        [id("Banana Bread")]: 200,
+      }),
+    );
+    const user = userEvent.setup();
+    const view = render(await page());
+
+    await user.selectOptions(
+      view.getByRole("combobox", { name: "Sort and group" }),
+      "Recently viewed",
+    );
+    expect(cards(view.getByRole("list")).slice(0, 2)).toEqual([
+      expect.stringContaining("Banana Bread"),
+      expect.stringContaining("Chicken and Rice"),
+    ]);
+    expect(window.location.search).toBe("?sort=recent");
+    localStorage.removeItem("recently-viewed");
   });
 });

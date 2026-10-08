@@ -16,5 +16,6 @@ describe("TagsRepository [postgres]", () => {
     expect(groups["dinner"]).toBe("meal");
     expect(groups["middle eastern"]).toBe("cuisine");
     expect(groups["high-protein"]).toBe("diet");
+    expect(groups["meal prep"]).toBe("meal");
   });
 });

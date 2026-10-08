@@ -5,10 +5,13 @@ import Link from "next/link";
 import { AddToListButton } from "@/app/_components/add-to-list-button";
 import { AddToPlanButton } from "@/app/_components/add-to-plan-button";
 import { BackLink } from "@/app/_components/back-link";
+import { BookmarkButton } from "@/app/_components/bookmark-button";
 import { InlineMarkdown } from "@/app/_components/markdown";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
 import { CookLink, RecipeServings } from "@/app/_components/recipe-servings";
+import { RecipeVideo } from "@/app/_components/recipe-video";
+import { RememberView } from "@/app/_components/remember-view";
 import { ScaledIngredients } from "@/app/_components/scaled-ingredients";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { libraryHref } from "@/app/_lib/library-href";
@@ -36,9 +39,10 @@ export default async function RecipePage({
   const { id } = await params;
   const { recipe, canEdit } = await loadRecipe(id);
   const userId = await getCurrentUserId();
-  const [books, plans] = await Promise.all([
+  const [books, plans, bookmarks] = await Promise.all([
     getInjection("IListMySpacesController")({ type: "recipe-book" }, userId),
     getInjection("IListMySpacesController")({ type: "meal-plan" }, userId),
+    getInjection("IGetBookmarksController")(userId),
   ]);
   // A plan's grocery list is part of the plan, so whoever can plan can add to a list. In no
   // plan yet: adding creates their own.
@@ -52,9 +56,28 @@ export default async function RecipePage({
       (book) => book.id !== recipe.spaceId && hasRole(book.role, "editor"),
     )
     .map(({ id: bookId, name }) => ({ id: bookId, name }));
+  const picture = recipe.imageUrl ? (
+    <Image
+      src={recipe.imageUrl}
+      alt=""
+      width={1280}
+      height={720}
+      unoptimized
+      loading="eager"
+      className="bg-muted aspect-video h-auto w-full rounded-xl object-cover"
+    />
+  ) : (
+    <ProduceTile
+      produce={produceFor(recipe.id)}
+      className="font-heading aspect-video items-end rounded-xl p-5 text-8xl leading-none"
+    >
+      {recipe.title.charAt(0).toUpperCase()}
+    </ProduceTile>
+  );
 
   return (
     <article data-surface="reading">
+      <RememberView recipeId={recipe.id} />
       <RecipeServings yieldServings={recipe.yieldServings}>
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-2">
@@ -71,27 +94,22 @@ export default async function RecipePage({
           </div>
 
           <header className="flex flex-col gap-3">
-            {recipe.imageUrl ? (
-              <Image
-                src={recipe.imageUrl}
-                alt=""
-                width={1280}
-                height={720}
-                unoptimized
-                loading="eager"
-                className="bg-muted aspect-video h-auto w-full rounded-xl object-cover"
-              />
+            {recipe.videoUrl ? (
+              <RecipeVideo link={recipe.videoUrl} title={recipe.title}>
+                {picture}
+              </RecipeVideo>
             ) : (
-              <ProduceTile
-                produce={produceFor(recipe.id)}
-                className="font-heading aspect-video items-end rounded-xl p-5 text-8xl leading-none"
-              >
-                {recipe.title.charAt(0).toUpperCase()}
-              </ProduceTile>
+              picture
             )}
-            <h1 className="font-heading text-3xl text-balance">
-              {recipe.title}
-            </h1>
+            <div className="flex items-start justify-between gap-2">
+              <h1 className="font-heading text-3xl text-balance">
+                {recipe.title}
+              </h1>
+              <BookmarkButton
+                recipeId={recipe.id}
+                saved={bookmarks.includes(recipe.id)}
+              />
+            </div>
             {recipe.description && (
               <p className="text-muted-foreground">{recipe.description}</p>
             )}

@@ -21,7 +21,7 @@ app/
   (auth)/              # Signed out: welcome/ (logo, produce row, Create account / Sign in; names the
                        # space when arriving from an invite) and auth/[path]/ (Neon's forms, full-screen)
   (main)/              # Signed-in app: header + bottom tab bar (layout.tsx)
-    (library)/page.tsx # Library: ?book= (default: your default book, else All recipes when in 2+ books; `all` = every book, cards name their book), ?q= search (narrows as you type, P10.4), ?group= (Group by: meal, cuisine or diet, D57), ?tag= chips, book switcher.
+    (library)/page.tsx # Library: ?book= (default: your default book, else All recipes when in 2+ books; `all` = every book, cards name their book), ?q= search (narrows as you type, P10.4), ?sort= and ?group= (one Sort and group control: Saved first by default, Recently viewed, A to Z; or by meal, cuisine or diet; D57, D80), ?saved=1 and ?tag= chips, book switcher.
                        # In a route group only so its card-grid loading.tsx doesn't cover every page under (main)
     recipes/[id]       # A recipe (reading surface); new and edit live in (form)
     books/             # Your recipe books, the Default book picker (All recipes or a book), create; books/[id]/copy = bulk copy ("merge")
@@ -56,7 +56,7 @@ src/
     aisles.ts          # the fixed aisle list (D25), groupByAisle, stackLikeItems (like items together, D61)
     ingredient-text.ts # pasted ingredient text -> lines ("Section:" lines, pasted Obsidian lists)
     editor-rows.ts     # the recipe editor's rows: from stored lines or pasted text, to what's saved
-    library.ts         # library search (searchRecipes), tag list, Group by (groupRecipes)
+    library.ts         # library search (searchRecipes), tag list, order (orderRecipes), grouping (groupRecipes)
     week.ts            # date-only helpers ("YYYY-MM-DD", UTC math), PLAN_TIME_ZONE = America/New_York
     meal-days.ts       # a meal's cook and eat days: moveCookDay, toggleEatDay, mealsOnDay, mealDaysText
     scaling.ts         # servings scaling + kitchen-friendly fractions
@@ -65,7 +65,7 @@ src/
     realtime.ts        # planChannel: a plan's live-updates channel
     recipe-page.ts     # recipeFromPage: a page's schema.org Recipe data -> draft, without AI
   application/
-    repositories/      # interfaces: spaces, recipes, plan-entries, grocery-items, recipe-reads
+    repositories/      # interfaces: spaces, recipes, plan-entries, grocery-items, recipe-reads, bookmarks
     services/          # interfaces: authentication, logger, transaction-manager, realtime, recipe-reader, recipe-page-fetcher
     use-cases/         # by domain: spaces/ (with the access helpers require-space-role, require-owner), recipes/, plan/, grocery/, realtime/
   interface-adapters/
@@ -102,15 +102,16 @@ Full rationale in the spec. Summary:
 - **`spaces`**: anything shareable. `type` is `'recipe-book' | 'meal-plan'`. There's no separate grocery list: a plan's list is part of the plan and shares its members (`docs/ux-plan.md` D13; migration 0003 moved the old lists' items onto their owners' plans).
 - **`space_members`**: `(space_id, user_id)` with `role` `'owner' | 'editor' | 'viewer'`. Exactly one owner per space (partial unique index).
 - **`space_invites`**: link tokens carrying a role (used from increment 5).
-- **`recipes`**: live in a `recipe-book` space. `created_by` is the author only; access comes from the space. `tags text[]`, optional `time_minutes` / `yield_servings`, `external_ref` for imports.
+- **`recipes`**: live in a `recipe-book` space. `created_by` is the author only; access comes from the space. `tags text[]`, optional `time_minutes` / `yield_servings`, `external_ref` for imports, and an optional `video_url` (migration 0017, docs/ux-plan.md D81), shown in the photo's place.
 - **`recipe_ingredients`**: PK `(recipe_id, position)`. Itemized (ux-plan D23): `quantity`, `unit`, `name` as written, `note` (prep or a swap; shown on the recipe, left off the grocery list), `optional`, and `ingredient_id` into the catalog. `raw` keeps the original line for reference. Any of the itemized fields may be null.
 - **`recipe_steps`**: PK `(recipe_id, position)`, `text`, an optional `timer_minutes` (D24), and an optional `section`, the heading over it and the steps after it that share it (D35, migration 0008). Saving replaces a recipe's steps. They replaced the markdown `instructions` column (migration 0007).
 - **`ingredients`**: global catalog, unique name, and an `aisle` from the fixed list in `src/entities/aisles.ts` (D25).
 - **`plan_entries`** / **`grocery_items`**: both in `meal-plan` spaces; a plan's `grocery_items` are its grocery list. A plan entry is a meal (docs/ux-plan.md D38): one cooking of a recipe, with its cook day (the column is still called `date`; `cookDate` in code), its eat days (`eat_dates`, sorted, at least one (a check since 0010), none before the cook day) and `cooked` (D39).
 - **`grocery_item_recipes`**: which recipes a grocery item is for (migration 0014, docs/ux-plan.md D59), keyed by `(item_id, recipe_id)`, with `quantity`, that recipe's share of the item's amount, and `link_order` (an identity, migration 0015), the order links were made in. Both keys cascade, so deleting a recipe keeps its items. `grocery_items.source_note` is no longer read or written, and is dropped later (L8).
+- **`recipe_bookmarks`**: a person's saved recipes (migration 0016, docs/ux-plan.md D77), keyed by `(user_id, recipe_id)`, gone with the recipe. Anyone who can open a recipe can save it, so the use case checks only that the recipe exists. Saving twice keeps the first save's time.
 - **`user_settings`**: one row per person, `default_plan_id` / `default_book_id` (FKs to `spaces`, set null when the space is deleted). No default book means All recipes.
 - **`recipe_reads`**: one row per AI read of a recipe (migration 0012): `user_id`, `kind` (`'image' | 'text' | 'document'`) and `created_at`, indexed on `(user_id, created_at)`, for the daily limit (`DAILY_RECIPE_READS`, docs/ux-plan.md D48). No space columns: the limit is per person.
-- **`tags`**: the tag catalog (migration 0013, docs/ux-plan.md D55): `name` (the key, as `recipes.tags` stores it) and `category` (`'meal' | 'cuisine' | 'diet'`). Only a tag with a group has a row, so there's no row to add when a recipe gets a tag without one; saving a recipe adds one for a new tag given a group in the form (`addGroups`, which never changes a tag's existing group). Shared by everyone, like `ingredients`. The migration fills it with `STARTING_TAGS` (`src/entities/models/tag.model.ts`), and a test checks the two agree.
+- **`tags`**: the tag catalog (migration 0013, docs/ux-plan.md D55): `name` (the key, as `recipes.tags` stores it) and `category` (`'meal' | 'cuisine' | 'diet'`). Only a tag with a group has a row, so there's no row to add when a recipe gets a tag without one; saving a recipe adds one for a new tag given a group in the form (`addGroups`, which never changes a tag's existing group). Shared by everyone, like `ingredients`. Migrations 0013 and 0018 ("meal prep", D78) fill it with `STARTING_TAGS` (`src/entities/models/tag.model.ts`), and a test checks the two agree. A tag added to `STARTING_TAGS` needs a migration that inserts it.
 
 Content tables carry `(space_id, space_type)` with a composite FK to `spaces(id, type)` plus a check on `space_type`, so the database itself rejects a recipe in a meal plan. User ids are Neon Auth `neon_auth.user.id` uuids, with no FK into the managed `neon_auth` schema.
 
@@ -180,7 +181,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Actions and page helpers run through the real DI container, whose mock repositories live for the whole test run: call `signInAsNewUser()` in `beforeEach` so each test starts with empty data.
 - Database: `@/db` is swapped for PGlite (an in-memory Postgres, `tests/_support/database.ts`) in the preload, with the real migrations applied. Nothing in tests can reach Neon.
 - Use-case tests use `describeEachBackend(...)` instead of `describe(...)`: each runs twice, on the mock repositories and on the real ones over PGlite (`[mock]` / `[postgres]` in the output). A test that fails only on `[postgres]` means a mock has drifted from the real SQL; fix the mock.
-- Things only a database can show (constraints, cascades, advisory lock, member names from `neon_auth.user`, transaction rollback) are in `tests/src/infrastructure/**`, Postgres only. Call `resetDatabase()` in `beforeEach`; `sql()` runs raw queries for assertions. `resetDatabase` empties the tables it names, and in `tags` keeps only migration 0013's rows (`STARTING_TAGS`), deleting any a test added. Don't run `sql()` inside an open transaction: PGlite has one connection, so it waits forever.
+- Things only a database can show (constraints, cascades, advisory lock, member names from `neon_auth.user`, transaction rollback) are in `tests/src/infrastructure/**`, Postgres only. Call `resetDatabase()` in `beforeEach`; `sql()` runs raw queries for assertions. `resetDatabase` empties the tables it names, and in `tags` keeps only the migrations' rows (`STARTING_TAGS`), deleting any a test added. Don't run `sql()` inside an open transaction: PGlite has one connection, so it waits forever.
 - Adding a migration needs nothing extra: the test database applies `db/migrations/` itself. A migration that moves data gets its own test from the schema before it (`tests/db/migrations/`): apply the earlier migrations' SQL to a PGlite once in `beforeAll`, `clone()` it in `beforeEach`, seed, then run it in a transaction as the migrator does. Replaying the migrations per test ran past bun's 5 s limit on CI, and the timed-out setup then ran into the next test's database.
 - Controllers: `controllerBasics()` (`tests/_support/controller.ts`) covers the three things every controller does (signed-out rejected, bad input rejected before the use case, parsed input passed on). Give it a valid input, the expected use-case arguments, and labelled bad inputs.
 - The goal is a safety net for the basics, not exhaustive specs: cover the rule and its main denial (e.g. viewer can't), skip restating the implementation.

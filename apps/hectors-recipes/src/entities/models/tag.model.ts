@@ -32,7 +32,8 @@ export function groupsFor(tags: string[], groups: TagGroups): TagGroups {
 }
 
 // The tags the catalog starts with (D58), each group in its order: a day's meals, cuisines A to
-// Z, then diets. The migration that makes the catalog adds the same ones.
+// Z, then diets. The migrations add the same ones (0013, and 0018's "meal prep", D78). Every
+// recipe form offers them (suggestedTags).
 export const STARTING_TAGS: Record<TagCategory, readonly string[]> = {
   meal: [
     "breakfast",
@@ -42,6 +43,7 @@ export const STARTING_TAGS: Record<TagCategory, readonly string[]> = {
     "snack",
     "dessert",
     "drink",
+    "meal prep",
   ],
   cuisine: [
     "american",

@@ -113,6 +113,27 @@
       "when": 1791218656710,
       "tag": "0015_grocery_link_order",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791459634917,
+      "tag": "0016_recipe_bookmarks",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791460128090,
+      "tag": "0017_recipe_video",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791460519230,
+      "tag": "0018_tag_meal_prep",
+      "breakpoints": true
     }
   ]
 }

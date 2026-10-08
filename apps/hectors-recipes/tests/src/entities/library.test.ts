@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   buildLibraryView,
   groupRecipes,
+  orderRecipes,
   recipeCountText,
   searchRecipes,
 } from "@/src/entities/library";
@@ -23,6 +24,7 @@ const recipe = (
   tags,
   sourceUrl: null,
   imageUrl: null,
+  videoUrl: null,
   copiedFromRecipeId: null,
   externalRef: null,
   createdAt: new Date(),
@@ -211,5 +213,41 @@ describe("groupRecipes", () => {
       ["dinner", ["Zucchini Pasta", "Apple Pie"]],
     ]);
     expect(groupRecipes([], "meal", tagGroups)).toEqual([]);
+  });
+});
+
+// D80: the library's order, before search and grouping.
+describe("orderRecipes", () => {
+  const [apple, bread, chili, dal] = ["Apple Pie", "Bread", "Chili", "Dal"].map(
+    (title) => recipe(title),
+  );
+  const list = [apple, bread, chili, dal] as ListedRecipe[];
+  const none = { saved: [], viewedAt: {} };
+
+  it("puts saved recipes first, each part A to Z", () => {
+    expect(
+      titles(
+        orderRecipes(list, "saved", {
+          saved: [dal?.id ?? "", bread?.id ?? ""],
+          viewedAt: {},
+        }),
+      ),
+    ).toEqual(["Bread", "Dal", "Apple Pie", "Chili"]);
+    expect(titles(orderRecipes(list, "saved", none))).toEqual(titles(list));
+  });
+
+  it("puts the last opened first, the rest A to Z", () => {
+    const viewedAt = { [chili?.id ?? ""]: 100, [apple?.id ?? ""]: 300 };
+    expect(
+      titles(orderRecipes(list, "recent", { saved: [], viewedAt })),
+    ).toEqual(["Apple Pie", "Chili", "Bread", "Dal"]);
+  });
+
+  it("leaves A to Z as it comes", () => {
+    expect(
+      titles(
+        orderRecipes(list, "az", { saved: [dal?.id ?? ""], viewedAt: {} }),
+      ),
+    ).toEqual(titles(list));
   });
 });

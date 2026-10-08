@@ -30,6 +30,8 @@ export default async function LibraryPage({
   const search = firstParam(params.q);
   const tag = firstParam(params.tag);
   const group = firstParam(params.group);
+  const sort = firstParam(params.sort);
+  const savedOnly = firstParam(params.saved) === "1";
   const requestedBook = firstParam(params.book);
 
   const userId = await getCurrentUserId();
@@ -45,6 +47,8 @@ export default async function LibraryPage({
       books.length > 1 &&
       !books.some((book) => book.isDefault));
   // Every card the tag allows: the search narrows them in the page as you type (P10.4).
+  // This person's saved recipes (D77): first by default, and the Saved chip's filter.
+  const saved = await getInjection("IGetBookmarksController")(userId);
   const library = showAll
     ? await getInjection("IGetAllRecipesController")({ tag }, userId)
     : await getInjection("IGetRecipesController")(
@@ -102,14 +106,20 @@ export default async function LibraryPage({
       )}
 
       <LibraryResults
-        // A new tag or address starts from its own search and grouping; typing and Group by
-        // only update ?q= and ?group= in place.
-        key={`${viewId}|${tag ?? ""}|${search ?? ""}|${group ?? ""}`}
+        // A new tag, Saved or address starts from its own search and arrangement; typing and
+        // Sort and group only update ?q=, ?sort= and ?group= in place.
+        key={`${viewId}|${tag ?? ""}|${search ?? ""}|${group ?? ""}|${sort ?? ""}|${savedOnly}`}
         book={requestedBook}
         tags={library.tags}
         tagGroups={library.tagGroups}
         activeTag={tag}
-        recipes={library.recipes}
+        recipes={
+          savedOnly
+            ? library.recipes.filter((recipe) => saved.includes(recipe.id))
+            : library.recipes
+        }
+        saved={saved}
+        savedOnly={savedOnly}
         total={library.total}
         bookNames={
           showAll

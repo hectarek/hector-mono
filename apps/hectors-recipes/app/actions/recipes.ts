@@ -94,6 +94,7 @@ function recipeFields(formData: FormData) {
     tags: tags(formData),
     sourceUrl: text(formData, "sourceUrl") ?? null,
     imageUrl: text(formData, "imageUrl") ?? null,
+    videoUrl: text(formData, "videoUrl") ?? null,
     ingredients: ingredients(formData),
     steps: rows(formData, "steps"),
   };
@@ -171,4 +172,27 @@ export async function deleteRecipe(
   // Back to the book it was in (not the default book, which may be another one).
   revalidatePath("/");
   redirect(`/?book=${bookId}`);
+}
+
+// Saves a recipe for this person, or no longer (docs/ux-plan.md D77): the bookmark beside a
+// recipe's name. The library puts saved recipes first.
+export async function setBookmark(
+  recipeId: string,
+  saved: boolean,
+): Promise<ActionState> {
+  try {
+    await getInjection("ISetBookmarkController")(
+      { recipeId, saved },
+      await getCurrentUserId(),
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("setBookmark"),
+      saved ? "Couldn't save that recipe." : "Couldn't unsave that recipe.",
+    );
+  }
+  revalidatePath("/");
+  revalidatePath(`/recipes/${recipeId}`);
+  return null;
 }

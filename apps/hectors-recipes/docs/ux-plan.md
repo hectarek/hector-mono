@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 23 (clearer, and small things testers asked for) on `feat/recipes-p23-clearer`, stacked on Phase 22's branch: done, in review. Phase 22 (the UX map) is in review as hectarek/hector-mono#31. Then 24 (bookmarks, recently viewed, a video, suggested tags; three migrations, H31) and 25 (the map's 12 fixes, H32). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Hector reviews hectarek/hector-mono#31, then Phase 23's PR; then Phase 24 (H31 before its PR merges). |
+| Phase | 24 (bookmarks, recently viewed, a video, suggested tags) on `feat/recipes-p24-saved-video-tags`, stacked on Phase 23's branch: built, tested, and checked on the test project (its migrations, the flows, 375 px); its migrations are on production too (H31). In review as hectarek/hector-mono#33. Phases 22 and 23 (#31, #32) are merged. Then 25 (#35) and 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Hector reviews hectarek/hector-mono#33, then #35 (Phase 25). Then Phase 26 (H34 before P26.3). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2195,18 +2195,45 @@ One commit per task; the PR when the phase is done.
 
 Branch `feat/recipes-p24-saved-video-tags`, after Phase 23. Its three migrations are applied together (H31). From the first testers' round: F9, F10, F14, F19, F20.
 
-- [ ] **P24.1** Bookmarks — C+H · D72, D77, F9 · needs H31
+- [x] **P24.1** Bookmarks — C+H · D72, D77, F9 · H31
   - Do: a table of bookmarks (person, recipe), removed with the recipe. A bookmark icon to the right of the recipe's name, filled when saved.
   - Verify: use-case tests on both backends (save, unsave, only yours, gone with the recipe); a screen test; 375 px.
-- [ ] **P24.2** The library's order: saved first, and recently viewed — C · D76, D77, F9, F10
+  - Evidence (2026-10-08):
+    - Migration 0016 adds `recipe_bookmarks` (person and recipe, the recipe's delete cascading). `IBookmarksRepository` and its mock, `setBookmark` and `getBookmarks` use cases and controllers, and the `setBookmark` action.
+    - Anyone who can open a recipe can save it (a recipe opens with a session alone), so saving checks only that the recipe exists, inside the write's transaction.
+    - The recipe page has `BookmarkButton` to the right of the name: `quiet`, `icon-lg`, "Save recipe" with `aria-pressed`, filled when saved. It changes at once and goes back with a message if the save fails (`callAction`).
+    - Tests: on both backends, saving and unsaving newest first, saving twice keeping one, each person's own (a viewer, and someone outside the book), a missing recipe refused, and a deleted recipe's bookmark gone; the controller's basics; a screen test that saves and unsaves through the real action.
+    - At 375 px (a throwaway flow on the test project): the bookmark sits right of the name, outlined, then filled once saved.
+- [x] **P24.2** The library's order: saved first, and recently viewed — C · D76, D77, D80, F9, F10
   - Do: bookmarked recipes first by default and a Saved chip. Recipes you open are remembered on the device (D76), and the library can order by them, from one control with Group by (placed on the map when the phase starts).
   - Verify: tests for the ordering with search and Group by; screen tests; the `plan-and-shop` flow still finds its recipe.
-- [ ] **P24.3** A video in place of the photo — C+H · D72, F20 · needs H31
+  - Evidence (2026-10-08):
+    - Group by became Sort and group (D80): Sort holds Saved first (the default), Recently viewed (`?sort=recent`) and A to Z (`?sort=az`); Group holds By meal, cuisine and diet (`?group=`), each with the default order inside its headings. `orderRecipes` orders before search, so search's title-first ranking holds, and grouping comes after.
+    - The Saved chip leads the chips when you've saved any (`?saved=1`, filtered on the server); Clear filters drops it.
+    - Recently viewed: `RememberView` on the recipe page notes when it was opened, in local storage (the newest 200; D76), and the library orders by it once loaded. Nothing is stored in the database.
+    - Tests: `orderRecipes` (saved first, last opened first, A to Z as it comes); screen tests for saved first by default, the Saved chip's link and filter ("1 of 4 recipes"), Recently viewed from local storage with `?sort=recent`, and the grouping test with the renamed control.
+    - The `plan-and-shop` flow's grouping step names the new control. All three flows pass on the test project with the migrations applied.
+    - At 375 px: Saved first, the Saved chip leading the tags, and the count. The search box's placeholder was cut to "Search recip" beside the wider control, so it's "Search" now; its name stays "Search recipes".
+- [x] **P24.3** A video in place of the photo — C+H · D72, D81, F20 · H31
   - Do: a video link column, its field under Photo link, and the recipe page showing the video where the photo was. A host that can't be embedded keeps the photo, with the video as a link.
   - Verify: a test for each host's link; a screen test; 375 px.
-- [ ] **P24.4** Suggested tags, and meal prep — C+H · D78, F14, F19 · needs H31
+  - Evidence (2026-10-08):
+    - Migration 0017 adds `recipes.video_url`. It's read, created, updated and copied with a recipe (Copy to another book); a read draft starts without one.
+    - The form's Video link sits under Photo link, with "YouTube and Vimeo play on the recipe; other sites open their own page."
+    - `videoEmbed` takes YouTube's watch, youtu.be, Shorts, embed and live links to its cookie-less player (`youtube-nocookie.com`), and Vimeo's to `player.vimeo.com`, both set to play. Anything else, such as Instagram, TikTok or a channel page, gets null.
+    - `RecipeVideo` keeps the photo, or the produce tile, with a button in its middle: Play video swaps in the player (nothing loads before the tap), and Watch video opens another host's page in a new tab.
+    - Tests: each host's links and the ones refused; a screen test that plays a YouTube video only after the tap, and one that sends Instagram to its own page.
+    - At 375 px: Play video sits in the middle of the produce tile, and a tap swaps in YouTube's player, which loaded and played in the photo's place with its corners rounded.
+- [x] **P24.4** Suggested tags, and meal prep — C+H · D78, F14, F19 · H31
   - Do: the tag picker offers the catalog's tags under their groups, beside your own; a migration adds "meal prep" under meal, and `STARTING_TAGS` with it.
   - Verify: a new account's picker shows the catalog's tags (a screen test); the catalog test still agrees with `STARTING_TAGS`.
+  - Evidence (2026-10-08):
+    - `suggestedTags` gives the form your tags (most used first), then the starting tags you don't use, each once; `TagPicker` puts them under their groups as before. New and Edit both use it.
+    - It offers `STARTING_TAGS`, not every row in `tags`: a tag anyone gives a group joins the shared catalog, and one household's tags shouldn't show in another's form. Claude's call, within D78.
+    - Migration 0018 inserts "meal prep" under meal, leaving it alone if someone already grouped it; `STARTING_TAGS` lists it last among meals, so By meal puts its heading after Drink.
+    - Tests: `suggestedTags`' order; `loadNewRecipe` gives a new account the catalog's tags with their groups, and puts a cook's own first; the catalog test on Postgres finds "meal prep" under meal. A loader test stands in for the screen test: the picker already has screen tests for grouping the chips it's given.
+    - At 375 px: a new account's form offers the starting tags under Meal, Cuisine and Diet, with "meal prep" last under Meal. The test project's catalog has gained a random "texmex …" cuisine from every `plan-and-shop` run, which the form rightly leaves out.
+    - H31: migrations 0016–0018 applied to the test project on 2026-10-08 (checked: the table, the column, and "meal prep" under meal). Production's run was stopped by Claude Code's auto-mode check, so Hector ran it the same day; Claude checked production has the same three.
 
 ## Phase 25: Where the app breaks its own rules
 
@@ -2340,7 +2367,7 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
 | H28 | Run P19.1's and P19.2's additive migrations (0014 `grocery_item_recipes`, 0015 its `link_order`) on production, before the PR merges (Vercel's previews use production too). One `bun run db:migrate` applies both. | P19.1, P19.2 | done 2026-10-05: Hector ran it; Claude checked read-only (16 migrations, the last two 0015 and 0014 by hash; the table, its identity column and its keys) |
 | H29 | Check the units fix's list (each changed line's new unit, name and catalog link, and each stray catalog entry's merge), then run its SQL on production. | P19.5 | done 2026-10-05: Hector approved the list; Claude ran the SQL at his "run it" and checked it read-only |
 | H30 | Share the testers' feedback (raw is fine). | P22.3 | done 2026-10-07: 23 items; filed in feedback/ (D71) |
-| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | OK'd 2026-10-08: "run migration yourself if possible" |
+| H31 | Run Phase 24's three migrations (bookmarks, the video column, "meal prep" in the tag catalog) on production and the test project, before its PR merges. | P24.1, P24.3, P24.4 | done 2026-10-08: the test project by Claude, production by Hector |
 | H32 | OK Phase 25's list of fixes, or change any of them. | P25.1 | done 2026-10-08: "those 12 changes are fine" |
 | H33 | Decide the second round's proposals ([feedback](./feedback/2026-10-08-desktop-tester.md)): whose book a pill is and the back link's name (F1), what follows a name change (F5), sheets as wide as the page and a Wide screens record with its test (F6), and which phase the groceries and meal plan words go in (F4). | Round 2 | done 2026-10-08: the recommendations, as D82–D85 and Phase 26 |
 | H34 | OK P26.3's additive migration (a flag on books still carrying their automatic name) on production and the test project. | P26.3 | open |
@@ -2588,3 +2615,9 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: Hector's answers to H31–H33; his review of hectarek/hector-mono#31 and #32.
 - **2026-10-08 (bm)** — Hector OK'd Phase 25's list (H32) and Phase 24's migrations (H31), and took the recommendations: D80 and D81 for Phase 24, D82–D85 for the second round, planned as Phase 26. Whiteboard is now only for PRs with large backend changes (root AGENTS.md). Sandboxed commands may listen on local ports (Hector's settings).
   - Next: Phase 24.
+- **2026-10-08 (bn)** — Phase 24 built: P24.1 bookmarks, P24.2 Sort and group with Saved first and Recently viewed, P24.3 a video in the photo's place, P24.4 the catalog's tags in the picker and "meal prep" (migrations 0016–0018). Lint, types, dead code and the app's 1,166 tests pass. The migrations, flows and 375 px wait on the worktree's `.env` files, which the session can't copy.
+  - Next: Phase 24's migrations (H31), flows and 375 px; its PR; Phase 25.
+- **2026-10-08 (bp)** — Phase 24 checked: migrations 0016–0018 on the test project, the three flows passing, and its screens at 375 px, which cut the library's search placeholder to "Search". Production's migrations were stopped by the auto-mode check: Hector's to run or approve before hectarek/hector-mono#33 merges.
+  - Next: production's migrations; Phase 25's flows and 375 px once its worktree has the `.env` files.
+- **2026-10-08 (br)** — Hector applied migrations 0016–0018 to production (H31), and Claude checked the table, the column and "meal prep" are there. hectarek/hector-mono#33 is ready for review.
+  - Next: Hector's review of #33 and #35; Phase 26.

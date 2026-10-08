@@ -105,7 +105,7 @@ test("sign up, add a recipe, plan it, shop for it, start the list over", async (
   // D57: grouped by cuisine, it's under the tag made for it.
   await search.fill("");
   await page
-    .getByRole("combobox", { name: "Group by" })
+    .getByRole("combobox", { name: "Sort and group" })
     .selectOption("By cuisine");
   await expect(
     page

@@ -2,6 +2,7 @@
 // like the feature: make a book, add a recipe, share it. Inside describeEachBackend the
 // same tests run twice: on the in-memory mocks and on the real repositories (PGlite).
 import { beforeEach, describe } from "bun:test";
+import type { IBookmarksRepository } from "@/src/application/repositories/bookmarks.repository.interface";
 import type { IGroceryItemsRepository } from "@/src/application/repositories/grocery-items.repository.interface";
 import type { IPlanEntriesRepository } from "@/src/application/repositories/plan-entries.repository.interface";
 import type { IRecipesRepository } from "@/src/application/repositories/recipes.repository.interface";
@@ -28,8 +29,10 @@ import { adoptRecipesUseCase } from "@/src/application/use-cases/recipes/adopt-r
 import { createRecipeUseCase } from "@/src/application/use-cases/recipes/create-recipe.use-case";
 import { deleteRecipeUseCase } from "@/src/application/use-cases/recipes/delete-recipe.use-case";
 import { getAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-all-recipes.use-case";
+import { getBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
 import { getRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import { getRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
+import { setBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
 import { updateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
 import { acceptInviteUseCase } from "@/src/application/use-cases/spaces/accept-invite.use-case";
 import { createInviteUseCase } from "@/src/application/use-cases/spaces/create-invite.use-case";
@@ -47,6 +50,8 @@ import { setDefaultSpaceUseCase } from "@/src/application/use-cases/spaces/set-d
 import { updateMemberRoleUseCase } from "@/src/application/use-cases/spaces/update-member-role.use-case";
 import type { CreateRecipeInput } from "@/src/entities/models/recipe.model";
 import type { InviteRole, SpaceType } from "@/src/entities/models/space.model";
+import { BookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository";
+import { MockBookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository.mock";
 import { GroceryItemsRepository } from "@/src/infrastructure/repositories/grocery-items.repository";
 import { MockGroceryItemsRepository } from "@/src/infrastructure/repositories/grocery-items.repository.mock";
 import { PlanEntriesRepository } from "@/src/infrastructure/repositories/plan-entries.repository";
@@ -75,21 +80,25 @@ export type Repositories = {
   tags: ITagsRepository;
   planEntries: IPlanEntriesRepository;
   groceryItems: IGroceryItemsRepository;
+  bookmarks: IBookmarksRepository;
   transactions: ITransactionManagerService;
 };
 
 function mockRepositories(): Repositories {
   const planEntries = new MockPlanEntriesRepository();
   const groceryItems = new MockGroceryItemsRepository();
+  const bookmarks = new MockBookmarksRepository();
   return {
     spaces: new MockSpacesRepository(),
     recipes: new MockRecipesRepository((id) => {
       planEntries.unlinkRecipe(id);
       groceryItems.unlinkRecipe(id);
+      bookmarks.forgetRecipe(id);
     }),
     tags: new MockTagsRepository(),
     planEntries,
     groceryItems,
+    bookmarks,
     transactions: new MockTransactionManagerService(),
   };
 }
@@ -103,6 +112,7 @@ export function postgresRepositories(): Repositories {
     tags: new TagsRepository(log),
     planEntries: new PlanEntriesRepository(log),
     groceryItems: new GroceryItemsRepository(log),
+    bookmarks: new BookmarksRepository(log),
     transactions: new TransactionManagerService(log),
   };
 }
@@ -142,8 +152,15 @@ export function describeEachBackend(name: string, fn: () => void): void {
 
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
   const log = new MockLoggerService();
-  const { spaces, recipes, tags, planEntries, groceryItems, transactions } =
-    repos;
+  const {
+    spaces,
+    recipes,
+    tags,
+    planEntries,
+    groceryItems,
+    bookmarks,
+    transactions,
+  } = repos;
 
   // What grocery writes would have published (ux-plan D21).
   const realtime = new MockRealtimeService();
@@ -180,6 +197,8 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     updateRecipe: updateRecipeUseCase(recipes, tags, spaces, transactions, log),
     deleteRecipe: deleteRecipeUseCase(recipes, spaces, transactions, log),
     adoptRecipes: adoptRecipesUseCase(recipes, spaces, transactions, log),
+    setBookmark: setBookmarkUseCase(bookmarks, recipes, transactions, log),
+    getBookmarks: getBookmarksUseCase(bookmarks, log),
 
     getWeekPlan: getWeekPlanUseCase(planEntries, recipes, spaces, log),
     addPlanEntry: addPlanEntryUseCase(

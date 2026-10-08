@@ -129,6 +129,8 @@ export const recipes = pgTable(
     tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
     sourceUrl: text("source_url"),
     imageUrl: text("image_url"),
+    // A video of the recipe, shown in the photo's place (docs/ux-plan.md D72, D81).
+    videoUrl: text("video_url"),
     copiedFromRecipeId: uuid("copied_from_recipe_id").references(
       (): AnyPgColumn => recipes.id,
       { onDelete: "set null" },
@@ -332,6 +334,23 @@ export const recipeReads = pgTable(
       table.userId,
       table.createdAt,
     ),
+  ],
+);
+
+// A person's saved recipes (docs/ux-plan.md D77): their own, whatever book a recipe is in, so
+// a phone and a laptop agree. Gone with the recipe.
+export const recipeBookmarks = pgTable(
+  "recipe_bookmarks",
+  {
+    userId: uuid("user_id").notNull(),
+    recipeId: uuid("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.recipeId] }),
+    index("recipe_bookmarks_recipe_idx").on(table.recipeId),
   ],
 );
 
