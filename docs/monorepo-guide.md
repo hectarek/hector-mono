@@ -183,7 +183,7 @@ When multiple workspaces depend on the same package, use the **same version stri
 ### Version ranges in practice
 
 - **`^major.minor.patch`** (e.g. `^4.3.3`, what `bun add` writes): most deps.
-- **Exact** (e.g. `16.4.0`): `next`, `react` and `react-dom` (the same in every app), `recharts` (identical in `packages/ui` and every app that imports it), and a few tools and SDKs (`@biomejs/biome`, `@types/bun`, `babel-plugin-react-compiler`, recipes' `ably`, and `ai` with `@ai-sdk/gateway` in hectors-recipes and hectors-tools, pinned together).
+- **Exact** (e.g. `16.4.0`): `next`, `react` and `react-dom` (the same in every app), `recharts` (identical in `packages/ui` and every app that imports it), and a few tools and SDKs (`@biomejs/biome`, `@types/bun`, `fallow`, recipes' `ably`, and `ai` with `@ai-sdk/gateway` in hectors-recipes and hectors-tools, pinned together).
 - **`workspace:*`**: For internal packages (`@repo/ui`, `@repo/biome-config`). Always use this for cross-workspace references.
 
 ### Updating dependencies
@@ -197,6 +197,15 @@ bun run deps:interactive  # bun update --interactive --recursive: pick what to u
 `deps:update` is not "latest compatible": `--latest` ignores the current ranges, jumps major versions, and rewrites the ranges in every `package.json`. Read the changelogs of anything that crossed a major, and check that `recharts` is still the identical version in `packages/ui` and every app that imports it.
 
 After updating, always run `bun ts && bun check && bun run test` to verify nothing broke.
+
+### Experimental Next.js options
+
+Turned on 2026-10-08 with Next.js 16.4, in every app's `next.config.ts` under `experimental`. Next.js marks both as experimental; remove each one here and in the configs when it becomes the default.
+
+- **`turbopackRustReactCompiler`** (the apps with `reactCompiler: true`): the React Compiler's Rust port runs inside Turbopack instead of through Babel, so `babel-plugin-react-compiler` isn't installed. It compiles the components the Babel plugin compiled, memoized much the same way, and also hectors-recipes' link import (`link-import.tsx`), which the Babel plugin skipped only because of syntax it couldn't handle. Like the Babel plugin, it leaves cook mode uncompiled: `CookModeContent` reads a ref during render. In one clean build of each app, the compile step was 9–29% faster. To go back: remove the option and add `babel-plugin-react-compiler` as a dev dependency.
+- **`turbopackGc`** (every app): Turbopack removes work it no longer needs from memory and from its cache in `.next/`, so long dev sessions and a `.next` per worktree stay smaller. It applies to `next dev` and `next build`.
+
+Left off: worker threads (`turbopackPluginRuntimeStrategy`), which save memory but aren't a setup change, and Bun's global store with `turbopackAdditionalRoots`, which Next.js 16.4 supports only by hand.
 
 ---
 

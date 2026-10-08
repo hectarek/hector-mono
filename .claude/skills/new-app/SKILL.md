@@ -38,14 +38,13 @@ Update `package.json` (take current versions from an existing app, e.g. `apps/he
     "@types/node": "…",
     "@types/react": "…",
     "@types/react-dom": "…",
-    "babel-plugin-react-compiler": "…",
     "tailwindcss": "…",
     "typescript": "…"
   }
 }
 ```
 
-- `babel-plugin-react-compiler` goes with `reactCompiler: true` in `next.config.ts`, as in every app except `relationship-meter`.
+- `next.config.ts` sets `reactCompiler: true`, as in every app except `relationship-meter`, and the experimental options in [docs/monorepo-guide.md](../../../docs/monorepo-guide.md#experimental-nextjs-options): `turbopackRustReactCompiler` runs the compiler inside Turbopack, so there's no `babel-plugin-react-compiler` to install.
 - Add every package the app imports itself (e.g. `lucide-react`): installs are isolated, so an app can't import a package it doesn't declare, even when `@repo/ui` has it. Not `next-themes` or `tw-animate-css`: those come through `@repo/ui`.
 - Use the same version string as the other apps for shared packages; `recharts`, if the app imports it, must be exactly `packages/ui`'s version.
 
