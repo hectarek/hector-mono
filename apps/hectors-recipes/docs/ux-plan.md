@@ -2331,11 +2331,11 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
 - [x] **P27.1** Saved recipes marked on the library's cards — C
   - Do: a saved recipe's card carries a filled bookmark, so the grid shows which are saved at a glance.
   - Verify: a screen test; 375 px.
-  - Evidence (2026-10-08): `RecipeCard` takes `saved` and puts a filled bookmark on a `bg-background/90` disc in the picture's top-right corner, which reads on a photo and on every produce tile; screen readers hear "Saved" (`role="img"`). `LibraryResults` passes it from the saved ids it already has. The library's saved-first test finds the mark on Stock's card and not on the next. 375 px with the flows.
+  - Evidence (2026-10-08): `RecipeCard` takes `saved` and puts a filled bookmark on a `bg-background/90` disc in the picture's top-right corner, which reads on a photo and on every produce tile; screen readers hear "Saved" (`role="img"`). `LibraryResults` passes it from the saved ids it already has. The library's saved-first test finds the mark on Stock's card and not on the next. At 375 px the dark bookmark on its light disc reads on a carrot-orange tile.
 - [x] **P27.2** The recipe page's buttons in the tab bar's order — C
   - Do: Add to meal plan, then Add to groceries, as Meal plan comes before Groceries in the tab bar.
   - Verify: a screen test; 375 px.
-  - Evidence (2026-10-08): the two swapped under Cook; a screen test renders the recipe page and finds Add to meal plan first. The map's recipe page and Wide screens row say them in that order. 375 px with the flows.
+  - Evidence (2026-10-08): the two swapped under Cook; a screen test renders the recipe page and finds Add to meal plan first. The map's recipe page and Wide screens row say them in that order. At 375 px both fit side by side under Cook.
 - [x] **P27.3** Cook mode's ingredients as a checklist — C
   - Do: Gather's hint above the list, and each ingredient a row you check off as on Groceries (the same component), on Gather, under a step and in the ingredients sheet.
   - Verify: screen tests; the `cook` flow; 375 px.
@@ -2343,10 +2343,16 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
     - `CheckRow` (`app/_components/check-row.tsx`) is the design system's checklist row taken out of Groceries: a label around a hidden checkbox, the drawn box, then the words. Groceries' items and cook mode's ingredients both use it, so they look and work the same. A second use, not a third, but it's the system's named pattern, kept in one place so the two lists can't drift.
     - Cook mode's `IngredientRow` is a `CheckRow`: on Gather, under a step ("This step uses") and in the ingredients sheet, with one set of ticks (D65). A ticked line is struck through and muted, fading as on Groceries.
     - Gather's hint is "Check off each ingredient as you get it out.", under the Ingredients heading and above the list.
-    - Tests: cook mode's screen tests find ingredients as checkboxes (one new: the hint comes before the first ingredient), and Groceries' pass unchanged. The `cook` flow taps the onion by its words once cook mode is open; it had tapped the recipe page's own "1 onion" before cook mode loaded.
-- [ ] **P27.4** The carrot's greens and the basil's top leaf — C
+    - Tests: cook mode's screen tests find ingredients as checkboxes (one new: the hint comes before the first ingredient), and Groceries' pass unchanged. The `cook` flow taps the onion by its words once cook mode is open; it had tapped the recipe page's own "1 onion" before cook mode loaded. All three flows pass.
+    - At 375 px: the hint under Ingredients, then the rows, a ticked one struck through beside a filled box.
+- [x] **P27.4** The carrot's greens and the basil's top leaf — C
   - Do: the carrot's greens grow from the middle of its top, turned with it; the basil's stem ends in its top leaf.
   - Verify: the welcome screen at 375 px.
+  - Evidence (2026-10-08):
+    - The design system's own Produce drawings have both slips, so `ProduceArt` was a faithful copy: the carrot's leaves were placed for an upright carrot while only its body was turned 28°, so they sprouted about 10 px left of its top; the basil's stem ran on past its top leaf to a bare tip at (56, 22).
+    - The carrot's leaves now turn with its body, their stems meeting at the middle of its top, and the drawing is moved (−4, 2) to sit in the middle of its box. The basil's stem ends inside its top leaf (`M30 84 Q42 59 55 41`).
+    - Compared side by side before the change, then on the welcome screen at 375 px. The same drawings hop while the AI reads a recipe (`ReadingWait`).
+    - The design system's Produce assets still have the old drawings; updating them is Hector's call.
 
 ## Later (to-dos, not scheduled)
 
