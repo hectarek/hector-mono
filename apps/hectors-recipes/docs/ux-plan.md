@@ -10,8 +10,8 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, stacked on Phase 24's branch: built and tested, in review as hectarek/hector-mono#35; 375 px and the flows not yet run. Phase 24 (#33, a draft) is checked on the test project (its migrations, the flows, 375 px); production's migrations not yet run (H31). Phase 23 is in review as #32; Phase 22 (#31) is merged. Then 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
-| Next task | Phase 24's migrations on production (H31; the test project's are done), before hectarek/hector-mono#33 merges. Phase 25's flows and 375 px, once its worktree has the `.env` files. Then Phase 26. |
+| Phase | 25 (the map's 12 fixes) on `fix/recipes-p25-consistency`, stacked on Phase 24's branch: built and tested, in review as hectarek/hector-mono#35; the flows pass and its screens are checked at 375 px. Phase 24 (#33, a draft) is checked on the test project (its migrations, the flows, 375 px); production's migrations not yet run (H31). Phases 22 and 23 (#31, #32) are merged. Then 26 (the second round's words, whose book, sheets on wide screens). Phase 20 (measuring AI reads) is still to come. |
+| Next task | Phase 24's migrations on production (H31; the test project's are done), before hectarek/hector-mono#33 merges. Then Phase 26 (H34 before P26.3). |
 | Waiting on Hector | Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, and the signed-in screens L5 changed; L2; L3. |
 | Last updated | 2026-10-08 |
 
@@ -2267,7 +2267,14 @@ Branch `fix/recipes-p25-consistency`, after Phase 24. The 12 places [ux-map.md](
     10. Cook mode's Done and Back to the recipe carry `?servings=`, and the recipe page takes it and keeps it in the URL, as cook mode does. Screen test: back at 6 servings, and at the recipe's own servings a plain link.
     11. The read's note keeps "Saving to <book>." for someone with one book. The import screen tests check the whole note.
     12. Books' Create submits through a transition. Screen test: a refused name stays in the box (it fails on the old form).
-    - 375 px for 1, 4, 5, 6, 7, 8 and 9 runs with the flows, once the worktrees have their `.env` files.
+    - The three flows pass on the test project.
+    - At 375 px (a throwaway flow on the test project):
+      - 1: both sheets rise from the bottom, Add above Cancel.
+      - 4: a pinned "Step 2: time's up · Dismiss" is `secondary` with its bell, and Next is the one filled button. On that screen the yellow screen-lock warning now draws the eye more than the finished timer. Its ring and alert carry it; whether it needs more weight is for Hector.
+      - 5: Books shows Members.
+      - 7: a refused PDF offers Add by link or text and Add manually.
+      - 9: Turn off asks in a dialog, Turn off above Cancel as the deletes have them.
+    - 6 and 8 are covered by their screen tests only. A viewer's screen needs a second account, and the used-up note needs 20 real reads.
 
 ## Phase 26: Words, whose book, and wide screens
 
@@ -2638,3 +2645,5 @@ Branch `feat/recipes-p26-words-books-wide`, after Phase 25. From the second test
   - Next: production's migrations; Phase 25's flows and 375 px once its worktree has the `.env` files.
 - **2026-10-08 (br)** — Hector applied migrations 0016–0018 to production (H31), and Claude checked the table, the column and "meal prep" are there. hectarek/hector-mono#33 is ready for review.
   - Next: Hector's review of #33 and #35; Phase 26.
+- **2026-10-08 (bq)** — Phase 25 checked: the flows pass on the test project, and fixes 1, 4, 5, 7 and 9 are checked at 375 px. A finished timer is now quieter than the yellow screen-lock warning beside it, noted for Hector. GitHub rebased Phase 24 onto main once #31 and #32 merged; Phase 25 is rebased onto it.
+  - Next: production's migrations (H31) before #33 merges; Phase 26.
