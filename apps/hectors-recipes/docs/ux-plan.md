@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | Two at once. 20 (measuring AI reads), in Hector's own session for it. 28 (Cache Components, and moving between screens), in review as hectarek/hector-mono#46: all five tasks built and the flows pass; P28.5's moves are not yet checked by eye. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
-| Next task | Phase 28: check P28.5's moves by eye on #46's preview, at 375 px in light and dark, and on an iPhone (H5). The Browser pane only works for this when it's open in the app: a hidden pane doesn't paint, and a move waits for a frame. Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
-| Waiting on Hector | Phase 28: #46's review, and P28.5's moves on an iPhone; optionally `instant.flow.ts` on P28.2's commit `000f909`, to see it fail, and a second account's change showing within 5 minutes (P28.3). Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-08 |
+| Phase | 20 (measuring AI reads), in Hector's own session for it. 28 (Cache Components, and moving between screens) is merged (hectarek/hector-mono#46) and on production, but P28.5's moves haven't been looked at yet. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
+| Next task | Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
+| Waiting on Hector | Phase 28: P28.5's moves by eye, on an iPhone on production, in light and dark (H5). Two P28.3 checks are still listed, to run or drop: `instant.flow.ts` on P28.2's commit `000f909`, to see it fail, and a second account's change showing within 5 minutes. Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
+| Last updated | 2026-10-09 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -2360,7 +2360,7 @@ Branch `feat/recipes-p27-polish`, after Phase 26 merged. Hector's notes, 2026-10
 
 ## Phase 28: Cache Components, and moving between screens
 
-Decided 2026-10-08: Hector took the recommendations (H36), as D87–D90. In progress: stash went first (hectarek/hector-mono#45, D90), and P28.1 to P28.4 are built; P28.5 is next. From the Next.js 16.4 upgrade (hectarek/hector-mono#38 to #40). Hector, 2026-10-08: "yes, draft the recipes phase in the ux-plan".
+Decided 2026-10-08: Hector took the recommendations (H36), as D87–D90. Merged 2026-10-08 as hectarek/hector-mono#46, after stash went first (hectarek/hector-mono#45, D90). Left: P28.5's moves on an iPhone, and two P28.3 checks. From the Next.js 16.4 upgrade (hectarek/hector-mono#38 to #40). Hector, 2026-10-08: "yes, draft the recipes phase in the ux-plan".
 
 Why now: Next.js 16.4 recommends Cache Components for every app, and Next.js 17 turns it on for every app, so the app moves either way. With it on, `export const dynamic` fails the build. The portfolio moved in hectarek/hector-mono#39. React 19.3's view transitions are stable, and Next.js 16.4 needs no setting for them. Both are in one phase because the best transition here, a recipe card growing into its page, only plays when the page is ready at the tap. Cache Components' caching is what makes it ready.
 
@@ -2536,7 +2536,8 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
     - The Browser pane can't show the moves while it's hidden in the app. The page doesn't paint, so a move waits for a frame that doesn't come, and the page holds its skeleton until something repaints it.
     - `bun check`, `bun ts`, 1114 + 96 tests, the dead-code check and `next build` pass.
     - The flows pass with reduced motion (Hector's run at `7732f2e`), so with the moves in place nothing a flow does is broken.
-    - **Left:** each move by eye at 375 px, light and dark, in a browser that's on screen (the Browser pane, once open); the iPhone (H5).
+    - Merged as hectarek/hector-mono#46, and deployed to production on 2026-10-08 (main at `4d35e92`).
+    - **Left:** each move by eye, in light and dark, on an iPhone on production (H5). That covers the 375 px look as well. The Browser pane can't do it unless it's open in the app and signed in on production, and on 2026-10-09 it was neither.
 
 ## Later (to-dos, not scheduled)
 
@@ -2932,3 +2933,5 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
   - A page transition blocked every tap while `<html>` took part in it, which hung the flows at Add to meal plan.
   - All three are fixed. The flows pass, and P28.3's speed was checked on a production build. Hector chose to keep only the Recipes tab in `instant.flow.ts`, since `next dev` fetches a reopened page again.
   - Next: P28.5's moves by eye on the PR's preview, and on an iPhone (H5).
+- **2026-10-09 (ce)** — #46 merged, and recipes' production deploy of it succeeded. The portfolio and relationship-meter skipped the build (`Canceled by Ignored Build Step`), as #44 meant them to. P28.5's look by eye moves to an iPhone on production (H5): the Browser pane was hidden and signed out there. Two P28.3 checks are still listed, for Hector to run or drop.
+  - Next: Phase 20; Hector's look at the moves on his iPhone.
