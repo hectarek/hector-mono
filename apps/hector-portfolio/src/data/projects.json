@@ -272,6 +272,179 @@
       ]
     },
     {
+      "id": "grand-theft-autonomous",
+      "slug": "grand-theft-autonomous",
+      "title": "Grand Theft Autonomous",
+      "description": "A block-coding simulator and live event console for a state robotics competition, where students' programs drive real cars through a miniature city.",
+      "longDescription": "Grand Theft Autonomous was the robotics finale of a programming curriculum and the event at VESL's state competition in May 2026. Competitors stack code blocks into a mission program, test it in the simulator, then send the same program to a real SunFounder Zeus car that drives a grid \"Smart City\": collect coins, avoid the cops, and get back to the vault. I built the app on my own, and it ran the training, the testing, and the competition itself.",
+      "technologies": ["TypeScript", "React", "Vite", "dnd-kit", "WebSockets"],
+      "image": "/projects/grand-theft-autonomous.webp",
+      "url": "https://set-mono-grand-theft-autonomous.vercel.app",
+      "github": null,
+      "featured": false,
+      "date": "2026-05-01",
+      "status": "Live Event App",
+      "role": "Sole designer and engineer",
+      "metrics": [
+        {
+          "label": "Heat length",
+          "value": "3 min"
+        },
+        {
+          "label": "Competition map",
+          "value": "9×9"
+        },
+        {
+          "label": "Team size",
+          "value": "1"
+        }
+      ],
+      "highlights": [
+        "A drag-and-drop block editor with if/else, repeat, and sensor conditions, run by a deterministic interpreter, so the simulator and the car execute the same program.",
+        "Sends programs to the car and drives it live over WebSocket, with gamepad driving for practice.",
+        "Judge scoring by coin value (+10, +25, +50) with a −5 penalty for hitting a cop, 180-second heats, heat replay, and a live sensor strip.",
+        "Spec tests that keep the scoring and the map's fairness rules honest."
+      ],
+      "problem": "Students who had learned programming logic in drag-and-drop games needed a way to program real cars at a live, judged state event.",
+      "solution": "One app that is both the practice simulator and the event's operator and scoring console, sending the same block program to the simulator and to the car.",
+      "impact": "Ran the training, the testing, and the competition at the state robotics event."
+    },
+    {
+      "id": "stiegler-edtech-site",
+      "slug": "stiegler-edtech-site",
+      "title": "Stiegler EdTech Website",
+      "description": "Moved the company's two paid web platforms, a WordPress site and a Bubble app, onto one Next.js app without breaking a legacy URL or a form.",
+      "longDescription": "Stiegler EdTech's web presence ran on two paid platforms: a WordPress and Elementor site, and a separate Bubble site for The Mothership. I planned and led their consolidation into one Next.js app on Vercel, rebuilt page by page to match the live sites, and cut over in September 2026. The WordPress hosting, its paid plugins and email add-on, and the Bubble plan were retired, so the company now runs on one host instead of two paid platforms.",
+      "technologies": [
+        "TypeScript",
+        "Next.js",
+        "React",
+        "Tailwind CSS",
+        "shadcn/ui",
+        "PostgreSQL",
+        "Drizzle ORM",
+        "Zod",
+        "Playwright",
+        "Resend",
+        "Vercel"
+      ],
+      "image": "/projects/stiegleredtech-site.webp",
+      "url": "https://stiegleredtech.org",
+      "github": null,
+      "featured": false,
+      "date": "2026-09-24",
+      "status": "Legacy Migration",
+      "role": "CTO · planned and led the migration",
+      "metrics": [
+        {
+          "label": "Legacy URLs kept",
+          "value": "198/198"
+        },
+        {
+          "label": "Pages at parity",
+          "value": "22/22"
+        },
+        {
+          "label": "Submissions migrated",
+          "value": "1,708"
+        },
+        {
+          "label": "Paid platforms",
+          "value": "2 → 1"
+        }
+      ],
+      "highlights": [
+        "Measured both live sites with a headless crawl at desktop and phone widths, then rebuilt every page to match, checked by a Playwright parity test against a snapshot of the old site.",
+        "Kept all 198 legacy URLs working, with permanent redirects from the retired domain and a checker that verifies every one.",
+        "Moved every form onto one server action, with its delivery services injected so tests run against stubs; all ten forms were verified end to end at cutover.",
+        "Imported 1,708 past form submissions, from August 2023 to September 2026, into Postgres, and built site search from the rendered pages.",
+        "Cut the hero video from 26 MB to 6.4 MB and added an image pipeline for share cards."
+      ],
+      "problem": "One organization paid for two web platforms: WordPress with paid plugins and an email add-on, and a Bubble plan, each with its own pages, forms, and data.",
+      "solution": "One Next.js app on Vercel that serves both sites, keeps every old URL, and stores all form submissions in one Postgres table.",
+      "impact": "One host instead of two paid platforms, with a verified cutover: 22 of 22 pages at parity, 198 of 198 legacy URLs, and all ten forms working."
+    },
+    {
+      "id": "safe-bet",
+      "slug": "safe-bet",
+      "title": "Safe Bet",
+      "description": "A compliance platform prototype for regulated sports wagering: it turns the rules about who may bet into a status sportsbooks can check, with a gambling-literacy curriculum alongside.",
+      "longDescription": "States, institutions, and employers set rules about who may wager, and sportsbooks need a clear answer before they take a bet. Safe Bet turns those rules into one of three statuses (prohibited, conditional, or clear) and adds the education, attestation, and records that move someone into compliance. I built the product prototype for a startup client in 2026, with workspaces for regulators, sportsbook operators, educators, students, and college athletes, all running on typed demo data.",
+      "technologies": ["TypeScript", "Next.js", "React", "shadcn/ui"],
+      "image": "/projects/safe-bet.webp",
+      "url": "https://safebets-three.vercel.app",
+      "github": null,
+      "featured": false,
+      "date": "2026-09-01",
+      "status": "Product Prototype",
+      "role": "Freelance engineer for a startup client",
+      "metrics": [
+        {
+          "label": "Permission states",
+          "value": "3"
+        },
+        {
+          "label": "Role workspaces",
+          "value": "6"
+        },
+        {
+          "label": "Curriculum domains",
+          "value": "5"
+        },
+        {
+          "label": "Lessons",
+          "value": "104"
+        }
+      ],
+      "highlights": [
+        "A cascading rules engine where the most restrictive rule wins, across seven registry categories of people barred from wagering.",
+        "Operators get a legal citation rather than the reason a person is listed, so a check reveals as little as possible.",
+        "Six role views (admin, operator, educator, high school student, learner, college athlete) switched from one \"View as\" control.",
+        "A curriculum across five domains (recognition, reasoning, influence, vulnerability, protection), with a presenter mode for educators and certificates for learners.",
+        "20 spec files covering the rules engine and the registry categories."
+      ]
+    },
+    {
+      "id": "vesl-terminal",
+      "slug": "vesl-terminal",
+      "title": "VESL Cyber Command",
+      "description": "A browser terminal game that teaches students the command line through a cybersecurity story, reused for competitions across a cybersecurity curriculum.",
+      "longDescription": "VESL Cyber Command casts students as trainee operators who work in the command line, starting with Operation First Contact, a secure digital dead-drop. It runs a simulated shell in the browser, with an explain command for hints when students get stuck, a tutorial, adjustable typing speed, and four color themes. I built it for an earlier curriculum build-out, and it was used again and again for competitions and events in a cybersecurity curriculum.",
+      "technologies": ["JavaScript", "Vite", "xterm.js"],
+      "image": "/projects/vesl-terminal.webp",
+      "url": "https://sparknc-terminal.vercel.app",
+      "github": null,
+      "featured": false,
+      "date": "2025-09-01",
+      "status": "Educational Game",
+      "role": "Designer and engineer",
+      "highlights": [
+        "A simulated shell where students run real commands, such as ls, to complete story missions.",
+        "An explain command that walks students through the mission reports when they're stuck.",
+        "Reused across competitions and events in a cybersecurity curriculum."
+      ]
+    },
+    {
+      "id": "build-the-carolinas",
+      "slug": "build-the-carolinas",
+      "title": "Build the Carolinas",
+      "description": "Marketing site for Build the Carolinas, the skilled-trades careers brand of ABC Carolinas and VESL.",
+      "longDescription": "Build the Carolinas is the joint brand that ABC Carolinas and VESL use to bring students into construction careers. I built its marketing site: trade pathways such as the Electrician Pathway, credentials, careers and salaries, pages for students, parents, and employers, and a connected contact form. It's the public front door for the skilled-trades games, which send players to its careers page.",
+      "technologies": ["Next.js", "React"],
+      "image": "/projects/build-the-carolinas.webp",
+      "url": "https://www.buildthecarolinas.org",
+      "github": null,
+      "featured": false,
+      "date": "2026-03-01",
+      "status": "Marketing Site",
+      "role": "Built the site",
+      "highlights": [
+        "Pages for each audience (students, parents, employers) and for pathways, credentials, careers and salaries, sponsorships, and events.",
+        "A connected contact form for program inquiries.",
+        "Linked from the skilled-trades games, whose results send students to its careers page."
+      ]
+    },
+    {
       "id": "ctac-program",
       "slug": "ctac-program",
       "title": "CTAC — Careers in Technology Cohort",
