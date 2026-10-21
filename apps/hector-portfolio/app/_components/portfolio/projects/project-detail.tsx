@@ -32,8 +32,6 @@ function SectionBlock({ index, label, heading, children }: SectionBlockProps) {
 }
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
-  const hasCaseStudy =
-    project.problem || project.solution || project.impact || project.features;
   const hasExtraLinks = project.links && project.links.length > 0;
   let sectionCount = 0;
   const nextIndex = () => String(++sectionCount).padStart(2, "0");
@@ -200,100 +198,88 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         </SectionBlock>
       )}
 
-      {hasCaseStudy && (
-        <>
-          {project.problem && (
-            <SectionBlock
-              index={nextIndex()}
-              label="Context"
-              heading="The problem"
-            >
-              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-                {project.problem}
-              </p>
-            </SectionBlock>
-          )}
+      {project.problem && (
+        <SectionBlock index={nextIndex()} label="Context" heading="The problem">
+          <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {project.problem}
+          </p>
+        </SectionBlock>
+      )}
 
-          {project.solution && (
-            <SectionBlock
-              index={nextIndex()}
-              label="Approach"
-              heading="What I built"
-            >
-              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-                {project.solution}
-              </p>
-            </SectionBlock>
-          )}
+      {project.solution && (
+        <SectionBlock
+          index={nextIndex()}
+          label="Approach"
+          heading="What I built"
+        >
+          <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {project.solution}
+          </p>
+        </SectionBlock>
+      )}
 
-          {project.screenshots && project.screenshots.length > 0 && (
-            <SectionBlock
-              index={nextIndex()}
-              label="Screens"
-              heading="Inside the product"
-            >
-              <div className="grid gap-6 sm:grid-cols-2">
-                {project.screenshots.map((shot) => (
-                  <figure key={shot.src} className="flex flex-col gap-2">
-                    <Link
-                      href={shot.src}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block overflow-hidden rounded-lg border border-border bg-muted transition-colors hover:border-accent"
-                    >
-                      <Image
-                        src={shot.src}
-                        alt={shot.alt}
-                        width={shot.width}
-                        height={shot.height}
-                        className="h-auto w-full"
-                        sizes="(max-width: 640px) 100vw, 448px"
-                      />
-                    </Link>
-                    <figcaption className="text-sm leading-relaxed text-muted-foreground">
-                      {shot.caption}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </SectionBlock>
-          )}
+      {project.screenshots && project.screenshots.length > 0 && (
+        <SectionBlock
+          index={nextIndex()}
+          label="Gallery"
+          heading="A closer look"
+        >
+          <div className="grid gap-6 sm:grid-cols-2">
+            {project.screenshots.map((shot) => (
+              <figure key={shot.src} className="flex flex-col gap-2">
+                <Link
+                  href={shot.src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block overflow-hidden rounded-lg border border-border bg-muted transition-colors hover:border-accent"
+                >
+                  <Image
+                    src={shot.src}
+                    alt={shot.alt}
+                    width={shot.width}
+                    height={shot.height}
+                    className="h-auto w-full"
+                    sizes="(max-width: 640px) 100vw, 448px"
+                  />
+                </Link>
+                <figcaption className="text-sm leading-relaxed text-muted-foreground">
+                  {shot.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </SectionBlock>
+      )}
 
-          {project.features && project.features.length > 0 && (
-            <SectionBlock
-              index={nextIndex()}
-              label="System"
-              heading="What's inside"
-            >
-              <ul className="grid gap-2 sm:grid-cols-2">
-                {project.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex gap-3 rounded-md border border-border bg-background p-3 text-sm text-muted-foreground transition-colors hover:border-foreground/25"
-                  >
-                    <span
-                      className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
-                      aria-hidden
-                    />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </SectionBlock>
-          )}
+      {project.features && project.features.length > 0 && (
+        <SectionBlock
+          index={nextIndex()}
+          label="System"
+          heading="What's inside"
+        >
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {project.features.map((feature) => (
+              <li
+                key={feature}
+                className="flex gap-3 rounded-md border border-border bg-background p-3 text-sm text-muted-foreground transition-colors hover:border-foreground/25"
+              >
+                <span
+                  className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+                  aria-hidden
+                />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </SectionBlock>
+      )}
 
-          {project.impact && (
-            <SectionBlock
-              index={nextIndex()}
-              label="Outcome"
-              heading="The impact"
-            >
-              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-                {project.impact}
-              </p>
-            </SectionBlock>
-          )}
-        </>
+      {project.impact && (
+        <SectionBlock index={nextIndex()} label="Outcome" heading="The impact">
+          <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {project.impact}
+          </p>
+        </SectionBlock>
       )}
 
       {project.highlights && project.highlights.length > 0 && (
