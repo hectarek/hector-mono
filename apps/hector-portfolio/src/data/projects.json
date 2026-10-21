@@ -307,7 +307,30 @@
       ],
       "problem": "Students who had learned programming logic in drag-and-drop games needed a way to program real cars at a live, judged state event.",
       "solution": "One app that is both the practice simulator and the event's operator and scoring console, sending the same block program to the simulator and to the car.",
-      "impact": "Ran the training, the testing, and the competition at the state robotics event."
+      "impact": "Ran the training, the testing, and the competition at the state robotics event.",
+      "screenshots": [
+        {
+          "src": "/projects/gta-programming-the-car.webp",
+          "width": 1600,
+          "height": 2000,
+          "alt": "Hector programming a Zeus robot car on a laptop at the event",
+          "caption": "Programming a Zeus car at the state event."
+        },
+        {
+          "src": "/projects/gta-competition-map.webp",
+          "width": 1600,
+          "height": 2133,
+          "alt": "The competition floor: a grid city mapped on the floor, with Zeus cars staged at the operator table",
+          "caption": "The competition floor: the grid \"Smart City\" and the cars waiting at the operator table."
+        },
+        {
+          "src": "/projects/gta-zeus-car.webp",
+          "width": 1600,
+          "height": 2133,
+          "alt": "A SunFounder Zeus car with mecanum wheels, an ultrasonic sensor, and its control boards",
+          "caption": "A SunFounder Zeus car, the robot competitors programmed."
+        }
+      ]
     },
     {
       "id": "stiegler-edtech-site",
@@ -442,6 +465,22 @@
         "Pages for each audience (students, parents, employers) and for pathways, credentials, careers and salaries, sponsorships, and events.",
         "A connected contact form for program inquiries.",
         "Linked from the skilled-trades games, whose results send students to its careers page."
+      ],
+      "screenshots": [
+        {
+          "src": "/projects/build-the-carolinas-mobile-lab.webp",
+          "width": 1600,
+          "height": 1066,
+          "alt": "The Build the Carolinas mobile lab truck with the program team in front of it",
+          "caption": "The Build the Carolinas mobile lab, the program on the road."
+        },
+        {
+          "src": "/projects/build-the-carolinas-event.webp",
+          "width": 1600,
+          "height": 1066,
+          "alt": "A Build the Carolinas booth at an outdoor event, with a visitor trying an activity on a tablet",
+          "caption": "A Build the Carolinas booth at an outdoor event."
+        }
       ]
     },
     {
@@ -456,6 +495,7 @@
         "Program operations",
         "Mentorship"
       ],
+      "image": "/projects/ctac-cohort-ally.webp",
       "url": null,
       "github": null,
       "featured": false,
@@ -485,6 +525,43 @@
         "Taught about 130 of the program's ~200 graduates across three years of cohorts: two teaching daily, one supervising.",
         "Led a four-person curriculum team on a contracted cohort build for an external client.",
         "Worked with corporate sponsors so cohorts launched with the curriculum their hiring pipelines needed."
+      ],
+      "screenshots": [
+        {
+          "src": "/projects/ctac-graduation-2023.webp",
+          "width": 768,
+          "height": 532,
+          "alt": "A CTAC graduation ceremony, with a slide reading Welcome to CTAC Graduation 2023 at Lowe's Tech Hub in Charlotte",
+          "caption": "CTAC's 2023 graduation at Lowe's Tech Hub in Charlotte."
+        },
+        {
+          "src": "/projects/ctac-graduation.webp",
+          "width": 768,
+          "height": 768,
+          "alt": "CTAC graduates and guests standing in front of a Welcome to CTAC Graduation slide",
+          "caption": "A CTAC graduating class."
+        },
+        {
+          "src": "/projects/ctac-alumni-ally.webp",
+          "width": 1600,
+          "height": 1200,
+          "alt": "A group of CTAC graduates on the purple stairs at Ally's Charlotte office",
+          "caption": "CTAC graduates at Ally's Charlotte office."
+        },
+        {
+          "src": "/projects/ctac-alumni-event.webp",
+          "width": 1600,
+          "height": 1199,
+          "alt": "CTAC alumni together at a casual evening event",
+          "caption": "A CTAC alumni get-together."
+        },
+        {
+          "src": "/projects/ctac-graduates-office.webp",
+          "width": 1600,
+          "height": 1200,
+          "alt": "CTAC graduates in business dress standing together in an office",
+          "caption": "CTAC graduates at a partner's office."
+        }
       ]
     },
     {
