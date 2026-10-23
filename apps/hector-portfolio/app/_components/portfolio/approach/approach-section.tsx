@@ -18,18 +18,18 @@ interface ApproachItem {
 const APPROACH_ITEMS: ApproachItem[] = [
   {
     step: "01",
-    title: "Scope the real problem",
-    body: "Most asks come in vague. I sit with the actual problem, the constraints, and the people involved before suggesting a build.",
+    title: "Start with the real problem",
+    body: "Most requests come in vague. I talk to the people doing the work before I suggest building anything.",
   },
   {
     step: "02",
-    title: "Design the smallest useful system",
-    body: "I prefer clean architecture, modern serverless tools, and a path that's maintainable by a small team — not the most clever option.",
+    title: "Build what a small team can keep running",
+    body: "I build the simplest thing that works, with tests and monitoring, so it keeps working after launch.",
   },
   {
     step: "03",
-    title: "Ship it, then keep it alive",
-    body: "I build to run in production: tests, error handling, logging, and monitoring, plus the AI workflows and internal tools that keep a product working after launch.",
+    title: "Use AI, and check its work",
+    body: "I write a short spec before I prompt and read every change like a teammate's pull request. The decisions are mine.",
   },
 ];
 
@@ -45,13 +45,13 @@ export function ApproachSection() {
       <div className="mx-auto max-w-6xl">
         <div className="border-t mb-10" />
 
-        <SectionEyebrow index="06" label="How I work" />
+        <SectionEyebrow index="05" label="How I work" />
 
         <m.h2
-          className="font-mono mt-5 max-w-2xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
+          className="font-mono mt-5 max-w-2xl text-3xl font-medium text-balance leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={fadeInUp}
         >
-          Ambiguity in. Useful systems out.
+          What working with me looks like.
         </m.h2>
 
         <m.ol
@@ -61,7 +61,7 @@ export function ApproachSection() {
           {APPROACH_ITEMS.map((item) => (
             <m.li
               key={item.step}
-              className="group relative flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-muted"
+              className="group relative row-span-3 grid grid-rows-subgrid gap-3 bg-background p-6 transition-colors hover:bg-muted"
               variants={staggerItem}
             >
               <span className="font-mono text-2xl font-medium text-accent sm:text-3xl">
@@ -76,6 +76,14 @@ export function ApproachSection() {
             </m.li>
           ))}
         </m.ol>
+
+        <m.p
+          className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground"
+          variants={fadeInUp}
+        >
+          What I use most: TypeScript, React, Next.js, Node, Postgres, the
+          Vercel AI SDK and Claude.
+        </m.p>
       </div>
     </m.section>
   );

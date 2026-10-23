@@ -4,8 +4,8 @@
       "id": "the-notwork",
       "slug": "the-notwork",
       "title": "The Notwork",
-      "description": "Production edtech platform where North Carolina high schoolers learn, play, and compete in STEM and skilled-trades programs.",
-      "longDescription": "The Notwork is the full-stack platform behind North Carolina's first state-backed esports and STEM league. Students learn through mastery pathways, play games, earn micro-credentials, and compete on rosters and leaderboards. The same platform runs the league: teachers verify students, staff manage content and seasons, and admins push updates all year. I co-architected it, led the team that built it and its 2025 rebuild, and have run it on my own since October 2025.",
+      "description": "The platform behind North Carolina's first state-backed esports and STEM league, where high schoolers learn, play and compete.",
+      "longDescription": "The Notwork runs North Carolina's first state-backed esports and STEM league. High schoolers use it to learn, play games, earn micro-credentials and compete. Teachers verify their students on it, and the league's staff run the whole season from it.",
       "technologies": [
         "TypeScript",
         "React",
@@ -29,32 +29,32 @@
       "role": "Co-architect · led the build team · sole maintainer since Oct 2025",
       "metrics": [
         {
-          "label": "Users",
-          "value": "~24K"
+          "label": "Users I build for",
+          "value": "10,000+"
         },
         {
-          "label": "Page views",
-          "value": "~490K"
+          "label": "Developers I led",
+          "value": "5"
         },
         {
-          "label": "Peak DAU",
-          "value": "~1K"
+          "label": "Engineer on it now",
+          "value": "1"
         },
         {
-          "label": "Tracked events",
-          "value": "~1.5M"
+          "label": "Daily users at peak",
+          "value": "900+"
         }
       ],
       "highlights": [
-        "One of two architects who set the platform's direction. Led five developers through the initial build: hired the team, set coding standards and tooling, reviewed PRs weekly, and refined tickets with product and design.",
-        "Led the 2025 rebuild on a new architecture: schema redesign, end-to-end notifications, server pagination, error handling and logging, and hundreds of regression tests.",
-        "Designed identity verification for in-person competition: a teacher-as-verifier workflow, roster and eligibility logic, and team locking at playoff cutoffs, replacing manual spreadsheet checks.",
-        "AI-assisted judging: the model scores a submission against each rubric criterion with written reasoning and drafts feedback, and staff review and adjust it before saving.",
-        "Built mastery pathways with submissions, rubrics, AI-assisted grading, and micro-credentials, plus an Explore feed that mixes lessons, video, games, and submissions."
+        "I was one of two architects. For the first build I hired and led five developers, set the coding standards, reviewed pull requests every week and worked through tickets with product and design.",
+        "In 2025 I led a rebuild on a new architecture: a redesigned schema, notifications end to end, server-side pagination, error handling and logging, and hundreds of regression tests.",
+        "Students compete in person, so they have to be who they say they are. I made teachers the verifiers, added roster and eligibility rules, and locked teams at playoff cutoffs. That replaced checking spreadsheets by hand.",
+        "AI helps judge submissions. It scores each rubric criterion, explains its reasoning and drafts feedback, and staff review and adjust every score before it counts.",
+        "I built mastery pathways with submissions, rubrics and micro-credentials, and an Explore feed that mixes lessons, video, games and student work."
       ],
-      "problem": "The league needed one platform that could both teach students and run the season: learning content, games, and competition for students, plus verification, rosters, communication, and content tools for teachers and staff.",
-      "solution": "A full-stack Next.js platform with role-based experiences for students, teachers, and staff. Students engage through pathways, games, and competitions; staff get admin tooling, content management, verification, messaging, and analytics in one place.",
-      "impact": "Replaced spreadsheets and ad-hoc tools with one production system that runs the league day to day: ~24K users, ~490K page views, and a peak of ~1K daily active users.",
+      "problem": "The league ran on spreadsheets and separate tools. It needed one place where students could learn and compete, and where teachers and staff could verify students, manage rosters, send messages and publish content.",
+      "solution": "One Next.js app with a view for each role. Students get learning pathways, games and competitions. Teachers verify their students. Staff get the content library, rosters, messaging and analytics in one place.",
+      "impact": "It replaced the spreadsheets the league used to run on, and newer work runs on it too: AI-assisted judging, the lesson pipeline and the skilled-trades games.",
       "features": [
         "Student profiles, teams, rosters, and leaderboards",
         "Mastery pathways, submissions, rubrics, and micro-credentials",
@@ -94,8 +94,8 @@
       "id": "ai-curriculum-generator",
       "slug": "ai-curriculum-generator",
       "title": "AI Curriculum Pipeline",
-      "description": "A nine-step AI pipeline, with a human review point at every step, that turns a rough lesson idea into a published, multi-modal lesson in 10–30 minutes.",
-      "longDescription": "An applied-AI pipeline built into The Notwork that produces complete lessons. It runs nine steps modeled on real curriculum development: blueprint, outline, content, editorialize, accuracy check, media, formatting, audio, and release. Each step builds on the last, runs on the model the educator picks from Anthropic, OpenAI, or Google, and can be refined or regenerated before the lesson publishes straight to the platform.",
+      "description": "Turns a rough lesson idea into a published lesson in nine steps. AI drafts each step, and a person approves it before the next one runs.",
+      "longDescription": "A pipeline inside The Notwork that turns a rough lesson idea into a published lesson. It follows the steps a curriculum team would: blueprint, outline, content, editing, fact check, media, formatting, audio and release. An educator picks the model for each step, from Anthropic, OpenAI or Google, and approves or redoes each step before the next one runs.",
       "technologies": [
         "TypeScript",
         "Next.js",
@@ -114,33 +114,29 @@
       "role": "Sole designer and engineer",
       "metrics": [
         {
-          "label": "Per lesson, was ~1 week",
-          "value": "10–30 min"
+          "label": "Lesson time I cut",
+          "value": "95%+"
         },
         {
           "label": "Lessons published",
-          "value": "55"
+          "value": "50+"
         },
         {
-          "label": "Pipeline steps",
-          "value": "9"
-        },
-        {
-          "label": "Human review",
+          "label": "Checked by a person",
           "value": "Every step"
         }
       ],
       "highlights": [
-        "Modeled the pipeline on how curriculum teams actually build lessons, so each step has one job and a clear output.",
-        "Model choice per step across Anthropic, OpenAI, and Google (Claude, GPT, and Gemini), including Gemini image generation for lesson media.",
-        "Human-in-the-loop by design: each step takes the previous output as context, and an educator can refine or regenerate it before it feeds the next.",
-        "An editorial step scores tone and readability and proposes line edits as before-and-after diffs; an accuracy step checks each factual claim with a confidence score and flags what needs subject-matter review.",
-        "Generated images wait for an educator to approve or regenerate them, then upload to the Cloudflare CDN and are written into the lesson.",
-        "Each finished lesson ships with text-to-speech narration and practice questions."
+        "I modeled it on how curriculum teams build lessons, so each step has one job and a clear output.",
+        "Each step can run on a different model: Claude, GPT or Gemini, with Gemini making the lesson images.",
+        "A person stays in the loop. Each step gets the last step's output as context, and an educator can refine or regenerate it before it feeds the next.",
+        "The editing step scores tone and readability and suggests line edits as before-and-after diffs. The fact-check step rates each claim's confidence and flags what needs an expert's review.",
+        "Generated images wait for an educator to approve or regenerate them. Approved ones go to the Cloudflare CDN and into the lesson.",
+        "Every finished lesson comes with narration and practice questions."
       ],
-      "problem": "Curriculum production was slow and inconsistent. A single quality lesson could take a week by hand, and the platform needed a steady stream of multi-modal content for students.",
-      "solution": "A nine-step pipeline that walks an educator from rough requirements to a published, multi-modal lesson, with refine and regenerate controls at every step and direct publishing into The Notwork.",
-      "impact": "Cut lesson production from about a week to 10–30 minutes, with higher consistency than the manual process. 55 lessons published so far.",
+      "problem": "A good lesson took about a week to write by hand, and quality depended on who wrote it. The platform needed a steady supply of lessons with text, images and audio.",
+      "solution": "Nine steps, each with one job, that take an educator from rough notes to a published lesson. Every step can be refined or regenerated, and the finished lesson publishes straight into The Notwork.",
+      "impact": "A lesson that took about a week now takes half an hour or less, and the lessons come out more consistent than the hand-written ones. More than 50 have been published so far.",
       "features": [
         "Nine steps: blueprint → outline → content → editorialize → accuracy check → media → formatting → audio → release",
         "Per-step model picker across Claude, GPT, and Gemini",
@@ -181,8 +177,8 @@
       "id": "vesl-skilled-trade-games",
       "slug": "vesl-skilled-trade-games",
       "title": "Skilled-Trades Games",
-      "description": "Ten playable browser games that teach skilled-trades work through short, scored scenarios. Built solo in Pixi.js and Three.js.",
-      "longDescription": "A suite of browser games built for a skilled-trades workforce program on The Notwork. They cover construction sequencing, electrical, plumbing and HVAC, site safety, and tool fluency, from 2D puzzles in Pixi.js to a 3D isometric job site in Three.js. Each game is short and scored, with levels and progression, so it works as standalone practice or as league content.",
+      "description": "Short, scored games on electrical, plumbing, site safety and more, from 2D puzzles to a 3D job site. You can play every one in your browser.",
+      "longDescription": "Ten browser games for a skilled-trades program on The Notwork. They cover building in the right order, electrical, plumbing and HVAC, site safety and knowing your tools, from 2D puzzles in Pixi.js to a 3D job site in Three.js. Each one is short and scored, with levels, so it works as practice or as league content.",
       "technologies": ["TypeScript", "Pixi.js", "Three.js", "Next.js", "React"],
       "image": "/projects/skilled-trades-games.webp",
       "url": "https://games.thenotwork.org",
@@ -193,22 +189,18 @@
       "role": "Sole designer and engineer",
       "metrics": [
         {
-          "label": "Playable games",
+          "label": "Games I built solo",
           "value": "10"
         },
         {
-          "label": "Rendering",
-          "value": "2D + 3D"
-        },
-        {
-          "label": "Team size",
-          "value": "1"
+          "label": "Games made before",
+          "value": "0"
         }
       ],
       "highlights": [
-        "Designed and built every game end to end, with no prior game-development background.",
-        "Used AI-assisted workflows for scoping, programmatically generated assets, and fast iteration.",
-        "Each game has scoring, levels, and progression, and works as standalone practice or league content."
+        "I designed and built every game end to end, without any game-development background going in.",
+        "I used AI to help scope the games, generate assets and iterate quickly.",
+        "Every game has scoring, levels and progression, so it works as practice on its own or as league content."
       ],
       "features": [
         "Scoring, levels, and unlock progression in every game",
@@ -276,7 +268,7 @@
       "slug": "grand-theft-autonomous",
       "title": "Grand Theft Autonomous",
       "description": "A block-coding simulator and live event console for a state robotics competition, where students' programs drive real cars through a miniature city.",
-      "longDescription": "Grand Theft Autonomous was the robotics finale of a programming curriculum and the event at VESL's state competition in May 2026. Competitors stack code blocks into a mission program, test it in the simulator, then send the same program to a real SunFounder Zeus car that drives a grid \"Smart City\": collect coins, avoid the cops, and get back to the vault. I built the app on my own, and it ran the training, the testing, and the competition itself.",
+      "longDescription": "The robotics finale of a programming curriculum, and the robotics event at VESL's state competition in May 2026. Students stack code blocks into a mission program, test it in the simulator, then send the same program to a real SunFounder Zeus car on a 9×9 grid \"Smart City\". Each car has to collect coins, avoid the cops and get back to the vault.",
       "technologies": ["TypeScript", "React", "Vite", "dnd-kit", "WebSockets"],
       "image": "/projects/grand-theft-autonomous.webp",
       "url": "https://set-mono-grand-theft-autonomous.vercel.app",
@@ -285,29 +277,16 @@
       "date": "2026-05-01",
       "status": "Live Event App",
       "role": "Sole designer and engineer",
-      "metrics": [
-        {
-          "label": "Heat length",
-          "value": "3 min"
-        },
-        {
-          "label": "Competition map",
-          "value": "9×9"
-        },
-        {
-          "label": "Team size",
-          "value": "1"
-        }
-      ],
       "highlights": [
-        "A drag-and-drop block editor with if/else, repeat, and sensor conditions, run by a deterministic interpreter, so the simulator and the car execute the same program.",
-        "Sends programs to the car and drives it live over WebSocket, with gamepad driving for practice.",
-        "Judge scoring by coin value (+10, +25, +50) with a −5 penalty for hitting a cop, 180-second heats, heat replay, and a live sensor strip.",
-        "Spec tests that keep the scoring and the map's fairness rules honest."
+        "A drag-and-drop block editor with if/else, repeat and sensor conditions. One deterministic interpreter runs every program, so the simulator and the car behave the same.",
+        "Programs go to the car over WebSocket, and a gamepad can drive it live for practice.",
+        "Judges score by coin value (+10, +25 or +50) and take off 5 for hitting a cop, in 3-minute heats. Every heat can be replayed, with a live strip of the car's sensors.",
+        "Spec tests keep the scoring and the map's fairness rules honest.",
+        "I audited the car's firmware too. Taking out a heading reset it ran on every pass made its idle loop about ten times faster."
       ],
-      "problem": "Students who had learned programming logic in drag-and-drop games needed a way to program real cars at a live, judged state event.",
-      "solution": "One app that is both the practice simulator and the event's operator and scoring console, sending the same block program to the simulator and to the car.",
-      "impact": "Ran the training, the testing, and the competition at the state robotics event.",
+      "problem": "Students had learned programming logic in drag-and-drop games. At the state event they had to program real cars, live, in front of judges.",
+      "solution": "One app for practice and for the event itself. The same block program runs in the simulator and on the car, and the judges score every run from the app.",
+      "impact": "It ran the training, the testing and the competition at the state robotics event.",
       "screenshots": [
         {
           "src": "/projects/gta-programming-the-car.webp",
@@ -330,14 +309,24 @@
           "alt": "A SunFounder Zeus car with mecanum wheels, an ultrasonic sensor, and its control boards",
           "caption": "A SunFounder Zeus car, the robot competitors programmed."
         }
+      ],
+      "metrics": [
+        {
+          "label": "Person who built it",
+          "value": "1"
+        },
+        {
+          "label": "Faster firmware loop",
+          "value": "10x"
+        }
       ]
     },
     {
       "id": "stiegler-edtech-site",
       "slug": "stiegler-edtech-site",
       "title": "Stiegler EdTech Website",
-      "description": "Moved the company's two paid web platforms, a WordPress site and a Bubble app, onto one Next.js app without breaking a legacy URL or a form.",
-      "longDescription": "Stiegler EdTech's web presence ran on two paid platforms: a WordPress and Elementor site, and a separate Bubble site for The Mothership. I planned and led their consolidation into one Next.js app on Vercel, rebuilt page by page to match the live sites, and cut over in September 2026. The WordPress hosting, its paid plugins and email add-on, and the Bubble plan were retired, so the company now runs on one host instead of two paid platforms.",
+      "description": "Moved the company's two paid web platforms onto one Next.js app, saving thousands of dollars a year without breaking a link or a form.",
+      "longDescription": "Stiegler EdTech was paying for two web platforms. I led the move into one Next.js app on Vercel, which saves the company thousands of dollars a year, and not one old link or form broke.",
       "technologies": [
         "TypeScript",
         "Next.js",
@@ -360,39 +349,39 @@
       "role": "CTO · planned and led the migration",
       "metrics": [
         {
-          "label": "Legacy URLs kept",
-          "value": "198/198"
-        },
-        {
-          "label": "Pages at parity",
-          "value": "22/22"
-        },
-        {
-          "label": "Submissions migrated",
-          "value": "1,708"
+          "label": "Saved every year",
+          "value": "$1,000+"
         },
         {
           "label": "Paid platforms",
           "value": "2 → 1"
+        },
+        {
+          "label": "Links broken",
+          "value": "0"
+        },
+        {
+          "label": "Pages matched",
+          "value": "100%"
         }
       ],
       "highlights": [
-        "Measured both live sites with a headless crawl at desktop and phone widths, then rebuilt every page to match, checked by a Playwright parity test against a snapshot of the old site.",
-        "Kept all 198 legacy URLs working, with permanent redirects from the retired domain and a checker that verifies every one.",
-        "Moved every form onto one server action, with its delivery services injected so tests run against stubs; all ten forms were verified end to end at cutover.",
-        "Imported 1,708 past form submissions, from August 2023 to September 2026, into Postgres, and built site search from the rendered pages.",
-        "Cut the hero video from 26 MB to 6.4 MB and added an image pipeline for share cards."
+        "I measured both live sites with a headless crawl at desktop and phone widths, rebuilt every page to match, and checked each one with a Playwright parity test against a snapshot of the old site.",
+        "All 198 old URLs still work, with permanent redirects from the retired domain and a checker that verifies every one.",
+        "Every form posts to one server action, with its delivery services injected so tests run against stubs. All ten forms were checked end to end at cutover.",
+        "More than 1,700 past form submissions, from August 2023 to September 2026, moved into Postgres, and site search is built from the rendered pages.",
+        "I cut the hero video from 26 MB to 6.4 MB and added an image pipeline for share cards."
       ],
-      "problem": "One organization paid for two web platforms: WordPress with paid plugins and an email add-on, and a Bubble plan, each with its own pages, forms, and data.",
-      "solution": "One Next.js app on Vercel that serves both sites, keeps every old URL, and stores all form submissions in one Postgres table.",
-      "impact": "One host instead of two paid platforms, with a verified cutover: 22 of 22 pages at parity, 198 of 198 legacy URLs, and all ten forms working."
+      "problem": "The company paid for two web platforms: WordPress, with paid hosting, plugins and an email add-on, and a Bubble plan for The Mothership. Each had its own pages, forms and data, and its own bill.",
+      "solution": "One Next.js app on Vercel that serves both sites, keeps every old URL working and stores every form submission in one Postgres table.",
+      "impact": "The savings come from what's gone: the WordPress hosting, its paid plugins and email add-on, and the paid Bubble plan, which dropped to free. The cutover was checked end to end: every page, every old URL and all ten forms."
     },
     {
       "id": "safe-bet",
       "slug": "safe-bet",
       "title": "Safe Bet",
-      "description": "A compliance platform prototype for regulated sports wagering: it turns the rules about who may bet into a status sportsbooks can check, with a gambling-literacy curriculum alongside.",
-      "longDescription": "States, institutions, and employers set rules about who may wager, and sportsbooks need a clear answer before they take a bet. Safe Bet turns those rules into one of three statuses (prohibited, conditional, or clear) and adds the education, attestation, and records that move someone into compliance. I built the product prototype for a startup client in 2026, with workspaces for regulators, sportsbook operators, educators, students, and college athletes, all running on typed demo data.",
+      "description": "A compliance prototype for sports betting: it tells a sportsbook whether someone may bet, and teaches gambling literacy alongside.",
+      "longDescription": "States, institutions and employers all set rules about who may bet, and a sportsbook needs a clear answer before it takes a wager. Safe Bet turns those rules into one of three statuses: prohibited, conditional or clear. It also has the lessons, attestations and records that move someone into compliance. I built it in 2026 as a working prototype on typed demo data.",
       "technologies": ["TypeScript", "Next.js", "React", "shadcn/ui"],
       "image": "/projects/safe-bet.webp",
       "url": "https://safebets-three.vercel.app",
@@ -401,38 +390,20 @@
       "date": "2026-09-01",
       "status": "Product Prototype",
       "role": "Freelance engineer for a startup client",
-      "metrics": [
-        {
-          "label": "Permission states",
-          "value": "3"
-        },
-        {
-          "label": "Role workspaces",
-          "value": "6"
-        },
-        {
-          "label": "Curriculum domains",
-          "value": "5"
-        },
-        {
-          "label": "Lessons",
-          "value": "104"
-        }
-      ],
       "highlights": [
-        "A cascading rules engine where the most restrictive rule wins, across seven registry categories of people barred from wagering.",
-        "Operators get a legal citation rather than the reason a person is listed, so a check reveals as little as possible.",
-        "Six role views (admin, operator, educator, high school student, learner, college athlete) switched from one \"View as\" control.",
-        "A curriculum across five domains (recognition, reasoning, influence, vulnerability, protection), with a presenter mode for educators and certificates for learners.",
-        "20 spec files covering the rules engine and the registry categories."
+        "A rules engine where the most restrictive rule wins, across seven categories of people barred from betting.",
+        "A sportsbook gets a legal citation, not the reason a person is listed, so a check reveals as little as possible.",
+        "Six views (admin, operator, educator, high school student, learner and college athlete), switched from one \"View as\" control.",
+        "A course of 100+ lessons across five topics (recognition, reasoning, influence, vulnerability and protection), with a presenter mode for educators and certificates for learners.",
+        "20 spec files cover the rules engine and the barred categories."
       ]
     },
     {
       "id": "vesl-terminal",
       "slug": "vesl-terminal",
       "title": "VESL Cyber Command",
-      "description": "A browser terminal game that teaches students the command line through a cybersecurity story, reused for competitions across a cybersecurity curriculum.",
-      "longDescription": "VESL Cyber Command casts students as trainee operators who work in the command line, starting with Operation First Contact, a secure digital dead-drop. It runs a simulated shell in the browser, with an explain command for hints when students get stuck, a tutorial, adjustable typing speed, and four color themes. I built it for an earlier curriculum build-out, and it was used again and again for competitions and events in a cybersecurity curriculum.",
+      "description": "A browser game that teaches the command line through a cybersecurity story, used again and again at competitions and events.",
+      "longDescription": "Students play trainee operators who work in the command line. The first mission, Operation First Contact, is a secure digital dead-drop. It runs a simulated shell in the browser, with a tutorial, an explain command for when students get stuck, adjustable typing speed and four color themes. I built it for an earlier curriculum build-out, and it kept getting used for competitions and events in a cybersecurity curriculum.",
       "technologies": ["JavaScript", "Vite", "xterm.js"],
       "image": "/projects/vesl-terminal.webp",
       "url": "https://sparknc-terminal.vercel.app",
@@ -442,9 +413,8 @@
       "status": "Educational Game",
       "role": "Designer and engineer",
       "highlights": [
-        "A simulated shell where students run real commands, such as ls, to complete story missions.",
-        "An explain command that walks students through the mission reports when they're stuck.",
-        "Reused across competitions and events in a cybersecurity curriculum."
+        "A simulated shell where students run real commands, like ls, to finish story missions.",
+        "An explain command that walks students through the mission reports when they're stuck."
       ]
     },
     {
@@ -452,7 +422,7 @@
       "slug": "build-the-carolinas",
       "title": "Build the Carolinas",
       "description": "Marketing site for Build the Carolinas, the skilled-trades careers brand of ABC Carolinas and VESL.",
-      "longDescription": "Build the Carolinas is the joint brand that ABC Carolinas and VESL use to bring students into construction careers. I built its marketing site: trade pathways such as the Electrician Pathway, credentials, careers and salaries, pages for students, parents, and employers, and a connected contact form. It's the public front door for the skilled-trades games, which send players to its careers page.",
+      "longDescription": "Build the Carolinas is the brand ABC Carolinas and VESL use to bring students into construction careers. I built its marketing site.",
       "technologies": ["Next.js", "React"],
       "image": "/projects/build-the-carolinas.webp",
       "url": "https://www.buildthecarolinas.org",
@@ -462,9 +432,9 @@
       "status": "Marketing Site",
       "role": "Built the site",
       "highlights": [
-        "Pages for each audience (students, parents, employers) and for pathways, credentials, careers and salaries, sponsorships, and events.",
-        "A connected contact form for program inquiries.",
-        "Linked from the skilled-trades games, whose results send students to its careers page."
+        "Pages for each audience (students, parents and employers) and for trade pathways like the Electrician Pathway, credentials, careers and salaries, sponsorships and events.",
+        "A working contact form for program inquiries.",
+        "The skilled-trades games link to it: their results send players to its careers page."
       ],
       "screenshots": [
         {
@@ -487,8 +457,8 @@
       "id": "ctac-program",
       "slug": "ctac-program",
       "title": "CTAC — Careers in Technology Cohort",
-      "description": "Ran a software-careers program for adults: wrote the curriculum and taught about 130 career changers, over 100 of whom were placed in full-time roles.",
-      "longDescription": "CTAC was an intensive careers-in-technology program for adults moving into software. I went through the program as a student, then came back as a co-founder and its Director of Curriculum and Programming. I wrote the curriculum, taught it daily as the sole instructor for two years, supervised a third, and worked with corporate sponsors so each cohort learned what their hiring pipelines needed.",
+      "description": "A coding program for adults changing careers. I wrote the curriculum and taught about 130 people, and more than 100 were hired into full-time roles.",
+      "longDescription": "CTAC trained adults to move into software jobs. I went through it as a student, then came back to run it: I wrote the curriculum, taught it every day as the only instructor for two years, and supervised a third. I also worked with the sponsoring employers so each cohort learned what their hiring teams needed.",
       "technologies": [
         "Curriculum design",
         "Teaching",
@@ -504,27 +474,22 @@
       "role": "Co-founder & Director of Curriculum and Programming",
       "metrics": [
         {
-          "label": "Graduates placed",
+          "label": "My students hired",
           "value": "100+"
         },
         {
-          "label": "Adults taught",
-          "value": "~130"
+          "label": "Adults I taught",
+          "value": "About 130"
         },
         {
-          "label": "Years running",
+          "label": "Years I ran it",
           "value": "3"
-        },
-        {
-          "label": "Curriculum team",
-          "value": "4"
         }
       ],
       "highlights": [
-        "Over 100 of the roughly 130 career changers I taught were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
-        "Taught about 130 of the program's ~200 graduates across three years of cohorts: two teaching daily, one supervising.",
-        "Led a four-person curriculum team on a contracted cohort build for an external client.",
-        "Worked with corporate sponsors so cohorts launched with the curriculum their hiring pipelines needed."
+        "More than 100 of the 130 or so career changers I taught were hired into full-time roles at Charlotte employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated and Truist.",
+        "Those 130 were over half of the program's 200 or so graduates, across three years of cohorts.",
+        "I led a four-person curriculum team on a cohort build for an outside client."
       ],
       "screenshots": [
         {
@@ -569,7 +534,7 @@
       "slug": "hector-mono",
       "title": "hector-mono",
       "description": "My public monorepo: this site, a recipes app, a bookmarks app, and an AI tools catalog, on a shared component library with strict CI.",
-      "longDescription": "A Turborepo monorepo where I build in public. It holds this portfolio, a recipes app with sign-in and a Postgres database, Stash for bookmarks, and a catalog of AI and web tools built on the AI SDK. The apps share a shadcn/ui-based component package, the backend apps follow clean-architecture layers that lint rules enforce, and CI runs lint, typecheck, and tests on every pull request.",
+      "longDescription": "Where I build in public: five apps, including this site, a recipes app with sign-in and a Postgres database, Stash for bookmarks, and a catalog of AI and web tools on the AI SDK, all sharing one component library.",
       "technologies": [
         "TypeScript",
         "Next.js",
@@ -587,20 +552,11 @@
       "date": "2026-10-01",
       "status": "Open Source",
       "role": "Sole engineer",
-      "metrics": [
-        {
-          "label": "Apps",
-          "value": "5"
-        },
-        {
-          "label": "License",
-          "value": "MIT"
-        }
-      ],
       "highlights": [
-        "Clean-architecture layers in the backend apps, enforced by lint rules rather than convention.",
-        "A shared design system: shadcn/ui components with a lint layer that fails CI on off-system colors and styles.",
-        "Every pull request runs lint, typecheck, and tests for the packages it touches."
+        "The backend apps keep clean-architecture layers, and lint rules enforce them rather than convention.",
+        "One design system: shadcn/ui components, with a lint rule that fails CI on any color or style outside the system.",
+        "Every pull request runs lint, typecheck and tests for the packages it touches.",
+        "I build it with Claude. I write a short spec before I prompt, read every change like a teammate's pull request, and the decisions are mine."
       ],
       "links": [
         {

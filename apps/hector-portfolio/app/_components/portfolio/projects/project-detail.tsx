@@ -79,12 +79,15 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         </div>
       )}
 
+      {/* A column per metric from sm up, and an odd last metric spans both columns on
+          phones, so no empty cell shows the border colour through. Each metric is a
+          two-row subgrid, so labels and values line up when a label wraps */}
       {project.metrics && project.metrics.length > 0 && (
-        <dl className="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
+        <dl className="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:auto-cols-fr sm:grid-flow-col sm:grid-cols-none">
           {project.metrics.map((metric, index) => (
             <div
               key={metric.label}
-              className="flex flex-col gap-1 bg-background p-4"
+              className="row-span-2 grid grid-rows-subgrid gap-1 bg-background p-4 max-sm:last:odd:col-span-2"
             >
               <dt className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 {metric.label}

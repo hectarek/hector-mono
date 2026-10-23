@@ -19,13 +19,13 @@ app/
   (main)/              # Route group (about, contact, now, projects, reading)
   _components/         # Private components organized by section
     portfolio/
-      hero/, proof/, skills/, projects/, experience/, approach/, contact/, about/, now/, reading/, nav/, shared/
+      hero/, path/, proof/, projects/, experience/, approach/, contact/, about/, now/, reading/, nav/, shared/
     shared/            # brand-icons
   _providers/          # MotionProvider: LazyMotion, which loads framer-motion's features after first paint
   ui/                  # Public, noindex @repo/ui component gallery with a theme switcher; its layout imports neobrutalist.css and the TooltipProvider, so neither ships with the rest of the site
   robots.ts, sitemap.ts
 src/
-  data/                # Static JSON (profile, skills, experience, projects, reading-list)
+  data/                # Static JSON (profile, experience, projects, reading-list)
   lib/                 # Data access, animations, skill icons
   shared/              # Config (site URL), SEO utils
   types/               # TypeScript types
@@ -38,7 +38,7 @@ tests/                 # Tests
 
 ## Data
 - All data lives in `src/data/*.json`
-- `src/lib/data.ts` exposes typed getters: `getProfile()`, `getSkills()`, `getExperience()`, `getProjects()`, etc.
+- `src/lib/data.ts` exposes typed getters: `getProfile()`, `getExperience()`, `getProjects()`, etc.
 - Pages call these directly in Server Components
 
 ## Patterns
@@ -58,12 +58,12 @@ tests/                 # Tests
 Static site — keep it simple. No auth, no database, no API routes, no TanStack Query, no DI containers, no use cases, no domain error classes.
 
 ## Brand Voice
-Personal portfolio for Hector Gonzalez: a full-stack engineer, strongest on the front end, who ships AI features. The full voice and style guide is `docs/spec.md` §5; this is the short version.
-- **Direct** — information-first, no fluff
-- **Analytical** — grounded in reasoning and structure
-- **Pragmatic** — minimal, efficient, purpose-driven
-- **Builder mindset** — focuses on systems and execution
-- Avoid filler words: "excited", "passionate", "synergy"
+Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the front end, with applied AI as the specialty. The hero line (`src/data/profile.json`'s tagline) says how he works: figure out what's needed, build it with AI, and work with others. The full voice and style guide is `docs/spec.md` §5, and every copy change follows its Copy Rules; this is the short version.
+- **Short and plain** — write the way Hector talks; the hero is one line, and the home page reads as one story (`docs/spec.md` §4)
+- **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
+- **No clichés or slogans** — no "ships AI features", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
+- **Round the headline numbers, and say why they matter** — "tens of thousands of people" in a sentence, "10,000+" on the proof strip with a line on what it means, not a bare "~24K users" or "30 min"; a stat strip holds statistics that say something about Hector (what he built, led, cut, saved or taught), never plain facts like a step count
+- **Hector reviews new copy** before it merges. The tagline and bio are also the home page's meta description, and the share card shows the tagline and the proof strip (`docs/seo.md`)
 
 ## Visual Style
 - Minimal, clean grids; neutral colors (white, black, gray, sparse accents)

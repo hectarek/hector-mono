@@ -15,7 +15,7 @@ Static personal portfolio site for Hector Gonzalez. Part of the [hector-mono](..
 ```
 app/            # App Router pages (home, about, contact, now, projects, reading) + _components (organized by section)
 app/ui/         # Public @repo/ui component gallery with a theme switcher
-src/data/       # Static JSON (profile, skills, experience, projects, reading-list)
+src/data/       # Static JSON (profile, experience, projects, reading-list)
 src/lib/        # Typed data getters, animations, skill icons
 src/shared/     # Config (canonical site URL), SEO utils
 ```

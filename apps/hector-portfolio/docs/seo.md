@@ -38,7 +38,13 @@ export const metadata = generateSEOMetadata({
 
 ### Share image
 
-Every page gets `public/og-image.png` (1200×630) as its `og:image` and `twitter:image` unless it passes its own `image` (`DEFAULT_SHARE_IMAGE` in `src/shared/utils/seo.ts`). It's set there rather than as an `app/opengraph-image` file because a page that sets its own `openGraph` replaces the inherited one, so a file-based image reached only the home page. The card is a static PNG, not an `ImageResponse` route: `next/og` needs inline styles, which the design lint bans. To change it, edit and re-render the card (any 1200×630 PNG works) and replace the file. The home-screen icon is `app/apple-icon.png` (180×180), which Next.js links on every page.
+Every page gets `public/og-image.png` (1200×630) as its `og:image` and `twitter:image` unless it passes its own `image` (`DEFAULT_SHARE_IMAGE` in `src/shared/utils/seo.ts`). It's set there rather than as an `app/opengraph-image` file because a page that sets its own `openGraph` replaces the inherited one, so a file-based image reached only the home page. The card is a static PNG, not an `ImageResponse` route: `next/og` needs inline styles, which the design lint bans. The home-screen icon is `app/apple-icon.png` (180×180), which Next.js links on every page.
+
+The card's source is [`og-image.html`](./og-image.html). It shows the hero line and the proof strip, so render it again whenever either changes. From `apps/hector-portfolio`, with Chrome installed (the page loads its fonts from Google Fonts):
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --user-data-dir="$(mktemp -d)" --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=5000 --screenshot="$PWD/public/og-image.png" "file://$PWD/docs/og-image.html"
+```
 
 ### Page-Level SEO
 
