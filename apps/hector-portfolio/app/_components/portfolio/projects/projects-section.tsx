@@ -39,9 +39,7 @@ export function ProjectsSection({
             className="font-mono max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
             variants={fadeInUp}
           >
-            Production platforms, applied AI,
-            <br className="hidden sm:block" />
-            and games people actually play.
+            The work behind those numbers.
           </m.h2>
           <m.a
             href="/projects"
@@ -64,7 +62,8 @@ export function ProjectsSection({
         >
           {projects.map((project) => (
             <m.div key={project.id} variants={staggerItemScale}>
-              <ProjectCard project={project} />
+              {/* The proof strip right above already shows each project's number */}
+              <ProjectCard project={project} showMetric={false} />
             </m.div>
           ))}
         </m.div>

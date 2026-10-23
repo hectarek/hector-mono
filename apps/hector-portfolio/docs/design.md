@@ -68,6 +68,7 @@ If something else needs color, we make it ink, paper, or accent. Anything else d
 - **Project cards** — hairline border, accent on hover, status chip in the image corner, a key metric in the top-right of the card body in accent.
 - **Proof / approach grids** — `gap-px` on a `bg-border` grid (inside `border border-border`) so cells share clean hairlines without double borders.
 - **Timeline** — single hairline rule on the left, small status dot at each role, mono period label.
+- **Path** — the home page's story: one row per step, a mono year on the left and one sentence on the right, hairline rules between rows.
 - **Photo** — 4:5 portrait rectangle, hairline border, mono caption strip below (`location` left; a pulsing dot and "Building now →", linking to `/now`, right).
 - **Nav** — three items (`Work`, `About`, `Contact`). Brand is `/ Hector Gonzalez`. The cursor `>` shows on hover and persists for the active route.
 - **Footer** — three columns: brand attribution, site links (including `Now`), elsewhere + colophon line.

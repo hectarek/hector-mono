@@ -24,21 +24,20 @@ export function ContactCTA({ profile }: ContactCTAProps) {
       <div className="mx-auto max-w-6xl">
         <div className="border-t mb-10" />
 
-        <SectionEyebrow index="07" label="Get in touch" />
+        <SectionEyebrow index="06" label="Get in touch" />
 
         <m.h2
           className="font-mono mt-5 max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={heroItem}
         >
-          Have a problem worth building for?
+          Got work that should be easier?
         </m.h2>
 
         <m.p
           className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={heroItem}
         >
-          Reach out about roles, collaborations, or interesting builds. Email is
-          the fastest way in.
+          I&apos;m in Charlotte. Email is the fastest way to reach me.
         </m.p>
 
         <m.div className="mt-8 flex flex-wrap gap-3" variants={heroItem}>

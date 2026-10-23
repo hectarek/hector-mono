@@ -19,7 +19,7 @@ const PROOF_ITEMS: ProofItem[] = [
   {
     value: "10,000+",
     label: "Users",
-    hint: "Students and teachers on The Notwork, which I co-architected and run",
+    hint: "Students and teachers on The Notwork",
   },
   {
     value: "95%+",
@@ -38,11 +38,7 @@ const PROOF_ITEMS: ProofItem[] = [
   },
 ];
 
-interface ProofStripProps {
-  intro: string;
-}
-
-export function ProofStrip({ intro }: ProofStripProps) {
+export function ProofStrip() {
   return (
     <m.section
       className="relative px-4 py-12 sm:py-16"
@@ -52,14 +48,16 @@ export function ProofStrip({ intro }: ProofStripProps) {
       variants={fadeInUp}
     >
       <div className="mx-auto max-w-6xl">
-        <SectionEyebrow index="02" label="Proof" />
+        <div className="border-t mb-10" />
 
-        <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          {intro}
-        </p>
+        <SectionEyebrow index="03" label="Proof" />
+
+        <h2 className="font-mono mt-5 text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl">
+          What it&apos;s added up to so far.
+        </h2>
 
         <m.dl
-          className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4"
+          className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4"
           variants={staggerContainer}
         >
           {PROOF_ITEMS.map((item, index) => (

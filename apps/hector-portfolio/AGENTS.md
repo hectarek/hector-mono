@@ -19,13 +19,13 @@ app/
   (main)/              # Route group (about, contact, now, projects, reading)
   _components/         # Private components organized by section
     portfolio/
-      hero/, proof/, skills/, projects/, experience/, approach/, contact/, about/, now/, reading/, nav/, shared/
+      hero/, path/, proof/, projects/, experience/, approach/, contact/, about/, now/, reading/, nav/, shared/
     shared/            # brand-icons
   _providers/          # MotionProvider: LazyMotion, which loads framer-motion's features after first paint
   ui/                  # Public, noindex @repo/ui component gallery with a theme switcher; its layout imports neobrutalist.css and the TooltipProvider, so neither ships with the rest of the site
   robots.ts, sitemap.ts
 src/
-  data/                # Static JSON (profile, skills, experience, projects, reading-list)
+  data/                # Static JSON (profile, experience, projects, reading-list)
   lib/                 # Data access, animations, skill icons
   shared/              # Config (site URL), SEO utils
   types/               # TypeScript types
@@ -38,7 +38,7 @@ tests/                 # Tests
 
 ## Data
 - All data lives in `src/data/*.json`
-- `src/lib/data.ts` exposes typed getters: `getProfile()`, `getSkills()`, `getExperience()`, `getProjects()`, etc.
+- `src/lib/data.ts` exposes typed getters: `getProfile()`, `getExperience()`, `getProjects()`, etc.
 - Pages call these directly in Server Components
 
 ## Patterns
@@ -59,7 +59,7 @@ Static site — keep it simple. No auth, no database, no API routes, no TanStack
 
 ## Brand Voice
 Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the front end, with applied AI as the specialty. The hero says it in one line: "I build software that makes someone's work easier." The full voice and style guide is `docs/spec.md` §5, and every copy change follows its Copy Rules; this is the short version.
-- **Short and plain** — write the way Hector talks; the hero is one line, and the proof section opens with one sentence
+- **Short and plain** — write the way Hector talks; the hero is one line, and the home page reads as one story (`docs/spec.md` §4)
 - **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
 - **No clichés or slogans** — no "ships", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
 - **Round the headline numbers** — "tens of thousands of people" in a sentence, "10,000+ users" on the proof strip, not "~24K" or "30 min"

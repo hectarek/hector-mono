@@ -43,11 +43,4 @@ describe("ExperienceSection Logic", () => {
       expect(Array.isArray(exp.technologies)).toBe(true);
     });
   });
-
-  it("should validate showCTA prop logic", () => {
-    const showCTA = true;
-    const hideCTA = false;
-    expect(typeof showCTA).toBe("boolean");
-    expect(typeof hideCTA).toBe("boolean");
-  });
 });

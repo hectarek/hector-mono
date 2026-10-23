@@ -6,7 +6,6 @@ import {
   getProfile,
   getProjectBySlug,
   getProjects,
-  getSkills,
 } from "@/src/lib/data";
 
 describe("Data Functions", () => {
@@ -27,30 +26,6 @@ describe("Data Functions", () => {
       expect(profile.name.length).toBeGreaterThan(0);
       expect(typeof profile.email).toBe("string");
       expect(profile.email).toContain("@");
-    });
-  });
-
-  describe("getSkills", () => {
-    it("should return skills data", () => {
-      const skills = getSkills();
-      expect(skills).toBeDefined();
-      expect(skills).toHaveProperty("categories");
-      expect(Array.isArray(skills.categories)).toBe(true);
-    });
-
-    it("should have at least one category", () => {
-      const skills = getSkills();
-      expect(skills.categories.length).toBeGreaterThan(0);
-    });
-
-    it("should have valid category structure", () => {
-      const skills = getSkills();
-      skills.categories.forEach((category) => {
-        expect(category).toHaveProperty("name");
-        expect(category).toHaveProperty("skills");
-        expect(Array.isArray(category.skills)).toBe(true);
-        expect(category.skills.length).toBeGreaterThan(0);
-      });
     });
   });
 

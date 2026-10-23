@@ -27,13 +27,15 @@ This is a personal portfolio website for myself.
 
 ## 4. Layout and Design
 
-- Main Page
-    - Should have a hero section with my name, image and a short description of what I do
-    - Should have a section with my skills 
-    - Should have a section with my projects (with badges for the technologies used)
-    - Should have a section with my experience
+- Main Page, told as one story from top to bottom
+    - Should have a hero section with my name, image and one line about what I do
+    - Should have the path: how I got here, a year and a sentence per step, and a line about life outside work
+    - Should have the proof: the numbers it has added up to
+    - Should have a section with my projects (with badges for the technologies used), framed as the work behind the numbers
+    - Should have how I work: a few principles and the tools I use most
     - Should have a section with my contact information (email) CTA to contact me
     - Should have a footer with social media links
+    - Each section adds something the ones before it didn't say; the full skills and experience lists live on the About page
 - About Me Page
     - Should be a page that explains my background, experience, and skills
     - Should be a page that explains my brand and personality
@@ -128,11 +130,11 @@ D. Learning systems (the domain)
 5. Copy Rules
 
 From Hector's review of the site's copy (2026-10). They cover every page, the metadata and the share card.
-	•	Short and plain. Write the way Hector talks. The hero is one line, and the proof section opens with one sentence.
+	•	Short and plain. Write the way Hector talks. The hero is one line.
 	•	Show, don't name. Specific facts carry the copy: what was built, for whom, and what changed. Never name a trait (“passionate,” “authentic,” “caring,” “product-minded”) or hint at one with adjectives.
 	•	No clichés or slogans: no “ships,” “passionate,” “excited” or “synergy,” and no setup-and-reversal lines like “Ambiguity in. Useful systems out.”
 	•	Sell the outcome, not the exact figure. Sentences round to words (“tens of thousands of people,” not “~24K”), and the proof strip rounds down to a number with a plus (“10,000+ users,” “95%+ less time per lesson,” “10+ browser games,” “100+ graduates placed,” not “30 min”).
-	•	The hero's line and the proof section's sentence (profile.json's tagline and bio) are also the home page's meta description (app/page.tsx, with app/layout.tsx as the fallback), and the share card (docs/og-image.html) shows the line and the proof strip. Change them together.
+	•	The hero's line and the one-sentence summary of the path (profile.json's tagline and bio) are also the home page's meta description (app/page.tsx, with app/layout.tsx as the fallback), and the share card (docs/og-image.html) shows the line and the proof strip. Change them together.
 	•	Hector reviews new copy before it merges.
 
 ⸻

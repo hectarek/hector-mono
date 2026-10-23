@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
 import { ApproachSection } from "@/app/_components/portfolio/approach/approach-section";
 import { ContactCTA } from "@/app/_components/portfolio/contact/contact-cta";
-import { ExperienceSection } from "@/app/_components/portfolio/experience/experience-section";
 import { HeroSection } from "@/app/_components/portfolio/hero/hero-section";
+import { PathSection } from "@/app/_components/portfolio/path/path-section";
 import { ProjectsSection } from "@/app/_components/portfolio/projects/projects-section";
 import { ProofStrip } from "@/app/_components/portfolio/proof/proof-strip";
-import { SkillsSection } from "@/app/_components/portfolio/skills/skills-section";
-import {
-  getExperience,
-  getFeaturedProjects,
-  getProfile,
-  getSkills,
-} from "@/src/lib/data";
+import { getFeaturedProjects, getProfile } from "@/src/lib/data";
 import { generateSEOMetadata } from "@/src/shared/utils/seo";
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -36,27 +30,14 @@ export const metadata: Metadata = generateSEOMetadata({
 
 export default function Home() {
   const profile = getProfile();
-  const skills = getSkills();
   const featuredProjects = getFeaturedProjects();
-  const allExperience = getExperience();
-
-  // Show only the 2 most recent experiences on home page
-  const recentExperience = {
-    experience: allExperience.experience.slice(0, 2),
-  };
 
   return (
     <>
       <HeroSection profile={profile} />
-      <ProofStrip intro={profile.bio} />
-      <SkillsSection skills={skills} eyebrowIndex="03" />
+      <PathSection />
+      <ProofStrip />
       <ProjectsSection projects={featuredProjects} eyebrowIndex="04" />
-      <ExperienceSection
-        experience={recentExperience}
-        showCTA={true}
-        eyebrowIndex="05"
-        heading="Where I've built and shipped recently."
-      />
       <ApproachSection />
       <ContactCTA profile={profile} />
     </>
