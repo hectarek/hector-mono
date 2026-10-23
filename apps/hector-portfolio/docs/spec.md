@@ -12,7 +12,7 @@ This is a personal portfolio website for myself.
 - [ ] Should be SEO friendly and easy to find on search engines
 - [ ] Should be clean and simple to navigate and use
 - [ ] Should effectively convey my brand and personality
-- [ ] Should lead with one plain line about what I do: “I build software that makes someone's work easier.”
+- [ ] Should lead with one plain line about how I work: the hero line, `profile.json`'s tagline (§5's One-Sentence Brand Summary)
 - [ ] Should link proof people can open: live sites, playable games, screenshots, and code
 
 
@@ -58,7 +58,7 @@ For Hector Gonzalez — full-stack engineer (front end and applied AI), co-found
 
 1. Brand Positioning Statement
 
-“I build software that makes someone's work easier.” A full-stack engineer, strongest on the front end, who owns a product end to end, from the interface to the data to the AI pipeline. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
+In Hector's words, the hero line (One-Sentence Brand Summary, below). A full-stack engineer, strongest on the front end, who owns a product end to end, from the interface to the data to the AI pipeline. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
 
 ⸻
 
@@ -132,7 +132,7 @@ D. Learning systems (the domain)
 From Hector's review of the site's copy (2026-10). They cover every page, the metadata and the share card.
 	•	Short and plain. Write the way Hector talks. The hero is one line.
 	•	Show, don't name. Specific facts carry the copy: what was built, for whom, and what changed. Never name a trait (“passionate,” “authentic,” “caring,” “product-minded”) or hint at one with adjectives.
-	•	No clichés or slogans: no “ships,” “passionate,” “excited” or “synergy,” and no setup-and-reversal lines like “Ambiguity in. Useful systems out.”
+	•	No clichés or slogans: no “ships AI features,” “passionate,” “excited” or “synergy,” and no setup-and-reversal lines like “Ambiguity in. Useful systems out.”
 	•	Sell the outcome, not the exact figure. Sentences round to words (“tens of thousands of people,” not “~24K”), and the proof strip rounds down to a number with a plus (“10,000+ platform users,” “95%+ time saved with AI,” “10+ browser games,” “100+ students hired,” not “30 min”).
 	•	Every number says why it matters, not just what it counts. Its label names the takeaway and its line gives the plain facts behind it (“Students and teachers on a platform I co-architected and keep running”), so a reader who never opens a case study still gets the point.
 	•	The hero's line and the one-sentence summary of the path (profile.json's tagline and bio) are also the home page's meta description (app/page.tsx, with app/layout.tsx as the fallback), and the share card (docs/og-image.html) shows the line and the proof strip. Change them together.
@@ -167,4 +167,6 @@ Your work is inherently technical and system-oriented—your visuals should refl
 
 7. One-Sentence Brand Summary
 
-I build software that makes someone's work easier.
+I figure out what's needed, build it with AI, and work with others to get it done.
+
+It's the hero line, from `src/data/profile.json`; change them together.

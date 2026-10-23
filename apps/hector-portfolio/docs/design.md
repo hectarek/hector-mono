@@ -14,7 +14,7 @@ Bold and opinionated through structure and typography, restrained with color and
 
 - Direct, pragmatic, dry.
 - Plain language first; technical detail when it earns its place.
-- "Builder/operator" is the through-line — someone who scopes the problem, designs the system, and builds it.
+- "Builder/operator" is the through-line — someone who scopes the problem, designs the system, and ships the thing.
 - Personality leans humble and curious, not corporate or hustle-y. No "passionate self-starter" energy.
 - Mono labels carry the dossier feel: small, uppercase, tracking-wide. Sentences can be casual.
 - What the copy says, and the words it avoids, are in `spec.md` §5, Copy Rules.

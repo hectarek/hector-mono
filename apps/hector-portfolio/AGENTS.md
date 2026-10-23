@@ -58,10 +58,10 @@ tests/                 # Tests
 Static site — keep it simple. No auth, no database, no API routes, no TanStack Query, no DI containers, no use cases, no domain error classes.
 
 ## Brand Voice
-Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the front end, with applied AI as the specialty. The hero says it in one line: "I build software that makes someone's work easier." The full voice and style guide is `docs/spec.md` §5, and every copy change follows its Copy Rules; this is the short version.
+Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the front end, with applied AI as the specialty. The hero line (`src/data/profile.json`'s tagline) says how he works: figure out what's needed, build it with AI, and work with others. The full voice and style guide is `docs/spec.md` §5, and every copy change follows its Copy Rules; this is the short version.
 - **Short and plain** — write the way Hector talks; the hero is one line, and the home page reads as one story (`docs/spec.md` §4)
 - **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
-- **No clichés or slogans** — no "ships", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
+- **No clichés or slogans** — no "ships AI features", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
 - **Round the headline numbers, and say why they matter** — "tens of thousands of people" in a sentence, "10,000+" on the proof strip with a line on what it means, not a bare "~24K users" or "30 min"
 - **Hector reviews new copy** before it merges. The tagline and bio are also the home page's meta description, and the share card shows the tagline and the proof strip (`docs/seo.md`)
 
