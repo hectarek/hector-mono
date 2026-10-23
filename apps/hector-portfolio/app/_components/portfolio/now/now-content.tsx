@@ -101,9 +101,10 @@ export function NowContent({ profile }: NowContentProps) {
     <>
       <m.section
         className="relative px-4 pb-10 pt-12 sm:pt-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOptions}
+        // Visible from the first paint, as the home hero is: fading the header in
+        // from opacity 0 left it blank until hydration.
+        initial={false}
+        animate="visible"
         variants={heroVariants}
       >
         <div className="relative mx-auto max-w-6xl">
