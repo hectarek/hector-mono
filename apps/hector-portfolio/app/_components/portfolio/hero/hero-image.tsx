@@ -2,6 +2,7 @@
 
 import { m } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { scaleIn } from "@/src/lib/animations";
 import type { Profile } from "@/src/types/portfolio";
 
@@ -48,9 +49,14 @@ export function HeroImage({ profile }: HeroImageProps) {
         )}
       </div>
 
-      <figcaption className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+      {/* On large screens the caption hangs below the figure, so the figure is only as tall
+          as the photo and the hero's buttons line up with the photo's bottom edge */}
+      <figcaption className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground lg:absolute lg:inset-x-0 lg:top-full">
         <span>{profile.location ?? "—"}</span>
-        <span className="flex items-center gap-2 text-muted-foreground">
+        <Link
+          href="/now"
+          className="group flex items-center gap-2 transition-colors hover:text-accent"
+        >
           <span
             className="relative flex h-1.5 w-1.5 items-center justify-center"
             aria-hidden
@@ -59,7 +65,19 @@ export function HeroImage({ profile }: HeroImageProps) {
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
           </span>
           Building
-        </span>
+          <span
+            data-font="hand"
+            className="text-lg normal-case leading-none tracking-normal text-accent"
+          >
+            now
+          </span>
+          <span
+            aria-hidden
+            className="transition-transform group-hover:translate-x-0.5"
+          >
+            →
+          </span>
+        </Link>
       </figcaption>
     </m.figure>
   );

@@ -17,7 +17,7 @@ import { generateSEOMetadata } from "@/src/shared/utils/seo";
 export const metadata: Metadata = generateSEOMetadata({
   title: "Hector Gonzalez | Full-Stack Engineer, Front End and Applied AI",
   description:
-    "I build software that makes someone's work easier. Six years building for the web, from a bank's public site to a learning platform tens of thousands of people use.",
+    "I build software that makes someone's work easier. Six years building for the web, from a bank's public site to a learning platform for North Carolina high schoolers.",
   keywords: [
     "Hector Gonzalez",
     "Full-Stack Engineer",
@@ -48,7 +48,7 @@ export default function Home() {
   return (
     <>
       <HeroSection profile={profile} />
-      <ProofStrip />
+      <ProofStrip intro={profile.bio} />
       <SkillsSection skills={skills} eyebrowIndex="03" />
       <ProjectsSection projects={featuredProjects} eyebrowIndex="04" />
       <ExperienceSection

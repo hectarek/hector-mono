@@ -59,11 +59,11 @@ Static site — keep it simple. No auth, no database, no API routes, no TanStack
 
 ## Brand Voice
 Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the front end, with applied AI as the specialty. The hero says it in one line: "I build software that makes someone's work easier." The full voice and style guide is `docs/spec.md` §5, and every copy change follows its Copy Rules; this is the short version.
-- **Short and plain** — write the way Hector talks; the hero is one line and one sentence
+- **Short and plain** — write the way Hector talks; the hero is one line, and the proof section opens with one sentence
 - **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
 - **No clichés or slogans** — no "ships", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
 - **Round the headline numbers** — "tens of thousands of people" in a sentence, "10,000+ users" on the proof strip, not "~24K" or "30 min"
-- **Hector reviews new copy** before it merges. The hero's line also feeds the home page's meta description and the share card (`docs/seo.md`)
+- **Hector reviews new copy** before it merges. The tagline and bio are also the home page's meta description, and the share card shows the tagline and the proof strip (`docs/seo.md`)
 
 ## Visual Style
 - Minimal, clean grids; neutral colors (white, black, gray, sparse accents)

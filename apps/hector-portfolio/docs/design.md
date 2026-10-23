@@ -60,7 +60,7 @@ If something else needs color, we make it ink, paper, or accent. Anything else d
 - Page-level dot grid + paper grain set the constant background atmosphere. Individual sections don't need to add extra dots — the page is already the journal.
 - Hairline rules separate major sections (`border-t mb-8` / `border-t mb-10`, which draw in the `border` colour; a strong rule is `border-foreground/25`). No card shadows. No drop-shadows.
 - Cards: hairline border + accent border on hover. Status chips show a small colored category dot.
-- Asymmetric hero: name + tagline + bio + CTAs on the left, big portrait photo with a mono caption strip on the right.
+- Asymmetric hero: name + title + tagline + CTAs on the left, with the CTAs lined up with the photo's bottom edge on large screens; big portrait photo with a mono caption strip on the right.
 
 ## Component Hints
 
@@ -68,7 +68,7 @@ If something else needs color, we make it ink, paper, or accent. Anything else d
 - **Project cards** — hairline border, accent on hover, status chip in the image corner, a key metric in the top-right of the card body in accent.
 - **Proof / approach grids** — `gap-px` on a `bg-border` grid (inside `border border-border`) so cells share clean hairlines without double borders.
 - **Timeline** — single hairline rule on the left, small status dot at each role, mono period label.
-- **Photo** — 4:5 portrait rectangle, hairline border, mono caption strip below (`location` left, `availability` with pulsing dot right).
+- **Photo** — 4:5 portrait rectangle, hairline border, mono caption strip below (`location` left; a pulsing dot and "Building now →", linking to `/now`, right).
 - **Nav** — three items (`Work`, `About`, `Contact`). Brand is `/ Hector Gonzalez`. The cursor `>` shows on hover and persists for the active route.
 - **Footer** — three columns: brand attribution, site links (including `Now`), elsewhere + colophon line.
 

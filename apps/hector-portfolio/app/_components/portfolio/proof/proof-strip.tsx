@@ -38,7 +38,11 @@ const PROOF_ITEMS: ProofItem[] = [
   },
 ];
 
-export function ProofStrip() {
+interface ProofStripProps {
+  intro: string;
+}
+
+export function ProofStrip({ intro }: ProofStripProps) {
   return (
     <m.section
       className="relative px-4 py-12 sm:py-16"
@@ -50,8 +54,12 @@ export function ProofStrip() {
       <div className="mx-auto max-w-6xl">
         <SectionEyebrow index="02" label="Proof" />
 
+        <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          {intro}
+        </p>
+
         <m.dl
-          className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4"
+          className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4"
           variants={staggerContainer}
         >
           {PROOF_ITEMS.map((item, index) => (
