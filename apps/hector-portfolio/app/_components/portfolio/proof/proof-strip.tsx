@@ -28,7 +28,7 @@ const PROOF_ITEMS: ProofItem[] = [
   },
   {
     value: "10+",
-    label: "Browser games",
+    label: "Games built solo",
     hint: "2D and 3D games I designed and built in Pixi.js and Three.js.",
   },
   {
