@@ -108,6 +108,34 @@
         "typescript": "^7.0.2",
       },
     },
+    "apps/job-search": {
+      "name": "job-search",
+      "version": "0.1.0",
+      "dependencies": {
+        "@evyweb/ioctopus": "^1.4.1",
+        "@neondatabase/auth": "^0.5.0-beta",
+        "@neondatabase/serverless": "^1.2.0",
+        "@repo/ui": "workspace:*",
+        "drizzle-orm": "^0.45.4",
+        "lucide-react": "^1.53.0",
+        "next": "16.4.0",
+        "react": "19.3.0",
+        "react-dom": "19.3.0",
+        "zod": "^4.6.5",
+      },
+      "devDependencies": {
+        "@repo/biome-config": "workspace:*",
+        "@repo/typescript-config": "workspace:*",
+        "@tailwindcss/postcss": "^4.3.3",
+        "@types/bun": "1.4.2",
+        "@types/node": "^26.6.4",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
+        "drizzle-kit": "^0.31.11",
+        "tailwindcss": "^4.3.3",
+        "typescript": "^7.0.2",
+      },
+    },
     "apps/relationship-meter": {
       "name": "relationship-meter",
       "version": "0.1.0",
@@ -1561,6 +1589,8 @@
     "isomorphic-fetch": ["isomorphic-fetch@3.0.0", "", { "dependencies": { "node-fetch": "^2.6.1", "whatwg-fetch": "^3.4.1" } }, "sha512-qvUtwJ3j6qwsF3jLxkZ72qCgjMysPzDfeV240JHiGZsANBYd+EEuu35v7dfrJ9Up0Ak07D7GGSkGhCHTqg/5wA=="],
 
     "jiti": ["jiti@2.7.0", "", { "bin": { "jiti": "lib/jiti-cli.mjs" } }, "sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ=="],
+
+    "job-search": ["job-search@workspace:apps/job-search"],
 
     "jose": ["jose@6.2.5", "", {}, "sha512-2E5L2yRp03FnwreJLJX8/r7mHiZICCf8kG7fAsTWkSQTDAcc46NIZoQLKy+EJ8sPoJlxyS4OQR5H70LjIZZlIQ=="],
 

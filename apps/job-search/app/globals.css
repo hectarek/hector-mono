@@ -1,0 +1,15 @@
+/* Layer order first. Neon Auth puts its defaults (including `* { border-color }`) in
+   @layer neon-auth; left undeclared, that layer would rank above Tailwind's utilities
+   and beat classes like border-transparent. Rank it with base styles instead. */
+@layer theme, base, neon-auth, components, utilities;
+
+@import "@repo/ui/styles/globals.css";
+/* After Tailwind (inside the line above), as Neon Auth requires. */
+@import "@neondatabase/auth/ui/tailwind";
+
+/* Neon Auth re-points Tailwind's colours and radius at its own --neon-* variables.
+   The colours fall back to our theme tokens; the radius is a fixed 0.625rem, so point
+   it at the theme's --radius (unlayered, so it beats Neon's @layer neon-auth). */
+:root {
+  --neon-radius: var(--radius);
+}
