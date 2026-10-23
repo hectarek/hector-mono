@@ -1,2 +1,5 @@
 [test]
 preload = ["./tests/_support/preload.ts"]
+# Screen tests (*.test.tsx) need a browser (happy-dom) each, so they run on their own,
+# isolated: `bun run test:screens`. `bun run test` runs both.
+pathIgnorePatterns = ["**/*.test.tsx"]

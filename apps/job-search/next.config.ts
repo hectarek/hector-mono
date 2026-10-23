@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
     // Next.js 16.4 experiments: see docs/monorepo-guide.md#experimental-nextjs-options.
     turbopackRustReactCompiler: true,
     turbopackGc: true,
-    // A page that reads the session stops prerendering at the read; NeonAuthService's catch
-    // (and Neon's own) then log that stop as a failed sign-in. Requests log as before.
+    // A page that reads the session stops prerendering at the read; Neon Auth's own catch
+    // then logs that stop as a cookie validation error. Requests log as before.
     hideLogsAfterAbort: true,
   },
 };

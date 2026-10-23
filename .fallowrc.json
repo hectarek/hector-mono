@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/fallow/schema.json",
-  "entry": ["apps/hectors-recipes/scripts/*.ts", "apps/job-search/scripts/*.ts"],
+  "entry": [
+    "apps/hectors-recipes/scripts/*.ts",
+    "apps/job-search/scripts/*.ts",
+    "apps/job-search/tests/_support/dom.ts"
+  ],
   "ignoreDependencies": ["@repo/biome-config"],
   "ignoreExports": [
     {

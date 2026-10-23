@@ -1,4 +1,7 @@
 // Runs before every test file (bunfig.toml [test].preload).
+import { mock } from "bun:test";
+import { fakeNeonAuth } from "@/tests/_support/neon-auth";
+import { Redirected } from "@/tests/_support/next";
 
 // Bun loads .env for tests too. Drop the app's credentials and account settings so no test
 // can reach the test project's database, auth or Google, and so tests behave the same with
@@ -16,3 +19,18 @@ for (const key of [
 ]) {
   delete process.env[key];
 }
+
+// The real module throws at import without those variables, and would reach Neon. Tests
+// read the session through MockAuthService; the auth route forwards to this stand-in.
+mock.module("@/lib/auth/server", () => ({ auth: fakeNeonAuth }));
+
+mock.module("next/navigation", () => ({
+  redirect: (url: string): never => {
+    throw new Redirected(url);
+  },
+}));
+
+// next/font only works inside Next's compiler; the root layout calls it at import.
+mock.module("next/font/google", () => ({
+  Geist: () => ({ variable: "font-geist", className: "font-geist" }),
+}));

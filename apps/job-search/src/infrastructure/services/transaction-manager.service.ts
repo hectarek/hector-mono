@@ -7,7 +7,9 @@ import type { ILoggerService } from "@/src/application/services/logger.service.i
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import {
   DatabaseOperationError,
+  HumanOnlyError,
   InputParseError,
+  NotAllowedError,
   NotFoundError,
   UnauthenticatedError,
   UnauthorizedError,
@@ -16,7 +18,9 @@ import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 const DOMAIN_ERRORS = [
   DatabaseOperationError,
+  HumanOnlyError,
   InputParseError,
+  NotAllowedError,
   NotFoundError,
   UnauthenticatedError,
   UnauthorizedError,

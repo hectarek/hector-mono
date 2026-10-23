@@ -4,7 +4,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@repo/ui/components/empty";
-import { getCurrentUserId } from "@/app/_lib/current-user";
+import { getPageActor } from "@/app/_lib/current-actor";
 import {
   formatWeekRange,
   mondayOf,
@@ -13,8 +13,9 @@ import {
 } from "@/src/entities/week";
 
 export default async function ThisWeekPage() {
-  // The session first: it ends the prerender, so the clock is read only at request time.
-  await getCurrentUserId();
+  // The session first: it keeps other accounts out, and it ends the prerender, so the clock
+  // is read only at request time.
+  await getPageActor();
   const monday = mondayOf(todayIn(PLAN_TIME_ZONE));
 
   return (

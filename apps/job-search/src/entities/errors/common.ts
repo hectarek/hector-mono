@@ -30,3 +30,21 @@ export class UnauthorizedError extends Error {
     super(message, options);
   }
 }
+
+// Signed in, but not one of the app's two accounts (docs/build-plan.md R23). Seen by
+// strangers, so it never says whose workspace this is.
+export class NotAllowedError extends Error {
+  constructor(
+    message = "This account can't use the app.",
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
+
+// Something only Hector may do, asked for from Claude's session (R21).
+export class HumanOnlyError extends Error {
+  constructor(message = "Only Hector can do this.", options?: ErrorOptions) {
+    super(message, options);
+  }
+}

@@ -12,13 +12,11 @@ export function generateStaticParams() {
   return AUTH_PATHS.map((path) => ({ path }));
 }
 
-// Neon's wording, in the app's voice ("Sign in", not "Login").
+// Neon's wording, in the app's voice ("Sign in", not "Login"). Sign-up is off (AuthProvider).
 const LOCALIZATION = {
   SIGN_IN: "Sign in",
   SIGN_IN_ACTION: "Sign in",
   SIGN_IN_DESCRIPTION: "Welcome back.",
-  SIGN_UP: "Create account",
-  SIGN_UP_ACTION: "Create account",
 };
 
 // Full-screen like the welcome screen it comes from, not a card on a page. Neon's view

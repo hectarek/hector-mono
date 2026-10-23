@@ -1,4 +1,5 @@
 import { createContainer } from "@evyweb/ioctopus";
+import { createAccessModule } from "@/di/modules/access.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
 import { createLoggerModule } from "@/di/modules/logger.module";
 import { createTransactionModule } from "@/di/modules/transaction.module";
@@ -11,6 +12,7 @@ ApplicationContainer.load(
   Symbol("AuthenticationModule"),
   createAuthenticationModule(),
 );
+ApplicationContainer.load(Symbol("AccessModule"), createAccessModule());
 ApplicationContainer.load(
   Symbol("TransactionModule"),
   createTransactionModule(),

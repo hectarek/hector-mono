@@ -1,20 +1,54 @@
+import { getInjection } from "@/di/container";
 import { auth } from "@/lib/auth/server";
 import { logger } from "@/lib/logger";
+import {
+  HumanOnlyError,
+  NotAllowedError,
+  UnauthenticatedError,
+} from "@/src/entities/errors/common";
 
 const handler = auth.handler();
 const log = logger.child({ layer: "route", op: "auth" });
 
+type AuthRouteContext = { params: Promise<{ path: string[] }> };
+
+// What any session may reach: reading itself and signing out. Everything else Neon offers a
+// signed-in account (update-user, change-email and the rest) is Hector's alone, so Claude's
+// session, or any account but his, stops here (docs/build-plan.md R21, KTD2).
+const OPEN_TO_ANY_SESSION = new Set(["GET get-session", "POST sign-out"]);
+
 export async function GET(
   request: Request,
-  context: { params: Promise<{ path: string[] }> },
+  context: AuthRouteContext,
+): Promise<Response> {
+  return handle("GET", request, context);
+}
+
+export async function POST(
+  request: Request,
+  context: AuthRouteContext,
+): Promise<Response> {
+  return handle("POST", request, context);
+}
+
+async function handle(
+  method: "GET" | "POST",
+  request: Request,
+  context: AuthRouteContext,
 ): Promise<Response> {
   const params = await context.params;
   const path = params.path?.join("/");
   try {
-    const response = await handler.GET(request, context);
+    const refusal = OPEN_TO_ANY_SESSION.has(`${method} ${path}`)
+      ? null
+      : await refusalFor(path);
+    if (refusal) {
+      return refusal;
+    }
+    const response = await handler[method](request, context);
     if (!response.ok) {
       const body = await response.clone().text();
-      log.error("Auth GET error response", {
+      log.error(`Auth ${method} error response`, {
         path,
         status: response.status,
         body,
@@ -22,7 +56,7 @@ export async function GET(
     }
     return response;
   } catch (err) {
-    log.error("Auth GET handler threw", {
+    log.error(`Auth ${method} failed`, {
       path,
       error: err instanceof Error ? err.message : String(err),
     });
@@ -30,28 +64,31 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ path: string[] }> },
-): Promise<Response> {
-  const params = await context.params;
-  const path = params.path?.join("/");
+// Hector's session goes on to Neon, and so does a request with no session (signing in,
+// resetting a password), which Neon can't act on as anyone. A session that can't be read
+// throws, so it's refused rather than taken as signed out.
+async function refusalFor(path: string | undefined): Promise<Response | null> {
   try {
-    const response = await handler.POST(request, context);
-    if (!response.ok) {
-      const body = await response.clone().text();
-      log.error("Auth POST error response", {
-        path,
-        status: response.status,
-        body,
-      });
-    }
-    return response;
+    const { actor } = await getInjection("IResolveActor")();
+    return actor === "owner" ? null : refused(path, new HumanOnlyError());
   } catch (err) {
-    log.error("Auth POST handler threw", {
-      path,
-      error: err instanceof Error ? err.message : String(err),
-    });
-    return new Response("Internal Server Error", { status: 500 });
+    if (err instanceof UnauthenticatedError) {
+      return null;
+    }
+    if (err instanceof NotAllowedError) {
+      return refused(path, err);
+    }
+    throw err;
   }
+}
+
+// The codes server actions answer with (docs/build-plan.md KTD4). A stranger's message never
+// says whose app this is.
+function refused(
+  path: string | undefined,
+  err: HumanOnlyError | NotAllowedError,
+): Response {
+  const code = err instanceof HumanOnlyError ? "human-only" : "not-allowed";
+  log.warn("Refused an account endpoint", { path, code });
+  return Response.json({ code, message: err.message }, { status: 403 });
 }
