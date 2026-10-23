@@ -25,6 +25,7 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
       {experiences.map((experience) => (
         <m.div
           key={`${experience.company}-${experience.role}-${experience.period}`}
+          className="group/role"
           variants={staggerItem}
         >
           <ExperienceCard experience={experience} />

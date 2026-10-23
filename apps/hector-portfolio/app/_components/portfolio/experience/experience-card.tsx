@@ -31,8 +31,9 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
       ? experience.bullets
       : deriveBullets(experience.description);
 
+  // The timeline wraps each card in its own element, where `last:` would match every card
   return (
-    <div className="relative border-l border-border pl-6 pb-10 last:pb-0">
+    <div className="relative border-l border-border pl-6 pb-10 group-last/role:pb-0">
       <div className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full border border-foreground/25 bg-background" />
 
       <div className="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">

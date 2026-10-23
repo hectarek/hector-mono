@@ -52,6 +52,7 @@ tests/                 # Tests
 - Framer Motion for animations: components use `m` from `framer-motion` (see the light-only note below), with shared variants (`fadeInUp`, `heroVariants`/`heroItem`, `viewportOptions`, etc.) from `src/lib/animations.ts`, and `useScrollReveal()` (`src/lib/use-scroll-reveal.ts`) for scroll-in reveals that respect reduced motion
 - Light only (2026-10): no `ThemeProvider`, so the theme's `.dark` tokens never apply; `viewport.colorScheme` is `light` in `app/layout.tsx`. Don't add `next-themes` back for this site.
 - Animations use `m.*` from `framer-motion` inside `MotionProvider` (`LazyMotion strict`): a `motion.*` component throws. Above-the-fold content (the hero) renders with `initial={false}`, so it's visible on first paint; fading it in from opacity 0 delayed LCP until hydration.
+  - A list that wraps each item in its own `m.div` (to stagger them) makes `first:` and `last:` on the item match every item. Name a group on the wrapper and use `group-last/<name>:`, as the experience timeline does.
 - Vercel Web Analytics: `<Analytics />` in the root layout, rendered only when `VERCEL` is set at build (the script is served by Vercel, so a local build would log a 404). Enabled per project in the Vercel dashboard.
 
 ## What NOT to Add
