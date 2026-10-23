@@ -1,6 +1,8 @@
 "use client";
 
 import { m } from "framer-motion";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { SectionEyebrow } from "@/app/_components/portfolio/shared/section-eyebrow";
 import {
   fadeInUp,
@@ -18,40 +20,80 @@ interface NowContentProps {
 
 interface FocusItem {
   area: string;
-  body: string;
+  body: ReactNode;
 }
 
-const LAST_UPDATED = { label: "Oct 2, 2026", iso: "2026-10-02" };
+interface ReadingItem {
+  title: string;
+  source: string;
+  href: string;
+  note: string;
+}
+
+const LINK_CLASS =
+  "underline decoration-accent/40 underline-offset-4 hover:decoration-accent";
+
+const LAST_UPDATED = { label: "Oct 23, 2026", iso: "2026-10-23" };
 
 const FOCUS_ITEMS: FocusItem[] = [
   {
-    area: "The Notwork",
-    body: "Running the production platform on my own: features, fixes, and the AI tooling built into it.",
+    area: "Client work",
+    body: (
+      <>
+        Contract work for small clients: HubSpot automation and integrations for
+        an online school, and{" "}
+        <Link href="/projects/safe-bet" className={LINK_CLASS}>
+          Safe Bet
+        </Link>
+        , a sports-betting compliance prototype for a startup.
+      </>
+    ),
   },
   {
-    area: "Building in public",
-    body: "My monorepo, hector-mono, is now public: this site, a recipes app, and an AI tools catalog, with lint, typecheck, and tests on every pull request.",
+    area: "A recipes app",
+    body: "I build it in public, and a few people test it. It reads a recipe from a link or a photo, and cook mode walks you through one step at a time.",
   },
   {
-    area: "AI curriculum pipeline",
-    body: "Keeping the nine-step lesson pipeline in production and pushing more of our content through it.",
+    area: "Measuring its AI",
+    body: "Next up: measuring how often the app reads a recipe right, so a prompt change can't quietly make it worse.",
   },
   {
-    area: "CS fundamentals",
-    body: "Working back through data structures, algorithms, and system design: the computer science I skipped by learning on the job.",
+    area: "hector-mono",
+    body: "My public monorepo: this site, the recipes app and an AI tools catalog. Every pull request runs lint, typecheck and tests.",
   },
 ];
 
-const READING: string[] = [
-  "Patterns for shipping AI features that don't break in production.",
-  "Evaluating AI output: how to test and measure what a model produces.",
-  "Learning science: spaced retrieval and how people keep what they learn.",
+const READING: ReadingItem[] = [
+  {
+    title: "After Automation",
+    source: "Dan Shipper, Every",
+    href: "https://every.to/p/after-automation",
+    note: "Why AI makes more work for people, not less.",
+  },
+  {
+    title: "Pi Durable",
+    source: "Earendil",
+    href: "https://earendil.com/posts/pi-durable/",
+    note: "Agents that save each step, so a run that crashes picks up where it left off.",
+  },
+  {
+    title: "Getting the most out of Opus 5.5 in Claude and Claude Code",
+    source: "Addy Osmani, claude.dev",
+    href: "https://claude.dev/blog/getting-the-most-out-of-opus-5-5/#1-how-to-ask",
+    note: "Give the model the whole task and say what done looks like, then let it run.",
+  },
+  {
+    title: "AI Style Guides: How to Help AI Write Like You",
+    source: "Katie Parrott, Every",
+    href: "https://every.to/guides/ai-style-guide",
+    note: "How to put your voice in writing so a model can match it.",
+  },
 ];
 
 const TINKERING: string[] = [
-  "3D printing and small home projects.",
-  "Cooking most nights, and working out.",
-  "Travel and short trips when I can fit them in.",
+  "Learning to read and write Polish. I grew up speaking it.",
+  "A modded Stardew Valley farm with friends.",
+  "Three 3D printers, in an enclosure I built from wood and acrylic.",
 ];
 
 export function NowContent({ profile }: NowContentProps) {
@@ -59,9 +101,10 @@ export function NowContent({ profile }: NowContentProps) {
     <>
       <m.section
         className="relative px-4 pb-10 pt-12 sm:pt-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOptions}
+        // Visible from the first paint, as the home hero is: fading the header in
+        // from opacity 0 left it blank until hydration.
+        initial={false}
+        animate="visible"
         variants={heroVariants}
       >
         <div className="relative mx-auto max-w-6xl">
@@ -72,31 +115,30 @@ export function NowContent({ profile }: NowContentProps) {
             className="font-mono mt-6 max-w-4xl text-4xl font-medium leading-[1.05] tracking-tight text-foreground sm:text-5xl"
             variants={heroItem}
           >
-            What I&apos;m working on, right now
+            What I&apos;m working on now
             <span className="text-accent">.</span>
           </m.h1>
           <m.p
             className="font-serif mt-5 max-w-3xl text-2xl italic leading-snug text-muted-foreground sm:text-3xl"
             variants={heroItem}
           >
-            Inspired by{" "}
+            A /now page, an idea from{" "}
             <a
               href="https://nownownow.com/about"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+              className={LINK_CLASS}
             >
-              Derek Sivers&apos; /now page
-            </a>{" "}
-            idea.
+              Derek Sivers
+            </a>
+            .
           </m.p>
           <m.p
             className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             variants={heroItem}
           >
-            Below is what currently has my attention &mdash; current focus,
-            things I&apos;m reading, and what I&apos;m tinkering with outside of
-            work. I update this when it changes meaningfully, not on a schedule.
+            What has my attention this month, at work and outside it. I update
+            it when something changes.
           </m.p>
           <m.div
             className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
@@ -172,7 +214,7 @@ export function NowContent({ profile }: NowContentProps) {
           >
             {READING.map((item) => (
               <m.li
-                key={item}
+                key={item.href}
                 className="flex gap-3 text-base leading-relaxed text-muted-foreground"
                 variants={staggerItem}
               >
@@ -180,7 +222,19 @@ export function NowContent({ profile }: NowContentProps) {
                   className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
                   aria-hidden
                 />
-                {item}
+                <div>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`font-medium text-foreground ${LINK_CLASS}`}
+                  >
+                    {item.title}
+                  </a>
+                  <p className="mt-0.5 text-sm">
+                    {item.source}. {item.note}
+                  </p>
+                </div>
               </m.li>
             ))}
           </m.ul>

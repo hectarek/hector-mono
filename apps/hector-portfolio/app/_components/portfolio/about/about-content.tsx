@@ -60,9 +60,8 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
     <>
       <m.section
         className="relative px-4 pb-16 pt-12 sm:pb-20 sm:pt-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewportOptions}
+        initial={false}
+        animate="visible"
         variants={heroVariants}
       >
         <div className="relative mx-auto max-w-6xl">
