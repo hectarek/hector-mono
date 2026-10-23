@@ -62,7 +62,7 @@ Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the 
 - **Short and plain** — write the way Hector talks; the hero is one line, and the home page reads as one story (`docs/spec.md` §4)
 - **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
 - **No clichés or slogans** — no "ships AI features", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
-- **Round the headline numbers, and say why they matter** — "tens of thousands of people" in a sentence, "10,000+" on the proof strip with a line on what it means, not a bare "~24K users" or "30 min"; a stat strip holds statistics (money saved, people reached, nothing broken), never plain facts like a step count
+- **Round the headline numbers, and say why they matter** — "tens of thousands of people" in a sentence, "10,000+" on the proof strip with a line on what it means, not a bare "~24K users" or "30 min"; a stat strip holds statistics that say something about Hector (what he built, led, cut, saved or taught), never plain facts like a step count
 - **Hector reviews new copy** before it merges. The tagline and bio are also the home page's meta description, and the share card shows the tagline and the proof strip (`docs/seo.md`)
 
 ## Visual Style
