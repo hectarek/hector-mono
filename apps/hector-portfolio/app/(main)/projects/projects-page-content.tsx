@@ -33,9 +33,8 @@ export function ProjectsPageContent({ projects }: ProjectsPageContentProps) {
           className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
           variants={fadeInUp}
         >
-          A production platform, an applied-AI pipeline, playable games, and the
-          program I taught. Each card opens a case study with role, stack,
-          screenshots, and outcomes.
+          Each case study covers the problem, what I built and how it turned
+          out. The first three are the ones I&apos;d start with.
         </m.p>
 
         <div className="mt-14">
