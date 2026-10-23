@@ -122,10 +122,6 @@
           "value": "50+"
         },
         {
-          "label": "Steps",
-          "value": "9"
-        },
-        {
           "label": "Reviewed by a person",
           "value": "Every step"
         }
@@ -197,11 +193,7 @@
           "value": "10"
         },
         {
-          "label": "Pixi.js and Three.js",
-          "value": "2D + 3D"
-        },
-        {
-          "label": "Designer and engineer",
+          "label": "Person who built them",
           "value": "1"
         }
       ],
@@ -276,7 +268,7 @@
       "slug": "grand-theft-autonomous",
       "title": "Grand Theft Autonomous",
       "description": "A block-coding simulator and live event console for a state robotics competition, where students' programs drive real cars through a miniature city.",
-      "longDescription": "The robotics finale of a programming curriculum, and the robotics event at VESL's state competition in May 2026. Students stack code blocks into a mission program, test it in the simulator, then send the same program to a real SunFounder Zeus car on a grid \"Smart City\". Each car has to collect coins, avoid the cops and get back to the vault.",
+      "longDescription": "The robotics finale of a programming curriculum, and the robotics event at VESL's state competition in May 2026. Students stack code blocks into a mission program, test it in the simulator, then send the same program to a real SunFounder Zeus car on a 9×9 grid \"Smart City\". Each car has to collect coins, avoid the cops and get back to the vault.",
       "technologies": ["TypeScript", "React", "Vite", "dnd-kit", "WebSockets"],
       "image": "/projects/grand-theft-autonomous.webp",
       "url": "https://set-mono-grand-theft-autonomous.vercel.app",
@@ -285,24 +277,10 @@
       "date": "2026-05-01",
       "status": "Live Event App",
       "role": "Sole designer and engineer",
-      "metrics": [
-        {
-          "label": "Per competition heat",
-          "value": "3 min"
-        },
-        {
-          "label": "Grid the cars drive",
-          "value": "9×9"
-        },
-        {
-          "label": "Designer and engineer",
-          "value": "1"
-        }
-      ],
       "highlights": [
         "A drag-and-drop block editor with if/else, repeat and sensor conditions. One deterministic interpreter runs every program, so the simulator and the car behave the same.",
         "Programs go to the car over WebSocket, and a gamepad can drive it live for practice.",
-        "Judges score by coin value (+10, +25 or +50) and take off 5 for hitting a cop. Every heat can be replayed, with a live strip of the car's sensors.",
+        "Judges score by coin value (+10, +25 or +50) and take off 5 for hitting a cop, in 3-minute heats. Every heat can be replayed, with a live strip of the car's sensors.",
         "Spec tests keep the scoring and the map's fairness rules honest."
       ],
       "problem": "Students had learned programming logic in drag-and-drop games. At the state event they had to program real cars, live, in front of judges.",
@@ -336,8 +314,8 @@
       "id": "stiegler-edtech-site",
       "slug": "stiegler-edtech-site",
       "title": "Stiegler EdTech Website",
-      "description": "Moved the company's two paid web platforms, a WordPress site and a Bubble app, onto one Next.js app without breaking a legacy URL or a form.",
-      "longDescription": "I led the move of Stiegler EdTech's two paid web platforms, a WordPress site and a Bubble site, into one Next.js app on Vercel. It went live in September 2026 with every old URL and every form still working.",
+      "description": "Moved the company's two paid web platforms onto one Next.js app, saving thousands of dollars a year without breaking a link or a form.",
+      "longDescription": "Stiegler EdTech was paying for two web platforms. I led the move into one Next.js app on Vercel, which saves the company thousands of dollars a year, and not one old link or form broke.",
       "technologies": [
         "TypeScript",
         "Next.js",
@@ -360,20 +338,20 @@
       "role": "CTO · planned and led the migration",
       "metrics": [
         {
-          "label": "Old URLs still work",
-          "value": "100%"
-        },
-        {
-          "label": "Pages matched",
-          "value": "22"
-        },
-        {
-          "label": "Form entries kept",
-          "value": "1,700+"
+          "label": "Dollars saved a year",
+          "value": "Thousands"
         },
         {
           "label": "Paid platforms",
           "value": "2 → 1"
+        },
+        {
+          "label": "Broken links",
+          "value": "0"
+        },
+        {
+          "label": "Pages matched",
+          "value": "100%"
         }
       ],
       "highlights": [
@@ -383,9 +361,9 @@
         "More than 1,700 past form submissions, from August 2023 to September 2026, moved into Postgres, and site search is built from the rendered pages.",
         "I cut the hero video from 26 MB to 6.4 MB and added an image pipeline for share cards."
       ],
-      "problem": "The company paid for two platforms, each with its own pages, forms and data: WordPress, with paid plugins and an email add-on, and a Bubble plan for The Mothership.",
+      "problem": "The company paid for two web platforms: WordPress, with paid hosting, plugins and an email add-on, and a Bubble plan for The Mothership. Each had its own pages, forms and data, and its own bill.",
       "solution": "One Next.js app on Vercel that serves both sites, keeps every old URL working and stores every form submission in one Postgres table.",
-      "impact": "The WordPress hosting, its paid plugins and its email add-on are gone, and Bubble dropped to its free plan. The cutover was checked end to end: every page, every old URL and all ten forms."
+      "impact": "The savings come from what's gone: the WordPress hosting, its paid plugins and email add-on, and the paid Bubble plan, which dropped to free. The cutover was checked end to end: every page, every old URL and all ten forms."
     },
     {
       "id": "safe-bet",
@@ -401,29 +379,11 @@
       "date": "2026-09-01",
       "status": "Product Prototype",
       "role": "Freelance engineer for a startup client",
-      "metrics": [
-        {
-          "label": "Betting statuses",
-          "value": "3"
-        },
-        {
-          "label": "Views, one per role",
-          "value": "6"
-        },
-        {
-          "label": "Literacy topics",
-          "value": "5"
-        },
-        {
-          "label": "Lessons",
-          "value": "100+"
-        }
-      ],
       "highlights": [
         "A rules engine where the most restrictive rule wins, across seven categories of people barred from betting.",
         "A sportsbook gets a legal citation, not the reason a person is listed, so a check reveals as little as possible.",
         "Six views (admin, operator, educator, high school student, learner and college athlete), switched from one \"View as\" control.",
-        "A course across five topics (recognition, reasoning, influence, vulnerability and protection), with a presenter mode for educators and certificates for learners.",
+        "A course of 100+ lessons across five topics (recognition, reasoning, influence, vulnerability and protection), with a presenter mode for educators and certificates for learners.",
         "20 spec files cover the rules engine and the barred categories."
       ]
     },
@@ -513,10 +473,6 @@
         {
           "label": "Years I ran it",
           "value": "3"
-        },
-        {
-          "label": "Writers I led",
-          "value": "4"
         }
       ],
       "highlights": [
@@ -567,7 +523,7 @@
       "slug": "hector-mono",
       "title": "hector-mono",
       "description": "My public monorepo: this site, a recipes app, a bookmarks app, and an AI tools catalog, on a shared component library with strict CI.",
-      "longDescription": "Where I build in public: this site, a recipes app with sign-in and a Postgres database, Stash for bookmarks, and a catalog of AI and web tools on the AI SDK, all sharing one component library.",
+      "longDescription": "Where I build in public: five apps, including this site, a recipes app with sign-in and a Postgres database, Stash for bookmarks, and a catalog of AI and web tools on the AI SDK, all sharing one component library.",
       "technologies": [
         "TypeScript",
         "Next.js",
@@ -585,16 +541,6 @@
       "date": "2026-10-01",
       "status": "Open Source",
       "role": "Sole engineer",
-      "metrics": [
-        {
-          "label": "Apps in one repo",
-          "value": "5"
-        },
-        {
-          "label": "Open-source license",
-          "value": "MIT"
-        }
-      ],
       "highlights": [
         "The backend apps keep clean-architecture layers, and lint rules enforce them rather than convention.",
         "One design system: shadcn/ui components, with a lint rule that fails CI on any color or style outside the system.",
