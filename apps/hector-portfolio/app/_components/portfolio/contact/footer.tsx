@@ -34,7 +34,7 @@ export function Footer({ profile, year }: FooterProps) {
               Hector Gonzalez
             </p>
             <p className="font-mono text-base font-medium text-foreground">
-              Building, shipping, &amp; maintaining
+              Full-stack engineer
               <span className="text-accent">.</span>
             </p>
             <p className="text-sm text-muted-foreground">
@@ -68,17 +68,6 @@ export function Footer({ profile, year }: FooterProps) {
             <div className="sm:flex sm:justify-end">
               <SocialLinks profile={profile} variant="footer" />
             </div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Built by hand · Next.js · Tailwind v4 ·{" "}
-              <a
-                href="https://github.com/hectarek/hector-mono/tree/main/apps/hector-portfolio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline-offset-4 transition-colors hover:text-accent hover:underline"
-              >
-                Source
-              </a>
-            </p>
           </m.div>
         </div>
       </div>
