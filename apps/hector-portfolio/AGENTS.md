@@ -62,7 +62,7 @@ Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the 
 - **Short and plain** — write the way Hector talks; the hero is one line and one sentence
 - **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
 - **No clichés or slogans** — no "ships", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
-- **Round the headline numbers** — "tens of thousands of users" and "95%+ less time per lesson", not "~24K" or "30 min"
+- **Round the headline numbers** — "tens of thousands of people" in a sentence, "10,000+ users" on the proof strip, not "~24K" or "30 min"
 - **Hector reviews new copy** before it merges. The hero's line also feeds the home page's meta description and the share card (`docs/seo.md`)
 
 ## Visual Style

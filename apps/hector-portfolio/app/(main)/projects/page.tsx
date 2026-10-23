@@ -6,7 +6,7 @@ import { ProjectsPageContent } from "./projects-page-content";
 export const metadata: Metadata = generateSEOMetadata({
   title: "Projects | Hector Gonzalez",
   description:
-    "A learning platform tens of thousands of people use, an AI pipeline that cuts lesson time by 95%+, a dozen browser games, and 100+ graduates placed.",
+    "A learning platform tens of thousands of people use, an AI pipeline that cuts lesson time by 95%+, 10+ browser games, and 100+ graduates placed.",
   keywords: [
     "Projects",
     "Portfolio",
