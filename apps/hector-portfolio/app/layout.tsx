@@ -46,7 +46,7 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: "Hector Gonzalez | Full-Stack Engineer, Front End and Applied AI",
   description:
-    "Product-minded full-stack engineer, strongest on the front end, who ships AI features. Co-architect and sole maintainer of The Notwork, a production edtech platform with ~24K users.",
+    "I figure out what's needed, build it with AI, and work with others to get it done. Six years building for the web, from a bank's public site to a learning platform for North Carolina high schoolers.",
 };
 
 // Every page is prerendered: anything that would render per request fails the build.

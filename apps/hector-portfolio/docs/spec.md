@@ -12,7 +12,7 @@ This is a personal portfolio website for myself.
 - [ ] Should be SEO friendly and easy to find on search engines
 - [ ] Should be clean and simple to navigate and use
 - [ ] Should effectively convey my brand and personality
-- [ ] Should lead with the positioning: a full-stack engineer, strongest on the front end, who ships AI features
+- [ ] Should lead with one plain line about how I work: the hero line, `profile.json`'s tagline (§5's One-Sentence Brand Summary)
 - [ ] Should link proof people can open: live sites, playable games, screenshots, and code
 
 
@@ -27,13 +27,15 @@ This is a personal portfolio website for myself.
 
 ## 4. Layout and Design
 
-- Main Page
-    - Should have a hero section with my name, image and a short description of what I do
-    - Should have a section with my skills 
-    - Should have a section with my projects (with badges for the technologies used)
-    - Should have a section with my experience
+- Main Page, told as one story from top to bottom
+    - Should have a hero section with my name, image and one line about what I do
+    - Should have the path: how I got here, a year and a sentence per step, and a line about life outside work
+    - Should have the proof: the numbers it has added up to
+    - Should have a section with my projects (with badges for the technologies used), framed as the work behind the numbers
+    - Should have how I work: a few principles and the tools I use most
     - Should have a section with my contact information (email) CTA to contact me
     - Should have a footer with social media links
+    - Each section adds something the ones before it didn't say; the full skills and experience lists live on the About page
 - About Me Page
     - Should be a page that explains my background, experience, and skills
     - Should be a page that explains my brand and personality
@@ -56,7 +58,7 @@ For Hector Gonzalez — full-stack engineer (front end and applied AI), co-found
 
 1. Brand Positioning Statement
 
-A product-minded full-stack engineer, strongest on the front end, who ships AI features. Owns a product end to end, from interface to data to the AI pipeline, and turns ambiguous asks into shipped systems. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
+In Hector's words, the hero line (One-Sentence Brand Summary, below). A full-stack engineer, strongest on the front end, who owns a product end to end, from the interface to the data to the AI pipeline. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
 
 ⸻
 
@@ -81,7 +83,7 @@ A. Sentence Style
 	•	Prefer short, declarative sentences.
 	•	Avoid filler (“excited,” “passionate,” “synergy,” etc.).
 	•	Default to active voice.
-	•	Use parallel structure (e.g., “Plan → Build → Ship”).
+	•	Use parallel structure.
 
 Example:
 “I built a Next.js + Bun microservice that ingests recipes, normalizes data, and syncs it to Notion.”
@@ -125,6 +127,19 @@ D. Learning systems (the domain)
 
 ⸻
 
+5. Copy Rules
+
+From Hector's review of the site's copy (2026-10). They cover every page, the metadata and the share card.
+	•	Short and plain. Write the way Hector talks. The hero is one line.
+	•	Show, don't name. Specific facts carry the copy: what was built, for whom, and what changed. Never name a trait (“passionate,” “authentic,” “caring,” “product-minded”) or hint at one with adjectives.
+	•	No clichés or slogans: no “ships AI features,” “passionate,” “excited” or “synergy,” and no setup-and-reversal lines like “Ambiguity in. Useful systems out.”
+	•	Sell the outcome, not the exact figure. Sentences round to words (“tens of thousands of people,” not “~24K”), and the proof strip rounds down to a number with a plus (“10,000+ platform users,” “95%+ time saved with AI,” “10+ browser games,” “100+ students hired,” not “30 min”).
+	•	Every number says why it matters, not just what it counts. Its label names the takeaway and its line gives the plain facts behind it (“Students and teachers on a platform I co-architected and keep running”), so a reader who never opens a case study still gets the point.
+	•	The hero's line and the one-sentence summary of the path (profile.json's tagline and bio) are also the home page's meta description (app/page.tsx, with app/layout.tsx as the fallback), and the share card (docs/og-image.html) shows the line and the proof strip. Change them together.
+	•	Hector reviews new copy before it merges.
+
+⸻
+
 6. Visual Style Guidance
 
 This controls how your portfolio should feel visually.
@@ -152,4 +167,6 @@ Your work is inherently technical and system-oriented—your visuals should refl
 
 7. One-Sentence Brand Summary
 
-I build modern, scalable systems for learning and operations—combining engineering clarity, product strategy, and educational impact.
+I figure out what's needed, build it with AI, and work with others to get it done.
+
+It's the hero line, from `src/data/profile.json`; change them together.

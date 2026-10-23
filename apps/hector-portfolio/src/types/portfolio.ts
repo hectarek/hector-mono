@@ -13,16 +13,6 @@ export interface Profile {
   };
 }
 
-export interface SkillCategory {
-  name: string;
-  description?: string;
-  skills: string[];
-}
-
-export interface SkillsData {
-  categories: SkillCategory[];
-}
-
 export interface ProjectMetric {
   label: string;
   value: string;

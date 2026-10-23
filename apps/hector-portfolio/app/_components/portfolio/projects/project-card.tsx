@@ -12,10 +12,11 @@ import { ProjectBadges } from "./project-badges";
 
 interface ProjectCardProps {
   project: Project;
+  showMetric?: boolean;
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
-  const keyMetric = project.metrics?.[0];
+export function ProjectCard({ project, showMetric = true }: ProjectCardProps) {
+  const keyMetric = showMetric ? project.metrics?.[0] : undefined;
 
   return (
     <m.article

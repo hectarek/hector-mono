@@ -4,7 +4,7 @@
       "id": "the-notwork",
       "slug": "the-notwork",
       "title": "The Notwork",
-      "description": "Production edtech platform where North Carolina high schoolers learn, play, and compete in STEM and skilled-trades programs.",
+      "description": "The platform behind North Carolina's first state-backed esports and STEM league, where high schoolers learn, play and compete.",
       "longDescription": "The Notwork is the full-stack platform behind North Carolina's first state-backed esports and STEM league. Students learn through mastery pathways, play games, earn micro-credentials, and compete on rosters and leaderboards. The same platform runs the league: teachers verify students, staff manage content and seasons, and admins push updates all year. I co-architected it, led the team that built it and its 2025 rebuild, and have run it on my own since October 2025.",
       "technologies": [
         "TypeScript",
@@ -94,7 +94,7 @@
       "id": "ai-curriculum-generator",
       "slug": "ai-curriculum-generator",
       "title": "AI Curriculum Pipeline",
-      "description": "A nine-step AI pipeline, with a human review point at every step, that turns a rough lesson idea into a published, multi-modal lesson in 10–30 minutes.",
+      "description": "Turns a rough lesson idea into a published lesson in nine steps. AI drafts each step, and a person approves it before the next one runs.",
       "longDescription": "An applied-AI pipeline built into The Notwork that produces complete lessons. It runs nine steps modeled on real curriculum development: blueprint, outline, content, editorialize, accuracy check, media, formatting, audio, and release. Each step builds on the last, runs on the model the educator picks from Anthropic, OpenAI, or Google, and can be refined or regenerated before the lesson publishes straight to the platform.",
       "technologies": [
         "TypeScript",
@@ -181,7 +181,7 @@
       "id": "vesl-skilled-trade-games",
       "slug": "vesl-skilled-trade-games",
       "title": "Skilled-Trades Games",
-      "description": "Ten playable browser games that teach skilled-trades work through short, scored scenarios. Built solo in Pixi.js and Three.js.",
+      "description": "Short, scored games on electrical, plumbing, site safety and more, from 2D puzzles to a 3D job site. You can play every one in your browser.",
       "longDescription": "A suite of browser games built for a skilled-trades workforce program on The Notwork. They cover construction sequencing, electrical, plumbing and HVAC, site safety, and tool fluency, from 2D puzzles in Pixi.js to a 3D isometric job site in Three.js. Each game is short and scored, with levels and progression, so it works as standalone practice or as league content.",
       "technologies": ["TypeScript", "Pixi.js", "Three.js", "Next.js", "React"],
       "image": "/projects/skilled-trades-games.webp",
