@@ -17,18 +17,18 @@ interface ProofItem {
 
 const PROOF_ITEMS: ProofItem[] = [
   {
-    value: "~24K",
+    value: "Tens of thousands",
     label: "Users",
     hint: "On The Notwork, the platform I co-architected and run",
   },
   {
-    value: "30 min",
-    label: "Lesson build time",
+    value: "95%+",
+    label: "Less time per lesson",
     hint: "Down from about a week, with a nine-step AI pipeline",
   },
   {
-    value: "10",
-    label: "Playable games",
+    value: "A dozen",
+    label: "Browser games",
     hint: "Built solo in Pixi.js and Three.js",
   },
   {
@@ -57,14 +57,15 @@ export function ProofStrip() {
           {PROOF_ITEMS.map((item, index) => (
             <m.div
               key={item.label}
-              className="relative flex flex-col gap-1.5 bg-background p-5 sm:p-6"
+              className="@container relative flex flex-col gap-1.5 bg-background p-5 sm:p-6"
               variants={staggerItem}
             >
               <dt className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 {item.label}
                 <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
               </dt>
-              <dd className="font-mono text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
+              {/* Sized to the cell, so the longest word, "thousands", fits on a phone */}
+              <dd className="font-mono text-[min(2.25rem,19cqi)] font-medium leading-[1.1] tracking-tight text-foreground">
                 {item.value}
               </dd>
               <dd className="text-xs leading-relaxed text-muted-foreground">

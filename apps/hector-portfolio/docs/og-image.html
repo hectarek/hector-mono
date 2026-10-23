@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share card</title>
+<!--
+  The portfolio's share card, public/og-image.png (1200 × 630), in the portfolio theme's dark tokens.
+  It shows the hero line and the proof strip, so render it again when they change: the command is
+  in docs/seo.md → Share image.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@1&display=block">
+<style>
+:root {
+  /* The portfolio theme's dark tokens (packages/ui/src/styles/themes/portfolio.css) */
+  --background: oklch(15% 0 0);
+  --foreground: oklch(96% 0 0);
+  --muted-foreground: oklch(72% 0 0);
+  --accent: oklch(82% 0.16 88);
+  --border: oklch(28% 0 0);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 1200px;
+  height: 630px;
+  padding: 58px 72px 56px;
+  overflow: hidden;
+  background-color: var(--background);
+  /* The site's card dot grid */
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklch, var(--foreground) 20%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+p {
+  margin: 0;
+}
+
+.label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 17px;
+}
+
+.rule {
+  width: 48px;
+  height: 1px;
+  background: color-mix(in oklch, var(--foreground) 25%, transparent);
+}
+
+.name {
+  margin-top: 40px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 96px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.dot {
+  color: var(--accent);
+}
+
+.title {
+  margin-top: 34px;
+  font-size: 22px;
+}
+
+.tagline {
+  margin-top: 26px;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 48px;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+/* The proof strip: hairlines from a 1px gap on the border colour */
+.proof {
+  display: grid;
+  grid-template-columns: max-content repeat(3, 1fr);
+  gap: 1px;
+  margin-top: auto;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--border);
+}
+
+.proof > div {
+  padding: 20px 22px;
+  background: var(--background);
+}
+
+.value {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+.proof .label {
+  margin-top: 8px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+</style>
+</head>
+<body>
+  <div class="eyebrow label"><span>01</span><span class="rule"></span><span>hectorfgonzalez.com</span></div>
+  <p class="name">Hector Gonzalez<span class="dot">.</span></p>
+  <p class="title label">Full-Stack Engineer · Front End · Applied AI</p>
+  <p class="tagline">I build software that makes someone&rsquo;s work easier.</p>
+  <div class="proof">
+    <div><p class="value">Tens of thousands</p><p class="label">Users</p></div>
+    <div><p class="value">95%+</p><p class="label">Less time per lesson</p></div>
+    <div><p class="value">A dozen</p><p class="label">Browser games</p></div>
+    <div><p class="value">100+</p><p class="label">Graduates placed</p></div>
+  </div>
+</body>
+</html>

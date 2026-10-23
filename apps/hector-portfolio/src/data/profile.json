@@ -1,8 +1,8 @@
 {
   "name": "Hector Gonzalez",
   "title": "Full-Stack Engineer · Front End · Applied AI",
-  "tagline": "Product-minded full-stack engineer, strongest on the front end, who ships AI features.",
-  "bio": "Six years across a large bank's web properties and a production edtech platform I co-architected and now run for ~24,000 users. I own the whole product: React and Next.js front ends, data, auth, CI/CD, monitoring, and the AI pipeline that cut lesson production from about a week to 10–30 minutes.",
+  "tagline": "I build software that makes someone's work easier.",
+  "bio": "Six years building for the web, from a bank's public site to a learning platform tens of thousands of people use.",
   "image": "/hector.webp",
   "email": "hello@hectorfgonzalez.com",
   "location": "Charlotte, NC",

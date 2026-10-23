@@ -12,7 +12,7 @@ This is a personal portfolio website for myself.
 - [ ] Should be SEO friendly and easy to find on search engines
 - [ ] Should be clean and simple to navigate and use
 - [ ] Should effectively convey my brand and personality
-- [ ] Should lead with the positioning: a full-stack engineer, strongest on the front end, who ships AI features
+- [ ] Should lead with one plain line about what I do: “I build software that makes someone's work easier.”
 - [ ] Should link proof people can open: live sites, playable games, screenshots, and code
 
 
@@ -56,7 +56,7 @@ For Hector Gonzalez — full-stack engineer (front end and applied AI), co-found
 
 1. Brand Positioning Statement
 
-A product-minded full-stack engineer, strongest on the front end, who ships AI features. Owns a product end to end, from interface to data to the AI pipeline, and turns ambiguous asks into shipped systems. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
+“I build software that makes someone's work easier.” A full-stack engineer, strongest on the front end, who owns a product end to end, from the interface to the data to the AI pipeline. The shape is a T: front-end product engineering is the depth, applied AI the specialty, and the rest of the stack the breadth (updated 2026-10).
 
 ⸻
 
@@ -81,7 +81,7 @@ A. Sentence Style
 	•	Prefer short, declarative sentences.
 	•	Avoid filler (“excited,” “passionate,” “synergy,” etc.).
 	•	Default to active voice.
-	•	Use parallel structure (e.g., “Plan → Build → Ship”).
+	•	Use parallel structure.
 
 Example:
 “I built a Next.js + Bun microservice that ingests recipes, normalizes data, and syncs it to Notion.”
@@ -125,6 +125,18 @@ D. Learning systems (the domain)
 
 ⸻
 
+5. Copy Rules
+
+From Hector's review of the site's copy (2026-10). They cover every page, the metadata and the share card.
+	•	Short and plain. Write the way Hector talks. The hero is one line and one sentence.
+	•	Show, don't name. Specific facts carry the copy: what was built, for whom, and what changed. Never name a trait (“passionate,” “authentic,” “caring,” “product-minded”) or hint at one with adjectives.
+	•	No clichés or slogans: no “ships,” “passionate,” “excited” or “synergy,” and no setup-and-reversal lines like “Ambiguity in. Useful systems out.”
+	•	Sell the outcome, not the exact figure. Round the headline numbers: “tens of thousands of users,” not “~24K”; “95%+ less time per lesson,” not “30 min”; “a dozen browser games”; “100+ graduates placed.”
+	•	The hero's line and sentence are also the home page's meta description (app/page.tsx, with app/layout.tsx as the fallback), and the share card (docs/og-image.html) shows the line and the proof strip. Change them together.
+	•	Hector reviews new copy before it merges.
+
+⸻
+
 6. Visual Style Guidance
 
 This controls how your portfolio should feel visually.
@@ -152,4 +164,4 @@ Your work is inherently technical and system-oriented—your visuals should refl
 
 7. One-Sentence Brand Summary
 
-I build modern, scalable systems for learning and operations—combining engineering clarity, product strategy, and educational impact.
+I build software that makes someone's work easier.

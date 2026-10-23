@@ -49,7 +49,7 @@ export function HeroSection({ profile }: HeroSectionProps) {
 
             {profile.tagline && (
               <m.p
-                className="font-serif max-w-2xl text-xl leading-snug text-foreground sm:text-2xl"
+                className="font-serif max-w-2xl text-xl leading-snug text-balance text-foreground sm:text-2xl"
                 variants={heroItem}
               >
                 <span className="italic">{profile.tagline}</span>
