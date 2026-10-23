@@ -17,7 +17,7 @@ export function HeroSection({ profile }: HeroSectionProps) {
   return (
     <m.section
       id="top"
-      className="relative overflow-hidden px-4 pb-10 pt-8 sm:pt-12"
+      className="relative overflow-hidden px-4 pb-16 pt-8 sm:pb-20 sm:pt-12"
       // Rendered visible from the first paint: the name and photo are the page's
       // largest content, and fading them in from opacity 0 delayed LCP until hydration.
       initial={false}
@@ -40,26 +40,37 @@ export function HeroSection({ profile }: HeroSectionProps) {
               Gonzalez<span className="text-accent">.</span>
             </m.h1>
 
+            {/* Every part carries a leading "·", and the clipped negative margin hides the
+                one that starts each line, so a wrapped title never ends a line on a dot */}
             <m.p
-              className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground sm:text-sm"
+              className="overflow-hidden font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground sm:text-sm"
               variants={heroItem}
             >
-              {profile.title}
+              <span className="-ml-[1.6em] flex flex-wrap">
+                {profile.title.split(" · ").map((part) => (
+                  <span
+                    key={part}
+                    className="whitespace-nowrap before:inline-block before:w-[1.6em] before:text-center before:content-['·']"
+                  >
+                    {part}
+                  </span>
+                ))}
+              </span>
             </m.p>
 
             {profile.tagline && (
               <m.p
-                className="font-serif max-w-2xl pt-3 text-xl leading-snug text-balance text-foreground sm:text-2xl lg:text-3xl"
+                className="font-serif max-w-2xl pt-3 text-xl leading-snug text-balance text-foreground sm:text-2xl lg:my-auto lg:pt-0 lg:text-3xl"
                 variants={heroItem}
               >
                 <span className="italic">{profile.tagline}</span>
               </m.p>
             )}
 
-            {/* On large screens the column is as tall as the photo, and mt-auto lines the
-                buttons up with its bottom edge */}
+            {/* On large screens the column is as tall as the photo: the line's auto margins
+                center it between the title and the buttons, which end at the photo's bottom edge */}
             <m.div
-              className="flex flex-wrap items-center gap-3 pt-2 lg:mt-auto"
+              className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center lg:pt-0"
               variants={heroItem}
             >
               <Button

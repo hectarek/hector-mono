@@ -36,7 +36,7 @@ export function ProjectsSection({
 
         <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
           <m.h2
-            className="font-mono max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
+            className="font-mono max-w-3xl text-3xl font-medium text-balance leading-tight tracking-tight text-foreground sm:text-4xl"
             variants={fadeInUp}
           >
             The work behind those numbers.

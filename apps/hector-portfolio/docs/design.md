@@ -54,13 +54,14 @@ If something else needs color, we make it ink, paper, or accent. Anything else d
 
 ## Layout & Atmosphere
 
+- Every home page section after the hero has the same rhythm: `py-16 sm:py-20`, a hairline rule, the eyebrow, a mono `h2`, then the content at `mt-10`.
 - Every section uses `max-w-6xl` outer container. The hairline rule and section eyebrow always sit at this consistent edge — that's how the site reads as a continuous dossier.
 - Inner narrative content (paragraphs, dl lists, single-column timelines) constrains to `max-w-3xl` or `max-w-4xl` for comfortable reading. The visual edge stays wide; the reading width stays narrow.
 - Section eyebrows: a large faded mono numeral (`01`, `02`...) followed by a small mono label, set off by a hairline tick. Sequential numbering across the homepage tells the reader it's a structured document.
 - Page-level dot grid + paper grain set the constant background atmosphere. Individual sections don't need to add extra dots — the page is already the journal.
 - Hairline rules separate major sections (`border-t mb-8` / `border-t mb-10`, which draw in the `border` colour; a strong rule is `border-foreground/25`). No card shadows. No drop-shadows.
 - Cards: hairline border + accent border on hover. Status chips show a small colored category dot.
-- Asymmetric hero: name + title + tagline + CTAs on the left, with the CTAs lined up with the photo's bottom edge on large screens; big portrait photo with a mono caption strip on the right.
+- Asymmetric hero: name + title + tagline + CTAs on the left; on large screens the CTAs line up with the photo's bottom edge and the tagline sits halfway between the title and the CTAs; big portrait photo with a mono caption strip on the right.
 
 ## Component Hints
 

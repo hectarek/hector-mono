@@ -48,7 +48,7 @@ export function ApproachSection() {
         <SectionEyebrow index="05" label="How I work" />
 
         <m.h2
-          className="font-mono mt-5 max-w-2xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
+          className="font-mono mt-5 max-w-2xl text-3xl font-medium text-balance leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={fadeInUp}
         >
           What working with me looks like.
@@ -61,7 +61,7 @@ export function ApproachSection() {
           {APPROACH_ITEMS.map((item) => (
             <m.li
               key={item.step}
-              className="group relative flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-muted"
+              className="group relative row-span-3 grid grid-rows-subgrid gap-3 bg-background p-6 transition-colors hover:bg-muted"
               variants={staggerItem}
             >
               <span className="font-mono text-2xl font-medium text-accent sm:text-3xl">

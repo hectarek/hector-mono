@@ -34,49 +34,55 @@ const PATH_STEPS: PathStep[] = [
   },
 ];
 
+const ROW =
+  "grid gap-1 border-t border-border py-4 sm:grid-cols-[8rem_1fr] sm:gap-6";
+const ROW_LABEL =
+  "font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:pt-1";
+
 export function PathSection() {
   return (
     <m.section
-      className="relative px-4 py-12 sm:py-16"
+      className="relative px-4 py-16 sm:py-20"
       initial="hidden"
       whileInView="visible"
       viewport={viewportOptions}
       variants={fadeInUp}
     >
       <div className="mx-auto max-w-6xl">
+        <div className="border-t mb-10" />
+
         <SectionEyebrow index="02" label="The path" />
 
-        <m.ol className="mt-6 max-w-3xl" variants={staggerContainer}>
-          {PATH_STEPS.map((step) => (
-            <m.li
-              key={step.year}
-              className="grid gap-1 border-t border-border py-4 sm:grid-cols-[8rem_1fr] sm:gap-6"
-              variants={staggerItem}
-            >
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:pt-1">
-                {step.year}
-              </span>
-              <p className="text-base leading-relaxed text-foreground">
-                {step.text}
-              </p>
-            </m.li>
-          ))}
-        </m.ol>
-
-        <m.div
-          className="grid max-w-3xl gap-1 border-t border-border py-4 sm:grid-cols-[8rem_1fr] sm:gap-6"
+        <m.h2
+          className="font-mono mt-5 text-3xl font-medium text-balance leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={fadeInUp}
         >
-          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:pt-1">
-            Off the clock
-          </span>
-          <div>
+          I didn&apos;t start in tech.
+        </m.h2>
+
+        <div className="mt-10 max-w-3xl">
+          <m.ol variants={staggerContainer}>
+            {PATH_STEPS.map((step) => (
+              <m.li key={step.year} className={ROW} variants={staggerItem}>
+                <span className={ROW_LABEL}>{step.year}</span>
+                <p className="text-base leading-relaxed text-foreground">
+                  {step.text}
+                </p>
+              </m.li>
+            ))}
+          </m.ol>
+
+          <m.div className={`${ROW} border-b`} variants={fadeInUp}>
+            <span className={ROW_LABEL}>Off the clock</span>
             <p className="text-base leading-relaxed text-muted-foreground">
               3D printing and home projects. I also have a music degree.
             </p>
+          </m.div>
+
+          <m.div className="mt-6" variants={fadeInUp}>
             <Link
               href="/about"
-              className="group mt-4 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-accent"
+              className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-accent"
             >
               The long version
               <span
@@ -86,8 +92,8 @@ export function PathSection() {
                 →
               </span>
             </Link>
-          </div>
-        </m.div>
+          </m.div>
+        </div>
       </div>
     </m.section>
   );

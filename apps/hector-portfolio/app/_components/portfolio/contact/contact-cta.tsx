@@ -15,7 +15,7 @@ interface ContactCTAProps {
 export function ContactCTA({ profile }: ContactCTAProps) {
   return (
     <m.section
-      className="relative px-4 py-20 sm:py-24"
+      className="relative px-4 py-16 sm:py-20"
       initial="hidden"
       whileInView="visible"
       viewport={viewportOptions}
@@ -27,10 +27,10 @@ export function ContactCTA({ profile }: ContactCTAProps) {
         <SectionEyebrow index="06" label="Get in touch" />
 
         <m.h2
-          className="font-mono mt-5 max-w-3xl text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl"
+          className="font-mono mt-5 max-w-3xl text-3xl font-medium text-balance leading-tight tracking-tight text-foreground sm:text-4xl"
           variants={heroItem}
         >
-          Got work that should be easier?
+          Got a problem that needs figuring out?
         </m.h2>
 
         <m.p
@@ -40,7 +40,10 @@ export function ContactCTA({ profile }: ContactCTAProps) {
           I&apos;m in Charlotte. Email is the fastest way to reach me.
         </m.p>
 
-        <m.div className="mt-8 flex flex-wrap gap-3" variants={heroItem}>
+        <m.div
+          className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
+          variants={heroItem}
+        >
           <Button
             size="label"
             nativeButton={false}

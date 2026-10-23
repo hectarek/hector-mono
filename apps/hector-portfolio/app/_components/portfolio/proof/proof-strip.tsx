@@ -18,30 +18,30 @@ interface ProofItem {
 const PROOF_ITEMS: ProofItem[] = [
   {
     value: "10,000+",
-    label: "Users",
-    hint: "Students and teachers on The Notwork",
+    label: "Platform users",
+    hint: "Students and teachers on a platform I co-architected and keep running.",
   },
   {
     value: "95%+",
-    label: "Less time per lesson",
-    hint: "About a week down to half an hour, with an AI pipeline I built",
+    label: "Time saved with AI",
+    hint: "A week of lesson writing now takes half an hour or less, with a pipeline I built.",
   },
   {
     value: "10+",
     label: "Browser games",
-    hint: "Built on my own in Pixi.js and Three.js",
+    hint: "2D and 3D games I designed and built in Pixi.js and Three.js.",
   },
   {
     value: "100+",
-    label: "Graduates placed",
-    hint: "Of about 130 adults I taught to code",
+    label: "Students hired",
+    hint: "Of about 130 adults I taught to code, hired at places like Bank of America and Lowe's.",
   },
 ];
 
 export function ProofStrip() {
   return (
     <m.section
-      className="relative px-4 py-12 sm:py-16"
+      className="relative px-4 py-16 sm:py-20"
       initial="hidden"
       whileInView="visible"
       viewport={viewportOptions}
@@ -52,12 +52,12 @@ export function ProofStrip() {
 
         <SectionEyebrow index="03" label="Proof" />
 
-        <h2 className="font-mono mt-5 text-3xl font-medium leading-tight tracking-tight text-foreground sm:text-4xl">
+        <h2 className="font-mono mt-5 text-3xl font-medium text-balance leading-tight tracking-tight text-foreground sm:text-4xl">
           What it&apos;s added up to so far.
         </h2>
 
         <m.dl
-          className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4"
+          className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
           variants={staggerContainer}
         >
           {PROOF_ITEMS.map((item, index) => (
@@ -74,7 +74,7 @@ export function ProofStrip() {
               <dd className="font-mono text-[min(2.25rem,23cqi)] font-medium leading-[1.1] tracking-tight text-foreground">
                 {item.value}
               </dd>
-              <dd className="text-xs leading-relaxed text-muted-foreground">
+              <dd className="text-sm leading-relaxed text-muted-foreground">
                 {item.hint}
               </dd>
             </m.div>

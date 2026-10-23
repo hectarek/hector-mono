@@ -29,7 +29,7 @@ export function Navbar() {
     >
       <div className="mx-auto max-w-6xl px-4">
         <m.div
-          className="flex h-16 items-center justify-between gap-4"
+          className="flex h-16 items-center justify-between gap-2 sm:gap-4"
           variants={staggerContainerFast}
         >
           <m.div variants={staggerItem}>
@@ -57,7 +57,7 @@ export function Navbar() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "group inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors sm:px-3 sm:text-xs",
+                      "group inline-flex items-center gap-1 rounded-md px-1.5 py-1 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors sm:px-3 sm:text-xs sm:tracking-[0.18em]",
                       isActive
                         ? "text-foreground"
                         : "text-muted-foreground hover:text-foreground",

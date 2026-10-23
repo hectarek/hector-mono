@@ -133,7 +133,8 @@ From Hector's review of the site's copy (2026-10). They cover every page, the me
 	•	Short and plain. Write the way Hector talks. The hero is one line.
 	•	Show, don't name. Specific facts carry the copy: what was built, for whom, and what changed. Never name a trait (“passionate,” “authentic,” “caring,” “product-minded”) or hint at one with adjectives.
 	•	No clichés or slogans: no “ships,” “passionate,” “excited” or “synergy,” and no setup-and-reversal lines like “Ambiguity in. Useful systems out.”
-	•	Sell the outcome, not the exact figure. Sentences round to words (“tens of thousands of people,” not “~24K”), and the proof strip rounds down to a number with a plus (“10,000+ users,” “95%+ less time per lesson,” “10+ browser games,” “100+ graduates placed,” not “30 min”).
+	•	Sell the outcome, not the exact figure. Sentences round to words (“tens of thousands of people,” not “~24K”), and the proof strip rounds down to a number with a plus (“10,000+ platform users,” “95%+ time saved with AI,” “10+ browser games,” “100+ students hired,” not “30 min”).
+	•	Every number says why it matters, not just what it counts. Its label names the takeaway and its line gives the plain facts behind it (“Students and teachers on a platform I co-architected and keep running”), so a reader who never opens a case study still gets the point.
 	•	The hero's line and the one-sentence summary of the path (profile.json's tagline and bio) are also the home page's meta description (app/page.tsx, with app/layout.tsx as the fallback), and the share card (docs/og-image.html) shows the line and the proof strip. Change them together.
 	•	Hector reviews new copy before it merges.
 
