@@ -55,7 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger size="icon-lg" />
+          <SidebarTrigger size="icon-lg" className="min-h-11 min-w-11" />
         </header>
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col p-4 md:p-6">
           {children}

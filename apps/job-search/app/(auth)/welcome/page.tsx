@@ -40,6 +40,7 @@ async function SignIn({ searchParams }: { searchParams: SearchParams }) {
   return (
     <Button
       size="lg"
+      className="min-h-11"
       nativeButton={false}
       render={<Link href={`/auth/${authViewPaths.SIGN_IN}${query}`} />}
     >
