@@ -30,9 +30,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // next dev reads the app's .env, which holds the Neon test project's settings only
-    // (docs/build-plan.md KTD17).
-    command: `node_modules/.bin/next dev --port ${PORT}`,
+    // next dev reads the app's .env, which holds the Neon test project's settings only, and the
+    // check before it stops the run unless that's so (docs/build-plan.md KTD17). Bun loads .env
+    // for the check.
+    command: `bun scripts/check-test-database.ts && node_modules/.bin/next dev --port ${PORT}`,
     url: `http://localhost:${PORT}/welcome`,
     // Never a server that's already running: it could be using other settings.
     reuseExistingServer: false,

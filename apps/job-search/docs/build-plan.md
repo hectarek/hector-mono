@@ -778,7 +778,7 @@ Each phase is one branch and PR and leaves a usable app:
     - A session start is an activity row (record kind `agent-session`, action `created`), with no new table. `start_session` answers with the changes from the actor's previous start to this one.
     - The wrapper answers `unexpected` with "Couldn't reach the server" when a call throws for any reason but a removed action.
     - Write actions check the page tool's name they're given (snake_case, at most 30 characters).
-    - The flow has no test-database guard, because the app's `.env` holds test values only (KTD17).
+    - The flow first had no test-database guard. That missed KTD17's "guarded like recipes' `check-test-database`", so `scripts/check-test-database.ts` was added with H1 (2026-10-24).
   - Probed without an account, in Playwright 1.64's Chromium (Chrome for Testing 156.0.8078.4) with `--enable-features=WebMCP`:
     - `document.modelContext` exists and `navigator.modelContext` doesn't
     - `registerTool` returns a promise that rejects on a duplicate name or an aborted signal, and aborting unregisters
