@@ -18,8 +18,8 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 | | |
 |---|---|
-| Phase | 1, Foundation and the agent path: not started |
-| Next task | U1, once H1 is done |
+| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are built and committed. Each waits on a check that needs H1, H2 or H3 (their Evidence says which) |
+| Next task | Once H1 to H3 are done: apply `0000_activity` to the test project, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
 | Waiting on Hector | H1 (Neon and Vercel projects), H2 (Claude's account), H3 (Playwright MCP config) |
 | Last updated | 2026-10-23 |
 
@@ -45,10 +45,10 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 Tasks are this plan's units, so the tracker and the plan share IDs (see Conventions).
 
 **Phase 1: Foundation and the agent path**
-- [ ] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
-- [ ] **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
-- [ ] **U3** Action envelope and activity log — C · KTD4, KTD7
-- [ ] **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
+- [~] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
+- [~] **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
+- [~] **U3** Action envelope and activity log — C · KTD4, KTD7
+- [~] **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
 
 **Phase 2: Pipeline**
 - [ ] **U5** Companies, lead sources and settings — C · KTD3
@@ -320,7 +320,7 @@ None block planning. Deferred to implementation:
 
   In Claude's identity the UI shows human-only controls disabled with "Only Hector", under the banner.
 - KTD4. **Every write and every tool read is a plain-argument server action that returns an envelope and never redirects.**
-  - Writes follow `apps/hectors-recipes/app/actions/plan.ts` and return `{ ok: true, data, asOf }` or `{ ok: false, code, message, fields?, current? }`. Codes: `validation`, `unauthenticated`, `not-allowed`, `not-found`, `conflict`, `duplicate`, `queue-full`, `human-only`, `calendar-disconnected` (carrying the calendar state, KTD11), `reload-needed`.
+  - Writes follow `apps/hectors-recipes/app/actions/plan.ts` and return `{ ok: true, data, asOf }` or `{ ok: false, code, message, fields?, current? }`. Codes: `validation`, `unauthenticated`, `not-allowed`, `not-found`, `conflict`, `duplicate`, `queue-full`, `human-only`, `calendar-disconnected` (carrying the calendar state, KTD11), `reload-needed`, `unexpected`. (Revised 2026-10-23 in U3: `unexpected` added for any failure no other code covers. It's logged by class and code and answered with the action's own message.)
   - Actions call `revalidatePath`, never `redirect`, and forms navigate in the client after success. A redirect navigates the page, Chrome's `executeTool` then returns null, and Claude could not confirm the write.
   - `proxy.ts` lets requests carrying the `Next-Action` header past its signed-out redirect, so an action without a session returns `unauthenticated`. Recipes' proxy redirects them, and the redirect's HTML breaks the action client (`docs/proxy-auth-research.md`).
   - Tool reads use the same transport: one transport, one envelope mapper and one parity scan over `app/actions/*.ts` serve every tool, and R18 rules out a separate API. Each view has one controller that both its page and its read action call, and no invariant relies on the one-at-a-time dispatch Next.js uses today.
@@ -645,6 +645,15 @@ Each phase is one branch and PR and leaves a usable app:
   - The planted import fails `bun check --filter=job-search`.
   - A signed-out visit lands on the welcome page.
   - The preview deploy serves the shell marked `noindex`.
+- **Evidence (2026-10-23):** commits 868bfdd and f50e1b6 on the Phase 1 branch; no PR yet.
+  - Built: the app's config, the shell (a sidebar on desktop, an off-canvas sheet on phones), the welcome and auth pages, and `proxy.ts` with the `Next-Action` pass-through. Also recipes' auth, logger and transaction services with their mocks, DI, the test harness, and the root lint, Fallow, launch and README entries. Recipes' `BaseRepository` and `app/actions/shared.ts` came with U3, and `app/_lib/call-action.ts` comes with U4, because Fallow fails an unused file.
+  - Checks:
+    - lint and types pass, and a planted `src/entities` import of infrastructure fails `bun check` on `no-restricted-imports`
+    - the build passes with placeholder env values
+    - 39 tests pass, 12 of them in `tests/proxy.test.ts`
+    - locally, a signed-out `GET /` gets a 307 to `/welcome`, which is titled "Job search", is marked `noindex, nofollow`, and has no horizontal scroll at 375 px in light or dark mode
+    - f50e1b6 raised the welcome page's Sign in button and the sidebar trigger to 44 px (`min-h-11`)
+  - Pending: the preview deploy's `noindex` check, which needs the Vercel project (H1).
 
 ### U2. Identity, access and the private screen
 
@@ -678,6 +687,10 @@ Each phase is one branch and PR and leaves a usable app:
   - Claude's session calls the auth route's update-user path: refused. Its get-session and sign-out calls work.
   - Signed-out pages and metadata show the generic app name only.
 - **Verification:** on the test project, a third account sees the private screen and signs out, and Claude's account sees the banner.
+- **Evidence (2026-10-23):** commit c3ae126; no PR yet.
+  - Built: the actor model and `resolveActor` on pinned ids, the page and action helpers, the private screen, Claude's banner, and the auth route's limits on Claude's session. `NeonAuthService` now throws when a session can't be read, and sign-up is hidden in the UI.
+  - Checks: lint, types, dead code and a placeholder build pass. 64 tests and 5 screen tests pass, with no failures over repeated runs (`--rerun-each`).
+  - Pending: the Verification on the test project, and the 375 px check in light and dark mode. Both need the test project and both accounts (H1, H2).
 
 ### U3. Action envelope and activity log
 
@@ -708,6 +721,17 @@ Each phase is one branch and PR and leaves a usable app:
   - Before and after hold only the fields that changed.
   - A record's history section lists its changes newest first, with actor, tool, and before and after values.
 - **Verification:** an action test shows one activity row per write, with the right actor.
+- **Evidence (2026-10-23):** commit 7c7a7e3; no PR yet.
+  - Built:
+    - the envelope and its mapper (`app/actions/shared.ts`)
+    - the append-only `activity` table
+    - `recordChange`, `listActivity` with its controller, `requireHuman` and `RecordHistory`
+    - KTD20 logging through `loggable()` in the transaction manager, `BaseRepository`, `toActionError` and the auth route
+  - The app's errors set their own `name`, because the production build renames classes. `ConflictError` carries R22's code, and the code `unexpected` was added (KTD4, revised).
+  - Checks: lint, types, dead code and a placeholder build pass, and 108 tests and 8 screen tests pass. Each test scenario above has a test. The Verification's action test, through a stand-in write action, writes one row per write with the acting session's actor.
+  - Pending:
+    - migration `0000_activity` (one table, two indexes) is generated and reviewed but not applied. It goes to the test project with Hector's OK once H1 exists.
+    - the history section's 375 px check comes with U5, the first page that mounts it
 
 ### U4. WebMCP adapter and the agent-path spike (gate)
 
@@ -745,6 +769,29 @@ Each phase is one branch and PR and leaves a usable app:
   - A call to an action that a deploy removed, which Next.js reports as an unrecognized action, returns `reload-needed`.
   - Real-browser flow: Chromium with the flag lists `whoami` and `start_session` through `page.webmcp.tools()`, and `callTool` on `start_session` writes an agent activity row on the test project.
 - **Verification:** in a Claude Code session, `webmcp_whoami` and `webmcp_start_session` appear and work, the activity log shows Claude's session start, and Hector can repeat the setup from `docs/agent-access.md`.
+- **Evidence (2026-10-23, local part):** commit 118eb76 on the Phase 1 branch; no PR yet.
+  - Built:
+    - the adapter (`app/_lib/page-tools.ts`), the registry, the registrar mounted in the session chrome for Claude's session, and recipes' `call-action.ts`
+    - `whoami` and `start_session`, with their actions, use cases and controllers
+    - `/agent` (its sidebar item is "Claude"), `playwright.config.ts` and `tests/flows/webmcp.flow.ts`, and `docs/agent-access.md`
+  - Decided in the unit:
+    - A session start is an activity row (record kind `agent-session`, action `created`), with no new table. `start_session` answers with the changes from the actor's previous start to this one.
+    - The wrapper answers `unexpected` with "Couldn't reach the server" when a call throws for any reason but a removed action.
+    - Write actions check the page tool's name they're given (snake_case, at most 30 characters).
+    - The flow has no test-database guard, because the app's `.env` holds test values only (KTD17).
+  - Probed without an account, in Playwright 1.64's Chromium (Chrome for Testing 156.0.8078.4) with `--enable-features=WebMCP`:
+    - `document.modelContext` exists and `navigator.modelContext` doesn't
+    - `registerTool` returns a promise that rejects on a duplicate name or an aborted signal, and aborting unregisters
+    - the browser doesn't check input against the schema
+    - a throwing handler reaches the caller only as "invocation failed"
+    - results of 50 MB pass through
+    - the app's own `registerPageTools`, with the registry's real definitions, listed each tool once after a StrictMode remount, and its results round-tripped
+  - Checks: lint, types, dead code and a placeholder build pass, and 137 tests and 17 screen tests pass. Every test scenario above has a test except the real-browser flow, which is written and lists in `playwright test --list`.
+  - Pending:
+    - the flow on the test project (H1, and H2 for Claude's test-project account in `.env`)
+    - the spike in Claude Code: the `webmcp_*` tools, the codes, ask and deny rules, and the result-size limit after the browser (H3)
+    - the deployed-app run (H1)
+    - `/agent` at 375 px in light and dark mode
 
 ### Phase 2: Pipeline
 
@@ -1131,6 +1178,7 @@ Each phase is one branch and PR and leaves a usable app:
 ## Session log
 
 - **2026-10-23** — Plan of record written. **Next:** H1, then U1.
+- **2026-10-23** — U1 to U3 and U4's local part built on branch `claude/job-tracker-app-446186` (868bfdd, c3ae126, f50e1b6, 7c7a7e3, 118eb76), not pushed. Every check that runs without a cloud project passes. Probed without an account: Playwright 1.64's Chromium has `document.modelContext` with the WebMCP flag and runs the app's adapter. **Next:** H1 to H3, then the pending checks and U4's spike. The branch becomes `feat/job-search-p1-foundation` before the Phase 1 PR.
 
 ---
 
