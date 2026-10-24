@@ -18,7 +18,7 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 | | |
 |---|---|
-| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. Each unit waits on a check that needs H1, H2 or H3 (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
+| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2, U3 and U4's local part each wait on a check that needs H2 or H3, or the test project's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
 | Next task | The production migration wrapper (KTD17). Then apply `0000_activity` to the test project and to production, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
 | Waiting on Hector | Production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); an OK to apply `0000_activity` to the test project; H2 (the accounts); H3 (Playwright MCP config) |
 | Last updated | 2026-10-24 |
@@ -45,7 +45,7 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 Tasks are this plan's units, so the tracker and the plan share IDs (see Conventions).
 
 **Phase 1: Foundation and the agent path**
-- [~] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
+- [x] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
 - [~] **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
 - [~] **U3** Action envelope and activity log — C · KTD4, KTD7
 - [~] **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
@@ -404,7 +404,7 @@ None block planning. Deferred to implementation:
 - KTD17. **Local development and previews use the test project; production secrets live only in production.**
   - Local development and preview deploys use the Neon test project with test-only secrets: database, cookie secret, ids, Google client and token key, and a throwaway Google account as the expected calendar account. Production values exist only in Vercel's Production environment. Recipes uses its production database locally; this app doesn't, because `.worktreeinclude` copies `apps/*/.env` into every worktree, and the production cookie secret plus the owner id would be enough to forge an owner session.
   - No production secret passes through a Claude session, where transcripts would keep it. Hector creates the production Neon project and enters its database URL in Vercel himself. The cookie secret and token key are generated straight into Vercel's Production environment as sensitive (write-only) variables, without being printed. Production migrations and the import's commit run in Hector's terminal through a small wrapper that reads the database URL from a no-echo prompt, never from a file left on disk.
-  - On the production project, Neon Auth trusts only the production domain; the test project trusts localhost and the preview wildcard.
+  - On the production project, Neon Auth trusts only the production domain; the test project trusts localhost and the preview wildcard. (Revised 2026-10-24: Neon accepts a wildcard only as the leftmost whole label, and a Vercel preview address is a single label under `vercel.app`. So the test project trusts each preview branch's alias exactly, added when the branch first deploys.)
   - A Vercel project rooted at the app folder, with the turbo `ignoreCommand` and the default `vercel.app` domain. (Revised 2026-10-24: Hector also gave production a custom domain. Its addresses stay out of the repo.) `noindex` through root metadata and `app/robots.ts`, and signed-out pages and metadata carry a generic name, never Hector's.
   - Browser flows run against the test project, guarded like recipes' `check-test-database`.
   - Env names, listed in the app's `turbo.json`: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `OWNER_USER_ID`, `AGENT_USER_ID`, `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_CALENDAR_ACCOUNT_EMAIL`, `CALENDAR_TOKEN_KEY`, `LOG_LEVEL`.
@@ -653,7 +653,7 @@ Each phase is one branch and PR and leaves a usable app:
     - 39 tests pass, 12 of them in `tests/proxy.test.ts`
     - locally, a signed-out `GET /` gets a 307 to `/welcome`, which is titled "Job search", is marked `noindex, nofollow`, and has no horizontal scroll at 375 px in light or dark mode
     - f50e1b6 raised the welcome page's Sign in button and the sidebar trigger to 44 px (`min-h-11`)
-  - Pending: the preview deploy's `noindex` check, which needs the Vercel project (H1). On 2026-10-24 the production deploy of `main` served the welcome page marked `noindex, nofollow`.
+  - Deploy check (2026-10-24), on production: previews sit behind Vercel Authentication. Production's `/` sends a signed-out visit to `/welcome` (307), which is titled "Job search" and marked `noindex, nofollow`. The first preview, of `feat/job-search-p1-gate`, built without errors.
 
 ### U2. Identity, access and the private screen
 
@@ -1187,6 +1187,7 @@ Each phase is one branch and PR and leaves a usable app:
   - Production still needs `DATABASE_URL` and the account ids.
 
   Follow-ups go on `feat/job-search-p1-gate`, merged up to date with `main`. **Next:** a preview build of that branch, then the test project trusts its addresses; the migration wrapper.
+- **2026-10-24** — The first preview, of `feat/job-search-p1-gate`, built without errors. Previews redirect signed-out visitors to Vercel's sign-in. The test project's Neon Auth trusts that branch's alias: Neon refused the planned wildcard (KTD17, revised). U1 is done, its deploy check run on production. **Next:** the migration wrapper; Hector's production `DATABASE_URL` and localhost off; an OK to migrate the test project; H2 and H3.
 
 ---
 
