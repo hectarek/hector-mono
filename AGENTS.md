@@ -123,6 +123,7 @@ apps/
   hectors-recipes/     # Recipes app (Next.js + Neon + Drizzle + auth) — clean arch, kept simple
   stash/               # Stash/bookmark app (Next.js + Neon + Drizzle + auth) — full clean arch
   hectors-tools/       # AI/web tools catalog (Next.js + AI SDK) — clean arch + DI, no DB or auth yet
+  job-search/          # Private job search workspace (Next.js + Neon + Drizzle + auth) — clean arch on recipes' pattern; no search specifics in the repo
 
 packages/
   ui/                  # Shared UI components (shadcn/ui based) — see packages/ui/AGENTS.md
