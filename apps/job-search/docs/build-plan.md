@@ -18,9 +18,9 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 | | |
 |---|---|
-| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are built and committed. Each waits on a check that needs H1, H2 or H3 (their Evidence says which) |
-| Next task | Once H1 to H3 are done: apply `0000_activity` to the test project, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
-| Waiting on Hector | H1's rest: the Vercel CLI's sign-in, so Claude can set Vercel's variables, and turning off localhost on production's Neon Auth. Then H2 (the accounts), H3 (Playwright MCP config), and an OK to apply `0000_activity` to the test project |
+| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. Each unit waits on a check that needs H1, H2 or H3 (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
+| Next task | The production migration wrapper (KTD17). Then apply `0000_activity` to the test project and to production, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
+| Waiting on Hector | Production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); an OK to apply `0000_activity` to the test project; H2 (the accounts); H3 (Playwright MCP config) |
 | Last updated | 2026-10-24 |
 
 ---
@@ -653,7 +653,7 @@ Each phase is one branch and PR and leaves a usable app:
     - 39 tests pass, 12 of them in `tests/proxy.test.ts`
     - locally, a signed-out `GET /` gets a 307 to `/welcome`, which is titled "Job search", is marked `noindex, nofollow`, and has no horizontal scroll at 375 px in light or dark mode
     - f50e1b6 raised the welcome page's Sign in button and the sidebar trigger to 44 px (`min-h-11`)
-  - Pending: the preview deploy's `noindex` check, which needs the Vercel project (H1).
+  - Pending: the preview deploy's `noindex` check, which needs the Vercel project (H1). On 2026-10-24 the production deploy of `main` served the welcome page marked `noindex, nofollow`.
 
 ### U2. Identity, access and the private screen
 
@@ -1166,7 +1166,7 @@ Each phase is one branch and PR and leaves a usable app:
 
 | # | Need | Unblocks | Status |
 |---|---|---|---|
-| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo | U1 | OK given 2026-10-24. Done: the test project, and Hector's production Neon project and Vercel project. Open: Vercel's variables (they wait on the Vercel CLI's sign-in) and turning off localhost on production's Neon Auth (KTD17) |
+| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo | U1 | OK given 2026-10-24. Done: the test project; Hector's production Neon project and Vercel project; Preview's variables, from the test project. Open: production's `DATABASE_URL` (Hector), its account ids (H2), and turning off localhost on production's Neon Auth (KTD17) |
 | H2 | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. On the test project, create an owner, an agent and a third account (U2's check) in the Neon console; their ids, and the agent's email and password for the flows, go in the app's `.env`. Once the accounts exist, close sign-up in each Neon project, the test project first: turn on `disable_sign_up` in the email-and-password settings, and remove Neon Auth's shared Google provider, since the app doesn't use it and email sign-up being off doesn't stop a Google one (found 2026-10-24) | U2, U4 | open |
 | H3 | In the folder where search sessions start, apply the settings Claude drafts: the Playwright MCP server (profile and output folders, WebMCP flag), `ask` rules for consequential tools (`close_job`, `set_profile`, the calendar writes), and the deny rules in System-Wide Impact, including keeping the database connection away from the app's project | U4 | open |
 | H4 | Create a Google OAuth web client (consent screen in production for personal use, scope `calendar.events.owned`), put its production values only in Vercel's Production environment, and set up a throwaway Google account for local testing | U13 | open |
@@ -1181,6 +1181,12 @@ Each phase is one branch and PR and leaves a usable app:
 - **2026-10-23** — U1 to U3 and U4's local part built on branch `claude/job-tracker-app-446186` (868bfdd, c3ae126, f50e1b6, 7c7a7e3, 118eb76), not pushed. Every check that runs without a cloud project passes. Probed without an account: Playwright 1.64's Chromium has `document.modelContext` with the WebMCP flag and runs the app's adapter. **Next:** H1 to H3, then the pending checks and U4's spike. The branch becomes `feat/job-search-p1-foundation` before the Phase 1 PR.
 - **2026-10-24** — H1 in part. The Neon test project `job-search-test` (aws-us-east-1, Postgres 17) has Neon Auth, a database comment the flow guard checks, and its values in the app's local `.env`. Locally against it, `/` redirects to the welcome page, the sign-in form renders, and Neon Auth answers `get-session`. Added the flow guard KTD17 asked for, which U4 had missed (60d2e17). The Vercel project waits on the Vercel CLI's sign-in. The branch is renamed `feat/job-search-p1-foundation` and pushed, with no PR yet. **Next:** `vercel login`, then the Vercel project; an OK to apply `0000_activity` to the test project; H2 and H3.
 - **2026-10-24** — Hector created the production Neon project (Postgres 18; the test project is on 17) and the Vercel project, with a custom domain as well as the `vercel.app` one. Production's Neon Auth trusts both addresses, but still allows localhost, which KTD17 rules out. The production migration wrapper in KTD17 doesn't exist yet. **Next:** `vercel login`, then Vercel's variables (preview from the test project; the production cookie secret generated straight into Vercel); the migration wrapper; localhost off on production.
+- **2026-10-24** — Hector merged the Phase 1 branch as hectarek/hector-mono#56 so the Vercel project could build from `main`. That was before the gate and before the code review ce-work runs ahead of a PR, which hasn't run on Phase 1 yet. Production deploys `main` and serves the welcome page, `noindex`. In Vercel:
+  - Hector's `NEON_AUTH_BASE_URL` and `NEON_AUTH_COOKIE_SECRET` now cover Production only. They had covered Preview too.
+  - Preview has the test project's database and auth, and a cookie secret of its own, each sensitive.
+  - Production still needs `DATABASE_URL` and the account ids.
+
+  Follow-ups go on `feat/job-search-p1-gate`, merged up to date with `main`. **Next:** a preview build of that branch, then the test project trusts its addresses; the migration wrapper.
 
 ---
 
