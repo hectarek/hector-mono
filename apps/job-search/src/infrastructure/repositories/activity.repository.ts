@@ -49,7 +49,9 @@ export class ActivityRepository
           and(
             eq(activity.ownerId, ownerId),
             record && eq(activity.recordKind, record.kind),
-            record && eq(activity.recordId, record.id),
+            record?.id === undefined
+              ? undefined
+              : eq(activity.recordId, record.id),
             actor && eq(activity.actor, actor),
             since && gte(activity.createdAt, since),
             until && lt(activity.createdAt, until),

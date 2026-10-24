@@ -14,8 +14,18 @@ export type ChangeContext = {
   tool?: string;
 };
 
-// The records that keep a history, each added by the unit that brings it (R19).
-const recordKindSchema = z.enum(["company", "job", "person"]);
+// A page tool's name (KTD5): snake_case and at most 30 characters, since Playwright MCP adds
+// `webmcp_` to it and Claude Code `mcp__playwright__`. Actions check the name a page sends.
+export const toolNameSchema = z
+  .string()
+  .max(30, { error: "A page tool's name is at most 30 characters" })
+  .regex(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/, {
+    error: "A page tool's name is snake_case",
+  });
+
+// What the log's rows are about: the records that keep a history, each added by the unit that
+// brings it (R19), and Claude's working sessions, a record each (start_session, U4).
+const recordKindSchema = z.enum(["company", "job", "person", "agent-session"]);
 export type RecordRef = { kind: z.infer<typeof recordKindSchema>; id: string };
 
 export type ActivityAction = "created" | "updated" | "deleted" | "refused";
@@ -53,10 +63,12 @@ const timeSchema = z.iso
   .transform((value) => new Date(value));
 
 // What list_activity takes, and a record's history asks for: an owner's changes, newest first,
-// narrowed to one record, one kind of actor and a window of time (since is inclusive, until
-// isn't), a page at a time.
+// narrowed to one record (or, without an id, every record of a kind), one kind of actor and a
+// window of time (since is inclusive, until isn't), a page at a time.
 export const listActivitySchema = z.object({
-  record: z.object({ kind: recordKindSchema, id: z.uuid() }).optional(),
+  record: z
+    .object({ kind: recordKindSchema, id: z.uuid().optional() })
+    .optional(),
   actor: changeActorSchema.optional(),
   since: timeSchema.optional(),
   until: timeSchema.optional(),

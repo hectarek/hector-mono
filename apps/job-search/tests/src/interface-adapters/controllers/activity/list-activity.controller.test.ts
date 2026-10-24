@@ -38,7 +38,7 @@ describe("listActivityController", () => {
     },
     { label: "a page larger than 50", input: { limit: 51 } },
     {
-      label: "a record without an id",
+      label: "a record with a malformed id",
       input: { record: { kind: "job", id: "x" } },
     },
     { label: "someone who isn't an actor", input: { actor: "hector" } },

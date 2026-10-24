@@ -1,3 +1,4 @@
+import { getActionActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
 import type { DI_RETURN_TYPES } from "@/di/types";
 import {
@@ -9,6 +10,10 @@ import {
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
+import {
+  type ChangeContext,
+  toolNameSchema,
+} from "@/src/entities/models/activity.model";
 
 // Helpers for app/actions/*: not a "use server" module, so nothing here is callable from the client.
 
@@ -53,6 +58,21 @@ export function succeeded<T>(data: T): ActionResult<T> {
 
 export function actionLogger(op: string): DI_RETURN_TYPES["ILoggerService"] {
   return getInjection("ILoggerService").child({ layer: "action", op });
+}
+
+// Who's making a write (KTD7): the session's actor and, when a page tool made the call, the tool's
+// name, which a write action takes as its last argument. The name comes from the page, so it's
+// only a label, and it's checked as input is (KTD5). Throws before anything is written.
+export async function changeContext(tool?: unknown): Promise<ChangeContext> {
+  const actor = await getActionActor();
+  if (tool === undefined) {
+    return actor;
+  }
+  const { data, error } = toolNameSchema.safeParse(tool);
+  if (error) {
+    throw new InputParseError("Invalid tool name", { cause: error });
+  }
+  return { ...actor, tool: data };
 }
 
 // Inputs as the screens and tools name them, and a record's history names its fields. Anything

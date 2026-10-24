@@ -27,7 +27,7 @@ export class MockActivityRepository implements IActivityRepository {
           row.ownerId === ownerId &&
           (!record ||
             (row.entry.record.kind === record.kind &&
-              row.entry.record.id === record.id)) &&
+              (!record.id || row.entry.record.id === record.id))) &&
           (!actor || row.entry.actor === actor) &&
           (!since || row.entry.createdAt >= since) &&
           (!until || row.entry.createdAt < until),

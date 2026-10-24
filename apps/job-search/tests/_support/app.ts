@@ -5,6 +5,7 @@ import { beforeEach, describe } from "bun:test";
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
+import { startSessionUseCase } from "@/src/application/use-cases/session/start-session.use-case";
 import { ActivityRepository } from "@/src/infrastructure/repositories/activity.repository";
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
@@ -75,6 +76,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
   return {
     repos,
     listActivity: listActivityUseCase(repos.activity, log),
+    startSession: startSessionUseCase(repos.activity, repos.transactions, log),
   };
 }
 

@@ -91,6 +91,31 @@ describeEachBackend("the activity log", () => {
     expect(reasons(history)).toEqual(["this job"]);
   });
 
+  // Claude's sessions are one kind of record, each start a record of its own (start_session).
+  it("lists every record of one kind, given the kind without an id", async () => {
+    const session = () => ({
+      kind: "agent-session" as const,
+      id: crypto.randomUUID(),
+    });
+    await record(
+      change({ record: session(), action: "created", reason: "first session" }),
+    );
+    await record(change({ reason: "a job" }));
+    await record(
+      change({
+        record: session(),
+        action: "created",
+        reason: "second session",
+      }),
+    );
+
+    const sessions = await app.listActivity(
+      OWNER,
+      filter({ record: { kind: "agent-session" } }),
+    );
+    expect(reasons(sessions)).toEqual(["second session", "first session"]);
+  });
+
   it("filtered by time and who made the change, returns them newest first, a page at a time", async () => {
     await record(change({ actor: "agent", reason: "before the window" }));
     await tick();

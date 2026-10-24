@@ -13,7 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@repo/ui/components/sidebar";
-import { CalendarDays, LogOut } from "lucide-react";
+import { Bot, CalendarDays, LogOut } from "lucide-react";
 import Link from "next/link";
 
 // The signed-in frame (docs/build-plan.md KTD19): a sidebar on desktop, an off-canvas sheet
@@ -33,6 +33,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton size="lg" render={<Link href="/" />}>
                     <CalendarDays />
                     <span>This week</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="lg" render={<Link href="/agent" />}>
+                    <Bot />
+                    <span>Claude</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

@@ -7,3 +7,8 @@ export class Redirected extends Error {
     super(`Redirected to ${url}`);
   }
 }
+
+// What actions asked Next to do: the paths revalidatePath() was given. Tests reset it.
+export const nextState = {
+  revalidated: [] as string[],
+};

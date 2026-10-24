@@ -1,8 +1,9 @@
 // Runs before every test file (bunfig.toml [test].preload).
 import { mock } from "bun:test";
+import { unstable_isUnrecognizedActionError } from "next/dist/client/components/unrecognized-action-error";
 import { testDb } from "@/tests/_support/database";
 import { fakeNeonAuth } from "@/tests/_support/neon-auth";
-import { Redirected } from "@/tests/_support/next";
+import { nextState, Redirected } from "@/tests/_support/next";
 
 // Bun loads .env for tests too. Drop the app's credentials and account settings so no test
 // can reach the test project's database, auth or Google, and so tests behave the same with
@@ -32,6 +33,16 @@ mock.module("@/lib/auth/server", () => ({ auth: fakeNeonAuth }));
 mock.module("next/navigation", () => ({
   redirect: (url: string): never => {
     throw new Redirected(url);
+  },
+  // The real check: the page tools' wrapper (app/_lib/call-action.ts) tells by it that a deploy
+  // removed an action.
+  unstable_isUnrecognizedActionError,
+}));
+
+// Outside Next.js there's no page to refresh: tests read the paths an action revalidated.
+mock.module("next/cache", () => ({
+  revalidatePath: (path: string) => {
+    nextState.revalidated.push(path);
   },
 }));
 

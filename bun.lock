@@ -126,10 +126,12 @@
       "devDependencies": {
         "@electric-sql/pglite": "^0.5.8",
         "@happy-dom/global-registrator": "^20.14.5",
+        "@playwright/test": "^1.64.0",
         "@repo/biome-config": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "^4.3.3",
         "@testing-library/dom": "^10.4.2",
+        "@testing-library/react": "^16.3.3",
         "@types/bun": "1.4.2",
         "@types/node": "^26.6.4",
         "@types/react": "^19.3.0",
