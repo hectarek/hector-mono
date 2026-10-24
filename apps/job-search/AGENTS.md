@@ -107,7 +107,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - Env names, in `.env.example` and `turbo.json`: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `OWNER_USER_ID`, `AGENT_USER_ID`, `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_CALENDAR_ACCOUNT_EMAIL`, `CALENDAR_TOKEN_KEY`, `LOG_LEVEL`. Turborepo withholds any variable `turbo.json` doesn't list from `next build`. The browser flows' `FLOW_AGENT_EMAIL` and `FLOW_AGENT_PASSWORD` are in `.env.example` only: the build never reads them.
 - The local `.env` holds test-project values only: the Neon project `job-search-test`, whose database carries that name as its comment. `tests/_support/preload.ts` deletes every one of the build's variables but `LOG_LEVEL` before the tests run. The repo's settings deny reading `.env` files, so a command that needs them (the flows, `db:migrate`) runs outside Claude Code's sandbox, and nothing prints their values.
 - Ports: `next dev` on 3101 (`.claude/launch.json`); the browser flows' own server on 3301 (`playwright.config.ts`).
-- Deploying: a Vercel project rooted at `apps/job-search`, on the default `vercel.app` domain, built only when the app changed (`vercel.json`'s `ignoreCommand`). Not set up yet: it waits on H1 in the plan.
+- Deploying: a Vercel project rooted at `apps/job-search`, on the default `vercel.app` domain, built only when the app changed (`vercel.json`'s `ignoreCommand`). Not set up yet (the plan's H1). Its name and address stay out of the repo, so the address can't be guessed from it.
 
 ## UI Rules
 - The shell is `app/_components/app-shell.tsx`. A unit that adds a section adds its item to the sidebar menu.

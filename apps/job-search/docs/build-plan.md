@@ -20,8 +20,8 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 |---|---|
 | Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are built and committed. Each waits on a check that needs H1, H2 or H3 (their Evidence says which) |
 | Next task | Once H1 to H3 are done: apply `0000_activity` to the test project, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
-| Waiting on Hector | H1 (Neon and Vercel projects), H2 (Claude's account), H3 (Playwright MCP config) |
-| Last updated | 2026-10-23 |
+| Waiting on Hector | H1's rest (the Vercel CLI's sign-in, so Claude can create the Vercel project, and the production Neon project), H2 (the accounts), H3 (Playwright MCP config), and an OK to apply `0000_activity` to the test project |
+| Last updated | 2026-10-24 |
 
 ---
 
@@ -1166,8 +1166,8 @@ Each phase is one branch and PR and leaves a usable app:
 
 | # | Need | Unblocks | Status |
 |---|---|---|---|
-| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17) | U1 | open |
-| H2 | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. Once both accounts exist, turn on `disable_sign_up` in each Neon project's email-and-password settings, trying it on the test project first | U2, U4 | open |
+| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo | U1 | OK given 2026-10-24. Test project done. The Vercel project waits on the Vercel CLI's sign-in (`vercel login`), and the production Neon project is open |
+| H2 | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. On the test project, create an owner, an agent and a third account (U2's check) in the Neon console; their ids, and the agent's email and password for the flows, go in the app's `.env`. Once the accounts exist, close sign-up in each Neon project, the test project first: turn on `disable_sign_up` in the email-and-password settings, and remove Neon Auth's shared Google provider, since the app doesn't use it and email sign-up being off doesn't stop a Google one (found 2026-10-24) | U2, U4 | open |
 | H3 | In the folder where search sessions start, apply the settings Claude drafts: the Playwright MCP server (profile and output folders, WebMCP flag), `ask` rules for consequential tools (`close_job`, `set_profile`, the calendar writes), and the deny rules in System-Wide Impact, including keeping the database connection away from the app's project | U4 | open |
 | H4 | Create a Google OAuth web client (consent screen in production for personal use, scope `calendar.events.owned`), put its production values only in Vercel's Production environment, and set up a throwaway Google account for local testing | U13 | open |
 | H5 | Enter the weekly targets and the queue cap in Settings | U11 | open |
@@ -1179,6 +1179,7 @@ Each phase is one branch and PR and leaves a usable app:
 
 - **2026-10-23** — Plan of record written. **Next:** H1, then U1.
 - **2026-10-23** — U1 to U3 and U4's local part built on branch `claude/job-tracker-app-446186` (868bfdd, c3ae126, f50e1b6, 7c7a7e3, 118eb76), not pushed. Every check that runs without a cloud project passes. Probed without an account: Playwright 1.64's Chromium has `document.modelContext` with the WebMCP flag and runs the app's adapter. **Next:** H1 to H3, then the pending checks and U4's spike. The branch becomes `feat/job-search-p1-foundation` before the Phase 1 PR.
+- **2026-10-24** — H1 in part. The Neon test project `job-search-test` (aws-us-east-1, Postgres 17) has Neon Auth, a database comment the flow guard checks, and its values in the app's local `.env`. Locally against it, `/` redirects to the welcome page, the sign-in form renders, and Neon Auth answers `get-session`. Added the flow guard KTD17 asked for, which U4 had missed (60d2e17). The Vercel project waits on the Vercel CLI's sign-in. **Next:** `vercel login`, then the Vercel project; an OK to apply `0000_activity` to the test project; H2 and H3.
 
 ---
 
