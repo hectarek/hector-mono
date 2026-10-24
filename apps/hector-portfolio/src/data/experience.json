@@ -5,28 +5,28 @@
       "role": "Co-founder & Chief Technology Officer",
       "period": "Aug 2023 – Present",
       "location": "Charlotte, NC",
-      "description": "Hands-on lead engineer for the company's platform and applied-AI work. Co-architected and now solely run The Notwork, the production platform behind North Carolina's first state-backed esports and STEM league, and built its AI layer.",
+      "description": "Lead engineer for the company's platform and its AI work. Co-architected The Notwork, the platform behind North Carolina's first state-backed esports and STEM league, and have run it on my own since October 2025.",
       "bullets": [
-        "Co-architected The Notwork (Next.js, React 19, TypeScript): ~24K users, ~490K views, peak ~1K daily active users.",
-        "Sole maintainer and product owner since Oct 2025, after leading the team through a 2025 rebuild: schema redesign, notifications, pagination, error handling and logging, and hundreds of regression tests.",
-        "Built a nine-step AI curriculum pipeline on the Vercel AI SDK with a human review point at every step. Cut lesson production from about a week to 10–30 minutes; 55 lessons published.",
-        "Built AI-assisted rubric grading and designed teacher-as-verifier identity verification for in-person competition.",
-        "Designed and shipped 11 browser games solo in Pixi.js and Three.js, 10 of them for a skilled-trades workforce program.",
-        "Stood up org-wide AI tooling (a Claude team workspace, MCP integrations into the platform) and trained staff on it.",
-        "Led five developers through the initial build: hired the team, set coding standards, reviewed PRs weekly, and refined tickets with product and design."
+        "Co-architected The Notwork in Next.js, React 19 and TypeScript. More than 10,000 people have used it, with over 900 on it in a single day at its peak.",
+        "Hired and led five developers for the first build: set the coding standards, reviewed pull requests every week and worked through tickets with product and design.",
+        "Sole engineer and product owner since October 2025, after leading the team through the 2025 rebuild: a redesigned schema, notifications end to end, server-side pagination, error handling and logging, and hundreds of regression tests.",
+        "Built a nine-step AI curriculum pipeline on the Vercel AI SDK: AI drafts each step, and a person approves it before the next one runs. A lesson that took about a week now takes half an hour or less, and more than 50 have been published.",
+        "Built AI-assisted rubric grading, where staff review every score before it counts, and made teachers the verifiers for in-person competition.",
+        "Set up AI tools for the whole company, including a Claude team workspace and MCP integrations into the platform, and trained the staff to use them.",
+        "Designed and built more than 10 browser games on my own in Pixi.js and Three.js, most of them for a skilled-trades program, without having made a game before."
       ],
       "metrics": [
         {
-          "label": "Notwork users",
-          "value": "~24K"
+          "label": "Users I build for",
+          "value": "10,000+"
         },
         {
-          "label": "Lessons published",
-          "value": "55"
+          "label": "Developers I led",
+          "value": "5"
         },
         {
-          "label": "Games shipped",
-          "value": "11"
+          "label": "Lesson time I cut",
+          "value": "95%+"
         }
       ],
       "technologies": [
@@ -47,26 +47,22 @@
       "role": "Co-founder & Director of Curriculum and Programming",
       "period": "Mar 2022 – Aug 2023",
       "location": "Charlotte, NC",
-      "description": "Co-founded the company and ran CTAC, its careers-in-technology program, end to end: curriculum, daily teaching, cohort operations, and sponsor relationships.",
+      "description": "Co-founded the company and ran CTAC, its coding program for adults changing careers: the curriculum, the daily teaching, the cohorts and the sponsoring employers.",
       "bullets": [
-        "Wrote the curriculum and taught daily as the sole instructor: about 130 adults across three years of cohorts (two teaching, one supervising), over half of the program's ~200 graduates.",
-        "Over 100 of them were placed in full-time roles at Charlotte's major employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated, and Truist.",
-        "Led a four-person curriculum team on a contracted cohort build for an external client.",
-        "Worked with corporate sponsors so cohorts launched with the curriculum their hiring pipelines needed.",
-        "Set up hiring, onboarding, and program operations as the company scaled from its founding."
+        "Wrote the curriculum and taught it every day as the only instructor for two years, then supervised a third: about 130 adults, more than half of the program's graduates.",
+        "More than 100 of them were hired into full-time roles at Charlotte employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated and Truist.",
+        "Led a four-person curriculum team on a cohort build for an outside client.",
+        "Worked with the sponsoring employers so each cohort learned what their hiring teams needed.",
+        "Set up hiring, onboarding and program operations from the company's founding."
       ],
       "metrics": [
         {
-          "label": "Graduates placed",
+          "label": "My students hired",
           "value": "100+"
         },
         {
-          "label": "Adults taught",
-          "value": "~130"
-        },
-        {
-          "label": "Cohort years",
-          "value": "3"
+          "label": "Adults I taught",
+          "value": "About 130"
         }
       ],
       "technologies": [
@@ -85,12 +81,12 @@
       "role": "Frontend Web Developer",
       "period": "Aug 2020 – Mar 2022",
       "location": "Charlotte, NC",
-      "description": "Front-end developer on ally.com inside a large, multi-team engineering org with formal release, review, and change control.",
+      "description": "Front-end developer on ally.com, in a large engineering org with formal releases, code review and change control.",
       "bullets": [
-        "Delivered UI features, new content, and bug fixes to ally.com, including the home page.",
-        "Sole owner of several legacy codebases, kept integrated with shared site components.",
-        "Triaged and remediated security vulnerabilities with site owners.",
-        "Learned production engineering practice from senior and principal engineers."
+        "Shipped UI features, new content and fixes to ally.com, including the home page.",
+        "Owned several legacy codebases on my own and kept them working with the site's shared components.",
+        "Worked with site owners to triage and fix security vulnerabilities.",
+        "Learned code review, releases and change control from senior and principal engineers."
       ],
       "technologies": [
         "JavaScript",
@@ -107,11 +103,11 @@
       "role": "WIN Program — Software Apprentice",
       "period": "Mar 2020 – Aug 2020",
       "location": "Charlotte, NC",
-      "description": "Career-changing technical training program. Built and deployed full-stack web applications alongside a 50-person cohort and went through every phase of the SDLC.",
+      "description": "A six-month coding program for career changers. Built and deployed full-stack web apps alongside a 50-person cohort, through every phase of a project.",
       "bullets": [
-        "Trained intensively in full-stack development as a career pivot from banking.",
-        "Built and shipped applications across the SDLC with a 50-person cohort.",
-        "Placed into a full-time frontend role at Ally on completion."
+        "Trained intensively in full-stack development to move from banking into software.",
+        "Built and deployed full-stack apps through every phase of a project, alongside a 50-person cohort.",
+        "Hired as a front-end developer at Ally when it ended."
       ],
       "technologies": ["JavaScript", "Java", "Spring Boot", "React", "SQL"]
     },
@@ -120,11 +116,11 @@
       "role": "Early Talent Program — Risk & Analytics",
       "period": "Aug 2018 – Mar 2020",
       "location": "Charlotte, NC",
-      "description": "Rotational early-talent program across risk and analytics functions. Built dashboards, mapped business processes, and supported audit and reporting work for senior leadership before transitioning into software.",
+      "description": "A rotational early-talent program across risk and analytics teams. Built dashboards, mapped business processes and supported audit and reporting work for senior leadership, before moving into software.",
       "bullets": [
-        "Rotated across business functions to learn how a large enterprise actually operates.",
-        "Built a project management dashboard in Tableau and reporting in Excel/VBA for senior leadership.",
-        "Documented complex business processes and supported audit/regulatory work."
+        "Rotated across business teams and learned how a big company runs.",
+        "Built a project management dashboard in Tableau and Excel/VBA reports for senior leadership.",
+        "Documented business processes and supported audit and regulatory work."
       ],
       "technologies": [
         "Tableau",

@@ -6,7 +6,7 @@ import { Mail } from "lucide-react";
 import Link from "next/link";
 import { SocialLinks } from "@/app/_components/portfolio/contact/social-links";
 import { SectionEyebrow } from "@/app/_components/portfolio/shared/section-eyebrow";
-import { heroItem, heroVariants, viewportOptions } from "@/src/lib/animations";
+import { heroItem, heroVariants } from "@/src/lib/animations";
 import type { Profile } from "@/src/types/portfolio";
 
 interface ContactPageContentProps {
@@ -17,9 +17,8 @@ export function ContactPageContent({ profile }: ContactPageContentProps) {
   return (
     <m.div
       className="relative px-4 py-14 sm:py-20"
-      initial="hidden"
-      whileInView="visible"
-      viewport={viewportOptions}
+      initial={false}
+      animate="visible"
       variants={heroVariants}
     >
       <div className="relative mx-auto max-w-6xl">

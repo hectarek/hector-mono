@@ -3,7 +3,7 @@
 import { m } from "framer-motion";
 import { ProjectsList } from "@/app/_components/portfolio/projects/projects-list";
 import { SectionEyebrow } from "@/app/_components/portfolio/shared/section-eyebrow";
-import { fadeInUp, viewportOptions } from "@/src/lib/animations";
+import { fadeInUp } from "@/src/lib/animations";
 import type { Project } from "@/src/types/portfolio";
 
 interface ProjectsPageContentProps {
@@ -14,9 +14,8 @@ export function ProjectsPageContent({ projects }: ProjectsPageContentProps) {
   return (
     <m.div
       className="relative px-4 py-14 sm:py-20"
-      initial="hidden"
-      whileInView="visible"
-      viewport={viewportOptions}
+      initial={false}
+      animate="visible"
       variants={fadeInUp}
     >
       <div className="relative mx-auto max-w-6xl">
