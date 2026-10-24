@@ -3,9 +3,17 @@
 // auth route let through to Neon.
 type AuthRouteContext = { params: Promise<{ path: string[] }> };
 
+const answerOk = async (): Promise<Response> => Response.json({});
+
 export const neonAuth = {
   // "GET get-session", "POST update-user", …
   reached: [] as string[],
+  // What Neon answers. A test that makes Neon fail swaps it, and calls reset() after.
+  answer: answerOk,
+  reset() {
+    neonAuth.reached = [];
+    neonAuth.answer = answerOk;
+  },
 };
 
 async function handle(
@@ -13,7 +21,7 @@ async function handle(
   { params }: AuthRouteContext,
 ): Promise<Response> {
   neonAuth.reached.push(`${request.method} ${(await params).path.join("/")}`);
-  return Response.json({});
+  return neonAuth.answer();
 }
 
 export const fakeNeonAuth = {

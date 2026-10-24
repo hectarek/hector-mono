@@ -1,5 +1,6 @@
 import { createContainer } from "@evyweb/ioctopus";
 import { createAccessModule } from "@/di/modules/access.module";
+import { createActivityModule } from "@/di/modules/activity.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
 import { createLoggerModule } from "@/di/modules/logger.module";
 import { createTransactionModule } from "@/di/modules/transaction.module";
@@ -17,6 +18,7 @@ ApplicationContainer.load(
   Symbol("TransactionModule"),
   createTransactionModule(),
 );
+ApplicationContainer.load(Symbol("ActivityModule"), createActivityModule());
 
 export function getInjection<K extends keyof typeof DI_SYMBOLS>(
   symbol: K,

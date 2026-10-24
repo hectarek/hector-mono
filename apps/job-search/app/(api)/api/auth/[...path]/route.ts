@@ -6,6 +6,7 @@ import {
   NotAllowedError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
+import { loggable } from "@/src/entities/errors/loggable";
 
 const handler = auth.handler();
 const log = logger.child({ layer: "route", op: "auth" });
@@ -45,21 +46,18 @@ async function handle(
     if (refusal) {
       return refusal;
     }
+    // Logged by status, path and error class or code, never Neon's body or an error's
+    // message, which can quote an email (docs/build-plan.md KTD20).
     const response = await handler[method](request, context);
     if (!response.ok) {
-      const body = await response.clone().text();
       log.error(`Auth ${method} error response`, {
         path,
         status: response.status,
-        body,
       });
     }
     return response;
   } catch (err) {
-    log.error(`Auth ${method} failed`, {
-      path,
-      error: err instanceof Error ? err.message : String(err),
-    });
+    log.error(`Auth ${method} failed`, { path, ...loggable(err) });
     return new Response("Internal Server Error", { status: 500 });
   }
 }

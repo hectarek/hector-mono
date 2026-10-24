@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import { GET, POST } from "@/app/(api)/api/auth/[...path]/route";
+import { ConsoleLoggerService } from "@/src/infrastructure/services/console-logger.service";
 import { neonAuth } from "@/tests/_support/neon-auth";
 import { signInAs, testAuth } from "@/tests/_support/session";
 
@@ -14,7 +15,7 @@ const call = (method: "GET" | "POST", path: string) => {
 
 describe("the auth route", () => {
   beforeEach(() => {
-    neonAuth.reached = [];
+    neonAuth.reset();
   });
 
   it("refuses Claude's session the account endpoints, which are Hector's alone", async () => {
@@ -71,5 +72,56 @@ describe("the auth route", () => {
     } finally {
       unreadable.mockRestore();
     }
+  });
+});
+
+// Logs carry status, path and error class or code, never what Neon or an error says: a sign-in
+// failure's body or message can quote the email (docs/build-plan.md KTD20).
+describe("what the auth route logs", () => {
+  const EMAIL = "someone@example.com";
+  const logged = () =>
+    JSON.stringify([...errorLog.mock.calls, ...warnLog.mock.calls]);
+  let errorLog: ReturnType<typeof spyOn>;
+  let warnLog: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    neonAuth.reset();
+    signInAs("signed-out");
+    errorLog = spyOn(ConsoleLoggerService.prototype, "error").mockReturnValue();
+    warnLog = spyOn(ConsoleLoggerService.prototype, "warn").mockReturnValue();
+  });
+
+  afterEach(() => {
+    errorLog.mockRestore();
+    warnLog.mockRestore();
+    neonAuth.reset();
+  });
+
+  it("logs Neon's failed answer by status and path, never its body", async () => {
+    neonAuth.answer = async () =>
+      Response.json(
+        { code: "INVALID_EMAIL_OR_PASSWORD", message: `No account: ${EMAIL}` },
+        { status: 401 },
+      );
+
+    expect((await call("POST", "sign-in/email")).status).toBe(401);
+    expect(errorLog).toHaveBeenCalledWith("Auth POST error response", {
+      path: "sign-in/email",
+      status: 401,
+    });
+    expect(logged()).not.toContain(EMAIL);
+  });
+
+  it("logs a failure by error class, never its message", async () => {
+    neonAuth.answer = async () => {
+      throw new TypeError(`Couldn't send to ${EMAIL}`);
+    };
+
+    expect((await call("POST", "sign-in/email")).status).toBe(500);
+    expect(errorLog).toHaveBeenCalledWith("Auth POST failed", {
+      path: "sign-in/email",
+      errorClass: "TypeError",
+    });
+    expect(logged()).not.toContain(EMAIL);
   });
 });

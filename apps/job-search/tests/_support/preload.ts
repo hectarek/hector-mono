@@ -1,5 +1,6 @@
 // Runs before every test file (bunfig.toml [test].preload).
 import { mock } from "bun:test";
+import { testDb } from "@/tests/_support/database";
 import { fakeNeonAuth } from "@/tests/_support/neon-auth";
 import { Redirected } from "@/tests/_support/next";
 
@@ -19,6 +20,10 @@ for (const key of [
 ]) {
   delete process.env[key];
 }
+
+// The real repositories and transaction manager (the database tests use them) talk to PGlite,
+// never Neon.
+mock.module("@/db", () => ({ db: testDb }));
 
 // The real module throws at import without those variables, and would reach Neon. Tests
 // read the session through MockAuthService; the auth route forwards to this stand-in.

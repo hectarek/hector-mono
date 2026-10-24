@@ -6,24 +6,25 @@ import type * as schema from "@/db/schema";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import {
+  ConflictError,
   DatabaseOperationError,
   HumanOnlyError,
   InputParseError,
   NotAllowedError,
   NotFoundError,
   UnauthenticatedError,
-  UnauthorizedError,
 } from "@/src/entities/errors/common";
+import { loggable } from "@/src/entities/errors/loggable";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 const DOMAIN_ERRORS = [
+  ConflictError,
   DatabaseOperationError,
   HumanOnlyError,
   InputParseError,
   NotAllowedError,
   NotFoundError,
   UnauthenticatedError,
-  UnauthorizedError,
 ];
 
 type DrizzleTx = PgTransaction<
@@ -35,8 +36,6 @@ type DrizzleTx = PgTransaction<
 const TX_BRAND = "DrizzleTransaction" as const;
 const STATEMENT_TIMEOUT_MS = 15_000;
 
-// The brand lets a repository unwrap the transaction (recipes' unwrapDrizzleTx). That comes
-// with BaseRepository and the first repository; until then nothing reads it.
 class DrizzleTransactionWrapper implements ITransaction {
   readonly _brand = TX_BRAND;
   private completed = false;
@@ -54,6 +53,13 @@ class DrizzleTransactionWrapper implements ITransaction {
   markCompleted(): void {
     this.completed = true;
   }
+}
+
+export function unwrapDrizzleTx(tx: ITransaction): DrizzleTx {
+  if ("_brand" in tx && (tx as DrizzleTransactionWrapper)._brand === TX_BRAND) {
+    return (tx as DrizzleTransactionWrapper)._internal;
+  }
+  throw new Error("Unknown transaction type");
 }
 
 export class TransactionManagerService implements ITransactionManagerService {
@@ -97,16 +103,16 @@ export class TransactionManagerService implements ITransactionManagerService {
       }
 
       // Domain errors (auth denials, not-found, validation) must reach the caller unchanged.
+      // Logged by class and code only, as every error here is (docs/build-plan.md KTD20).
       if (DOMAIN_ERRORS.some((ErrorClass) => err instanceof ErrorClass)) {
-        this.logger.debug("Transaction rolled back by domain error", {
-          error: err instanceof Error ? err.message : String(err),
-        });
+        this.logger.debug(
+          "Transaction rolled back by domain error",
+          loggable(err),
+        );
         throw err;
       }
 
-      this.logger.error("Transaction failed", {
-        error: err instanceof Error ? err.message : String(err),
-      });
+      this.logger.error("Transaction failed", loggable(err));
       throw new DatabaseOperationError("Transaction failed", { cause: err });
     }
   }
