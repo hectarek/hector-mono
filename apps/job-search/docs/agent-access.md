@@ -35,7 +35,7 @@ Save this as `<config file>`, outside any repo:
 
 - `userDataDir` is fixed because Playwright MCP's default profile folder is named after a hash of the folder Claude Code starts in. Without it, a session started anywhere else gets a new profile and no sign-in.
 - `<agent profile folder>` sits outside iCloud and outside any repo. Playwright's Chromium keeps the profile's cookies in that folder rather than in the macOS keychain, so the folder is the sign-in.
-- `"channel": "chromium"` is Playwright's own Chromium. Install it with `npx playwright@1.64.0 install chromium`. With neither a `browserName` nor a channel, Playwright MCP opens the installed Google Chrome instead.
+- `"channel": "chromium"` is Playwright's own Chromium. Install it with `bunx playwright@1.64.0 install chromium`. With neither a `browserName` nor a channel, Playwright MCP opens the installed Google Chrome instead.
 - `--enable-features=WebMCP` turns the page tools API on. Playwright 1.64's Chromium (156) has it with the flag (checked 2026-10-23).
 - `<output folder>` gets screenshots and traces, so it also sits outside any repo.
 
@@ -47,8 +47,8 @@ In that folder's `.mcp.json`:
 {
   "mcpServers": {
     "playwright": {
-      "command": "npx",
-      "args": ["-y", "playwright@1.64.0", "mcp", "--config", "<config file>"]
+      "command": "bunx",
+      "args": ["playwright@1.64.0", "mcp", "--config", "<config file>"]
     }
   }
 }

@@ -5,7 +5,7 @@
 ## Overview
 A private job search workspace. Its owner and Claude both keep it current, and each day it shows what needs a decision and what's due. Claude is to work in it through page tools (WebMCP) from its own browser profile. Clean architecture on recipes' pattern: [../../docs/clean-architecture.md](../../docs/clean-architecture.md), with `apps/hectors-recipes` as the reference.
 
-The plan of record is [docs/build-plan.md](docs/build-plan.md): read its Status and How to resume before starting any of its tasks. Built so far: U1, the scaffold (sign-in and an empty shell), U2, the two identities (who's acting, the private screen and the auth route's limits), U3, the action envelope and the activity log (Backend Rules), and U4's local part, Claude's page tools (Page Tools). Setting up Claude's browser: [docs/agent-access.md](docs/agent-access.md).
+The plan of record is [docs/build-plan.md](docs/build-plan.md): read its Status and How to resume before starting any of its tasks. Setting up Claude's browser: [docs/agent-access.md](docs/agent-access.md).
 
 ## Privacy (R24)
 - The repo is public. Code, tests, fixtures, docs, tool descriptions, screenshots, commit messages and PR text use fictional or generic data. Companies, people, targets, pay and strategy live only in the app's database or Hector's private docs. A task that would put a specific of the search into the repo stops, and that content goes to one of those two places.
