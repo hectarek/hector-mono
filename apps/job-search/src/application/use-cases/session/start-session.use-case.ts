@@ -30,42 +30,53 @@ export const startSessionUseCase = (
     { limit }: StartSessionInput,
   ): Promise<SessionStart> => {
     const id = crypto.randomUUID();
-    await transactionManager.startTransaction((tx) =>
-      recordChange(activityRepository, tx, context, {
-        record: { kind: "agent-session", id },
-        action: "created",
-      }),
-    );
+    // One transaction for the start and both reads, so a failure anywhere rolls the start back.
+    // A start that stayed would be the retry's previous one, and the retry would skip every
+    // change since the actor's last session that started.
+    const sessionStart = await transactionManager.startTransaction(
+      async (tx) => {
+        await recordChange(activityRepository, tx, context, {
+          record: { kind: "agent-session", id },
+          action: "created",
+        });
 
-    // This session's start and the one before it, newest first.
-    const {
-      entries: [started, previous],
-    } = await activityRepository.list(context.ownerId, {
-      record: { kind: "agent-session" },
-      actor: context.actor,
-      limit: 2,
-      offset: 0,
-    });
-    if (started?.record.id !== id) {
-      throw new DatabaseOperationError(
-        "Couldn't read back the session's start",
-      );
-    }
+        // This session's start and the one before it, newest first.
+        const {
+          entries: [started, previous],
+        } = await activityRepository.list(
+          context.ownerId,
+          {
+            record: { kind: "agent-session" },
+            actor: context.actor,
+            limit: 2,
+            offset: 0,
+          },
+          tx,
+        );
+        if (started?.record.id !== id) {
+          throw new DatabaseOperationError(
+            "Couldn't read back the session's start",
+          );
+        }
 
-    const since = previous?.createdAt;
-    const { entries, nextOffset } = await activityRepository.list(
-      context.ownerId,
-      { since, until: started.createdAt, limit, offset: 0 },
+        const since = previous?.createdAt;
+        const { entries, nextOffset } = await activityRepository.list(
+          context.ownerId,
+          { since, until: started.createdAt, limit, offset: 0 },
+          tx,
+        );
+        return {
+          session: { id, startedAt: started.createdAt },
+          since: since ?? null,
+          changes: entries,
+          nextOffset,
+        };
+      },
     );
     logger.info("Session started", {
       sessionId: id,
-      changes: entries.length,
+      changes: sessionStart.changes.length,
     });
-    return {
-      session: { id, startedAt: started.createdAt },
-      since: since ?? null,
-      changes: entries,
-      nextOffset,
-    };
+    return sessionStart;
   };
 };
