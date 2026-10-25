@@ -109,6 +109,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - Ports: `next dev` on 3101 (`.claude/launch.json`); the browser flows' own server on 3301 (`playwright.config.ts`).
 - Deploying: a Vercel project rooted at `apps/job-search`, on the default `vercel.app` domain, built only when the app changed (`vercel.json`'s `ignoreCommand`). Production's addresses stay out of the repo, so they can't be found from it.
 - Production deploys `main`, with production's variables. Previews use the test project's variables and sit behind Vercel Authentication. A preview signs in only at its branch alias, `<project>-git-<branch>-<team>.vercel.app`, and only once the test project's Neon Auth trusts that alias, so add each new branch's alias when it first deploys. Neon takes a wildcard only as the leftmost whole label, which a Vercel address doesn't have.
+- Production gets its migrations only from Hector's terminal (KTD17): `bun run db:migrate:production` (`scripts/migrate-production.ts`) reads the URL from a prompt that shows nothing, refuses `.env`'s URL and the test database, lists what's pending and applies it only when he types `migrate`. It won't run without a terminal, which Claude's shell doesn't have.
 - The `ignoreCommand` compares a push with the commit before it, so a push whose last commit changes nothing in the app (a merge from `main`, say) builds no preview.
 - Run the Vercel CLI inside Claude Code's sandbox (`allowed_domains` api.vercel.com). Outside it, CLI 60 found no sign-in and logged out (2026-10-24).
 
@@ -133,6 +134,7 @@ bun run dev --filter=job-search
 bun run build --filter=job-search
 bun run --filter=job-search db:generate --name=<what>   # after editing db/schema.ts; review the SQL
 bun run --filter=job-search db:migrate    # the test project (.env); production migrates from Hector's terminal (KTD17)
+cd apps/job-search && bun run db:migrate:production   # production only, from Hector's own terminal, never Claude
 bun run test --filter=job-search          # both passes; or from apps/job-search: bun test tests/proxy.test.ts
 bun run --filter=job-search test:screens  # the screen tests (*.test.tsx) alone
 bun run --filter=job-search test:flows    # the browser flows, on the test project (needs Claude's account in .env)
