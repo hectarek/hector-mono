@@ -10,10 +10,10 @@ This is the one place for **what's next** and **what's done** in the UX pass tha
 
 | | |
 |---|---|
-| Phase | 20 (measuring AI reads), in Hector's own session for it. 28 (Cache Components, and moving between screens) is merged (hectarek/hector-mono#46) and on production, but P28.5's moves haven't been looked at yet. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
+| Phase | 20 (measuring AI reads), in Hector's own session for it. A batch of four Meal plan and Groceries changes (D91–D94) is in review as hectarek/hector-mono#59. 28 (Cache Components, and moving between screens) is merged (hectarek/hector-mono#46) and on production, but P28.5's moves haven't been looked at yet. Stash's move is hectarek/hector-mono#45. Phases 22 to 27 (hectarek/hector-mono#31, #32, #33, #35, #37, #41) are merged. |
 | Next task | Phase 20's discussion (how to measure an AI feature), then its plan; session log (bz) has what it starts from. Or the drafts in Hector's tracker. |
 | Waiting on Hector | Phase 28: P28.5's moves by eye, on an iPhone on production, in light and dark (H5). Real-phone checks (H5), now including Add by photo or file (the iPhone's picker with PDFs and several photos, and whether it keeps the order photos were picked in), the week swipe and its slide-in (P16.2, P17.5), cook mode one screen at a time (P21.4), the share buttons' words on an iPhone (P23.3, P23.5: Share there, Copy only where there's no share sheet), a Word document from the iPhone's Files (P23.7), a long screenshot by photo, a timer's sound after the page reloads, whether a running timer pauses music, a recipe's video playing in place on an iPhone (P24.3), whether a finished timer stands out beside the yellow screen-lock warning (P25.1 fix 4), cook mode's checklist (P27.3), the portfolio's `/ui` Drawer at a desktop width (P26.4), and the signed-in screens L5 changed; L2; L3. |
-| Last updated | 2026-10-09 |
+| Last updated | 2026-10-25 |
 
 PR numbers, branch names and commits in this plan are from the earlier private repo (gone since 2026-10-01): this repo's history starts at its first public commit, and its PRs start again at #1.
 
@@ -2940,3 +2940,5 @@ One commit per task; the PR when the phase is done. Branch `feat/recipes-p28-cac
 - **2026-10-09 (ce)** — #46 merged, and recipes' production deploy of it succeeded. The portfolio and relationship-meter skipped the build (`Canceled by Ignored Build Step`), as #44 meant them to. P28.5's look by eye moves to an iPhone on production (H5): the Browser pane was hidden and signed out there. Two P28.3 checks are still listed, for Hector to run or drop.
   - Next: Phase 20; Hector's look at the moves on his iPhone.
   - Later the same day: Hector dropped both P28.3 checks, so P28.3 is done. The reasons are under P28.3.
+- **2026-10-25 (cf)** — Four changes Hector asked for, placed on the map and proposed with options; he took the recommendations (D91–D94), built in one PR, hectarek/hector-mono#59: Clear meal plan in Meal plan's ⋯, Today in the week's row in place of Back to this week, Show (All meals, Cook days, Eat days) beside the title's ⋯, and Copy groceries in Groceries' ⋯. `NativeSelect` gained an `lg` size (45 px). Tests pass; one run hit an unrelated flake in `bookmarks [postgres]` (two saves in the same millisecond). The browser flows couldn't reach the test database from this machine (403, "Connection blocked by network allowlist"), so the signed-in screens weren't seen.
+  - Next: Hector's look on the PR's Vercel preview, at 375 px in light and dark; the flows from a machine that reaches the test project.
