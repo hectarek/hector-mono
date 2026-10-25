@@ -160,6 +160,42 @@ describe("Groceries", () => {
     await view.findByText("List cleared.");
   });
 
+  // D94: what's left to buy, a line each, from the ⋯ sheet; nothing when it's all in the cart.
+  it("copies what's left to buy from the ⋯ sheet", async () => {
+    const user = userEvent.setup();
+    for (const text of ["Milk", "Eggs", "Bread"]) {
+      await getInjection("IAddGroceryItemController")(
+        { spaceId: ownPlan, text },
+        userId,
+      );
+    }
+    const eggs = (await items()).find((item) => item.text === "Eggs");
+    await getInjection("ISetGroceryItemCheckedController")(
+      { itemId: eggs?.id, checked: true },
+      userId,
+    );
+    const view = render(await page(ownPlan));
+
+    await user.click(view.getByRole("button", { name: /^More for / }));
+    await user.click(
+      await view.findByRole("button", { name: "Copy groceries" }),
+    );
+    await view.findByRole("button", { name: "Copied" });
+    expect(await navigator.clipboard.readText()).toBe("Milk\nBread");
+    view.unmount();
+
+    for (const item of await items()) {
+      await getInjection("ISetGroceryItemCheckedController")(
+        { itemId: item.id, checked: true },
+        userId,
+      );
+    }
+    const done = render(await page(ownPlan));
+    await user.click(done.getByRole("button", { name: /^More for / }));
+    await done.findByRole("button", { name: "Clear groceries" });
+    expect(done.queryByRole("button", { name: "Copy groceries" })).toBe(null);
+  });
+
   // D8: in a store with no signal, a check-off is kept in the browser, survives a reload,
   // and is sent when the signal comes back.
   it("keeps a check-off made with no signal, and sends it when the signal is back", async () => {

@@ -68,3 +68,18 @@ export function stackLikeItems<T extends { ingredientId: string | null }>(
   }
   return order.flat();
 }
+
+// What Copy groceries copies (docs/ux-plan.md D94): the items still to buy, one a line as the
+// list writes them, in the order By aisle shows them, with no headings or "for …".
+export function toBuyText<
+  T extends {
+    text: string;
+    checked: boolean;
+    aisle: Aisle | null;
+    ingredientId: string | null;
+  },
+>(items: T[]): string {
+  return groupByAisle(stackLikeItems(items.filter((item) => !item.checked)))
+    .flatMap((group) => group.items.map((item) => item.text))
+    .join("\n");
+}

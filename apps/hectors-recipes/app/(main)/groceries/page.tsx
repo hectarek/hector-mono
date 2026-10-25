@@ -1,5 +1,6 @@
 import { AutoRefresh } from "@/app/_components/auto-refresh";
 import { ClearListButton } from "@/app/_components/clear-list-button";
+import { CopyGroceriesButton } from "@/app/_components/copy-groceries-button";
 import { GroceryList } from "@/app/_components/grocery-list";
 import { LiveList } from "@/app/_components/live-list";
 import { PageMotion } from "@/app/_components/page-motion";
@@ -9,6 +10,7 @@ import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadPlans } from "@/app/_lib/load-plans";
 import { firstParam, type SearchParams } from "@/app/_lib/search-params";
 import { getInjection } from "@/di/container";
+import { toBuyText } from "@/src/entities/aisles";
 import { hasRole } from "@/src/entities/models/space.model";
 
 // A plan's grocery list: the list is part of the plan and shares its people.
@@ -26,6 +28,7 @@ export default async function GroceriesPage({
     userId,
   );
   const canEdit = hasRole(current.role, "editor");
+  const toBuy = toBuyText(items);
 
   return (
     <PageMotion>
@@ -41,6 +44,9 @@ export default async function GroceriesPage({
         />
 
         <SpaceHeader space={current} label="Groceries">
+          {/* What's left to buy, to paste elsewhere (D94); copying changes nothing, so viewers
+            have it too. */}
+          {toBuy && <CopyGroceriesButton text={toBuy} />}
           {/* Starting the list over (D52), keyed by plan like the list. */}
           {canEdit && (
             <ClearListButton

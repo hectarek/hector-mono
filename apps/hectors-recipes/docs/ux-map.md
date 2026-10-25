@@ -132,7 +132,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Tab page.
 - **Title:** "Groceries" over the plan's name, with a role badge. Plan pills above it in two or more plans.
 - **Main action:** Add, beside the add box (editors).
-- **⋯:** Invite (owner), Rename (owner), Members, Clear groceries (editors, when the list has items; asks first, D52).
+- **⋯:** Invite (owner), Rename (owner), Members, Copy groceries (everyone, when something is left to buy: the items to buy, a line each, in aisle order; D94), Clear groceries (editors, when the list has items; asks first, D52).
 - **Also on it:** the add box; Group by, By aisle or By recipe (D60; shown when items came from recipes); the list under aisle or recipe headings; Got it (closed until tapped), holding the checked items and Clear checked.
 - **Rows:** tap to check off (the whole row; it folds into Got it); "for" its recipes; "Not saved yet" when offline; a ⋯ (editors) opening Edit and Remove from groceries.
 - **Live:** other people's changes appear as they're made (D21), with a refresh every 60 s. Check-offs made with no signal are kept and sent later (D8).
