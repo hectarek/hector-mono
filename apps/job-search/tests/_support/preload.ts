@@ -26,8 +26,9 @@ for (const key of [
 // never Neon.
 mock.module("@/db", () => ({ db: testDb }));
 
-// The real module throws at import without those variables, and would reach Neon. Tests
-// read the session through MockAuthService; the auth route forwards to this stand-in.
+// The real module throws at import without those variables, and would reach Neon. Tests read
+// the session through MockAuthService, except the auth page, which reads it from this stand-in's
+// getSession (set neonAuth.session); the auth route forwards to the stand-in too.
 mock.module("@/lib/auth/server", () => ({ auth: fakeNeonAuth }));
 
 mock.module("next/navigation", () => ({
