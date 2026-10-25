@@ -39,10 +39,11 @@ export class ActivityRepository
   async list(
     ownerId: string,
     { record, actor, since, until, limit, offset }: ActivityFilter,
+    tx?: ITransaction,
   ): Promise<ActivityPage> {
     try {
       // One more than the page, to tell whether another follows.
-      const rows = await this.getDbContext()
+      const rows = await this.getDbContext(tx)
         .select()
         .from(activity)
         .where(

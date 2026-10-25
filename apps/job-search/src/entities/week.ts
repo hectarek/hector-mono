@@ -1,5 +1,5 @@
 // Calendar-date helpers on "YYYY-MM-DD" strings. All arithmetic is done in UTC on the
-// date alone, so no local time zone can shift a meal onto the wrong day.
+// date alone, so no local time zone can shift a date onto the wrong day.
 
 export const PLAN_TIME_ZONE = "America/New_York";
 
@@ -37,11 +37,6 @@ export function addDays(date: string, days: number): string {
   return toIso(result);
 }
 
-// Whole days from one date to another: 2 from Monday to Wednesday, -1 back to Sunday.
-export function daysBetween(from: string, to: string): number {
-  return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / 86_400_000);
-}
-
 // Weeks start on Monday.
 export function mondayOf(date: string): string {
   const day = toUtc(date).getUTCDay();
@@ -50,45 +45,6 @@ export function mondayOf(date: string): string {
 
 export function weekDates(monday: string): string[] {
   return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
-}
-
-export function formatDay(date: string): { weekday: string; label: string } {
-  const value = toUtc(date);
-  return {
-    weekday: value.toLocaleDateString("en-US", {
-      weekday: "short",
-      timeZone: "UTC",
-    }),
-    label: value.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      timeZone: "UTC",
-    }),
-  };
-}
-
-// Whether a day is a week or more from today, so it's written with its month (D47).
-function showsMonth(date: string, today: string): boolean {
-  return Math.abs(daysBetween(today, date)) >= 7;
-}
-
-// A day on a button: "Today", or its weekday and date ("Sat 26"), with the month once it's a
-// week or more from today ("Thu Oct 8", no comma, as lists of days use commas; D47).
-export function shortDay(date: string, today: string): string {
-  if (date === today) return "Today";
-  const { weekday, label } = formatDay(date);
-  return showsMonth(date, today)
-    ? `${weekday} ${label}`
-    : `${weekday} ${toUtc(date).getUTCDate()}`;
-}
-
-// The days to offer when adding a meal: today and the six after it ("Today", "Sat 26", …).
-// From today rather than Monday, so a Sunday add still has a week of choices.
-export function upcomingDays(today: string): { date: string; label: string }[] {
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = addDays(today, index);
-    return { date, label: shortDay(date, today) };
-  });
 }
 
 export function formatWeekRange(monday: string): string {

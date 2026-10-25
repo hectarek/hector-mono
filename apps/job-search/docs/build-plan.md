@@ -18,10 +18,10 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 | | |
 |---|---|
-| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are built and committed. Each waits on a check that needs H1, H2 or H3 (their Evidence says which) |
-| Next task | Once H1 to H3 are done: apply `0000_activity` to the test project, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
-| Waiting on Hector | H1's rest (the Vercel CLI's sign-in, so Claude can create the Vercel project, and the production Neon project), H2 (the accounts), H3 (Playwright MCP config), and an OK to apply `0000_activity` to the test project |
-| Last updated | 2026-10-24 |
+| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2 and U4's local part wait on checks that need H2 or H3, and U3 on production's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
+| Next task | Hector merges the follow-ups' PR (reviewed 2026-10-25, its findings fixed), then applies `0000_activity` to production with the wrapper from an up-to-date checkout (`cd apps/job-search && bun run db:migrate:production`), before production's account ids are set. The test project has it since 2026-10-25. Then the pending checks in U2 to U4, and U4's flow and spike, the gate |
+| Waiting on Hector | Merging the follow-ups' PR; production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); running the wrapper against production; H2 (the accounts); H3 (Playwright MCP config); before U5, whether a record's history keeps its 50-change cap and when `list_activity` becomes a tool (the 2026-10-24 and 2026-10-25 reviews) |
+| Last updated | 2026-10-25 |
 
 ---
 
@@ -45,7 +45,7 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 Tasks are this plan's units, so the tracker and the plan share IDs (see Conventions).
 
 **Phase 1: Foundation and the agent path**
-- [~] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
+- [x] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
 - [~] **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
 - [~] **U3** Action envelope and activity log — C · KTD4, KTD7
 - [~] **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
@@ -404,8 +404,8 @@ None block planning. Deferred to implementation:
 - KTD17. **Local development and previews use the test project; production secrets live only in production.**
   - Local development and preview deploys use the Neon test project with test-only secrets: database, cookie secret, ids, Google client and token key, and a throwaway Google account as the expected calendar account. Production values exist only in Vercel's Production environment. Recipes uses its production database locally; this app doesn't, because `.worktreeinclude` copies `apps/*/.env` into every worktree, and the production cookie secret plus the owner id would be enough to forge an owner session.
   - No production secret passes through a Claude session, where transcripts would keep it. Hector creates the production Neon project and enters its database URL in Vercel himself. The cookie secret and token key are generated straight into Vercel's Production environment as sensitive (write-only) variables, without being printed. Production migrations and the import's commit run in Hector's terminal through a small wrapper that reads the database URL from a no-echo prompt, never from a file left on disk.
-  - On the production project, Neon Auth trusts only the production domain; the test project trusts localhost and the preview wildcard.
-  - A Vercel project rooted at the app folder, with the turbo `ignoreCommand` and the default `vercel.app` domain. `noindex` through root metadata and `app/robots.ts`, and signed-out pages and metadata carry a generic name, never Hector's.
+  - On the production project, Neon Auth trusts only the production domain; the test project trusts localhost and the preview wildcard. (Revised 2026-10-24: Neon accepts a wildcard only as the leftmost whole label, and a Vercel preview address is a single label under `vercel.app`. So the test project trusts each preview branch's alias exactly, added when the branch first deploys.)
+  - A Vercel project rooted at the app folder, with the turbo `ignoreCommand` and the default `vercel.app` domain. (Revised 2026-10-24: Hector also gave production a custom domain. Its addresses stay out of the repo.) `noindex` through root metadata and `app/robots.ts`, and signed-out pages and metadata carry a generic name, never Hector's.
   - Browser flows run against the test project, guarded like recipes' `check-test-database`.
   - Env names, listed in the app's `turbo.json`: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `OWNER_USER_ID`, `AGENT_USER_ID`, `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_CALENDAR_ACCOUNT_EMAIL`, `CALENDAR_TOKEN_KEY`, `LOG_LEVEL`.
 - KTD18. **Eastern time everywhere.** Dates are `YYYY-MM-DD` strings end to end, and "today" comes from `todayIn` on the server for every read and write, Claude's included. Tool inputs take dates only as `YYYY-MM-DD` and times only as ISO strings with an offset. A helper beside the copied `week.ts` turns an Eastern date into UTC instants for Google's window and for "changes today", tested across the 2026-11-01 daylight-saving change. Google all-day events end on an exclusive date. One fixed zone, as recipes does: there is one user, and days spent traveling still count in Eastern time.
@@ -653,7 +653,7 @@ Each phase is one branch and PR and leaves a usable app:
     - 39 tests pass, 12 of them in `tests/proxy.test.ts`
     - locally, a signed-out `GET /` gets a 307 to `/welcome`, which is titled "Job search", is marked `noindex, nofollow`, and has no horizontal scroll at 375 px in light or dark mode
     - f50e1b6 raised the welcome page's Sign in button and the sidebar trigger to 44 px (`min-h-11`)
-  - Pending: the preview deploy's `noindex` check, which needs the Vercel project (H1).
+  - Deploy check (2026-10-24), on production: previews sit behind Vercel Authentication. Production's `/` sends a signed-out visit to `/welcome` (307), which is titled "Job search" and marked `noindex, nofollow`. The first preview, of `feat/job-search-p1-gate`, built without errors.
 
 ### U2. Identity, access and the private screen
 
@@ -730,7 +730,7 @@ Each phase is one branch and PR and leaves a usable app:
   - The app's errors set their own `name`, because the production build renames classes. `ConflictError` carries R22's code, and the code `unexpected` was added (KTD4, revised).
   - Checks: lint, types, dead code and a placeholder build pass, and 108 tests and 8 screen tests pass. Each test scenario above has a test. The Verification's action test, through a stand-in write action, writes one row per write with the acting session's actor.
   - Pending:
-    - migration `0000_activity` (one table, two indexes) is generated and reviewed but not applied. It goes to the test project with Hector's OK once H1 exists.
+    - migration `0000_activity` (one table, two indexes) on production, which Hector applies with the wrapper (KTD17). The test project has it, applied with his OK on 2026-10-25.
     - the history section's 375 px check comes with U5, the first page that mounts it
 
 ### U4. WebMCP adapter and the agent-path spike (gate)
@@ -788,7 +788,7 @@ Each phase is one branch and PR and leaves a usable app:
     - the app's own `registerPageTools`, with the registry's real definitions, listed each tool once after a StrictMode remount, and its results round-tripped
   - Checks: lint, types, dead code and a placeholder build pass, and 137 tests and 17 screen tests pass. Every test scenario above has a test except the real-browser flow, which is written and lists in `playwright test --list`.
   - Pending:
-    - the flow on the test project (H1, and H2 for Claude's test-project account in `.env`)
+    - the flow on the test project (H2, for Claude's test-project account in `.env`; the test project and its `activity` table exist)
     - the spike in Claude Code: the `webmcp_*` tools, the codes, ask and deny rules, and the result-size limit after the browser (H3)
     - the deployed-app run (H1)
     - `/agent` at 375 px in light and dark mode
@@ -1166,7 +1166,7 @@ Each phase is one branch and PR and leaves a usable app:
 
 | # | Need | Unblocks | Status |
 |---|---|---|---|
-| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo | U1 | OK given 2026-10-24. Test project done. The Vercel project waits on the Vercel CLI's sign-in (`vercel login`), and the production Neon project is open |
+| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo | U1 | OK given 2026-10-24. Done: the test project; Hector's production Neon project and Vercel project; Preview's variables, from the test project. Open: production's `DATABASE_URL` (Hector), its account ids (H2), and turning off localhost on production's Neon Auth (KTD17) |
 | H2 | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. On the test project, create an owner, an agent and a third account (U2's check) in the Neon console; their ids, and the agent's email and password for the flows, go in the app's `.env`. Once the accounts exist, close sign-up in each Neon project, the test project first: turn on `disable_sign_up` in the email-and-password settings, and remove Neon Auth's shared Google provider, since the app doesn't use it and email sign-up being off doesn't stop a Google one (found 2026-10-24) | U2, U4 | open |
 | H3 | In the folder where search sessions start, apply the settings Claude drafts: the Playwright MCP server (profile and output folders, WebMCP flag), `ask` rules for consequential tools (`close_job`, `set_profile`, the calendar writes), and the deny rules in System-Wide Impact, including keeping the database connection away from the app's project | U4 | open |
 | H4 | Create a Google OAuth web client (consent screen in production for personal use, scope `calendar.events.owned`), put its production values only in Vercel's Production environment, and set up a throwaway Google account for local testing | U13 | open |
@@ -1180,6 +1180,23 @@ Each phase is one branch and PR and leaves a usable app:
 - **2026-10-23** — Plan of record written. **Next:** H1, then U1.
 - **2026-10-23** — U1 to U3 and U4's local part built on branch `claude/job-tracker-app-446186` (868bfdd, c3ae126, f50e1b6, 7c7a7e3, 118eb76), not pushed. Every check that runs without a cloud project passes. Probed without an account: Playwright 1.64's Chromium has `document.modelContext` with the WebMCP flag and runs the app's adapter. **Next:** H1 to H3, then the pending checks and U4's spike. The branch becomes `feat/job-search-p1-foundation` before the Phase 1 PR.
 - **2026-10-24** — H1 in part. The Neon test project `job-search-test` (aws-us-east-1, Postgres 17) has Neon Auth, a database comment the flow guard checks, and its values in the app's local `.env`. Locally against it, `/` redirects to the welcome page, the sign-in form renders, and Neon Auth answers `get-session`. Added the flow guard KTD17 asked for, which U4 had missed (60d2e17). The Vercel project waits on the Vercel CLI's sign-in. The branch is renamed `feat/job-search-p1-foundation` and pushed, with no PR yet. **Next:** `vercel login`, then the Vercel project; an OK to apply `0000_activity` to the test project; H2 and H3.
+- **2026-10-24** — Hector created the production Neon project (Postgres 18; the test project is on 17) and the Vercel project, with a custom domain as well as the `vercel.app` one. Production's Neon Auth trusts both addresses, but still allows localhost, which KTD17 rules out. The production migration wrapper in KTD17 doesn't exist yet. **Next:** `vercel login`, then Vercel's variables (preview from the test project; the production cookie secret generated straight into Vercel); the migration wrapper; localhost off on production.
+- **2026-10-24** — Hector merged the Phase 1 branch as hectarek/hector-mono#56 so the Vercel project could build from `main`. That was before the gate and before the code review ce-work runs ahead of a PR, which hasn't run on Phase 1 yet. Production deploys `main` and serves the welcome page, `noindex`. In Vercel:
+  - Hector's `NEON_AUTH_BASE_URL` and `NEON_AUTH_COOKIE_SECRET` now cover Production only. They had covered Preview too.
+  - Preview has the test project's database and auth, and a cookie secret of its own, each sensitive.
+  - Production still needs `DATABASE_URL` and the account ids.
+
+  Follow-ups go on `feat/job-search-p1-gate`, merged up to date with `main`. **Next:** a preview build of that branch, then the test project trusts its addresses; the migration wrapper.
+- **2026-10-24** — The first preview, of `feat/job-search-p1-gate`, built without errors. Previews redirect signed-out visitors to Vercel's sign-in. The test project's Neon Auth trusts that branch's alias: Neon refused the planned wildcard (KTD17, revised). U1 is done, its deploy check run on production. **Next:** the migration wrapper; Hector's production `DATABASE_URL` and localhost off; an OK to migrate the test project; H2 and H3.
+- **2026-10-24** — Code review (ce-code-review, eight reviewers) of what hectarek/hector-mono#56 merged: Ready with fixes. No P0 or P1; seven P2s confirmed by an independent validator, five P3s, and one decision for Hector before U5 (a record's history shows its latest 50 changes). The cross-model pass didn't run: the installed cursor-agent rejected its command line. **Next:** the review's fixes on this branch, in its order (Playwright trace folders gitignored first, then `start_session` in one transaction), then the migration wrapper.
+- **2026-10-25** — The review's 12 actionable fixes are in, in its order (d14233b to 513b0ca). `start_session` now runs its start and both reads in one transaction, and Playwright's trace folders are gitignored. KTD17's production migration wrapper is in too (33d98f8): it reads the URL from a hidden prompt, refuses `.env`'s URL and the test database, and won't run without a terminal. Checks pass (165 tests and 23 screen tests). The wrapper's interactive run is unverified, since it needs a real terminal. **Next:** the test project's migration with Hector's OK; Hector runs the wrapper against production before setting its account ids; H2 and H3.
+- **2026-10-25** — With Hector's OK, `0000_activity` is applied to the test project (`bun run db:migrate`, outside Claude Code's sandbox), after `scripts/check-test-database.ts` confirmed `.env`'s target. The test database has `activity`, with its primary key, both indexes and no rows, and one row in `drizzle.__drizzle_migrations` whose hash and time match the file and the journal. **Next:** Hector runs the wrapper against production before setting its account ids; a code review of this branch's follow-ups, then their PR; H2 and H3.
+- **2026-10-25** — Code review (ce-code-review, eight reviewers) of this branch's follow-ups: Ready with fixes, no P0 or P1. The cross-model pass didn't run: the installed cursor-agent, which failed it on 2026-10-24, hasn't changed. Its four findings are fixed (0cfcc35, 6229a32):
+  - The migration wrapper now plans as drizzle applies. drizzle runs only the migrations newer than the newest one a target records, and skips an older unrecorded one without an error. So the wrapper refuses a target that records migrations the journal doesn't have, or a migration drizzle would skip, and fails if any is still unapplied afterwards.
+  - PGlite tests drive its test-database, confirmation and post-migrate gates.
+  - Two agent-context notes were wrong (the `ignoreCommand`'s comparison and the test preload's comment), and AGENTS.md gains the rule that a read which must see its write's own rows takes the transaction.
+
+  A reviewer ran the wrapper in a pseudo-terminal with an unreachable URL: the prompt echoed nothing and the failure printed only its class. Typing by hand is still unexercised. Also from the review, for Hector: `start_session`'s window can be read once, since `list_activity` isn't a tool yet; and whether to deny the wrapper's commands to Claude in the repo's settings. Checks pass (174 tests and 23 screen tests). **Next:** the follow-ups' PR; Hector runs the wrapper against production before setting its account ids; H2 and H3.
 
 ---
 
