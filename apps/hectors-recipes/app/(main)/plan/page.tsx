@@ -101,7 +101,8 @@ export default async function PlanPage({
           )}
         </SpaceHeader>
 
-        {/* A swipe changes the week as the arrows do (D51), and a new week slides in (D54). */}
+        {/* A swipe changes the week as the arrows do (D51), and a new week slides in (D54).
+          Today sits in the arrows' row (D92), so the days start in the same place on every week. */}
         <WeekSwipe
           week={monday}
           previousHref={previousWeekHref}
@@ -121,12 +122,26 @@ export default async function PlanPage({
             >
               <ChevronLeft />
             </Button>
-            <div className="flex flex-col items-center">
-              <span className="text-sm font-medium">
-                {formatWeekRange(monday)}
-              </span>
-              {isThisWeek && (
-                <span className="text-muted-foreground text-xs">This week</span>
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-medium">
+                  {formatWeekRange(monday)}
+                </span>
+                {isThisWeek && (
+                  <span className="text-muted-foreground text-xs">
+                    This week
+                  </span>
+                )}
+              </div>
+              {!isThisWeek && (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={weekHref(today)} />}
+                >
+                  Today
+                </Button>
               )}
             </div>
             <Button
@@ -138,17 +153,6 @@ export default async function PlanPage({
               <ChevronRight />
             </Button>
           </nav>
-          {!isThisWeek && (
-            <Button
-              variant="secondary"
-              size="lg"
-              nativeButton={false}
-              render={<Link href={weekHref(today)} />}
-              className="self-center"
-            >
-              Back to this week
-            </Button>
-          )}
 
           <PlanWeek
             today={today}

@@ -41,6 +41,26 @@ describe("Plan", () => {
     expect(view.queryByText(EMPTY_WEEK)).toBe(null);
   });
 
+  // D92: Today sits in the week's row, only off the current week, so the days don't move.
+  it("offers Today beside the week's dates, only on another week", async () => {
+    const today = todayIn(PLAN_TIME_ZONE);
+    const week = (view: ReturnType<typeof render>) =>
+      within(view.getByRole("navigation", { name: "Week" }));
+
+    const thisWeek = render(await page());
+    week(thisWeek).getByText("This week");
+    expect(week(thisWeek).queryByRole("button", { name: "Today" })).toBe(null);
+    thisWeek.unmount();
+
+    const later = render(await page(addDays(today, 21), fixture.planId));
+    const goToday = week(later).getByRole("button", { name: "Today" });
+    expect(goToday.closest("a")?.getAttribute("href")).toBe(
+      `/plan?week=${today}&plan=${fixture.planId}`,
+    );
+    expect(week(later).queryByText("This week")).toBe(null);
+    expect(later.queryByRole("button", { name: /this week/i })).toBe(null);
+  });
+
   it("says how to plan a meal on a week with nothing planned", async () => {
     const view = render(await page(addDays(todayIn(PLAN_TIME_ZONE), 21)));
     view.getByText(EMPTY_WEEK);
