@@ -236,4 +236,16 @@ export class PlanEntriesRepository
       this.handleError(err, "delete", { id });
     }
   }
+
+  async deleteAll(spaceId: string, tx?: ITransaction): Promise<number> {
+    try {
+      const removed = await this.getDbContext(tx)
+        .delete(planEntries)
+        .where(eq(planEntries.spaceId, spaceId))
+        .returning({ id: planEntries.id });
+      return removed.length;
+    } catch (err) {
+      this.handleError(err, "deleteAll", { spaceId });
+    }
+  }
 }

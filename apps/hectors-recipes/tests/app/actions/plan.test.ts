@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import {
   addPlanEntry,
   changeEntryDays,
+  clearMealPlan,
   removePlanEntry,
   setEntryCooked,
 } from "@/app/actions/plan";
@@ -80,6 +81,17 @@ describe("plan actions", () => {
     expect((await week(await plan()))[0]?.cooked).toBe(true);
     expect(await removePlanEntry(entry?.id ?? "")).toBeNull();
     expect(await week(await plan())).toEqual([]);
+  });
+
+  it("clears the meal plan", async () => {
+    await addPlanEntry({ recipeId, ...tuesday });
+
+    expect(await clearMealPlan(await plan())).toBeNull();
+    expect(await week(await plan())).toEqual([]);
+    expect(nextState.revalidated).toContain("/plan");
+    expect(await clearMealPlan(crypto.randomUUID())).toEqual({
+      error: "Space not found",
+    });
   });
 
   it("reports problems instead of throwing", async () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   canTakeDayOff,
   mealDaysText,
+  mealShowFrom,
   mealsOnDay,
   moveCookDay,
   toggleEatDay,
@@ -60,6 +61,33 @@ describe("meal days", () => {
       { meal: prep, cooks: false, eats: true },
     ]);
     expect(mealsOnDay(meals, "2026-09-30")).toEqual([]);
+  });
+
+  // D93: cook days show only the meals cooked that day, eat days only the meals eaten.
+  it("shows only the cook days, or only the eat days", () => {
+    const prep = { cookDate: "2026-09-27", eatDates: ["2026-09-28"] };
+    const meals = [chili, prep];
+
+    expect(mealsOnDay(meals, "2026-09-27", "cook")).toEqual([
+      { meal: chili, cooks: true, eats: true },
+      { meal: prep, cooks: true, eats: false },
+    ]);
+    expect(mealsOnDay(meals, "2026-09-28", "cook")).toEqual([]);
+    expect(mealsOnDay(meals, "2026-09-27", "eat")).toEqual([
+      { meal: chili, cooks: true, eats: true },
+    ]);
+    expect(mealsOnDay(meals, "2026-09-28", "eat")).toEqual([
+      { meal: chili, cooks: false, eats: true },
+      { meal: prep, cooks: false, eats: true },
+    ]);
+  });
+
+  it("reads ?show= back, and anything else is every meal", () => {
+    expect(mealShowFrom("cook")).toBe("cook");
+    expect(mealShowFrom("eat")).toBe("eat");
+    expect(mealShowFrom("all")).toBe("all");
+    expect(mealShowFrom("both")).toBe("all");
+    expect(mealShowFrom(undefined)).toBe("all");
   });
 });
 

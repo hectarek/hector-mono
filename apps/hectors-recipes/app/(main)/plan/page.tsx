@@ -1,9 +1,14 @@
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
 import { AddPlanToListButton } from "@/app/_components/add-plan-to-list-button";
+import { ClearMealPlanButton } from "@/app/_components/clear-meal-plan-button";
 import { MakeDefaultButton } from "@/app/_components/make-default-button";
 import { PageMotion } from "@/app/_components/page-motion";
+import {
+  PlanShowProvider,
+  PlanShowSelect,
+  ShowLink,
+} from "@/app/_components/plan-show";
 import { PlanWeek } from "@/app/_components/plan-week";
 import { SpaceHeader } from "@/app/_components/space-header";
 import { SpaceSwitcher } from "@/app/_components/space-switcher";
@@ -13,6 +18,7 @@ import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadPlans } from "@/app/_lib/load-plans";
 import { firstParam, type SearchParams } from "@/app/_lib/search-params";
 import { getInjection } from "@/di/container";
+import { mealShowFrom } from "@/src/entities/meal-days";
 import { hasRole } from "@/src/entities/models/space.model";
 import {
   addDays,
@@ -33,6 +39,7 @@ export default async function PlanPage({
   const params = await searchParams;
   const requestedWeek = firstParam(params.week);
   const requestedPlan = firstParam(params.plan);
+  const show = mealShowFrom(firstParam(params.show));
 
   // The session first: it ends the prefetch, so the clock is read only at request time.
   const userId = await getCurrentUserId();
@@ -44,7 +51,7 @@ export default async function PlanPage({
   const { plans, current } = await loadPlans(userId, requestedPlan);
   const canEdit = hasRole(current.role, "editor");
 
-  const [entries, cookDaysToAdd] = await Promise.all([
+  const [entries, cookDaysToAdd, hasMeals] = await Promise.all([
     getInjection("IGetWeekPlanController")(
       { spaceId: current.id, date: monday },
       userId,
@@ -55,6 +62,9 @@ export default async function PlanPage({
           userId,
         )
       : Promise.resolve([]),
+    canEdit
+      ? getInjection("IHasMealsController")({ planId: current.id }, userId)
+      : Promise.resolve(false),
   ]);
 
   const planParam = requestedPlan ? `&plan=${requestedPlan}` : "";
@@ -65,115 +75,136 @@ export default async function PlanPage({
 
   return (
     <PageMotion>
-      <div className="flex flex-col gap-4">
-        <SpaceSwitcher
-          spaces={plans}
-          currentId={current.id}
-          label="Meal plans"
-          hrefFor={(id) => `/plan?plan=${id}&week=${monday}`}
-        />
+      {/* Cook days or eat days (D93): the select in the title row; the week, its links and the
+        plan pills keep it. */}
+      <PlanShowProvider initial={show}>
+        <div className="flex flex-col gap-4">
+          <SpaceSwitcher
+            spaces={plans}
+            currentId={current.id}
+            label="Meal plans"
+            hrefFor={(id) => `/plan?plan=${id}&week=${monday}`}
+            link={ShowLink}
+          />
 
-        {/* In the ⋯ sheet (D42). In more than one plan: which one Plan and Groceries open to
-          (D14). Only in someone else's: a way to start their own (D16). */}
-        <SpaceHeader space={current}>
-          {plans.length > 1 &&
-            (current.isDefault ? (
-              <p className="text-muted-foreground text-center text-sm">
-                Your default meal plan: Meal plan and Groceries open to it.
-              </p>
-            ) : (
-              <MakeDefaultButton type="meal-plan" spaceId={current.id} />
-            ))}
-          {!plans.some((plan) => plan.role === "owner") && (
-            <StartOwnPlanButton />
-          )}
-        </SpaceHeader>
+          {/* In the ⋯ sheet (D42). In more than one plan: which one Plan and Groceries open to
+            (D14). Only in someone else's: a way to start their own (D16). */}
+          <SpaceHeader space={current} action={<PlanShowSelect />}>
+            {plans.length > 1 &&
+              (current.isDefault ? (
+                <p className="text-muted-foreground text-center text-sm">
+                  Your default meal plan: Meal plan and Groceries open to it.
+                </p>
+              ) : (
+                <MakeDefaultButton type="meal-plan" spaceId={current.id} />
+              ))}
+            {!plans.some((plan) => plan.role === "owner") && (
+              <StartOwnPlanButton />
+            )}
+            {/* Starting the plan over (D91), keyed by plan like the grocery box. */}
+            {canEdit && (
+              <ClearMealPlanButton
+                key={current.id}
+                planId={current.id}
+                hasMeals={hasMeals}
+              />
+            )}
+          </SpaceHeader>
 
-        {/* A swipe changes the week as the arrows do (D51), and a new week slides in (D54). */}
-        <WeekSwipe
-          week={monday}
-          previousHref={previousWeekHref}
-          nextHref={nextWeekHref}
-        >
-          <nav
-            aria-label="Week"
-            className="flex items-center justify-between gap-2"
+          {/* A swipe changes the week as the arrows do (D51), and a new week slides in (D54).
+            Today sits in the arrows' row (D92), so the days start in the same place on every
+            week. */}
+          <WeekSwipe
+            week={monday}
+            previousHref={previousWeekHref}
+            nextHref={nextWeekHref}
           >
-            <Button
-              variant="secondary"
-              size="icon-lg"
-              nativeButton={false}
-              render={
-                <Link href={previousWeekHref} aria-label="Previous week" />
-              }
+            <nav
+              aria-label="Week"
+              className="flex items-center justify-between gap-2"
             >
-              <ChevronLeft />
-            </Button>
-            <div className="flex flex-col items-center">
-              <span className="text-sm font-medium">
-                {formatWeekRange(monday)}
-              </span>
-              {isThisWeek && (
-                <span className="text-muted-foreground text-xs">This week</span>
-              )}
-            </div>
-            <Button
-              variant="secondary"
-              size="icon-lg"
-              nativeButton={false}
-              render={<Link href={nextWeekHref} aria-label="Next week" />}
-            >
-              <ChevronRight />
-            </Button>
-          </nav>
-          {!isThisWeek && (
-            <Button
-              variant="secondary"
-              size="lg"
-              nativeButton={false}
-              render={<Link href={weekHref(today)} />}
-              className="self-center"
-            >
-              Back to this week
-            </Button>
+              <Button
+                variant="secondary"
+                size="icon-lg"
+                nativeButton={false}
+                render={
+                  <ShowLink
+                    href={previousWeekHref}
+                    aria-label="Previous week"
+                  />
+                }
+              >
+                <ChevronLeft />
+              </Button>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-medium">
+                    {formatWeekRange(monday)}
+                  </span>
+                  {isThisWeek && (
+                    <span className="text-muted-foreground text-xs">
+                      This week
+                    </span>
+                  )}
+                </div>
+                {!isThisWeek && (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    nativeButton={false}
+                    render={<ShowLink href={weekHref(today)} />}
+                  >
+                    Today
+                  </Button>
+                )}
+              </div>
+              <Button
+                variant="secondary"
+                size="icon-lg"
+                nativeButton={false}
+                render={<ShowLink href={nextWeekHref} aria-label="Next week" />}
+              >
+                <ChevronRight />
+              </Button>
+            </nav>
+
+            <PlanWeek
+              today={today}
+              canEdit={canEdit}
+              entries={entries}
+              days={weekDates(monday).map((date) => ({
+                date,
+                ...formatDay(date),
+                isToday: date === today,
+                isPast: date < today,
+              }))}
+            />
+          </WeekSwipe>
+
+          {/* Planning starts from a recipe (D40); with no button for it (D50), an empty week
+            says how, to those who can plan. */}
+          {entries.length === 0 && (
+            <p className="text-muted-foreground text-center text-sm">
+              {canEdit
+                ? "Nothing planned this week. To plan a meal, open a recipe and tap Add to meal plan."
+                : "Nothing planned this week."}
+            </p>
           )}
 
-          <PlanWeek
-            today={today}
-            canEdit={canEdit}
-            entries={entries}
-            days={weekDates(monday).map((date) => ({
-              date,
-              ...formatDay(date),
-              isToday: date === today,
-              isPast: date < today,
-            }))}
-          />
-        </WeekSwipe>
-
-        {/* Planning starts from a recipe (D40); with no button for it (D50), an empty week
-          says how, to those who can plan. */}
-        {entries.length === 0 && (
-          <p className="text-muted-foreground text-center text-sm">
-            {canEdit
-              ? "Nothing planned this week. To plan a meal, open a recipe and tap Add to meal plan."
-              : "Nothing planned this week."}
-          </p>
-        )}
-
-        {/* Under the week (D50): the planned meals in a range not on the list yet (D41, D44);
-          with none, it says so, with the way to the list. Always there for an editor, so a
-          press's result isn't lost when nothing is left to add. Keyed by plan, so its message
-          doesn't follow you. */}
-        {canEdit && (
-          <AddPlanToListButton
-            key={current.id}
-            planId={current.id}
-            today={today}
-            cookDays={cookDaysToAdd}
-          />
-        )}
-      </div>
+          {/* Under the week (D50): the planned meals in a range not on the list yet (D41, D44);
+            with none, it says so, with the way to the list. Always there for an editor, so a
+            press's result isn't lost when nothing is left to add. Keyed by plan, so its message
+            doesn't follow you. */}
+          {canEdit && (
+            <AddPlanToListButton
+              key={current.id}
+              planId={current.id}
+              today={today}
+              cookDays={cookDaysToAdd}
+            />
+          )}
+        </div>
+      </PlanShowProvider>
     </PageMotion>
   );
 }

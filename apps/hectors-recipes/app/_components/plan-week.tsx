@@ -6,6 +6,7 @@ import { Check, CookingPot, Ellipsis, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { PlanEntrySheet } from "@/app/_components/plan-entry-sheet";
+import { usePlanShow } from "@/app/_components/plan-show";
 import { callAction } from "@/app/_lib/call-action";
 import { removePlanEntry, setEntryCooked } from "@/app/actions/plan";
 import { mealsOnDay } from "@/src/entities/meal-days";
@@ -178,9 +179,9 @@ function MealRow({
   );
 }
 
-// The week, a day at a time: the meals eaten each day and the ones cooked then (D38).
-// Days before today are muted, so the week reads as a schedule; their controls stay full
-// strength, since they still work.
+// The week, a day at a time: the meals eaten each day and the ones cooked then (D38), or only
+// one of the two when the title row's filter says so (D93). Days before today are muted, so
+// the week reads as a schedule; their controls stay full strength, since they still work.
 export function PlanWeek({
   today,
   days,
@@ -193,10 +194,11 @@ export function PlanWeek({
   entries: PlanEntry[];
   canEdit: boolean;
 }) {
+  const show = usePlanShow();
   return (
     <ol className="flex flex-col divide-y rounded-xl border">
       {days.map((day) => {
-        const meals = mealsOnDay(entries, day.date);
+        const meals = mealsOnDay(entries, day.date, show);
         return (
           <li
             key={day.date}

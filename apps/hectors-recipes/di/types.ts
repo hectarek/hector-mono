@@ -23,7 +23,9 @@ import type { ISetGroceryItemCheckedUseCase } from "@/src/application/use-cases/
 import type { IUpdateGroceryItemUseCase } from "@/src/application/use-cases/grocery/update-grocery-item.use-case";
 import type { IAddPlanEntryUseCase } from "@/src/application/use-cases/plan/add-plan-entry.use-case";
 import type { IChangeEntryDaysUseCase } from "@/src/application/use-cases/plan/change-entry-days.use-case";
+import type { IClearMealPlanUseCase } from "@/src/application/use-cases/plan/clear-meal-plan.use-case";
 import type { IGetWeekPlanUseCase } from "@/src/application/use-cases/plan/get-week-plan.use-case";
+import type { IHasMealsUseCase } from "@/src/application/use-cases/plan/has-meals.use-case";
 import type { IRemovePlanEntryUseCase } from "@/src/application/use-cases/plan/remove-plan-entry.use-case";
 import type { ISetEntryCookedUseCase } from "@/src/application/use-cases/plan/set-entry-cooked.use-case";
 import type { IGrantPlanSubscriptionUseCase } from "@/src/application/use-cases/realtime/grant-plan-subscription.use-case";
@@ -65,7 +67,9 @@ import type { ISetGroceryItemCheckedController } from "@/src/interface-adapters/
 import type { IUpdateGroceryItemController } from "@/src/interface-adapters/controllers/grocery/update-grocery-item.controller";
 import type { IAddPlanEntryController } from "@/src/interface-adapters/controllers/plan/add-plan-entry.controller";
 import type { IChangeEntryDaysController } from "@/src/interface-adapters/controllers/plan/change-entry-days.controller";
+import type { IClearMealPlanController } from "@/src/interface-adapters/controllers/plan/clear-meal-plan.controller";
 import type { IGetWeekPlanController } from "@/src/interface-adapters/controllers/plan/get-week-plan.controller";
+import type { IHasMealsController } from "@/src/interface-adapters/controllers/plan/has-meals.controller";
 import type { IRemovePlanEntryController } from "@/src/interface-adapters/controllers/plan/remove-plan-entry.controller";
 import type { ISetEntryCookedController } from "@/src/interface-adapters/controllers/plan/set-entry-cooked.controller";
 import type { IGrantPlanSubscriptionController } from "@/src/interface-adapters/controllers/realtime/grant-plan-subscription.controller";
@@ -141,6 +145,8 @@ export const DI_SYMBOLS = {
   ISetEntryCookedUseCase: Symbol.for("ISetEntryCookedUseCase"),
   IChangeEntryDaysUseCase: Symbol.for("IChangeEntryDaysUseCase"),
   IRemovePlanEntryUseCase: Symbol.for("IRemovePlanEntryUseCase"),
+  IClearMealPlanUseCase: Symbol.for("IClearMealPlanUseCase"),
+  IHasMealsUseCase: Symbol.for("IHasMealsUseCase"),
   IListMySpacesUseCase: Symbol.for("IListMySpacesUseCase"),
   ICreateSpaceUseCase: Symbol.for("ICreateSpaceUseCase"),
   IGetSpaceSettingsUseCase: Symbol.for("IGetSpaceSettingsUseCase"),
@@ -185,6 +191,8 @@ export const DI_SYMBOLS = {
   ISetEntryCookedController: Symbol.for("ISetEntryCookedController"),
   IChangeEntryDaysController: Symbol.for("IChangeEntryDaysController"),
   IRemovePlanEntryController: Symbol.for("IRemovePlanEntryController"),
+  IClearMealPlanController: Symbol.for("IClearMealPlanController"),
+  IHasMealsController: Symbol.for("IHasMealsController"),
   IListMySpacesController: Symbol.for("IListMySpacesController"),
   ICreateSpaceController: Symbol.for("ICreateSpaceController"),
   IGetSpaceSettingsController: Symbol.for("IGetSpaceSettingsController"),
@@ -246,6 +254,8 @@ export interface DI_RETURN_TYPES {
   ISetEntryCookedUseCase: ISetEntryCookedUseCase;
   IChangeEntryDaysUseCase: IChangeEntryDaysUseCase;
   IRemovePlanEntryUseCase: IRemovePlanEntryUseCase;
+  IClearMealPlanUseCase: IClearMealPlanUseCase;
+  IHasMealsUseCase: IHasMealsUseCase;
   IListMySpacesUseCase: IListMySpacesUseCase;
   ICreateSpaceUseCase: ICreateSpaceUseCase;
   IGetSpaceSettingsUseCase: IGetSpaceSettingsUseCase;
@@ -288,6 +298,8 @@ export interface DI_RETURN_TYPES {
   ISetEntryCookedController: ISetEntryCookedController;
   IChangeEntryDaysController: IChangeEntryDaysController;
   IRemovePlanEntryController: IRemovePlanEntryController;
+  IClearMealPlanController: IClearMealPlanController;
+  IHasMealsController: IHasMealsController;
   IListMySpacesController: IListMySpacesController;
   ICreateSpaceController: ICreateSpaceController;
   IGetSpaceSettingsController: IGetSpaceSettingsController;

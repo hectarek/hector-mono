@@ -42,8 +42,17 @@ export function mealDaysText(days: MealDays, today: string): string {
   return `Cook ${shortDay(days.cookDate, today)} · eat ${list}`;
 }
 
+// Which of its days the week shows a meal on (docs/ux-plan.md D93): all of them (the default),
+// only the day it's cooked (the prep schedule), or only the days it's eaten (the menu).
+export type MealShow = "all" | "cook" | "eat";
+
+// `?show=` read back; anything else shows every meal.
+export function mealShowFrom(value: string | null | undefined): MealShow {
+  return value === "cook" || value === "eat" ? value : "all";
+}
+
 // What a day on the plan shows (D38, D39): each meal cooked or eaten that day, once, and
-// which of the two it is there.
+// which of the two it is there; with `show`, only the meals cooked, or only those eaten.
 export type DayMeal<T extends MealDays> = {
   meal: T;
   cooks: boolean;
@@ -53,10 +62,13 @@ export type DayMeal<T extends MealDays> = {
 export function mealsOnDay<T extends MealDays>(
   meals: T[],
   date: string,
+  show: MealShow = "all",
 ): DayMeal<T>[] {
   return meals.flatMap((meal) => {
     const cooks = meal.cookDate === date;
     const eats = meal.eatDates.includes(date);
-    return cooks || eats ? [{ meal, cooks, eats }] : [];
+    const shown =
+      show === "cook" ? cooks : show === "eat" ? eats : cooks || eats;
+    return shown ? [{ meal, cooks, eats }] : [];
   });
 }

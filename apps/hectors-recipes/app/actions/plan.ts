@@ -99,3 +99,21 @@ export async function removePlanEntry(entryId: string): Promise<ActionState> {
   revalidatePath("/plan");
   return null;
 }
+
+// Clear meal plan, in Meal plan's ⋯ sheet (docs/ux-plan.md D91).
+export async function clearMealPlan(planId: string): Promise<ActionState> {
+  try {
+    await getInjection("IClearMealPlanController")(
+      { planId },
+      await getCurrentUserId(),
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("clearMealPlan"),
+      "Couldn't clear the meal plan. Try again.",
+    );
+  }
+  revalidatePath("/plan");
+  return null;
+}

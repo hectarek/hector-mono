@@ -123,4 +123,10 @@ export class MockPlanEntriesRepository implements IPlanEntriesRepository {
   async delete(id: string): Promise<void> {
     this.entries = this.entries.filter((entry) => entry.id !== id);
   }
+
+  async deleteAll(spaceId: string): Promise<number> {
+    const before = this.entries.length;
+    this.entries = this.entries.filter((entry) => entry.spaceId !== spaceId);
+    return before - this.entries.length;
+  }
 }

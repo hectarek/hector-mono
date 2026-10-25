@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { groupByAisle, stackLikeItems } from "@/src/entities/aisles";
+import { groupByAisle, stackLikeItems, toBuyText } from "@/src/entities/aisles";
 
 // D61: like items together, so you don't walk back for the garlic.
 describe("stackLikeItems", () => {
@@ -60,5 +60,40 @@ describe("groupByAisle", () => {
       ["Dairy & eggs", ["milk", "eggs"]],
       ["Other", ["paper towels"]],
     ]);
+  });
+});
+
+// D94: Copy groceries copies what's left to buy, a line each, in the screen's aisle order.
+describe("toBuyText", () => {
+  it("lists the items still to buy by aisle, like items together, leaving out checked ones", () => {
+    const item = (
+      text: string,
+      aisle: "produce" | "dairy-and-eggs" | null,
+      { ingredientId = null, checked = false } = {} as {
+        ingredientId?: string | null;
+        checked?: boolean;
+      },
+    ) => ({ text, aisle, ingredientId, checked });
+    expect(
+      toBuyText([
+        item("1 cup milk", "dairy-and-eggs"),
+        item("2 cloves garlic", "produce", { ingredientId: "garlic" }),
+        item("Paper towels", null),
+        item("2 onions", "produce", { checked: true }),
+        item("1 lemon", "produce"),
+        item("1 tbsp garlic", "produce", { ingredientId: "garlic" }),
+      ]),
+    ).toBe(
+      [
+        "2 cloves garlic",
+        "1 tbsp garlic",
+        "1 lemon",
+        "1 cup milk",
+        "Paper towels",
+      ].join("\n"),
+    );
+    expect(toBuyText([item("2 onions", "produce", { checked: true })])).toBe(
+      "",
+    );
   });
 });

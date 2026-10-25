@@ -1,6 +1,7 @@
 import { cn } from "@repo/ui/lib/utils";
 import { Users } from "lucide-react";
 import Link from "next/link";
+import type { ComponentProps, ComponentType } from "react";
 
 // Pills to move between the spaces of one type (books, plans) you're in. One marked `shared`
 // is someone else's, shared with you, and carries a people icon (D82).
@@ -9,11 +10,14 @@ export function SpaceSwitcher({
   currentId,
   label,
   hrefFor,
+  link: PillLink = Link,
 }: {
   spaces: { id: string; name: string; shared?: boolean }[];
   currentId: string;
   label: string;
   hrefFor: (id: string) => string;
+  // The pills' link, when it carries something of the page's (Meal plan's filter, D93).
+  link?: ComponentType<ComponentProps<typeof Link>>;
 }) {
   if (spaces.length < 2) {
     return null;
@@ -27,7 +31,7 @@ export function SpaceSwitcher({
       {spaces.map((space) => {
         const active = space.id === currentId;
         return (
-          <Link
+          <PillLink
             key={space.id}
             href={hrefFor(space.id)}
             aria-current={active ? "page" : undefined}
@@ -41,7 +45,7 @@ export function SpaceSwitcher({
             {space.shared && <Users className="size-3.5" aria-hidden />}
             {space.name}
             {space.shared && <span className="sr-only">, shared with you</span>}
-          </Link>
+          </PillLink>
         );
       })}
     </nav>
