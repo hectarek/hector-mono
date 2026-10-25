@@ -2,14 +2,18 @@ import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
 import { addPlanEntryUseCase } from "@/src/application/use-cases/plan/add-plan-entry.use-case";
 import { changeEntryDaysUseCase } from "@/src/application/use-cases/plan/change-entry-days.use-case";
+import { clearMealPlanUseCase } from "@/src/application/use-cases/plan/clear-meal-plan.use-case";
 import { getWeekPlanUseCase } from "@/src/application/use-cases/plan/get-week-plan.use-case";
+import { hasMealsUseCase } from "@/src/application/use-cases/plan/has-meals.use-case";
 import { removePlanEntryUseCase } from "@/src/application/use-cases/plan/remove-plan-entry.use-case";
 import { setEntryCookedUseCase } from "@/src/application/use-cases/plan/set-entry-cooked.use-case";
 import { PlanEntriesRepository } from "@/src/infrastructure/repositories/plan-entries.repository";
 import { MockPlanEntriesRepository } from "@/src/infrastructure/repositories/plan-entries.repository.mock";
 import { addPlanEntryController } from "@/src/interface-adapters/controllers/plan/add-plan-entry.controller";
 import { changeEntryDaysController } from "@/src/interface-adapters/controllers/plan/change-entry-days.controller";
+import { clearMealPlanController } from "@/src/interface-adapters/controllers/plan/clear-meal-plan.controller";
 import { getWeekPlanController } from "@/src/interface-adapters/controllers/plan/get-week-plan.controller";
+import { hasMealsController } from "@/src/interface-adapters/controllers/plan/has-meals.controller";
 import { removePlanEntryController } from "@/src/interface-adapters/controllers/plan/remove-plan-entry.controller";
 import { setEntryCookedController } from "@/src/interface-adapters/controllers/plan/set-entry-cooked.controller";
 
@@ -51,6 +55,16 @@ export function createPlanModule() {
     .bind(DI_SYMBOLS.IRemovePlanEntryUseCase)
     .toHigherOrderFunction(removePlanEntryUseCase, entryDeps);
   planModule
+    .bind(DI_SYMBOLS.IClearMealPlanUseCase)
+    .toHigherOrderFunction(clearMealPlanUseCase, entryDeps);
+  planModule
+    .bind(DI_SYMBOLS.IHasMealsUseCase)
+    .toHigherOrderFunction(hasMealsUseCase, [
+      DI_SYMBOLS.IPlanEntriesRepository,
+      DI_SYMBOLS.ISpacesRepository,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  planModule
     .bind(DI_SYMBOLS.IAddPlanEntryUseCase)
     .toHigherOrderFunction(addPlanEntryUseCase, [
       DI_SYMBOLS.IPlanEntriesRepository,
@@ -85,6 +99,16 @@ export function createPlanModule() {
       DI_SYMBOLS.IRemovePlanEntryController,
       removePlanEntryController,
       DI_SYMBOLS.IRemovePlanEntryUseCase,
+    ],
+    [
+      DI_SYMBOLS.IClearMealPlanController,
+      clearMealPlanController,
+      DI_SYMBOLS.IClearMealPlanUseCase,
+    ],
+    [
+      DI_SYMBOLS.IHasMealsController,
+      hasMealsController,
+      DI_SYMBOLS.IHasMealsUseCase,
     ],
   ] as const) {
     planModule

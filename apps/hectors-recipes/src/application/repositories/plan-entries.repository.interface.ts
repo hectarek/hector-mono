@@ -41,4 +41,6 @@ export interface IPlanEntriesRepository {
   // None of the plan's meals is on the list any more (its list was cleared, D52).
   unmarkAddedToList(spaceId: string, tx?: ITransaction): Promise<void>;
   delete(id: string, tx?: ITransaction): Promise<void>;
+  // Every meal on the plan, in every week (Clear meal plan, D91); how many went.
+  deleteAll(spaceId: string, tx?: ITransaction): Promise<number>;
 }

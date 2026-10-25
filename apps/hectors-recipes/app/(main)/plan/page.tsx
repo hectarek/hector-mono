@@ -2,6 +2,7 @@ import { Button } from "@repo/ui/components/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { AddPlanToListButton } from "@/app/_components/add-plan-to-list-button";
+import { ClearMealPlanButton } from "@/app/_components/clear-meal-plan-button";
 import { MakeDefaultButton } from "@/app/_components/make-default-button";
 import { PageMotion } from "@/app/_components/page-motion";
 import { PlanWeek } from "@/app/_components/plan-week";
@@ -44,7 +45,7 @@ export default async function PlanPage({
   const { plans, current } = await loadPlans(userId, requestedPlan);
   const canEdit = hasRole(current.role, "editor");
 
-  const [entries, cookDaysToAdd] = await Promise.all([
+  const [entries, cookDaysToAdd, hasMeals] = await Promise.all([
     getInjection("IGetWeekPlanController")(
       { spaceId: current.id, date: monday },
       userId,
@@ -55,6 +56,9 @@ export default async function PlanPage({
           userId,
         )
       : Promise.resolve([]),
+    canEdit
+      ? getInjection("IHasMealsController")({ planId: current.id }, userId)
+      : Promise.resolve(false),
   ]);
 
   const planParam = requestedPlan ? `&plan=${requestedPlan}` : "";
@@ -86,6 +90,14 @@ export default async function PlanPage({
             ))}
           {!plans.some((plan) => plan.role === "owner") && (
             <StartOwnPlanButton />
+          )}
+          {/* Starting the plan over (D91), keyed by plan like the grocery box. */}
+          {canEdit && (
+            <ClearMealPlanButton
+              key={current.id}
+              planId={current.id}
+              hasMeals={hasMeals}
+            />
           )}
         </SpaceHeader>
 

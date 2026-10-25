@@ -115,7 +115,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Market. Tab page.
 - **Title:** the plan's name over "Meal plan", with a role badge. Plan pills above it in two or more plans.
 - **Main action:** "Add N meals to groceries", in the grocery box under the week (editors, when there's something to add; D41, D44, D50).
-- **⋯:** Invite (owner), Rename (owner), Members, Make my default meal plan (two or more plans; a line instead when it is), Start my own meal plan (when you own none).
+- **⋯:** Invite (owner), Rename (owner), Members, Make my default meal plan (two or more plans; a line instead when it is), Start my own meal plan (when you own none), Clear meal plan (editors, when the plan has meals; asks first, D91).
 - **Also on it:** the week's arrows and range, Back to this week, seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open groceries.
 - **Opens:** a meal's sheet: Change days, Add to groceries (or Add to groceries again), Not eating it on Mon 5 (from a leftovers day, D43), Remove meal.
 - **Gestures:** a sideways swipe changes the week (D51), sliding in (D54).

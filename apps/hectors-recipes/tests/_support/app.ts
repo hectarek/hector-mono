@@ -21,7 +21,9 @@ import { setGroceryItemCheckedUseCase } from "@/src/application/use-cases/grocer
 import { updateGroceryItemUseCase } from "@/src/application/use-cases/grocery/update-grocery-item.use-case";
 import { addPlanEntryUseCase } from "@/src/application/use-cases/plan/add-plan-entry.use-case";
 import { changeEntryDaysUseCase } from "@/src/application/use-cases/plan/change-entry-days.use-case";
+import { clearMealPlanUseCase } from "@/src/application/use-cases/plan/clear-meal-plan.use-case";
 import { getWeekPlanUseCase } from "@/src/application/use-cases/plan/get-week-plan.use-case";
+import { hasMealsUseCase } from "@/src/application/use-cases/plan/has-meals.use-case";
 import { removePlanEntryUseCase } from "@/src/application/use-cases/plan/remove-plan-entry.use-case";
 import { setEntryCookedUseCase } from "@/src/application/use-cases/plan/set-entry-cooked.use-case";
 import { grantPlanSubscriptionUseCase } from "@/src/application/use-cases/realtime/grant-plan-subscription.use-case";
@@ -226,6 +228,8 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
+    clearMealPlan: clearMealPlanUseCase(planEntries, spaces, transactions, log),
+    hasMeals: hasMealsUseCase(planEntries, spaces, log),
 
     getGroceryList: getGroceryListUseCase(groceryItems, spaces, log),
     addGroceryItem: addGroceryItemUseCase(

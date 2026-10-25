@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import { render } from "@testing-library/react";
+import { render, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import PlanPage from "@/app/(main)/plan/page";
 import { getInjection } from "@/di/container";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
@@ -64,5 +65,46 @@ describe("Plan", () => {
     const view = render(await page(undefined, plan.id));
     view.getByText("Nothing planned this week.");
     expect(view.queryByText(EMPTY_WEEK)).toBe(null);
+
+    const user = userEvent.setup();
+    await user.click(view.getByRole("button", { name: /^More for / }));
+    await view.findByRole("button", { name: "Members" });
+    expect(view.queryByRole("button", { name: "Clear meal plan" })).toBe(null);
+  });
+
+  // D91: starting the plan over, from the ⋯ sheet: every week's meals go, groceries stay.
+  it("clears the meal plan from the ⋯ sheet, after asking", async () => {
+    const user = userEvent.setup();
+    const today = todayIn(PLAN_TIME_ZONE);
+    await fixture.planChili({ cookDate: today, eatDates: [today] });
+    const later = addDays(today, 28);
+    await fixture.planChili({ cookDate: later, eatDates: [later] });
+    await getInjection("IAddGroceryItemController")(
+      { spaceId: fixture.planId, text: "Milk" },
+      fixture.userId,
+    );
+    const view = render(await page());
+    const question = () =>
+      view.getByRole("group", { name: "Clear the meal plan?" });
+
+    await user.click(view.getByRole("button", { name: /^More for / }));
+    await user.click(
+      await view.findByRole("button", { name: "Clear meal plan" }),
+    );
+    within(question()).getByText(/every meal, in every week/);
+    await user.click(
+      within(question()).getByRole("button", { name: "Cancel" }),
+    );
+    expect(await fixture.meals(today)).toHaveLength(1);
+
+    await user.click(view.getByRole("button", { name: "Clear meal plan" }));
+    await user.click(
+      within(question()).getByRole("button", { name: "Clear meal plan" }),
+    );
+    await waitFor(async () => expect(await fixture.meals(today)).toEqual([]));
+    expect(await fixture.meals(later)).toEqual([]);
+    expect(await fixture.groceries()).toEqual(["Milk"]);
+    view.rerender(await page());
+    await view.findByText("Meal plan cleared.");
   });
 });
