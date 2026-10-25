@@ -19,9 +19,9 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 | | |
 |---|---|
 | Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2, U3 and U4's local part each wait on a check that needs H2 or H3, or the test project's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
-| Next task | The production migration wrapper (KTD17). Then apply `0000_activity` to the test project and to production, run the pending checks in U1 to U3, then U4's flow and spike, the gate |
-| Waiting on Hector | Production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); an OK to apply `0000_activity` to the test project; H2 (the accounts); H3 (Playwright MCP config) |
-| Last updated | 2026-10-24 |
+| Next task | Apply `0000_activity` to the test project (with Hector's OK), then Hector applies it to production with the wrapper (`cd apps/job-search && bun run db:migrate:production`), before production's account ids are set. Then the pending checks in U2 to U4, and U4's flow and spike, the gate |
+| Waiting on Hector | Production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); an OK to apply `0000_activity` to the test project; running the wrapper against production; H2 (the accounts); H3 (Playwright MCP config) |
+| Last updated | 2026-10-25 |
 
 ---
 
@@ -1189,6 +1189,7 @@ Each phase is one branch and PR and leaves a usable app:
   Follow-ups go on `feat/job-search-p1-gate`, merged up to date with `main`. **Next:** a preview build of that branch, then the test project trusts its addresses; the migration wrapper.
 - **2026-10-24** — The first preview, of `feat/job-search-p1-gate`, built without errors. Previews redirect signed-out visitors to Vercel's sign-in. The test project's Neon Auth trusts that branch's alias: Neon refused the planned wildcard (KTD17, revised). U1 is done, its deploy check run on production. **Next:** the migration wrapper; Hector's production `DATABASE_URL` and localhost off; an OK to migrate the test project; H2 and H3.
 - **2026-10-24** — Code review (ce-code-review, eight reviewers) of what hectarek/hector-mono#56 merged: Ready with fixes. No P0 or P1; seven P2s confirmed by an independent validator, five P3s, and one decision for Hector before U5 (a record's history shows its latest 50 changes). The cross-model pass didn't run: the installed cursor-agent rejected its command line. **Next:** the review's fixes on this branch, in its order (Playwright trace folders gitignored first, then `start_session` in one transaction), then the migration wrapper.
+- **2026-10-25** — The review's 12 actionable fixes are in, in its order (d14233b to 513b0ca). `start_session` now runs its start and both reads in one transaction, and Playwright's trace folders are gitignored. KTD17's production migration wrapper is in too (33d98f8): it reads the URL from a hidden prompt, refuses `.env`'s URL and the test database, and won't run without a terminal. Checks pass (165 tests and 23 screen tests). The wrapper's interactive run is unverified, since it needs a real terminal. **Next:** the test project's migration with Hector's OK; Hector runs the wrapper against production before setting its account ids; H2 and H3.
 
 ---
 
