@@ -88,7 +88,7 @@ export default async function PlanPage({
           />
 
           {/* In the ⋯ sheet (D42). In more than one plan: which one Plan and Groceries open to
-          (D14). Only in someone else's: a way to start their own (D16). */}
+            (D14). Only in someone else's: a way to start their own (D16). */}
           <SpaceHeader space={current} action={<PlanShowSelect />}>
             {plans.length > 1 &&
               (current.isDefault ? (
@@ -112,7 +112,8 @@ export default async function PlanPage({
           </SpaceHeader>
 
           {/* A swipe changes the week as the arrows do (D51), and a new week slides in (D54).
-          Today sits in the arrows' row (D92), so the days start in the same place on every week. */}
+            Today sits in the arrows' row (D92), so the days start in the same place on every
+            week. */}
           <WeekSwipe
             week={monday}
             previousHref={previousWeekHref}
@@ -181,7 +182,7 @@ export default async function PlanPage({
           </WeekSwipe>
 
           {/* Planning starts from a recipe (D40); with no button for it (D50), an empty week
-          says how, to those who can plan. */}
+            says how, to those who can plan. */}
           {entries.length === 0 && (
             <p className="text-muted-foreground text-center text-sm">
               {canEdit
@@ -191,9 +192,9 @@ export default async function PlanPage({
           )}
 
           {/* Under the week (D50): the planned meals in a range not on the list yet (D41, D44);
-          with none, it says so, with the way to the list. Always there for an editor, so a
-          press's result isn't lost when nothing is left to add. Keyed by plan, so its message
-          doesn't follow you. */}
+            with none, it says so, with the way to the list. Always there for an editor, so a
+            press's result isn't lost when nothing is left to add. Keyed by plan, so its message
+            doesn't follow you. */}
           {canEdit && (
             <AddPlanToListButton
               key={current.id}
