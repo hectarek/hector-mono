@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { videoEmbed } from "@/src/entities/video-link";
+import { videoEmbed, videoThumbnail } from "@/src/entities/video-link";
 
 // D81: YouTube and Vimeo play in the page; other hosts open on their own.
 describe("videoEmbed", () => {
@@ -34,6 +34,36 @@ describe("videoEmbed", () => {
       "not a link",
     ]) {
       expect(videoEmbed(link)).toBe(null);
+    }
+  });
+});
+
+// A recipe with a video and no photo shows the video's thumbnail.
+describe("videoThumbnail", () => {
+  it("gives a YouTube link's thumbnail in either size", () => {
+    for (const link of [
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "https://m.youtube.com/watch?v=dQw4w9WgXcQ&pp=2AEAkAIB",
+      "https://youtu.be/dQw4w9WgXcQ?si=abc",
+      "https://www.youtube.com/shorts/dQw4w9WgXcQ",
+    ]) {
+      expect(videoThumbnail(link, "medium")).toBe(
+        "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+      );
+      expect(videoThumbnail(link, "high")).toBe(
+        "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      );
+    }
+  });
+
+  it("gives none for other hosts", () => {
+    for (const link of [
+      "https://vimeo.com/76979871",
+      "https://www.tiktok.com/@cook/video/7300000000000000000",
+      "https://www.youtube.com/@somechannel",
+      "not a link",
+    ]) {
+      expect(videoThumbnail(link, "high")).toBe(null);
     }
   });
 });

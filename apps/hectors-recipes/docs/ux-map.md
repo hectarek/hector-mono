@@ -85,7 +85,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **⋯:** Invite (owner), Rename (owner, a step in the sheet, D83), Members, All books. In All recipes: All books only. Invite turns the sheet into "Share a link to edit" and "Share a view-only link" ("Copy …" where the browser has no share sheet, P23.3).
 - **Also on it:** search (narrows as you type, D56); Sort and group (Saved first, Recently viewed, A to Z; by meal, cuisine or diet; D57, D80); the Saved chip first among the tag chips (D77); the count over the cards ("24 recipes", or "3 of 24 recipes" while narrowed, P23.2); the card grid (a card opens its recipe; a saved one carries a filled bookmark in its picture's corner, P27.1); "Copy recipes to another book" under the grid (the book has recipes, it isn't All recipes, and you're in two or more books).
 - **Empty:** "No recipes yet" with Add a recipe (editors); "No recipes match" with Clear filters.
-- **Bold:** produce tiles on cards without a photo; the grid is the exception to one bold moment. A saved card's bookmark sits on a light disc, so it never competes with the tile.
+- **Bold:** produce tiles on cards without a photo (a YouTube video's thumbnail stands in for one); the grid is the exception to one bold moment. A saved card's bookmark sits on a light disc, so it never competes with the tile.
 - **Reached from:** the Recipes tab, the logo, a recipe's back link and tag chips, Books, Join, Copy recipes, and after deleting or copying a recipe.
 - **Leads to:** Recipe, Add a recipe, Books, Members, Copy recipes.
 - **Room:** the title row is full (Add recipe and ⋯). Search, Sort and group and the chips already sit above the grid: a new order or grouping belongs in Sort and group, a new filter among the chips, and a new book-wide action in the ⋯.
@@ -95,7 +95,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** read a recipe and decide what to do with it: cook it, plan it, or shop for it.
 - **Surface:** Reading. Back link to its book: named for the book when you're in two or more (D82), else "Recipes"; the Recipes tab stays lit.
-- **Title:** photo or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
+- **Title:** photo (or a YouTube video's thumbnail) or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
 - **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
 - **Also on it:** Add to meal plan and Add to groceries, in the tab bar's order (when you can plan; P27.2); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.

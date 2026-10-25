@@ -200,4 +200,39 @@ describe("Recipes", () => {
     expect(window.location.search).toBe("?sort=recent");
     localStorage.removeItem("recently-viewed");
   });
+
+  // A card without a photo shows its YouTube video's thumbnail; a photo stays first.
+  it("shows a YouTube video's thumbnail on a card without a photo", async () => {
+    const userId = nextStateUser();
+    const book = await getInjection("IEnsurePersonalSpaceController")(
+      "recipe-book",
+      userId,
+    );
+    const video = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    for (const data of [
+      { title: "Butter Chicken", videoUrl: video },
+      {
+        title: "Mac and Cheese",
+        videoUrl: video,
+        imageUrl: "https://example.com/mac.jpg",
+      },
+    ]) {
+      await getInjection("ICreateRecipeController")(
+        { spaceId: book.id, data: { ...data, ingredients: [{ raw: "salt" }] } },
+        userId,
+      );
+    }
+    const view = render(await page());
+    const picture = (title: string) =>
+      view
+        .getByRole("link", { name: new RegExp(title) })
+        .querySelector("img")
+        ?.getAttribute("src");
+
+    expect(picture("Butter Chicken")).toBe(
+      "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+    );
+    expect(picture("Mac and Cheese")).toBe("https://example.com/mac.jpg");
+    expect(picture("Stock")).toBeUndefined();
+  });
 });

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ProduceTile, produceFor } from "@/app/_components/produce-tile";
 import { RecipePicture } from "@/app/_components/recipe-picture";
 import type { Recipe } from "@/src/entities/models/recipe.model";
+import { videoThumbnail } from "@/src/entities/video-link";
 
 export function RecipeCard({
   recipe,
@@ -20,11 +21,15 @@ export function RecipeCard({
   // the page, since two pictures can't share the name.
   grows?: boolean;
 }) {
-  const picture = recipe.imageUrl ? (
+  // No photo: its video's thumbnail, which has no bars at this size.
+  const photo =
+    recipe.imageUrl ??
+    (recipe.videoUrl ? videoThumbnail(recipe.videoUrl, "medium") : null);
+  const picture = photo ? (
     // Unoptimized: photos come from any recipe site, served as they are (no remotePatterns,
     // no image-optimization quota).
     <Image
-      src={recipe.imageUrl}
+      src={photo}
       alt=""
       width={400}
       height={300}
