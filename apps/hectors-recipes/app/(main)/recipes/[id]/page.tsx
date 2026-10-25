@@ -23,6 +23,7 @@ import { type SearchParams, servingsParam } from "@/app/_lib/search-params";
 import { getInjection } from "@/di/container";
 import { editableSpaces, hasRole } from "@/src/entities/models/space.model";
 import { stepGroups } from "@/src/entities/step-text";
+import { videoThumbnail } from "@/src/entities/video-link";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 function sourceHost(url: string): string {
@@ -59,11 +60,15 @@ export default async function RecipePage({
       (book) => book.id !== recipe.spaceId && hasRole(book.role, "editor"),
     )
     .map(({ id: bookId, name }) => ({ id: bookId, name }));
+  // No photo: its video's thumbnail, the larger one, as the frame crops off its bars.
+  const photo =
+    recipe.imageUrl ??
+    (recipe.videoUrl ? videoThumbnail(recipe.videoUrl, "high") : null);
   const picture = (
     <RecipePicture recipeId={recipe.id}>
-      {recipe.imageUrl ? (
+      {photo ? (
         <Image
-          src={recipe.imageUrl}
+          src={photo}
           alt=""
           width={1280}
           height={720}
