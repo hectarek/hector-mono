@@ -113,7 +113,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 - **Job:** see the week: what's cooked and eaten each day. Start the shop.
 - **Surface:** Market. Tab page.
-- **Title:** the plan's name over "Meal plan", with a role badge. Plan pills above it in two or more plans.
+- **Title:** the plan's name over "Meal plan", with a role badge. Beside it, before the ⋯: Show, a select of All meals, Cook days or Eat days (D93), kept in the address and by the week's links and the plan pills. Plan pills above it in two or more plans.
 - **Main action:** "Add N meals to groceries", in the grocery box under the week (editors, when there's something to add; D41, D44, D50).
 - **⋯:** Invite (owner), Rename (owner), Members, Make my default meal plan (two or more plans; a line instead when it is), Start my own meal plan (when you own none), Clear meal plan (editors, when the plan has meals; asks first, D91).
 - **Also on it:** the week's arrows and dates, with Today beside the dates on any other week (D92), seven days (the Today sticker). Each meal: a cooked check on its cook day (D39), its title (→ the recipe), a note of its days and whether it's on the list, and a ⋯ (editors). The grocery box: "Shopping for" (next 3, 7 or 14 days, or all upcoming), the result line, Open groceries.
@@ -123,7 +123,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Bold:** the Today sticker.
 - **Reached from:** the Meal plan tab, Add to meal plan's Open meal plan, Join (a plan), Start my own meal plan, after leaving or deleting a plan.
 - **Leads to:** Recipe (a meal's title), Groceries (Open groceries), Members.
-- **Room:** no title-row action: planning starts on a recipe (D40). The week fills the screen, with the grocery box under it (D50). An action on one meal goes in the meal's sheet.
+- **Room:** no title-row action: planning starts on a recipe (D40), so the title row holds Show, a view control, instead (D93); it has no room for more. The week fills the screen, with the grocery box under it (D50). An action on one meal goes in the meal's sheet.
 - **Motion (D89):** crossfades in from the other tabs or Open meal plan. A new week still slides in from its side (D54), with no view transition.
 
 ### Groceries — `/groceries`
@@ -287,7 +287,7 @@ Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`
 
 | Pattern | The rule | Used on |
 |---|---|---|
-| Page title with the main action and a ⋯ | AGENTS.md UI Rules (D42) | Library, Meal plan, Groceries |
+| Page title with the main action and a ⋯ | AGENTS.md UI Rules (D42) | Library, Meal plan (Show in the action's place, D93), Groceries |
 | Back link | AGENTS.md UI Rules | Recipe, Books, Copy recipes, Members, Join, Account, Sign in |
 | Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
 | Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |

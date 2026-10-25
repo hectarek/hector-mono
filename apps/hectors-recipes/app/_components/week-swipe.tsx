@@ -3,6 +3,8 @@
 import { cn } from "@repo/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
+import { usePlanShow } from "@/app/_components/plan-show";
+import { withShow } from "@/app/_lib/plan-href";
 import { useSwipe } from "@/app/_lib/use-swipe";
 
 // The week Plan last showed. Kept outside the component because the loading screen between
@@ -25,8 +27,10 @@ export function WeekSwipe({
   children: ReactNode;
 }) {
   const router = useRouter();
+  // The week's filter goes with it, as with the arrows (D93).
+  const show = usePlanShow();
   const swipe = useSwipe((by) =>
-    router.push(by === 1 ? nextHref : previousHref),
+    router.push(withShow(by === 1 ? nextHref : previousHref, show)),
   );
   const slideFrom =
     shownWeek === undefined || shownWeek === week

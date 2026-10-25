@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
+import { PlanShowProvider } from "@/app/_components/plan-show";
 import { WeekSwipe } from "@/app/_components/week-swipe";
 import { nextState, resetNextState } from "@/tests/_support/next";
 
@@ -60,5 +61,16 @@ describe("WeekSwipe", () => {
     expect(slide()).toContain("slide-in-from-left");
     view.rerender(shown("2026-11-02"));
     expect(slide()).not.toContain("animate-in");
+  });
+
+  // D93: the week's filter goes with a swipe, as with the arrows.
+  it("keeps the week's filter", () => {
+    const view = render(
+      <PlanShowProvider initial="eat">{shown("2026-10-05")}</PlanShowProvider>,
+    );
+    const target = view.getByText("The week");
+    fireEvent.touchStart(target, { touches: [touch(300, 200)] });
+    fireEvent.touchEnd(target, { changedTouches: [touch(150, 210)] });
+    expect(nextState.pushed).toEqual(["/plan?week=after&show=eat"]);
   });
 });

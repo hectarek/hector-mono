@@ -3,7 +3,12 @@ import { render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PlanPage from "@/app/(main)/plan/page";
 import { getInjection } from "@/di/container";
-import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
+import {
+  addDays,
+  mondayOf,
+  PLAN_TIME_ZONE,
+  todayIn,
+} from "@/src/entities/week";
 import { planScreenFixture } from "@/tests/_support/plan-screens";
 
 const EMPTY_WEEK =
@@ -17,11 +22,12 @@ describe("Plan", () => {
     fixture = await planScreenFixture();
   });
 
-  const page = async (week?: string, plan?: string) =>
+  const page = async (week?: string, plan?: string, show?: string) =>
     PlanPage({
       searchParams: Promise.resolve({
         ...(week ? { week } : {}),
         ...(plan ? { plan } : {}),
+        ...(show ? { show } : {}),
       }),
     });
 
@@ -59,6 +65,64 @@ describe("Plan", () => {
     );
     expect(week(later).queryByText("This week")).toBe(null);
     expect(later.queryByRole("button", { name: /this week/i })).toBe(null);
+  });
+
+  // D93: a Monday cook eaten Tuesday and Wednesday is on three days, or only its cook day, or
+  // only the days it's eaten; the choice goes in the address and with the week's links.
+  it("shows the cook days or the eat days, and keeps the choice", async () => {
+    const user = userEvent.setup();
+    window.history.replaceState(null, "", "/plan");
+    const monday = mondayOf(addDays(todayIn(PLAN_TIME_ZONE), 14));
+    await fixture.planChili({
+      cookDate: monday,
+      eatDates: [addDays(monday, 1), addDays(monday, 2)],
+    });
+    const other = await getInjection("ICreateSpaceController")(
+      { type: "meal-plan", name: "Other" },
+      fixture.userId,
+    );
+    const view = render(await page(monday));
+    // The days Chili shows on.
+    const shown = () =>
+      view.getAllByRole("heading", { level: 2 }).flatMap((heading) => {
+        const day = heading.closest("li");
+        return day && within(day).queryByRole("link", { name: "Chili" })
+          ? [heading.querySelector("span")?.textContent]
+          : [];
+      });
+    const show = view.getByRole("combobox", { name: "Show" });
+    const next = () =>
+      view
+        .getByRole("button", { name: "Next week" })
+        .closest("a")
+        ?.getAttribute("href");
+
+    expect(shown()).toEqual(["Mon", "Tue", "Wed"]);
+    await user.selectOptions(show, "Cook days");
+    expect(shown()).toEqual(["Mon"]);
+    expect(window.location.search).toBe("?show=cook");
+    await user.selectOptions(show, "Eat days");
+    expect(shown()).toEqual(["Tue", "Wed"]);
+    expect(window.location.search).toBe("?show=eat");
+    expect(next()).toBe(`/plan?week=${addDays(monday, 7)}&show=eat`);
+    expect(
+      view
+        .getByRole("navigation", { name: "Meal plans" })
+        .querySelector(`a[href*="${other.id}"]`)
+        ?.getAttribute("href"),
+    ).toBe(`/plan?plan=${other.id}&week=${monday}&show=eat`);
+    await user.selectOptions(show, "All meals");
+    expect(shown()).toEqual(["Mon", "Tue", "Wed"]);
+    expect(window.location.search).toBe("");
+    view.unmount();
+
+    // Opened from a link that carries it.
+    const opened = render(await page(monday, undefined, "cook"));
+    expect(
+      (opened.getByRole("combobox", { name: "Show" }) as HTMLSelectElement)
+        .value,
+    ).toBe("cook");
+    expect(opened.getAllByRole("link", { name: "Chili" })).toHaveLength(1);
   });
 
   it("says how to plan a meal on a week with nothing planned", async () => {
