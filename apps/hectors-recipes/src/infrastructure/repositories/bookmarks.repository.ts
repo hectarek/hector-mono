@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, max, sql } from "drizzle-orm";
 import { recipeBookmarks } from "@/db/schema";
 import type { IBookmarksRepository } from "@/src/application/repositories/bookmarks.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -35,9 +35,19 @@ export class BookmarksRepository
     try {
       const db = this.getDbContext(tx);
       if (saved) {
+        // Stamped now, or just after this person's newest save, whichever is later: two saves
+        // within one tick of the clock still list newest first.
+        const newest = db
+          .select({ createdAt: max(recipeBookmarks.createdAt) })
+          .from(recipeBookmarks)
+          .where(eq(recipeBookmarks.userId, userId));
         await db
           .insert(recipeBookmarks)
-          .values({ userId, recipeId })
+          .values({
+            userId,
+            recipeId,
+            createdAt: sql`greatest(now(), (${newest}) + interval '1 millisecond')`,
+          })
           .onConflictDoNothing();
       } else {
         await db
