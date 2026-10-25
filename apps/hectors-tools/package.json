@@ -13,22 +13,22 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "4.0.108",
+    "@ai-sdk/gateway": "4.0.126",
     "@evyweb/ioctopus": "^1.4.1",
     "@repo/ui": "workspace:*",
-    "ai": "7.0.133",
-    "lucide-react": "^1.53.0",
-    "next": "16.4.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "zod": "^4.6.5"
+    "ai": "7.0.153",
+    "lucide-react": "^1.61.0",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/bun": "1.4.2",
-    "@types/node": "^26.6.4",
+    "@types/bun": "1.4.4",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
