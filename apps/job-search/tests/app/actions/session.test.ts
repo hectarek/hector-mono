@@ -1,9 +1,15 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  setSystemTime,
+} from "bun:test";
 import { startSession, whoami } from "@/app/actions/session";
 import { getInjection } from "@/di/container";
 import type { CurrentActor } from "@/src/entities/models/actor.model";
 import { TOOL_SET_VERSION } from "@/src/entities/models/agent-session.model";
-import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { TEST_ACCOUNTS } from "@/src/infrastructure/services/mock-auth.service";
 import { nextState } from "@/tests/_support/next";
 import { signInAs } from "@/tests/_support/session";
@@ -24,14 +30,20 @@ const sessionStarts = async () =>
   ).entries;
 
 describe("whoami", () => {
+  afterEach(() => {
+    setSystemTime();
+  });
+
   it("answers who the session acts as, today's date in Eastern time and the tool set's version", async () => {
+    // 10:30 pm in New York, when the date in UTC is already the next day's.
+    setSystemTime(new Date("2026-09-23T02:30:00Z"));
     for (const actor of ["agent", "owner"] as const) {
       signInAs(actor);
       expect(await whoami({})).toEqual({
         ok: true,
         data: {
           actor,
-          today: todayIn(PLAN_TIME_ZONE),
+          today: "2026-09-22",
           toolSetVersion: TOOL_SET_VERSION,
         },
         asOf: expect.any(String),
