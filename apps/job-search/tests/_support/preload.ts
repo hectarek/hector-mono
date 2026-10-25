@@ -3,7 +3,7 @@ import { mock } from "bun:test";
 import { unstable_isUnrecognizedActionError } from "next/dist/client/components/unrecognized-action-error";
 import { testDb } from "@/tests/_support/database";
 import { fakeNeonAuth } from "@/tests/_support/neon-auth";
-import { nextState, Redirected } from "@/tests/_support/next";
+import { NotFoundPage, nextState, Redirected } from "@/tests/_support/next";
 
 // Bun loads .env for tests too. Drop the app's credentials and account settings so no test
 // can reach the test project's database, auth or Google, and so tests behave the same with
@@ -33,6 +33,9 @@ mock.module("@/lib/auth/server", () => ({ auth: fakeNeonAuth }));
 mock.module("next/navigation", () => ({
   redirect: (url: string): never => {
     throw new Redirected(url);
+  },
+  notFound: (): never => {
+    throw new NotFoundPage();
   },
   // The real check: the page tools' wrapper (app/_lib/call-action.ts) tells by it that a deploy
   // removed an action.

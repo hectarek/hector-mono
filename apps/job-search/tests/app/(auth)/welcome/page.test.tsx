@@ -21,4 +21,18 @@ describe("the welcome screen", () => {
     expect(view.getAllByRole("button")).toHaveLength(1);
     expect(page.textContent).not.toMatch(/hector/i);
   });
+
+  // The proxy sends a signed-out visitor here with the page they asked for.
+  it("carries where the visitor was going on to the sign-in form", async () => {
+    const page = await renderOnServer(
+      <WelcomePage searchParams={Promise.resolve({ redirectTo: "/agent" })} />,
+    );
+
+    expect(
+      within(page)
+        .getByRole("button", { name: "Sign in" })
+        .closest("a")
+        ?.getAttribute("href"),
+    ).toBe("/auth/sign-in?redirectTo=%2Fagent");
+  });
 });
