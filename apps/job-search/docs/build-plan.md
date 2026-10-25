@@ -18,9 +18,9 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 | | |
 |---|---|
-| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2, U3 and U4's local part each wait on a check that needs H2 or H3, or the test project's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
-| Next task | Apply `0000_activity` to the test project (with Hector's OK), then Hector applies it to production with the wrapper (`cd apps/job-search && bun run db:migrate:production`), before production's account ids are set. Then the pending checks in U2 to U4, and U4's flow and spike, the gate |
-| Waiting on Hector | Production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); an OK to apply `0000_activity` to the test project; running the wrapper against production; H2 (the accounts); H3 (Playwright MCP config) |
+| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2 and U4's local part wait on checks that need H2 or H3, and U3 on production's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
+| Next task | Hector applies `0000_activity` to production with the wrapper (`cd apps/job-search && bun run db:migrate:production`, on `feat/job-search-p1-gate` until its PR merges), before production's account ids are set. The test project has it since 2026-10-25. A code review of that branch's follow-ups, then their PR. Then the pending checks in U2 to U4, and U4's flow and spike, the gate |
+| Waiting on Hector | Production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); running the wrapper against production; H2 (the accounts); H3 (Playwright MCP config); before U5, whether a record's history keeps its 50-change cap (the 2026-10-24 review) |
 | Last updated | 2026-10-25 |
 
 ---
@@ -730,7 +730,7 @@ Each phase is one branch and PR and leaves a usable app:
   - The app's errors set their own `name`, because the production build renames classes. `ConflictError` carries R22's code, and the code `unexpected` was added (KTD4, revised).
   - Checks: lint, types, dead code and a placeholder build pass, and 108 tests and 8 screen tests pass. Each test scenario above has a test. The Verification's action test, through a stand-in write action, writes one row per write with the acting session's actor.
   - Pending:
-    - migration `0000_activity` (one table, two indexes) is generated and reviewed but not applied. It goes to the test project with Hector's OK once H1 exists.
+    - migration `0000_activity` (one table, two indexes) on production, which Hector applies with the wrapper (KTD17). The test project has it, applied with his OK on 2026-10-25.
     - the history section's 375 px check comes with U5, the first page that mounts it
 
 ### U4. WebMCP adapter and the agent-path spike (gate)
@@ -788,7 +788,7 @@ Each phase is one branch and PR and leaves a usable app:
     - the app's own `registerPageTools`, with the registry's real definitions, listed each tool once after a StrictMode remount, and its results round-tripped
   - Checks: lint, types, dead code and a placeholder build pass, and 137 tests and 17 screen tests pass. Every test scenario above has a test except the real-browser flow, which is written and lists in `playwright test --list`.
   - Pending:
-    - the flow on the test project (H1, and H2 for Claude's test-project account in `.env`)
+    - the flow on the test project (H2, for Claude's test-project account in `.env`; the test project and its `activity` table exist)
     - the spike in Claude Code: the `webmcp_*` tools, the codes, ask and deny rules, and the result-size limit after the browser (H3)
     - the deployed-app run (H1)
     - `/agent` at 375 px in light and dark mode
@@ -1190,6 +1190,7 @@ Each phase is one branch and PR and leaves a usable app:
 - **2026-10-24** — The first preview, of `feat/job-search-p1-gate`, built without errors. Previews redirect signed-out visitors to Vercel's sign-in. The test project's Neon Auth trusts that branch's alias: Neon refused the planned wildcard (KTD17, revised). U1 is done, its deploy check run on production. **Next:** the migration wrapper; Hector's production `DATABASE_URL` and localhost off; an OK to migrate the test project; H2 and H3.
 - **2026-10-24** — Code review (ce-code-review, eight reviewers) of what hectarek/hector-mono#56 merged: Ready with fixes. No P0 or P1; seven P2s confirmed by an independent validator, five P3s, and one decision for Hector before U5 (a record's history shows its latest 50 changes). The cross-model pass didn't run: the installed cursor-agent rejected its command line. **Next:** the review's fixes on this branch, in its order (Playwright trace folders gitignored first, then `start_session` in one transaction), then the migration wrapper.
 - **2026-10-25** — The review's 12 actionable fixes are in, in its order (d14233b to 513b0ca). `start_session` now runs its start and both reads in one transaction, and Playwright's trace folders are gitignored. KTD17's production migration wrapper is in too (33d98f8): it reads the URL from a hidden prompt, refuses `.env`'s URL and the test database, and won't run without a terminal. Checks pass (165 tests and 23 screen tests). The wrapper's interactive run is unverified, since it needs a real terminal. **Next:** the test project's migration with Hector's OK; Hector runs the wrapper against production before setting its account ids; H2 and H3.
+- **2026-10-25** — With Hector's OK, `0000_activity` is applied to the test project (`bun run db:migrate`, outside Claude Code's sandbox), after `scripts/check-test-database.ts` confirmed `.env`'s target. The test database has `activity`, with its primary key, both indexes and no rows, and one row in `drizzle.__drizzle_migrations` whose hash and time match the file and the journal. **Next:** Hector runs the wrapper against production before setting its account ids; a code review of this branch's follow-ups, then their PR; H2 and H3.
 
 ---
 
