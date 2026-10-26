@@ -1,21 +1,12 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
 import { Button } from "@repo/ui/components/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldTitle,
-} from "@repo/ui/components/field";
-import { Input } from "@repo/ui/components/input";
-import { Textarea } from "@repo/ui/components/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
+import { FieldGroup } from "@repo/ui/components/field";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState, useTransition } from "react";
+import { ConflictNotice } from "@/app/_components/conflict-notice";
+import { type FieldKind, FormField } from "@/app/_components/form-field";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { editedFields, rebased } from "@/app/_lib/form-changes";
@@ -30,28 +21,39 @@ type Fact = keyof CompanyFacts;
 type Fields = Record<Fact, string>;
 type Failure = Extract<ActionResult<unknown>, { ok: false }>;
 
+const TIERS = [
+  { value: "", label: "None" },
+  { value: "1", label: "1" },
+  { value: "2", label: "2" },
+  { value: "3", label: "3" },
+];
+
 // Each fact the form holds, in its order, and how it's typed.
 const FACTS: readonly {
   fact: Fact;
-  input: "text" | "url" | "number" | "tier" | "long";
+  kind: FieldKind;
   description?: string;
 }[] = [
-  { fact: "name", input: "text" },
-  { fact: "website", input: "url" },
-  { fact: "location", input: "text", description: "Where it's based" },
-  { fact: "industry", input: "text" },
+  { fact: "name", kind: "text" },
+  { fact: "website", kind: "url" },
+  { fact: "location", kind: "text", description: "Where it's based" },
+  { fact: "industry", kind: "text" },
   {
     fact: "headcount",
-    input: "number",
+    kind: "number",
     description: "About how many people work there",
   },
-  { fact: "tier", input: "tier", description: "1 is the most wanted" },
-  { fact: "officePolicy", input: "text" },
-  { fact: "leavePolicy", input: "text" },
-  { fact: "researchSummary", input: "long" },
+  {
+    fact: "tier",
+    kind: { choices: TIERS },
+    description: "1 is the most wanted",
+  },
+  { fact: "officePolicy", kind: "text" },
+  { fact: "leavePolicy", kind: "text" },
+  { fact: "researchSummary", kind: "long" },
   {
     fact: "researchRef",
-    input: "text",
+    kind: "text",
     description: "Where the long-form research is kept",
   },
 ];
@@ -144,80 +146,29 @@ export function CompanyForm({ company }: { company?: Company }) {
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       {failure?.code === "conflict" ? (
-        <Alert>
-          <AlertTitle>Changed since you opened it</AlertTitle>
-          <AlertDescription>
-            <p>
-              The form shows the company as it is now, with your edits kept.
-              Save to keep them.
-            </p>
-            <ul>
-              {changedSince.map((fact) => (
-                <li key={fact}>
-                  {FIELD_LABELS[fact]} is now {now[fact] || "empty"}
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
+        <ConflictNotice
+          what="the company"
+          changes={changedSince.map((fact) => ({
+            label: FIELD_LABELS[fact] ?? fact,
+            now: now[fact],
+          }))}
+        />
       ) : null}
       <FieldGroup>
-        {FACTS.map(({ fact, input, description }) => {
-          const error = failure?.fields?.[fact];
-          const id = `company-${fact}`;
-          return (
-            <Field key={fact} data-invalid={error ? true : undefined}>
-              {/* A label names one control; the tier's buttons are a group, which a title names. */}
-              {input === "tier" ? (
-                <FieldTitle id={id}>{FIELD_LABELS[fact]}</FieldTitle>
-              ) : (
-                <FieldLabel htmlFor={id}>{FIELD_LABELS[fact]}</FieldLabel>
-              )}
-              {input === "tier" ? (
-                <ToggleGroup
-                  aria-labelledby={id}
-                  variant="outline"
-                  value={[fields.tier]}
-                  onValueChange={([tier]) => set("tier", tier ?? "")}
-                >
-                  {["", "1", "2", "3"].map((tier) => (
-                    <ToggleGroupItem
-                      key={tier}
-                      value={tier}
-                      className="min-h-11 min-w-11"
-                    >
-                      {tier || "None"}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              ) : input === "long" ? (
-                <Textarea
-                  id={id}
-                  value={fields[fact]}
-                  onChange={(event) => set(fact, event.target.value)}
-                  maxLength={MAX_LENGTH[fact]}
-                  aria-invalid={error ? true : undefined}
-                />
-              ) : (
-                <Input
-                  id={id}
-                  type={input === "url" ? "url" : "text"}
-                  inputMode={input === "number" ? "numeric" : undefined}
-                  value={fields[fact]}
-                  onChange={(event) => set(fact, event.target.value)}
-                  required={fact === "name"}
-                  maxLength={MAX_LENGTH[fact]}
-                  aria-invalid={error ? true : undefined}
-                  className="min-h-11"
-                />
-              )}
-              {description ? (
-                <FieldDescription>{description}</FieldDescription>
-              ) : null}
-              {error ? <FieldError>{error}</FieldError> : null}
-            </Field>
-          );
-        })}
+        {FACTS.map(({ fact, kind, description }) => (
+          <FormField
+            key={fact}
+            id={`company-${fact}`}
+            label={FIELD_LABELS[fact] ?? fact}
+            kind={kind}
+            value={fields[fact]}
+            onChange={(text) => set(fact, text)}
+            error={failure?.fields?.[fact]}
+            description={description}
+            required={fact === "name"}
+            maxLength={MAX_LENGTH[fact]}
+          />
+        ))}
       </FieldGroup>
       {failure && failure.code !== "conflict" ? (
         <p role="alert" className="text-destructive text-sm">

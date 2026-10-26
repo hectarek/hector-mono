@@ -8,6 +8,7 @@ import {
   OWNER,
   type TestApp,
 } from "@/tests/_support/app";
+import { HECTOR, jobFixtures } from "@/tests/_support/jobs";
 
 describeEachBackend("getCompany", () => {
   let app: TestApp;
@@ -24,7 +25,7 @@ describeEachBackend("getCompany", () => {
       )
     ).company;
 
-  // get_company's answer (U5). A company's accepted jobs come with U6, its people with U7.
+  // get_company's answer (U5). Its people come with U7.
   it("answers with the company, every fact, and the companies whose names match its own", async () => {
     const company = await add(OWNER, {
       name: "Acme Inc",
@@ -44,6 +45,7 @@ describeEachBackend("getCompany", () => {
     expect(await app.getCompany(OWNER, { id: company.id })).toEqual({
       company,
       similar: [{ id: similar.id, name: "ACME, inc" }],
+      jobs: [],
     });
   });
 
@@ -53,5 +55,30 @@ describeEachBackend("getCompany", () => {
     await expect(
       app.getCompany(OWNER, { id: theirs.id }),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  // From U5's scenarios, once jobs exist (U6).
+  it("answers with the company's accepted jobs, compactly, and not its proposals", async () => {
+    const jobs = jobFixtures(app);
+    const company = await add(OWNER, { name: "Acme Inc" });
+    const job = await jobs.add(company.id, { role: "Widget engineer" });
+    await app.moveJob(HECTOR, { id: job.id, status: "target" });
+    await jobs.propose(company.id, { role: "Proposed role" });
+
+    expect((await app.getCompany(OWNER, { id: company.id })).jobs).toEqual([
+      {
+        id: job.id,
+        role: "Widget engineer",
+        company: { id: company.id, name: "Acme Inc", tier: null },
+        status: "target",
+        nextStep: null,
+        nextDate: null,
+        appliedOn: null,
+        location: null,
+        workMode: null,
+        reviewState: "accepted",
+        dismissReason: null,
+      },
+    ]);
   });
 });

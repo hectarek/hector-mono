@@ -235,6 +235,7 @@ describe("findCompanies and getCompany", () => {
     expect(dataOf(await getCompany({ id: company.id }))).toEqual({
       company,
       similar: [{ id: similar.id, name: similar.name }],
+      jobs: [],
     });
   });
 

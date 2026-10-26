@@ -4,10 +4,12 @@ import { getInjection } from "@/di/container";
 import type { DI_RETURN_TYPES } from "@/di/types";
 import {
   ConflictError,
+  DuplicateError,
   HumanOnlyError,
   InputParseError,
   NotAllowedError,
   NotFoundError,
+  QueueFullError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
@@ -18,10 +20,9 @@ import {
 
 // Helpers for app/actions/*: not a "use server" module, so nothing here is callable from the client.
 
-// Why an action didn't do what it was asked (docs/build-plan.md KTD4). Some arrive with the
-// units that raise them: `duplicate` and `queue-full` with proposals, `calendar-disconnected`
-// with the calendar, and `reload-needed` from the page tools' wrapper, for an action a deploy
-// removed.
+// Why an action didn't do what it was asked (docs/build-plan.md KTD4). `calendar-disconnected`
+// arrives with the calendar, and `reload-needed` comes from the page tools' wrapper, for an
+// action a deploy removed.
 type ActionErrorCode =
   | "validation"
   | "unauthenticated"
@@ -42,7 +43,7 @@ type ActionFailure = {
   message: string;
   // Validation messages by field, for forms that show them under each field.
   fields?: Partial<Record<string, string>>;
-  // On a conflict, the record as it is now.
+  // On a conflict, the record as it is now; on a duplicate, the job that holds the posting.
   current?: unknown;
 };
 
@@ -173,6 +174,17 @@ function expectedFailure(err: unknown): ActionFailure | undefined {
       message: err.message,
       current: err.current,
     };
+  }
+  if (err instanceof DuplicateError) {
+    return {
+      ok: false,
+      code: "duplicate",
+      message: err.message,
+      current: err.existing,
+    };
+  }
+  if (err instanceof QueueFullError) {
+    return { ok: false, code: "queue-full", message: err.message };
   }
   return undefined;
 }

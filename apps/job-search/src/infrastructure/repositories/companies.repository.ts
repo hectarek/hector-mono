@@ -60,9 +60,13 @@ export class CompaniesRepository
     }
   }
 
-  async get(ownerId: string, id: string): Promise<Company | undefined> {
+  async get(
+    ownerId: string,
+    id: string,
+    tx?: ITransaction,
+  ): Promise<Company | undefined> {
     try {
-      const [company] = await this.getDbContext()
+      const [company] = await this.getDbContext(tx)
         .select(COMPANY)
         .from(companies)
         .where(and(eq(companies.ownerId, ownerId), eq(companies.id, id)));

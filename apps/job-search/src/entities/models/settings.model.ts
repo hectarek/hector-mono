@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { timeSchema } from "./time.model";
+import { timeSchema } from "./input.model";
 
 // The week's counts (R10), each with a weekly target Hector sets (R12).
 export const WEEKLY_COUNTS = [

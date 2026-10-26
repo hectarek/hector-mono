@@ -1,5 +1,9 @@
 import { beforeEach, expect, it } from "bun:test";
-import { HumanOnlyError, NotFoundError } from "@/src/entities/errors/common";
+import {
+  HumanOnlyError,
+  InputParseError,
+  NotFoundError,
+} from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import { saveCompanySchema } from "@/src/entities/models/company.model";
 import {
@@ -9,6 +13,7 @@ import {
   OWNER,
   type TestApp,
 } from "@/tests/_support/app";
+import { jobFixtures } from "@/tests/_support/jobs";
 
 const CLAUDE: ChangeContext = { actor: "agent", ownerId: OWNER };
 const HECTOR: ChangeContext = { actor: "owner", ownerId: OWNER };
@@ -92,5 +97,22 @@ describeEachBackend("deleteCompany", () => {
     expect(
       (await app.getCompany(ANOTHER_OWNER, { id: theirs.id })).company,
     ).toEqual(theirs);
+  });
+
+  // From U5's scenarios, once jobs exist (U6).
+  it("refuses Hector's delete of a company that has jobs, saying so, and keeps it", async () => {
+    const jobs = jobFixtures(app);
+    const company = await companyOf(OWNER, { name: "Fictional Widgets" });
+    await jobs.add(company.id);
+    await jobs.propose(company.id);
+
+    await expect(app.deleteCompany(HECTOR, { id: company.id })).rejects.toThrow(
+      new InputParseError(
+        "Fictional Widgets has 2 jobs. Delete them or move them to another company first.",
+      ),
+    );
+    expect((await app.getCompany(OWNER, { id: company.id })).company).toEqual(
+      company,
+    );
   });
 });

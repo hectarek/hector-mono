@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
 import CompanyPage from "@/app/(main)/companies/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
+import { addJob } from "@/app/actions/jobs";
 import { NotFoundPage, type Redirected } from "@/tests/_support/next";
 import { renderOnServer } from "@/tests/_support/server-render";
 import { signInAs } from "@/tests/_support/session";
@@ -93,5 +94,28 @@ describe("a company's page", () => {
       params: Promise.resolve({ id: crypto.randomUUID() }),
     }).catch((err: unknown) => err);
     expect((outcome as Redirected).url).toBe("/private");
+  });
+
+  it("lists the company's jobs, with a way to add one", async () => {
+    signInAs("owner");
+    const company = await add({ name: "Globex Corp" });
+    const job = await addJob({
+      companyId: company.id,
+      role: "Widget engineer",
+      source: "Referral",
+    });
+    if (!job.ok) throw new Error(`The job wasn't added: ${job.code}`);
+
+    const page = await companyPage(company.id);
+
+    const jobs = within(page.getByRole("region", { name: "Jobs" }));
+    expect(
+      within(jobs.getByRole("table"))
+        .getByRole("link", { name: "Widget engineer" })
+        .getAttribute("href"),
+    ).toBe(`/jobs/${job.data.id}`);
+    expect(
+      jobs.getByRole("button", { name: "Add a job" }).getAttribute("href"),
+    ).toBe(`/jobs/new?company=${company.id}`);
   });
 });

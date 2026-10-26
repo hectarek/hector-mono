@@ -2,7 +2,7 @@ import type { IActivityRepository } from "@/src/application/repositories/activit
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
-import { recordChange } from "@/src/application/use-cases/activity/record-change";
+import { sourceNamed } from "@/src/application/use-cases/sources/source-named";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import type {
   AddedSource,
@@ -25,17 +25,9 @@ export const addSourceUseCase = (
     context: ChangeContext,
     { name }: AddSourceInput,
   ): Promise<AddedSource> => {
-    const added = await transactionManager.startTransaction(async (tx) => {
-      const result = await leadSourcesRepository.add(context.ownerId, name, tx);
-      if (result.created) {
-        await recordChange(activityRepository, tx, context, {
-          record: { kind: "lead-source", id: result.source.id },
-          action: "created",
-          after: { name: result.source.name },
-        });
-      }
-      return result;
-    });
+    const added = await transactionManager.startTransaction((tx) =>
+      sourceNamed(leadSourcesRepository, activityRepository, tx, context, name),
+    );
     logger.info("Source added", {
       sourceId: added.source.id,
       created: added.created,

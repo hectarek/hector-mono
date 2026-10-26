@@ -3,17 +3,19 @@ import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { DeleteCompanyButton } from "@/app/_components/delete-company-button";
+import { DeleteButton } from "@/app/_components/delete-button";
+import { JobList } from "@/app/_components/job-list";
 import { RecordHistory } from "@/app/_components/record-history";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { loadCompany } from "@/app/_lib/load-company";
+import { deleteCompany } from "@/app/actions/companies";
 import type { Company } from "@/src/entities/models/company.model";
 
 const HEADCOUNT = new Intl.NumberFormat("en-US");
 
 // A company (R4): its facts and research, a warning when another company's name matches its own,
-// and its history (R19). Its jobs and people arrive with U6 and U7.
+// its jobs, and its history (R19). Its people arrive with U7.
 export default async function CompanyPage({
   params,
 }: {
@@ -21,7 +23,7 @@ export default async function CompanyPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const { company, similar } = await loadCompany(id, actor);
+  const { company, similar, jobs } = await loadCompany(id, actor);
 
   return (
     <div className="flex flex-col gap-8">
@@ -54,8 +56,10 @@ export default async function CompanyPage({
             </Button>
             {/* Deleting is Hector's alone (R21): Claude's session sees it off (KTD3). */}
             {actor.actor === "owner" ? (
-              <DeleteCompanyButton
-                company={{ id: company.id, name: company.name }}
+              <DeleteButton
+                what={company.name}
+                action={deleteCompany.bind(null, { id: company.id })}
+                then="/companies"
               />
             ) : (
               <>
@@ -143,6 +147,28 @@ export default async function CompanyPage({
             <span className="break-words">{company.researchRef}</span>
           </p>
         ) : null}
+      </section>
+
+      <section aria-labelledby="company-jobs" className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="company-jobs" className="font-semibold">
+            Jobs
+          </h2>
+          <Button
+            variant="secondary"
+            size="lg"
+            nativeButton={false}
+            render={<Link href={`/jobs/new?company=${company.id}`} />}
+            className="min-h-11"
+          >
+            Add a job
+          </Button>
+        </div>
+        {jobs.length ? (
+          <JobList jobs={jobs} />
+        ) : (
+          <p className="text-muted-foreground text-sm">No jobs here yet.</p>
+        )}
       </section>
 
       <RecordHistory record={{ kind: "company", id: company.id }} />

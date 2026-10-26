@@ -46,4 +46,77 @@ describe("the tables [postgres]", () => {
     );
     expect(row?.fraction.endsWith("000")).toBe(true);
   });
+
+  // Jobs (U6): a company and a source to name, as the use cases make them.
+  const aCompany = () =>
+    sql<{ id: string }>(
+      "insert into companies (owner_id, name, name_key) values ($1, 'Acme Inc', 'acmeinc') returning id",
+      [OWNER],
+    );
+  const aSource = () =>
+    sql<{ id: string }>(
+      "insert into lead_sources (owner_id, name, name_key) values ($1, 'Referral', 'referral') returning id",
+      [OWNER],
+    );
+  const aJob = (
+    companyId: string,
+    sourceId: string,
+    columns: Record<string, unknown> = {},
+  ) => {
+    const values = {
+      owner_id: OWNER,
+      company_id: companyId,
+      lead_source_id: sourceId,
+      role: "Widget engineer",
+      status: "verify",
+      review_state: "accepted",
+      found_on: "2026-10-26",
+      ...columns,
+    };
+    const names = Object.keys(values);
+    return sql<{ id: string }>(
+      `insert into jobs (${names.join(", ")}) values (${names.map((name) => `$${names.indexOf(name) + 1}`).join(", ")}) returning id`,
+      Object.values(values),
+    );
+  };
+
+  it("keep a posting's key to one job per owner, and statuses and the band to what the app knows", async () => {
+    const [acme] = await aCompany();
+    const [referral] = await aSource();
+    if (!acme || !referral) throw new Error("No company or source");
+
+    await aJob(acme.id, referral.id, {
+      posting_key: "linkedin.com/jobs/view/1",
+    });
+    await expect(
+      aJob(acme.id, referral.id, { posting_key: "linkedin.com/jobs/view/1" }),
+    ).rejects.toThrow();
+    await aJob(acme.id, referral.id);
+    await aJob(acme.id, referral.id);
+    await expect(
+      aJob(acme.id, referral.id, { status: "hired" }),
+    ).rejects.toThrow();
+    await expect(
+      aJob(acme.id, referral.id, { pay_min: 100, pay_max: 50 }),
+    ).rejects.toThrow();
+    await expect(aJob(acme.id, referral.id, { pay_max: -1 })).rejects.toThrow();
+  });
+
+  it("refuse to delete a company that has jobs, and take a job's status moves with it", async () => {
+    const [acme] = await aCompany();
+    const [referral] = await aSource();
+    if (!acme || !referral) throw new Error("No company or source");
+    const [made] = await aJob(acme.id, referral.id);
+    if (!made) throw new Error("No job");
+    await sql(
+      "insert into job_status_changes (owner_id, job_id, from_status, to_status, occurred_on, actor) values ($1, $2, 'verify', 'target', '2026-10-26', 'owner')",
+      [OWNER, made.id],
+    );
+
+    await expect(
+      sql("delete from companies where id = $1", [acme.id]),
+    ).rejects.toThrow();
+    await sql("delete from jobs where id = $1", [made.id]);
+    expect(await sql("select * from job_status_changes")).toEqual([]);
+  });
 });

@@ -1,10 +1,11 @@
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { requireHuman } from "@/src/application/use-cases/access/require-human";
 import { recordChange } from "@/src/application/use-cases/activity/record-change";
-import { NotFoundError } from "@/src/entities/errors/common";
+import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import type {
   ChangeContext,
   RecordRef,
@@ -17,9 +18,11 @@ import {
 export type IDeleteCompanyUseCase = ReturnType<typeof deleteCompanyUseCase>;
 
 // Deletes a company, which only Hector may do (R21): Claude's try is refused, and logged, before
-// anything is read. The history keeps the company's facts as they were.
+// anything is read. A company that has jobs is refused, saying so: they'd lose their employer.
+// The history keeps the company's facts as they were.
 export const deleteCompanyUseCase = (
   companiesRepository: ICompaniesRepository,
+  jobsRepository: IJobsRepository,
   activityRepository: IActivityRepository,
   transactionManager: ITransactionManagerService,
   loggerService: ILoggerService,
@@ -46,6 +49,18 @@ export const deleteCompanyUseCase = (
       );
       if (!company) {
         throw new NotFoundError("Couldn't find that company.");
+      }
+      const jobs = await jobsRepository.countForCompany(
+        context.ownerId,
+        id,
+        tx,
+      );
+      if (jobs > 0) {
+        const them = jobs === 1 ? "it" : "them";
+        const count = jobs === 1 ? "a job" : `${jobs} jobs`;
+        throw new InputParseError(
+          `${company.name} has ${count}. Delete ${them} or move ${them} to another company first.`,
+        );
       }
       await companiesRepository.delete(context.ownerId, id, tx);
       await recordChange(activityRepository, tx, context, {

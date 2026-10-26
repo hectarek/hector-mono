@@ -1,6 +1,5 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
 import { Button } from "@repo/ui/components/button";
 import {
   Field,
@@ -13,6 +12,7 @@ import {
 } from "@repo/ui/components/field";
 import { Input } from "@repo/ui/components/input";
 import { type FormEvent, useState, useTransition } from "react";
+import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { rebased } from "@/app/_lib/form-changes";
@@ -123,22 +123,13 @@ export function SettingsForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       {failure?.code === "conflict" ? (
-        <Alert>
-          <AlertTitle>Changed since you opened them</AlertTitle>
-          <AlertDescription>
-            <p>
-              The form shows the settings as they are now, with your edits kept.
-              Save to keep them.
-            </p>
-            <ul>
-              {changedSince.map((setting) => (
-                <li key={setting}>
-                  {FIELD_LABELS[setting]} is now {now[setting] || "none"}
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
+        <ConflictNotice
+          what="the settings"
+          changes={changedSince.map((setting) => ({
+            label: FIELD_LABELS[setting] ?? setting,
+            now: now[setting],
+          }))}
+        />
       ) : null}
       <div className="flex flex-col gap-6">
         <FieldSet>

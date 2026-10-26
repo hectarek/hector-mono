@@ -4,7 +4,9 @@
 import { beforeEach, describe } from "bun:test";
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
+import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
@@ -12,6 +14,16 @@ import { deleteCompanyUseCase } from "@/src/application/use-cases/companies/dele
 import { findCompaniesUseCase } from "@/src/application/use-cases/companies/find-companies.use-case";
 import { getCompanyUseCase } from "@/src/application/use-cases/companies/get-company.use-case";
 import { saveCompanyUseCase } from "@/src/application/use-cases/companies/save-company.use-case";
+import { createJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
+import { deleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
+import { findJobsUseCase } from "@/src/application/use-cases/jobs/find-jobs.use-case";
+import { getJobUseCase } from "@/src/application/use-cases/jobs/get-job.use-case";
+import { moveJobUseCase } from "@/src/application/use-cases/jobs/move-job.use-case";
+import { reviewProposalUseCase } from "@/src/application/use-cases/jobs/review-proposal.use-case";
+import { updateJobUseCase } from "@/src/application/use-cases/jobs/update-job.use-case";
+import { addNoteUseCase } from "@/src/application/use-cases/notes/add-note.use-case";
+import { deleteNoteUseCase } from "@/src/application/use-cases/notes/delete-note.use-case";
+import { editNoteUseCase } from "@/src/application/use-cases/notes/edit-note.use-case";
 import { startSessionUseCase } from "@/src/application/use-cases/session/start-session.use-case";
 import { getSettingsUseCase } from "@/src/application/use-cases/settings/get-settings.use-case";
 import { updateSettingsUseCase } from "@/src/application/use-cases/settings/update-settings.use-case";
@@ -21,8 +33,12 @@ import { ActivityRepository } from "@/src/infrastructure/repositories/activity.r
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { CompaniesRepository } from "@/src/infrastructure/repositories/companies.repository";
 import { MockCompaniesRepository } from "@/src/infrastructure/repositories/companies.repository.mock";
+import { JobsRepository } from "@/src/infrastructure/repositories/jobs.repository";
+import { MockJobsRepository } from "@/src/infrastructure/repositories/jobs.repository.mock";
 import { LeadSourcesRepository } from "@/src/infrastructure/repositories/lead-sources.repository";
 import { MockLeadSourcesRepository } from "@/src/infrastructure/repositories/lead-sources.repository.mock";
+import { NotesRepository } from "@/src/infrastructure/repositories/notes.repository";
+import { MockNotesRepository } from "@/src/infrastructure/repositories/notes.repository.mock";
 import { SettingsRepository } from "@/src/infrastructure/repositories/settings.repository";
 import { MockSettingsRepository } from "@/src/infrastructure/repositories/settings.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
@@ -39,15 +55,21 @@ type Repositories = {
   companies: ICompaniesRepository;
   sources: ILeadSourcesRepository;
   settings: ISettingsRepository;
+  jobs: IJobsRepository;
+  notes: INotesRepository;
   transactions: ITransactionManagerService;
 };
 
 function mockRepositories(): Repositories {
+  const companies = new MockCompaniesRepository();
+  const sources = new MockLeadSourcesRepository();
   return {
     activity: new MockActivityRepository(),
-    companies: new MockCompaniesRepository(),
-    sources: new MockLeadSourcesRepository(),
+    companies,
+    sources,
     settings: new MockSettingsRepository(),
+    jobs: new MockJobsRepository(companies, sources),
+    notes: new MockNotesRepository(),
     transactions: new MockTransactionManagerService(),
   };
 }
@@ -60,6 +82,8 @@ export function postgresRepositories(): Repositories {
     companies: new CompaniesRepository(log),
     sources: new LeadSourcesRepository(log),
     settings: new SettingsRepository(log),
+    jobs: new JobsRepository(log),
+    notes: new NotesRepository(log),
     transactions: new TransactionManagerService(log),
   };
 }
@@ -99,15 +123,22 @@ export function describeEachBackend(name: string, fn: () => void): void {
 
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
   const log = new MockLoggerService();
-  const { activity, companies, sources, settings, transactions } = repos;
+  const { activity, companies, sources, settings, jobs, notes, transactions } =
+    repos;
   return {
     repos,
     listActivity: listActivityUseCase(activity, log),
     startSession: startSessionUseCase(activity, transactions, log),
     findCompanies: findCompaniesUseCase(companies, log),
-    getCompany: getCompanyUseCase(companies, log),
+    getCompany: getCompanyUseCase(companies, jobs, log),
     saveCompany: saveCompanyUseCase(companies, activity, transactions, log),
-    deleteCompany: deleteCompanyUseCase(companies, activity, transactions, log),
+    deleteCompany: deleteCompanyUseCase(
+      companies,
+      jobs,
+      activity,
+      transactions,
+      log,
+    ),
     addSource: addSourceUseCase(sources, activity, transactions, log),
     listSources: listSourcesUseCase(sources, log),
     getSettings: getSettingsUseCase(settings),
@@ -117,6 +148,31 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
+    findJobs: findJobsUseCase(jobs, log),
+    getJob: getJobUseCase(jobs, notes, activity, log),
+    createJob: createJobUseCase(
+      jobs,
+      companies,
+      sources,
+      settings,
+      activity,
+      transactions,
+      log,
+    ),
+    updateJob: updateJobUseCase(
+      jobs,
+      companies,
+      sources,
+      activity,
+      transactions,
+      log,
+    ),
+    moveJob: moveJobUseCase(jobs, activity, transactions, log),
+    reviewProposal: reviewProposalUseCase(jobs, activity, transactions, log),
+    deleteJob: deleteJobUseCase(jobs, notes, activity, transactions, log),
+    addNote: addNoteUseCase(notes, jobs, activity, transactions, log),
+    editNote: editNoteUseCase(notes, activity, transactions, log),
+    deleteNote: deleteNoteUseCase(notes, activity, transactions, log),
   };
 }
 

@@ -20,9 +20,9 @@ export class SettingsRepository
     super(logger, "settings");
   }
 
-  async get(ownerId: string): Promise<Settings | undefined> {
+  async get(ownerId: string, tx?: ITransaction): Promise<Settings | undefined> {
     try {
-      const [row] = await this.getDbContext()
+      const [row] = await this.getDbContext(tx)
         .select()
         .from(settings)
         .where(eq(settings.ownerId, ownerId));

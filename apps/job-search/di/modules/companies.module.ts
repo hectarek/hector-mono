@@ -42,6 +42,7 @@ export function createCompaniesModule() {
     .bind(DI_SYMBOLS.IGetCompanyUseCase)
     .toHigherOrderFunction(getCompanyUseCase, [
       DI_SYMBOLS.ICompaniesRepository,
+      DI_SYMBOLS.IJobsRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
   companiesModule
@@ -70,6 +71,7 @@ export function createCompaniesModule() {
     .bind(DI_SYMBOLS.IDeleteCompanyUseCase)
     .toHigherOrderFunction(deleteCompanyUseCase, [
       DI_SYMBOLS.ICompaniesRepository,
+      DI_SYMBOLS.IJobsRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,

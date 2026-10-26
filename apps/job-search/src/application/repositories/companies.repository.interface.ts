@@ -15,7 +15,11 @@ export interface ICompaniesRepository {
     facts: CompanyFacts,
     tx: ITransaction,
   ): Promise<Company>;
-  get(ownerId: string, id: string): Promise<Company | undefined>;
+  get(
+    ownerId: string,
+    id: string,
+    tx?: ITransaction,
+  ): Promise<Company | undefined>;
   // The company, read for a change: it stays locked until the transaction ends, so no other
   // write lands between the check against what was read and the change.
   getForUpdate(

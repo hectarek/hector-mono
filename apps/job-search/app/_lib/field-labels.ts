@@ -29,6 +29,38 @@ export const FIELD_LABELS: Record<string, string> = {
   practiceSessions: "Practice sessions",
   screensReached: "Moves to screen or beyond",
   pendingCap: "Queue cap",
+  // A job's facts, where it stands and Hector's review, as inputs and its history name them
+  // (`company` and `source` are the history's names for the two)
+  companyId: "Company",
+  company: "Company",
+  clientName: "Client",
+  role: "Role",
+  status: "Status",
+  nextStep: "Next step",
+  nextDate: "Next date",
+  appliedOn: "Applied on",
+  targetRole: "Target role",
+  level: "Level",
+  workMode: "Work mode",
+  payMin: "Pay from",
+  payMax: "Pay to",
+  postingUrl: "Posting link",
+  summary: "Summary",
+  foundOn: "Found on",
+  source: "Source",
+  travelPercent: "Travel (%)",
+  employmentType: "Employment type",
+  teamSize: "Team size",
+  reviewState: "Review",
+  proposalReason: "Claude's reason",
+  dismissReason: "Dismissed because",
+  dismissNote: "Dismissal note",
+  // A status move's date and a closing's reason, a proposal's reason, and a dismissal's note
+  on: "Date",
+  reason: "Reason",
+  note: "Note",
+  // A note's text
+  body: "Note",
 };
 
 // A field's label, or its name in words ("nextStep" is "Next step"): a history names every field

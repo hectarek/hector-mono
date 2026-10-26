@@ -8,10 +8,12 @@ import type { ITransactionManagerService } from "@/src/application/services/tran
 import {
   ConflictError,
   DatabaseOperationError,
+  DuplicateError,
   HumanOnlyError,
   InputParseError,
   NotAllowedError,
   NotFoundError,
+  QueueFullError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
@@ -20,10 +22,12 @@ import type { ITransaction } from "@/src/entities/models/transaction.model";
 const DOMAIN_ERRORS = [
   ConflictError,
   DatabaseOperationError,
+  DuplicateError,
   HumanOnlyError,
   InputParseError,
   NotAllowedError,
   NotFoundError,
+  QueueFullError,
   UnauthenticatedError,
 ];
 

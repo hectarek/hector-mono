@@ -11,10 +11,12 @@ import { recordChange } from "@/src/application/use-cases/activity/record-change
 import {
   ConflictError,
   DatabaseOperationError,
+  DuplicateError,
   HumanOnlyError,
   InputParseError,
   NotAllowedError,
   NotFoundError,
+  QueueFullError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { listActivitySchema } from "@/src/entities/models/activity.model";
@@ -102,6 +104,39 @@ describe("toActionError", () => {
       message: "This changed since it was read.",
       current,
     });
+  });
+
+  // R20, KTD8.
+  it("answers a posting already on a job with `duplicate` and that job, and a full queue with `queue-full`", () => {
+    const existing = {
+      id: "00000000-0000-4000-8000-0000000000b1",
+      role: "Widget engineer",
+      company: "Acme Inc",
+      reviewState: "dismissed",
+      dismissReason: "not-hiring",
+    };
+    const logger = new RecordingLogger();
+    expect(
+      toActionError(
+        new DuplicateError(
+          existing,
+          "This posting was dismissed (not hiring).",
+        ),
+        logger,
+        FALLBACK,
+      ),
+    ).toEqual({
+      ok: false,
+      code: "duplicate",
+      message: "This posting was dismissed (not hiring).",
+      current: existing,
+    });
+    expect(toActionError(new QueueFullError(), logger, FALLBACK)).toEqual({
+      ok: false,
+      code: "queue-full",
+      message: "The review queue is full: Hector reviews what's waiting first.",
+    });
+    expect(logger.text).not.toContain("Acme Inc");
   });
 
   it("logs an unexpected error by class and code only, and answers with the action's own message", () => {

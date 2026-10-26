@@ -21,8 +21,9 @@ function migrateOnce(): Promise<void> {
 // Call in beforeEach: migrates on first use, then empties every table.
 export async function resetDatabase(): Promise<void> {
   await migrateOnce();
+  // All at once: jobs point at companies and sources, and status moves at jobs.
   await client.exec(
-    "truncate activity, companies, lead_sources, settings restart identity;",
+    "truncate activity, companies, lead_sources, settings, jobs, job_status_changes, notes restart identity;",
   );
 }
 

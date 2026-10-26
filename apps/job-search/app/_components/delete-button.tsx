@@ -14,29 +14,41 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { callAction } from "@/app/_lib/call-action";
-import { deleteCompany } from "@/app/actions/companies";
-import type { CompanyRef } from "@/src/entities/models/company.model";
+import type { ActionResult } from "@/app/actions/shared";
 
-// Deleting a company, which asks first (R21: Hector's alone, and the server refuses anyone else).
-// Deleted, it goes back to the companies.
-export function DeleteCompanyButton({ company }: { company: CompanyRef }) {
+// Deleting something, which asks first: deleting is Hector's alone (R21), and the server refuses
+// anyone else. Deleted, it goes to `then`, or stays when the page still stands.
+export function DeleteButton({
+  what,
+  action,
+  then,
+}: {
+  // What's deleted, as the question names it: a company's name, a job's role, "this note".
+  what: string;
+  action: () => Promise<ActionResult<unknown>>;
+  then?: string;
+}) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
 
   function confirm() {
     startTransition(async () => {
-      const result = await callAction(() => deleteCompany({ id: company.id }));
-      if (result.ok) {
-        router.push("/companies");
+      const result = await callAction(action);
+      if (!result.ok) {
+        setError(result.message);
         return;
       }
-      setError(result.message);
+      setOpen(false);
+      if (then) {
+        router.push(then);
+      }
     });
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={<Button variant="destructive" size="lg" className="min-h-11" />}
       >
@@ -44,7 +56,7 @@ export function DeleteCompanyButton({ company }: { company: CompanyRef }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete {company.name}?</DialogTitle>
+          <DialogTitle>Delete {what}?</DialogTitle>
           <DialogDescription>
             It can&apos;t be undone. Its history stays in the log.
           </DialogDescription>

@@ -1,4 +1,5 @@
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import { byCodePoint } from "@/src/entities/code-point-order";
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import {
   type Company,
@@ -123,11 +124,4 @@ export class MockCompaniesRepository implements ICompaniesRepository {
       (row) => row.ownerId === ownerId && row.company.id === id,
     );
   }
-}
-
-function byCodePoint(a: string, b: string): number {
-  if (a === b) {
-    return 0;
-  }
-  return a < b ? -1 : 1;
 }

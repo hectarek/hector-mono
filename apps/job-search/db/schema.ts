@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -11,18 +12,40 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import {
+  CLOSED_STATUSES,
+  type JobStatus,
+  OPEN_STATUSES,
+} from "@/src/entities/job-lifecycle";
 import type {
   ActivityAction,
   ChangeActor,
   FieldChange,
   RecordRef,
 } from "@/src/entities/models/activity.model";
+import {
+  DISMISS_REASONS,
+  type DismissReason,
+  EMPLOYMENT_TYPES,
+  type JobFacts,
+  LEVELS,
+  REVIEW_STATES,
+  type ReviewState,
+  WORK_MODES,
+} from "@/src/entities/models/job.model";
 
 // The app's tables, added by the units that need them (docs/build-plan.md). Every root table
 // carries owner_id (KTD2).
 
 const createdAt = () =>
   timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+
+// A date with no time, "YYYY-MM-DD" in Eastern time (docs/build-plan.md KTD18), read as text.
+const day = (name: string) => date(name, { mode: "string" });
+
+// A check that a column holds one of a fixed set of values.
+const oneOf = (column: unknown, values: readonly string[]) =>
+  sql`${column} in (${sql.raw(values.map((value) => `'${value}'`).join(", "))})`;
 
 // When a row last changed, which a change sends back to show what it read (R22, KTD15). Kept to
 // the millisecond, a JS Date's precision, and each update moves it on at least a millisecond, so
@@ -136,5 +159,135 @@ export const settings = pgTable(
       sql`${table.messagesSentTarget} >= 0 and ${table.conversationsHeldTarget} >= 0 and ${table.applicationsTarget} >= 0 and ${table.practiceSessionsTarget} >= 0 and ${table.screensReachedTarget} >= 0`,
     ),
     check("settings_pending_cap_check", sql`${table.pendingCap} >= 1`),
+  ],
+);
+
+// Jobs (R1, U6): Hector's pipeline and Claude's proposals in one table, told apart by review_state
+// (KTD8). posting_key is the posting's link as posting-link.ts keys it, unique per owner, so a
+// posting is on one job whatever its review. A company or lead source with jobs can't be deleted.
+export const jobs = pgTable(
+  "jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id),
+    clientName: text("client_name"),
+    role: text("role").notNull(),
+    status: text("status").$type<JobStatus>().notNull(),
+    nextStep: text("next_step"),
+    nextDate: day("next_date"),
+    appliedOn: day("applied_on"),
+    targetRole: text("target_role"),
+    level: text("level").$type<NonNullable<JobFacts["level"]>>(),
+    location: text("location"),
+    workMode: text("work_mode").$type<NonNullable<JobFacts["workMode"]>>(),
+    payMin: integer("pay_min"),
+    payMax: integer("pay_max"),
+    postingUrl: text("posting_url"),
+    postingKey: text("posting_key"),
+    summary: text("summary"),
+    foundOn: day("found_on").notNull(),
+    sourceId: uuid("lead_source_id")
+      .notNull()
+      .references(() => leadSources.id),
+    travelPercent: integer("travel_percent"),
+    employmentType:
+      text("employment_type").$type<NonNullable<JobFacts["employmentType"]>>(),
+    teamSize: integer("team_size"),
+    reviewState: text("review_state").$type<ReviewState>().notNull(),
+    proposalReason: text("proposal_reason"),
+    dismissReason: text("dismiss_reason").$type<DismissReason>(),
+    dismissNote: text("dismiss_note"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("jobs_owner_id_posting_key_idx")
+      .on(table.ownerId, table.postingKey)
+      .where(sql`${table.postingKey} is not null`),
+    index("jobs_owner_id_review_state_idx").on(
+      table.ownerId,
+      table.reviewState,
+      table.nextDate,
+    ),
+    index("jobs_company_id_idx").on(table.companyId),
+    check(
+      "jobs_status_check",
+      oneOf(table.status, [...OPEN_STATUSES, ...CLOSED_STATUSES]),
+    ),
+    check("jobs_review_state_check", oneOf(table.reviewState, REVIEW_STATES)),
+    check("jobs_level_check", oneOf(table.level, LEVELS)),
+    check("jobs_work_mode_check", oneOf(table.workMode, WORK_MODES)),
+    check(
+      "jobs_employment_type_check",
+      oneOf(table.employmentType, EMPLOYMENT_TYPES),
+    ),
+    check(
+      "jobs_dismiss_reason_check",
+      oneOf(table.dismissReason, DISMISS_REASONS),
+    ),
+    check(
+      "jobs_pay_check",
+      sql`${table.payMin} >= 0 and ${table.payMax} >= 0 and ${table.payMax} >= ${table.payMin}`,
+    ),
+    check(
+      "jobs_travel_percent_check",
+      sql`${table.travelPercent} between 0 and 100`,
+    ),
+    check("jobs_team_size_check", sql`${table.teamSize} > 0`),
+  ],
+);
+
+// Each status move (KTD7): the date it happened, which counts and yield read, and who made it.
+// Append-only; a job's moves go with it.
+export const jobStatusChanges = pgTable(
+  "job_status_changes",
+  {
+    // Also the order moves were logged in.
+    id: bigint("id", { mode: "number" })
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    ownerId: uuid("owner_id").notNull(),
+    jobId: uuid("job_id")
+      .notNull()
+      .references(() => jobs.id, { onDelete: "cascade" }),
+    fromStatus: text("from_status").$type<JobStatus>().notNull(),
+    toStatus: text("to_status").$type<JobStatus>().notNull(),
+    occurredOn: day("occurred_on").notNull(),
+    actor: text("actor").$type<ChangeActor>().notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    index("job_status_changes_owner_id_occurred_on_idx").on(
+      table.ownerId,
+      table.occurredOn,
+    ),
+    index("job_status_changes_job_id_idx").on(table.jobId),
+  ],
+);
+
+// Dated notes on a record (R1, R21), which point at it by kind and id, as the activity log does.
+// A job's notes go with it, in its delete's transaction.
+export const notes = pgTable(
+  "notes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    recordKind: text("record_kind").$type<"job">().notNull(),
+    recordId: uuid("record_id").notNull(),
+    author: text("author").$type<ChangeActor>().notNull(),
+    body: text("body").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("notes_owner_id_record_idx").on(
+      table.ownerId,
+      table.recordKind,
+      table.recordId,
+      table.createdAt,
+    ),
   ],
 );

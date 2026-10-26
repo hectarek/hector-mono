@@ -82,6 +82,7 @@ describeEachBackend("saveCompany", () => {
     expect(await app.getCompany(OWNER, { id: saved.company.id })).toEqual({
       company: saved.company,
       similar: [],
+      jobs: [],
     });
     expect(await history(saved.company.id)).toEqual([
       expect.objectContaining({

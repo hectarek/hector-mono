@@ -1,4 +1,5 @@
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
+import { byCodePoint } from "@/src/entities/code-point-order";
 import {
   type AddedSource,
   type LeadSource,
@@ -28,12 +29,10 @@ export class MockLeadSourcesRepository implements ILeadSourcesRepository {
     return this.rows
       .filter((row) => row.ownerId === ownerId)
       .map(({ source }) => ({ ...source }))
-      .sort((a, b) => {
-        const [keyA, keyB] = [sourceNameKey(a.name), sourceNameKey(b.name)];
-        if (keyA !== keyB) {
-          return keyA < keyB ? -1 : 1;
-        }
-        return a.id < b.id ? -1 : 1;
-      });
+      .sort(
+        (a, b) =>
+          byCodePoint(sourceNameKey(a.name), sourceNameKey(b.name)) ||
+          byCodePoint(a.id, b.id),
+      );
   }
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { timeSchema } from "./time.model";
+import { timeSchema } from "./input.model";
 
 // Who made a change (R19, docs/build-plan.md KTD7): Hector's session, Claude's, the one-time
 // import, or the app itself.
@@ -32,6 +32,7 @@ const recordKindSchema = z.enum([
   "lead-source",
   "settings",
   "job",
+  "note",
   "person",
   "agent-session",
 ]);

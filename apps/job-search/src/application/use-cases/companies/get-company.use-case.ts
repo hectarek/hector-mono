@@ -1,14 +1,18 @@
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import { NotFoundError } from "@/src/entities/errors/common";
 import type { CompanyDetail } from "@/src/entities/models/company.model";
+import { JOB_PAGE_MAX } from "@/src/entities/models/job.model";
 
 export type IGetCompanyUseCase = ReturnType<typeof getCompanyUseCase>;
 
-// A company as its page and get_company show it (docs/build-plan.md U5), with any other company
-// whose name matches its own ignoring case and punctuation.
+// A company as its page and get_company show it (docs/build-plan.md U5, U6): with any other company
+// whose name matches its own ignoring case and punctuation, and its accepted jobs. Its people
+// come with U7.
 export const getCompanyUseCase = (
   companiesRepository: ICompaniesRepository,
+  jobsRepository: IJobsRepository,
   loggerService: ILoggerService,
 ) => {
   const logger = loggerService.child({ layer: "use-case", op: "getCompany" });
@@ -21,12 +25,16 @@ export const getCompanyUseCase = (
     if (!company) {
       throw new NotFoundError("Couldn't find that company.");
     }
-    const similar = await companiesRepository.findSimilar(
-      ownerId,
-      company.name,
-      id,
-    );
+    const [similar, { jobs }] = await Promise.all([
+      companiesRepository.findSimilar(ownerId, company.name, id),
+      jobsRepository.find(ownerId, {
+        companyId: id,
+        reviewState: "accepted",
+        limit: JOB_PAGE_MAX,
+        offset: 0,
+      }),
+    ]);
     logger.debug("Company read", { companyId: id });
-    return { company, similar };
+    return { company, similar, jobs };
   };
 };

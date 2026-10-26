@@ -28,6 +28,7 @@ const RECORDS: Record<ActivityEntry["record"]["kind"], string> = {
   "lead-source": "a lead source",
   settings: "the settings",
   job: "a job",
+  note: "a note",
   person: "a person",
   "agent-session": "a session",
 };

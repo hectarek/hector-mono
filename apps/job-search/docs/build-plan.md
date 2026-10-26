@@ -17,12 +17,12 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 ## Status
 
-|                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Phase             | 2, Pipeline: U5 is built on `feat/job-search-p2-pipeline` but for its page tools, which wait for U4's gate (revised 2026-10-26); no PR yet. Phase 1: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56, follow-ups hectarek/hector-mono#61). Production's deploy of f0da9b1 (hectarek/hector-mono#64) runs with its database and both account ids. U1 and U3 are done. U2 and U4's local part wait on checks that need H2 or H3 (their Evidence says which)                                                                                                                                     |
-| Next task         | Hector's choice: U5's PR now, or U6 on the same branch first. Before the PR: a code review (ce-code-review) and its fixes, and a Whiteboard board. Then a sign-in check on production (This week, and Claude's page, which reads `activity`); localhost and sign-up off on production's Neon Auth (H1's rest, H2); the test project's accounts (H2) and H3, which unblock the pending checks in U2, U4 and U5, and U4's flow and spike, the gate                                                                                                                                                                         |
-| Waiting on Hector | Whether to open U5's PR now or build U6 on the same branch first; `0001_companies_sources_settings` on the test project (his OK at that moment) and on production from his terminal before the merge deploys (KTD17); localhost access and sign-up off on production's Neon Auth (H1's rest, H2), or his OK for Claude to do it: its Google sign-in is removed (2026-10-26); the test project's accounts (H2); H3 (Claude's browser: the Playwright MCP server and the permission rules). Answered 2026-10-26, before U5: a record's history keeps its 50-change cap, and `list_activity` becomes one of U5's page tools |
-| Last updated      | 2026-10-26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase             | 2, Pipeline: U5 and U6 are built on `feat/job-search-p2-pipeline` but for their page tools, which wait for U4's gate (revised 2026-10-26); Phase 2's PR is next. Phase 1: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56, follow-ups hectarek/hector-mono#61). Production's deploy of f0da9b1 (hectarek/hector-mono#64) runs with its database and both account ids. U1 and U3 are done. U2 and U4's local part wait on checks that need H2 or H3 (their Evidence says which)                                                                                                                                                                                                                                 |
+| Next task         | Phase 2's PR (U5 and U6): a code review (ce-code-review) and its fixes, a Whiteboard board, then the PR, which says production needs `0001_companies_sources_settings` and `0002_jobs_and_notes` before the merge deploys. Then a sign-in check on production (This week, and Claude's page, which reads `activity`); localhost and sign-up off on production's Neon Auth (H1's rest, H2); the test project's accounts (H2) and H3, which unblock the pending checks in U2, U4, U5 and U6, and U4's flow and spike, the gate                                                                                                                                                                                                              |
+| Waiting on Hector | Phase 2's review and merge, with `0001_companies_sources_settings` and `0002_jobs_and_notes` applied to production from his terminal first (KTD17) and to the test project with his OK; whether a job keeps a tier of its own (R1) or shows its company's, as U6 built it; localhost access and sign-up off on production's Neon Auth (H1's rest, H2), or his OK for Claude to do it: its Google sign-in is removed (2026-10-26); the test project's accounts (H2); H3 (Claude's browser: the Playwright MCP server and the permission rules). Answered 2026-10-26: U5 started before U4's gate; a record's history keeps its 50-change cap; `list_activity` is one of U5's page tools; U6 follows on the same branch, one PR for Phase 2 |
+| Last updated      | 2026-10-26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ---
 
@@ -53,7 +53,7 @@ Tasks are this plan's units, so the tracker and the plan share IDs (see Conventi
 
 **Phase 2: Pipeline**
 - [~] **U5** Companies, lead sources and settings — C · KTD3
-- [ ] **U6** Jobs, status lifecycle and the review queue — C · KTD7, KTD8
+- [~] **U6** Jobs, status lifecycle and the review queue — C · KTD7, KTD8
 
 **Phase 3: People, practice and the week**
 - [ ] **U7** People, interactions and outreach logging — C · KTD9
@@ -604,7 +604,7 @@ Each phase is one branch and PR and leaves a usable app:
 | U3   | Action envelope and activity log             | `app/actions/shared.ts`, `activity` table, `use-cases/activity/`                                                    | U2                        |
 | U4   | WebMCP adapter and the agent-path spike      | `app/_lib/page-tools.ts`, `agent-tools/registry.ts`, `_components/agent-tools.tsx`, `(main)/agent/`, `tests/flows/` | U3                        |
 | U5   | Companies, lead sources and settings         | `companies`, `lead_sources`, `settings` tables and pages                                                            | U3; U4 for its page tools |
-| U6   | Jobs, status lifecycle and the review queue  | `job-lifecycle.ts`, `posting-link.ts`, `jobs`, `job_status_changes`, `notes`                                        | U5                        |
+| U6   | Jobs, status lifecycle and the review queue  | `job-lifecycle.ts`, `posting-link.ts`, `jobs`, `job_status_changes`, `notes`                                        | U5; U4 for its page tools |
 | U7   | People, interactions and outreach logging    | `people`, `interactions`, `quick-log.tsx`                                                                           | U6                        |
 | U8   | Practice log                                 | `practice-ladder.ts`, `practice_entries`                                                                            | U3, U4                    |
 | U9   | This week, the weekly review and fresh views | `weekly-counts.ts`, `(main)/page.tsx`, `(main)/week/`, `auto-refresh.tsx`                                           | U6, U7, U8                |
@@ -847,7 +847,7 @@ Each phase is one branch and PR and leaves a usable app:
 
 - **Goal:** the pipeline: jobs with the sheet's fields, dated status moves with follow-up defaults, and proposals Hector reviews.
 - **Requirements:** R1, R2, R3, R5 (a job's source), R20, R21, R22.
-- **Dependencies:** U5.
+- **Dependencies:** U5; U4 for its page tools (revised 2026-10-26: U4's execution note holds for U6's tools as for U5's).
 - **Files:**
   - `apps/job-search/src/entities/models/job.model.ts`, `job-status-change.model.ts`, `note.model.ts`
   - `apps/job-search/src/entities/job-lifecycle.ts`, `posting-link.ts`
@@ -891,6 +891,26 @@ Each phase is one branch and PR and leaves a usable app:
   - Hector deletes a job: removed with its status history. Claude deletes: `human-only`.
   - From U5's scenarios (moved 2026-10-26): Hector deletes a company that has jobs: refused with the reason. `get_company` returns the company's accepted jobs in a compact shape.
 - **Verification:** Hector can work the pipeline from the jobs page on laptop and phone, and Claude can propose and update jobs through tools.
+- **Evidence (2026-10-26, all but the page tools):** the commit `feat(job-search): U6 jobs, status moves and the review queue` on `feat/job-search-p2-pipeline`; no PR yet.
+  - Built:
+    - `job-lifecycle.ts` and `posting-link.ts`, test-first
+    - the `jobs`, `job_status_changes` and `notes` tables, in migration `0002_jobs_and_notes` (the posting key unique per owner where there is one, a company or source with jobs kept from deletion, a job's moves deleted with it, and check constraints)
+    - models, repositories and mocks, use cases (create, for Claude's proposals and Hector's adds; update; move; review; delete; find; get; and a note's add, edit and delete), controllers, DI and actions
+    - the pages: Jobs (open, closed, to review with its count, and dismissed; a table on desktop and cards on phones), a job's page (its status moves or Hector's review, its facts, summary and notes, a stale candidate's notice, its history), the job form at `/jobs/new` (the company picked first) and `/jobs/[id]/edit`, and each company's jobs on its page, with Jobs in the sidebar
+  - Decided in the unit:
+    - The tools wait for U4's gate, as U5's do.
+    - A job names its source by name, found ignoring case or added, so Claude needs no `add_source` first, and its company by id, which Hector's form picks first.
+    - A job shows its company's tier and holds none of its own, so the two can't disagree. R1 lists a tier among a job's fields: Hector's call whether a job needs its own.
+    - Contacts, the `job_people` table, moved to U7, which creates people. Dismissed proposals are a view of the jobs page (`/jobs?view=dismissed`) rather than a route of their own.
+    - Only an accepted job moves, and never to a date after today. Its moves list in the order they were logged, which chains them whatever their dates.
+    - Notes are records of their own in the log. Hector edits and deletes any note; Claude only adds.
+    - A new job takes the owner's queue lock before its duplicate and cap checks. The mock transaction manager runs one transaction at a time, as PGlite does, so the tests of two proposals at once settle the same on both backends.
+    - The forms share `FormField`, `ConflictNotice` and `DeleteButton`, which replaced U5's company-only delete.
+  - Checks: lint, types and dead code pass; 427 tests and 70 screen tests pass; a build with placeholder values passes, every route partly prerendered. Every test scenario has a test, the two moved from U5 included (a company that has jobs refuses deletion; `get_company` lists its accepted jobs), except those that need the page tools.
+  - Pending:
+    - the registry entries once U4's gate passes, with `TOOL_SET_VERSION` bumped: `find_jobs` and `get_job` (read-only, outside text), `propose_job`, `update_job`, `set_job_status`, `close_job` (consequential) and `add_note`
+    - `0002_jobs_and_notes`, after `0001_companies_sources_settings`, on the test project with Hector's OK at that moment, and on production from Hector's terminal before the merge deploys (KTD17)
+    - the Verification on a phone and a laptop, and the 375 px check in light and dark mode, once the test project has accounts (H2)
 
 ### Phase 3: People, practice and the week
 
@@ -913,6 +933,7 @@ Each phase is one branch and PR and leaves a usable app:
   - The quick-log sheet opens with the person preselected from a person's page or a person row in the due list, and from a "+" on This week and People, where the person is picked by search. Fields: kind, date (today), optional job (preselected from a job page), optional note, optional next step and next date. Batch mode picks several people for one kind, date and job. A search with no match offers "Add person", asking only for name and company.
   - The person page mounts U3's record history. Deleting a person or an interaction is human-only.
   - From U5 (moved 2026-10-26): a company that has people can't be deleted, and `get_company` lists its people.
+  - From U6 (moved 2026-10-26): a job's contacts (R1), the `job_people` table, which needs people; `get_job` lists them.
 - **Test scenarios:**
   - A message dated last Tuesday: messaged-on is last Tuesday. A later message: the latest wins.
   - Hector deletes the latest interaction: the derived date falls back to the one before.
@@ -1230,6 +1251,7 @@ Each phase is one branch and PR and leaves a usable app:
 
   U5 starts on `feat/job-search-p2-pipeline`. **Next:** U5; a sign-in check on production; localhost and sign-up off there; H2's test-project accounts and H3.
 - **2026-10-26** — U5 built on `feat/job-search-p2-pipeline` (`feat(job-search): U5 companies, lead sources and settings`), all but its page tools: companies with a soft duplicate warning, lead sources, Hector's settings, their pages, and `listActivity`'s action. Changes to a company or the settings are made against the `updatedAt` read (R22), and the forms keep the typing on a conflict (KTD15). Migration `0001_companies_sources_settings` is on no real database yet. Two of U5's scenarios need jobs or people, so those halves moved to U6 and U7. Checks pass (284 tests, 48 screen tests, a placeholder build). **Next:** Hector chooses U5's PR now or U6 first; before the PR, a code review and a Whiteboard board, and the migration on the test project with his OK.
+- **2026-10-26** — Hector chose to build U6 on the same branch, then open one PR for Phase 2. U6 is built (`feat(job-search): U6 jobs, status moves and the review queue`), all but its page tools, which wait for U4's gate as U5's do: jobs with their status moves, Claude's proposals and Hector's review, duplicate postings and the pending cap under the queue's lock, and notes. Contacts moved to U7, which creates people. A job shows its company's tier rather than one of its own, Hector's call (R1). Migration `0002_jobs_and_notes` is on no real database yet. Checks pass (427 tests, 70 screen tests, a placeholder build). **Next:** Phase 2's code review, its fixes and Whiteboard board, then the PR.
 
 ---
 

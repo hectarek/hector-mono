@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { timeSchema } from "./time.model";
+import {
+  httpLink,
+  optionalText,
+  requiredText,
+  timeSchema,
+} from "./input.model";
+import type { JobSummary } from "./job.model";
 
 // A company (R4): the employer of record for its jobs, so for a role through an agency, the
 // agency. It holds the facts R4 lists, a short research summary, and where the long-form research
@@ -38,45 +44,25 @@ export function companyFacts({
 // Another company, by name: one whose name matches ignoring case and punctuation.
 export type CompanyRef = Pick<Company, "id" | "name">;
 
-// A fact that's text: trimmed and at most `max` characters, with blank or null clearing it.
-const text = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, { error: `At most ${max} characters` })
-    .transform((value) => value || null)
-    .nullable();
-
 const companyFactsSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, { error: "A company needs a name" })
-    .max(120, { error: "At most 120 characters" }),
-  website: z
-    .url({
-      protocol: /^https?$/,
-      hostname: z.regexes.domain,
-      error: "Use an http or https link, like https://example.com",
-    })
-    .max(300, { error: "At most 300 characters" })
-    .nullable(),
-  location: text(120),
+  name: requiredText(120, "A company needs a name"),
+  website: httpLink(300).nullable(),
+  location: optionalText(120),
   headcount: z
     .int({ error: "Use a whole number of people" })
     .min(1, { error: "At least 1" })
     .max(10_000_000, { error: "At most 10,000,000" })
     .nullable(),
-  industry: text(80),
-  officePolicy: text(200),
-  leavePolicy: text(200),
+  industry: optionalText(80),
+  officePolicy: optionalText(200),
+  leavePolicy: optionalText(200),
   tier: z
     .int({ error: "Use 1, 2 or 3" })
     .min(1, { error: "Use 1, 2 or 3" })
     .max(3, { error: "Use 1, 2 or 3" })
     .nullable(),
-  researchSummary: text(2000),
-  researchRef: text(300),
+  researchSummary: optionalText(2000),
+  researchRef: optionalText(300),
 });
 
 // What save_company asks for, once read: a new company with its facts (a fact not given is
@@ -145,8 +131,12 @@ export type SavedCompany = {
 // get_company's input, and deleting's: which company.
 export const companyIdSchema = z.object({ id: z.uuid() });
 
-// A company as its page and get_company show it, with the same warning.
-export type CompanyDetail = { company: Company; similar: CompanyRef[] };
+// A company as its page and get_company show it, with the same warning and its accepted jobs.
+export type CompanyDetail = {
+  company: Company;
+  similar: CompanyRef[];
+  jobs: JobSummary[];
+};
 
 // The most companies a page of find_companies holds.
 export const COMPANY_PAGE_MAX = 50;
