@@ -1,5 +1,5 @@
 import { getPageActor } from "@/app/_lib/current-actor";
-import { fieldLabel } from "@/app/actions/shared";
+import { fieldLabel } from "@/app/_lib/field-labels";
 import { getInjection } from "@/di/container";
 import {
   ACTIVITY_PAGE_MAX,

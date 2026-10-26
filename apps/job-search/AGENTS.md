@@ -35,29 +35,34 @@ app/
   (api)/api/auth/[...path]/  # Neon Auth's endpoints, limited for any session but Hector's (Auth Rules)
   (auth)/                    # Outside the shell: welcome/ (the name and Sign in), auth/[path]/ (Neon's forms)
                              # and private/ (any account but the app's two)
-  (main)/                    # Signed in, in the app shell: This week at /, Claude's page at /agent
+  (main)/                    # Signed in, in the app shell: This week at /, companies/ (list, [id], [id]/edit,
+                             # new), settings/, Claude's page at /agent
   _components/               # app-shell.tsx (sidebar on desktop, off-canvas sheet on phones, KTD19),
                              # session-chrome.tsx (Claude's banner and page tools), agent-tools.tsx (the
-                             # page tools' registrar), record-history.tsx (a record's history)
+                             # page tools' registrar), record-history.tsx (a record's history), company-list,
+                             # company-form, delete-company-button, settings-form, add-source-form
   _lib/                      # auth client, auth paths, current actor (page and action helpers), safe redirect,
-                             # page-tools.ts (the WebMCP adapter), agent-tools/registry.ts, call-action.ts
+                             # page-tools.ts (the WebMCP adapter), agent-tools/registry.ts, call-action.ts,
+                             # field-labels.ts, form-changes.ts (KTD15), load-company.ts
   _providers/                # @repo/ui ThemeProvider around AuthProvider
-  actions/                   # shared.ts: the envelope and its helpers (not "use server"); session.ts
+  actions/                   # shared.ts: the envelope and its helpers (not "use server"); session.ts,
+                             # activity.ts, companies.ts, sources.ts, settings.ts
   error.tsx, not-found.tsx, robots.ts
 
 src/
-  entities/                  # errors (common.ts, loggable.ts), models (actor, activity, agent-session, user,
-                             # session, transaction, logger), week.ts
-  application/repositories/  # interfaces: activity
+  entities/                  # errors (common.ts, loggable.ts), models (actor, activity, agent-session, company,
+                             # lead-source, settings, time, user, session, transaction, logger), week.ts
+  application/repositories/  # interfaces: activity, companies, lead-sources, settings
   application/services/      # interfaces: authentication, logger, transaction-manager
   application/use-cases/     # access/ (resolve-actor, require-human), activity/ (record-change, list-activity),
-                             # session/ (whoami, start-session)
-  interface-adapters/        # controllers: activity/list-activity, session/whoami, session/start-session
-  infrastructure/repositories/  # base, activity (+ mock)
+                             # session/ (whoami, start-session), companies/ (find, get, save, delete),
+                             # sources/ (add, list), settings/ (get, update)
+  interface-adapters/        # controllers, one per use case: activity/, session/, companies/, sources/, settings/
+  infrastructure/repositories/  # base, activity, companies, lead-sources, settings (each + mock)
   infrastructure/services/   # neon-auth, console-logger, transaction-manager (+ mocks)
 
 di/                          # container.ts, types.ts, modules: logger, authentication, access, transaction,
-                             # activity, session
+                             # activity, session, companies, sources, settings
 db/                          # schema.ts, index.ts, migrations/ (drizzle-kit generated)
 lib/                         # auth/server.ts, logger.ts
 tests/                       # bun:test, mirroring the source tree; flows/ (Playwright)
@@ -92,8 +97,11 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - Claude's working sessions are in the log too, with no table of their own: `start_session` writes one `created` row per start, record kind `agent-session` and a fresh id, and answers with the changes from the actor's previous start (inclusive) to this one, newest first (`start-session.use-case.ts`). `list_activity`'s `record` filter without an `id` lists every record of a kind.
 - A read that has to see the write's own rows runs inside its transaction: pass it the `tx`, as `start-session.use-case.ts` does with `activityRepository.list(ownerId, filter, tx)`. Outside it, Postgres doesn't see the uncommitted rows, and PGlite waits on its one connection.
 - **Human-only operations check first (R21, KTD3).** Accepting, dismissing or reopening a proposal, deleting anything, connecting or disconnecting the calendar and changing settings: the use case calls `requireHuman` (`src/application/use-cases/access/require-human.ts`) before its own transaction opens. Anyone but Hector gets a `refused` row, written in a transaction of its own so it stays, and `HumanOnlyError`.
-- A record that keeps a history adds its kind to `recordKindSchema` (`activity.model.ts`), and its page mounts `<RecordHistory record={{ kind, id }} />`, which shows the latest 50 changes.
-- A screen or tool input gets a label in `FIELD_LABELS` (`app/actions/shared.ts`): a validation message names only listed fields. A record's history names every field, in words when it has no label (`nextStep` is "Next step").
+- A record that keeps a history adds its kind to `recordKindSchema` (`activity.model.ts`), and its page mounts `<RecordHistory record={{ kind, id }} />`, which shows the latest 50 changes (Hector kept the cap, 2026-10-26). The owner's settings are one record, kind `settings`, whose id is the owner's.
+- A screen or tool input gets a label in `FIELD_LABELS` (`app/_lib/field-labels.ts`, which the forms import too): a validation message names only listed fields. A record's history names every field, in words when it has no label (`nextStep` is "Next step").
+- **A change is made against what was read (R22, KTD15).** It sends the `updatedAt` read with the record (an ISO time, `timeSchema` in `time.model.ts`), and the use case reads the record with `getForUpdate` (`select … for update`, so it stays locked to the write), compares the two in JS and throws `ConflictError(current)` on a mismatch, as `save-company.use-case.ts` and `update-settings.use-case.ts` do. A change that sets what's already there writes and logs nothing. `updated_at` columns keep milliseconds (default `date_trunc('milliseconds', now())`, a JS Date's precision), and each update moves the value on at least a millisecond (`greatest(…, updated_at + interval '1 millisecond')`, the mocks the same), so two changes in one millisecond still conflict.
+- A form keeps the record it opened on and sends only the fields typed since, so a field someone else changed meanwhile keeps their value. On `conflict` it stays open on `current` with what was typed kept and lists what changed (`editedFields` and `rebased`, `app/_lib/form-changes.ts`), and the next save goes against `current`'s `updatedAt`.
+- Names that compare loosely keep a key column the entity computes: `companyNameKey` (case and punctuation ignored) for the soft duplicate warning and `find_companies`, `sourceNameKey` (case and runs of spaces) under `lead_sources`' unique index, so `add_source` answers with the source already listed. Keys and names sort with `collate "C"`, by code point as the mocks sort, so the two backends agree.
 - An error class thrown inside a transaction goes in the transaction manager's `DOMAIN_ERRORS`, or the action sees "Transaction failed" instead. Recipes' `UnauthorizedError` isn't here: nothing threw it, and `NotAllowedError` and `HumanOnlyError` are the refusals.
 - Every repository query takes the owner id (KTD2), with a PGlite test that another owner's rows stay out. A repository passes `handleError` record ids only.
 
@@ -105,6 +113,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - `app/_components/agent-tools.tsx` registers every tool on mount and aborts on unmount, so the list is the same on every page. `ActorChrome` (`session-chrome.tsx`) renders it for Claude's session only. A call runs its action through `callAction` (`app/_lib/call-action.ts`) inside a transition, which answers with the action's envelope unchanged, `reload-needed` when the server no longer knows the action (a deploy since the page loaded, so nothing ran), or `unexpected` with "Couldn't reach the server" for any other throw: a tool that throws reaches Claude only as "invocation failed".
 - The browser checks nothing against a tool's input schema: the controller's parse is the only check.
 - Claude's page, `/agent`, lists the tools and Claude's latest changes, with no calendar and no auto refresh (KTD6). A write that changes what it shows revalidates it, as `start_session` does.
+- U5's tools wait for U4's gate (the plan's execution note): `findCompanies`, `getCompany`, `saveCompany` (`app/actions/companies.ts`), `addSource` and `listActivity` already take their input as `(input, tool?)` and parse it with an entity schema, so each needs only its registry entry. `deleteCompany` and `updateSettings` are human-only and get no tool.
 
 ## Logging Rules
 
@@ -127,7 +136,10 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 ## UI Rules
 
 - The shell is `app/_components/app-shell.tsx`. A unit that adds a section adds its item to the sidebar menu.
-- The plan's UI definition of done asks for 44 × 44 px touch targets. `SidebarMenuButton` at `lg` is 48 px, but in the default theme `Button` at `lg` is 36 px: recipes reaches 45 px only through its theme's spacing. A `Button` that's a touch target adds `min-h-11` (44 px; the design lint counts height as layout), as the private screen's Sign out does.
+- The plan's UI definition of done asks for 44 × 44 px touch targets. `SidebarMenuButton` at `lg` is 48 px, but in the default theme `Button` at `lg` is 36 px: recipes reaches 45 px only through its theme's spacing. A `Button` that's a touch target adds `min-h-11` (44 px; the design lint counts height as layout), as the private screen's Sign out does, and so does an `Input`. `NativeSelect` puts its class on a wrapper, so its select can't reach 44 px: the company form's tier is a `ToggleGroup` of `min-h-11 min-w-11` items instead.
+- A form is a page in the shell (`/companies/new`, `/companies/[id]/edit`), as recipes' forms are, not a dialog: a phone can't fit ten fields in one. It calls its action through `callAction` in a transition and goes on with `router.push` after success (KTD4).
+- In Claude's session a human-only control shows, off, with "Only Hector" beside it (KTD3): Delete on a company's page, the settings form. Disable each input, not a `fieldset`: happy-dom doesn't pass a fieldset's disabled state to its inputs.
+- Lists are a table from `md` up and cards (`Item` rendered as a `Link`) below (KTD19), as `company-list.tsx` is.
 
 ## Testing
 
@@ -137,7 +149,8 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged at every level, so a test can show a value never reached the logs (KTD20).
 - Who's signed in: `signInAs("owner" | "agent" | "stranger" | "signed-out")` (`tests/_support/session.ts`) sets the test container's `MockAuthService`. The container lives for the whole run, so every test that depends on the session calls it. Its mock repositories keep their rows for the whole run too, and the owner never changes, so a test that goes through the container works on records of its own (a fresh `crypto.randomUUID()`).
 - Screen tests are `*.test.tsx`, as in recipes: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them with happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Server components render with `renderOnServer` (`tests/_support/server-render.ts`): the tree streams as the server would send it, async components and `<Suspense>` included, into the page, and Testing Library's `within` finds things in it. What a component throws inside `<Suspense>`, such as a `redirect()`, goes to the `onError` a test passes it. Client components render with Testing Library's `render`, which runs their effects; `dom.ts` loads it once the document is in place and unmounts what it rendered after each test. Fallow (3.36) follows that preload, so `dom.ts` needs no entry in `.fallowrc.json`.
-- The preload stubs `next/cache` (`nextState.revalidated` in `tests/_support/next.ts` keeps the paths an action revalidated) and keeps Next's real `unstable_isUnrecognizedActionError` in its `next/navigation` stand-in.
+- The preload stubs `next/cache` (`nextState.revalidated` in `tests/_support/next.ts` keeps the paths an action revalidated) and keeps Next's real `unstable_isUnrecognizedActionError` in its `next/navigation` stand-in, whose `useRouter` keeps where a screen went in `nextState.pushed`.
+- In screen tests, a `Button` rendered as a `Link` (`nativeButton={false}`) has the role `button`, not `link`, and a card `Item` that's a link is named by all its text. Testing Library's bound queries (`render(…).getByLabelText`) take no type argument: assert with `toHaveProperty("value", …)`.
 - Page tools: `tests/_support/model-context.ts` is a fake `document.modelContext` that behaves as flag-enabled Chromium 156 did when measured (rejections, abort unregistering, results as JSON text). `setModelContext` gives the page one, or none, with a stand-in document in a plain test.
 - Browser flows are `tests/flows/*.flow.ts`: Playwright's Chromium with `--enable-features=WebMCP`, run with `bun run test:flows`, locally only (not in `bun run test` or CI). `playwright.config.ts` starts its own `next dev` on 3301, never reused, which reads `.env`; the flows sign in as Claude's test-project account from `.env`'s `FLOW_AGENT_EMAIL` and `FLOW_AGENT_PASSWORD`. Before the server starts, `scripts/check-test-database.ts` stops the run unless `.env`'s database carries the test project's comment (`COMMENT ON DATABASE neondb IS 'job-search-test'`) and its auth is on the same Neon endpoint, as recipes' check does (KTD17). Next allows one `next dev` per folder, so stop a 3101 preview in the same checkout first. Chromium (`bunx playwright install chromium`) won't start inside Claude Code's sandbox (a ProcessSingleton error), so run the flows outside it.
 

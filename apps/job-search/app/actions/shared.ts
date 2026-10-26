@@ -1,4 +1,5 @@
 import { getActionActor } from "@/app/_lib/current-actor";
+import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { getInjection } from "@/di/container";
 import type { DI_RETURN_TYPES } from "@/di/types";
 import {
@@ -73,26 +74,6 @@ export async function changeContext(tool?: unknown): Promise<ChangeContext> {
     throw new InputParseError("Invalid tool name", { cause: error });
   }
   return { ...actor, tool: data };
-}
-
-// Inputs as the screens and tools name them, and a record's history names its fields. Anything
-// not listed (a hidden id) is never named in a message: no one sees it, so a code name would
-// only confuse. Each unit adds its own.
-const FIELD_LABELS: Record<string, string> = {
-  // list_activity's filters
-  record: "Record",
-  actor: "Actor",
-  since: "Since",
-  until: "Until",
-  limit: "Limit",
-  offset: "Offset",
-};
-
-// A field's label, or its name in words ("nextStep" is "Next step"): a history names every field
-// a change touched, listed or not.
-export function fieldLabel(field: string): string {
-  const words = field.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase();
-  return FIELD_LABELS[field] ?? words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 type Issue = { path: PropertyKey[]; message: string };

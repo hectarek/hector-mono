@@ -38,6 +38,12 @@ mock.module("next/navigation", () => ({
   notFound: (): never => {
     throw new NotFoundPage();
   },
+  // A screen's router: where it was told to go, for the test to read.
+  useRouter: () => ({
+    push: (href: string) => {
+      nextState.pushed.push(href);
+    },
+  }),
   // The real check: the page tools' wrapper (app/_lib/call-action.ts) tells by it that a deploy
   // removed an action.
   unstable_isUnrecognizedActionError,

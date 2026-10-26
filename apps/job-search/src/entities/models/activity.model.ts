@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { timeSchema } from "./time.model";
 
 // Who made a change (R19, docs/build-plan.md KTD7): Hector's session, Claude's, the one-time
 // import, or the app itself.
@@ -24,8 +25,16 @@ export const toolNameSchema = z
   });
 
 // What the log's rows are about: the records that keep a history, each added by the unit that
-// brings it (R19), and Claude's working sessions, a record each (start_session, U4).
-const recordKindSchema = z.enum(["company", "job", "person", "agent-session"]);
+// brings it (R19), and Claude's working sessions, a record each (start_session, U4). The owner's
+// settings are one record, whose id is the owner's.
+const recordKindSchema = z.enum([
+  "company",
+  "lead-source",
+  "settings",
+  "job",
+  "person",
+  "agent-session",
+]);
 export type RecordRef = { kind: z.infer<typeof recordKindSchema>; id: string };
 
 export type ActivityAction = "created" | "updated" | "deleted" | "refused";
@@ -53,14 +62,6 @@ export type NewActivityEntry = Omit<ActivityEntry, "id" | "createdAt"> & {
 
 // The most a page holds, and so the most a record's history shows at once.
 export const ACTIVITY_PAGE_MAX = 50;
-
-// Times come with their offset (KTD18): "2026-10-23T09:00:00-04:00", or "Z" for UTC.
-const timeSchema = z.iso
-  .datetime({
-    offset: true,
-    error: "Use an ISO time with an offset, like 2026-10-23T09:00:00-04:00",
-  })
-  .transform((value) => new Date(value));
 
 // What list_activity takes, and a record's history asks for: an owner's changes, newest first,
 // narrowed to one record (or, without an id, every record of a kind), one kind of actor and a

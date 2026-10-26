@@ -22,6 +22,16 @@ const ACTIONS: Record<ActivityEntry["action"], string> = {
   refused: "Refused",
 };
 
+// What a change was made to, in words.
+const RECORDS: Record<ActivityEntry["record"]["kind"], string> = {
+  company: "a company",
+  "lead-source": "a lead source",
+  settings: "the settings",
+  job: "a job",
+  person: "a person",
+  "agent-session": "a session",
+};
+
 // Eastern time, as everywhere in the app (docs/build-plan.md KTD18).
 const WHEN = new Intl.DateTimeFormat("en-US", {
   timeZone: PLAN_TIME_ZONE,
@@ -111,5 +121,5 @@ export default async function AgentPage() {
 function whatHappened({ action, record }: ActivityEntry): string {
   return record.kind === "agent-session"
     ? "Started a session"
-    : `${ACTIONS[action]} a ${record.kind}`;
+    : `${ACTIONS[action]} ${RECORDS[record.kind]}`;
 }

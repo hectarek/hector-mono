@@ -2,8 +2,11 @@ import { createContainer } from "@evyweb/ioctopus";
 import { createAccessModule } from "@/di/modules/access.module";
 import { createActivityModule } from "@/di/modules/activity.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
+import { createCompaniesModule } from "@/di/modules/companies.module";
 import { createLoggerModule } from "@/di/modules/logger.module";
 import { createSessionModule } from "@/di/modules/session.module";
+import { createSettingsModule } from "@/di/modules/settings.module";
+import { createSourcesModule } from "@/di/modules/sources.module";
 import { createTransactionModule } from "@/di/modules/transaction.module";
 import { type DI_RETURN_TYPES, DI_SYMBOLS } from "@/di/types";
 
@@ -21,6 +24,9 @@ ApplicationContainer.load(
 );
 ApplicationContainer.load(Symbol("ActivityModule"), createActivityModule());
 ApplicationContainer.load(Symbol("SessionModule"), createSessionModule());
+ApplicationContainer.load(Symbol("CompaniesModule"), createCompaniesModule());
+ApplicationContainer.load(Symbol("SourcesModule"), createSourcesModule());
+ApplicationContainer.load(Symbol("SettingsModule"), createSettingsModule());
 
 export function getInjection<K extends keyof typeof DI_SYMBOLS>(
   symbol: K,
