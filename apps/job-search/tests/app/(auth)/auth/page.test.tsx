@@ -7,15 +7,16 @@ import { renderOnServer } from "@/tests/_support/server-render";
 
 // Neon's form, as a stand-in that shows what the page hands it. In a file of its own, so no
 // other test gets it.
-mock.module("@neondatabase/auth/react", () => ({
-  AuthView: ({ path, redirectTo }: { path: string; redirectTo?: string }) => (
+function NeonForm({ path, redirectTo }: { path: string; redirectTo?: string }) {
+  return (
     <section
       aria-label="Neon's form"
       data-path={path}
       data-redirect-to={redirectTo}
     />
-  ),
-}));
+  );
+}
+mock.module("@neondatabase/auth/react", () => ({ AuthView: NeonForm }));
 // Loaded after the mock, so the page takes the stand-in.
 const { default: AuthPage } = await import("@/app/(auth)/auth/[path]/page");
 

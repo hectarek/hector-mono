@@ -11,6 +11,29 @@ const TODAY = "2026-10-04";
 const MON = "2026-10-05";
 const TUE = "2026-10-06";
 
+// A plan row that owns its meal's sheet's open state, on a page Next.js shows or hides (D88).
+function Row({
+  entry,
+  mode,
+}: {
+  entry: PlanEntry;
+  mode: "visible" | "hidden";
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <Activity mode={mode}>
+      <PlanEntrySheet
+        entry={entry}
+        date={TODAY}
+        today={TODAY}
+        open={open}
+        onOpenChange={setOpen}
+        onRemove={() => {}}
+      />
+    </Activity>
+  );
+}
+
 // A meal's ⋯ sheet, against the real actions and the test container's repositories.
 describe("PlanEntrySheet", () => {
   let fixture: Awaited<ReturnType<typeof planScreenFixture>>;
@@ -130,27 +153,12 @@ describe("PlanEntrySheet", () => {
       cookDate: TODAY,
       eatDates: [TODAY],
     });
-    function Row({ mode }: { mode: "visible" | "hidden" }) {
-      const [open, setOpen] = useState(true);
-      return (
-        <Activity mode={mode}>
-          <PlanEntrySheet
-            entry={meal}
-            date={TODAY}
-            today={TODAY}
-            open={open}
-            onOpenChange={setOpen}
-            onRemove={() => {}}
-          />
-        </Activity>
-      );
-    }
-    const view = render(<Row mode="visible" />);
+    const view = render(<Row entry={meal} mode="visible" />);
     await user.click(view.getByRole("button", { name: "Change days" }));
     await view.findByRole("button", { name: "Save days" });
 
-    view.rerender(<Row mode="hidden" />);
-    view.rerender(<Row mode="visible" />);
+    view.rerender(<Row entry={meal} mode="hidden" />);
+    view.rerender(<Row entry={meal} mode="visible" />);
     await waitFor(() =>
       expect(view.queryByRole("button", { name: "Save days" })).toBe(null),
     );
