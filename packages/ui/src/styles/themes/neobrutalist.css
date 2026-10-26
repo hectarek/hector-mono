@@ -1820,7 +1820,7 @@
    -------------------------------------------------------------------------- */
 
 [data-theme="neobrutalist"]
-[data-slot="separator"][data-orientation="horizontal"] {
+  [data-slot="separator"][data-orientation="horizontal"] {
   height: 2px;
 }
 

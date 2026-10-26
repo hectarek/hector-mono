@@ -1,4 +1,5 @@
 ---
+
 title: Job Search App - Plan
 type: feat
 date: 2026-10-23
@@ -16,12 +17,12 @@ The plan of record for building `apps/job-search`. It follows the repo's plan-do
 
 ## Status
 
-| | |
-|---|---|
-| Phase | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2 and U4's local part wait on checks that need H2 or H3, and U3 on production's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate` |
-| Next task | Hector merges the follow-ups' PR (reviewed 2026-10-25, its findings fixed), then applies `0000_activity` to production with the wrapper from an up-to-date checkout (`cd apps/job-search && bun run db:migrate:production`), before production's account ids are set. The test project has it since 2026-10-25. Then the pending checks in U2 to U4, and U4's flow and spike, the gate |
-| Waiting on Hector | Merging the follow-ups' PR; production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); running the wrapper against production; H2 (the accounts); H3 (Playwright MCP config); before U5, whether a record's history keeps its 50-change cap and when `list_activity` becomes a tool (the 2026-10-24 and 2026-10-25 reviews) |
-| Last updated | 2026-10-25 |
+|                   |                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase             | 1, Foundation and the agent path: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56), and production deploys `main`. U1 is done. U2 and U4's local part wait on checks that need H2 or H3, and U3 on production's migration (their Evidence says which). Follow-ups are on branch `feat/job-search-p1-gate`                                                   |
+| Next task         | Hector merges the follow-ups' PR (reviewed 2026-10-25, its findings fixed), then applies `0000_activity` to production with the wrapper from an up-to-date checkout (`cd apps/job-search && bun run db:migrate:production`), before production's account ids are set. The test project has it since 2026-10-25. Then the pending checks in U2 to U4, and U4's flow and spike, the gate |
+| Waiting on Hector | Merging the follow-ups' PR; production's `DATABASE_URL` in Vercel, and localhost off on production's Neon Auth (H1's rest); running the wrapper against production; H2 (the accounts); H3 (Playwright MCP config); before U5, whether a record's history keeps its 50-change cap and when `list_activity` becomes a tool (the 2026-10-24 and 2026-10-25 reviews)                       |
+| Last updated      | 2026-10-25                                                                                                                                                                                                                                                                                                                                                                             |
 
 ---
 
@@ -552,22 +553,22 @@ Each phase is one branch and PR and leaves a usable app:
 
 ### Risks & Dependencies
 
-| Risk | Handling |
-|---|---|
-| WebMCP changes again or is withdrawn: origin trial through Chrome 162, no ship date | One adapter (KTD5), a real-browser flow (KTD16), a flag-enabled agent profile (KTD6); a server MCP endpoint is the deferred fallback |
-| Playwright MCP's WebMCP support is new | Pin its version in the search folder's config; Chrome DevTools MCP is the fallback (KTD6) |
-| The client truncates large tool results | Compact, paged results (KTD5); U4 measures the limit |
-| A deploy changes action ids under Claude's open tab | `reload-needed` (KTD5); Claude reloads and retries |
-| Google revokes the refresh token | `reconnect-needed` (R15); Hector reconnects from Settings |
-| Google deletes the OAuth client after six idle months | `setup-needed` (KTD10, KTD11): restore it within 30 days or redo H4 |
-| Production secrets reach worktrees or Claude's transcripts | Local development and previews use the test project, and production values never pass through a Claude session (KTD17) |
-| Claude acts through a side door: a connector, a database or hosting tool, arbitrary JavaScript in the page, or Hector's own browser | Deny rules in the search sessions' settings (System-Wide Impact); U4 checks each one |
-| A stranger registers on the open sign-up endpoint | Sign-up disabled in each Neon project once both accounts exist (H2); pinned ids, the action helper's refusal and the auth-route wrapper as the second layer (KTD2) |
-| A specific of the search lands in the public repo or the logs | R24, KTD20, fictional fixtures, the PR check in the Verification Contract |
-| Prompt injection through outside text: postings, invite descriptions, notes | KTD21 |
-| Time-zone and daylight-saving errors in counts | KTD18 helpers and tests around 2026-11-01 |
-| Cutover loses or doubles data | Frozen sheet, dry run, idempotent import, sheet kept as an archive (U11) |
-| Two Claude sessions open the agent profile | Playwright MCP's profile lock allows one; `docs/agent-access.md` says so |
+| Risk                                                                                                                                | Handling                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| WebMCP changes again or is withdrawn: origin trial through Chrome 162, no ship date                                                 | One adapter (KTD5), a real-browser flow (KTD16), a flag-enabled agent profile (KTD6); a server MCP endpoint is the deferred fallback                               |
+| Playwright MCP's WebMCP support is new                                                                                              | Pin its version in the search folder's config; Chrome DevTools MCP is the fallback (KTD6)                                                                          |
+| The client truncates large tool results                                                                                             | Compact, paged results (KTD5); U4 measures the limit                                                                                                               |
+| A deploy changes action ids under Claude's open tab                                                                                 | `reload-needed` (KTD5); Claude reloads and retries                                                                                                                 |
+| Google revokes the refresh token                                                                                                    | `reconnect-needed` (R15); Hector reconnects from Settings                                                                                                          |
+| Google deletes the OAuth client after six idle months                                                                               | `setup-needed` (KTD10, KTD11): restore it within 30 days or redo H4                                                                                                |
+| Production secrets reach worktrees or Claude's transcripts                                                                          | Local development and previews use the test project, and production values never pass through a Claude session (KTD17)                                             |
+| Claude acts through a side door: a connector, a database or hosting tool, arbitrary JavaScript in the page, or Hector's own browser | Deny rules in the search sessions' settings (System-Wide Impact); U4 checks each one                                                                               |
+| A stranger registers on the open sign-up endpoint                                                                                   | Sign-up disabled in each Neon project once both accounts exist (H2); pinned ids, the action helper's refusal and the auth-route wrapper as the second layer (KTD2) |
+| A specific of the search lands in the public repo or the logs                                                                       | R24, KTD20, fictional fixtures, the PR check in the Verification Contract                                                                                          |
+| Prompt injection through outside text: postings, invite descriptions, notes                                                         | KTD21                                                                                                                                                              |
+| Time-zone and daylight-saving errors in counts                                                                                      | KTD18 helpers and tests around 2026-11-01                                                                                                                          |
+| Cutover loses or doubles data                                                                                                       | Frozen sheet, dry run, idempotent import, sheet kept as an archive (U11)                                                                                           |
+| Two Claude sessions open the agent profile                                                                                          | Playwright MCP's profile lock allows one; `docs/agent-access.md` says so                                                                                           |
 
 ### System-Wide Impact
 
@@ -596,24 +597,24 @@ Each phase is one branch and PR and leaves a usable app:
 
 ## Implementation Units
 
-| U-ID | Title | Key files | Depends on |
-|---|---|---|---|
-| U1 | Scaffold the app | `apps/job-search/` config, `app/` shell, copied infrastructure; root lint, Fallow and launch config | none |
-| U2 | Identity, access and the private screen | `app/_lib/current-actor.ts`, `neon-auth.service.ts`, `(auth)/private/page.tsx` | U1 |
-| U3 | Action envelope and activity log | `app/actions/shared.ts`, `activity` table, `use-cases/activity/` | U2 |
-| U4 | WebMCP adapter and the agent-path spike | `app/_lib/page-tools.ts`, `agent-tools/registry.ts`, `_components/agent-tools.tsx`, `(main)/agent/`, `tests/flows/` | U3 |
-| U5 | Companies, lead sources and settings | `companies`, `lead_sources`, `settings` tables and pages | U3, U4 |
-| U6 | Jobs, status lifecycle and the review queue | `job-lifecycle.ts`, `posting-link.ts`, `jobs`, `job_status_changes`, `notes` | U5 |
-| U7 | People, interactions and outreach logging | `people`, `interactions`, `quick-log.tsx` | U6 |
-| U8 | Practice log | `practice-ladder.ts`, `practice_entries` | U3, U4 |
-| U9 | This week, the weekly review and fresh views | `weekly-counts.ts`, `(main)/page.tsx`, `(main)/week/`, `auto-refresh.tsx` | U6, U7, U8 |
-| U10 | Tool parity check and agent docs | `agent-tools/parity.ts`, parity test, app `AGENTS.md`, `docs/agent-access.md` | U5–U9 |
-| U11 | Import and cutover | `scripts/import-snapshot.ts`, `import-snapshot.model.ts` | U9, U10 |
-| U12 | Interview rounds and lead-source yield | `interview_rounds`, `(main)/sources/` | U9 |
-| U13 | Google Calendar connection | `google-oauth.service.ts`, `calendar_connections`, `(api)/api/calendar/` | U2 |
-| U14 | Calendar view, scheduling and linking | `google-calendar.gateway.ts`, `eastern-time.ts`, `(main)/calendar/` | U12, U13 |
-| U15 | Profile, fit checklist and fit notes | `fit.ts`, `profiles`, `(main)/profile/` | U6, U9 |
-| U16 | Public README and demo | `apps/job-search/README.md` | U10 |
+| U-ID | Title                                        | Key files                                                                                                           | Depends on |
+| ---- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------- |
+| U1   | Scaffold the app                             | `apps/job-search/` config, `app/` shell, copied infrastructure; root lint, Fallow and launch config                 | none       |
+| U2   | Identity, access and the private screen      | `app/_lib/current-actor.ts`, `neon-auth.service.ts`, `(auth)/private/page.tsx`                                      | U1         |
+| U3   | Action envelope and activity log             | `app/actions/shared.ts`, `activity` table, `use-cases/activity/`                                                    | U2         |
+| U4   | WebMCP adapter and the agent-path spike      | `app/_lib/page-tools.ts`, `agent-tools/registry.ts`, `_components/agent-tools.tsx`, `(main)/agent/`, `tests/flows/` | U3         |
+| U5   | Companies, lead sources and settings         | `companies`, `lead_sources`, `settings` tables and pages                                                            | U3, U4     |
+| U6   | Jobs, status lifecycle and the review queue  | `job-lifecycle.ts`, `posting-link.ts`, `jobs`, `job_status_changes`, `notes`                                        | U5         |
+| U7   | People, interactions and outreach logging    | `people`, `interactions`, `quick-log.tsx`                                                                           | U6         |
+| U8   | Practice log                                 | `practice-ladder.ts`, `practice_entries`                                                                            | U3, U4     |
+| U9   | This week, the weekly review and fresh views | `weekly-counts.ts`, `(main)/page.tsx`, `(main)/week/`, `auto-refresh.tsx`                                           | U6, U7, U8 |
+| U10  | Tool parity check and agent docs             | `agent-tools/parity.ts`, parity test, app `AGENTS.md`, `docs/agent-access.md`                                       | U5–U9      |
+| U11  | Import and cutover                           | `scripts/import-snapshot.ts`, `import-snapshot.model.ts`                                                            | U9, U10    |
+| U12  | Interview rounds and lead-source yield       | `interview_rounds`, `(main)/sources/`                                                                               | U9         |
+| U13  | Google Calendar connection                   | `google-oauth.service.ts`, `calendar_connections`, `(api)/api/calendar/`                                            | U2         |
+| U14  | Calendar view, scheduling and linking        | `google-calendar.gateway.ts`, `eastern-time.ts`, `(main)/calendar/`                                                 | U12, U13   |
+| U15  | Profile, fit checklist and fit notes         | `fit.ts`, `profiles`, `(main)/profile/`                                                                             | U6, U9     |
+| U16  | Public README and demo                       | `apps/job-search/README.md`                                                                                         | U10        |
 
 ### Phase 1: Foundation and the agent path
 
@@ -1113,16 +1114,16 @@ Each phase is one branch and PR and leaves a usable app:
 
 ## Verification Contract
 
-| When | Check |
-|---|---|
-| Every change | `bun check --filter=job-search && bun ts --filter=job-search` |
-| Every change | `bun run dead-code` |
-| Units with tests | `cd apps/job-search && bun test tests/<path>.test.ts`, then `bun run test --filter=job-search` |
-| Tool-layer changes (U4–U10, U12, U14, U15) | The local real-browser flow on the test project: Playwright with Chromium and `--enable-features=WebMCP` (KTD16) |
-| Schema changes | `bun run --filter=job-search db:generate`, review the SQL, apply to the test project; Hector applies it to production from his own terminal (KTD17) |
-| U1, and any config change | `bun run build --filter=job-search` |
-| PRs with new tables, use cases, services or access rules | A Whiteboard board, per the root `AGENTS.md` |
-| Every PR | The diff, screenshots and PR text hold only fictional or generic data (R24) |
+| When                                                     | Check                                                                                                                                               |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Every change                                             | `bun check --filter=job-search && bun ts --filter=job-search`                                                                                       |
+| Every change                                             | `bun run dead-code`                                                                                                                                 |
+| Units with tests                                         | `cd apps/job-search && bun test tests/<path>.test.ts`, then `bun run test --filter=job-search`                                                      |
+| Tool-layer changes (U4–U10, U12, U14, U15)               | The local real-browser flow on the test project: Playwright with Chromium and `--enable-features=WebMCP` (KTD16)                                    |
+| Schema changes                                           | `bun run --filter=job-search db:generate`, review the SQL, apply to the test project; Hector applies it to production from his own terminal (KTD17) |
+| U1, and any config change                                | `bun run build --filter=job-search`                                                                                                                 |
+| PRs with new tables, use cases, services or access rules | A Whiteboard board, per the root `AGENTS.md`                                                                                                        |
+| Every PR                                                 | The diff, screenshots and PR text hold only fictional or generic data (R24)                                                                         |
 
 ---
 
@@ -1164,14 +1165,14 @@ Each phase is one branch and PR and leaves a usable app:
 
 ## Needs from Hector
 
-| # | Need | Unblocks | Status |
-|---|---|---|---|
-| H1 | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo | U1 | OK given 2026-10-24. Done: the test project; Hector's production Neon project and Vercel project; Preview's variables, from the test project. Open: production's `DATABASE_URL` (Hector), its account ids (H2), and turning off localhost on production's Neon Auth (KTD17) |
-| H2 | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. On the test project, create an owner, an agent and a third account (U2's check) in the Neon console; their ids, and the agent's email and password for the flows, go in the app's `.env`. Once the accounts exist, close sign-up in each Neon project, the test project first: turn on `disable_sign_up` in the email-and-password settings, and remove Neon Auth's shared Google provider, since the app doesn't use it and email sign-up being off doesn't stop a Google one (found 2026-10-24) | U2, U4 | open |
-| H3 | In the folder where search sessions start, apply the settings Claude drafts: the Playwright MCP server (profile and output folders, WebMCP flag), `ask` rules for consequential tools (`close_job`, `set_profile`, the calendar writes), and the deny rules in System-Wide Impact, including keeping the database connection away from the app's project | U4 | open |
-| H4 | Create a Google OAuth web client (consent screen in production for personal use, scope `calendar.events.owned`), put its production values only in Vercel's Production environment, and set up a throwaway Google account for local testing | U13 | open |
-| H5 | Enter the weekly targets and the queue cap in Settings | U11 | open |
-| H6 | Review the import snapshot and confirm each job's status date, then run the production dry run and commit from your terminal over the weekend after a Friday review, so the app starts on a new week | U11 | open |
+| #   | Need                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Unblocks | Status                                                                                                                                                                                                                                                                      |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| H1  | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo                                                                                                                                                                                                                                                                                                                                                         | U1       | OK given 2026-10-24. Done: the test project; Hector's production Neon project and Vercel project; Preview's variables, from the test project. Open: production's `DATABASE_URL` (Hector), its account ids (H2), and turning off localhost on production's Neon Auth (KTD17) |
+| H2  | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. On the test project, create an owner, an agent and a third account (U2's check) in the Neon console; their ids, and the agent's email and password for the flows, go in the app's `.env`. Once the accounts exist, close sign-up in each Neon project, the test project first: turn on `disable_sign_up` in the email-and-password settings, and remove Neon Auth's shared Google provider, since the app doesn't use it and email sign-up being off doesn't stop a Google one (found 2026-10-24) | U2, U4   | open                                                                                                                                                                                                                                                                        |
+| H3  | In the folder where search sessions start, apply the settings Claude drafts: the Playwright MCP server (profile and output folders, WebMCP flag), `ask` rules for consequential tools (`close_job`, `set_profile`, the calendar writes), and the deny rules in System-Wide Impact, including keeping the database connection away from the app's project                                                                                                                                                                                                                                                                               | U4       | open                                                                                                                                                                                                                                                                        |
+| H4  | Create a Google OAuth web client (consent screen in production for personal use, scope `calendar.events.owned`), put its production values only in Vercel's Production environment, and set up a throwaway Google account for local testing                                                                                                                                                                                                                                                                                                                                                                                            | U13      | open                                                                                                                                                                                                                                                                        |
+| H5  | Enter the weekly targets and the queue cap in Settings                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | U11      | open                                                                                                                                                                                                                                                                        |
+| H6  | Review the import snapshot and confirm each job's status date, then run the production dry run and commit from your terminal over the weekend after a Friday review, so the app starts on a new week                                                                                                                                                                                                                                                                                                                                                                                                                                   | U11      | open                                                                                                                                                                                                                                                                        |
 
 ---
 
