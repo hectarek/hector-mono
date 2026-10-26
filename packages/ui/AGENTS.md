@@ -44,6 +44,7 @@ bunx --bun shadcn@latest add <component> --diff src/components/<component>.tsx  
   - `field.tsx`: `==` → `===`
   - `sidebar.tsx`: `setOpenMobile` (a stable state setter) listed as a hook dependency twice
   - `calendar.tsx`: `modifiers.x` → `modifiers["x"]` (the portfolio sets `noPropertyAccessFromIndexSignature`, and apps typecheck this package's source)
+  - `calendar.tsx`: the components it hands `DayPicker` (`Root`, `Chevron`, `DayButton`, `WeekNumber`) are module-level functions, not arrow functions inside `Calendar` (Biome 2.6's `noComponentHookFactories`), and `CalendarDayButton` reads the locale from `useDayPicker()` when none is passed
   - `drawer.tsx`: a bottom or top sheet is capped at `--drawer-max-width` (42rem unless an app sets it) and centred, so on a wide screen it's no wider than the page (hectors-recipes D85). The overwrite drops it; add it back.
   - `button.tsx`: our `quiet` variant (low-emphasis actions in `muted-foreground`, e.g. "Clear checked") and `label` size (mono, uppercase, letter-spaced, 40px: the portfolio's buttons; colours come from the variant). The overwrite drops both; add them back.
   - `native-select.tsx`: our `lg` size (`h-9`, as Button's `lg`: 45px in recipes, a thumb's size; hectors-recipes D93). The overwrite drops it; add it back.
