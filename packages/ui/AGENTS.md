@@ -3,9 +3,11 @@
 > Read the root [AGENTS.md](../../AGENTS.md) first. This file only covers shared-UI-specific context.
 
 ## Overview
+
 Shared shadcn/ui component library consumed by every app. **Always check here before creating a new component in an app.**
 
 ## Structure
+
 ```
 src/
   components/   # shadcn/ui primitives (button.tsx, dialog.tsx, sidebar.tsx, ...) + theme-provider.tsx
@@ -17,6 +19,7 @@ tests/          # mirrors src/ (bun test): tests/src/styles/themes.test.ts guard
 ```
 
 ## Consuming from apps
+
 Setting up a new app (components.json, globals.css, fonts, ThemeProvider) is a step-by-step in [docs/ui-package.md](../../docs/ui-package.md).
 Import via the package export paths (no barrel files):
 ```ts
@@ -25,12 +28,14 @@ import { cn } from "@repo/ui/lib/utils";
 ```
 
 ## Adding components
+
 Use the shadcn CLI, don't hand-write primitives. This follows shadcn's official monorepo setup: every app has a `components.json` whose `ui` alias is `@repo/ui/components`, so running the CLI **from an app** installs base components here (and blocks into that app):
 ```bash
 cd apps/<app> && bunx --bun shadcn@latest add <component>     # → packages/ui/src/components
 cd packages/ui && bun run ui:add <component>                  # same, from this package
 bunx --bun shadcn@latest add <component> --diff src/components/<component>.tsx  # compare with upstream
 ```
+
 - Every `components.json` (this package and each app) must keep the same `style: base-nova`, `baseColor: neutral` and `iconLibrary: lucide`; the CLI requires it.
 - An app's `components.json` also tells the shadcn lint plugin (oxlint) which design system the app uses: `tailwind.css` points at this package's `globals.css`, so colours or classes an app defines only in its own stylesheet are reported as unknown. That's intended: a colour belongs in the shared theme, not one app.
 - `lib/utils.ts` is shadcn's own `export { cn } from "cn"` (the `cn` package replaces clsx + tailwind-merge). Registry components import `cn` straight from `"cn"`, as shadcn ships them (leave it, or every CLI update fights you); apps and hand-written components import it from `@repo/ui/lib/utils`.
@@ -39,8 +44,9 @@ bunx --bun shadcn@latest add <component> --diff src/components/<component>.tsx  
   - `field.tsx`: `==` → `===`
   - `sidebar.tsx`: `setOpenMobile` (a stable state setter) listed as a hook dependency twice
   - `calendar.tsx`: `modifiers.x` → `modifiers["x"]` (the portfolio sets `noPropertyAccessFromIndexSignature`, and apps typecheck this package's source)
+  - `calendar.tsx`: the components it hands `DayPicker` (`Root`, `Chevron`, `DayButton`, `WeekNumber`) are module-level functions, not arrow functions inside `Calendar` (Biome 2.6's `noComponentHookFactories`), and `CalendarDayButton` reads the locale from `useDayPicker()` when none is passed
   - `drawer.tsx`: a bottom or top sheet is capped at `--drawer-max-width` (42rem unless an app sets it) and centred, so on a wide screen it's no wider than the page (hectors-recipes D85). The overwrite drops it; add it back.
-  - `button.tsx`: our `quiet` variant (low-emphasis actions in `muted-foreground`, e.g. "Clear checked") and `label` size (mono, uppercase, letter-spaced, 40px: the portfolio's buttons; colours come from the variant). The overwrite drops both; add them back.
+  - `button.tsx`: our `quiet` variant (low-emphasis actions in `muted-foreground`, e.g. "Clear checked") and `label` size (mono, uppercase, letter-spaced, 40px: the portfolio's buttons; colours come from the variant), plus `label-sm` (the same at 32px with 10px text: the Live / Code / Case study row on a portfolio project card). The overwrite drops all three; add them back.
   - `native-select.tsx`: our `lg` size (`h-9`, as Button's `lg`: 45px in recipes, a thumb's size; hectors-recipes D93). The overwrite drops it; add it back.
 - Components here are registry code plus only the lint/type fixes above, so an update is an overwrite followed by re-applying what the checks flag. `file-drop-zone` and `theme-provider` are ours, not registry components; never overwrite them.
 - Packages an app also imports directly must resolve to ONE version repo-wide. `recharts` is the known one: an app's `BarChart` inside `ChartContainer` from a different copy renders nothing, with no error. Pin it in every app that imports it to exactly this package's `recharts` version.
@@ -49,6 +55,7 @@ bunx --bun shadcn@latest add <component> --diff src/components/<component>.tsx  
 - `globals.css` imports `shadcn/tailwind.css` (devDependency `shadcn`): the `data-open`/`data-checked`/`data-active`/orientation variants, accordion keyframes and `no-scrollbar` utility the components are written against. Without it, state styling (tab indicators, scrollbars, open/closed) silently doesn't apply.
 
 ## Theming
+
 Same model as shadcn (tokens in `:root` / `.dark`, exposed through `@theme inline`), extended to several brand themes. shadcn only documents one theme per stylesheet.
 - **The contract** is the token list at the top of `themes/default.css`: shadcn's set, plus `success`, `warning`, `info` (each with `-foreground`), `chart-foreground` (text on a chart colour used as a fill), plus `radius`. `globals.css` maps every one to a Tailwind utility, identically for every theme. Components and apps use only these (`bg-primary`, `text-warning-foreground`, `rounded-lg`). A new colour role is a contract change: add it to `default.css` (light and dark), the `@theme inline` list, and the test's `CONTRACT`.
 - **Default theme** (`themes/default.css`) is shadcn preset `b1YmpVjjs` exactly, as `shadcn init` writes it, plus the status colours (foreground on its colour ≥ 7.6:1 in both modes). It always loads.
@@ -61,15 +68,17 @@ Same model as shadcn (tokens in `:root` / `.dark`, exposed through `@theme inlin
 - **Fonts** aren't theme tokens. Each app loads them with `next/font`, using `variable: "--font-sans"` (required), `"--font-heading"` and `"--font-mono"` (optional), and puts those classes plus `font-sans` on `<html>`, as shadcn's reference app does. `globals.css` maps `font-sans` / `font-heading` / `font-mono` with fallbacks.
 - **Radius:** one `--radius` per theme; `rounded-sm`…`rounded-4xl` derive from it (shadcn's multiplicative scale).
 - **Tailwind sources:** `globals.css` has `@source "../**/*.{ts,tsx}"` for this package; apps' own files are auto-detected, so apps add no `@source` lines.
-- **Apps using Neon Auth UI** (recipes, stash): import `@neondatabase/auth/ui/tailwind` *after* `@repo/ui/styles/globals.css` (it must come after Tailwind; before it, Tailwind wrote the font mapping to `:root` as a self-reference and every app fell back to the system font). Neon re-points Tailwind's colours and radius at `--neon-*` variables. The colours fall back to our tokens, so themes still apply when set on `<html>` (not on a subtree). The radius is a fixed `0.625rem`, so those apps set `:root { --neon-radius: var(--radius); }`. Neon also puts `* { border-color }` in `@layer neon-auth`. Named after Tailwind's layers, that layer outranks utilities and beats `border-transparent` (ghost buttons grow borders), so those apps' stylesheets start with `@layer theme, base, neon-auth, components, utilities;`. Copy `apps/hectors-recipes/app/globals.css` for any new Neon app.
+- **Apps using Neon Auth UI** (recipes, stash): import `@neondatabase/auth/ui/tailwind` _after_ `@repo/ui/styles/globals.css` (it must come after Tailwind; before it, Tailwind wrote the font mapping to `:root` as a self-reference and every app fell back to the system font). Neon re-points Tailwind's colours and radius at `--neon-*` variables. The colours fall back to our tokens, so themes still apply when set on `<html>` (not on a subtree). The radius is a fixed `0.625rem`, so those apps set `:root { --neon-radius: var(--radius); }`. Neon also puts `* { border-color }` in `@layer neon-auth`. Named after Tailwind's layers, that layer outranks utilities and beats `border-transparent` (ghost buttons grow borders), so those apps' stylesheets start with `@layer theme, base, neon-auth, components, utilities;`. Copy `apps/hectors-recipes/app/globals.css` for any new Neon app.
 
 ## Conventions
+
 - kebab-case filenames, one component group per file
 - Use `class-variance-authority` for variants (match existing `button.tsx` pattern)
 - `react`/`react-dom` are peer deps — never add them as direct deps here
 - Keep components presentational; app-specific logic stays in the consuming app
 
 ## Before Finishing Any Change
+
 Every app consumes this package, so check them too: Turbo's leading `...` adds the packages that depend on `@repo/ui`.
 ```bash
 bun check --filter=...@repo/ui && bun ts --filter=...@repo/ui && bun run test --filter=...@repo/ui

@@ -19,6 +19,7 @@ Run it from the app directory. It isn't part of CI (`.github/workflows/ci.yml` r
 
 1. **Stop anything on port 3000** (a dev server, or an earlier `next start`)
 2. Run Lighthouse:
+
    ```bash
    cd apps/hector-portfolio
    bun run lighthouse
@@ -31,6 +32,7 @@ Run it from the app directory. It isn't part of CI (`.github/workflows/ci.yml` r
 If you want to test against an already-running server:
 
 1. **Edit `.lighthouserc.js`**:
+
    ```javascript
    collect: {
      url: ["http://localhost:3000"],
@@ -40,11 +42,13 @@ If you want to test against an already-running server:
    ```
 
 2. **Build and start a production server manually**:
+
    ```bash
    bun run build && bun run start
    ```
 
 3. **Run Lighthouse** (in another terminal):
+
    ```bash
    bun run lighthouse
    ```
@@ -68,10 +72,11 @@ Lighthouse 12 (the version `@lhci/cli` 0.15 runs) has no PWA category, so there'
 
 **Error**: `Port 3000 is in use`
 
-**Solution**: 
+**Solution**:
 1. Stop the server that's using the port (the dev server, or an earlier `next start`).
 
 2. Or update `.lighthouserc.js` to use a different port:
+
    ```javascript
    url: ["http://localhost:3001"],
    startServerCommand: "bun run build && bun run start --port 3001",
@@ -101,4 +106,3 @@ You can also run Lighthouse manually in Chrome:
 - **Accessibility**: ARIA labels, contrast, keyboard navigation
 - **Best Practices**: HTTPS, modern APIs, no console errors
 - **SEO**: Meta tags, structured data, sitemap
-

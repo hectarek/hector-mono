@@ -27,14 +27,14 @@ A change that adds, moves or removes a screen, an action, a sheet or a way betwe
 
 The app is phone-first, built for people who share a recipe book and a plan. Six jobs cover what people come to it for (Claude's grouping).
 
-| Job | Starts at | Screens, in order | Browser flow |
-|---|---|---|---|
-| Find something to cook | Recipes tab | Library → Recipe | `plan-and-shop` (search, Sort and group) |
-| Add a recipe | Library's Add recipe | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe | `plan-and-shop` (manually), `add-recipe` (photo or file) |
-| Plan the week | A recipe's Add to meal plan | Recipe (Add to meal plan) → Meal plan | `plan-and-shop` |
-| Shop | Meal plan's grocery button, or a recipe's Add to groceries | Meal plan → Groceries | `plan-and-shop` (check off, Got it, Clear groceries) |
-| Cook | A recipe's Cook | Recipe → Cook mode (Gather → each step → Done) → Recipe | `cook` |
-| Share a book or plan | A tab's ⋯ → Invite | ⋯ → the phone's share sheet; the person invited: Welcome → Create account → Join → the book or plan | none |
+| Job                    | Starts at                                                  | Screens, in order                                                                                   | Browser flow                                             |
+| ---------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Find something to cook | Recipes tab                                                | Library → Recipe                                                                                    | `plan-and-shop` (search, Sort and group)                 |
+| Add a recipe           | Library's Add recipe                                       | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe                        | `plan-and-shop` (manually), `add-recipe` (photo or file) |
+| Plan the week          | A recipe's Add to meal plan                                | Recipe (Add to meal plan) → Meal plan                                                               | `plan-and-shop`                                          |
+| Shop                   | Meal plan's grocery button, or a recipe's Add to groceries | Meal plan → Groceries                                                                               | `plan-and-shop` (check off, Got it, Clear groceries)     |
+| Cook                   | A recipe's Cook                                            | Recipe → Cook mode (Gather → each step → Done) → Recipe                                             | `cook`                                                   |
+| Share a book or plan   | A tab's ⋯ → Invite                                         | ⋯ → the phone's share sheet; the person invited: Welcome → Create account → Join → the book or plan | none                                                     |
 
 Supporting screens: Books (default book, new books), Members (links, roles, leaving, deleting), Copy recipes, Account.
 
@@ -257,16 +257,16 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 One word for each thing (D84), so a new screen names it as the rest of the app does. Button and sheet names use these words: "Add to groceries", "Open meal plan".
 
-| Thing | Say | Not |
-|---|---|---|
-| A shared set of recipes | recipe book (on a pill or a heading: the book's name) | collection, cookbook |
-| The week's cooking, shared | meal plan (the tab: Meal plan) | plan, calendar, schedule |
-| What to buy, one per meal plan | groceries (the tab: Groceries) | list, grocery list, shopping list |
-| One recipe on the meal plan | meal | entry, item |
-| The day it's cooked | cook day | |
-| The days it's eaten | eat days (leftovers are eat days after the cook day) | |
-| A line in groceries | item | |
-| The people in a book or meal plan | members (the page: Members) | people, sharing |
+| Thing                             | Say                                                   | Not                               |
+| --------------------------------- | ----------------------------------------------------- | --------------------------------- |
+| A shared set of recipes           | recipe book (on a pill or a heading: the book's name) | collection, cookbook              |
+| The week's cooking, shared        | meal plan (the tab: Meal plan)                        | plan, calendar, schedule          |
+| What to buy, one per meal plan    | groceries (the tab: Groceries)                        | list, grocery list, shopping list |
+| One recipe on the meal plan       | meal                                                  | entry, item                       |
+| The day it's cooked               | cook day                                              |                                   |
+| The days it's eaten               | eat days (leftovers are eat days after the cook day)  |                                   |
+| A line in groceries               | item                                                  |                                   |
+| The people in a book or meal plan | members (the page: Members)                           | people, sharing                   |
 
 Code keeps its own names (`plan`, `grocery_items`, `AddToListButton`); only the words on screen follow this table.
 
@@ -274,33 +274,33 @@ Code keeps its own names (`plan`, `grocery_items`, `AddToListButton`); only the 
 
 The app is a phone design; on a wider screen it stays one (D85). Every style that changes with the screen's width is listed here, with why, so a responsive change is a choice someone made, not drift. `tests/app/wide-screens.test.ts` fails on a width-specific class (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`) in `app/` that isn't in this table, and on a row whose class is gone.
 
-| File | Classes | What it does | Kind |
-|---|---|---|---|
-| `app/_components/library-results.tsx` | `sm:grid-cols-3` | Three recipe cards a row from 640 px, two on a phone. | Fitted: the same design, more room |
-| `app/(main)/(library)/loading.tsx` | `sm:grid-cols-3` | The library's loading cards, matching the cards. | Fitted |
-| `app/(main)/recipes/[id]/page.tsx` | `sm:flex` | Cook, Add to meal plan and Add to groceries in one row from 640 px; on a phone Cook takes its own row. | Fitted |
-| `app/(main)/account/[path]/page.tsx` | `md:gap-6`, `md:gap-12`, `md:block`, `lg:w-60` | The Appearance card lines up under Neon Auth's account cards, whose nav column appears at md and widens at lg. | A different design: Neon's own |
+| File                                  | Classes                                        | What it does                                                                                                   | Kind                               |
+| ------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `app/_components/library-results.tsx` | `sm:grid-cols-3`                               | Three recipe cards a row from 640 px, two on a phone.                                                          | Fitted: the same design, more room |
+| `app/(main)/(library)/loading.tsx`    | `sm:grid-cols-3`                               | The library's loading cards, matching the cards.                                                               | Fitted                             |
+| `app/(main)/recipes/[id]/page.tsx`    | `sm:flex`                                      | Cook, Add to meal plan and Add to groceries in one row from 640 px; on a phone Cook takes its own row.         | Fitted                             |
+| `app/(main)/account/[path]/page.tsx`  | `md:gap-6`, `md:gap-12`, `md:block`, `lg:w-60` | The Appearance card lines up under Neon Auth's account cards, whose nav column appears at md and widens at lg. | A different design: Neon's own     |
 
 Outside `app/`: every bottom sheet is capped at 42rem and centred, in `@repo/ui`'s Drawer (`--drawer-max-width`), so on a desktop it's no wider than the page (D85). The pages themselves are `max-w-3xl` (tabs) or `max-w-2xl` (full-screen tasks, cook mode), centred.
 
 ## Patterns: where each rule lives, and where it's used
 
-| Pattern | The rule | Used on |
-|---|---|---|
-| Page title with the main action and a ⋯ | AGENTS.md UI Rules (D42) | Library, Meal plan (Show in the action's place, D93), Groceries |
-| Back link | AGENTS.md UI Rules | Recipe, Books, Copy recipes, Members, Join, Account, Sign in |
-| Full-screen task with its own way out | AGENTS.md UI Rules | Add a recipe and its three ways in, the recipe form, cook mode |
-| Buttons: one filled main action, the rest `secondary`, 45 px | AGENTS.md UI Rules (D32) | Every screen |
-| Bottom sheet for a short task | The design system's Patterns; D10 | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to meal plan and Add to groceries |
-| Dialog | AGENTS.md UI Rules (asking first) | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link |
-| List you check off | The design system's Patterns; AGENTS.md UI Rules (`CheckRow`) | Groceries and cook mode's ingredients (P27.3). Copy recipes uses plain checkboxes |
-| Empty state: a produce tile, one sentence, the action | The design system's Patterns | Library. Meal plan and Groceries have the sentence only |
-| Book or plan pills, and pickers | AGENTS.md UI Rules (pickers); D82 for the book pills (yours first, a people icon on shared ones) | Pills on the three tabs; pickers in dialogs and the form |
-| Sideways swipe | D51, D54, D63 | Meal plan's week, cook mode |
-| A tap's message when the connection drops (`callAction`) | AGENTS.md UI Rules | Meal plan's meals and its grocery button, Groceries, a recipe's Add to meal plan and Add to groceries (cook mode's too) |
-| Bold moments, one in view | The design system; AGENTS.md UI Rules | Library tiles, a recipe's tile, Meal plan's Today sticker, the active tab, Welcome's produce row |
-| Waiting on the AI: the produce row in a wave | D75; AGENTS.md UI Rules | Add by link or text, Add by photo or file |
-| Motion between screens: a card grows into its recipe, deeper and back, tabs crossfade, cook mode rises, a skeleton fades into its page | AGENTS.md UI Rules (D89) | A library card into Recipe (grows); Recipe, Books, Copy recipes, Members, Join (deeper and back); the three tabs (crossfade); Cook mode (rises); every page with a loading screen (fades). Each screen's **Motion** says which |
+| Pattern                                                                                                                                | The rule                                                                                         | Used on                                                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Page title with the main action and a ⋯                                                                                                | AGENTS.md UI Rules (D42)                                                                         | Library, Meal plan (Show in the action's place, D93), Groceries                                                                                                                                                                |
+| Back link                                                                                                                              | AGENTS.md UI Rules                                                                               | Recipe, Books, Copy recipes, Members, Join, Account, Sign in                                                                                                                                                                   |
+| Full-screen task with its own way out                                                                                                  | AGENTS.md UI Rules                                                                               | Add a recipe and its three ways in, the recipe form, cook mode                                                                                                                                                                 |
+| Buttons: one filled main action, the rest `secondary`, 45 px                                                                           | AGENTS.md UI Rules (D32)                                                                         | Every screen                                                                                                                                                                                                                   |
+| Bottom sheet for a short task                                                                                                          | The design system's Patterns; D10                                                                | Every ⋯ (a recipe's too, with Copy to another book as a step), a meal, a grocery item, a form row, cook mode's steps and ingredients, the recipe page's Add to meal plan and Add to groceries                                  |
+| Dialog                                                                                                                                 | AGENTS.md UI Rules (asking first)                                                                | Confirmations: discard changes, delete a recipe or a space, remove a member, leave, turn off a link                                                                                                                            |
+| List you check off                                                                                                                     | The design system's Patterns; AGENTS.md UI Rules (`CheckRow`)                                    | Groceries and cook mode's ingredients (P27.3). Copy recipes uses plain checkboxes                                                                                                                                              |
+| Empty state: a produce tile, one sentence, the action                                                                                  | The design system's Patterns                                                                     | Library. Meal plan and Groceries have the sentence only                                                                                                                                                                        |
+| Book or plan pills, and pickers                                                                                                        | AGENTS.md UI Rules (pickers); D82 for the book pills (yours first, a people icon on shared ones) | Pills on the three tabs; pickers in dialogs and the form                                                                                                                                                                       |
+| Sideways swipe                                                                                                                         | D51, D54, D63                                                                                    | Meal plan's week, cook mode                                                                                                                                                                                                    |
+| A tap's message when the connection drops (`callAction`)                                                                               | AGENTS.md UI Rules                                                                               | Meal plan's meals and its grocery button, Groceries, a recipe's Add to meal plan and Add to groceries (cook mode's too)                                                                                                        |
+| Bold moments, one in view                                                                                                              | The design system; AGENTS.md UI Rules                                                            | Library tiles, a recipe's tile, Meal plan's Today sticker, the active tab, Welcome's produce row                                                                                                                               |
+| Waiting on the AI: the produce row in a wave                                                                                           | D75; AGENTS.md UI Rules                                                                          | Add by link or text, Add by photo or file                                                                                                                                                                                      |
+| Motion between screens: a card grows into its recipe, deeper and back, tabs crossfade, cook mode rises, a skeleton fades into its page | AGENTS.md UI Rules (D89)                                                                         | A library card into Recipe (grows); Recipe, Books, Copy recipes, Members, Join (deeper and back); the three tabs (crossfade); Cook mode (rises); every page with a loading screen (fades). Each screen's **Motion** says which |
 
 ## Where the app and its rules disagree
 

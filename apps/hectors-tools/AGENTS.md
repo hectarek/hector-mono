@@ -3,6 +3,7 @@
 > Read the root [AGENTS.md](../../AGENTS.md) first. This file only covers app-specific context.
 
 ## Overview
+
 A catalog of small AI and general-purpose web tools, navigable from a `@repo/ui` sidebar. Long-term goal: make these public-access utilities for solving everyday problems. First tool is a **Resume Analyzer** (resume vs. job-description scoring) powered by the `ai` SDK through the Vercel AI Gateway.
 
 This is a **complex app** structurally — it uses clean architecture and DI — but it is currently **lean**: no database, no auth, no transactions. Those layers are deferred until a specific tool needs persistence or users. (Tools therefore skip the `userId`/auth gate in controllers and actions.)
@@ -10,12 +11,14 @@ This is a **complex app** structurally — it uses clean architecture and DI —
 Deployment: not deployed; no Vercel project.
 
 ## Stack
+
 - Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui via `@repo/ui`
 - DI via `@evyweb/ioctopus` (wires `ILoggerService` + `IAiService` and the resume-analyzer use-case/controller)
 - AI via the `ai` SDK 7 (`generateText` with `Output.object` and `instructions`) through the **Vercel AI Gateway**
 - No DB / no auth (yet)
 
 ## AI / environment
+
 - The Gateway is the AI SDK's built-in default provider — no per-provider keys. Set in `.env`:
   - `AI_GATEWAY_API_KEY` — Vercel AI Gateway key (required for live calls).
   - `AI_MODEL` — optional model override (default `anthropic/claude-sonnet-4.6`), as a `provider/model` string.
@@ -93,24 +96,30 @@ When a tool needs an inward layer (entity, use-case, controller, repository) fol
 ## Conventions
 
 ### Logging
+
 - Never use `console.*` directly. Use `ILoggerService` via DI (`getInjection("ILoggerService").child({ layer, op })`); root or edge code outside the container gets `lib/logger.ts` (see above).
 - Standard `layer` values: `action`, `use-case`, `controller`, `service`, `route`, `page`. `op` is the function name.
 
 ### File Naming
+
 - All files and folders use kebab-case.
 - Model files use `.model.ts`, interfaces use `.interface.ts`; mocks are `<name>.repository.mock.ts` for repositories and `mock-<name>.service.ts` for services.
 
 ### Zod 4
+
 - `import { z } from "zod"` (we are on `zod@^4`).
 - Use top-level validators: `z.uuid()`, `z.url()`, `z.email()`. Use `error` (not `message`) for custom errors.
 
 ### Sidebar
+
 - `@repo/ui/components/sidebar` is BaseUI-backed. Use `render={<Link href="..." />}` on `SidebarMenuButton` to make it render as a Next.js `Link` (no `asChild`).
 
 ### Reusable UI
+
 - `@repo/ui/components/file-drop-zone` (`FileDropZone`) is a shared, controlled drag-and-drop file picker (`value`/`onValueChange`, `accept`, `maxSizeBytes`, `hint`). It is not a form field — read its `File` from component state and append it to `FormData` in the submit handler (see the Resume Analyzer form).
 
 ## Commands
+
 ```bash
 bun run dev --filter=hectors-tools
 bun run build --filter=hectors-tools
@@ -119,6 +128,7 @@ bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ```
 
 ## Before Finishing Any Change
+
 Scope checks to this app:
 ```bash
 bun check --filter=hectors-tools && bun ts --filter=hectors-tools && bun run test --filter=hectors-tools

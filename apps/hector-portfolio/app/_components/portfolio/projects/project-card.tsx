@@ -97,10 +97,9 @@ export function ProjectCard({ project, showMetric = true }: ProjectCardProps) {
                 />
               }
               variant="outline"
-              size="sm"
-              className="h-8 border-border px-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:border-accent hover:text-accent"
+              size="label-sm"
             >
-              <ExternalLink className="mr-1.5 h-3 w-3" />
+              <ExternalLink />
               Live
             </Button>
           )}
@@ -115,10 +114,9 @@ export function ProjectCard({ project, showMetric = true }: ProjectCardProps) {
                 />
               }
               variant="outline"
-              size="sm"
-              className="h-8 border-border px-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:border-accent hover:text-accent"
+              size="label-sm"
             >
-              <GitHubIcon className="mr-1.5 h-3 w-3" />
+              <GitHubIcon />
               Code
             </Button>
           )}
@@ -126,12 +124,12 @@ export function ProjectCard({ project, showMetric = true }: ProjectCardProps) {
             nativeButton={false}
             render={<Link href={`/projects/${project.slug}`} />}
             variant="default"
-            size="sm"
-            className="ml-auto h-8 bg-foreground px-3 font-mono text-[10px] uppercase tracking-[0.16em] text-background hover:bg-foreground/90"
+            size="label-sm"
+            className="ml-auto"
           >
             Case study
             <span className="sr-only">: {project.title}</span>
-            <ArrowUpRight className="ml-1.5 h-3 w-3" />
+            <ArrowUpRight />
           </Button>
         </div>
       </div>

@@ -3,11 +3,13 @@
 > Read the root [AGENTS.md](../../AGENTS.md) first. This file only covers app-specific context
 
 ## Overview
+
 Simple recipes app with auth and database. Keep the clean architecture structure, but prefer the simplest implementation that satisfies the feature. Canonical pattern reference: [../../docs/clean-architecture.md](../../docs/clean-architecture.md).
 
 The meal planner is built (MVP): shared recipe books, weekly meal plan, grocery list, cook mode. The spec and its "As built" notes are in [docs/meal-planner-spec.md](docs/meal-planner-spec.md). A UX pass to get it ready for a small group is tracked in [docs/ux-plan.md](docs/ux-plan.md): read its Status block before starting any of its tasks.
 
 ## Stack
+
 - Next.js 16, React 19, Tailwind CSS, shadcn/ui
 - Neon Postgres via `@neondatabase/serverless`, Drizzle ORM, generated migrations in `db/migrations/`
 - Auth via `@neondatabase/auth` (Better Auth powered)
@@ -118,10 +120,12 @@ Content tables carry `(space_id, space_type)` with a composite FK to `spaces(id,
 Stored enum-like values are readable on their own (`recipe-book`, not `book`); keep that convention for new columns.
 
 ## Data Flow
+
 1. **Read**: `page.tsx` -> `IEnsurePersonalSpaceController` -> `IGetRecipesController` -> use case -> repository -> DB
 2. **Write**: form action -> `app/actions/<domain>.ts` -> controller -> use case (in a transaction) -> repository -> DB -> `revalidatePath` (and `redirect` when the action leaves the page, as a recipe's create, update and delete do)
 
 ## Cache Components
+
 Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `next.config.ts`; docs/ux-plan.md Phase 28).
 - `export const dynamic`, `revalidate` and `dynamicParams` fail the build. A page that reads the session, its address or the database in its body has a `loading.tsx` in its own folder, so the prerendered shell is the layout and the skeleton, and the page streams in after. One at `(main)` or `(form)` isn't enough: a tap between two pages re-renders only below the layout they share, so it covers a page load but not that tap. The general shapes are `PageSkeleton` and `FormSkeleton` (`app/_components/page-skeletons.tsx`). Books needs none: it reads only through a private cache (below).
 - `next dev` checks every page as it loads (Next.js's instant-navigation validation) and logs what would hold up a tap into it: a read outside `<Suspense>`, or the clock while prerendering. A new page loads clean in dev, on a page load and on a tap from another page.
@@ -143,6 +147,7 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
   - In tests, the preload's `cacheLife` does nothing, so every call reads afresh. `tests/flows/instant.flow.ts` checks the Recipes tab with `@next/playwright`'s `instant()`. A page opened again within 5 minutes shows at once only in a production build (`next dev`, which the flows run on, fetches it again), so check that by hand on `next start`.
 
 ## Feature Rules
+
 How each feature works, and what to keep true when changing it, is in [docs/features.md](docs/features.md). When a feature's behaviour or rules change, update its section there in the same change; only rules every change follows go here. Before changing a feature, read its section:
 - [Recipes: ingredient lines, steps and scaling](docs/features.md#recipes-ingredient-lines-steps-and-scaling)
 - [Library and tags](docs/features.md#library-and-tags)
@@ -155,6 +160,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - [Cook mode and servings](docs/features.md#cook-mode-and-servings)
 
 ## Backend Rules
+
 - Every use case that lists or writes a space's contents calls `requireSpaceRole(spacesRepository, { spaceId, userId, type, minRole })` from `src/application/use-cases/spaces/require-space-role.ts`. Don't hand-roll membership checks.
 - Writes check access and mutate inside one `startTransaction` so the check and the write see the same state.
 - Every read inside a transaction passes `tx`: a read without it hangs on PGlite's one connection.
@@ -176,6 +182,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Removing a column takes two deploys. Drizzle's inserts name every column in the schema (`default` for ones not given), so code whose schema still has a column breaks on insert once the column is gone. Take it out of `db/schema.ts` and deploy first; drop it in a migration applied after (0010 dropped `plan_entries.eaten` too early and it had to be put back; 0011 drops it after the deploy). Adding a nullable or defaulted column is safe before the deploy.
 
 ## UI Rules
+
 - What each screen is for, which jobs cross it and what fits on it: [docs/ux-map.md](docs/ux-map.md). Place a change on it before designing it (the job, the screen and its room, the pattern, the cost to the other jobs; docs/ux-plan.md D70). A change that adds, moves or removes a screen, an action, a sheet or a way between screens updates the map in the same commit.
 - Design system: "Hector's Recipes" in Claude Design (tokens, type, patterns, logo: https://claude.ai/artifact/LjXi5gzWvjsaw1w1vKcNQn; screen mockups drawn 2026-09-24, before most of today's screens, so the map is the record of what's built: https://claude.ai/artifact/DbiC7qhnhsWqXaQtyLF9Lw). In code it is `packages/ui/src/styles/themes/recipes.css` with `data-theme="recipes"` on `<html>`; fonts are Figtree (`--font-sans`) and Young Serif (`--font-heading`).
 - Surfaces: library, plan and groceries use the base (Market); the recipe page sets `data-surface="reading"` on its `<article>`, and the `(cook)` layout sets `data-surface="cook"`.
@@ -209,6 +216,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Entities are pure and safe to import in client components (the form's parse preview and the servings stepper reuse the server's parser and scaler).
 
 ## Testing
+
 - `tests/` mirrors the source tree: the test for `src/entities/scaling.ts` is `tests/src/entities/scaling.test.ts`, for `app/_lib/safe-redirect.ts` it's `tests/app/_lib/safe-redirect.test.ts`. New source file with logic → matching test file.
 - Shared setup lives in `tests/_support/` (it mirrors nothing): `makeApp()` wires every use case to one set of repositories (in-memory mocks by default) with fixtures (`newSpace`, `newRecipe`, `join`), plus `OWNER` / `PARTNER` / `STRANGER` user ids. `groceryFixture()` adds a plan (whose grocery list the tests fill) and two recipes that share ingredients.
 - Tests add members through `repos.spaces.addMember` (via `app.join`), never a mock-only shortcut, so the same test can run against the real repositories.
@@ -237,6 +245,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Browser-tool testing note: at the mobile preset the pane scales the emulated screen, and taps land about 4% off, worse lower on the screen (a tap sent at y 640 arrived at 667), so a bottom sheet's buttons can be missed. Drive them with `element.click()` in `javascript_tool`, confirm where a tap arrived with a `pointerdown` listener, and leave finger taps to the real-phone check.
 
 ## Auth Rules
+
 - Route all auth access through `IAuthenticationService` in app/actions/pages.
 - `lib/auth/server.ts` is only for the auth route (`app/(api)/api/auth/[...path]/route.ts`), the auth pages (`app/(auth)/auth/[path]/page.tsx`) and the auth service implementation (`src/infrastructure/services/neon-auth.service.ts`).
 - Pages can't write cookies, and Neon's `getSession()` writes one when its 5-minute session cache has expired and Neon hands back a refreshed cookie; in a page that throws and the page fails as signed out. `proxy.ts` therefore refreshes the cache (through our own `/api/auth/get-session` route) whenever the cache cookie is missing, passing the new cookies to the browser and to that request's render; an ended session goes to `/welcome` (with `redirectTo`). See [../../docs/proxy-auth-research.md](../../docs/proxy-auth-research.md) (2026-09 addendum).
@@ -248,11 +257,13 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Neon's auth screens are styled through `AuthView`'s `classNames` (the card frame is removed) and `localization` (the app's wording), set in `app/(auth)/auth/[path]/page.tsx`.
 
 ## Logging Rules
+
 - Never call `console.*` directly.
 - Use `ILoggerService` in server-side app/layers.
 - Use `lib/logger.ts` in root/edge files.
 
 ## Deploying (Vercel)
+
 - Vercel project root directory: `apps/hectors-recipes` (Next.js preset; Bun is detected from the root `bun.lock`).
 - Env vars: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `ABLY_API_KEY` (same as `.env`; `LOG_LEVEL` optional). `ABLY_API_KEY` is server-only, limited to `publish` and `subscribe` on `plan:*`; without it the app works and live updates are off.
 - AI Gateway: production authenticates with Vercel OIDC, so don't add `AI_GATEWAY_API_KEY` in Vercel (D27); it lives in the local `.env` only. There's no Gateway budget: the account's credit is the limit (about $18 on 2026-10-08, docs/ux-plan.md D86), and a read refused for spent credit (a 402, `budget-paused`) asks people to let Hector know. The Gateway's free tier refuses Claude models (403 "Free tier users do not have access to this model"), so reading recipes needs paid Gateway credits (bought 2026-09-26). The adapter's log line has input, output and reasoning tokens (an `info` line, so shown in production only with `LOG_LEVEL=info` or `debug`); a recipe read costs a few cents with Opus 5.5 ($4 in, $20 out per million tokens on the Gateway): a short typed recipe was 2,471 in and 948 out, about 3¢, in 12 s. Nothing reads the Gateway at build time, so it isn't in `turbo.json`.
@@ -260,6 +271,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Every domain the app runs on must be added in the Neon console: Auth → Configuration → Domains (`https://…`, no trailing slash). Previews need a wildcard entry.
 
 ## Commands
+
 ```bash
 bun run dev --filter=hectors-recipes
 bun run build --filter=hectors-recipes
@@ -278,6 +290,7 @@ OBSIDIAN_RECIPES_DIR="…" bun scripts/seed-from-obsidian.ts --commit --email=<a
 `tsconfig.json` sets `"types": ["bun"]`. TypeScript 6+ no longer auto-includes `@types/*`, so without it `tsc` and `next build` fail on `bun:test` imports in `tests/`.
 
 ## Before Finishing Any Change
+
 ```bash
 bun check --filter=hectors-recipes
 bun ts --filter=hectors-recipes

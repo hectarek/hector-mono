@@ -135,4 +135,3 @@ This is used for:
 - Canonical URLs, Open Graph URLs and relative image URLs in `generateSEOMetadata()`
 - Sitemap URLs
 - Robots.txt sitemap reference
-

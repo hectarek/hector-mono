@@ -12,25 +12,25 @@ There are three shareable things: **recipe books** (what you cook), **meal plans
 
 ## Decisions
 
-| Topic | Decision |
-|---|---|
-| Auth | Keep Neon Auth; each person has their own account |
-| ORM | Drizzle (already in place) |
-| Offline / PWA | Dropped for v1. Online only, plus a web app manifest so it installs to the home screen |
-| Sharing | One shared `spaces` table typed `recipe-book` / `meal-plan` / `grocery-list`, with one membership table, one invite table, and one role set (`owner` / `editor` / `viewer`) |
-| Default share role | `editor`, with a view-only toggle. Viewers are fully read-only |
-| Recipe read access | Any signed-in user can open a recipe by its link. Membership controls **browsing** a book and **editing** it, not reading a single recipe. There are no secret recipes |
-| Plan ↔ recipe | Loose. A plan entry saves the recipe title when added, and the recipe link is optional. Free-text entries ("Leftovers", "Eating out") are allowed |
-| Plan ↔ grocery list | No tie. "Add to list" goes to the grocery list you use |
-| Plan dates | None for MVP. A plan is a long-running shared calendar of dated entries, viewed a week at a time. Optional start/end dates can be added later without breaking anything |
-| Servings | Stored on the recipe as the source states it (optional). Scaling is a best estimate. Plan entries have no servings |
-| Grocery list | A plain to-do list: one check state, remove, "Clear checked". Adding from a recipe copies text in once. One rolling list, not per-week |
-| Ingredients | The raw line as written is the source of truth; quantity/unit/name are a best-effort parse and may be empty |
-| Instructions | Markdown text. More structure (step order, timers, sections) comes later |
-| Units | The parser recognizes the common units plus clove, can, bunch, slice, pinch, and "to taste" |
-| Tags | Vault `meal` (Dinner, Dessert…) and `recipe_tags` both become plain tags |
-| Seed | From the Obsidian vault's recipe notes via a dry-run-first script. The full migration happens later |
-| Removed | `recipes.visibility`: access now comes from spaces plus open reading by link |
+| Topic               | Decision                                                                                                                                                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth                | Keep Neon Auth; each person has their own account                                                                                                                           |
+| ORM                 | Drizzle (already in place)                                                                                                                                                  |
+| Offline / PWA       | Dropped for v1. Online only, plus a web app manifest so it installs to the home screen                                                                                      |
+| Sharing             | One shared `spaces` table typed `recipe-book` / `meal-plan` / `grocery-list`, with one membership table, one invite table, and one role set (`owner` / `editor` / `viewer`) |
+| Default share role  | `editor`, with a view-only toggle. Viewers are fully read-only                                                                                                              |
+| Recipe read access  | Any signed-in user can open a recipe by its link. Membership controls **browsing** a book and **editing** it, not reading a single recipe. There are no secret recipes      |
+| Plan ↔ recipe       | Loose. A plan entry saves the recipe title when added, and the recipe link is optional. Free-text entries ("Leftovers", "Eating out") are allowed                           |
+| Plan ↔ grocery list | No tie. "Add to list" goes to the grocery list you use                                                                                                                      |
+| Plan dates          | None for MVP. A plan is a long-running shared calendar of dated entries, viewed a week at a time. Optional start/end dates can be added later without breaking anything     |
+| Servings            | Stored on the recipe as the source states it (optional). Scaling is a best estimate. Plan entries have no servings                                                          |
+| Grocery list        | A plain to-do list: one check state, remove, "Clear checked". Adding from a recipe copies text in once. One rolling list, not per-week                                      |
+| Ingredients         | The raw line as written is the source of truth; quantity/unit/name are a best-effort parse and may be empty                                                                 |
+| Instructions        | Markdown text. More structure (step order, timers, sections) comes later                                                                                                    |
+| Units               | The parser recognizes the common units plus clove, can, bunch, slice, pinch, and "to taste"                                                                                 |
+| Tags                | Vault `meal` (Dinner, Dessert…) and `recipe_tags` both become plain tags                                                                                                    |
+| Seed                | From the Obsidian vault's recipe notes via a dry-run-first script. The full migration happens later                                                                         |
+| Removed             | `recipes.visibility`: access now comes from spaces plus open reading by link                                                                                                |
 
 ### Data naming convention
 
@@ -44,11 +44,11 @@ A **space** is anything that can be shared: a recipe book, a meal plan, or a gro
 
 ### Roles (the same for every space type)
 
-| Capability | owner | editor (default) | viewer |
-|---|---|---|---|
-| See the space's contents | ✓ | ✓ | ✓ |
-| Add / edit / remove contents (recipes, plan entries, grocery items) | ✓ | ✓ | ✗ |
-| Invite, change roles, remove members; rename / delete the space | ✓ | ✗ | ✗ |
+| Capability                                                          | owner | editor (default) | viewer |
+| ------------------------------------------------------------------- | ----- | ---------------- | ------ |
+| See the space's contents                                            | ✓     | ✓                | ✓      |
+| Add / edit / remove contents (recipes, plan entries, grocery items) | ✓     | ✓                | ✗      |
+| Invite, change roles, remove members; rename / delete the space     | ✓     | ✗                | ✗      |
 
 Each space has exactly one owner, enforced in the database. Transferring ownership means changing two role rows.
 
@@ -94,6 +94,7 @@ The database is empty (checked 2026-09-22), so all changes are free. Use `drizzl
 User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **without** foreign keys into `neon_auth`, since Neon manages that schema. Member names, emails, and avatars are read from `neon_auth.user` (`name`, `email`, `image`) for display. Fallback if that schema ever changes: a local `profiles` table synced at sign-in.
 
 ### `spaces`
+
 - `id uuid pk`
 - `type text not null`: `'recipe-book' | 'meal-plan' | 'grocery-list'`
 - `name text not null`, `description text`
@@ -101,6 +102,7 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 - Unique `(id, type)`, which is the target for the composite foreign keys below
 
 ### `space_members`
+
 - `space_id` → spaces, cascade
 - `user_id uuid not null`
 - `role text not null`: `'owner' | 'editor' | 'viewer'`
@@ -110,6 +112,7 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 - Index `(user_id)` for "my spaces"
 
 ### `space_invites`
+
 - `id uuid pk`, `space_id` → spaces, cascade
 - `token text unique not null`: random, URL-safe
 - `role text not null default 'editor'`: `'editor' | 'viewer'`
@@ -117,6 +120,7 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 - Reusable until revoked
 
 ### `recipes`
+
 - `id uuid pk`
 - `space_id uuid not null`, `space_type text not null default 'recipe-book'` (check: `= 'recipe-book'`)
   - FK `(space_id, space_type)` → `spaces(id, type)`, cascade. This lets the database guarantee a recipe can only live in a recipe book.
@@ -132,6 +136,7 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 - **Removed:** `visibility`
 
 ### `recipe_ingredients`
+
 - `recipe_id` → recipes, cascade
 - `position int not null`
 - `section text`: sub-heading such as "To Serve" or "Cream Cheese Frosting"
@@ -140,10 +145,12 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 - PK `(recipe_id, position)`. The old `(recipe_id, ingredient_id)` key broke when a recipe used the same ingredient twice (the vault's carrot cake uses walnuts twice) and can't hold empty ingredient ids.
 
 ### `ingredients`
+
 - Unchanged: a global catalog with a unique name. Names are normalized by the parser (trimmed, lowercased, **singular**) so "onions" and "onion" match.
 - `category` is deferred until aisle grouping is wanted.
 
 ### `plan_entries`
+
 - `id uuid pk`
 - `space_id`, `space_type default 'meal-plan'`: composite FK → spaces, cascade
 - `date date not null`
@@ -154,6 +161,7 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 - Index `(space_id, date)`
 
 ### `grocery_items`
+
 - `id uuid pk`
 - `space_id`, `space_type default 'grocery-list'`: composite FK → spaces, cascade
 - `text text not null`: displayed and editable, e.g. "2 tbsp olive oil"
@@ -164,12 +172,12 @@ User ids are Neon Auth `neon_auth.user.id` (uuid), stored as `uuid` columns **wi
 
 ### What deleting does
 
-| Delete | Effect |
-|---|---|
-| A space | Its members, invites, and contents (recipes / entries / items) go with it |
-| A recipe | Its ingredient lines go; plan entries keep their title and lose the link; copies keep existing (`copied_from_recipe_id` set null) |
-| An ingredient | Parsed links on recipe lines and grocery items are cleared; raw text is untouched |
-| A user account | Spaces they own are left without an owner. That's rare; handle it with a later cleanup job |
+| Delete         | Effect                                                                                                                            |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| A space        | Its members, invites, and contents (recipes / entries / items) go with it                                                         |
+| A recipe       | Its ingredient lines go; plan entries keep their title and lose the link; copies keep existing (`copied_from_recipe_id` set null) |
+| An ingredient  | Parsed links on recipe lines and grocery items are cleared; raw text is untouched                                                 |
+| A user account | Spaces they own are left without an owner. That's rare; handle it with a later cleanup job                                        |
 
 Eight tables total. The only link across space types is the optional `plan_entries.recipe_id`.
 
@@ -180,7 +188,7 @@ Eight tables total. The only link across space types is the optional `plan_entri
 A pure function in the domain layer, unit-tested with real vault lines as fixtures:
 - Leading quantity: integers, decimals, `1/2`, `1 1/2`, unicode fractions (`½ ⅓ ¾`), ranges (`1-2` → upper value)
 - Unit: normalize spellings (`tablespoon(s)`/`tbsp`/`T` → `tbsp`, `ounces` → `oz`, and so on), including clove, can, bunch, slice, pinch
-- Name: the rest, minus trailing prep notes after a comma or ` - `, singularized
+- Name: the rest, minus trailing prep notes after a comma or `-`, singularized
 - "to taste" or no leading number → quantity empty
 - Parse failure is never an error. The line is stored raw with empty parsed fields.
 
@@ -215,16 +223,16 @@ Different units for the same ingredient stay as separate lines. That's acceptabl
 
 Designed at 375px first, with a bottom tab bar: **Recipes · Plan · Groceries**.
 
-| Route | Purpose |
-|---|---|
-| `/` | Library: book switcher, search, tag chips |
-| `/spaces/[id]/settings` | Name, members and roles, invite link with view-only toggle (the same screen for all three types) |
-| `/join/[token]` | Accept an invite |
+| Route                                | Purpose                                                                                                                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                  | Library: book switcher, search, tag chips                                                                                                                                       |
+| `/spaces/[id]/settings`              | Name, members and roles, invite link with view-only toggle (the same screen for all three types)                                                                                |
+| `/join/[token]`                      | Accept an invite                                                                                                                                                                |
 | `/recipes/new`, `/recipes/[id]/edit` | Form: book, title, description, tags, servings, time, source URL, image URL, ingredient lines (raw text, optional section, preview of what was parsed), instructions (markdown) |
-| `/recipes/[id]` | Detail: stepper, ingredients, instructions, add to plan, add to list, cook, adopt |
-| `/recipes/[id]/cook` | Cook mode |
-| `/plan?week=` | Weekly plan |
-| `/groceries` | Grocery list |
+| `/recipes/[id]`                      | Detail: stepper, ingredients, instructions, add to plan, add to list, cook, adopt                                                                                               |
+| `/recipes/[id]/cook`                 | Cook mode                                                                                                                                                                       |
+| `/plan?week=`                        | Weekly plan                                                                                                                                                                     |
+| `/groceries`                         | Grocery list                                                                                                                                                                    |
 
 ---
 
@@ -237,16 +245,16 @@ What's there:
 - **Body:** 59 notes use `## Ingredients` with `- [ ]` lines and `## Instructions` with a numbered list. Some NYT clippings use `## **INGREDIENTS**` / `## **PREPARATION**`. Some have sub-headings inside ingredients or state servings inline ("Makes 4 serving/s").
 - **Stubs that won't import as-is:** a PDF-only note, one-line notes, and a photo-plus-pasted-text note
 
-| Vault | App |
-|---|---|
-| H1 title (fallback: filename) | `title` |
-| `meal` + `recipe_tags` | `tags`, lowercased |
-| `source` | `source_url` |
-| `cover` (http URLs only; `![[...]]` embeds are skipped) | `image_url` |
-| `time` / `servings` / inline "Makes N serving" | `time_minutes` / `yield_servings`, best effort |
-| Ingredient lines (strip `- [ ]`); a plain line ending in `:` | `recipe_ingredients.raw` + parse; `section` |
-| Everything under the instructions heading | `instructions` as markdown, unchanged |
-| Relative file path | `external_ref` = `obsidian:<path>` |
+| Vault                                                        | App                                            |
+| ------------------------------------------------------------ | ---------------------------------------------- |
+| H1 title (fallback: filename)                                | `title`                                        |
+| `meal` + `recipe_tags`                                       | `tags`, lowercased                             |
+| `source`                                                     | `source_url`                                   |
+| `cover` (http URLs only; `![[...]]` embeds are skipped)      | `image_url`                                    |
+| `time` / `servings` / inline "Makes N serving"               | `time_minutes` / `yield_servings`, best effort |
+| Ingredient lines (strip `- [ ]`); a plain line ending in `:` | `recipe_ingredients.raw` + parse; `section`    |
+| Everything under the instructions heading                    | `instructions` as markdown, unchanged          |
+| Relative file path                                           | `external_ref` = `obsidian:<path>`             |
 
 Process: a `bun` script with the vault path from an env var. **Dry run first**: it prints what parsed, what was skipped and why, and lines with no parsed quantity. After your review it inserts into your "My Recipes" book. Re-runs skip anything whose `external_ref` already exists.
 
@@ -262,15 +270,15 @@ Unchanged pattern: `page/action → controller → use case → repository`, wir
 
 ### Changes to existing code
 
-| File | Change |
-|---|---|
-| `db/schema.ts` | All tables above |
-| `src/entities/models/recipe.model.ts` | Drop `visibility`; add `spaceId`, `tags`, `copiedFromRecipeId`, `externalRef`; `instructions` is markdown; nullable `timeMinutes` / `yieldServings`; ingredient input is `{ raw, section? }` |
-| `src/entities/models/recipe-ingredient.model.ts` | `raw`, `section`, nullable parsed fields |
-| `src/application/repositories/recipes.repository.interface.ts` | `getForUser` → `getBySpace(spaceId, { search, tag })`; add `delete`, `copyToSpace` |
-| `src/application/use-cases/recipes/*` | Use `requireSpaceRole` |
-| `app/actions/recipes.ts` | Structured ingredient rows instead of the pipe-delimited textarea |
-| `app/_components/*` | Replaced by the routes above |
+| File                                                           | Change                                                                                                                                                                                       |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/schema.ts`                                                 | All tables above                                                                                                                                                                             |
+| `src/entities/models/recipe.model.ts`                          | Drop `visibility`; add `spaceId`, `tags`, `copiedFromRecipeId`, `externalRef`; `instructions` is markdown; nullable `timeMinutes` / `yieldServings`; ingredient input is `{ raw, section? }` |
+| `src/entities/models/recipe-ingredient.model.ts`               | `raw`, `section`, nullable parsed fields                                                                                                                                                     |
+| `src/application/repositories/recipes.repository.interface.ts` | `getForUser` → `getBySpace(spaceId, { search, tag })`; add `delete`, `copyToSpace`                                                                                                           |
+| `src/application/use-cases/recipes/*`                          | Use `requireSpaceRole`                                                                                                                                                                       |
+| `app/actions/recipes.ts`                                       | Structured ingredient rows instead of the pipe-delimited textarea                                                                                                                            |
+| `app/_components/*`                                            | Replaced by the routes above                                                                                                                                                                 |
 
 ### New pieces
 
@@ -325,18 +333,18 @@ Phases 9–14 changed more than this table shows: see [ux-plan.md](./ux-plan.md)
 
 Everything in the build order shipped. Where the build differs from the spec above:
 
-| Area | Spec | Built | Why |
-|---|---|---|---|
-| Ingredient entry | A row per ingredient with add/remove/reorder | As specced since [ux-plan.md](./ux-plan.md) P9.4: a row per line (amount, unit, name), its note and optional flag in its ⋯ sheet, and section rows; a pasted list becomes a row per line. (At first it was one text box with a "How these will be read" preview.) | Itemized lines (ux-plan D23) need fields to edit |
-| Unit handling | Parser recognizes common units | Also: a bracketed alternate measure after a measuring unit scales ("110 g (⅓ cup)" → "220 g (⅔ cup)"); package sizes don't ("1 can (14 oz)"); spelled-out unit words follow the amount ("2 cups", "½ cup") | Found scaling real vault recipes |
-| Grocery merging | Merge same ingredient + same unit | Also skips an amount-less line already on the list ("Salt, to taste" once), and merges within one batch (garlic from three recipes becomes one line) | Found testing the plan's grocery button (then "add this week") |
-| Grocery list freshness | Request/response only | Live: a change reaches everyone with the list open (Ably, [ux-plan.md](./ux-plan.md) D21), with a refresh every 60 s as a safety net | Two people shopping see each other's check-offs as they happen |
-| Grocery lists | A third kind of space, loosely tied to plans | Since 2026-09-25, a plan's grocery list is part of the plan: its items carry the plan's id and it shares the plan's members. There are no list spaces (migration 0003 moved the old lists' items onto their owners' plans) | One set of members, nothing to keep in sync; joining a plan brings its list ([ux-plan.md](./ux-plan.md) D13) |
-| Default plan | Personal plan created on first visit | Created only if you're in none; a plan someone shared with you is the default over your own | A partner who joins your plan shouldn't land on an empty one of theirs |
-| Whose list "add to list" uses | A picker that remembers your last choice (cookie) | The default plan you can edit (a shared one beats your own), with a picker when you're in several; nothing stored in a cookie. The plan's grocery button adds onto its own plan's list | The common case is one shared plan |
-| "Add this week" | Entries that aren't eaten and have a recipe | Since Phase 13–14 ([ux-plan.md](./ux-plan.md) D38–D45): a meal has a cook day and eat days, and is checked off once, as cooked. One grocery button adds the meals cooking in a range picked from today (the next 3, 7 or 14 days, or all upcoming) that aren't cooked or on the list yet, each once. A second cooking of a recipe is bought again; a recipe already on the list from its own Add to list covers one meal of it. Typed entries are gone: everything planned comes from a recipe | Shopping happens mid-week or for more than a week; a meal is eaten over several days but cooked once |
-| Sign-in | — | Sign-in returns you to where you were going (e.g. an invite link), same-app paths only | Invite links have to survive signing up |
-| Install | Manifest + icons | Also an iPhone-only "Add to Home Screen" hint (dismissible); manifest and icons load signed out | Safari never offers install; browsers fetch the manifest without cookies |
+| Area                          | Spec                                              | Built                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Why                                                                                                          |
+| ----------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Ingredient entry              | A row per ingredient with add/remove/reorder      | As specced since [ux-plan.md](./ux-plan.md) P9.4: a row per line (amount, unit, name), its note and optional flag in its ⋯ sheet, and section rows; a pasted list becomes a row per line. (At first it was one text box with a "How these will be read" preview.)                                                                                                                                                                                                                              | Itemized lines (ux-plan D23) need fields to edit                                                             |
+| Unit handling                 | Parser recognizes common units                    | Also: a bracketed alternate measure after a measuring unit scales ("110 g (⅓ cup)" → "220 g (⅔ cup)"); package sizes don't ("1 can (14 oz)"); spelled-out unit words follow the amount ("2 cups", "½ cup")                                                                                                                                                                                                                                                                                     | Found scaling real vault recipes                                                                             |
+| Grocery merging               | Merge same ingredient + same unit                 | Also skips an amount-less line already on the list ("Salt, to taste" once), and merges within one batch (garlic from three recipes becomes one line)                                                                                                                                                                                                                                                                                                                                           | Found testing the plan's grocery button (then "add this week")                                               |
+| Grocery list freshness        | Request/response only                             | Live: a change reaches everyone with the list open (Ably, [ux-plan.md](./ux-plan.md) D21), with a refresh every 60 s as a safety net                                                                                                                                                                                                                                                                                                                                                           | Two people shopping see each other's check-offs as they happen                                               |
+| Grocery lists                 | A third kind of space, loosely tied to plans      | Since 2026-09-25, a plan's grocery list is part of the plan: its items carry the plan's id and it shares the plan's members. There are no list spaces (migration 0003 moved the old lists' items onto their owners' plans)                                                                                                                                                                                                                                                                     | One set of members, nothing to keep in sync; joining a plan brings its list ([ux-plan.md](./ux-plan.md) D13) |
+| Default plan                  | Personal plan created on first visit              | Created only if you're in none; a plan someone shared with you is the default over your own                                                                                                                                                                                                                                                                                                                                                                                                    | A partner who joins your plan shouldn't land on an empty one of theirs                                       |
+| Whose list "add to list" uses | A picker that remembers your last choice (cookie) | The default plan you can edit (a shared one beats your own), with a picker when you're in several; nothing stored in a cookie. The plan's grocery button adds onto its own plan's list                                                                                                                                                                                                                                                                                                         | The common case is one shared plan                                                                           |
+| "Add this week"               | Entries that aren't eaten and have a recipe       | Since Phase 13–14 ([ux-plan.md](./ux-plan.md) D38–D45): a meal has a cook day and eat days, and is checked off once, as cooked. One grocery button adds the meals cooking in a range picked from today (the next 3, 7 or 14 days, or all upcoming) that aren't cooked or on the list yet, each once. A second cooking of a recipe is bought again; a recipe already on the list from its own Add to list covers one meal of it. Typed entries are gone: everything planned comes from a recipe | Shopping happens mid-week or for more than a week; a meal is eaten over several days but cooked once         |
+| Sign-in                       | —                                                 | Sign-in returns you to where you were going (e.g. an invite link), same-app paths only                                                                                                                                                                                                                                                                                                                                                                                                         | Invite links have to survive signing up                                                                      |
+| Install                       | Manifest + icons                                  | Also an iPhone-only "Add to Home Screen" hint (dismissible); manifest and icons load signed out                                                                                                                                                                                                                                                                                                                                                                                                | Safari never offers install; browsers fetch the manifest without cookies                                     |
 
 **Obsidian seed:** ran once into "My Recipes": 62 of 75 notes imported (708 ingredient lines, 88% with a parsed amount). The 13 skipped notes have no ingredients section (PDF-only, links, photos) and need entering by hand; the dry-run report lists them.
 
@@ -346,4 +354,3 @@ Everything in the build order shipped. Where the build differs from the spec abo
 - Joining is always an explicit "Join" tap, never on opening the link (link previews fetch URLs).
 - Deleting a book or a plan (with its grocery list) deletes its contents for everyone in it.
 - The app icon is the design system's leaf on a herb-green tile; the drawing is in `app/_lib/app-icon.tsx`.
-
