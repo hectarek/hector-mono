@@ -208,19 +208,19 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
       NoObjectGeneratedError.isInstance(err) ||
       NoOutputGeneratedError.isInstance(err)
     ) {
-      this.logger.warn("The model's answer wasn't a recipe", describe(err));
+      this.logger.warn("The model's answer wasn't a recipe", errorFields(err));
       return new RecipeReadError("no-recipe-found", "No recipe in the answer", {
         cause: err,
       });
     }
     // The Gateway answers 402 when a key's budget or the account's credit is spent (D86).
     if (GatewayError.isInstance(err) && err.statusCode === 402) {
-      this.logger.warn("AI Gateway credit or budget spent", describe(err));
+      this.logger.warn("AI Gateway credit or budget spent", errorFields(err));
       return new RecipeReadError("budget-paused", "AI budget reached", {
         cause: err,
       });
     }
-    this.logger.error("Reading a recipe failed", describe(err));
+    this.logger.error("Reading a recipe failed", errorFields(err));
     return new RecipeReadError(
       "service-unavailable",
       "Reading a recipe failed",
@@ -231,7 +231,7 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
 
 // Just enough to diagnose. The SDK's errors carry the whole request, so logging them as they
 // are would log the recipe, or a photo as base64.
-function describe(err: unknown): Record<string, unknown> {
+function errorFields(err: unknown): Record<string, unknown> {
   if (!(err instanceof Error)) {
     return { error: String(err) };
   }

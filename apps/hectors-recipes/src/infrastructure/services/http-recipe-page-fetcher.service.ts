@@ -183,7 +183,7 @@ export class HttpRecipePageFetcherService implements IRecipePageFetcherService {
             (err: unknown) =>
               err instanceof PageFetchError
                 ? fail(err.reason, err.message)
-                : fail("unreachable", describe(err), err),
+                : fail("unreachable", errorKind(err), err),
           );
         },
       );
@@ -197,7 +197,7 @@ export class HttpRecipePageFetcherService implements IRecipePageFetcherService {
         } else if (err instanceof AddressNotAllowedError) {
           fail("not-allowed", err.message);
         } else {
-          fail("unreachable", describe(err), err);
+          fail("unreachable", errorKind(err), err);
         }
       });
     });
@@ -268,7 +268,7 @@ function decodeText(body: Buffer, contentType: string): string {
 }
 
 // An error's kind for the log, never its whole object.
-function describe(err: unknown): string {
+function errorKind(err: unknown): string {
   const { code } = err as NodeJS.ErrnoException;
   return code ?? (err instanceof Error ? err.name : "Unknown error");
 }
