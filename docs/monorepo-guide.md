@@ -241,6 +241,7 @@ Every push to a pull request, and every merge, starts a deploy in each Vercel pr
 - Vercel skips the build on exit 0 and builds on anything else. `--exit-code` exits 1 when the app is affected, and 1 too when the earlier commit isn't in Vercel's clone (`GitRefNotFound`), so a doubtful case builds.
 - It runs before `bun install`, so `bunx` fetches `turbo` (the 2.x line, as the root's). Vercel's build image has Bun before the install (its install step runs `bun install` without fetching Bun). If `bunx` were ever missing, the command would fail, and a failed command builds.
 - Checked on 2026-10-08 against commits that changed only `@repo/ui` (every app builds), only one app's code or Markdown (that app builds), and only the repo's own `docs/` and `AGENTS.md` (none builds).
+- A redeploy of an app's last successful deploy is skipped too: `VERCEL_GIT_PREVIOUS_SHA` is then the commit being redeployed, so nothing is affected, and Vercel marks the deploy Canceled with a link to the ignored build step (seen 2026-10-26). A changed environment variable reaches an app only with the next commit that builds it.
 - A Markdown-only change inside an app still builds that app. Excluding `*.md` from the `build` task's `inputs` doesn't help: in Turborepo 2.11.7, `--tasks build` reports a task "package is affected" for any file in its package.
 
 ### Vercel project settings
