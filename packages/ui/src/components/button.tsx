@@ -28,6 +28,8 @@ const buttonVariants = cva(
         lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         label:
           "h-10 gap-1.5 px-5 font-mono text-[11px] tracking-[0.18em] uppercase",
+        "label-sm":
+          "h-8 gap-1.5 px-3 font-mono text-[10px] tracking-[0.16em] uppercase [&_svg:not([class*='size-'])]:size-3.5",
         icon: "size-8",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",

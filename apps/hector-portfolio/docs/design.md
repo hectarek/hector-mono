@@ -65,7 +65,7 @@ If something else needs color, we make it ink, paper, or accent. Anything else d
 
 ## Component Hints
 
-- **Buttons** — `size="label"` (mono, uppercase, tracked) with the `default` variant (solid ink on paper) or `outline` (hairline border). Never restyle a Button's type or colour through `className`. Tertiary is a plain mono link with an accent icon.
+- **Buttons** — `size="label"` (mono, uppercase, tracked) with the `default` variant (solid ink on paper) or `outline` (hairline border). A project card's Live / Code / Case study row uses `size="label-sm"`, the same style at 32px. Never restyle a Button's type or colour through `className`. Tertiary is a plain mono link with an accent icon.
 - **Project cards** — hairline border, accent on hover, status chip in the image corner, a key metric in the top-right of the card body in accent.
 - **Proof / approach grids** — `gap-px` on a `bg-border` grid (inside `border border-border`) so cells share clean hairlines without double borders.
 - **Timeline** — single hairline rule on the left, small status dot at each role, mono period label.

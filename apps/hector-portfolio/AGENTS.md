@@ -80,7 +80,7 @@ Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the 
 - Small animations via Framer Motion
 - Code snippets and diagrams as visuals
 - Colours come from the shared portfolio theme (`@repo/ui/styles/themes/portfolio.css`, `data-theme="portfolio"` on `<html>`), through the contract tokens only: ink is `foreground`, soft ink `muted-foreground` (also for small labels: faint ink `muted-foreground/70` failed WCAG contrast for text, so it's only for non-text marks such as bullet dots), paper `background`, the second paper `muted`, a rule `border`, a strong rule `foreground/25`, honey `accent`. The design lint fails the build on anything else.
-- Buttons in the mono, uppercase label style use `size="label"` with the `default` or `outline` variant; don't restyle a Button's type or colour.
+- Buttons in the mono, uppercase label style use `size="label"` with the `default` or `outline` variant, and `size="label-sm"` (32px) in a project card's Live / Code / Case study row; don't restyle a Button's type or colour (the design lint fails on it).
 - Fonts: Geist is `font-sans`, IBM Plex Mono `font-mono` (display type too), Instrument Serif `font-serif`. The dot-grid texture inside a card is `data-texture="dot-grid"` and the handwritten accent `data-font="hand"`, both styled in `app/globals.css`.
 
 ## Commands
