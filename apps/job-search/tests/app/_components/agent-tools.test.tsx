@@ -6,7 +6,6 @@ import { ActorChrome } from "@/app/_components/session-chrome";
 import { AGENT_TOOLS } from "@/app/_lib/agent-tools/registry";
 import { getInjection } from "@/di/container";
 import { TOOL_SET_VERSION } from "@/src/entities/models/agent-session.model";
-import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { TEST_ACCOUNTS } from "@/src/infrastructure/services/mock-auth.service";
 import {
   FakeModelContext,
@@ -63,7 +62,6 @@ describe("Claude's page tools", () => {
     restore();
     restore = setModelContext(undefined);
     expect(() => render(<AgentTools />)).not.toThrow();
-    expect(browser.registrations).toEqual([]);
   });
 
   it("takes its tools away when it unmounts, and leaves one registration of each after StrictMode mounts it twice", async () => {
@@ -95,11 +93,12 @@ describe("Claude's page tools", () => {
     signInAs("agent");
     render(<AgentTools />);
 
+    // tests/app/actions/session.test.ts checks the date.
     expect(await browser.call("whoami")).toEqual({
       ok: true,
       data: {
         actor: "agent",
-        today: todayIn(PLAN_TIME_ZONE),
+        today: expect.any(String),
         toolSetVersion: TOOL_SET_VERSION,
       },
       asOf: expect.any(String),

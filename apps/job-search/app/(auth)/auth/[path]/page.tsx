@@ -85,7 +85,7 @@ async function AuthForm({
         size="lg"
         nativeButton={false}
         render={<Link href={welcomeHref} />}
-        className="-ml-2 self-start"
+        className="min-h-11 -ml-2 self-start"
       >
         <ChevronLeft data-icon="inline-start" />
         Welcome

@@ -13,9 +13,13 @@ const OWNER_ID = TEST_ACCOUNTS.owner.user.id;
 // What a page or action does after asking who's acting: read its data.
 async function readsAfter(helper: () => Promise<unknown>) {
   const query = mock(async () => {});
-  const outcome = await helper()
-    .then(query)
-    .catch((err: unknown) => err);
+  let outcome: unknown;
+  try {
+    await helper();
+    await query();
+  } catch (err) {
+    outcome = err;
+  }
   return { outcome, queried: query.mock.calls.length > 0 };
 }
 

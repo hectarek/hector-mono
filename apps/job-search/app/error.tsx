@@ -27,12 +27,13 @@ export default function ErrorPage({
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex-row justify-center">
-          <Button size="lg" onClick={reset}>
+          <Button size="lg" className="min-h-11" onClick={reset}>
             Try again
           </Button>
           <Button
             variant="secondary"
             size="lg"
+            className="min-h-11"
             nativeButton={false}
             render={<Link href="/" />}
           >

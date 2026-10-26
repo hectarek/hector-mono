@@ -17,7 +17,12 @@ export default function NotFound() {
           <EmptyDescription>This page doesn&apos;t exist.</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button size="lg" nativeButton={false} render={<Link href="/" />}>
+          <Button
+            size="lg"
+            className="min-h-11"
+            nativeButton={false}
+            render={<Link href="/" />}
+          >
             This week
           </Button>
         </EmptyContent>
