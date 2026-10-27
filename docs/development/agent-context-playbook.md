@@ -94,6 +94,10 @@ Work that takes more than one session (a feature pass, a migration, a review's f
 
 One plan per stream of work: update it rather than starting a parallel doc, and refer to PRs as `hectarek/hector-mono#n`.
 
+### A spec and live tasks
+
+Where Hector chooses it, a plan doc becomes the initial spec once its units are tasks in his private tracker: one per unit and one per need from him, under the same numbers. The spec keeps its decisions, requirements and units, and a changed decision is still marked revised in it. It drops the live parts: Status points to the tracker, unit lines carry no state, and Evidence and the Session log stop. Each session records its progress in the unit's task instead: its criteria, notes and status. [`apps/job-search/docs/build-plan.md`](../../apps/job-search/docs/build-plan.md) works this way since 2026-10-27.
+
 ---
 
 ## Where docs live

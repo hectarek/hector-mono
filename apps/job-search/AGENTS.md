@@ -6,7 +6,7 @@
 
 A private job search workspace. Its owner and Claude both keep it current, and each day it shows what needs a decision and what's due. Claude is to work in it through page tools (WebMCP) from its own browser profile. Clean architecture on recipes' pattern: [../../docs/clean-architecture.md](../../docs/clean-architecture.md), with `apps/hectors-recipes` as the reference.
 
-The plan of record is [docs/build-plan.md](docs/build-plan.md): read its Status and How to resume before starting any of its tasks. Setting up Claude's browser: [docs/agent-access.md](docs/agent-access.md).
+[docs/build-plan.md](docs/build-plan.md) is the initial spec: requirements, decisions (KTDs) and units. What's done and what's left lives in Hector's private task tracker, one task per unit under the same U number: start from the unit's task, then follow the spec's How to work from this spec. Setting up Claude's browser: [docs/agent-access.md](docs/agent-access.md).
 
 ## Privacy (R24)
 

@@ -1,6 +1,6 @@
 ---
 
-title: Job Search App - Plan
+title: Job Search App - Spec
 type: feat
 date: 2026-10-23
 deepened: 2026-10-23
@@ -9,73 +9,63 @@ product_contract_source: ce-plan-bootstrap
 execution: code
 ---
 
-# Job Search App - Plan
+# Job Search App - Spec
 
-The plan of record for building `apps/job-search`. It follows the repo's plan-doc convention ([agent-context playbook](../../../docs/development/agent-context-playbook.md#work-that-spans-sessions-the-plan-doc)): Status and How to resume first, then the plan, then Conventions, Needs from Hector and the Session log. A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
+The initial spec for building `apps/job-search`: its requirements (R1 to R25), decisions (KTD1 to KTD21) and units (U1 to U16). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H6) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
 
 ---
 
 ## Status
 
-|                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Phase             | 2, Pipeline: U5 and U6 are merged to `main` (hectarek/hector-mono#65, 2026-10-27) but for their page tools, which wait for U4's gate (revised 2026-10-26). Phase 1: U1 to U3 and U4's local part are merged to `main` (hectarek/hector-mono#56, follow-ups hectarek/hector-mono#61). Production's deploy of 412acca (hectarek/hector-mono#65) runs with its database, both account ids and Phase 2's tables, which the test project has too. U1 and U3 are done. U2 and U4's local part wait on checks that need H2 or H3 (their Evidence says which)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Next task         | A sign-in check on production (This week, Jobs, Companies and Settings, and Claude's page, which reads `activity`); localhost and sign-up off on production's Neon Auth (H1's rest, H2); the test project's accounts (H2) and H3, which unblock the pending checks in U2, U4, U5 and U6, and U4's flow and spike, the gate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Waiting on Hector | whether a job keeps a tier of its own (R1) or shows its company's, as U6 built it; from Phase 2's review, whether a dismissed proposal's posting link stays fixed for his own edits too until he reopens it (Claude's are refused), and whether Accept, Dismiss and Reopen check the `updatedAt` he read, so a proposal Claude changed meanwhile isn't decided unseen (R22 names edits); localhost access and sign-up off on production's Neon Auth (H1's rest, H2), or his OK for Claude to do it: its Google sign-in is removed (2026-10-26); the test project's accounts (H2); H3 (Claude's browser: the Playwright MCP server and the permission rules). Answered 2026-10-27: no Whiteboard board for Phase 2's PR; Claude applies Phase 2's migrations to production and the test project. Answered 2026-10-26: U5 started before U4's gate; a record's history keeps its 50-change cap; `list_activity` is one of U5's page tools; U6 follows on the same branch, one PR for Phase 2 |
-| Last updated      | 2026-10-27                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+In Hector's private task tracker, not here (since 2026-10-27). The Session log's last entries hold the status this doc last recorded.
 
 ---
 
-## How to resume
+## How to work from this spec
 
-1. Read Status above, then find the first open task:
-
-   ```bash
-   grep -nE "^- \[( |~)\] \*\*U" apps/job-search/docs/build-plan.md | head -5
-   ```
-
-2. Read the root `AGENTS.md`, `apps/job-search/AGENTS.md` (from U1 on), `packages/ui/AGENTS.md` for UI work, and `docs/clean-architecture.md`.
-3. Read the task's unit below, then only the KTDs and requirements it cites.
-4. Check that the branch and recent commits match the Session log.
-5. Before stopping, update Status, the task's state and Evidence, and add a Session log line.
+1. Find the unit's task in Hector's task tracker. Its acceptance criteria say what's left, its dependencies what it waits on (often a need from Hector), and its notes what earlier sessions did.
+2. Read the root `AGENTS.md`, `apps/job-search/AGENTS.md`, `packages/ui/AGENTS.md` for UI work, and `docs/clean-architecture.md`.
+3. Read the unit's section below, then only the KTDs and requirements it cites.
+4. Check that the branch and recent commits match the task's notes.
+5. Before stopping, record progress in the task: its criteria, notes and status. Change this doc only for a decision that changes it, marked revised with its date.
 
 ---
 
-## Task list
+## Unit list
 
-Tasks are this plan's units, so the tracker and the plan share IDs (see Conventions).
+Each unit is one task in Hector's task tracker, where its state lives (see Conventions).
 
 **Phase 1: Foundation and the agent path**
-- [x] **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
-- [~] **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
-- [x] **U3** Action envelope and activity log — C · KTD4, KTD7
-- [~] **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
+- **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
+- **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
+- **U3** Action envelope and activity log — C · KTD4, KTD7
+- **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
 
 **Phase 2: Pipeline**
-- [~] **U5** Companies, lead sources and settings — C · KTD3
-- [~] **U6** Jobs, status lifecycle and the review queue — C · KTD7, KTD8
+- **U5** Companies, lead sources and settings — C · KTD3
+- **U6** Jobs, status lifecycle and the review queue — C · KTD7, KTD8
 
 **Phase 3: People, practice and the week**
-- [ ] **U7** People, interactions and outreach logging — C · KTD9
-- [ ] **U8** Practice log — C
-- [ ] **U9** This week, the weekly review and fresh views — C · KTD9, KTD15
-- [ ] **U10** Tool parity check and agent docs — C · KTD5, KTD16
+- **U7** People, interactions and outreach logging — C · KTD9
+- **U8** Practice log — C
+- **U9** This week, the weekly review and fresh views — C · KTD9, KTD15
+- **U10** Tool parity check and agent docs — C · KTD5, KTD16
 
 **Phase 4: Cutover**
-- [ ] **U11** Import and cutover — C+H · KTD14 · needs H5, H6
+- **U11** Import and cutover — C+H · KTD14 · needs H5, H6
 
 **Phase 5: Interviews and lead-source yield**
-- [ ] **U12** Interview rounds and lead-source yield — C · KTD7
+- **U12** Interview rounds and lead-source yield — C · KTD7
 
 **Phase 6: Calendar**
-- [ ] **U13** Google Calendar connection — C+H · KTD10 · needs H4
-- [ ] **U14** Calendar view, scheduling and linking — C · KTD11, KTD12
+- **U13** Google Calendar connection — C+H · KTD10 · needs H4
+- **U14** Calendar view, scheduling and linking — C · KTD11, KTD12
 
 **Phase 7: Profile and fit**
-- [ ] **U15** Profile, fit checklist and fit notes — C · KTD13
+- **U15** Profile, fit checklist and fit notes — C · KTD13
 
 **Phase 8: Public write-up**
-- [ ] **U16** Public README and demo — C · KTD16
+- **U16** Public README and demo — C · KTD16
 
 ---
 
@@ -917,7 +907,7 @@ Each phase is one branch and PR and leaves a usable app:
     - `jobs.repository.test.ts` and `notes.repository.test.ts` keep another owner's rows out of every query, and pin the queue's advisory lock on PGlite and the lock-first order on both backends. They caught the jobs mock deleting another owner's status moves, now fixed.
     - The `updated_at` bump is one helper for the repositories (`nextUpdatedAt` in `base.repository.ts`) and one for the mocks.
     - Checks: lint, types and dead code pass; 463 tests and 74 screen tests pass; a build with placeholder values passes, every route partly prerendered.
-    - Left for later: one envelope helper for every action, and one hook for the forms' conflict handling (two maintainability notes, in Hector's backlog). Hector's calls, in Status.
+    - Left for later: one envelope helper for every action, and one hook for the forms' conflict handling (two maintainability notes, in Hector's task tracker). Hector's calls are tasks there too.
   - Pending:
     - the registry entries once U4's gate passes, with `TOOL_SET_VERSION` bumped: `find_jobs` and `get_job` (read-only, outside text), `propose_job`, `update_job`, `set_job_status`, `close_job` (consequential) and `add_note`
     - with them, from the review's agent-native pass: `list_sources` (read-only), so Claude names a source already listed rather than adding a near-miss; a note's change that names its job, so `start_session` can place it; descriptions that say what the schemas can't (`find_jobs` reads accepted jobs by default, where `updatedAt` comes from, dates are Eastern and default to today, what a move sets, `update_job` refusing applied-on from Claude, `save_company` creating despite a similar name); labels for `id` and `updatedAt`; and `queue-full` naming the cap. U10's parity map then maps `addJob` to `propose_job` and checks the pages' own reads too.
@@ -1055,7 +1045,7 @@ Each phase is one branch and PR and leaves a usable app:
   - A commit with an owner id that isn't in the target's users: stops before any write.
 - **Verification:**
   - After the commit run, the app's counts for the cutover week match the sheet's, and no routine references the sheet.
-  - In the first week after cutover, Hector's part of a daily session takes about 10 minutes; if it takes longer, the Session log records what slowed it.
+  - In the first week after cutover, Hector's part of a daily session takes about 10 minutes; if it takes longer, its task's notes record what slowed it.
 
 ### Phase 5: Interviews and lead-source yield
 
@@ -1193,7 +1183,7 @@ Each phase is one branch and PR and leaves a usable app:
 - The app's `AGENTS.md` and `docs/agent-access.md` describe what shipped.
 - The repo holds no specific of the search.
 - No code from abandoned approaches remains.
-- Status, the Task list and the Session log are current.
+- Every task for this app in Hector's task tracker is done.
 
 **Each unit**
 
@@ -1203,24 +1193,26 @@ Each phase is one branch and PR and leaves a usable app:
 - Migrations are applied with Hector's OK at that moment.
 - Screenshots come from the test project.
 - A unit that ships UI is checked at 375 px in light and dark mode, and its new touch targets are at least 44 × 44 px, as recipes' UI definition of done requires; the shared Button's default height is smaller.
-- Its Task list line is `[x]`, with Evidence under the unit.
+- Its task in Hector's task tracker is done, with its evidence in the task's notes.
 
 ---
 
 ## Conventions
 
-- **Task lines:** `- [ ] **U<n>** Title — owner · KTDs · needs H<n>`. States: `[ ]` open, `[~]` in progress, `[x]` done, `[-]` dropped with a reason. Tasks are this plan's units, so the tracker and the plan share one set of IDs.
+- **Unit lines:** `- **U<n>** Title — owner · KTDs · needs H<n>`, with no state. Each unit is a task in Hector's task tracker under the same U number, and so is each need from Hector under its H number; their state is the task's status. Until 2026-10-27 the lines here carried it: `[ ]` open, `[~]` in progress, `[x]` done, `[-]` dropped with a reason.
 - **Owners:** C is Claude, H is Hector, C+H is Claude after Hector's OK at that moment (migrations, real data, account and service setup).
 - **Branches and commits:** one branch and PR per phase, `feat/job-search-p<n>-<topic>`; one commit per unit, `feat(job-search): U<n> <summary>`. Refer to PRs as `hectarek/hector-mono#n`.
 - **Decisions:** the Key Decisions and KTDs above. A changed decision is marked revised with the date, not rewritten silently.
-- **Evidence:** when a unit is done, add **Evidence** under it: what changed, the checks run, the PR.
+- **Evidence:** a unit's evidence (what changed, the checks run, the PR) goes in its task's notes. The Evidence under U1 to U6 is the record up to 2026-10-27.
 - **Privacy:** R24 applies to every file, commit and PR. Private material goes to Hector's private docs or the app's database.
 
 ---
 
 ## Needs from Hector
 
-| #   | Need                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Unblocks | Status                                                                                                                                                                                                                                                                                                                                                                 |
+Each need is a task in Hector's task tracker, assigned to him, where its status lives now. The Status column is as of 2026-10-27.
+
+| #   | Need                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Unblocks | Status on 2026-10-27                                                                                                                                                                                                                                                                                                                                                   |
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | H1  | OK to create the Neon test project and the Vercel project (C+H). Create the production Neon project and enter its database URL in Vercel yourself, so no production secret passes through a Claude session (KTD17). The Vercel project's name and address stay out of the repo                                                                                                                                                                                                                                                                                                                                                         | U1       | OK given 2026-10-24. Done: the test project; Hector's production Neon project and Vercel project; Preview's variables, from the test project; production's `DATABASE_URL` (Hector, 2026-10-26). Open: turning off localhost on production's Neon Auth (KTD17)                                                                                                          |
 | H2  | Create Claude's account with an email you control, and sign it in once in Claude's browser profile; Claude never types the password. On the test project, create an owner, an agent and a third account (U2's check) in the Neon console; their ids, and the agent's email and password for the flows, go in the app's `.env`. Once the accounts exist, close sign-up in each Neon project, the test project first: turn on `disable_sign_up` in the email-and-password settings, and remove Neon Auth's shared Google provider, since the app doesn't use it and email sign-up being off doesn't stop a Google one (found 2026-10-24) | U2, U4   | In part: both production accounts, and their ids in Vercel's Production environment; the Google provider removed from production's Neon Auth (2026-10-26; the test project's has none). Open: signing Claude in once in Claude's browser profile (after H3); the test project's three accounts (it has none yet) and their `.env` values; sign-up off in both projects |
@@ -1266,6 +1258,7 @@ Each phase is one branch and PR and leaves a usable app:
 - **2026-10-26** — Hector chose to build U6 on the same branch, then open one PR for Phase 2. U6 is built (`feat(job-search): U6 jobs, status moves and the review queue`), all but its page tools, which wait for U4's gate as U5's do: jobs with their status moves, Claude's proposals and Hector's review, duplicate postings and the pending cap under the queue's lock, and notes. Contacts moved to U7, which creates people. A job shows its company's tier rather than one of its own, Hector's call (R1). Migration `0002_jobs_and_notes` is on no real database yet. Checks pass (427 tests, 70 screen tests, a placeholder build). **Next:** Phase 2's code review, its fixes and Whiteboard board, then the PR.
 - **2026-10-27** — Phase 2 reviewed (ce-code-review, 2026-10-26): 11 findings, all P2 or P3, fixed with tests in `fix(job-search): Phase 2 review fixes` (U6's Evidence lists them). Checks pass (463 tests, 74 screen tests, a placeholder build). Phase 2's PR is hectarek/hector-mono#65, with no Whiteboard board: Hector skipped it. **Next:** Hector's review, with production's migrations first.
 - **2026-10-27** — Hector merged hectarek/hector-mono#65, and production deployed 412acca before either migration ran. At his request Claude applied `0001_companies_sources_settings` and `0002_jobs_and_notes` through the Neon MCP about ten minutes later: a temporary branch first, then production, with drizzle's bookkeeping rows, so `db:migrate:production` finds nothing to apply. Vercel logged no runtime errors in between. The test project got both the same way, with his OK. **Next:** a sign-in check on production; localhost and sign-up off on production's Neon Auth; H2 and H3, then U4's gate.
+- **2026-10-27** — This doc becomes the build's initial spec. Its units, Hector's needs and his open decisions are tasks in his task tracker, which from now on holds what's done and what's left; the Status table and the task states are gone from here, and this log ends with this entry. Sessions record their progress in the tasks' notes.
 
 ---
 
