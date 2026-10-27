@@ -8,6 +8,20 @@
       "when": 1792803094365,
       "tag": "0000_activity",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793035220520,
+      "tag": "0001_companies_sources_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793037647419,
+      "tag": "0002_jobs_and_notes",
+      "breakpoints": true
     }
   ]
 }

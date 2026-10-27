@@ -2,7 +2,7 @@
 
 A private job search workspace: its owner and an AI agent both keep it current, and each day it shows what needs a decision and what's due. The agent is to work in the app through page tools (WebMCP) from its own browser profile. Part of [hector-mono](../../README.md).
 
-Status: the foundation, not yet a tracker. It has sign-in for the owner's and the agent's accounts, an activity log of every change, and the agent's first page tools. The plan of record is [docs/build-plan.md](docs/build-plan.md); setting up the agent's browser is in [docs/agent-access.md](docs/agent-access.md).
+Status: the pipeline, not yet the whole tracker. It has sign-in for the owner's and the agent's accounts, an activity log of every change, the agent's first page tools, companies, lead sources and the owner's settings, and jobs: their status moves, notes and the queue where the agent's finds wait for the owner's review. People, practice and the week come next. The plan of record is [docs/build-plan.md](docs/build-plan.md); setting up the agent's browser is in [docs/agent-access.md](docs/agent-access.md).
 
 > Agent context lives in [`AGENTS.md`](./AGENTS.md). Read it before making changes.
 

@@ -68,3 +68,29 @@ export class HumanOnlyError extends Error {
     super(message, options);
   }
 }
+
+// A posting already on a job, whatever its review (R20, docs/build-plan.md KTD8). It carries that
+// job: where it stands and, when dismissed, why.
+export class DuplicateError extends Error {
+  override name = "DuplicateError";
+
+  constructor(
+    readonly existing: unknown,
+    message = "This posting is already on a job.",
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
+
+// Claude's proposals waiting for Hector's review are at the cap his settings set (KTD8).
+export class QueueFullError extends Error {
+  override name = "QueueFullError";
+
+  constructor(
+    message = "The review queue is full: Hector reviews what's waiting first.",
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
