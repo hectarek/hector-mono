@@ -35,6 +35,7 @@ describe("the settings page", () => {
     const sources = within(page.getByRole("region", { name: "Lead sources" }));
     expect(sources.getByText(name)).toBeTruthy();
     expect(sources.getByLabelText("New source's name")).toBeTruthy();
+    expect(page.getByRole("region", { name: "History" })).toBeTruthy();
   });
 
   // R21, KTD3: settings are Hector's alone, and Claude's session sees them off.

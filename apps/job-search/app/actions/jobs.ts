@@ -10,7 +10,12 @@ import {
   toActionError,
 } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
-import type { Job, JobDetail, JobPage } from "@/src/entities/models/job.model";
+import type {
+  DeletedJob,
+  Job,
+  JobDetail,
+  JobPage,
+} from "@/src/entities/models/job.model";
 
 // Jobs and the review queue (docs/build-plan.md U6): plain-argument actions that answer an envelope
 // and never redirect (KTD4). find_jobs, get_job, propose_job, update_job, set_job_status and
@@ -124,8 +129,8 @@ export async function reopenProposal(
 
 export async function deleteJob(
   input: unknown,
-): Promise<ActionResult<{ id: string; role: string }>> {
-  let deleted: { id: string; role: string };
+): Promise<ActionResult<DeletedJob>> {
+  let deleted: DeletedJob;
   try {
     deleted = await getInjection("IDeleteJobController")(
       input,
@@ -139,8 +144,8 @@ export async function deleteJob(
     );
   }
   revalidatePath("/jobs");
-  revalidatePath("/jobs/dismissed");
   revalidatePath(`/jobs/${deleted.id}`);
+  revalidatePath(`/companies/${deleted.companyId}`);
   revalidatePath("/agent");
   return succeeded(deleted);
 }
@@ -158,7 +163,6 @@ async function write(
     return toActionError(err, actionLogger(op), fallback);
   }
   revalidatePath("/jobs");
-  revalidatePath("/jobs/dismissed");
   revalidatePath(`/jobs/${job.id}`);
   revalidatePath(`/companies/${job.company.id}`);
   revalidatePath("/agent");

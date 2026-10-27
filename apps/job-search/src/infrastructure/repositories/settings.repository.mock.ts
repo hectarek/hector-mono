@@ -4,6 +4,7 @@ import type {
   Settings,
   SettingsValues,
 } from "@/src/entities/models/settings.model";
+import { nextUpdatedAt } from "@/src/infrastructure/repositories/updated-at.mock";
 
 // Each owner's settings in memory. Like the table, a second first save fails, and each update
 // moves updatedAt on by at least a millisecond.
@@ -30,11 +31,7 @@ export class MockSettingsRepository implements ISettingsRepository {
     if (!previous) {
       throw new DatabaseOperationError("update found no settings");
     }
-    return this.put(
-      ownerId,
-      values,
-      new Date(Math.max(Date.now(), previous.getTime() + 1)),
-    );
+    return this.put(ownerId, values, nextUpdatedAt(previous));
   }
 
   private put(

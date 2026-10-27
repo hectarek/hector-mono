@@ -6,6 +6,7 @@ import Link from "next/link";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { JobNotes } from "@/app/_components/job-notes";
 import { JobStatusForm } from "@/app/_components/job-status-form";
+import { OnlyHector } from "@/app/_components/only-hector";
 import { ProposalReview } from "@/app/_components/proposal-review";
 import { RecordHistory } from "@/app/_components/record-history";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -82,15 +83,18 @@ export default async function JobPage({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="secondary"
-              size="lg"
-              nativeButton={false}
-              render={<Link href={`/jobs/${job.id}/edit`} />}
-              className="min-h-11"
-            >
-              Edit
-            </Button>
+            {/* A dismissed proposal changes only once Hector reopens it (R20). */}
+            {human || job.reviewState !== "dismissed" ? (
+              <Button
+                variant="secondary"
+                size="lg"
+                nativeButton={false}
+                render={<Link href={`/jobs/${job.id}/edit`} />}
+                className="min-h-11"
+              >
+                Edit
+              </Button>
+            ) : null}
             {human ? (
               <DeleteButton
                 what={job.role}
@@ -98,7 +102,13 @@ export default async function JobPage({
                 then="/jobs"
               />
             ) : (
-              <OnlyHector labels={["Delete"]} />
+              <OnlyHector
+                labels={
+                  job.reviewState === "dismissed"
+                    ? ["Edit", "Delete"]
+                    : ["Delete"]
+                }
+              />
             )}
           </div>
         </div>
@@ -213,25 +223,6 @@ export default async function JobPage({
 }
 
 // Controls only Hector may use, as Claude's session sees them: off, saying so (KTD3).
-function OnlyHector({ labels }: { labels: string[] }) {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {labels.map((label) => (
-        <Button
-          key={label}
-          variant={label === "Delete" ? "destructive" : "secondary"}
-          size="lg"
-          disabled
-          className="min-h-11"
-        >
-          {label}
-        </Button>
-      ))}
-      <span className="text-muted-foreground text-sm">Only Hector</span>
-    </div>
-  );
-}
-
 // The job's facts as the page lists them, each by its label, and none as null.
 function facts(job: Job): [string, React.ReactNode][] {
   const day = (value: string | null) => (value ? formatDay(value) : null);

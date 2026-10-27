@@ -2,6 +2,7 @@ import type { INotesRepository } from "@/src/application/repositories/notes.repo
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import type { ChangeActor } from "@/src/entities/models/activity.model";
 import type { Note, NoteRecord } from "@/src/entities/models/note.model";
+import { nextUpdatedAt } from "@/src/infrastructure/repositories/updated-at.mock";
 
 // The notes in memory, listed newest first: by when each was added, then the order they came in,
 // as the table's times put notes added one after another.
@@ -42,9 +43,7 @@ export class MockNotesRepository implements INotesRepository {
     row.note = {
       ...row.note,
       body,
-      updatedAt: new Date(
-        Math.max(Date.now(), row.note.updatedAt.getTime() + 1),
-      ),
+      updatedAt: nextUpdatedAt(row.note.updatedAt),
     };
     return copyOf(row.note);
   }

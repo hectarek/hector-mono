@@ -1,5 +1,9 @@
 import { beforeEach, expect, it } from "bun:test";
-import { ConflictError, HumanOnlyError } from "@/src/entities/errors/common";
+import {
+  ConflictError,
+  HumanOnlyError,
+  NotFoundError,
+} from "@/src/entities/errors/common";
 import type { Note } from "@/src/entities/models/note.model";
 import {
   describeEachBackend,
@@ -69,5 +73,26 @@ describeEachBackend("editNote", () => {
 
     expect(refusal).toBeInstanceOf(ConflictError);
     expect((refusal as ConflictError).current).toEqual(edited);
+  });
+
+  it("leaves a note as it is, logging nothing, when the edit sets the text it holds", async () => {
+    const same = await app.editNote(HECTOR, {
+      id: note.id,
+      updatedAt: note.updatedAt,
+      body: note.body,
+    });
+
+    expect(same).toEqual(note);
+    expect(await actionsOn(note.id)).toEqual(["created"]);
+  });
+
+  it("can't edit a note that isn't there", async () => {
+    await expect(
+      app.editNote(HECTOR, {
+        id: crypto.randomUUID(),
+        updatedAt: note.updatedAt,
+        body: "Nowhere.",
+      }),
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 });

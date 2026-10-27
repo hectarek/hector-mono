@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { settings } from "@/db/schema";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -8,7 +8,10 @@ import type {
   SettingsValues,
 } from "@/src/entities/models/settings.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
-import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
+import {
+  BaseRepository,
+  nextUpdatedAt,
+} from "@/src/infrastructure/repositories/base.repository";
 
 type SettingsRow = typeof settings.$inferSelect;
 
@@ -77,8 +80,7 @@ export class SettingsRepository
         .update(settings)
         .set({
           ...toColumns(values),
-          // On by at least a millisecond, so the change shows to anyone holding the old value.
-          updatedAt: sql`greatest(date_trunc('milliseconds', now()), ${settings.updatedAt} + interval '1 millisecond')`,
+          updatedAt: nextUpdatedAt(settings.updatedAt),
         })
         .where(eq(settings.ownerId, ownerId))
         .returning();

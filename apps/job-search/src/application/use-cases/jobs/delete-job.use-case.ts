@@ -10,7 +10,7 @@ import type {
   ChangeContext,
   RecordRef,
 } from "@/src/entities/models/activity.model";
-import { jobLogged } from "@/src/entities/models/job.model";
+import { type DeletedJob, jobLogged } from "@/src/entities/models/job.model";
 
 export type IDeleteJobUseCase = ReturnType<typeof deleteJobUseCase>;
 
@@ -28,7 +28,7 @@ export const deleteJobUseCase = (
   return async (
     context: ChangeContext,
     { id }: { id: string },
-  ): Promise<{ id: string; role: string }> => {
+  ): Promise<DeletedJob> => {
     const { ownerId } = context;
     const record: RecordRef = { kind: "job", id };
     await requireHuman(activityRepository, transactionManager, context, {
@@ -47,7 +47,7 @@ export const deleteJobUseCase = (
         action: "deleted",
         before: jobLogged(job),
       });
-      return { id, role: job.role };
+      return { id, role: job.role, companyId: job.company.id };
     });
     logger.info("Job deleted", { jobId: id });
     return deleted;

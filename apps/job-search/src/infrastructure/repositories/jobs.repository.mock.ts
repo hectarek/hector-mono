@@ -12,12 +12,14 @@ import {
   type JobPage,
   type JobQuery,
   jobSummary,
+  type ReviewState,
   statusesFor,
 } from "@/src/entities/models/job.model";
 import type {
   JobStatusChange,
   LoggedStatusChange,
 } from "@/src/entities/models/job-status-change.model";
+import { nextUpdatedAt } from "@/src/infrastructure/repositories/updated-at.mock";
 
 type StoredJob = JobRow & { id: string; updatedAt: Date };
 
@@ -26,11 +28,12 @@ type StoredJob = JobRow & { id: string; updatedAt: Date };
 // find sorts by next date (none last), then role and id, by code point.
 export class MockJobsRepository implements IJobsRepository {
   private readonly rows: { ownerId: string; job: StoredJob }[] = [];
-  private readonly moves: {
+  private moves: {
     ownerId: string;
     jobId: string;
     change: LoggedStatusChange;
   }[] = [];
+  private lastMoveId = 0;
 
   constructor(
     private readonly companies: ICompaniesRepository,
@@ -79,9 +82,7 @@ export class MockJobsRepository implements IJobsRepository {
     row.job = {
       ...row.job,
       ...given,
-      updatedAt: new Date(
-        Math.max(Date.now(), row.job.updatedAt.getTime() + 1),
-      ),
+      updatedAt: nextUpdatedAt(row.job.updatedAt),
     };
     return this.read(ownerId, row.job);
   }
@@ -90,14 +91,12 @@ export class MockJobsRepository implements IJobsRepository {
     const index = this.rows.findIndex(
       (row) => row.ownerId === ownerId && row.job.id === id,
     );
-    if (index >= 0) {
-      this.rows.splice(index, 1);
+    if (index < 0) {
+      return;
     }
-    for (let move = this.moves.length - 1; move >= 0; move -= 1) {
-      if (this.moves[move]?.jobId === id) {
-        this.moves.splice(move, 1);
-      }
-    }
+    this.rows.splice(index, 1);
+    // The table's cascade: the job's moves go with it, and only with it.
+    this.moves = this.moves.filter((move) => move.jobId !== id);
   }
 
   async find(
@@ -156,11 +155,17 @@ export class MockJobsRepository implements IJobsRepository {
     ).length;
   }
 
-  async countForCompany(ownerId: string, companyId: string): Promise<number> {
-    return this.rows.filter(
-      ({ ownerId: owner, job }) =>
-        owner === ownerId && job.companyId === companyId,
-    ).length;
+  async countForCompany(
+    ownerId: string,
+    companyId: string,
+  ): Promise<Record<ReviewState, number>> {
+    const counts = { pending: 0, accepted: 0, dismissed: 0 };
+    for (const { ownerId: owner, job } of this.rows) {
+      if (owner === ownerId && job.companyId === companyId) {
+        counts[job.reviewState] += 1;
+      }
+    }
+    return counts;
   }
 
   async addStatusChange(
@@ -168,10 +173,12 @@ export class MockJobsRepository implements IJobsRepository {
     jobId: string,
     change: JobStatusChange,
   ): Promise<void> {
+    // A serial id, as the table's: never one a deleted move had.
+    this.lastMoveId += 1;
     this.moves.push({
       ownerId,
       jobId,
-      change: { ...change, id: this.moves.length + 1 },
+      change: { ...change, id: this.lastMoveId },
     });
   }
 

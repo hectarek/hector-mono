@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import Link from "next/link";
+import { formatDay } from "@/app/_lib/format-day";
 import { DISMISS_LABELS, STATUS_LABELS } from "@/app/_lib/job-labels";
 import type { JobSummary } from "@/src/entities/models/job.model";
 
@@ -78,5 +79,6 @@ function next(job: JobSummary): string | null {
   if (job.reviewState === "dismissed") {
     return job.dismissReason ? DISMISS_LABELS[job.dismissReason] : null;
   }
-  return [job.nextStep, job.nextDate].filter(Boolean).join(", due ") || null;
+  const due = job.nextDate ? formatDay(job.nextDate) : null;
+  return [job.nextStep, due].filter(Boolean).join(", due ") || null;
 }

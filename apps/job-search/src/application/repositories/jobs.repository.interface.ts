@@ -5,6 +5,7 @@ import type {
   JobPage,
   JobQuery,
   JobState,
+  ReviewState,
 } from "@/src/entities/models/job.model";
 import type {
   JobStatusChange,
@@ -48,12 +49,12 @@ export interface IJobsRepository {
     tx: ITransaction,
   ): Promise<DuplicateJob | undefined>;
   countPending(ownerId: string, tx: ITransaction): Promise<number>;
-  // Every job at a company, whatever its review.
+  // Every job at a company, counted by its review.
   countForCompany(
     ownerId: string,
     companyId: string,
     tx: ITransaction,
-  ): Promise<number>;
+  ): Promise<Record<ReviewState, number>>;
   addStatusChange(
     ownerId: string,
     jobId: string,

@@ -11,7 +11,7 @@ import {
   requireCompany,
 } from "@/src/application/use-cases/jobs/job-checks";
 import { sourceNamed } from "@/src/application/use-cases/sources/source-named";
-import { QueueFullError } from "@/src/entities/errors/common";
+import { InputParseError, QueueFullError } from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import {
   type Job,
@@ -25,10 +25,11 @@ import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 export type ICreateJobUseCase = ReturnType<typeof createJobUseCase>;
 
 // A new job (R1, R20): Claude's proposal, which waits in Hector's review queue, or a job Hector
-// adds, accepted at once. Who is acting decides, whatever the entry point (KTD3). Either starts in
-// verify. A posting already on a job is refused as a duplicate, and so is a proposal once the
-// queue holds as many as Hector's cap, both checked under the queue's lock (KTD8). The source is
-// found by name, or added.
+// adds, accepted at once. Who is acting decides, whatever the entry point (KTD3), and a proposal
+// always carries its posting's link, for the duplicate rule, and Claude's reason, for Hector's
+// review. Either starts in verify. A posting already on a job is refused as a duplicate, and so is
+// a proposal once the queue holds as many as Hector's cap, both checked under the queue's lock
+// (KTD8). The source is found by name, or added.
 export const createJobUseCase = (
   jobsRepository: IJobsRepository,
   companiesRepository: ICompaniesRepository,
@@ -43,6 +44,11 @@ export const createJobUseCase = (
   return async (context: ChangeContext, input: NewJobInput): Promise<Job> => {
     const { ownerId } = context;
     const proposal = context.actor === "agent";
+    if (proposal && !(input.postingUrl && input.reason)) {
+      throw new InputParseError(
+        "A proposal needs the posting's link and a reason: use propose_job.",
+      );
+    }
     const today = todayIn(PLAN_TIME_ZONE);
     const key = input.postingUrl ? postingKey(input.postingUrl) : null;
 

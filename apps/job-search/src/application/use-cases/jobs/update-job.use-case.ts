@@ -50,9 +50,10 @@ const PLAIN_FACTS = [
 
 // Changes a job's facts (update_job, the job form; R1), against the updatedAt read with it (R22).
 // Its status moves only with a status move and its review only with Hector's call; Claude sets
-// applied-on only with a dated status move (KTD3), whatever the entry point. A new posting link is
-// checked for a duplicate, and a source is found by name, or added. A change that sets what's
-// already there writes and logs nothing.
+// applied-on only with a dated status move, and leaves a dismissed proposal as Hector left it, so
+// its posting stays refused (KTD3, R20), whatever the entry point. A new posting link is checked
+// for a duplicate, and a source is found by name, or added. A change that sets what's already
+// there writes and logs nothing.
 export const updateJobUseCase = (
   jobsRepository: IJobsRepository,
   companiesRepository: ICompaniesRepository,
@@ -79,6 +80,11 @@ export const updateJobUseCase = (
       if (!current) {
         throw new NotFoundError("Couldn't find that job.");
       }
+      if (current.reviewState === "dismissed" && context.actor !== "owner") {
+        throw new InputParseError(
+          "A dismissed proposal changes once Hector reopens it.",
+        );
+      }
       if (current.updatedAt.getTime() !== updatedAt.getTime()) {
         throw new ConflictError(current);
       }
@@ -90,8 +96,11 @@ export const updateJobUseCase = (
           Object.assign(changes, { [fact]: value });
         }
       }
-      const payMin = changes.payMin ?? current.payMin;
-      const payMax = changes.payMax ?? current.payMax;
+      // A cleared bound is null in the changes, not missing from them.
+      const payMin =
+        changes.payMin !== undefined ? changes.payMin : current.payMin;
+      const payMax =
+        changes.payMax !== undefined ? changes.payMax : current.payMax;
       if (payMin !== null && payMax !== null && payMax < payMin) {
         throw new InputParseError("The top of the band is below its bottom.");
       }

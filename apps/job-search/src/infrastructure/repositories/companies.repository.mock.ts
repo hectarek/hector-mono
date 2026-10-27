@@ -9,6 +9,7 @@ import {
   type CompanyRef,
   companyNameKey,
 } from "@/src/entities/models/company.model";
+import { nextUpdatedAt } from "@/src/infrastructure/repositories/updated-at.mock";
 
 // As the table's repository: the most similar names a company's warning lists.
 const SIMILAR_MAX = 10;
@@ -54,9 +55,7 @@ export class MockCompaniesRepository implements ICompaniesRepository {
     row.company = {
       ...row.company,
       ...given,
-      updatedAt: new Date(
-        Math.max(Date.now(), row.company.updatedAt.getTime() + 1),
-      ),
+      updatedAt: nextUpdatedAt(row.company.updatedAt),
     };
     return { ...row.company };
   }

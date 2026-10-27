@@ -11,7 +11,8 @@ import type { AddNoteInput, Note } from "@/src/entities/models/note.model";
 export type IAddNoteUseCase = ReturnType<typeof addNoteUseCase>;
 
 // Adds a dated note to a job (add_note, R1): Hector's or Claude's, whose notes only ever append
-// (R21). The note is a record of its own in the log.
+// (R21). The note is a record of its own in the log. The job stays locked until the note is in, so
+// a delete of the job either takes the note with it or comes first and leaves nothing to add to.
 export const addNoteUseCase = (
   notesRepository: INotesRepository,
   jobsRepository: IJobsRepository,
@@ -26,7 +27,9 @@ export const addNoteUseCase = (
     { record, body }: AddNoteInput,
   ): Promise<Note> => {
     const note = await transactionManager.startTransaction(async (tx) => {
-      if (!(await jobsRepository.get(context.ownerId, record.id, tx))) {
+      if (
+        !(await jobsRepository.getForUpdate(context.ownerId, record.id, tx))
+      ) {
         throw new NotFoundError("Couldn't find that job.");
       }
       const added = await notesRepository.add(

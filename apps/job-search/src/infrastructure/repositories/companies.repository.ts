@@ -12,7 +12,10 @@ import {
   companyNameKey,
 } from "@/src/entities/models/company.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
-import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
+import {
+  BaseRepository,
+  nextUpdatedAt,
+} from "@/src/infrastructure/repositories/base.repository";
 
 // A company as the app reads it: not its owner, its name key or when it was made.
 const COMPANY = {
@@ -107,8 +110,7 @@ export class CompaniesRepository
           ...(changes.name !== undefined && {
             nameKey: companyNameKey(changes.name),
           }),
-          // On by at least a millisecond, so the change shows to anyone holding the old value.
-          updatedAt: sql`greatest(date_trunc('milliseconds', now()), ${companies.updatedAt} + interval '1 millisecond')`,
+          updatedAt: nextUpdatedAt(companies.updatedAt),
         })
         .where(and(eq(companies.ownerId, ownerId), eq(companies.id, id)))
         .returning(COMPANY);

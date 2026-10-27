@@ -34,8 +34,8 @@ const WHEN = new Intl.DateTimeFormat("en-US", {
 });
 
 // A record's history (R19): its changes, newest first, each with who made it, the page tool when
-// one did, and each field it changed, before and after. Company, job and person pages mount it
-// (U5 to U7). It shows the latest ACTIVITY_PAGE_MAX changes; list_activity pages through more.
+// one did, and each field it changed, before and after. The company, job, settings and person
+// pages mount it (U5 to U7). It shows the latest ACTIVITY_PAGE_MAX changes; list_activity pages through more.
 export async function RecordHistory({ record }: { record: RecordRef }) {
   const actor = await getPageActor();
   const { entries } = await getInjection("IListActivityController")(

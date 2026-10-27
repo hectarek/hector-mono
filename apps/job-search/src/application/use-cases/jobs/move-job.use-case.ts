@@ -15,7 +15,8 @@ export type IMoveJobUseCase = ReturnType<typeof moveJobUseCase>;
 // never after it. The lifecycle rules set applied-on, the follow-up and a closing's cleared next
 // step (job-lifecycle.ts). The move is logged twice in one transaction: its dated row in
 // job_status_changes, which counts read (KTD7), and the job's history, with a closing's reason.
-// Only an accepted job moves: a proposal waits for Hector's review.
+// Only an accepted job moves: a proposal waits for Hector's review. A move to the status the job
+// holds already writes and logs nothing, so a retried move never counts twice.
 export const moveJobUseCase = (
   jobsRepository: IJobsRepository,
   activityRepository: IActivityRepository,
@@ -44,6 +45,9 @@ export const moveJobUseCase = (
         throw new InputParseError(
           "A proposal's status moves once Hector accepts it.",
         );
+      }
+      if (current.status === status) {
+        return current;
       }
       const stage = afterMove(current, status, date);
       const moved = await jobsRepository.update(ownerId, id, stage, tx);

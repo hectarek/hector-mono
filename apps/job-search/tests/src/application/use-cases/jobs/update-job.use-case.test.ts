@@ -3,16 +3,23 @@ import {
   ConflictError,
   DuplicateError,
   InputParseError,
+  NotFoundError,
 } from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import { type Job, updateJobSchema } from "@/src/entities/models/job.model";
 import {
+  ANOTHER_OWNER,
   describeEachBackend,
   makeApp,
   OWNER,
   type TestApp,
 } from "@/tests/_support/app";
-import { HECTOR, jobFixtures, newPosting } from "@/tests/_support/jobs";
+import {
+  HECTOR,
+  jobFixtures,
+  newPosting,
+  watchQueueReads,
+} from "@/tests/_support/jobs";
 
 const CLAUDE: ChangeContext = {
   actor: "agent",
@@ -134,5 +141,137 @@ describeEachBackend("updateJob", () => {
         })
       ).entries,
     ).toHaveLength(1);
+  });
+
+  it("clears one end of the band while the other crosses where it was", async () => {
+    const banded = await app.updateJob(
+      HECTOR,
+      changeTo(job, { payMin: 67_890, payMax: 99_999 }),
+    );
+
+    expect(
+      await app.updateJob(
+        HECTOR,
+        changeTo(banded, { payMin: null, payMax: 12_345 }),
+      ),
+    ).toMatchObject({ payMin: null, payMax: 12_345 });
+  });
+
+  it("moves a job's posting link: the old posting is free, the new one taken, and the job's own written another way is no duplicate", async () => {
+    const first = newPosting();
+    const second = newPosting();
+    const linked = await app.updateJob(
+      HECTOR,
+      changeTo(job, { postingUrl: first }),
+    );
+    const moved = await app.updateJob(
+      HECTOR,
+      changeTo(linked, { postingUrl: second }),
+    );
+
+    expect(moved.postingUrl).toBe(second);
+    await expect(
+      jobs.propose(job.company.id, { postingUrl: `${second}?utm_source=feed` }),
+    ).rejects.toBeInstanceOf(DuplicateError);
+    expect(
+      (await jobs.propose(job.company.id, { postingUrl: first })).postingUrl,
+    ).toBe(first);
+
+    const tracked = await app.updateJob(
+      HECTOR,
+      changeTo(moved, { postingUrl: `${second}?gh_src=feed` }),
+    );
+    expect(tracked.postingUrl).toBe(`${second}?gh_src=feed`);
+
+    const cleared = await app.updateJob(
+      HECTOR,
+      changeTo(tracked, { postingUrl: null }),
+    );
+    expect(cleared.postingUrl).toBeNull();
+    expect(
+      (await jobs.propose(job.company.id, { postingUrl: second })).postingUrl,
+    ).toBe(second);
+  });
+
+  it("moves a job to another of the owner's companies, and never to another owner's", async () => {
+    const globex = await jobs.company("Globex Corp");
+    const moved = await app.updateJob(
+      CLAUDE,
+      changeTo(job, { companyId: globex }),
+    );
+    expect(moved.company).toMatchObject({ id: globex, name: "Globex Corp" });
+
+    const theirs = await jobs.company("Initech", ANOTHER_OWNER);
+    await expect(
+      app.updateJob(CLAUDE, changeTo(moved, { companyId: theirs })),
+    ).rejects.toBeInstanceOf(NotFoundError);
+    expect((await app.getJob(OWNER, { id: job.id })).job.company.id).toBe(
+      globex,
+    );
+  });
+
+  // KTD3: update_job changes facts: a status or a review in its input goes.
+  it("takes no status or review from a change, so Claude's proposal stays pending", async () => {
+    const proposal = await jobs.propose(job.company.id);
+
+    expect(
+      await app.updateJob(
+        CLAUDE,
+        changeTo(proposal, {
+          role: "Gadget tester",
+          status: "applied",
+          reviewState: "accepted",
+        }),
+      ),
+    ).toMatchObject({
+      role: "Gadget tester",
+      status: "verify",
+      reviewState: "pending",
+    });
+  });
+
+  // R20, KTD3: a dismissed posting stays refused until Hector reopens its proposal.
+  it("refuses Claude's change to a dismissed proposal, so its posting stays refused, and takes Hector's", async () => {
+    const posting = newPosting();
+    const proposal = await jobs.propose(job.company.id, {
+      postingUrl: posting,
+    });
+    const dismissed = await app.reviewProposal(HECTOR, {
+      id: proposal.id,
+      decision: "dismiss",
+      reason: "not-hiring",
+      note: null,
+    });
+
+    for (const change of [
+      { postingUrl: null },
+      { postingUrl: newPosting() },
+      { role: "Gadget tester" },
+    ]) {
+      await expect(
+        app.updateJob(CLAUDE, changeTo(dismissed, change)),
+      ).rejects.toThrow(
+        new InputParseError(
+          "A dismissed proposal changes once Hector reopens it.",
+        ),
+      );
+    }
+    await expect(
+      jobs.propose(job.company.id, { postingUrl: posting }),
+    ).rejects.toBeInstanceOf(DuplicateError);
+    expect(
+      await app.updateJob(
+        HECTOR,
+        changeTo(dismissed, { role: "Gadget tester" }),
+      ),
+    ).toMatchObject({ role: "Gadget tester", reviewState: "dismissed" });
+  });
+
+  it("takes the queue's lock before it looks for a duplicate of a new link", async () => {
+    const calls = watchQueueReads(app);
+
+    await app.updateJob(HECTOR, changeTo(job, { postingUrl: newPosting() }));
+
+    expect(calls).toEqual(["lockQueue", "findByPostingKey"]);
   });
 });

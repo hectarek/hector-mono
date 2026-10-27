@@ -2,6 +2,7 @@ import { beforeEach, expect, it } from "bun:test";
 import { NotFoundError } from "@/src/entities/errors/common";
 import type { Job } from "@/src/entities/models/job.model";
 import {
+  ANOTHER_OWNER,
   describeEachBackend,
   makeApp,
   OWNER,
@@ -69,5 +70,25 @@ describeEachBackend("addNote", () => {
         body: "Nowhere",
       }),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("can't go on another owner's job, and adds nothing to it", async () => {
+    const jobs = jobFixtures(app);
+    const them = { actor: "owner", ownerId: ANOTHER_OWNER } as const;
+    const theirs = await jobs.add(
+      await jobs.company("Initech", ANOTHER_OWNER),
+      {},
+      them,
+    );
+
+    await expect(
+      app.addNote(CLAUDE, {
+        record: { kind: "job", id: theirs.id },
+        body: "Not ours.",
+      }),
+    ).rejects.toBeInstanceOf(NotFoundError);
+    expect(
+      await app.repos.notes.list(ANOTHER_OWNER, { kind: "job", id: theirs.id }),
+    ).toEqual([]);
   });
 });

@@ -2,7 +2,7 @@ import type { ILoggerService } from "@/src/application/services/logger.service.i
 import type { IDeleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
 import { InputParseError } from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
-import { jobIdSchema } from "@/src/entities/models/job.model";
+import { type DeletedJob, jobIdSchema } from "@/src/entities/models/job.model";
 
 export type IDeleteJobController = ReturnType<typeof deleteJobController>;
 
@@ -16,7 +16,7 @@ export const deleteJobController = (
   return async (
     input: unknown,
     context: ChangeContext,
-  ): Promise<{ id: string; role: string }> => {
+  ): Promise<DeletedJob> => {
     const { data, error: parseError } = jobIdSchema.safeParse(input);
     if (parseError) {
       logger.warn("Delete job input validation failed", {

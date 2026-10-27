@@ -1,5 +1,6 @@
 // Jobs as the use-case tests make them: fictional companies and postings, through the use cases,
 // so both backends hold the same rows.
+import { spyOn } from "bun:test";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import { saveCompanySchema } from "@/src/entities/models/company.model";
 import {
@@ -67,4 +68,25 @@ export function jobFixtures(app: TestApp) {
       );
     },
   };
+}
+
+// The queue's lock and the reads it guards, by name, in the order a write makes them (KTD8). The
+// tests' backends run one transaction at a time, so only the order shows the lock comes first.
+export function watchQueueReads(app: TestApp): string[] {
+  const calls: string[] = [];
+  const jobs = app.repos.jobs;
+  const { lockQueue, findByPostingKey, countPending } = jobs;
+  spyOn(jobs, "lockQueue").mockImplementation((ownerId, tx) => {
+    calls.push("lockQueue");
+    return lockQueue.call(jobs, ownerId, tx);
+  });
+  spyOn(jobs, "findByPostingKey").mockImplementation((ownerId, key, tx) => {
+    calls.push("findByPostingKey");
+    return findByPostingKey.call(jobs, ownerId, key, tx);
+  });
+  spyOn(jobs, "countPending").mockImplementation((ownerId, tx) => {
+    calls.push("countPending");
+    return countPending.call(jobs, ownerId, tx);
+  });
+  return calls;
 }

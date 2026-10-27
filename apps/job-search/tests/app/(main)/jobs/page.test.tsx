@@ -29,7 +29,7 @@ describe("the jobs page", () => {
     expect(
       table.getByRole("link", { name: "Widget engineer" }).getAttribute("href"),
     ).toBe(`/jobs/${job.id}`);
-    expect(table.getByText("Ask for a referral, due 2026-11-02")).toBeTruthy();
+    expect(table.getByText("Ask for a referral, due Nov 2, 2026")).toBeTruthy();
     expect(table.queryByText("Gadget designer")).toBeNull();
     expect(page.getByRole("button", { name: "To review (1)" })).toBeTruthy();
     expect(

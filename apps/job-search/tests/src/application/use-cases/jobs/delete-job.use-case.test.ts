@@ -28,6 +28,7 @@ describeEachBackend("deleteJob", () => {
     expect(await app.deleteJob(HECTOR, { id: job.id })).toEqual({
       id: job.id,
       role: "Widget engineer",
+      companyId: job.company.id,
     });
 
     await expect(app.getJob(OWNER, { id: job.id })).rejects.toBeInstanceOf(

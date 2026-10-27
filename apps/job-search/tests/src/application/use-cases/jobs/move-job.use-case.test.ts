@@ -154,6 +154,25 @@ describeEachBackend("moveJob", () => {
       [],
     );
   });
+
+  // A retried move counts once (KTD7: counts read the moves).
+  it("to the status the job holds already: writes and logs nothing", async () => {
+    const applied = await move("applied", YESTERDAY);
+
+    expect(await move("applied")).toEqual(applied);
+    expect(await app.repos.jobs.listStatusChanges(OWNER, job.id)).toHaveLength(
+      1,
+    );
+    expect(
+      (
+        await app.listActivity(OWNER, {
+          record: { kind: "job", id: job.id },
+          limit: 20,
+          offset: 0,
+        })
+      ).entries.map((entry) => entry.action),
+    ).toEqual(["updated", "created"]);
+  });
 });
 
 describe("moveJob's actor", () => {

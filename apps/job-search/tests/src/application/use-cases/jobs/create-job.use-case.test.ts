@@ -1,6 +1,7 @@
 import { beforeEach, expect, it } from "bun:test";
 import {
   DuplicateError,
+  InputParseError,
   NotFoundError,
   QueueFullError,
 } from "@/src/entities/errors/common";
@@ -13,7 +14,13 @@ import {
   OWNER,
   type TestApp,
 } from "@/tests/_support/app";
-import { HECTOR, jobFixtures, newPosting } from "@/tests/_support/jobs";
+import {
+  CLAUDE,
+  HECTOR,
+  jobFixtures,
+  newPosting,
+  watchQueueReads,
+} from "@/tests/_support/jobs";
 
 describeEachBackend("createJob", () => {
   let app: TestApp;
@@ -210,5 +217,27 @@ describeEachBackend("createJob", () => {
 
     const theirs = await jobs.company("Acme Inc", ANOTHER_OWNER);
     await expect(jobs.propose(theirs)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  // R20, KTD3: a proposal carries its posting's link, for the duplicate rule, and Claude's reason,
+  // for Hector's review, whatever the entry point (the add-job form included).
+  it("refuses Claude's job without a posting link or a reason, and adds nothing", async () => {
+    for (const input of [{}, { postingUrl: newPosting() }]) {
+      await expect(jobs.add(acme, input, CLAUDE)).rejects.toThrow(
+        new InputParseError(
+          "A proposal needs the posting's link and a reason: use propose_job.",
+        ),
+      );
+    }
+    expect(await queue()).toEqual([]);
+  });
+
+  // KTD8: on the database's own connections only the queue's lock keeps two writes apart.
+  it("takes the queue's lock before it looks for a duplicate or counts the queue", async () => {
+    const calls = watchQueueReads(app);
+
+    await jobs.propose(acme);
+
+    expect(calls).toEqual(["lockQueue", "findByPostingKey", "countPending"]);
   });
 });

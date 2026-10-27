@@ -14,12 +14,24 @@ import {
   type CompanyRef,
   companyFacts,
 } from "@/src/entities/models/company.model";
+import type { ReviewState } from "@/src/entities/models/job.model";
 
 export type IDeleteCompanyUseCase = ReturnType<typeof deleteCompanyUseCase>;
 
+// What keeps a company from its delete, one review state at a time: "a job", "2 proposals".
+const HELD: Record<ReviewState, [one: string, many: string]> = {
+  accepted: ["a job", "jobs"],
+  pending: ["a proposal", "proposals"],
+  dismissed: ["a dismissed proposal", "dismissed proposals"],
+};
+
+// "a job and a proposal": en-GB lists without the serial comma, as the app's copy does.
+const LIST = new Intl.ListFormat("en-GB", { type: "conjunction" });
+
 // Deletes a company, which only Hector may do (R21): Claude's try is refused, and logged, before
-// anything is read. A company that has jobs is refused, saying so: they'd lose their employer.
-// The history keeps the company's facts as they were.
+// anything is read. A company that has jobs is refused, naming them: they'd lose their employer.
+// Proposals count too, dismissed ones included, since a dismissed proposal is what keeps its
+// posting from coming back (R20). The history keeps the company's facts as they were.
 export const deleteCompanyUseCase = (
   companiesRepository: ICompaniesRepository,
   jobsRepository: IJobsRepository,
@@ -50,16 +62,22 @@ export const deleteCompanyUseCase = (
       if (!company) {
         throw new NotFoundError("Couldn't find that company.");
       }
-      const jobs = await jobsRepository.countForCompany(
+      const counts = await jobsRepository.countForCompany(
         context.ownerId,
         id,
         tx,
       );
-      if (jobs > 0) {
-        const them = jobs === 1 ? "it" : "them";
-        const count = jobs === 1 ? "a job" : `${jobs} jobs`;
+      const held = (Object.keys(HELD) as ReviewState[])
+        .filter((state) => counts[state] > 0)
+        .map((state) =>
+          counts[state] === 1
+            ? HELD[state][0]
+            : `${counts[state]} ${HELD[state][1]}`,
+        );
+      if (held.length) {
+        const total = counts.accepted + counts.pending + counts.dismissed;
         throw new InputParseError(
-          `${company.name} has ${count}. Delete ${them} or move ${them} to another company first.`,
+          `${company.name} has ${LIST.format(held)}. Delete ${total === 1 ? "it" : "them"} first.`,
         );
       }
       await companiesRepository.delete(context.ownerId, id, tx);

@@ -41,14 +41,15 @@ function duplicateMessage({
     : `This posting is already a job: ${job}.`;
 }
 
-// The owner's company, which a job must name.
+// The owner's company, which a job must name. It stays locked to the write, so a delete of the
+// company waits and then counts this job, or comes first and leaves the job no company to name.
 export async function requireCompany(
   companiesRepository: ICompaniesRepository,
   ownerId: string,
   companyId: string,
   tx: ITransaction,
 ): Promise<void> {
-  if (!(await companiesRepository.get(ownerId, companyId, tx))) {
+  if (!(await companiesRepository.getForUpdate(ownerId, companyId, tx))) {
     throw new NotFoundError("Couldn't find that company.");
   }
 }

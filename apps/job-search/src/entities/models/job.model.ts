@@ -141,6 +141,9 @@ export function jobSummary(job: Job): JobSummary {
   };
 }
 
+// A job that's gone, as its delete answers: which one, and the company whose page listed it.
+export type DeletedJob = { id: string; role: string; companyId: string };
+
 // Another job, as a duplicate names it (R20): which job holds the posting, and where it stands.
 export type DuplicateJob = Pick<
   Job,

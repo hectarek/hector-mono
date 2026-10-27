@@ -59,6 +59,25 @@ describeEachBackend("findJobs", () => {
     });
   });
 
+  // By code point, as the mock sorts (collate "C"): capitals before lower case, and accents last.
+  it("orders roles by code point on both backends", async () => {
+    for (const role of [
+      "anvil tester",
+      "Bolt fitter",
+      "Éclair baker",
+      "Anvil tester",
+    ]) {
+      await jobs.add(acme, { role });
+    }
+
+    expect(await roles()).toEqual([
+      "Anvil tester",
+      "Bolt fitter",
+      "anvil tester",
+      "Éclair baker",
+    ]);
+  });
+
   it("narrows to open or closed jobs, one status, or one company", async () => {
     const open = await jobs.add(acme, { role: "Open role" });
     const closed = await jobs.add(acme, { role: "Closed role" });

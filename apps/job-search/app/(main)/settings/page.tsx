@@ -1,10 +1,12 @@
 import { AddSourceForm } from "@/app/_components/add-source-form";
+import { RecordHistory } from "@/app/_components/record-history";
 import { SettingsForm } from "@/app/_components/settings-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
 
-// Hector's settings (R12): the weekly targets and the queue cap, which only he changes (R21), and
-// the lead sources jobs come from (R5), which Claude adds to as well.
+// Hector's settings (R12): the weekly targets and the queue cap, which only he changes (R21), the
+// lead sources jobs come from (R5), which Claude adds to as well, and the settings' history (R19),
+// Claude's refused tries included.
 export default async function SettingsPage() {
   const actor = await getPageActor();
   const [settings, sources] = await Promise.all([
@@ -51,6 +53,8 @@ export default async function SettingsPage() {
         )}
         <AddSourceForm />
       </section>
+
+      <RecordHistory record={{ kind: "settings", id: actor.ownerId }} />
     </div>
   );
 }

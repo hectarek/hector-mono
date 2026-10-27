@@ -94,7 +94,6 @@ describe("proposeJob", () => {
     ]);
     expect(nextState.revalidated).toEqual([
       "/jobs",
-      "/jobs/dismissed",
       `/jobs/${job.id}`,
       `/companies/${companyId}`,
       "/agent",
@@ -145,6 +144,21 @@ describe("a job's changes", () => {
       await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
     );
     expect(job.reviewState).toBe("accepted");
+  });
+
+  // R20, KTD3: the form's add from Claude's session would be a proposal with no link or reason.
+  it("answer Claude's add through the job form with `validation`, pointing to propose_job", async () => {
+    const companyId = await aCompany();
+    signInAs("agent");
+
+    expect(
+      await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
+    ).toMatchObject({
+      ok: false,
+      code: "validation",
+      message:
+        "A proposal needs the posting's link and a reason: use propose_job.",
+    });
   });
 
   it("answer Claude's update against an old updatedAt with `conflict` and the job as it is now, and its applied-on with `validation`", async () => {
@@ -281,12 +295,18 @@ describe("deleteJob", () => {
     expect(dataOf(await deleteJob({ id: job.id }))).toEqual({
       id: job.id,
       role: "Widget engineer",
+      companyId,
     });
     expect(await getJob({ id: job.id })).toMatchObject({
       ok: false,
       code: "not-found",
     });
-    expect(nextState.revalidated).toContain("/jobs");
+    expect(nextState.revalidated).toEqual([
+      "/jobs",
+      `/jobs/${job.id}`,
+      `/companies/${companyId}`,
+      "/agent",
+    ]);
   });
 });
 

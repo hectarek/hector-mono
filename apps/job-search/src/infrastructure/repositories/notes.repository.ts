@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { notes } from "@/db/schema";
 import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -6,7 +6,10 @@ import { DatabaseOperationError } from "@/src/entities/errors/common";
 import type { ChangeActor } from "@/src/entities/models/activity.model";
 import type { Note, NoteRecord } from "@/src/entities/models/note.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
-import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
+import {
+  BaseRepository,
+  nextUpdatedAt,
+} from "@/src/infrastructure/repositories/base.repository";
 
 export class NotesRepository
   extends BaseRepository
@@ -73,8 +76,7 @@ export class NotesRepository
         .update(notes)
         .set({
           body,
-          // On by at least a millisecond, so the change shows to anyone holding the old value.
-          updatedAt: sql`greatest(date_trunc('milliseconds', now()), ${notes.updatedAt} + interval '1 millisecond')`,
+          updatedAt: nextUpdatedAt(notes.updatedAt),
         })
         .where(and(eq(notes.ownerId, ownerId), eq(notes.id, id)))
         .returning();

@@ -12,6 +12,7 @@ import {
   type JobPage,
   type JobQuery,
   jobSummary,
+  type ReviewState,
   statusesFor,
 } from "@/src/entities/models/job.model";
 import type {
@@ -19,7 +20,10 @@ import type {
   LoggedStatusChange,
 } from "@/src/entities/models/job-status-change.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
-import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
+import {
+  BaseRepository,
+  nextUpdatedAt,
+} from "@/src/infrastructure/repositories/base.repository";
 
 // A job as the app reads it, its company and lead source by name too.
 const JOB = {
@@ -120,8 +124,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
         .update(jobs)
         .set({
           ...changes,
-          // On by at least a millisecond, so the change shows to anyone holding the old value.
-          updatedAt: sql`greatest(date_trunc('milliseconds', now()), ${jobs.updatedAt} + interval '1 millisecond')`,
+          updatedAt: nextUpdatedAt(jobs.updatedAt),
         })
         .where(and(eq(jobs.ownerId, ownerId), eq(jobs.id, id)))
         .returning({ id: jobs.id });
@@ -217,13 +220,18 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
     ownerId: string,
     companyId: string,
     tx: ITransaction,
-  ): Promise<number> {
+  ): Promise<Record<ReviewState, number>> {
     try {
-      const [row] = await this.getDbContext(tx)
-        .select({ jobs: count() })
+      const rows = await this.getDbContext(tx)
+        .select({ reviewState: jobs.reviewState, jobs: count() })
         .from(jobs)
-        .where(and(eq(jobs.ownerId, ownerId), eq(jobs.companyId, companyId)));
-      return row?.jobs ?? 0;
+        .where(and(eq(jobs.ownerId, ownerId), eq(jobs.companyId, companyId)))
+        .groupBy(jobs.reviewState);
+      const counts = { pending: 0, accepted: 0, dismissed: 0 };
+      for (const row of rows) {
+        counts[row.reviewState] = row.jobs;
+      }
+      return counts;
     } catch (err) {
       this.handleError(err, "countForCompany", { ownerId, companyId });
     }

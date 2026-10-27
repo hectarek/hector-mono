@@ -100,7 +100,7 @@ describeEachBackend("deleteCompany", () => {
   });
 
   // From U5's scenarios, once jobs exist (U6).
-  it("refuses Hector's delete of a company that has jobs, saying so, and keeps it", async () => {
+  it("refuses Hector's delete of a company that has jobs, naming them by their review, and keeps it", async () => {
     const jobs = jobFixtures(app);
     const company = await companyOf(OWNER, { name: "Fictional Widgets" });
     await jobs.add(company.id);
@@ -108,11 +108,34 @@ describeEachBackend("deleteCompany", () => {
 
     await expect(app.deleteCompany(HECTOR, { id: company.id })).rejects.toThrow(
       new InputParseError(
-        "Fictional Widgets has 2 jobs. Delete them or move them to another company first.",
+        "Fictional Widgets has a job and a proposal. Delete them first.",
       ),
     );
     expect((await app.getCompany(OWNER, { id: company.id })).company).toEqual(
       company,
+    );
+  });
+
+  // A dismissed proposal keeps its posting from coming back (R20), so it keeps its company too.
+  it("refuses the delete of a company whose only jobs are dismissed proposals", async () => {
+    const jobs = jobFixtures(app);
+    const company = await companyOf(OWNER, { name: "Fictional Widgets" });
+    const proposeAndDismiss = async () => {
+      const proposal = await jobs.propose(company.id);
+      await app.reviewProposal(HECTOR, {
+        id: proposal.id,
+        decision: "dismiss",
+        reason: "not-hiring",
+        note: null,
+      });
+    };
+    await proposeAndDismiss();
+    await proposeAndDismiss();
+
+    await expect(app.deleteCompany(HECTOR, { id: company.id })).rejects.toThrow(
+      new InputParseError(
+        "Fictional Widgets has 2 dismissed proposals. Delete them first.",
+      ),
     );
   });
 });

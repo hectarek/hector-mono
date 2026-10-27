@@ -2,8 +2,9 @@ import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
 import CompanyPage from "@/app/(main)/companies/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
-import { addJob } from "@/app/actions/jobs";
+import { addJob, dismissProposal } from "@/app/actions/jobs";
 import { NotFoundPage, type Redirected } from "@/tests/_support/next";
+import { aProposal, dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
 import { signInAs } from "@/tests/_support/session";
 
@@ -117,5 +118,35 @@ describe("a company's page", () => {
     expect(
       jobs.getByRole("button", { name: "Add a job" }).getAttribute("href"),
     ).toBe(`/jobs/new?company=${company.id}`);
+    expect(page.queryByRole("region", { name: "To review" })).toBeNull();
+    expect(page.queryByRole("region", { name: "Dismissed" })).toBeNull();
+  });
+
+  // Each keeps the company from its delete, so the page shows them.
+  it("lists the proposals that name the company, waiting or dismissed, under their own headings", async () => {
+    signInAs("owner");
+    const company = await add({ name: "Initech Labs" });
+    const waiting = await aProposal(company.id, { role: "Gadget designer" });
+    const dismissed = await aProposal(company.id, { role: "Anvil tester" });
+    signInAs("owner");
+    dataOf(await dismissProposal({ id: dismissed.id, reason: "wrong-level" }));
+
+    const page = await companyPage(company.id);
+
+    expect(
+      within(page.getByRole("region", { name: "Jobs" })).getByText(
+        "No jobs here yet.",
+      ),
+    ).toBeTruthy();
+    expect(
+      within(page.getByRole("region", { name: "To review" }))
+        .getAllByRole("link", { name: "Gadget designer" })[0]
+        ?.getAttribute("href"),
+    ).toBe(`/jobs/${waiting.id}`);
+    expect(
+      within(page.getByRole("region", { name: "Dismissed" })).getAllByText(
+        "Wrong level",
+      ),
+    ).not.toHaveLength(0);
   });
 });

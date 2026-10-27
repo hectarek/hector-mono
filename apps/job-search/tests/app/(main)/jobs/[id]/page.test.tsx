@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, setSystemTime } from "bun:test";
 import { within } from "@testing-library/dom";
 import JobPage from "@/app/(main)/jobs/[id]/page";
-import { setJobStatus } from "@/app/actions/jobs";
+import { dismissProposal, setJobStatus } from "@/app/actions/jobs";
 import { addNote } from "@/app/actions/notes";
 import { NotFoundPage } from "@/tests/_support/next";
 import { aCompany, aJob, aProposal, dataOf } from "@/tests/_support/screens";
@@ -99,6 +99,26 @@ describe("a job's page", () => {
         { name: "Edit" },
       ),
     ).toBeNull();
+  });
+
+  // R20: a dismissed proposal changes only once Hector reopens it.
+  it("shows Claude's session a dismissed proposal's Edit off, as only Hector's, and Hector his", async () => {
+    const proposal = await aProposal(await aCompany());
+    signInAs("owner");
+    dataOf(await dismissProposal({ id: proposal.id, reason: "not-hiring" }));
+
+    const hectors = await jobPage(proposal.id);
+    expect(
+      hectors.getByRole("button", { name: "Edit" }).getAttribute("href"),
+    ).toBe(`/jobs/${proposal.id}/edit`);
+
+    signInAs("agent");
+    const claudes = await jobPage(proposal.id);
+    const edit = claudes.getByRole<HTMLButtonElement>("button", {
+      name: "Edit",
+    });
+    expect(edit.disabled).toBe(true);
+    expect(edit.getAttribute("href")).toBeNull();
   });
 
   it("is not found for an unknown or malformed id", async () => {
