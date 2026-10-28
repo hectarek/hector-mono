@@ -1,13 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import {
-  type ActionResult,
-  actionLogger,
-  changeContext,
-  succeeded,
-  toActionError,
-} from "@/app/actions/shared";
+import { type ActionResult, answer, changeContext } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type { Note, NoteRecord } from "@/src/entities/models/note.model";
 
@@ -19,63 +12,38 @@ export async function addNote(
   input: unknown,
   tool?: string,
 ): Promise<ActionResult<Note>> {
-  let note: Note;
-  try {
-    note = await getInjection("IAddNoteController")(
-      input,
-      await changeContext(tool),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("addNote"),
-      "Couldn't add the note. Try again.",
-    );
-  }
-  refresh(note.record);
-  return succeeded(note);
+  return answer(
+    "addNote",
+    "Couldn't add the note. Try again.",
+    async () =>
+      getInjection("IAddNoteController")(input, await changeContext(tool)),
+    notePages,
+  );
 }
 
 export async function editNote(input: unknown): Promise<ActionResult<Note>> {
-  let note: Note;
-  try {
-    note = await getInjection("IEditNoteController")(
-      input,
-      await changeContext(),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("editNote"),
-      "Couldn't save the note. Try again.",
-    );
-  }
-  refresh(note.record);
-  return succeeded(note);
+  return answer(
+    "editNote",
+    "Couldn't save the note. Try again.",
+    async () =>
+      getInjection("IEditNoteController")(input, await changeContext()),
+    notePages,
+  );
 }
 
 export async function deleteNote(
   input: unknown,
 ): Promise<ActionResult<{ id: string; record: NoteRecord }>> {
-  let deleted: { id: string; record: NoteRecord };
-  try {
-    deleted = await getInjection("IDeleteNoteController")(
-      input,
-      await changeContext(),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("deleteNote"),
-      "Couldn't delete the note. Try again.",
-    );
-  }
-  refresh(deleted.record);
-  return succeeded(deleted);
+  return answer(
+    "deleteNote",
+    "Couldn't delete the note. Try again.",
+    async () =>
+      getInjection("IDeleteNoteController")(input, await changeContext()),
+    notePages,
+  );
 }
 
 // The page that lists the record's notes, and Claude's page, which lists its changes.
-function refresh(record: NoteRecord): void {
-  revalidatePath(`/jobs/${record.id}`);
-  revalidatePath("/agent");
+function notePages({ record }: { record: NoteRecord }): string[] {
+  return [`/jobs/${record.id}`, "/agent"];
 }

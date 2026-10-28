@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { getActionActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { getInjection } from "@/di/container";
@@ -60,6 +61,27 @@ export function succeeded<T>(data: T): ActionResult<T> {
 
 export function actionLogger(op: string): DI_RETURN_TYPES["ILoggerService"] {
   return getInjection("ILoggerService").child({ layer: "action", op });
+}
+
+// How every action answers: it runs the action's work, answers a failure through toActionError
+// under the action's name and its own message, and on success refreshes the pages that show what
+// the work returned (none for a read) before answering with it.
+export async function answer<T>(
+  op: string,
+  fallback: string,
+  run: () => Promise<T>,
+  pages: (data: T) => readonly string[] = () => [],
+): Promise<ActionResult<T>> {
+  let data: T;
+  try {
+    data = await run();
+  } catch (err) {
+    return toActionError(err, actionLogger(op), fallback);
+  }
+  for (const path of pages(data)) {
+    revalidatePath(path);
+  }
+  return succeeded(data);
 }
 
 // Who's making a write (KTD7): the session's actor and, when a page tool made the call, the tool's

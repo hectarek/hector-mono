@@ -1,14 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getActionActor } from "@/app/_lib/current-actor";
-import {
-  type ActionResult,
-  actionLogger,
-  changeContext,
-  succeeded,
-  toActionError,
-} from "@/app/actions/shared";
+import { type ActionResult, answer, changeContext } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type {
   CompanyDetail,
@@ -25,40 +18,24 @@ import type {
 export async function findCompanies(
   input: unknown,
 ): Promise<ActionResult<CompanyPage>> {
-  try {
-    return succeeded(
-      await getInjection("IFindCompaniesController")(
-        input,
-        await getActionActor(),
-      ),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("findCompanies"),
-      "Couldn't list the companies. Try again.",
-    );
-  }
+  return answer(
+    "findCompanies",
+    "Couldn't list the companies. Try again.",
+    async () =>
+      getInjection("IFindCompaniesController")(input, await getActionActor()),
+  );
 }
 
 // A company, with any company whose name matches its own.
 export async function getCompany(
   input: unknown,
 ): Promise<ActionResult<CompanyDetail>> {
-  try {
-    return succeeded(
-      await getInjection("IGetCompanyController")(
-        input,
-        await getActionActor(),
-      ),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("getCompany"),
-      "Couldn't read the company. Try again.",
-    );
-  }
+  return answer(
+    "getCompany",
+    "Couldn't read the company. Try again.",
+    async () =>
+      getInjection("IGetCompanyController")(input, await getActionActor()),
+  );
 }
 
 // A new company, or a change to one made against the updatedAt read with it. `tool` is the page
@@ -67,46 +44,28 @@ export async function saveCompany(
   input: unknown,
   tool?: string,
 ): Promise<ActionResult<SavedCompany>> {
-  let saved: SavedCompany;
-  try {
-    saved = await getInjection("ISaveCompanyController")(
-      input,
-      await changeContext(tool),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("saveCompany"),
-      "Couldn't save the company. Try again.",
-    );
-  }
-  refresh(saved.company.id);
-  return succeeded(saved);
+  return answer(
+    "saveCompany",
+    "Couldn't save the company. Try again.",
+    async () =>
+      getInjection("ISaveCompanyController")(input, await changeContext(tool)),
+    (saved) => companyPages(saved.company.id),
+  );
 }
 
 export async function deleteCompany(
   input: unknown,
 ): Promise<ActionResult<CompanyRef>> {
-  let deleted: CompanyRef;
-  try {
-    deleted = await getInjection("IDeleteCompanyController")(
-      input,
-      await changeContext(),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("deleteCompany"),
-      "Couldn't delete the company. Try again.",
-    );
-  }
-  refresh(deleted.id);
-  return succeeded(deleted);
+  return answer(
+    "deleteCompany",
+    "Couldn't delete the company. Try again.",
+    async () =>
+      getInjection("IDeleteCompanyController")(input, await changeContext()),
+    (deleted) => companyPages(deleted.id),
+  );
 }
 
 // The pages that show a company, and Claude's page, which lists its changes.
-function refresh(id: string): void {
-  revalidatePath("/companies");
-  revalidatePath(`/companies/${id}`);
-  revalidatePath("/agent");
+function companyPages(id: string): string[] {
+  return ["/companies", `/companies/${id}`, "/agent"];
 }

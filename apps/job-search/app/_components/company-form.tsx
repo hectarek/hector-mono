@@ -4,14 +4,12 @@ import { Button } from "@repo/ui/components/button";
 import { FieldGroup } from "@repo/ui/components/field";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { type FieldKind, FormField } from "@/app/_components/form-field";
-import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
-import { editedFields, rebased } from "@/app/_lib/form-changes";
+import { useRecordForm } from "@/app/_lib/use-record-form";
 import { saveCompany } from "@/app/actions/companies";
-import type { ActionResult } from "@/app/actions/shared";
 import type {
   Company,
   CompanyFacts,
@@ -19,7 +17,6 @@ import type {
 
 type Fact = keyof CompanyFacts;
 type Fields = Record<Fact, string>;
-type Failure = Extract<ActionResult<unknown>, { ok: false }>;
 
 const TIERS = [
   { value: "", label: "None" },
@@ -104,55 +101,29 @@ function isCompany(value: unknown): value is Company {
 // with what was typed kept (R22, docs/build-plan.md KTD15). Saved, it opens the company.
 export function CompanyForm({ company }: { company?: Company }) {
   const router = useRouter();
-  const [opened, setOpened] = useState(company);
-  const [fields, setFields] = useState(() => fieldsOf(company));
-  const [failure, setFailure] = useState<Failure>();
-  const [changedSince, setChangedSince] = useState<Fact[]>([]);
-  const [isPending, startTransition] = useTransition();
-
-  function set(fact: Fact, text: string) {
-    setFields((typed) => ({ ...typed, [fact]: text }));
-  }
+  const form = useRecordForm(company, fieldsOf, isCompany);
+  const { failure } = form;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const saving = opened
-      ? editedFields(fields, fieldsOf(opened))
-      : FACTS.map(({ fact }) => fact);
+    const { opened } = form;
+    const saving = opened ? form.edited : FACTS.map(({ fact }) => fact);
     const facts = Object.fromEntries(
-      saving.map((fact) => [fact, savedValue(fact, fields[fact])]),
+      saving.map((fact) => [fact, savedValue(fact, form.fields[fact])]),
     );
     const input = opened
       ? { id: opened.id, updatedAt: opened.updatedAt.toISOString(), ...facts }
       : facts;
-    startTransition(async () => {
-      const result = await callAction(() => saveCompany(input));
-      if (result.ok) {
-        router.push(`/companies/${result.data.company.id}`);
-        return;
-      }
-      setFailure(result);
-      if (result.code === "conflict" && opened && isCompany(result.current)) {
-        const now = rebased(fields, fieldsOf(opened), fieldsOf(result.current));
-        setFields(now.fields);
-        setChangedSince(now.changed);
-        setOpened(result.current);
-      }
-    });
+    form.save(
+      () => saveCompany(input),
+      (saved) => router.push(`/companies/${saved.company.id}`),
+    );
   }
-
-  const now = fieldsOf(opened);
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       {failure?.code === "conflict" ? (
-        <ConflictNotice
-          what="the company"
-          changes={changedSince.map((fact) => ({
-            label: FIELD_LABELS[fact] ?? fact,
-            now: now[fact],
-          }))}
-        />
+        <ConflictNotice what="the company" changes={form.changes} />
       ) : null}
       <FieldGroup>
         {FACTS.map(({ fact, kind, description }) => (
@@ -161,8 +132,8 @@ export function CompanyForm({ company }: { company?: Company }) {
             id={`company-${fact}`}
             label={FIELD_LABELS[fact] ?? fact}
             kind={kind}
-            value={fields[fact]}
-            onChange={(text) => set(fact, text)}
+            value={form.fields[fact]}
+            onChange={(text) => form.setField(fact, text)}
             error={failure?.fields?.[fact]}
             description={description}
             required={fact === "name"}
@@ -179,10 +150,10 @@ export function CompanyForm({ company }: { company?: Company }) {
         <Button
           type="submit"
           size="lg"
-          disabled={isPending}
+          disabled={form.isPending}
           className="min-h-11"
         >
-          {isPending ? "Saving…" : company ? "Save" : "Add company"}
+          {form.isPending ? "Saving…" : company ? "Save" : "Add company"}
         </Button>
         <Button
           variant="secondary"

@@ -11,13 +11,11 @@ import {
   FieldSet,
 } from "@repo/ui/components/field";
 import { Input } from "@repo/ui/components/input";
-import { type FormEvent, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
-import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
-import { rebased } from "@/app/_lib/form-changes";
+import { useRecordForm } from "@/app/_lib/use-record-form";
 import { updateSettings } from "@/app/actions/settings";
-import type { ActionResult } from "@/app/actions/shared";
 import {
   type Settings,
   WEEKLY_COUNTS,
@@ -60,39 +58,22 @@ export function SettingsForm({
   settings: Settings;
   humanOnly: boolean;
 }) {
-  const [opened, setOpened] = useState(settings);
-  const [fields, setFields] = useState(() => fieldsOf(settings));
-  const [result, setResult] = useState<ActionResult<Settings>>();
-  const [changedSince, setChangedSince] = useState<Setting[]>([]);
-  const [isPending, startTransition] = useTransition();
+  const form = useRecordForm(settings, fieldsOf, isSettings);
+  const { failure } = form;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const { fields } = form;
     const input = {
       targets: Object.fromEntries(
         WEEKLY_COUNTS.map((count) => [count, numberOf(fields[count])]),
       ),
       pendingCap: numberOf(fields.pendingCap),
-      updatedAt: opened.updatedAt?.toISOString() ?? null,
+      updatedAt: form.opened.updatedAt?.toISOString() ?? null,
     };
-    startTransition(async () => {
-      const answer = await callAction(() => updateSettings(input));
-      setResult(answer);
-      if (answer.ok) {
-        setOpened(answer.data);
-        setFields(fieldsOf(answer.data));
-        setChangedSince([]);
-      } else if (answer.code === "conflict" && isSettings(answer.current)) {
-        const now = rebased(fields, fieldsOf(opened), fieldsOf(answer.current));
-        setFields(now.fields);
-        setChangedSince(now.changed);
-        setOpened(answer.current);
-      }
-    });
+    // Saved, the form stays here, open on the settings as saved.
+    form.save(() => updateSettings(input), form.reopen);
   }
-
-  const now = fieldsOf(opened);
-  const failure = result?.ok === false ? result : undefined;
 
   const field = (setting: Setting, description?: string) => {
     const error = failure?.fields?.[setting];
@@ -104,10 +85,8 @@ export function SettingsForm({
         <Input
           id={`setting-${setting}`}
           inputMode="numeric"
-          value={fields[setting]}
-          onChange={(event) =>
-            setFields((typed) => ({ ...typed, [setting]: event.target.value }))
-          }
+          value={form.fields[setting]}
+          onChange={(event) => form.setField(setting, event.target.value)}
           aria-invalid={error ? true : undefined}
           disabled={humanOnly}
           className="min-h-11"
@@ -123,13 +102,7 @@ export function SettingsForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       {failure?.code === "conflict" ? (
-        <ConflictNotice
-          what="the settings"
-          changes={changedSince.map((setting) => ({
-            label: FIELD_LABELS[setting] ?? setting,
-            now: now[setting],
-          }))}
-        />
+        <ConflictNotice what="the settings" changes={form.changes} />
       ) : null}
       <div className="flex flex-col gap-6">
         <FieldSet>
@@ -150,7 +123,7 @@ export function SettingsForm({
           {failure.message}
         </p>
       ) : null}
-      {result?.ok ? (
+      {form.saved ? (
         <p role="status" className="text-muted-foreground text-sm">
           Saved.
         </p>
@@ -159,10 +132,10 @@ export function SettingsForm({
         <Button
           type="submit"
           size="lg"
-          disabled={humanOnly || isPending}
+          disabled={humanOnly || form.isPending}
           className="min-h-11"
         >
-          {isPending ? "Saving…" : "Save"}
+          {form.isPending ? "Saving…" : "Save"}
         </Button>
         {humanOnly ? (
           <span className="text-muted-foreground text-sm">Only Hector</span>
