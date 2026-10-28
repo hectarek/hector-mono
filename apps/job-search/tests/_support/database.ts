@@ -22,9 +22,9 @@ function migrateOnce(): Promise<void> {
 export async function resetDatabase(): Promise<void> {
   await migrateOnce();
   // All at once: jobs point at companies and sources, status moves at jobs, people at companies,
-  // and interactions and contact links at people and jobs.
+  // interactions and contact links at people and jobs, and practice reviews at their sessions.
   await client.exec(
-    "truncate activity, companies, lead_sources, settings, jobs, job_status_changes, notes, people, interactions, job_people restart identity;",
+    "truncate activity, companies, lead_sources, settings, jobs, job_status_changes, notes, people, interactions, job_people, practice_entries restart identity;",
   );
 }
 

@@ -79,6 +79,18 @@ export const FIELD_LABELS: Record<string, string> = {
   conversationId: "Conversation",
   outcome: "How it went",
   state: "State",
+  // A practice session and a review, as log_practice and the practice forms take them, and a
+  // review's session and step as its history names them (`notes` is above)
+  sessionId: "Session",
+  session: "Session",
+  step: "Review",
+  topic: "Problem or topic",
+  type: "Type",
+  pattern: "Pattern",
+  practicedOn: "Date",
+  result: "Result",
+  aiUsed: "AI used",
+  minutes: "Minutes",
 };
 
 // A field's label, or its name in words ("nextStep" is "Next step"): a history names every field
