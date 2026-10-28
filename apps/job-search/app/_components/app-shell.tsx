@@ -20,6 +20,7 @@ import {
   CalendarDays,
   LogOut,
   Settings,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -55,6 +56,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   >
                     <Building2 />
                     <span>Companies</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="lg" render={<Link href="/people" />}>
+                    <Users />
+                    <span>People</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

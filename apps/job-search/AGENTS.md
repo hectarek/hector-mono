@@ -36,41 +36,48 @@ app/
   (auth)/                    # Outside the shell: welcome/ (the name and Sign in), auth/[path]/ (Neon's forms)
                              # and private/ (any account but the app's two)
   (main)/                    # Signed in, in the app shell: This week at /, jobs/ (views, [id], [id]/edit, new),
-                             # companies/ (list, [id], [id]/edit, new), settings/, Claude's page at /agent
+                             # companies/ (list, [id], [id]/edit, new), people/ (list, [id], [id]/edit,
+                             # new), settings/, Claude's page at /agent
   _components/               # app-shell.tsx (sidebar on desktop, off-canvas sheet on phones, KTD19),
                              # session-chrome.tsx (Claude's banner and page tools), agent-tools.tsx (the
                              # page tools' registrar), record-history.tsx (a record's history); lists
-                             # (company-list, job-list), forms (form-field, conflict-notice, company-form,
-                             # job-form, settings-form, add-source-form), job-status-form, proposal-review,
-                             # job-notes, delete-button, only-hector
+                             # (company-list, job-list, person-list, contact-list), forms (form-field,
+                             # conflict-notice, company-form, job-form, person-form, settings-form,
+                             # add-source-form), quick-log (the outreach sheet), job-status-form,
+                             # proposal-review, job-notes, delete-button, remove-contact-button, only-hector
   _lib/                      # auth client, auth paths, current actor (page and action helpers), safe redirect,
                              # page-tools.ts (the WebMCP adapter), agent-tools/registry.ts, call-action.ts,
                              # field-labels.ts, job-labels.ts, format-day.ts, form-changes.ts and
-                             # use-record-form.ts (KTD15), load-company.ts, load-job.ts
+                             # use-record-form.ts (KTD15), load-company.ts, load-job.ts, load-person.ts,
+                             # list-companies.ts (every company, for a picker)
   _providers/                # @repo/ui ThemeProvider around AuthProvider
   actions/                   # shared.ts: the envelope and its helpers (not "use server"); session.ts,
-                             # activity.ts, companies.ts, sources.ts, settings.ts, jobs.ts, notes.ts
+                             # activity.ts, companies.ts, sources.ts, settings.ts, jobs.ts, notes.ts,
+                             # people.ts, interactions.ts
   error.tsx, not-found.tsx, robots.ts
 
 src/
   entities/                  # errors (common.ts, loggable.ts), models (actor, activity, agent-session, company,
-                             # lead-source, settings, job, job-status-change, note, input, user, session,
-                             # transaction, logger), job-lifecycle.ts, posting-link.ts, code-point-order.ts,
-                             # week.ts
-  application/repositories/  # interfaces: activity, companies, lead-sources, settings, jobs, notes
+                             # lead-source, settings, job, job-status-change, note, person, interaction,
+                             # input, user, session, transaction, logger), job-lifecycle.ts, posting-link.ts,
+                             # code-point-order.ts, week.ts
+  application/repositories/  # interfaces: activity, companies, lead-sources, settings, jobs, notes, people,
+                             # interactions
   application/services/      # interfaces: authentication, logger, transaction-manager
   application/use-cases/     # access/ (resolve-actor, require-human), activity/ (record-change, list-activity),
                              # session/ (whoami, start-session), companies/ (find, get, save, delete),
                              # sources/ (add, list, source-named), settings/ (get, update), jobs/ (create,
                              # find, get, update, move, review-proposal, delete, job-checks), notes/ (add,
-                             # edit, delete)
+                             # edit, delete), people/ (find, get, add, update, delete, remove-contact,
+                             # person-dates), interactions/ (log, delete)
   interface-adapters/        # controllers, one per entry: activity/, session/, companies/, sources/, settings/,
-                             # jobs/, notes/
-  infrastructure/repositories/  # base, activity, companies, lead-sources, settings, jobs, notes (each + mock)
+                             # jobs/, notes/, people/, interactions/
+  infrastructure/repositories/  # base, activity, companies, lead-sources, settings, jobs, notes, people,
+                             # interactions (each + mock)
   infrastructure/services/   # neon-auth, console-logger, transaction-manager (+ mocks)
 
 di/                          # container.ts, types.ts, modules: logger, authentication, access, transaction,
-                             # activity, session, companies, sources, settings, jobs, notes
+                             # activity, session, companies, sources, settings, jobs, notes, people, interactions
 db/                          # schema.ts, index.ts, migrations/ (drizzle-kit generated)
 lib/                         # auth/server.ts, logger.ts
 tests/                       # bun:test, mirroring the source tree; flows/ (Playwright)
@@ -113,6 +120,7 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - **Jobs and the review queue (R20, KTD8)** are one table, told apart by `review_state`. Who is acting decides a new job's review, whatever the entry point (KTD3): Claude's is a pending proposal, which needs its posting's link and Claude's reason, Hector's is accepted at once, and both start in verify (`create-job.use-case.ts`). Claude leaves a dismissed proposal as Hector left it, so its posting stays refused: `update_job` refuses it from Claude with `validation`, and only Hector's reopen brings it back. `find_jobs` reads accepted jobs unless asked for another review state. A new job, or a new posting link, takes the owner's queue lock (`lockQueue`, a `pg_advisory_xact_lock`) before it checks for a duplicate posting (`posting-link.ts`'s key, under a partial unique index) and Claude's pending cap (settings), so two writes at once settle one at a time. `DuplicateError` answers `duplicate`, its `current` the job that holds the posting (`job-checks.ts`); `QueueFullError` answers `queue-full`. A job's write reads its company locked (`requireCompany`), so a company's delete and a write that names it settle one at a time.
 - **A status move is a pure rule and two rows (R2, R3, KTD7).** `job-lifecycle.ts` says what a move sets (applied-on, the follow-up, a closing's cleared next step); `move-job.use-case.ts` writes the job, its dated `job_status_changes` row and its history in one transaction. Only an accepted job moves, and a move to the status it holds writes and logs nothing, so a retried move never counts twice. `set_job_status` takes open statuses and `close_job` closed ones with a reason. Claude sets applied-on only with a move: `update_job` refuses it from Claude with `validation`.
 - A job names its lead source by name, found ignoring case or added and logged (`sources/source-named.ts`, which `add_source` shares). Notes are records of their own in the log (kind `note`), pointing at their job by kind and id; a job's delete takes its notes and status moves with it, and `add_note` reads the job locked, so a note added meanwhile can't outlive it. A company with jobs refuses its delete, proposals included, dismissed ones too (each keeps its posting from coming back), and names them; its page lists its proposals and dismissed ones under their own headings.
+- **People and the outreach log (R7, R8, KTD9).** A person's messaged, replied and met dates are their latest sent message, reply and held conversation in `interactions`, read each time and never stored: the people repository returns a `PersonRecord`, and the use cases add the dates with `withDates` (`people/person-dates.ts`), one query for a page. `log_interaction` logs one interaction per person named, several only for sent messages (at most 20), today by default and never after it, a scheduled conversation on its start's day; or it records how a scheduled conversation ended, where the same outcome again changes nothing and another is refused. It can set the people's next step and date as it goes. A job named links each person as its contact (`job_people`, also linked by `add_person`'s `jobId`), and a sent message linked to an applied job moves the job's next date to applied-on + 14 (`afterFollowUp`), logged on the job. The stale rule reads the job's latest linked reply (`isStaleCandidate`, `JobDetail.repliedOn`). Deleting a person takes their interactions and links with them; deleting a job drops its contact links and unlinks its interactions, which stay on their people; a company with people refuses its delete. Taking a contact off a job is human-only (`remove-contact`), as deleting is.
 - An error class thrown inside a transaction goes in the transaction manager's `DOMAIN_ERRORS`, or the action sees "Transaction failed" instead. Recipes' `UnauthorizedError` isn't here: nothing threw it, and `NotAllowedError` and `HumanOnlyError` are the refusals.
 - Every repository query takes the owner id (KTD2), with a PGlite test that another owner's rows stay out. A repository passes `handleError` record ids only.
 
@@ -124,7 +132,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - `app/_components/agent-tools.tsx` registers every tool on mount and aborts on unmount, so the list is the same on every page. `ActorChrome` (`session-chrome.tsx`) renders it for Claude's session only. A call runs its action through `callAction` (`app/_lib/call-action.ts`) inside a transition, which answers with the action's envelope unchanged, `reload-needed` when the server no longer knows the action (a deploy since the page loaded, so nothing ran), or `unexpected` with "Couldn't reach the server" for any other throw: a tool that throws reaches Claude only as "invocation failed".
 - The browser checks nothing against a tool's input schema: the controller's parse is the only check.
 - Claude's page, `/agent`, lists the tools and Claude's latest changes, with no calendar and no auto refresh (KTD6). A write that changes what it shows revalidates it, as `start_session` does.
-- U5's and U6's tools wait for U4's gate (its execution note). Their actions already take `(input, tool?)`, or `(input)` for a read, and parse with an entity schema, so each needs only its registry entry: `findCompanies`, `getCompany`, `saveCompany`, `addSource`, `listActivity`, `findJobs`, `getJob`, `proposeJob`, `updateJob`, `setJobStatus`, `closeJob` and `addNote`. Human-only, with no tool: `deleteCompany`, `updateSettings`, `acceptProposal`, `dismissProposal`, `reopenProposal`, `deleteJob`, `editNote` and `deleteNote`. Hector's form adds jobs through `addJob`, which refuses Claude's session: a proposal needs its posting's link and a reason, which only `proposeJob` takes.
+- U5's, U6's and U7's tools wait for U4's gate (its execution note). Their actions already take `(input, tool?)`, or `(input)` for a read, and parse with an entity schema, so each needs only its registry entry: `findCompanies`, `getCompany`, `saveCompany`, `addSource`, `listActivity`, `findJobs`, `getJob`, `proposeJob`, `updateJob`, `setJobStatus`, `closeJob`, `addNote`, `findPeople`, `getPerson`, `addPerson`, `updatePerson` and `logInteraction`. Human-only, with no tool: `deleteCompany`, `updateSettings`, `acceptProposal`, `dismissProposal`, `reopenProposal`, `deleteJob`, `editNote`, `deleteNote`, `deletePerson`, `deleteInteraction` and `removeContact`. Hector's form adds jobs through `addJob`, which refuses Claude's session: a proposal needs its posting's link and a reason, which only `proposeJob` takes.
 
 ## Logging Rules
 
@@ -150,6 +158,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - The shell is `app/_components/app-shell.tsx`. A unit that adds a section adds its item to the sidebar menu.
 - The plan's UI definition of done asks for 44 × 44 px touch targets. `SidebarMenuButton` at `lg` is 48 px, but in the default theme `Button` at `lg` is 36 px: recipes reaches 45 px only through its theme's spacing. A `Button` that's a touch target adds `min-h-11` (44 px; the design lint counts height as layout), as the private screen's Sign out does, and so does an `Input`. `NativeSelect` puts its class on a wrapper, so its select can't reach 44 px: the company form's tier is a `ToggleGroup` of `min-h-11 min-w-11` items instead.
 - A form is a page in the shell (`/companies/new`, `/companies/[id]/edit`, `/jobs/new`, `/jobs/[id]/edit`), as recipes' forms are, not a dialog: a phone can't fit a record's fields in one. It saves through `useRecordForm`'s `save`, which calls its action through `callAction` in a transition, and goes on with `router.push` after success (KTD4). A record's form lays out each field with `FormField` (text, a link, a number, a date, long text, or a few choices as toggles) and shows a conflict with `ConflictNotice`; deleting anything asks first through `DeleteButton`, given a bound action (`deleteJob.bind(null, { id })`).
+- The quick log (`quick-log.tsx`, R8) is a bottom sheet behind a "Log" button: a sent message, a reply or a held conversation, today by default, saved with one tap. It opens on a person from their page, with their jobs to link to; from a job's page with the job; and from People with a search, where a sent message can go to several people and a search with no match offers to add the person by name and company. A form that picks a company (the person form, the sheet's add) takes its name from a datalist of `listCompanies` and resolves it to an id on the client, refusing a name that isn't listed.
 - Values show by their labels in `app/_lib/job-labels.ts` and dates through `formatDay`, never raw (`offer-declined` is "Offer declined").
 - In Claude's session a human-only control shows, off, with "Only Hector" beside it (KTD3): `OnlyHector` (`app/_components/only-hector.tsx`) draws Delete on a company's or a job's page, Edit on a dismissed proposal, a note's Edit and Delete, and the review's buttons; the settings form turns its own inputs off. Disable each input, not a `fieldset`: happy-dom doesn't pass a fieldset's disabled state to its inputs.
 - Lists are a table from `md` up and cards (`Item` rendered as a `Link`) below (KTD19), as `company-list.tsx` is.

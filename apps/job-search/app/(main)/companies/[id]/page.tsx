@@ -3,6 +3,7 @@ import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { JobList } from "@/app/_components/job-list";
 import { OnlyHector } from "@/app/_components/only-hector";
@@ -18,8 +19,8 @@ import { JOB_PAGE_MAX } from "@/src/entities/models/job.model";
 const HEADCOUNT = new Intl.NumberFormat("en-US");
 
 // A company (R4): its facts and research, a warning when another company's name matches its own,
-// its jobs, the proposals that name it, waiting or dismissed (each keeps it from its delete), and
-// its history (R19). Its people arrive with U7.
+// its jobs and people, the proposals that name it, waiting or dismissed (each keeps it from its
+// delete, as its people do), and its history (R19).
 export default async function CompanyPage({
   params,
 }: {
@@ -27,7 +28,7 @@ export default async function CompanyPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const { company, similar, jobs } = await loadCompany(id, actor);
+  const { company, similar, jobs, people } = await loadCompany(id, actor);
   const find = getInjection("IFindJobsController");
   const [waiting, dismissed] = await Promise.all([
     find(
@@ -171,6 +172,28 @@ export default async function CompanyPage({
           <JobList jobs={jobs} />
         ) : (
           <p className="text-muted-foreground text-sm">No jobs here yet.</p>
+        )}
+      </section>
+
+      <section aria-labelledby="company-people" className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="company-people" className="font-semibold">
+            People
+          </h2>
+          <Button
+            variant="secondary"
+            size="lg"
+            nativeButton={false}
+            render={<Link href={`/people/new?company=${company.id}`} />}
+            className="min-h-11"
+          >
+            Add a person
+          </Button>
+        </div>
+        {people.length ? (
+          <ContactList people={people} />
+        ) : (
+          <p className="text-muted-foreground text-sm">No one here yet.</p>
         )}
       </section>
 

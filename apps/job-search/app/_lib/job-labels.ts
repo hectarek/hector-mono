@@ -1,6 +1,10 @@
 import type { JobStatus } from "@/src/entities/job-lifecycle";
 import type { ChangeActor } from "@/src/entities/models/activity.model";
 import type {
+  ConversationState,
+  InteractionKind,
+} from "@/src/entities/models/interaction.model";
+import type {
   DismissReason,
   JobFacts,
   ReviewState,
@@ -72,4 +76,18 @@ export const ACTOR_LABELS: Record<ChangeActor, string> = {
   agent: "Claude",
   import: "Import",
   system: "The app",
+};
+
+// An interaction's values (KTD9), which the person page and the quick-log sheet show.
+export const INTERACTION_LABELS: Record<InteractionKind, string> = {
+  "message-sent": "Message sent",
+  "reply-received": "Reply",
+  conversation: "Conversation",
+};
+
+export const CONVERSATION_LABELS: Record<ConversationState, string> = {
+  scheduled: "Scheduled",
+  held: "Held",
+  cancelled: "Cancelled",
+  "no-show": "No-show",
 };
