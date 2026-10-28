@@ -9,6 +9,7 @@ import type { IJobsRepository } from "@/src/application/repositories/jobs.reposi
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
+import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
@@ -34,6 +35,10 @@ import { findPeopleUseCase } from "@/src/application/use-cases/people/find-peopl
 import { getPersonUseCase } from "@/src/application/use-cases/people/get-person.use-case";
 import { removeContactUseCase } from "@/src/application/use-cases/people/remove-contact.use-case";
 import { updatePersonUseCase } from "@/src/application/use-cases/people/update-person.use-case";
+import { deletePracticeEntryUseCase } from "@/src/application/use-cases/practice/delete-practice-entry.use-case";
+import { getPracticeSessionUseCase } from "@/src/application/use-cases/practice/get-practice-session.use-case";
+import { listPracticeUseCase } from "@/src/application/use-cases/practice/list-practice.use-case";
+import { logPracticeUseCase } from "@/src/application/use-cases/practice/log-practice.use-case";
 import { startSessionUseCase } from "@/src/application/use-cases/session/start-session.use-case";
 import { getSettingsUseCase } from "@/src/application/use-cases/settings/get-settings.use-case";
 import { updateSettingsUseCase } from "@/src/application/use-cases/settings/update-settings.use-case";
@@ -53,6 +58,8 @@ import { NotesRepository } from "@/src/infrastructure/repositories/notes.reposit
 import { MockNotesRepository } from "@/src/infrastructure/repositories/notes.repository.mock";
 import { PeopleRepository } from "@/src/infrastructure/repositories/people.repository";
 import { MockPeopleRepository } from "@/src/infrastructure/repositories/people.repository.mock";
+import { PracticeRepository } from "@/src/infrastructure/repositories/practice.repository";
+import { MockPracticeRepository } from "@/src/infrastructure/repositories/practice.repository.mock";
 import { SettingsRepository } from "@/src/infrastructure/repositories/settings.repository";
 import { MockSettingsRepository } from "@/src/infrastructure/repositories/settings.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
@@ -73,6 +80,7 @@ type Repositories = {
   notes: INotesRepository;
   people: IPeopleRepository;
   interactions: IInteractionsRepository;
+  practice: IPracticeRepository;
   transactions: ITransactionManagerService;
 };
 
@@ -88,6 +96,7 @@ function mockRepositories(): Repositories {
     notes: new MockNotesRepository(),
     people: new MockPeopleRepository(companies),
     interactions: new MockInteractionsRepository(),
+    practice: new MockPracticeRepository(),
     transactions: new MockTransactionManagerService(),
   };
 }
@@ -104,6 +113,7 @@ export function postgresRepositories(): Repositories {
     notes: new NotesRepository(log),
     people: new PeopleRepository(log),
     interactions: new InteractionsRepository(log),
+    practice: new PracticeRepository(log),
     transactions: new TransactionManagerService(log),
   };
 }
@@ -152,6 +162,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     notes,
     people,
     interactions,
+    practice,
     transactions,
   } = repos;
   return {
@@ -253,6 +264,15 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     ),
     deleteInteraction: deleteInteractionUseCase(
       interactions,
+      activity,
+      transactions,
+      log,
+    ),
+    listPractice: listPracticeUseCase(practice),
+    getPracticeSession: getPracticeSessionUseCase(practice),
+    logPractice: logPracticeUseCase(practice, activity, transactions, log),
+    deletePracticeEntry: deletePracticeEntryUseCase(
+      practice,
       activity,
       transactions,
       log,

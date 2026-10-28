@@ -18,6 +18,7 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  Dumbbell,
   LogOut,
   Settings,
   Users,
@@ -62,6 +63,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton size="lg" render={<Link href="/people" />}>
                     <Users />
                     <span>People</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    size="lg"
+                    render={<Link href="/practice" />}
+                  >
+                    <Dumbbell />
+                    <span>Practice</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   bigint,
+  boolean,
   check,
   date,
   index,
@@ -41,6 +43,14 @@ import {
   WORK_MODES,
 } from "@/src/entities/models/job.model";
 import { RANKS, type Rank } from "@/src/entities/models/person.model";
+import {
+  PRACTICE_KINDS,
+  type PracticeKind,
+} from "@/src/entities/models/practice-entry.model";
+import {
+  PRACTICE_RESULTS,
+  type PracticeResult,
+} from "@/src/entities/practice-ladder";
 
 // The app's tables, added by the units that need them (docs/build-plan.md). Every root table
 // carries owner_id (KTD2).
@@ -382,5 +392,56 @@ export const jobPeople = pgTable(
   (table) => [
     primaryKey({ columns: [table.jobId, table.personId] }),
     index("job_people_person_id_idx").on(table.personId),
+  ],
+);
+
+// The practice log (R11, U8): sessions and their reviews, a row each. A review points at its
+// session and goes with it. When the next review is due comes from the rows
+// (src/entities/practice-ladder.ts), never a column here.
+export const practiceEntries = pgTable(
+  "practice_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    kind: text("kind").$type<PracticeKind>().notNull(),
+    sessionId: uuid("session_id").references(
+      (): AnyPgColumn => practiceEntries.id,
+      { onDelete: "cascade" },
+    ),
+    topic: text("topic"),
+    type: text("type"),
+    pattern: text("pattern"),
+    practicedOn: day("practiced_on").notNull(),
+    result: text("result").$type<PracticeResult>().notNull(),
+    aiUsed: boolean("ai_used").notNull().default(false),
+    minutes: integer("minutes"),
+    notes: text("notes"),
+    author: text("author").$type<ChangeActor>().notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    index("practice_entries_owner_id_practiced_on_idx").on(
+      table.ownerId,
+      table.practicedOn,
+    ),
+    index("practice_entries_session_id_idx").on(table.sessionId),
+    check("practice_entries_kind_check", oneOf(table.kind, PRACTICE_KINDS)),
+    check(
+      "practice_entries_result_check",
+      oneOf(table.result, PRACTICE_RESULTS),
+    ),
+    // A review points at its session, and only a session names a problem or topic.
+    check(
+      "practice_entries_session_check",
+      sql`(${table.kind} = 'review') = (${table.sessionId} is not null)`,
+    ),
+    check(
+      "practice_entries_topic_check",
+      sql`(${table.kind} = 'session') = (${table.topic} is not null)`,
+    ),
+    check(
+      "practice_entries_minutes_check",
+      sql`${table.minutes} between 1 and 600`,
+    ),
   ],
 );

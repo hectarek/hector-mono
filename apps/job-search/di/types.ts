@@ -5,6 +5,7 @@ import type { IJobsRepository } from "@/src/application/repositories/jobs.reposi
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
+import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -36,6 +37,10 @@ import type { IFindPeopleUseCase } from "@/src/application/use-cases/people/find
 import type { IGetPersonUseCase } from "@/src/application/use-cases/people/get-person.use-case";
 import type { IRemoveContactUseCase } from "@/src/application/use-cases/people/remove-contact.use-case";
 import type { IUpdatePersonUseCase } from "@/src/application/use-cases/people/update-person.use-case";
+import type { IDeletePracticeEntryUseCase } from "@/src/application/use-cases/practice/delete-practice-entry.use-case";
+import type { IGetPracticeSessionUseCase } from "@/src/application/use-cases/practice/get-practice-session.use-case";
+import type { IListPracticeUseCase } from "@/src/application/use-cases/practice/list-practice.use-case";
+import type { ILogPracticeUseCase } from "@/src/application/use-cases/practice/log-practice.use-case";
 import type { IStartSessionUseCase } from "@/src/application/use-cases/session/start-session.use-case";
 import type { IWhoamiUseCase } from "@/src/application/use-cases/session/whoami.use-case";
 import type { IGetSettingsUseCase } from "@/src/application/use-cases/settings/get-settings.use-case";
@@ -69,6 +74,10 @@ import type { IFindPeopleController } from "@/src/interface-adapters/controllers
 import type { IGetPersonController } from "@/src/interface-adapters/controllers/people/get-person.controller";
 import type { IRemoveContactController } from "@/src/interface-adapters/controllers/people/remove-contact.controller";
 import type { IUpdatePersonController } from "@/src/interface-adapters/controllers/people/update-person.controller";
+import type { IDeletePracticeEntryController } from "@/src/interface-adapters/controllers/practice/delete-practice-entry.controller";
+import type { IGetPracticeSessionController } from "@/src/interface-adapters/controllers/practice/get-practice-session.controller";
+import type { IListPracticeController } from "@/src/interface-adapters/controllers/practice/list-practice.controller";
+import type { ILogPracticeController } from "@/src/interface-adapters/controllers/practice/log-practice.controller";
 import type { IStartSessionController } from "@/src/interface-adapters/controllers/session/start-session.controller";
 import type { IWhoamiController } from "@/src/interface-adapters/controllers/session/whoami.controller";
 import type { IGetSettingsController } from "@/src/interface-adapters/controllers/settings/get-settings.controller";
@@ -152,6 +161,15 @@ export const DI_SYMBOLS = {
   ILogInteractionController: Symbol.for("ILogInteractionController"),
   IDeleteInteractionUseCase: Symbol.for("IDeleteInteractionUseCase"),
   IDeleteInteractionController: Symbol.for("IDeleteInteractionController"),
+  IPracticeRepository: Symbol.for("IPracticeRepository"),
+  IListPracticeUseCase: Symbol.for("IListPracticeUseCase"),
+  IListPracticeController: Symbol.for("IListPracticeController"),
+  IGetPracticeSessionUseCase: Symbol.for("IGetPracticeSessionUseCase"),
+  IGetPracticeSessionController: Symbol.for("IGetPracticeSessionController"),
+  ILogPracticeUseCase: Symbol.for("ILogPracticeUseCase"),
+  ILogPracticeController: Symbol.for("ILogPracticeController"),
+  IDeletePracticeEntryUseCase: Symbol.for("IDeletePracticeEntryUseCase"),
+  IDeletePracticeEntryController: Symbol.for("IDeletePracticeEntryController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -230,4 +248,13 @@ export interface DI_RETURN_TYPES {
   ILogInteractionController: ILogInteractionController;
   IDeleteInteractionUseCase: IDeleteInteractionUseCase;
   IDeleteInteractionController: IDeleteInteractionController;
+  IPracticeRepository: IPracticeRepository;
+  IListPracticeUseCase: IListPracticeUseCase;
+  IListPracticeController: IListPracticeController;
+  IGetPracticeSessionUseCase: IGetPracticeSessionUseCase;
+  IGetPracticeSessionController: IGetPracticeSessionController;
+  ILogPracticeUseCase: ILogPracticeUseCase;
+  ILogPracticeController: ILogPracticeController;
+  IDeletePracticeEntryUseCase: IDeletePracticeEntryUseCase;
+  IDeletePracticeEntryController: IDeletePracticeEntryController;
 }

@@ -8,6 +8,7 @@ import { createJobsModule } from "@/di/modules/jobs.module";
 import { createLoggerModule } from "@/di/modules/logger.module";
 import { createNotesModule } from "@/di/modules/notes.module";
 import { createPeopleModule } from "@/di/modules/people.module";
+import { createPracticeModule } from "@/di/modules/practice.module";
 import { createSessionModule } from "@/di/modules/session.module";
 import { createSettingsModule } from "@/di/modules/settings.module";
 import { createSourcesModule } from "@/di/modules/sources.module";
@@ -38,6 +39,7 @@ ApplicationContainer.load(
   Symbol("InteractionsModule"),
   createInteractionsModule(),
 );
+ApplicationContainer.load(Symbol("PracticeModule"), createPracticeModule());
 
 export function getInjection<K extends keyof typeof DI_SYMBOLS>(
   symbol: K,

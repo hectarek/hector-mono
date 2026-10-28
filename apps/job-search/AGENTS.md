@@ -37,47 +37,50 @@ app/
                              # and private/ (any account but the app's two)
   (main)/                    # Signed in, in the app shell: This week at /, jobs/ (views, [id], [id]/edit, new),
                              # companies/ (list, [id], [id]/edit, new), people/ (list, [id], [id]/edit,
-                             # new), settings/, Claude's page at /agent
+                             # new), practice/ (list, [id], new), settings/, Claude's page at /agent
   _components/               # app-shell.tsx (sidebar on desktop, off-canvas sheet on phones, KTD19),
                              # session-chrome.tsx (Claude's banner and page tools), agent-tools.tsx (the
                              # page tools' registrar), record-history.tsx (a record's history); lists
-                             # (company-list, job-list, person-list, contact-list), forms (form-field,
-                             # conflict-notice, company-form, job-form, person-form, settings-form,
-                             # add-source-form), quick-log (the outreach sheet), job-status-form,
+                             # (company-list, job-list, person-list, contact-list, practice-list), forms
+                             # (form-field, conflict-notice, company-form, job-form, person-form,
+                             # settings-form, add-source-form, practice-form, practice-fields), quick-log
+                             # (the outreach sheet), practice-review (the review sheet), job-status-form,
                              # proposal-review, job-notes, delete-button, remove-contact-button, only-hector
   _lib/                      # auth client, auth paths, current actor (page and action helpers), safe redirect,
                              # page-tools.ts (the WebMCP adapter), agent-tools/registry.ts, call-action.ts,
                              # field-labels.ts, job-labels.ts, format-day.ts, form-changes.ts and
                              # use-record-form.ts (KTD15), load-company.ts, load-job.ts, load-person.ts,
-                             # list-companies.ts (every company, for a picker)
+                             # load-practice-session.ts, list-companies.ts (every company, for a picker)
   _providers/                # @repo/ui ThemeProvider around AuthProvider
   actions/                   # shared.ts: the envelope and its helpers (not "use server"); session.ts,
                              # activity.ts, companies.ts, sources.ts, settings.ts, jobs.ts, notes.ts,
-                             # people.ts, interactions.ts
+                             # people.ts, interactions.ts, practice.ts
   error.tsx, not-found.tsx, robots.ts
 
 src/
   entities/                  # errors (common.ts, loggable.ts), models (actor, activity, agent-session, company,
                              # lead-source, settings, job, job-status-change, note, person, interaction,
-                             # input, user, session, transaction, logger), job-lifecycle.ts, posting-link.ts,
-                             # code-point-order.ts, week.ts
+                             # practice-entry, input, user, session, transaction, logger), job-lifecycle.ts,
+                             # practice-ladder.ts, posting-link.ts, code-point-order.ts, week.ts
   application/repositories/  # interfaces: activity, companies, lead-sources, settings, jobs, notes, people,
-                             # interactions
+                             # interactions, practice
   application/services/      # interfaces: authentication, logger, transaction-manager
   application/use-cases/     # access/ (resolve-actor, require-human), activity/ (record-change, list-activity),
                              # session/ (whoami, start-session), companies/ (find, get, save, delete),
                              # sources/ (add, list, source-named), settings/ (get, update), jobs/ (create,
                              # find, get, update, move, review-proposal, delete, job-checks), notes/ (add,
                              # edit, delete), people/ (find, get, add, update, delete, remove-contact,
-                             # person-dates), interactions/ (log, delete)
+                             # person-dates), interactions/ (log, delete), practice/ (list, get, log,
+                             # delete, scheduled)
   interface-adapters/        # controllers, one per entry: activity/, session/, companies/, sources/, settings/,
-                             # jobs/, notes/, people/, interactions/
+                             # jobs/, notes/, people/, interactions/, practice/
   infrastructure/repositories/  # base, activity, companies, lead-sources, settings, jobs, notes, people,
-                             # interactions (each + mock)
+                             # interactions, practice (each + mock)
   infrastructure/services/   # neon-auth, console-logger, transaction-manager (+ mocks)
 
 di/                          # container.ts, types.ts, modules: logger, authentication, access, transaction,
-                             # activity, session, companies, sources, settings, jobs, notes, people, interactions
+                             # activity, session, companies, sources, settings, jobs, notes, people,
+                             # interactions, practice
 db/                          # schema.ts, index.ts, migrations/ (drizzle-kit generated)
 lib/                         # auth/server.ts, logger.ts
 tests/                       # bun:test, mirroring the source tree; flows/ (Playwright)
@@ -121,6 +124,7 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - **A status move is a pure rule and two rows (R2, R3, KTD7).** `job-lifecycle.ts` says what a move sets (applied-on, the follow-up, a closing's cleared next step); `move-job.use-case.ts` writes the job, its dated `job_status_changes` row and its history in one transaction. Only an accepted job moves, and a move to the status it holds writes and logs nothing, so a retried move never counts twice. `set_job_status` takes open statuses and `close_job` closed ones with a reason. Claude sets applied-on only with a move: `update_job` refuses it from Claude with `validation`.
 - A job names its lead source by name, found ignoring case or added and logged (`sources/source-named.ts`, which `add_source` shares). Notes are records of their own in the log (kind `note`), pointing at their job by kind and id; a job's delete takes its notes and status moves with it, and `add_note` reads the job locked, so a note added meanwhile can't outlive it. A company with jobs refuses its delete, proposals included, dismissed ones too (each keeps its posting from coming back), and names them; its page lists its proposals and dismissed ones under their own headings.
 - **People and the outreach log (R7, R8, KTD9).** A person's messaged, replied and met dates are their latest sent message, reply and held conversation in `interactions`, read each time and never stored: the people repository returns a `PersonRecord`, and the use cases add the dates with `withDates` (`people/person-dates.ts`), one query for a page. `log_interaction` logs one interaction per person named, several only for sent messages (at most 20), today by default and never after it, a scheduled conversation on its start's day; or it records how a scheduled conversation ended, where the same outcome again changes nothing and another is refused. It can set the people's next step and date as it goes. A job named links each person as its contact (`job_people`, also linked by `add_person`'s `jobId`), and a sent message linked to an applied job moves the job's next date to applied-on + 14 (`afterFollowUp`), logged on the job. The stale rule reads the job's latest linked reply (`isStaleCandidate`, `JobDetail.repliedOn`). Deleting a person takes their interactions and links with them; deleting a job drops its contact links and unlinks its interactions, which stay on their people; a company with people refuses its delete. Taking a contact off a job is human-only (`remove-contact`), as deleting is.
+- **The practice log (R11, U8)** is one table, `practice_entries`: sessions and their reviews, a review pointing at its session and going with it (record kind `practice-entry`). When the next review is due is worked out each time by `practice-ladder.ts`'s `nextReview`, never stored: a pure replay of the session and its reviews in the order they happened, so a deleted review takes its step with it. The first review comes 2 days after the session whatever its result (as the sheet's formula did), a solved review moves to the next step 7 and then 21 days later, none follows the third, and a failed or partial one is retried 2 days later on the same step. The use cases add it with `scheduled` (`practice/scheduled.ts`). `log_practice` logs a session, or with a `sessionId` that session's next review: today by default and never after it, never before the try it follows, and refused once the third review is solved. A review reads its session locked, so two at once settle one at a time. `listOpen` leaves out sessions with `LADDER_STEPS` solved reviews in SQL, and `list_practice` keeps those due by today in Eastern time, the earliest first.
 - An error class thrown inside a transaction goes in the transaction manager's `DOMAIN_ERRORS`, or the action sees "Transaction failed" instead. Recipes' `UnauthorizedError` isn't here: nothing threw it, and `NotAllowedError` and `HumanOnlyError` are the refusals.
 - Every repository query takes the owner id (KTD2), with a PGlite test that another owner's rows stay out. A repository passes `handleError` record ids only.
 
@@ -132,7 +136,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - `app/_components/agent-tools.tsx` registers every tool on mount and aborts on unmount, so the list is the same on every page. `ActorChrome` (`session-chrome.tsx`) renders it for Claude's session only. A call runs its action through `callAction` (`app/_lib/call-action.ts`) inside a transition, which answers with the action's envelope unchanged, `reload-needed` when the server no longer knows the action (a deploy since the page loaded, so nothing ran), or `unexpected` with "Couldn't reach the server" for any other throw: a tool that throws reaches Claude only as "invocation failed".
 - The browser checks nothing against a tool's input schema: the controller's parse is the only check.
 - Claude's page, `/agent`, lists the tools and Claude's latest changes, with no calendar and no auto refresh (KTD6). A write that changes what it shows revalidates it, as `start_session` does.
-- U5's, U6's and U7's tools wait for U4's gate (its execution note). Their actions already take `(input, tool?)`, or `(input)` for a read, and parse with an entity schema, so each needs only its registry entry: `findCompanies`, `getCompany`, `saveCompany`, `addSource`, `listActivity`, `findJobs`, `getJob`, `proposeJob`, `updateJob`, `setJobStatus`, `closeJob`, `addNote`, `findPeople`, `getPerson`, `addPerson`, `updatePerson` and `logInteraction`. Human-only, with no tool: `deleteCompany`, `updateSettings`, `acceptProposal`, `dismissProposal`, `reopenProposal`, `deleteJob`, `editNote`, `deleteNote`, `deletePerson`, `deleteInteraction` and `removeContact`. Hector's form adds jobs through `addJob`, which refuses Claude's session: a proposal needs its posting's link and a reason, which only `proposeJob` takes.
+- U5's, U6's, U7's and U8's tools wait for U4's gate (its execution note). Their actions already take `(input, tool?)`, or `(input)` for a read, and parse with an entity schema, so each needs only its registry entry: `findCompanies`, `getCompany`, `saveCompany`, `addSource`, `listActivity`, `findJobs`, `getJob`, `proposeJob`, `updateJob`, `setJobStatus`, `closeJob`, `addNote`, `findPeople`, `getPerson`, `addPerson`, `updatePerson`, `logInteraction`, `listPractice` and `logPractice`. Human-only, with no tool: `deleteCompany`, `updateSettings`, `acceptProposal`, `dismissProposal`, `reopenProposal`, `deleteJob`, `editNote`, `deleteNote`, `deletePerson`, `deleteInteraction`, `removeContact` and `deletePracticeEntry`. Hector's form adds jobs through `addJob`, which refuses Claude's session: a proposal needs its posting's link and a reason, which only `proposeJob` takes.
 
 ## Logging Rules
 
@@ -159,6 +163,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - The plan's UI definition of done asks for 44 × 44 px touch targets. `SidebarMenuButton` at `lg` is 48 px, but in the default theme `Button` at `lg` is 36 px: recipes reaches 45 px only through its theme's spacing. A `Button` that's a touch target adds `min-h-11` (44 px; the design lint counts height as layout), as the private screen's Sign out does, and so does an `Input`. `NativeSelect` puts its class on a wrapper, so its select can't reach 44 px: the company form's tier is a `ToggleGroup` of `min-h-11 min-w-11` items instead.
 - A form is a page in the shell (`/companies/new`, `/companies/[id]/edit`, `/jobs/new`, `/jobs/[id]/edit`), as recipes' forms are, not a dialog: a phone can't fit a record's fields in one. It saves through `useRecordForm`'s `save`, which calls its action through `callAction` in a transition, and goes on with `router.push` after success (KTD4). A record's form lays out each field with `FormField` (text, a link, a number, a date, long text, or a few choices as toggles) and shows a conflict with `ConflictNotice`; deleting anything asks first through `DeleteButton`, given a bound action (`deleteJob.bind(null, { id })`).
 - The quick log (`quick-log.tsx`, R8) is a bottom sheet behind a "Log" button: a sent message, a reply or a held conversation, today by default, saved with one tap. It opens on a person from their page, with their jobs to link to; from a job's page with the job; and from People with a search, where a sent message can go to several people and a search with no match offers to add the person by name and company. A form that picks a company (the person form, the sheet's add) takes its name from a datalist of `listCompanies` and resolves it to an id on the client, refusing a name that isn't listed.
+- Practice (R11): the practice page lists the reviews due, each logged from `PracticeReview`, a bottom sheet behind "Log review", once its result is picked, and the latest sessions. A session is logged on its own page (`/practice/new`, `PracticeForm`), and its page (`/practice/[id]`) holds its reviews, the review sheet and Hector's deletes. The form and the sheet share a try's fields through `TryFields` (`practice-fields.tsx`).
 - Values show by their labels in `app/_lib/job-labels.ts` and dates through `formatDay`, never raw (`offer-declined` is "Offer declined").
 - In Claude's session a human-only control shows, off, with "Only Hector" beside it (KTD3): `OnlyHector` (`app/_components/only-hector.tsx`) draws Delete on a company's or a job's page, Edit on a dismissed proposal, a note's Edit and Delete, and the review's buttons; the settings form turns its own inputs off. Disable each input, not a `fieldset`: happy-dom doesn't pass a fieldset's disabled state to its inputs.
 - Lists are a table from `md` up and cards (`Item` rendered as a `Link`) below (KTD19), as `company-list.tsx` is.
@@ -170,7 +175,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - Database: PGlite, an in-memory Postgres (`tests/_support/database.ts`), with the real migrations applied, so nothing in tests reaches Neon. Use-case and repository tests use `describeEachBackend` and `makeApp()` (`tests/_support/app.ts`, recipes' harness): each test runs on the mock repositories and on the real ones over PGlite, and one that fails only on `[postgres]` means a mock has drifted from the SQL. What only a database shows, such as a rollback, is tested on PGlite alone, with `resetDatabase()` in `beforeEach` and `sql()` for checks, never inside an open transaction (PGlite has one connection).
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged at every level, so a test can show a value never reached the logs (KTD20).
 - Who's signed in: `signInAs("owner" | "agent" | "stranger" | "signed-out")` (`tests/_support/session.ts`) sets the test container's `MockAuthService`. The container lives for the whole run, so every test that depends on the session calls it. Its mock repositories keep their rows for the whole run too, and the owner never changes, so a test that goes through the container works on records of its own (a fresh `crypto.randomUUID()`).
-- Screen tests are `*.test.tsx`, as in recipes: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them with happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Server components render with `renderOnServer` (`tests/_support/server-render.ts`): the tree streams as the server would send it, async components and `<Suspense>` included, into the page, and Testing Library's `within` finds things in it. What a component throws inside `<Suspense>`, such as a `redirect()`, goes to the `onError` a test passes it. Client components render with Testing Library's `render`, which runs their effects; `dom.ts` loads it once the document is in place and unmounts what it rendered after each test. Fallow (3.36) follows that preload, so `dom.ts` needs no entry in `.fallowrc.json`.
+- Screen tests are `*.test.tsx`, as in recipes: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them with happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Server components render with `renderOnServer` (`tests/_support/server-render.ts`): the tree streams as the server would send it, async components and `<Suspense>` included, into the page, and Testing Library's `within` finds things in it. What a component throws inside `<Suspense>`, such as a `redirect()`, goes to the `onError` a test passes it. Client components render with Testing Library's `render`, which runs their effects; `dom.ts` loads it once the document is in place and unmounts what it rendered after each test. `dom.ts` also gives Testing Library's waits (`findBy…`, `waitFor`) 3 seconds rather than 1, because CI's runners stall for about a second now and then. Fallow (3.36) follows that preload, so `dom.ts` needs no entry in `.fallowrc.json`.
 - The preload stubs `next/cache` (`nextState.revalidated` in `tests/_support/next.ts` keeps the paths an action revalidated) and keeps Next's real `unstable_isUnrecognizedActionError` in its `next/navigation` stand-in, whose `useRouter` keeps where a screen went in `nextState.pushed`.
 - In screen tests, a `Button` rendered as a `Link` (`nativeButton={false}`) has the role `button`, not `link`, and a card `Item` that's a link is named by all its text. Testing Library's bound queries (`render(…).getByLabelText`) take no type argument: assert with `toHaveProperty("value", …)`. Fire `submit` at the form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button.
 - `MockTransactionManagerService` runs one transaction at a time, as PGlite's one connection does, so two writes started together settle on the mocks as the database's locks settle them. Don't start a transaction inside another: on either backend it waits forever.
@@ -189,6 +194,7 @@ bun run --filter=job-search db:migrate    # the test project (.env); production 
 cd apps/job-search && bun run db:migrate:production   # production only, from Hector's own terminal, never Claude
 bun run test --filter=job-search          # both passes; or from apps/job-search: bun test tests/proxy.test.ts
 bun run --filter=job-search test:screens  # the screen tests (*.test.tsx) alone
+cd apps/job-search && bun run test:screens ./tests/app/_components/quick-log.test.tsx   # one screen file: a plain bun test skips *.test.tsx, and the path needs ./
 bun run --filter=job-search test:flows    # the browser flows, on the test project (needs Claude's account in .env)
 ```
 

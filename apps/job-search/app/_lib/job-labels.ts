@@ -9,6 +9,7 @@ import type {
   JobFacts,
   ReviewState,
 } from "@/src/entities/models/job.model";
+import type { PracticeResult } from "@/src/entities/practice-ladder";
 
 // A job's values as the screens name them.
 
@@ -90,4 +91,11 @@ export const CONVERSATION_LABELS: Record<ConversationState, string> = {
   held: "Held",
   cancelled: "Cancelled",
   "no-show": "No-show",
+};
+
+// How a practice try went (R11), which the practice pages and forms show.
+export const PRACTICE_RESULT_LABELS: Record<PracticeResult, string> = {
+  solved: "Solved",
+  partial: "Partial",
+  failed: "Failed",
 };
