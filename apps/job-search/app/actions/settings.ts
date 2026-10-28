@@ -1,13 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import {
-  type ActionResult,
-  actionLogger,
-  changeContext,
-  succeeded,
-  toActionError,
-} from "@/app/actions/shared";
+import { type ActionResult, answer, changeContext } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type { Settings } from "@/src/entities/models/settings.model";
 
@@ -15,19 +8,11 @@ import type { Settings } from "@/src/entities/models/settings.model";
 export async function updateSettings(
   input: unknown,
 ): Promise<ActionResult<Settings>> {
-  let saved: Settings;
-  try {
-    saved = await getInjection("IUpdateSettingsController")(
-      input,
-      await changeContext(),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("updateSettings"),
-      "Couldn't save the settings. Try again.",
-    );
-  }
-  revalidatePath("/settings");
-  return succeeded(saved);
+  return answer(
+    "updateSettings",
+    "Couldn't save the settings. Try again.",
+    async () =>
+      getInjection("IUpdateSettingsController")(input, await changeContext()),
+    () => ["/settings"],
+  );
 }

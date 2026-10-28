@@ -4,19 +4,17 @@ import { Button } from "@repo/ui/components/button";
 import { FieldGroup } from "@repo/ui/components/field";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { type FieldKind, FormField } from "@/app/_components/form-field";
-import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
-import { editedFields, rebased } from "@/app/_lib/form-changes";
 import {
   EMPLOYMENT_LABELS,
   LEVEL_LABELS,
   WORK_MODE_LABELS,
 } from "@/app/_lib/job-labels";
+import { useRecordForm } from "@/app/_lib/use-record-form";
 import { addJob, updateJob } from "@/app/actions/jobs";
-import type { ActionResult } from "@/app/actions/shared";
 import type { Job } from "@/src/entities/models/job.model";
 
 type Fact =
@@ -39,7 +37,6 @@ type Fact =
   | "appliedOn"
   | "summary";
 type Fields = Record<Fact, string>;
-type Failure = Extract<ActionResult<unknown>, { ok: false }>;
 
 // A set of choices, none first.
 const choicesOf = (labels: Record<string, string>): FieldKind => ({
@@ -170,21 +167,19 @@ export function JobForm({
   sources: string[];
 }) {
   const router = useRouter();
-  const [opened, setOpened] = useState(job);
-  const [fields, setFields] = useState(() => fieldsOf(job));
-  const [failure, setFailure] = useState<Failure>();
-  const [changedSince, setChangedSince] = useState<Fact[]>([]);
-  const [isPending, startTransition] = useTransition();
+  const form = useRecordForm(job, fieldsOf, isJob);
+  const { failure } = form;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const { opened } = form;
     const facts = (
       opened
-        ? editedFields(fields, fieldsOf(opened))
+        ? form.edited
         : FACTS.map(({ fact }) => fact).filter((fact) => fact !== "appliedOn")
-    ).map((fact) => [fact, savedValue(fact, fields[fact])] as const);
-    startTransition(async () => {
-      const result = await callAction(() =>
+    ).map((fact) => [fact, savedValue(fact, form.fields[fact])] as const);
+    form.save(
+      () =>
         opened
           ? updateJob({
               id: opened.id,
@@ -198,33 +193,14 @@ export function JobForm({
                 facts.filter(([, value]) => value !== null),
               ),
             }),
-      );
-      if (result.ok) {
-        router.push(`/jobs/${result.data.id}`);
-        return;
-      }
-      setFailure(result);
-      if (result.code === "conflict" && opened && isJob(result.current)) {
-        const now = rebased(fields, fieldsOf(opened), fieldsOf(result.current));
-        setFields(now.fields);
-        setChangedSince(now.changed);
-        setOpened(result.current);
-      }
-    });
+      (saved) => router.push(`/jobs/${saved.id}`),
+    );
   }
-
-  const now = fieldsOf(opened);
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-6">
       {failure?.code === "conflict" ? (
-        <ConflictNotice
-          what="the job"
-          changes={changedSince.map((fact) => ({
-            label: FIELD_LABELS[fact] ?? fact,
-            now: now[fact],
-          }))}
-        />
+        <ConflictNotice what="the job" changes={form.changes} />
       ) : null}
       <FieldGroup>
         {FACTS.filter(({ fact }) => job || fact !== "appliedOn").map(
@@ -234,10 +210,8 @@ export function JobForm({
               id={`job-${fact}`}
               label={FIELD_LABELS[fact] ?? fact}
               kind={kind}
-              value={fields[fact]}
-              onChange={(text) =>
-                setFields((typed) => ({ ...typed, [fact]: text }))
-              }
+              value={form.fields[fact]}
+              onChange={(text) => form.setField(fact, text)}
               error={failure?.fields?.[fact]}
               description={description}
               required={fact === "role" || fact === "source"}
@@ -261,10 +235,10 @@ export function JobForm({
         <Button
           type="submit"
           size="lg"
-          disabled={isPending}
+          disabled={form.isPending}
           className="min-h-11"
         >
-          {isPending ? "Saving…" : job ? "Save" : "Add job"}
+          {form.isPending ? "Saving…" : job ? "Save" : "Add job"}
         </Button>
         <Button
           variant="secondary"

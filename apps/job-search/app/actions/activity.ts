@@ -1,12 +1,7 @@
 "use server";
 
 import { getActionActor } from "@/app/_lib/current-actor";
-import {
-  type ActionResult,
-  actionLogger,
-  succeeded,
-  toActionError,
-} from "@/app/actions/shared";
+import { type ActionResult, answer } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type { ActivityPage } from "@/src/entities/models/activity.model";
 
@@ -15,18 +10,10 @@ import type { ActivityPage } from "@/src/entities/models/activity.model";
 export async function listActivity(
   input: unknown,
 ): Promise<ActionResult<ActivityPage>> {
-  try {
-    return succeeded(
-      await getInjection("IListActivityController")(
-        input,
-        await getActionActor(),
-      ),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("listActivity"),
-      "Couldn't list the changes. Try again.",
-    );
-  }
+  return answer(
+    "listActivity",
+    "Couldn't list the changes. Try again.",
+    async () =>
+      getInjection("IListActivityController")(input, await getActionActor()),
+  );
 }

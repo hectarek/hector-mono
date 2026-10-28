@@ -1,14 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getActionActor } from "@/app/_lib/current-actor";
-import {
-  type ActionResult,
-  actionLogger,
-  changeContext,
-  succeeded,
-  toActionError,
-} from "@/app/actions/shared";
+import { type ActionResult, answer, changeContext } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type {
   DeletedJob,
@@ -23,31 +16,15 @@ import type {
 // reviewing proposals and deleting are his alone (R21).
 
 export async function findJobs(input: unknown): Promise<ActionResult<JobPage>> {
-  try {
-    return succeeded(
-      await getInjection("IFindJobsController")(input, await getActionActor()),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("findJobs"),
-      "Couldn't list the jobs. Try again.",
-    );
-  }
+  return answer("findJobs", "Couldn't list the jobs. Try again.", async () =>
+    getInjection("IFindJobsController")(input, await getActionActor()),
+  );
 }
 
 export async function getJob(input: unknown): Promise<ActionResult<JobDetail>> {
-  try {
-    return succeeded(
-      await getInjection("IGetJobController")(input, await getActionActor()),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("getJob"),
-      "Couldn't read the job. Try again.",
-    );
-  }
+  return answer("getJob", "Couldn't read the job. Try again.", async () =>
+    getInjection("IGetJobController")(input, await getActionActor()),
+  );
 }
 
 // Claude's find, to wait for Hector's review. `tool` is the page tool's name.
@@ -55,15 +32,22 @@ export async function proposeJob(
   input: unknown,
   tool?: string,
 ): Promise<ActionResult<Job>> {
-  return write("proposeJob", "Couldn't propose the job. Try again.", async () =>
-    getInjection("IProposeJobController")(input, await changeContext(tool)),
+  return answer(
+    "proposeJob",
+    "Couldn't propose the job. Try again.",
+    async () =>
+      getInjection("IProposeJobController")(input, await changeContext(tool)),
+    pagesOf,
   );
 }
 
 // A job Hector adds from the form.
 export async function addJob(input: unknown): Promise<ActionResult<Job>> {
-  return write("addJob", "Couldn't add the job. Try again.", async () =>
-    getInjection("IAddJobController")(input, await changeContext()),
+  return answer(
+    "addJob",
+    "Couldn't add the job. Try again.",
+    async () => getInjection("IAddJobController")(input, await changeContext()),
+    pagesOf,
   );
 }
 
@@ -71,8 +55,12 @@ export async function updateJob(
   input: unknown,
   tool?: string,
 ): Promise<ActionResult<Job>> {
-  return write("updateJob", "Couldn't save the job. Try again.", async () =>
-    getInjection("IUpdateJobController")(input, await changeContext(tool)),
+  return answer(
+    "updateJob",
+    "Couldn't save the job. Try again.",
+    async () =>
+      getInjection("IUpdateJobController")(input, await changeContext(tool)),
+    pagesOf,
   );
 }
 
@@ -80,8 +68,12 @@ export async function setJobStatus(
   input: unknown,
   tool?: string,
 ): Promise<ActionResult<Job>> {
-  return write("setJobStatus", "Couldn't move the job. Try again.", async () =>
-    getInjection("ISetJobStatusController")(input, await changeContext(tool)),
+  return answer(
+    "setJobStatus",
+    "Couldn't move the job. Try again.",
+    async () =>
+      getInjection("ISetJobStatusController")(input, await changeContext(tool)),
+    pagesOf,
   );
 }
 
@@ -89,82 +81,69 @@ export async function closeJob(
   input: unknown,
   tool?: string,
 ): Promise<ActionResult<Job>> {
-  return write("closeJob", "Couldn't close the job. Try again.", async () =>
-    getInjection("ICloseJobController")(input, await changeContext(tool)),
+  return answer(
+    "closeJob",
+    "Couldn't close the job. Try again.",
+    async () =>
+      getInjection("ICloseJobController")(input, await changeContext(tool)),
+    pagesOf,
   );
 }
 
 export async function acceptProposal(
   input: unknown,
 ): Promise<ActionResult<Job>> {
-  return write(
+  return answer(
     "acceptProposal",
     "Couldn't accept the job. Try again.",
     async () =>
       getInjection("IAcceptProposalController")(input, await changeContext()),
+    pagesOf,
   );
 }
 
 export async function dismissProposal(
   input: unknown,
 ): Promise<ActionResult<Job>> {
-  return write(
+  return answer(
     "dismissProposal",
     "Couldn't dismiss the job. Try again.",
     async () =>
       getInjection("IDismissProposalController")(input, await changeContext()),
+    pagesOf,
   );
 }
 
 export async function reopenProposal(
   input: unknown,
 ): Promise<ActionResult<Job>> {
-  return write(
+  return answer(
     "reopenProposal",
     "Couldn't reopen the job. Try again.",
     async () =>
       getInjection("IReopenProposalController")(input, await changeContext()),
+    pagesOf,
   );
 }
 
 export async function deleteJob(
   input: unknown,
 ): Promise<ActionResult<DeletedJob>> {
-  let deleted: DeletedJob;
-  try {
-    deleted = await getInjection("IDeleteJobController")(
-      input,
-      await changeContext(),
-    );
-  } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("deleteJob"),
-      "Couldn't delete the job. Try again.",
-    );
-  }
-  revalidatePath("/jobs");
-  revalidatePath(`/jobs/${deleted.id}`);
-  revalidatePath(`/companies/${deleted.companyId}`);
-  revalidatePath("/agent");
-  return succeeded(deleted);
+  return answer(
+    "deleteJob",
+    "Couldn't delete the job. Try again.",
+    async () =>
+      getInjection("IDeleteJobController")(input, await changeContext()),
+    (deleted) => jobPages(deleted.id, deleted.companyId),
+  );
 }
 
-// A write to one job: run, answer the envelope, and refresh the pages that show the job.
-async function write(
-  op: string,
-  fallback: string,
-  run: () => Promise<Job>,
-): Promise<ActionResult<Job>> {
-  let job: Job;
-  try {
-    job = await run();
-  } catch (err) {
-    return toActionError(err, actionLogger(op), fallback);
-  }
-  revalidatePath("/jobs");
-  revalidatePath(`/jobs/${job.id}`);
-  revalidatePath(`/companies/${job.company.id}`);
-  revalidatePath("/agent");
-  return succeeded(job);
+// The pages that show a job: the jobs list, its own, its company's, and Claude's page, which
+// lists its changes.
+function jobPages(id: string, companyId: string): string[] {
+  return ["/jobs", `/jobs/${id}`, `/companies/${companyId}`, "/agent"];
+}
+
+function pagesOf(job: Job): string[] {
+  return jobPages(job.id, job.company.id);
 }
