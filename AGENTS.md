@@ -16,6 +16,7 @@
 Context is part of the deliverable — keep it lean, layered, and current. See [docs/development/agent-context-playbook.md](docs/development/agent-context-playbook.md).
 - Read the relevant `AGENTS.md` (root + app + `packages/ui`) before editing; scope work to that app.
 - When you learn something durable (new pattern, structure, or gotcha), write it back into the nearest `AGENTS.md` in the same change.
+- When a PR is ready, write up its lessons in the same PR: what cost time (a wrong guess, a retry, a detour, a tool that failed) that a future agent reading the final code, tests and docs would likely repeat. One doc per lesson in `docs/solutions/`, with the `ce-compound` skill, without asking first ([playbook](docs/development/agent-context-playbook.md#capturing-lessons-learned)).
 - Fix or remove any stale reference you touch — stale context misleads more than missing context.
 - Commit `AGENTS.md` / `.claude/` / `docs/` updates alongside the code they describe.
 - Big reference material → a kebab-case doc under `docs/` (global) or `apps/<app>/docs/` (app-specific), linked from `AGENTS.md` — don't inline it here.
