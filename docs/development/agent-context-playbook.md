@@ -77,6 +77,9 @@ When a session uncovers something non-obvious (a tricky bug root cause, a framew
 
 - **Small + durable** (a rule, a "never do X here") → fold into the relevant `AGENTS.md`.
 - **Large + reference** (research, deep dives) → a kebab-case doc under `docs/` (global) or `apps/<app>/docs/` (app-specific), linked from the relevant `AGENTS.md` so it's discoverable on demand without bloating the always-loaded context. Example: `docs/proxy-auth-research.md`.
+- **A solved problem** (something that cost time: a wrong guess, a retry, a detour, a tool that failed) → one doc in `docs/solutions/<category>/`, written with the `ce-compound` skill (Hector's compound-engineering plugin). Its YAML frontmatter (`module`, `problem_type`, `tags`) is what later sessions search by. Example: [`docs/solutions/integration-issues/neon-console-users-have-no-password.md`](../solutions/integration-issues/neon-console-users-have-no-password.md).
+
+Solved problems are written up as part of finishing, in the PR that produced them (since 2026-10-28). When the PR is ready, list what cost time in the work and test each item: if its doc disappeared, would a future engineer reading the final code, tests and docs still be likely to repeat the mistake or redo the investigation? Write each one that passes, one `ce-compound` run per lesson, without asking first. Completion, effort and diff size alone don't qualify a lesson. The PR's **Context updated** section names the docs written, or says that nothing passed. A lesson that spans repos goes to Hector's private notes, outside this repo.
 
 ---
 
@@ -104,6 +107,7 @@ Where Hector chooses it, a plan doc becomes the initial spec once its units are 
 
 - **Global** (`docs/`): monorepo-wide references — `monorepo-guide.md`, `clean-architecture.md` (the canonical guide for complex apps), `ui-package.md`, `lint-and-dead-code.md`, shared research like `proxy-auth-research.md`, and this playbook.
 - **App-specific** (`apps/<app>/docs/`): anything that pertains to exactly one app — specs, design notes, app SEO/perf.
+- **Lessons** (`docs/solutions/`): every solved-problem doc, an app's included, since `ce-compound` writes and searches only there. Its `module` names the app.
 - **Naming:** all docs are lower **kebab-case** (`my-doc.md`), like the repo's other files (the exceptions, such as `AGENTS.md` and `README.md`, are listed in the root `AGENTS.md`).
 - A doc is "global" only if 2+ apps use it. When in doubt, colocate it with the app.
 
@@ -130,4 +134,5 @@ Do a deliberate context review every **3–6 months**, and whenever performance 
 - [ ] Remove or fix any now-stale references you touched
 - [ ] Commit context changes alongside the code
 - [ ] If the work runs from a plan doc, update its Status and session log
+- [ ] When the PR is ready, write its lessons to `docs/solutions/`, or say in the PR that none passed
 - [ ] Run `bun check --filter=<app> && bun ts --filter=<app>`
