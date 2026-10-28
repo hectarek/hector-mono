@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   acceptedStage,
+  afterFollowUp,
   afterMove,
   isClosed,
   isStaleCandidate,
@@ -100,8 +101,36 @@ describe("accepting a proposal (R20)", () => {
   });
 });
 
+describe("a follow-up message (R3)", () => {
+  const applied: JobStage = {
+    status: "applied",
+    appliedOn: "2026-10-01",
+    nextStep: "Follow up",
+    nextDate: "2026-10-08",
+  };
+
+  it("moves an applied job's next date to 14 days after applied-on", () => {
+    expect(afterFollowUp(applied)).toEqual({
+      ...applied,
+      nextDate: "2026-10-15",
+    });
+  });
+
+  it("leaves a job past applied, or never applied to, as it was", () => {
+    expect(afterFollowUp({ ...applied, status: "screen" })).toEqual({
+      ...applied,
+      status: "screen",
+    });
+    expect(afterFollowUp(TARGET)).toEqual(TARGET);
+  });
+});
+
 describe("a stale candidate (R3)", () => {
-  const applied = { status: "applied" as const, appliedOn: "2026-10-01" };
+  const applied = {
+    status: "applied" as const,
+    appliedOn: "2026-10-01",
+    repliedOn: null,
+  };
 
   it("is a job still applied to 21 days after applied-on", () => {
     expect(isStaleCandidate(applied, "2026-10-22")).toBe(true);
@@ -111,6 +140,12 @@ describe("a stale candidate (R3)", () => {
   it("is no longer one once a move takes it past applied", () => {
     expect(
       isStaleCandidate({ ...applied, status: "screen" }, "2026-11-30"),
+    ).toBe(false);
+  });
+
+  it("is no longer one once a reply is linked to the job", () => {
+    expect(
+      isStaleCandidate({ ...applied, repliedOn: "2026-10-20" }, "2026-11-30"),
     ).toBe(false);
   });
 });

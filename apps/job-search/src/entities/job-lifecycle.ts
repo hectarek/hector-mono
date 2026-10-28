@@ -43,6 +43,7 @@ const APPLIED_OR_BEYOND: readonly JobStatus[] = [
 ];
 
 const FOLLOW_UP_DAYS = 7;
+const SECOND_FOLLOW_UP_DAYS = 14;
 const STALE_DAYS = 21;
 
 export function isClosed(status: JobStatus): status is ClosedStatus {
@@ -82,15 +83,30 @@ export function acceptedStage(
   return { status: "verify", nextStep: "Verify it's hiring", nextDate: today };
 }
 
-// A job still at applied 21 days after applied-on, for Hector or Claude to mark stale (R3).
-// Replies linked to the job arrive with U7, which adds them to this rule.
+// What a follow-up message linked to the job leaves it at (R3): a job at applied has its next date
+// moved to 14 days after applied-on. Any other job stays as it was.
+export function afterFollowUp(job: JobStage): JobStage {
+  if (job.status !== "applied" || !job.appliedOn) {
+    return job;
+  }
+  return { ...job, nextDate: addDays(job.appliedOn, SECOND_FOLLOW_UP_DAYS) };
+}
+
+// A job still at applied 21 days after applied-on with no reply linked to it, for Hector or Claude
+// to mark stale (R3). `repliedOn` is the latest reply linked to the job, if any: a reply, like any
+// move past applied, means it isn't stale.
 export function isStaleCandidate(
-  { status, appliedOn }: Pick<JobStage, "status" | "appliedOn">,
+  {
+    status,
+    appliedOn,
+    repliedOn,
+  }: Pick<JobStage, "status" | "appliedOn"> & { repliedOn: string | null },
   today: string,
 ): boolean {
   return (
     status === "applied" &&
     appliedOn !== null &&
+    repliedOn === null &&
     addDays(appliedOn, STALE_DAYS) <= today
   );
 }

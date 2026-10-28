@@ -43,6 +43,7 @@ export function createCompaniesModule() {
     .toHigherOrderFunction(getCompanyUseCase, [
       DI_SYMBOLS.ICompaniesRepository,
       DI_SYMBOLS.IJobsRepository,
+      DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
   companiesModule
@@ -72,6 +73,7 @@ export function createCompaniesModule() {
     .toHigherOrderFunction(deleteCompanyUseCase, [
       DI_SYMBOLS.ICompaniesRepository,
       DI_SYMBOLS.IJobsRepository,
+      DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,

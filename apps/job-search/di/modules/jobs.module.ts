@@ -58,6 +58,8 @@ export function createJobsModule() {
       DI_SYMBOLS.IJobsRepository,
       DI_SYMBOLS.INotesRepository,
       DI_SYMBOLS.IActivityRepository,
+      DI_SYMBOLS.IPeopleRepository,
+      DI_SYMBOLS.IInteractionsRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
   jobsModule
@@ -92,6 +94,8 @@ export function createJobsModule() {
     .toHigherOrderFunction(deleteJobUseCase, [
       DI_SYMBOLS.IJobsRepository,
       DI_SYMBOLS.INotesRepository,
+      DI_SYMBOLS.IPeopleRepository,
+      DI_SYMBOLS.IInteractionsRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,

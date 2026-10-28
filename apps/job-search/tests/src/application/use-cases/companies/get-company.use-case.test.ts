@@ -46,6 +46,7 @@ describeEachBackend("getCompany", () => {
       company,
       similar: [{ id: similar.id, name: "ACME, inc" }],
       jobs: [],
+      people: [],
     });
   });
 

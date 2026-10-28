@@ -4,9 +4,11 @@
 import { beforeEach, describe } from "bun:test";
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
+import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
@@ -14,6 +16,8 @@ import { deleteCompanyUseCase } from "@/src/application/use-cases/companies/dele
 import { findCompaniesUseCase } from "@/src/application/use-cases/companies/find-companies.use-case";
 import { getCompanyUseCase } from "@/src/application/use-cases/companies/get-company.use-case";
 import { saveCompanyUseCase } from "@/src/application/use-cases/companies/save-company.use-case";
+import { deleteInteractionUseCase } from "@/src/application/use-cases/interactions/delete-interaction.use-case";
+import { logInteractionUseCase } from "@/src/application/use-cases/interactions/log-interaction.use-case";
 import { createJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
 import { deleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
 import { findJobsUseCase } from "@/src/application/use-cases/jobs/find-jobs.use-case";
@@ -24,6 +28,12 @@ import { updateJobUseCase } from "@/src/application/use-cases/jobs/update-job.us
 import { addNoteUseCase } from "@/src/application/use-cases/notes/add-note.use-case";
 import { deleteNoteUseCase } from "@/src/application/use-cases/notes/delete-note.use-case";
 import { editNoteUseCase } from "@/src/application/use-cases/notes/edit-note.use-case";
+import { addPersonUseCase } from "@/src/application/use-cases/people/add-person.use-case";
+import { deletePersonUseCase } from "@/src/application/use-cases/people/delete-person.use-case";
+import { findPeopleUseCase } from "@/src/application/use-cases/people/find-people.use-case";
+import { getPersonUseCase } from "@/src/application/use-cases/people/get-person.use-case";
+import { removeContactUseCase } from "@/src/application/use-cases/people/remove-contact.use-case";
+import { updatePersonUseCase } from "@/src/application/use-cases/people/update-person.use-case";
 import { startSessionUseCase } from "@/src/application/use-cases/session/start-session.use-case";
 import { getSettingsUseCase } from "@/src/application/use-cases/settings/get-settings.use-case";
 import { updateSettingsUseCase } from "@/src/application/use-cases/settings/update-settings.use-case";
@@ -33,12 +43,16 @@ import { ActivityRepository } from "@/src/infrastructure/repositories/activity.r
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { CompaniesRepository } from "@/src/infrastructure/repositories/companies.repository";
 import { MockCompaniesRepository } from "@/src/infrastructure/repositories/companies.repository.mock";
+import { InteractionsRepository } from "@/src/infrastructure/repositories/interactions.repository";
+import { MockInteractionsRepository } from "@/src/infrastructure/repositories/interactions.repository.mock";
 import { JobsRepository } from "@/src/infrastructure/repositories/jobs.repository";
 import { MockJobsRepository } from "@/src/infrastructure/repositories/jobs.repository.mock";
 import { LeadSourcesRepository } from "@/src/infrastructure/repositories/lead-sources.repository";
 import { MockLeadSourcesRepository } from "@/src/infrastructure/repositories/lead-sources.repository.mock";
 import { NotesRepository } from "@/src/infrastructure/repositories/notes.repository";
 import { MockNotesRepository } from "@/src/infrastructure/repositories/notes.repository.mock";
+import { PeopleRepository } from "@/src/infrastructure/repositories/people.repository";
+import { MockPeopleRepository } from "@/src/infrastructure/repositories/people.repository.mock";
 import { SettingsRepository } from "@/src/infrastructure/repositories/settings.repository";
 import { MockSettingsRepository } from "@/src/infrastructure/repositories/settings.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
@@ -57,6 +71,8 @@ type Repositories = {
   settings: ISettingsRepository;
   jobs: IJobsRepository;
   notes: INotesRepository;
+  people: IPeopleRepository;
+  interactions: IInteractionsRepository;
   transactions: ITransactionManagerService;
 };
 
@@ -70,6 +86,8 @@ function mockRepositories(): Repositories {
     settings: new MockSettingsRepository(),
     jobs: new MockJobsRepository(companies, sources),
     notes: new MockNotesRepository(),
+    people: new MockPeopleRepository(companies),
+    interactions: new MockInteractionsRepository(),
     transactions: new MockTransactionManagerService(),
   };
 }
@@ -84,6 +102,8 @@ export function postgresRepositories(): Repositories {
     settings: new SettingsRepository(log),
     jobs: new JobsRepository(log),
     notes: new NotesRepository(log),
+    people: new PeopleRepository(log),
+    interactions: new InteractionsRepository(log),
     transactions: new TransactionManagerService(log),
   };
 }
@@ -123,18 +143,28 @@ export function describeEachBackend(name: string, fn: () => void): void {
 
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
   const log = new MockLoggerService();
-  const { activity, companies, sources, settings, jobs, notes, transactions } =
-    repos;
+  const {
+    activity,
+    companies,
+    sources,
+    settings,
+    jobs,
+    notes,
+    people,
+    interactions,
+    transactions,
+  } = repos;
   return {
     repos,
     listActivity: listActivityUseCase(activity, log),
     startSession: startSessionUseCase(activity, transactions, log),
     findCompanies: findCompaniesUseCase(companies, log),
-    getCompany: getCompanyUseCase(companies, jobs, log),
+    getCompany: getCompanyUseCase(companies, jobs, people, log),
     saveCompany: saveCompanyUseCase(companies, activity, transactions, log),
     deleteCompany: deleteCompanyUseCase(
       companies,
       jobs,
+      people,
       activity,
       transactions,
       log,
@@ -149,7 +179,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     findJobs: findJobsUseCase(jobs, log),
-    getJob: getJobUseCase(jobs, notes, activity, log),
+    getJob: getJobUseCase(jobs, notes, activity, people, interactions, log),
     createJob: createJobUseCase(
       jobs,
       companies,
@@ -169,10 +199,64 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     ),
     moveJob: moveJobUseCase(jobs, activity, transactions, log),
     reviewProposal: reviewProposalUseCase(jobs, activity, transactions, log),
-    deleteJob: deleteJobUseCase(jobs, notes, activity, transactions, log),
+    deleteJob: deleteJobUseCase(
+      jobs,
+      notes,
+      people,
+      interactions,
+      activity,
+      transactions,
+      log,
+    ),
     addNote: addNoteUseCase(notes, jobs, activity, transactions, log),
     editNote: editNoteUseCase(notes, activity, transactions, log),
     deleteNote: deleteNoteUseCase(notes, activity, transactions, log),
+    findPeople: findPeopleUseCase(people, interactions, log),
+    getPerson: getPersonUseCase(people, interactions, jobs, log),
+    addPerson: addPersonUseCase(
+      people,
+      companies,
+      jobs,
+      activity,
+      transactions,
+      log,
+    ),
+    updatePerson: updatePersonUseCase(
+      people,
+      companies,
+      interactions,
+      activity,
+      transactions,
+      log,
+    ),
+    deletePerson: deletePersonUseCase(
+      people,
+      interactions,
+      activity,
+      transactions,
+      log,
+    ),
+    removeContact: removeContactUseCase(
+      people,
+      jobs,
+      activity,
+      transactions,
+      log,
+    ),
+    logInteraction: logInteractionUseCase(
+      interactions,
+      people,
+      jobs,
+      activity,
+      transactions,
+      log,
+    ),
+    deleteInteraction: deleteInteractionUseCase(
+      interactions,
+      activity,
+      transactions,
+      log,
+    ),
   };
 }
 

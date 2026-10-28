@@ -83,6 +83,7 @@ describeEachBackend("saveCompany", () => {
       company: saved.company,
       similar: [],
       jobs: [],
+      people: [],
     });
     expect(await history(saved.company.id)).toEqual([
       expect.objectContaining({

@@ -61,6 +61,24 @@ export const FIELD_LABELS: Record<string, string> = {
   note: "Note",
   // A note's text
   body: "Note",
+  // A person's facts (their `name`, `role`, `nextStep` and `nextDate` are above), and a job's
+  // contacts as its history names them
+  howKnown: "Known from",
+  rank: "Rank",
+  ask: "The ask",
+  notes: "Notes",
+  contact: "Contact",
+  contactFor: "Contact for",
+  // An interaction, as log_interaction and the quick-log sheet take it
+  personIds: "People",
+  person: "Person",
+  kind: "What happened",
+  occurredOn: "Date",
+  jobId: "Job",
+  scheduled: "Time",
+  conversationId: "Conversation",
+  outcome: "How it went",
+  state: "State",
 };
 
 // A field's label, or its name in words ("nextStep" is "Next step"): a history names every field

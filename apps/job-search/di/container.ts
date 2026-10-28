@@ -3,9 +3,11 @@ import { createAccessModule } from "@/di/modules/access.module";
 import { createActivityModule } from "@/di/modules/activity.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
 import { createCompaniesModule } from "@/di/modules/companies.module";
+import { createInteractionsModule } from "@/di/modules/interactions.module";
 import { createJobsModule } from "@/di/modules/jobs.module";
 import { createLoggerModule } from "@/di/modules/logger.module";
 import { createNotesModule } from "@/di/modules/notes.module";
+import { createPeopleModule } from "@/di/modules/people.module";
 import { createSessionModule } from "@/di/modules/session.module";
 import { createSettingsModule } from "@/di/modules/settings.module";
 import { createSourcesModule } from "@/di/modules/sources.module";
@@ -31,6 +33,11 @@ ApplicationContainer.load(Symbol("SourcesModule"), createSourcesModule());
 ApplicationContainer.load(Symbol("SettingsModule"), createSettingsModule());
 ApplicationContainer.load(Symbol("JobsModule"), createJobsModule());
 ApplicationContainer.load(Symbol("NotesModule"), createNotesModule());
+ApplicationContainer.load(Symbol("PeopleModule"), createPeopleModule());
+ApplicationContainer.load(
+  Symbol("InteractionsModule"),
+  createInteractionsModule(),
+);
 
 export function getInjection<K extends keyof typeof DI_SYMBOLS>(
   symbol: K,

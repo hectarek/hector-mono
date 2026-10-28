@@ -3,12 +3,15 @@ import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { JobNotes } from "@/app/_components/job-notes";
 import { JobStatusForm } from "@/app/_components/job-status-form";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { ProposalReview } from "@/app/_components/proposal-review";
+import { QuickLog } from "@/app/_components/quick-log";
 import { RecordHistory } from "@/app/_components/record-history";
+import { RemoveContactButton } from "@/app/_components/remove-contact-button";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
@@ -21,6 +24,7 @@ import {
   STATUS_LABELS,
   WORK_MODE_LABELS,
 } from "@/app/_lib/job-labels";
+import { listCompanies } from "@/app/_lib/list-companies";
 import { loadJob } from "@/app/_lib/load-job";
 import { deleteJob } from "@/app/actions/jobs";
 import { isStaleCandidate } from "@/src/entities/job-lifecycle";
@@ -43,7 +47,8 @@ export default async function JobPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const { job, notes, moves } = await loadJob(id, actor);
+  const [{ job, notes, moves, contacts, repliedOn }, companies] =
+    await Promise.all([loadJob(id, actor), listCompanies(actor)]);
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
   const today = todayIn(PLAN_TIME_ZONE);
   const human = actor.actor === "owner";
@@ -119,7 +124,7 @@ export default async function JobPage({
           <h2 id="job-status" className="font-semibold">
             Status
           </h2>
-          {isStaleCandidate(job, today) ? (
+          {isStaleCandidate({ ...job, repliedOn }, today) ? (
             <Alert>
               <AlertDescription>
                 No reply 21 days after applying: close it as stale, or move it
@@ -209,6 +214,48 @@ export default async function JobPage({
           <p className="text-sm whitespace-pre-wrap">{job.summary}</p>
         </section>
       ) : null}
+
+      <section aria-labelledby="job-contacts" className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="job-contacts" className="font-semibold">
+            Contacts
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <QuickLog
+              jobs={[{ id: job.id, label: job.role }]}
+              jobId={job.id}
+              companies={companies}
+            />
+            <Button
+              variant="secondary"
+              size="lg"
+              nativeButton={false}
+              render={
+                <Link
+                  href={`/people/new?${new URLSearchParams({ company: job.company.id, job: job.id })}`}
+                />
+              }
+              className="min-h-11"
+            >
+              Add a contact
+            </Button>
+          </div>
+        </div>
+        {contacts.length ? (
+          <ContactList
+            people={contacts}
+            action={(person) =>
+              human ? (
+                <RemoveContactButton personId={person.id} jobId={job.id} />
+              ) : null
+            }
+          />
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            No contacts yet. Log a message to someone here, or add one.
+          </p>
+        )}
+      </section>
 
       <section aria-labelledby="job-notes" className="flex flex-col gap-2">
         <h2 id="job-notes" className="font-semibold">
