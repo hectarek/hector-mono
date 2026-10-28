@@ -43,7 +43,7 @@ export default async function JobPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const { job, notes, moves } = await loadJob(id, actor);
+  const { job, notes, moves, repliedOn } = await loadJob(id, actor);
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
   const today = todayIn(PLAN_TIME_ZONE);
   const human = actor.actor === "owner";
@@ -119,7 +119,7 @@ export default async function JobPage({
           <h2 id="job-status" className="font-semibold">
             Status
           </h2>
-          {isStaleCandidate(job, today) ? (
+          {isStaleCandidate({ ...job, repliedOn }, today) ? (
             <Alert>
               <AlertDescription>
                 No reply 21 days after applying: close it as stale, or move it

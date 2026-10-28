@@ -236,6 +236,7 @@ describe("findCompanies and getCompany", () => {
       company,
       similar: [{ id: similar.id, name: similar.name }],
       jobs: [],
+      people: [],
     });
   });
 

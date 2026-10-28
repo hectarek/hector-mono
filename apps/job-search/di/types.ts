@@ -1,8 +1,10 @@
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
+import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -16,6 +18,8 @@ import type { IDeleteCompanyUseCase } from "@/src/application/use-cases/companie
 import type { IFindCompaniesUseCase } from "@/src/application/use-cases/companies/find-companies.use-case";
 import type { IGetCompanyUseCase } from "@/src/application/use-cases/companies/get-company.use-case";
 import type { ISaveCompanyUseCase } from "@/src/application/use-cases/companies/save-company.use-case";
+import type { IDeleteInteractionUseCase } from "@/src/application/use-cases/interactions/delete-interaction.use-case";
+import type { ILogInteractionUseCase } from "@/src/application/use-cases/interactions/log-interaction.use-case";
 import type { ICreateJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
 import type { IDeleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
 import type { IFindJobsUseCase } from "@/src/application/use-cases/jobs/find-jobs.use-case";
@@ -26,6 +30,12 @@ import type { IUpdateJobUseCase } from "@/src/application/use-cases/jobs/update-
 import type { IAddNoteUseCase } from "@/src/application/use-cases/notes/add-note.use-case";
 import type { IDeleteNoteUseCase } from "@/src/application/use-cases/notes/delete-note.use-case";
 import type { IEditNoteUseCase } from "@/src/application/use-cases/notes/edit-note.use-case";
+import type { IAddPersonUseCase } from "@/src/application/use-cases/people/add-person.use-case";
+import type { IDeletePersonUseCase } from "@/src/application/use-cases/people/delete-person.use-case";
+import type { IFindPeopleUseCase } from "@/src/application/use-cases/people/find-people.use-case";
+import type { IGetPersonUseCase } from "@/src/application/use-cases/people/get-person.use-case";
+import type { IRemoveContactUseCase } from "@/src/application/use-cases/people/remove-contact.use-case";
+import type { IUpdatePersonUseCase } from "@/src/application/use-cases/people/update-person.use-case";
 import type { IStartSessionUseCase } from "@/src/application/use-cases/session/start-session.use-case";
 import type { IWhoamiUseCase } from "@/src/application/use-cases/session/whoami.use-case";
 import type { IGetSettingsUseCase } from "@/src/application/use-cases/settings/get-settings.use-case";
@@ -37,6 +47,8 @@ import type { IDeleteCompanyController } from "@/src/interface-adapters/controll
 import type { IFindCompaniesController } from "@/src/interface-adapters/controllers/companies/find-companies.controller";
 import type { IGetCompanyController } from "@/src/interface-adapters/controllers/companies/get-company.controller";
 import type { ISaveCompanyController } from "@/src/interface-adapters/controllers/companies/save-company.controller";
+import type { IDeleteInteractionController } from "@/src/interface-adapters/controllers/interactions/delete-interaction.controller";
+import type { ILogInteractionController } from "@/src/interface-adapters/controllers/interactions/log-interaction.controller";
 import type { IAcceptProposalController } from "@/src/interface-adapters/controllers/jobs/accept-proposal.controller";
 import type { IAddJobController } from "@/src/interface-adapters/controllers/jobs/add-job.controller";
 import type { ICloseJobController } from "@/src/interface-adapters/controllers/jobs/close-job.controller";
@@ -51,6 +63,12 @@ import type { IUpdateJobController } from "@/src/interface-adapters/controllers/
 import type { IAddNoteController } from "@/src/interface-adapters/controllers/notes/add-note.controller";
 import type { IDeleteNoteController } from "@/src/interface-adapters/controllers/notes/delete-note.controller";
 import type { IEditNoteController } from "@/src/interface-adapters/controllers/notes/edit-note.controller";
+import type { IAddPersonController } from "@/src/interface-adapters/controllers/people/add-person.controller";
+import type { IDeletePersonController } from "@/src/interface-adapters/controllers/people/delete-person.controller";
+import type { IFindPeopleController } from "@/src/interface-adapters/controllers/people/find-people.controller";
+import type { IGetPersonController } from "@/src/interface-adapters/controllers/people/get-person.controller";
+import type { IRemoveContactController } from "@/src/interface-adapters/controllers/people/remove-contact.controller";
+import type { IUpdatePersonController } from "@/src/interface-adapters/controllers/people/update-person.controller";
 import type { IStartSessionController } from "@/src/interface-adapters/controllers/session/start-session.controller";
 import type { IWhoamiController } from "@/src/interface-adapters/controllers/session/whoami.controller";
 import type { IGetSettingsController } from "@/src/interface-adapters/controllers/settings/get-settings.controller";
@@ -116,6 +134,24 @@ export const DI_SYMBOLS = {
   IEditNoteController: Symbol.for("IEditNoteController"),
   IDeleteNoteUseCase: Symbol.for("IDeleteNoteUseCase"),
   IDeleteNoteController: Symbol.for("IDeleteNoteController"),
+  IPeopleRepository: Symbol.for("IPeopleRepository"),
+  IInteractionsRepository: Symbol.for("IInteractionsRepository"),
+  IFindPeopleUseCase: Symbol.for("IFindPeopleUseCase"),
+  IFindPeopleController: Symbol.for("IFindPeopleController"),
+  IGetPersonUseCase: Symbol.for("IGetPersonUseCase"),
+  IGetPersonController: Symbol.for("IGetPersonController"),
+  IAddPersonUseCase: Symbol.for("IAddPersonUseCase"),
+  IAddPersonController: Symbol.for("IAddPersonController"),
+  IUpdatePersonUseCase: Symbol.for("IUpdatePersonUseCase"),
+  IUpdatePersonController: Symbol.for("IUpdatePersonController"),
+  IDeletePersonUseCase: Symbol.for("IDeletePersonUseCase"),
+  IDeletePersonController: Symbol.for("IDeletePersonController"),
+  IRemoveContactUseCase: Symbol.for("IRemoveContactUseCase"),
+  IRemoveContactController: Symbol.for("IRemoveContactController"),
+  ILogInteractionUseCase: Symbol.for("ILogInteractionUseCase"),
+  ILogInteractionController: Symbol.for("ILogInteractionController"),
+  IDeleteInteractionUseCase: Symbol.for("IDeleteInteractionUseCase"),
+  IDeleteInteractionController: Symbol.for("IDeleteInteractionController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -176,4 +212,22 @@ export interface DI_RETURN_TYPES {
   IEditNoteController: IEditNoteController;
   IDeleteNoteUseCase: IDeleteNoteUseCase;
   IDeleteNoteController: IDeleteNoteController;
+  IPeopleRepository: IPeopleRepository;
+  IInteractionsRepository: IInteractionsRepository;
+  IFindPeopleUseCase: IFindPeopleUseCase;
+  IFindPeopleController: IFindPeopleController;
+  IGetPersonUseCase: IGetPersonUseCase;
+  IGetPersonController: IGetPersonController;
+  IAddPersonUseCase: IAddPersonUseCase;
+  IAddPersonController: IAddPersonController;
+  IUpdatePersonUseCase: IUpdatePersonUseCase;
+  IUpdatePersonController: IUpdatePersonController;
+  IDeletePersonUseCase: IDeletePersonUseCase;
+  IDeletePersonController: IDeletePersonController;
+  IRemoveContactUseCase: IRemoveContactUseCase;
+  IRemoveContactController: IRemoveContactController;
+  ILogInteractionUseCase: ILogInteractionUseCase;
+  ILogInteractionController: ILogInteractionController;
+  IDeleteInteractionUseCase: IDeleteInteractionUseCase;
+  IDeleteInteractionController: IDeleteInteractionController;
 }

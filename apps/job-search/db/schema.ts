@@ -7,6 +7,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -24,6 +25,12 @@ import type {
   RecordRef,
 } from "@/src/entities/models/activity.model";
 import {
+  CONVERSATION_STATES,
+  type ConversationState,
+  INTERACTION_KINDS,
+  type InteractionKind,
+} from "@/src/entities/models/interaction.model";
+import {
   DISMISS_REASONS,
   type DismissReason,
   EMPLOYMENT_TYPES,
@@ -33,6 +40,7 @@ import {
   type ReviewState,
   WORK_MODES,
 } from "@/src/entities/models/job.model";
+import { RANKS, type Rank } from "@/src/entities/models/person.model";
 
 // The app's tables, added by the units that need them (docs/build-plan.md). Every root table
 // carries owner_id (KTD2).
@@ -289,5 +297,90 @@ export const notes = pgTable(
       table.recordId,
       table.createdAt,
     ),
+  ],
+);
+
+// People (R7, U7): Hector's contacts, at a company or none. Their messaged, replied and met dates
+// come from their interactions (KTD9), never a column here. A company with people can't be
+// deleted.
+export const people = pgTable(
+  "people",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    companyId: uuid("company_id").references(() => companies.id),
+    name: text("name").notNull(),
+    role: text("role"),
+    howKnown: text("how_known"),
+    rank: text("rank").$type<Rank>(),
+    ask: text("ask"),
+    nextStep: text("next_step"),
+    nextDate: day("next_date"),
+    notes: text("notes"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("people_owner_id_name_idx").on(table.ownerId, table.name),
+    index("people_company_id_idx").on(table.companyId),
+    check("people_rank_check", oneOf(table.rank, RANKS)),
+  ],
+);
+
+// Interactions (R8, U7): dated events with a person, which the weekly counts and a person's dates
+// read (KTD9). A person's go with them; a job's delete leaves its interactions on the person,
+// unlinked.
+export const interactions = pgTable(
+  "interactions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    kind: text("kind").$type<InteractionKind>().notNull(),
+    occurredOn: day("occurred_on").notNull(),
+    jobId: uuid("job_id").references(() => jobs.id, { onDelete: "set null" }),
+    note: text("note"),
+    state: text("state").$type<ConversationState>(),
+    startsAt: timestamp("starts_at", { withTimezone: true }),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    author: text("author").$type<ChangeActor>().notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    index("interactions_owner_id_occurred_on_idx").on(
+      table.ownerId,
+      table.occurredOn,
+    ),
+    index("interactions_person_id_idx").on(table.personId),
+    index("interactions_job_id_idx").on(table.jobId),
+    check("interactions_kind_check", oneOf(table.kind, INTERACTION_KINDS)),
+    check("interactions_state_check", oneOf(table.state, CONVERSATION_STATES)),
+    // A conversation has a state, and a message has none.
+    check(
+      "interactions_conversation_state_check",
+      sql`(${table.kind} = 'conversation') = (${table.state} is not null)`,
+    ),
+    check("interactions_times_check", sql`${table.endsAt} > ${table.startsAt}`),
+  ],
+);
+
+// A job's contacts (R1, U7): the people linked to it. A link goes with its job or its person.
+export const jobPeople = pgTable(
+  "job_people",
+  {
+    ownerId: uuid("owner_id").notNull(),
+    jobId: uuid("job_id")
+      .notNull()
+      .references(() => jobs.id, { onDelete: "cascade" }),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.jobId, table.personId] }),
+    index("job_people_person_id_idx").on(table.personId),
   ],
 );

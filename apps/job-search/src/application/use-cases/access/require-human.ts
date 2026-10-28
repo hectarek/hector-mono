@@ -7,13 +7,15 @@ import type {
   RecordRef,
 } from "@/src/entities/models/activity.model";
 
-// What only Hector may do (R21): Claude's notes only append, so editing one is his too. The account
-// endpoints, also his alone, are kept to his session by the auth route.
+// What only Hector may do (R21): Claude's notes only append, so editing one is his too, and taking
+// a contact off a job is a removal, as a delete is. The account endpoints, also his alone, are kept
+// to his session by the auth route.
 type HumanOnlyOperation =
   | "accept"
   | "dismiss"
   | "reopen"
   | "delete"
+  | "remove-contact"
   | "edit-note"
   | "connect-calendar"
   | "disconnect-calendar"

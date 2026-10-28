@@ -6,6 +6,7 @@ import {
   timeSchema,
 } from "./input.model";
 import type { JobSummary } from "./job.model";
+import type { PersonRef } from "./person.model";
 
 // A company (R4): the employer of record for its jobs, so for a role through an agency, the
 // agency. It holds the facts R4 lists, a short research summary, and where the long-form research
@@ -131,11 +132,13 @@ export type SavedCompany = {
 // get_company's input, and deleting's: which company.
 export const companyIdSchema = z.object({ id: z.uuid() });
 
-// A company as its page and get_company show it, with the same warning and its accepted jobs.
+// A company as its page and get_company show it, with the same warning, its accepted jobs and its
+// people.
 export type CompanyDetail = {
   company: Company;
   similar: CompanyRef[];
   jobs: JobSummary[];
+  people: PersonRef[];
 };
 
 // The most companies a page of find_companies holds.

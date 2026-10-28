@@ -16,6 +16,7 @@ import {
 import type { LoggedStatusChange } from "./job-status-change.model";
 import type { LeadSource } from "./lead-source.model";
 import type { Note } from "./note.model";
+import type { PersonRef } from "./person.model";
 
 // A job's level, from the most junior up: ordered, so the profile's range can compare (KTD13).
 export const LEVELS = [
@@ -100,13 +101,16 @@ export type Job = Omit<JobFacts, "companyId" | "sourceId"> &
     updatedAt: Date;
   };
 
-// A job as its page and get_job show it (U6): the job, its notes and status moves, the latest
-// first, and its latest changes. Contacts come with U7, interview rounds with U12 and fit with U15.
+// A job as its page and get_job show it (U6, U7): the job, its notes and status moves, the latest
+// first, its latest changes, its contacts, and the latest reply linked to it, which the stale rule
+// reads (R3). Interview rounds come with U12 and fit with U15.
 export type JobDetail = {
   job: Job;
   notes: Note[];
   moves: LoggedStatusChange[];
   activity: ActivityEntry[];
+  contacts: PersonRef[];
+  repliedOn: string | null;
 };
 
 // A job as a list shows it.
