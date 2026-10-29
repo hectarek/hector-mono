@@ -92,6 +92,11 @@ export function afterFollowUp(job: JobStage): JobStage {
   return { ...job, nextDate: addDays(job.appliedOn, SECOND_FOLLOW_UP_DAYS) };
 }
 
+// The latest applied-on a job can have and be a stale candidate on the day given (R3).
+export function staleAppliedBy(today: string): string {
+  return addDays(today, -STALE_DAYS);
+}
+
 // A job still at applied 21 days after applied-on with no reply linked to it, for Hector or Claude
 // to mark stale (R3). `repliedOn` is the latest reply linked to the job, if any: a reply, like any
 // move past applied, means it isn't stale.

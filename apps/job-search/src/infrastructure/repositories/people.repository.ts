@@ -1,4 +1,4 @@
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, asc, count, eq, lte, sql } from "drizzle-orm";
 import { companies, jobPeople, people } from "@/db/schema";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -158,6 +158,20 @@ export class PeopleRepository
       };
     } catch (err) {
       this.handleError(err, "find", { ownerId });
+    }
+  }
+
+  async listDue(ownerId: string, day: string): Promise<PersonRecord[]> {
+    try {
+      const rows = await this.getDbContext()
+        .select(PERSON)
+        .from(people)
+        .leftJoin(companies, eq(companies.id, people.companyId))
+        .where(and(eq(people.ownerId, ownerId), lte(people.nextDate, day)))
+        .orderBy(asc(people.nextDate), ...BY_NAME);
+      return rows.map(toRecord);
+    } catch (err) {
+      this.handleError(err, "listDue", { ownerId });
     }
   }
 

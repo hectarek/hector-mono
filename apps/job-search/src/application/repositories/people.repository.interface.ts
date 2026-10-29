@@ -40,6 +40,9 @@ export interface IPeopleRepository {
     ownerId: string,
     query: PeopleQuery,
   ): Promise<{ people: PersonRecord[]; nextOffset: number | null }>;
+  // People whose next date is on or before the day given: due or overdue, the earliest first,
+  // then by name (R9).
+  listDue(ownerId: string, day: string): Promise<PersonRecord[]>;
   // A company's people, by name.
   listForCompany(ownerId: string, companyId: string): Promise<PersonRef[]>;
   countForCompany(

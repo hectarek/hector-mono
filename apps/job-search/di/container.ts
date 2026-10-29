@@ -13,6 +13,7 @@ import { createSessionModule } from "@/di/modules/session.module";
 import { createSettingsModule } from "@/di/modules/settings.module";
 import { createSourcesModule } from "@/di/modules/sources.module";
 import { createTransactionModule } from "@/di/modules/transaction.module";
+import { createWeekModule } from "@/di/modules/week.module";
 import { type DI_RETURN_TYPES, DI_SYMBOLS } from "@/di/types";
 
 const ApplicationContainer = createContainer();
@@ -40,6 +41,7 @@ ApplicationContainer.load(
   createInteractionsModule(),
 );
 ApplicationContainer.load(Symbol("PracticeModule"), createPracticeModule());
+ApplicationContainer.load(Symbol("WeekModule"), createWeekModule());
 
 export function getInjection<K extends keyof typeof DI_SYMBOLS>(
   symbol: K,

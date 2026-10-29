@@ -9,7 +9,7 @@ export const WEEKLY_COUNTS = [
   "practiceSessions",
   "screensReached",
 ] as const;
-type WeeklyCount = (typeof WEEKLY_COUNTS)[number];
+export type WeeklyCount = (typeof WEEKLY_COUNTS)[number];
 
 // The most proposals that wait for Hector's review at once, until he sets another (KTD8).
 const DEFAULT_PENDING_CAP = 10;

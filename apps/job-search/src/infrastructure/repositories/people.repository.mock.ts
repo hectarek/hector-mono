@@ -102,6 +102,16 @@ export class MockPeopleRepository implements IPeopleRepository {
     };
   }
 
+  async listDue(ownerId: string, day: string): Promise<PersonRecord[]> {
+    return Promise.all(
+      this.peopleOf(ownerId)
+        .filter((person) => person.nextDate !== null && person.nextDate <= day)
+        // A stable sort, so people due the same day stay by name.
+        .sort((a, b) => byCodePoint(a.nextDate ?? "", b.nextDate ?? ""))
+        .map((person) => this.recordOf(ownerId, person)),
+    );
+  }
+
   async listForCompany(
     ownerId: string,
     companyId: string,

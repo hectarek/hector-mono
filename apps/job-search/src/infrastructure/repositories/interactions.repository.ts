@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, between, desc, eq, inArray, sql } from "drizzle-orm";
 import { interactions } from "@/db/schema";
 import type {
   IInteractionsRepository,
@@ -12,6 +12,7 @@ import type {
 } from "@/src/entities/models/interaction.model";
 import type { PersonDates } from "@/src/entities/models/person.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+import type { WeeklyCounts } from "@/src/entities/weekly-counts";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
 
 // The latest day an interaction of a kind happened, as "YYYY-MM-DD" text (KTD9).
@@ -171,6 +172,51 @@ export class InteractionsRepository
       return row?.repliedOn ?? null;
     } catch (err) {
       this.handleError(err, "repliedOnFor", { ownerId, jobId });
+    }
+  }
+
+  async listScheduled(ownerId: string): Promise<Interaction[]> {
+    try {
+      const rows = await this.getDbContext()
+        .select()
+        .from(interactions)
+        .where(
+          and(
+            eq(interactions.ownerId, ownerId),
+            eq(interactions.state, "scheduled"),
+          ),
+        )
+        .orderBy(asc(interactions.startsAt), asc(interactions.id));
+      return rows.map(toInteraction);
+    } catch (err) {
+      this.handleError(err, "listScheduled", { ownerId });
+    }
+  }
+
+  async countInRange(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<Pick<WeeklyCounts, "messagesSent" | "conversationsHeld">> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({
+          messagesSent: sql<number>`(count(*) filter (where ${interactions.kind} = 'message-sent'))::int`,
+          conversationsHeld: sql<number>`(count(*) filter (where ${interactions.kind} = 'conversation' and ${interactions.state} = 'held'))::int`,
+        })
+        .from(interactions)
+        .where(
+          and(
+            eq(interactions.ownerId, ownerId),
+            between(interactions.occurredOn, from, to),
+          ),
+        );
+      return {
+        messagesSent: row?.messagesSent ?? 0,
+        conversationsHeld: row?.conversationsHeld ?? 0,
+      };
+    } catch (err) {
+      this.handleError(err, "countInRange", { ownerId });
     }
   }
 

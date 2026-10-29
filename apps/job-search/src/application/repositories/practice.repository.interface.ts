@@ -47,4 +47,7 @@ export interface IPracticeRepository {
   listOpen(ownerId: string): Promise<PracticeSessionRecord[]>;
   // The latest sessions: the latest day first, then the latest logged.
   listRecent(ownerId: string, limit: number): Promise<PracticeSessionRecord[]>;
+  // Sessions practiced on the days between from and to, both counted; reviews aren't sessions
+  // (R10).
+  countSessions(ownerId: string, from: string, to: string): Promise<number>;
 }

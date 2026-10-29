@@ -6,11 +6,13 @@ import type {
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import { byCodePoint } from "@/src/entities/code-point-order";
 import { DatabaseOperationError } from "@/src/entities/errors/common";
+import { isClosed, type JobStatus } from "@/src/entities/job-lifecycle";
 import {
   type DuplicateJob,
   type Job,
   type JobPage,
   type JobQuery,
+  type JobSummary,
   jobSummary,
   type ReviewState,
   statusesFor,
@@ -130,6 +132,56 @@ export class MockJobsRepository implements IJobsRepository {
     };
   }
 
+  async listDue(ownerId: string, day: string): Promise<JobSummary[]> {
+    return this.summaries(
+      ownerId,
+      (job) =>
+        !isClosed(job.status) && job.nextDate !== null && job.nextDate <= day,
+      (a, b) => byNextDate(a.nextDate, b.nextDate),
+    );
+  }
+
+  async listAppliedBy(ownerId: string, day: string): Promise<JobSummary[]> {
+    return this.summaries(
+      ownerId,
+      (job) =>
+        job.status === "applied" &&
+        job.appliedOn !== null &&
+        job.appliedOn <= day,
+      (a, b) => byNextDate(a.appliedOn, b.appliedOn),
+    );
+  }
+
+  async countApplied(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<number> {
+    return this.rows.filter(
+      ({ ownerId: owner, job }) =>
+        owner === ownerId &&
+        job.reviewState === "accepted" &&
+        job.appliedOn !== null &&
+        job.appliedOn >= from &&
+        job.appliedOn <= to,
+    ).length;
+  }
+
+  async countMovesInto(
+    ownerId: string,
+    statuses: readonly JobStatus[],
+    from: string,
+    to: string,
+  ): Promise<number> {
+    return this.moves.filter(
+      ({ ownerId: owner, change }) =>
+        owner === ownerId &&
+        statuses.includes(change.to) &&
+        change.on >= from &&
+        change.on <= to,
+    ).length;
+  }
+
   async findByPostingKey(
     ownerId: string,
     postingKey: string,
@@ -196,6 +248,30 @@ export class MockJobsRepository implements IJobsRepository {
   private rowOf(ownerId: string, id: string) {
     return this.rows.find(
       (row) => row.ownerId === ownerId && row.job.id === id,
+    );
+  }
+
+  // The owner's accepted jobs that match, in the order given, then by role and id, as lists show
+  // them.
+  private summaries(
+    ownerId: string,
+    matches: (job: StoredJob) => boolean,
+    order: (a: StoredJob, b: StoredJob) => number,
+  ): Promise<JobSummary[]> {
+    return Promise.all(
+      this.rows
+        .filter(
+          ({ ownerId: owner, job }) =>
+            owner === ownerId && job.reviewState === "accepted" && matches(job),
+        )
+        .map(({ job }) => job)
+        .sort(
+          (a, b) =>
+            order(a, b) ||
+            byCodePoint(a.role, b.role) ||
+            byCodePoint(a.id, b.id),
+        )
+        .map(async (job) => jobSummary(await this.read(ownerId, job))),
     );
   }
 

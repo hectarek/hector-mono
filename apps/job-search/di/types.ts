@@ -47,6 +47,7 @@ import type { IGetSettingsUseCase } from "@/src/application/use-cases/settings/g
 import type { IUpdateSettingsUseCase } from "@/src/application/use-cases/settings/update-settings.use-case";
 import type { IAddSourceUseCase } from "@/src/application/use-cases/sources/add-source.use-case";
 import type { IListSourcesUseCase } from "@/src/application/use-cases/sources/list-sources.use-case";
+import type { IGetTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
 import type { IListActivityController } from "@/src/interface-adapters/controllers/activity/list-activity.controller";
 import type { IDeleteCompanyController } from "@/src/interface-adapters/controllers/companies/delete-company.controller";
 import type { IFindCompaniesController } from "@/src/interface-adapters/controllers/companies/find-companies.controller";
@@ -84,6 +85,7 @@ import type { IGetSettingsController } from "@/src/interface-adapters/controller
 import type { IUpdateSettingsController } from "@/src/interface-adapters/controllers/settings/update-settings.controller";
 import type { IAddSourceController } from "@/src/interface-adapters/controllers/sources/add-source.controller";
 import type { IListSourcesController } from "@/src/interface-adapters/controllers/sources/list-sources.controller";
+import type { IGetTodayController } from "@/src/interface-adapters/controllers/week/get-today.controller";
 
 export const DI_SYMBOLS = {
   IAuthenticationService: Symbol.for("IAuthenticationService"),
@@ -170,6 +172,8 @@ export const DI_SYMBOLS = {
   ILogPracticeController: Symbol.for("ILogPracticeController"),
   IDeletePracticeEntryUseCase: Symbol.for("IDeletePracticeEntryUseCase"),
   IDeletePracticeEntryController: Symbol.for("IDeletePracticeEntryController"),
+  IGetTodayUseCase: Symbol.for("IGetTodayUseCase"),
+  IGetTodayController: Symbol.for("IGetTodayController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -257,4 +261,6 @@ export interface DI_RETURN_TYPES {
   ILogPracticeController: ILogPracticeController;
   IDeletePracticeEntryUseCase: IDeletePracticeEntryUseCase;
   IDeletePracticeEntryController: IDeletePracticeEntryController;
+  IGetTodayUseCase: IGetTodayUseCase;
+  IGetTodayController: IGetTodayController;
 }
