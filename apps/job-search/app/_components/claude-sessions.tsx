@@ -24,6 +24,7 @@ const KINDS: Record<RecordRef["kind"], [one: string, many: string]> = {
   person: ["person", "people"],
   interaction: ["interaction", "interactions"],
   "practice-entry": ["practice entry", "practice entries"],
+  "weekly-review": ["weekly review", "weekly reviews"],
   "agent-session": ["session", "sessions"],
 };
 

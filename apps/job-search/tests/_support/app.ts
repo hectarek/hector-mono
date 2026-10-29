@@ -11,6 +11,7 @@ import type { INotesRepository } from "@/src/application/repositories/notes.repo
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
+import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
 import { deleteCompanyUseCase } from "@/src/application/use-cases/companies/delete-company.use-case";
@@ -45,6 +46,8 @@ import { updateSettingsUseCase } from "@/src/application/use-cases/settings/upda
 import { addSourceUseCase } from "@/src/application/use-cases/sources/add-source.use-case";
 import { listSourcesUseCase } from "@/src/application/use-cases/sources/list-sources.use-case";
 import { getTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
+import { getWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
+import { saveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
 import { ActivityRepository } from "@/src/infrastructure/repositories/activity.repository";
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { CompaniesRepository } from "@/src/infrastructure/repositories/companies.repository";
@@ -63,6 +66,8 @@ import { PracticeRepository } from "@/src/infrastructure/repositories/practice.r
 import { MockPracticeRepository } from "@/src/infrastructure/repositories/practice.repository.mock";
 import { SettingsRepository } from "@/src/infrastructure/repositories/settings.repository";
 import { MockSettingsRepository } from "@/src/infrastructure/repositories/settings.repository.mock";
+import { WeeklyReviewsRepository } from "@/src/infrastructure/repositories/weekly-reviews.repository";
+import { MockWeeklyReviewsRepository } from "@/src/infrastructure/repositories/weekly-reviews.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { MockTransactionManagerService } from "@/src/infrastructure/services/mock-transaction-manager.service";
 import { TransactionManagerService } from "@/src/infrastructure/services/transaction-manager.service";
@@ -82,6 +87,7 @@ type Repositories = {
   people: IPeopleRepository;
   interactions: IInteractionsRepository;
   practice: IPracticeRepository;
+  weeklyReviews: IWeeklyReviewsRepository;
   transactions: ITransactionManagerService;
 };
 
@@ -98,6 +104,7 @@ function mockRepositories(): Repositories {
     people: new MockPeopleRepository(companies),
     interactions: new MockInteractionsRepository(),
     practice: new MockPracticeRepository(),
+    weeklyReviews: new MockWeeklyReviewsRepository(),
     transactions: new MockTransactionManagerService(),
   };
 }
@@ -115,6 +122,7 @@ export function postgresRepositories(): Repositories {
     people: new PeopleRepository(log),
     interactions: new InteractionsRepository(log),
     practice: new PracticeRepository(log),
+    weeklyReviews: new WeeklyReviewsRepository(log),
     transactions: new TransactionManagerService(log),
   };
 }
@@ -164,6 +172,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     people,
     interactions,
     practice,
+    weeklyReviews,
     transactions,
   } = repos;
   return {
@@ -285,6 +294,23 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       practice,
       activity,
       settings,
+      log,
+    ),
+    getWeek: getWeekUseCase(
+      jobs,
+      interactions,
+      practice,
+      settings,
+      weeklyReviews,
+    ),
+    saveWeeklyReview: saveWeeklyReviewUseCase(
+      weeklyReviews,
+      jobs,
+      interactions,
+      practice,
+      settings,
+      activity,
+      transactions,
       log,
     ),
   };

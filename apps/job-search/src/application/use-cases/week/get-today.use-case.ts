@@ -7,6 +7,7 @@ import type { ISettingsRepository } from "@/src/application/repositories/setting
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import { withDates } from "@/src/application/use-cases/people/person-dates";
 import { dueBy } from "@/src/application/use-cases/practice/scheduled";
+import { weekCounts } from "@/src/application/use-cases/week/week-counts";
 import { claudeSessions } from "@/src/entities/claude-sessions";
 import { isStaleCandidate, staleAppliedBy } from "@/src/entities/job-lifecycle";
 import {
@@ -21,7 +22,6 @@ import type {
   TodayView,
 } from "@/src/entities/models/today.model";
 import { mondayOf, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
-import { SCREEN_OR_BEYOND, weekRange } from "@/src/entities/weekly-counts";
 
 export type IGetTodayUseCase = ReturnType<typeof getTodayUseCase>;
 
@@ -124,18 +124,6 @@ export const getTodayUseCase = (
     return entries;
   };
 
-  const counts = async (ownerId: string, monday: string) => {
-    const { from, to } = weekRange(monday);
-    const [interactions, applications, practiceSessions, screensReached] =
-      await Promise.all([
-        interactionsRepository.countInRange(ownerId, from, to),
-        jobsRepository.countApplied(ownerId, from, to),
-        practiceRepository.countSessions(ownerId, from, to),
-        jobsRepository.countMovesInto(ownerId, SCREEN_OR_BEYOND, from, to),
-      ]);
-    return { ...interactions, applications, practiceSessions, screensReached };
-  };
-
   return async (ownerId: string): Promise<TodayView> => {
     const now = new Date();
     const today = todayIn(PLAN_TIME_ZONE, now);
@@ -151,7 +139,7 @@ export const getTodayUseCase = (
       open,
       changes,
       settings,
-      weekCounts,
+      counts,
     ] = await Promise.all([
       proposals(ownerId),
       debriefs(ownerId, now),
@@ -161,7 +149,15 @@ export const getTodayUseCase = (
       practiceRepository.listOpen(ownerId),
       claudeChanges(ownerId, since),
       settingsRepository.get(ownerId),
-      counts(ownerId, monday),
+      weekCounts(
+        {
+          jobs: jobsRepository,
+          interactions: interactionsRepository,
+          practice: practiceRepository,
+        },
+        ownerId,
+        monday,
+      ),
     ]);
     const staleIds = new Set(staleJobs.map(({ id }) => id));
     const view: TodayView = {
@@ -175,7 +171,7 @@ export const getTodayUseCase = (
         practice: dueBy(open, today),
       },
       claude: claudeSessions(changes),
-      counts: weekCounts,
+      counts,
       targets: (settings ?? DEFAULT_SETTINGS).targets,
     };
     logger.debug("Today read", {

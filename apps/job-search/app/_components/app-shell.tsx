@@ -17,6 +17,7 @@ import {
   Bot,
   Briefcase,
   Building2,
+  CalendarCheck,
   CalendarDays,
   Dumbbell,
   LogOut,
@@ -42,6 +43,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton size="lg" render={<Link href="/" />}>
                     <CalendarDays />
                     <span>This week</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="lg" render={<Link href="/week" />}>
+                    <CalendarCheck />
+                    <span>Weekly review</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

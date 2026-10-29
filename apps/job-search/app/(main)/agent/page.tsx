@@ -32,6 +32,7 @@ const RECORDS: Record<ActivityEntry["record"]["kind"], string> = {
   person: "a person",
   interaction: "an interaction",
   "practice-entry": "a practice entry",
+  "weekly-review": "a weekly review",
   "agent-session": "a session",
 };
 

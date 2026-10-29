@@ -47,10 +47,12 @@ import {
   PRACTICE_KINDS,
   type PracticeKind,
 } from "@/src/entities/models/practice-entry.model";
+import type { Settings } from "@/src/entities/models/settings.model";
 import {
   PRACTICE_RESULTS,
   type PracticeResult,
 } from "@/src/entities/practice-ladder";
+import type { WeeklyCounts } from "@/src/entities/weekly-counts";
 
 // The app's tables, added by the units that need them (docs/build-plan.md). Every root table
 // carries owner_id (KTD2).
@@ -392,6 +394,30 @@ export const jobPeople = pgTable(
   (table) => [
     primaryKey({ columns: [table.jobId, table.personId] }),
     index("job_people_person_id_idx").on(table.personId),
+  ],
+);
+
+// Weekly reviews (R10, U9): a week's counts and targets as they stood at its first save, fixed from
+// then on, and its build milestone and one change. One per owner and week, keyed by its Monday.
+export const weeklyReviews = pgTable(
+  "weekly_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    week: day("week").notNull(),
+    counts: jsonb("counts").$type<WeeklyCounts>().notNull(),
+    targets: jsonb("targets").$type<Settings["targets"]>().notNull(),
+    milestone: text("milestone"),
+    change: text("change"),
+    author: text("author").$type<ChangeActor>().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("weekly_reviews_owner_id_week_idx").on(
+      table.ownerId,
+      table.week,
+    ),
   ],
 );
 

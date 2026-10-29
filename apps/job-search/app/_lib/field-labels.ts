@@ -91,6 +91,12 @@ export const FIELD_LABELS: Record<string, string> = {
   result: "Result",
   aiUsed: "AI used",
   minutes: "Minutes",
+  // A weekly review, as save_weekly_review and the week page take it and its history names it.
+  week: "Week",
+  milestone: "Build milestone",
+  change: "The one change",
+  counts: "Counts",
+  targets: "Targets",
 };
 
 // A field's label, or its name in words ("nextStep" is "Next step"): a history names every field
