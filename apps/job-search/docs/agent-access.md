@@ -35,7 +35,7 @@ Save this as `<config file>`, outside any repo:
 
 - `userDataDir` is fixed because Playwright MCP's default profile folder is named after a hash of the folder Claude Code starts in. Without it, a session started anywhere else gets a new profile and no sign-in.
 - `<agent profile folder>` sits outside iCloud and outside any repo. Playwright's Chromium keeps the profile's cookies in that folder rather than in the macOS keychain, so the folder is the sign-in.
-- `"channel": "chromium"` is Playwright's own Chromium. Install it with `bunx playwright@1.64.0 install chromium`. With neither a `browserName` nor a channel, Playwright MCP opens the installed Google Chrome instead.
+- `"channel": "chromium"` is Playwright's own Chromium. Install it with `bunx playwright@1.64.1 install chromium`. With neither a `browserName` nor a channel, Playwright MCP opens the installed Google Chrome instead.
 - `--enable-features=WebMCP` turns the page tools API on. Playwright 1.64's Chromium (156) has it with the flag (checked 2026-10-23).
 - `<output folder>` gets screenshots and traces, so it also sits outside any repo.
 
@@ -48,20 +48,22 @@ In that folder's `.mcp.json`:
   "mcpServers": {
     "playwright": {
       "command": "bunx",
-      "args": ["playwright@1.64.0", "mcp", "--config", "<config file>"]
+      "args": ["playwright@1.64.1", "mcp", "--config", "<config file>"]
     }
   }
 }
 ```
 
 - The server's name, `playwright`, is the middle of each tool's name in Claude Code.
-- Pin the version. WebMCP is an origin trial whose API changed during the trial, and Playwright's support for it is new. Playwright 1.64.0's `mcp` command offers page tools by default (`--no-webmcp` turns that off).
+- Pin the version, the same one as the app's `@playwright/test` (1.64.1), so the flows and the server use one Chromium build. WebMCP is an origin trial whose API changed during the trial, and Playwright's support for it is new. Playwright 1.64.0's `mcp` command offers page tools by default (`--no-webmcp` turns that off).
 
 ### 3. Sign Claude in, once
 
 Start a search session and have Claude open `<app origin>` with Playwright MCP. In the window that opens, Hector signs in with Claude's account. Never sign in as Hector there: anything that drives Hector's session acts as Hector, as far as the app can tell. Claude never types a password.
 
 ### 4. The folder's permission rules
+
+Deferred on 2026-10-28 (Hector's call): no lock-down while the app's core is built, through cutover. Until the lock-down pass after it, the folder has the server and none of the rules below.
 
 They go in the folder's Claude Code settings and in Hector's user settings. The specifics, such as each connector's server name, stay in his private config. Claude Code checks deny rules first, then ask, then allow. Deny rules are the boundary; ask rules only make Claude Code stop and ask.
 
@@ -108,5 +110,5 @@ After setting up, and after any change to Playwright, Chrome or the settings:
 1. `bun run --filter=job-search test:flows` passes on the test project. It signs in as Claude's test-project account (`FLOW_AGENT_EMAIL` and `FLOW_AGENT_PASSWORD` in the app's `.env`), lists the tools in Playwright's Chromium, and calls them.
 2. In a search session, `webmcp_whoami` and `webmcp_start_session` are among Claude's tools and work, and `/agent` shows the session's start.
 3. A call with bad input answers `validation`, a call after signing out answers `unauthenticated`, and a call from a page loaded before a redeploy answers `reload-needed`. The page stays where it is through each.
-4. The ask rule fires on a consequential tool, and each denied tool is refused in the permission mode Hector uses.
+4. After the lock-down pass (step 4 of Setup), the ask rule fires on a consequential tool, and each denied tool is refused in the permission mode Hector uses.
 5. Note the largest result that reaches Claude whole: the tools answer a page at a time, and their page sizes stay under it.
