@@ -7,6 +7,7 @@ import type { INotesRepository } from "@/src/application/repositories/notes.repo
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
+import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
@@ -48,6 +49,8 @@ import type { IUpdateSettingsUseCase } from "@/src/application/use-cases/setting
 import type { IAddSourceUseCase } from "@/src/application/use-cases/sources/add-source.use-case";
 import type { IListSourcesUseCase } from "@/src/application/use-cases/sources/list-sources.use-case";
 import type { IGetTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
+import type { IGetWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
+import type { ISaveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
 import type { IListActivityController } from "@/src/interface-adapters/controllers/activity/list-activity.controller";
 import type { IDeleteCompanyController } from "@/src/interface-adapters/controllers/companies/delete-company.controller";
 import type { IFindCompaniesController } from "@/src/interface-adapters/controllers/companies/find-companies.controller";
@@ -86,6 +89,8 @@ import type { IUpdateSettingsController } from "@/src/interface-adapters/control
 import type { IAddSourceController } from "@/src/interface-adapters/controllers/sources/add-source.controller";
 import type { IListSourcesController } from "@/src/interface-adapters/controllers/sources/list-sources.controller";
 import type { IGetTodayController } from "@/src/interface-adapters/controllers/week/get-today.controller";
+import type { IGetWeekController } from "@/src/interface-adapters/controllers/week/get-week.controller";
+import type { ISaveWeeklyReviewController } from "@/src/interface-adapters/controllers/week/save-weekly-review.controller";
 
 export const DI_SYMBOLS = {
   IAuthenticationService: Symbol.for("IAuthenticationService"),
@@ -174,6 +179,11 @@ export const DI_SYMBOLS = {
   IDeletePracticeEntryController: Symbol.for("IDeletePracticeEntryController"),
   IGetTodayUseCase: Symbol.for("IGetTodayUseCase"),
   IGetTodayController: Symbol.for("IGetTodayController"),
+  IWeeklyReviewsRepository: Symbol.for("IWeeklyReviewsRepository"),
+  IGetWeekUseCase: Symbol.for("IGetWeekUseCase"),
+  IGetWeekController: Symbol.for("IGetWeekController"),
+  ISaveWeeklyReviewUseCase: Symbol.for("ISaveWeeklyReviewUseCase"),
+  ISaveWeeklyReviewController: Symbol.for("ISaveWeeklyReviewController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -263,4 +273,9 @@ export interface DI_RETURN_TYPES {
   IDeletePracticeEntryController: IDeletePracticeEntryController;
   IGetTodayUseCase: IGetTodayUseCase;
   IGetTodayController: IGetTodayController;
+  IWeeklyReviewsRepository: IWeeklyReviewsRepository;
+  IGetWeekUseCase: IGetWeekUseCase;
+  IGetWeekController: IGetWeekController;
+  ISaveWeeklyReviewUseCase: ISaveWeeklyReviewUseCase;
+  ISaveWeeklyReviewController: ISaveWeeklyReviewController;
 }

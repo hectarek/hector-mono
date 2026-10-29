@@ -1,3 +1,5 @@
+import { Button } from "@repo/ui/components/button";
+import Link from "next/link";
 import { AutoRefresh } from "@/app/_components/auto-refresh";
 import { ClaudeSessions } from "@/app/_components/claude-sessions";
 import { DebriefCard } from "@/app/_components/debrief-card";
@@ -92,6 +94,15 @@ export default async function ThisWeekPage() {
           The week so far
         </h2>
         <WeekCounts counts={counts} targets={targets} />
+        <Button
+          variant="secondary"
+          size="lg"
+          nativeButton={false}
+          render={<Link href="/week" />}
+          className="min-h-11 w-fit"
+        >
+          Weekly review
+        </Button>
       </section>
     </div>
   );

@@ -36,6 +36,13 @@
       "when": 1793215153138,
       "tag": "0004_practice_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793305571245,
+      "tag": "0005_weekly_reviews",
+      "breakpoints": true
     }
   ]
 }
