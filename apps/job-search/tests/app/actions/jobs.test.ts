@@ -93,6 +93,7 @@ describe("proposeJob", () => {
       }),
     ]);
     expect(nextState.revalidated).toEqual([
+      "/",
       "/jobs",
       `/jobs/${job.id}`,
       `/companies/${companyId}`,
@@ -353,6 +354,7 @@ describe("deleteJob", () => {
       code: "not-found",
     });
     expect(nextState.revalidated).toEqual([
+      "/",
       "/jobs",
       `/jobs/${job.id}`,
       `/companies/${companyId}`,

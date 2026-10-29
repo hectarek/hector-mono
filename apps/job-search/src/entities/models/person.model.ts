@@ -124,7 +124,7 @@ export const findPeopleSchema = z.object({
 });
 export type PeopleQuery = z.output<typeof findPeopleSchema>;
 
-// A person as a list shows them.
+// A person as a list shows them, with the updatedAt a change from the list sends back (R22).
 export type PersonSummary = Pick<
   Person,
   | "id"
@@ -137,6 +137,7 @@ export type PersonSummary = Pick<
   | "messagedOn"
   | "repliedOn"
   | "metOn"
+  | "updatedAt"
 >;
 
 export function personSummary(person: Person): PersonSummary {
@@ -151,6 +152,7 @@ export function personSummary(person: Person): PersonSummary {
     messagedOn: person.messagedOn,
     repliedOn: person.repliedOn,
     metOn: person.metOn,
+    updatedAt: person.updatedAt,
   };
 }
 

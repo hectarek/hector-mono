@@ -55,5 +55,5 @@ export async function deletePracticeEntry(
 // The pages practice shows on: the practice page, the session's page, and Claude's page, which
 // lists its changes.
 function pagesOf(sessionId: string): string[] {
-  return ["/practice", `/practice/${sessionId}`, "/agent"];
+  return ["/", "/practice", `/practice/${sessionId}`, "/agent"];
 }

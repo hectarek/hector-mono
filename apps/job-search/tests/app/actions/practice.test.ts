@@ -25,6 +25,7 @@ describe("the practice log", () => {
 
     expect(session.author).toBe("agent");
     expect(nextState.revalidated).toEqual([
+      "/",
       "/practice",
       `/practice/${session.id}`,
       "/agent",

@@ -113,7 +113,7 @@ export type JobDetail = {
   repliedOn: string | null;
 };
 
-// A job as a list shows it.
+// A job as a list shows it, with the updatedAt a change from the list sends back (R22).
 export type JobSummary = Pick<
   Job,
   | "id"
@@ -127,6 +127,7 @@ export type JobSummary = Pick<
   | "workMode"
   | "reviewState"
   | "dismissReason"
+  | "updatedAt"
 >;
 
 export function jobSummary(job: Job): JobSummary {
@@ -142,6 +143,7 @@ export function jobSummary(job: Job): JobSummary {
     workMode: job.workMode,
     reviewState: job.reviewState,
     dismissReason: job.dismissReason,
+    updatedAt: job.updatedAt,
   };
 }
 

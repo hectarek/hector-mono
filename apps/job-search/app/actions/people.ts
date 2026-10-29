@@ -95,6 +95,7 @@ export async function removeContact(
 // which lists its changes.
 function personPages(id: string, companyId: string | null): string[] {
   return [
+    "/",
     "/people",
     `/people/${id}`,
     ...(companyId ? [`/companies/${companyId}`] : []),

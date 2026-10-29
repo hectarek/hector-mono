@@ -141,7 +141,7 @@ export async function deleteJob(
 // The pages that show a job: the jobs list, its own, its company's, and Claude's page, which
 // lists its changes.
 function jobPages(id: string, companyId: string): string[] {
-  return ["/jobs", `/jobs/${id}`, `/companies/${companyId}`, "/agent"];
+  return ["/", "/jobs", `/jobs/${id}`, `/companies/${companyId}`, "/agent"];
 }
 
 function pagesOf(job: Job): string[] {
