@@ -105,7 +105,13 @@ describe("a job's page", () => {
   it("shows Claude's session a dismissed proposal's Edit off, as only Hector's, and Hector his", async () => {
     const proposal = await aProposal(await aCompany());
     signInAs("owner");
-    dataOf(await dismissProposal({ id: proposal.id, reason: "not-hiring" }));
+    dataOf(
+      await dismissProposal({
+        id: proposal.id,
+        updatedAt: proposal.updatedAt.toISOString(),
+        reason: "not-hiring",
+      }),
+    );
 
     const hectors = await jobPage(proposal.id);
     expect(

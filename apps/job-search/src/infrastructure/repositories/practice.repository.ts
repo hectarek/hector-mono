@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, between, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { practiceEntries } from "@/db/schema";
 import type {
   IPracticeRepository,
@@ -156,6 +156,28 @@ export class PracticeRepository
       return await this.withReviews(ownerId, rows);
     } catch (err) {
       this.handleError(err, "listOpen", { ownerId });
+    }
+  }
+
+  async countSessions(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<number> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ sessions: count() })
+        .from(practiceEntries)
+        .where(
+          and(
+            eq(practiceEntries.ownerId, ownerId),
+            eq(practiceEntries.kind, "session"),
+            between(practiceEntries.practicedOn, from, to),
+          ),
+        );
+      return row?.sessions ?? 0;
+    } catch (err) {
+      this.handleError(err, "countSessions", { ownerId });
     }
   }
 

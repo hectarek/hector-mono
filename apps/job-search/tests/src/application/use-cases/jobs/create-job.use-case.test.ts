@@ -118,6 +118,7 @@ describeEachBackend("createJob", () => {
     const first = await jobs.propose(acme, { postingUrl: posting });
     await app.reviewProposal(HECTOR, {
       id: first.id,
+      updatedAt: first.updatedAt,
       decision: "dismiss",
       reason: "not-hiring",
       note: null,
@@ -148,6 +149,7 @@ describeEachBackend("createJob", () => {
     const dismissed = await jobs.propose(acme);
     await app.reviewProposal(HECTOR, {
       id: dismissed.id,
+      updatedAt: dismissed.updatedAt,
       decision: "dismiss",
       reason: "wrong-level",
       note: null,

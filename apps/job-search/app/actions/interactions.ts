@@ -45,7 +45,7 @@ export async function deleteInteraction(
 // The pages an interaction shows on: the people list (their dates), its person's page, its job's
 // page and the jobs list (a follow-up moves), and Claude's page, which lists its changes.
 function pagesOf(interactions: Interaction[]): string[] {
-  const pages = new Set(["/people"]);
+  const pages = new Set(["/", "/people"]);
   for (const { personId, jobId } of interactions) {
     pages.add(`/people/${personId}`);
     if (jobId) {

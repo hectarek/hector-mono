@@ -10,6 +10,7 @@ import type {
   InteractionKind,
 } from "@/src/entities/models/interaction.model";
 import type { PersonDates } from "@/src/entities/models/person.model";
+import type { WeeklyCounts } from "@/src/entities/weekly-counts";
 
 // The interactions in memory. A person's list runs as the table's does: the latest day first, then
 // the latest logged.
@@ -118,6 +119,42 @@ export class MockInteractionsRepository implements IInteractionsRepository {
         .map((row) => row.interaction),
       "reply-received",
     );
+  }
+
+  async listScheduled(ownerId: string): Promise<Interaction[]> {
+    return this.rows
+      .filter(
+        (row) =>
+          row.ownerId === ownerId && row.interaction.state === "scheduled",
+      )
+      .map((row) => ({ ...row.interaction }))
+      .sort(
+        (a, b) =>
+          (a.startsAt?.getTime() ?? 0) - (b.startsAt?.getTime() ?? 0) ||
+          byCodePoint(a.id, b.id),
+      );
+  }
+
+  async countInRange(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<Pick<WeeklyCounts, "messagesSent" | "conversationsHeld">> {
+    const inRange = this.rows
+      .filter(
+        (row) =>
+          row.ownerId === ownerId &&
+          row.interaction.occurredOn >= from &&
+          row.interaction.occurredOn <= to,
+      )
+      .map((row) => row.interaction);
+    return {
+      messagesSent: inRange.filter(({ kind }) => kind === "message-sent")
+        .length,
+      conversationsHeld: inRange.filter(
+        ({ kind, state }) => kind === "conversation" && state === "held",
+      ).length,
+    };
   }
 
   async deleteForPerson(ownerId: string, personId: string): Promise<void> {

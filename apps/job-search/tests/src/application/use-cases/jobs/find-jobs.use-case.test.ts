@@ -56,6 +56,7 @@ describeEachBackend("findJobs", () => {
       workMode: null,
       reviewState: "accepted",
       dismissReason: null,
+      updatedAt: expect.any(Date),
     });
   });
 

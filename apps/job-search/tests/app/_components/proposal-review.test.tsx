@@ -1,7 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { ProposalReview } from "@/app/_components/proposal-review";
-import { getJob } from "@/app/actions/jobs";
+import { getJob, updateJob } from "@/app/actions/jobs";
+import { nextState } from "@/tests/_support/next";
 import { aCompany, aProposal, dataOf } from "@/tests/_support/screens";
 import { signInAs } from "@/tests/_support/session";
 
@@ -12,7 +13,7 @@ describe("Hector's review of a proposal", () => {
     const proposal = await aProposal(await aCompany());
     signInAs("owner");
     const view = render(
-      <ProposalReview jobId={proposal.id} reviewState="pending" />,
+      <ProposalReview proposal={{ ...proposal, reviewState: "pending" }} />,
     );
 
     fireEvent.click(view.getByRole("button", { name: "Accept" }));
@@ -29,7 +30,7 @@ describe("Hector's review of a proposal", () => {
     const proposal = await aProposal(await aCompany());
     signInAs("owner");
     const view = render(
-      <ProposalReview jobId={proposal.id} reviewState="pending" />,
+      <ProposalReview proposal={{ ...proposal, reviewState: "pending" }} />,
     );
 
     expect(view.getByRole("button", { name: "Dismiss" })).toHaveProperty(
@@ -50,20 +51,49 @@ describe("Hector's review of a proposal", () => {
     );
 
     view.unmount();
-    const dismissed = render(
-      <ProposalReview jobId={proposal.id} reviewState="dismissed" />,
+    const dismissed = await reviewOf(proposal.id);
+    const reopen = render(
+      <ProposalReview proposal={{ ...dismissed, reviewState: "dismissed" }} />,
     );
-    fireEvent.click(dismissed.getByRole("button", { name: "Reopen" }));
+    fireEvent.click(reopen.getByRole("button", { name: "Reopen" }));
     await waitFor(async () =>
       expect((await reviewOf(proposal.id)).reviewState).toBe("pending"),
     );
+  });
+
+  // R22, revised 2026-10-29.
+  it("refuses a proposal Claude changed after the page read it, says so, and refreshes the page", async () => {
+    const proposal = await aProposal(await aCompany());
+    signInAs("agent");
+    dataOf(
+      await updateJob({
+        id: proposal.id,
+        updatedAt: proposal.updatedAt.toISOString(),
+        summary: "A fictional summary Claude added.",
+      }),
+    );
+    signInAs("owner");
+    nextState.refreshed = 0;
+    const view = render(
+      <ProposalReview proposal={{ ...proposal, reviewState: "pending" }} />,
+    );
+
+    fireEvent.click(view.getByRole("button", { name: "Accept" }));
+
+    expect(
+      await view.findByText(
+        "Claude changed this job after you opened it. Check it again, then decide.",
+      ),
+    ).toBeTruthy();
+    expect(nextState.refreshed).toBe(1);
+    expect((await reviewOf(proposal.id)).reviewState).toBe("pending");
   });
 
   it("says why when the server refuses Claude", async () => {
     const proposal = await aProposal(await aCompany());
     signInAs("agent");
     const view = render(
-      <ProposalReview jobId={proposal.id} reviewState="pending" />,
+      <ProposalReview proposal={{ ...proposal, reviewState: "pending" }} />,
     );
 
     fireEvent.click(view.getByRole("button", { name: "Accept" }));

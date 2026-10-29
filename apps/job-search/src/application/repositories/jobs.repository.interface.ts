@@ -1,3 +1,4 @@
+import type { JobStatus } from "@/src/entities/job-lifecycle";
 import type {
   DuplicateJob,
   Job,
@@ -5,6 +6,7 @@ import type {
   JobPage,
   JobQuery,
   JobState,
+  JobSummary,
   ReviewState,
 } from "@/src/entities/models/job.model";
 import type {
@@ -42,6 +44,21 @@ export interface IJobsRepository {
   // Accepted jobs unless the query asks for another review state, by next date (none last), then
   // role, a page at a time.
   find(ownerId: string, query: JobQuery): Promise<JobPage>;
+  // Accepted jobs at an open status whose next date is on or before the day given: due or
+  // overdue, the earliest first, then by role (R9).
+  listDue(ownerId: string, day: string): Promise<JobSummary[]>;
+  // Accepted jobs at applied since the day given or earlier, the earliest applied first: the stale
+  // rule's candidates, before their replies are read (R3).
+  listAppliedBy(ownerId: string, day: string): Promise<JobSummary[]>;
+  // Accepted jobs whose applied-on falls on the days between from and to, both counted (R10).
+  countApplied(ownerId: string, from: string, to: string): Promise<number>;
+  // Status moves into any of the statuses given, on the days between from and to (R10).
+  countMovesInto(
+    ownerId: string,
+    statuses: readonly JobStatus[],
+    from: string,
+    to: string,
+  ): Promise<number>;
   // The job that holds a posting, whatever its review.
   findByPostingKey(
     ownerId: string,

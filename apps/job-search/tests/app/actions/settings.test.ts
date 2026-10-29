@@ -60,7 +60,7 @@ describe("updateSettings", () => {
       actor: "owner",
       action: "updated",
     });
-    expect(nextState.revalidated).toEqual(["/settings"]);
+    expect(nextState.revalidated).toEqual(["/", "/settings"]);
   });
 
   // R21: settings are Hector's alone.

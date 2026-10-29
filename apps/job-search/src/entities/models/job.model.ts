@@ -113,7 +113,7 @@ export type JobDetail = {
   repliedOn: string | null;
 };
 
-// A job as a list shows it.
+// A job as a list shows it, with the updatedAt a change from the list sends back (R22).
 export type JobSummary = Pick<
   Job,
   | "id"
@@ -127,6 +127,7 @@ export type JobSummary = Pick<
   | "workMode"
   | "reviewState"
   | "dismissReason"
+  | "updatedAt"
 >;
 
 export function jobSummary(job: Job): JobSummary {
@@ -142,6 +143,7 @@ export function jobSummary(job: Job): JobSummary {
     workMode: job.workMode,
     reviewState: job.reviewState,
     dismissReason: job.dismissReason,
+    updatedAt: job.updatedAt,
   };
 }
 
@@ -286,28 +288,31 @@ export type StatusMoveInput = {
   reason?: string;
 };
 
-// Dismissing a proposal: one of the reasons, and a note if Hector adds one.
-export const dismissProposalSchema = z.object({
+// Accepting or reopening a proposal: which one, and the updatedAt read with it, so Hector never
+// decides on a version he hasn't seen (R22, revised 2026-10-29).
+export const reviewProposalSchema = z.object({
   id: z.uuid(),
+  updatedAt: timeSchema,
+});
+
+// Dismissing a proposal: one of the reasons, and a note if Hector adds one, against the updatedAt
+// read with it.
+export const dismissProposalSchema = reviewProposalSchema.extend({
   reason: z.enum(DISMISS_REASONS, {
     error: `Use one of: ${DISMISS_REASONS.join(", ")}`,
   }),
   note: optionalText(200).optional(),
 });
 
-// Which job: get_job's input, and accepting, reopening and deleting one's.
+// Which job: get_job's input, and deleting one's.
 export const jobIdSchema = z.object({ id: z.uuid() });
 
-// What Hector decides about a proposal (R20).
-export type ProposalDecision =
-  | { id: string; decision: "accept" }
-  | { id: string; decision: "reopen" }
-  | {
-      id: string;
-      decision: "dismiss";
-      reason: DismissReason;
-      note: string | null;
-    };
+// What Hector decides about a proposal (R20), against the updatedAt he read with it.
+export type ProposalDecision = { id: string; updatedAt: Date } & (
+  | { decision: "accept" }
+  | { decision: "reopen" }
+  | { decision: "dismiss"; reason: DismissReason; note: string | null }
+);
 
 // The most jobs a page of find_jobs holds.
 export const JOB_PAGE_MAX = 50;

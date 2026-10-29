@@ -13,9 +13,10 @@ export class NotFoundPage extends Error {
   }
 }
 
-// What actions and screens asked Next to do: the paths revalidatePath() was given, and where a
-// screen's router was told to go. Tests reset them.
+// What actions and screens asked Next to do: the paths revalidatePath() was given, where a
+// screen's router was told to go, and how many times it was told to refresh. Tests reset them.
 export const nextState = {
   revalidated: [] as string[],
   pushed: [] as string[],
+  refreshed: 0,
 };

@@ -13,6 +13,6 @@ export async function updateSettings(
     "Couldn't save the settings. Try again.",
     async () =>
       getInjection("IUpdateSettingsController")(input, await changeContext()),
-    () => ["/settings"],
+    () => ["/", "/settings"],
   );
 }

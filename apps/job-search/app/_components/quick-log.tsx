@@ -15,6 +15,7 @@ import {
 import { Plus, X } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { FormField } from "@/app/_components/form-field";
+import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { INTERACTION_LABELS } from "@/app/_lib/job-labels";
@@ -108,7 +109,12 @@ export function QuickLog({
         <Plus />
         Log
       </SheetTrigger>
-      <SheetContent side="bottom" className="max-h-dvh overflow-y-auto">
+      <SheetContent
+        side="bottom"
+        showCloseButton={false}
+        className="max-h-dvh overflow-y-auto"
+      >
+        <SheetCloseButton />
         <SheetHeader>
           <SheetTitle>Log outreach</SheetTitle>
           <SheetDescription>

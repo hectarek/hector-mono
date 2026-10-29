@@ -43,6 +43,9 @@ mock.module("next/navigation", () => ({
     push: (href: string) => {
       nextState.pushed.push(href);
     },
+    refresh: () => {
+      nextState.refreshed += 1;
+    },
   }),
   // The real check: the page tools' wrapper (app/_lib/call-action.ts) tells by it that a deploy
   // removed an action.

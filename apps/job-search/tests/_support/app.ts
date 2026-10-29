@@ -44,6 +44,7 @@ import { getSettingsUseCase } from "@/src/application/use-cases/settings/get-set
 import { updateSettingsUseCase } from "@/src/application/use-cases/settings/update-settings.use-case";
 import { addSourceUseCase } from "@/src/application/use-cases/sources/add-source.use-case";
 import { listSourcesUseCase } from "@/src/application/use-cases/sources/list-sources.use-case";
+import { getTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
 import { ActivityRepository } from "@/src/infrastructure/repositories/activity.repository";
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { CompaniesRepository } from "@/src/infrastructure/repositories/companies.repository";
@@ -275,6 +276,15 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       practice,
       activity,
       transactions,
+      log,
+    ),
+    getToday: getTodayUseCase(
+      jobs,
+      people,
+      interactions,
+      practice,
+      activity,
+      settings,
       log,
     ),
   };

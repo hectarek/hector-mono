@@ -1,11 +1,9 @@
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
-import { scheduled } from "@/src/application/use-cases/practice/scheduled";
-import { byCodePoint } from "@/src/entities/code-point-order";
-import type {
-  DueSession,
-  PracticePage,
-  PracticeSession,
-} from "@/src/entities/models/practice-entry.model";
+import {
+  dueBy,
+  scheduled,
+} from "@/src/application/use-cases/practice/scheduled";
+import type { PracticePage } from "@/src/entities/models/practice-entry.model";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type IListPracticeUseCase = ReturnType<typeof listPracticeUseCase>;
@@ -24,16 +22,5 @@ export const listPracticeUseCase =
       practiceRepository.listOpen(ownerId),
       practiceRepository.listRecent(ownerId, limit),
     ]);
-    const due = open
-      .map(scheduled)
-      .filter(
-        (session: PracticeSession): session is DueSession =>
-          session.nextReview !== null && session.nextReview.dueOn <= today,
-      )
-      .sort(
-        (a, b) =>
-          byCodePoint(a.nextReview.dueOn, b.nextReview.dueOn) ||
-          byCodePoint(a.topic, b.topic),
-      );
-    return { today, due, recent: recent.map(scheduled) };
+    return { today, due: dueBy(open, today), recent: recent.map(scheduled) };
   };

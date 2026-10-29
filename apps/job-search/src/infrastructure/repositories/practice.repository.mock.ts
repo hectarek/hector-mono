@@ -123,6 +123,19 @@ export class MockPracticeRepository implements IPracticeRepository {
       .map((row) => this.withReviews(row));
   }
 
+  async countSessions(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<number> {
+    return this.sessions.filter(
+      ({ ownerId: owner, session }) =>
+        owner === ownerId &&
+        session.practicedOn >= from &&
+        session.practicedOn <= to,
+    ).length;
+  }
+
   private withReviews(row: SessionRow): PracticeSessionRecord {
     return {
       ...row.session,

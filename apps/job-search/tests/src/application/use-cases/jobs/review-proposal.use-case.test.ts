@@ -1,6 +1,14 @@
 import { afterEach, beforeEach, expect, it, setSystemTime } from "bun:test";
-import { HumanOnlyError, InputParseError } from "@/src/entities/errors/common";
-import type { Job, ReviewState } from "@/src/entities/models/job.model";
+import {
+  ConflictError,
+  HumanOnlyError,
+  InputParseError,
+} from "@/src/entities/errors/common";
+import {
+  type Job,
+  type ReviewState,
+  updateJobSchema,
+} from "@/src/entities/models/job.model";
 import {
   describeEachBackend,
   makeApp,
@@ -29,9 +37,21 @@ describeEachBackend("reviewProposal", () => {
       (job) => job.id,
     );
 
+  // Claude changes the proposal after Hector read it.
+  const changedByClaude = (job: Job) =>
+    app.updateJob(
+      CLAUDE,
+      updateJobSchema.parse({
+        id: job.id,
+        updatedAt: job.updatedAt.toISOString(),
+        summary: "A fictional summary Claude added.",
+      }),
+    );
+
   it("Hector accepts: in the pipeline at verify, with checking it's hiring due today", async () => {
     const accepted = await app.reviewProposal(HECTOR, {
       id: proposal.id,
+      updatedAt: proposal.updatedAt,
       decision: "accept",
     });
 
@@ -48,6 +68,7 @@ describeEachBackend("reviewProposal", () => {
   it("Hector dismisses with a reason: listed under dismissed, with it; reopened, pending again", async () => {
     const dismissed = await app.reviewProposal(HECTOR, {
       id: proposal.id,
+      updatedAt: proposal.updatedAt,
       decision: "dismiss",
       reason: "wrong-level",
       note: "Too junior",
@@ -61,6 +82,7 @@ describeEachBackend("reviewProposal", () => {
 
     const reopened = await app.reviewProposal(HECTOR, {
       id: proposal.id,
+      updatedAt: dismissed.updatedAt,
       decision: "reopen",
     });
     expect(reopened).toMatchObject({
@@ -71,10 +93,53 @@ describeEachBackend("reviewProposal", () => {
     expect(await listed("pending")).toEqual([proposal.id]);
   });
 
+  // R22, revised 2026-10-29.
+  it("refuses each decision on a proposal Claude changed since Hector read it, with it as it is now", async () => {
+    const changed = await changedByClaude(proposal);
+
+    for (const decision of [
+      { decision: "accept" },
+      { decision: "dismiss", reason: "not-hiring", note: null },
+    ] as const) {
+      const refused = await app
+        .reviewProposal(HECTOR, {
+          id: proposal.id,
+          updatedAt: proposal.updatedAt,
+          ...decision,
+        })
+        .catch((error: unknown) => error);
+      expect(refused).toBeInstanceOf(ConflictError);
+      expect((refused as ConflictError).current).toEqual(changed);
+    }
+    expect(await listed("pending")).toEqual([proposal.id]);
+
+    const dismissed = await app.reviewProposal(HECTOR, {
+      id: proposal.id,
+      updatedAt: changed.updatedAt,
+      decision: "dismiss",
+      reason: "not-hiring",
+      note: null,
+    });
+    await expect(
+      app.reviewProposal(HECTOR, {
+        id: proposal.id,
+        updatedAt: changed.updatedAt,
+        decision: "reopen",
+      }),
+    ).rejects.toBeInstanceOf(ConflictError);
+    expect((await app.getJob(OWNER, { id: proposal.id })).job).toEqual(
+      dismissed,
+    );
+  });
+
   // AE2.
   it("refuses Claude's accept with HumanOnlyError, logs the refusal, and changes nothing", async () => {
     await expect(
-      app.reviewProposal(CLAUDE, { id: proposal.id, decision: "accept" }),
+      app.reviewProposal(CLAUDE, {
+        id: proposal.id,
+        updatedAt: proposal.updatedAt,
+        decision: "accept",
+      }),
     ).rejects.toBeInstanceOf(HumanOnlyError);
 
     expect((await app.getJob(OWNER, { id: proposal.id })).job).toEqual(
@@ -95,13 +160,25 @@ describeEachBackend("reviewProposal", () => {
   });
 
   it("refuses a decision that doesn't fit where the proposal stands", async () => {
-    await app.reviewProposal(HECTOR, { id: proposal.id, decision: "accept" });
+    const accepted = await app.reviewProposal(HECTOR, {
+      id: proposal.id,
+      updatedAt: proposal.updatedAt,
+      decision: "accept",
+    });
 
     await expect(
-      app.reviewProposal(HECTOR, { id: proposal.id, decision: "accept" }),
+      app.reviewProposal(HECTOR, {
+        id: proposal.id,
+        updatedAt: accepted.updatedAt,
+        decision: "accept",
+      }),
     ).rejects.toBeInstanceOf(InputParseError);
     await expect(
-      app.reviewProposal(HECTOR, { id: proposal.id, decision: "reopen" }),
+      app.reviewProposal(HECTOR, {
+        id: proposal.id,
+        updatedAt: accepted.updatedAt,
+        decision: "reopen",
+      }),
     ).rejects.toThrow("Only a dismissed proposal can be reopened.");
   });
 });

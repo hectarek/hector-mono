@@ -64,6 +64,7 @@ describe("the outreach log", () => {
     expect(interactions).toHaveLength(2);
     expect(interactions.every(({ author }) => author === "agent")).toBe(true);
     expect(nextState.revalidated).toEqual([
+      "/",
       "/people",
       `/people/${person.id}`,
       "/jobs",
@@ -138,6 +139,7 @@ describe("people", () => {
     );
 
     expect(nextState.revalidated).toEqual([
+      "/",
       "/people",
       `/people/${person.id}`,
       `/companies/${companyId}`,

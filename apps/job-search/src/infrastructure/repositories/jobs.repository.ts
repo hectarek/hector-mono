@@ -1,4 +1,14 @@
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  between,
+  count,
+  desc,
+  eq,
+  inArray,
+  lte,
+  sql,
+} from "drizzle-orm";
 import { companies, jobStatusChanges, jobs, leadSources } from "@/db/schema";
 import type {
   IJobsRepository,
@@ -6,11 +16,13 @@ import type {
 } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import { DatabaseOperationError } from "@/src/entities/errors/common";
+import { type JobStatus, OPEN_STATUSES } from "@/src/entities/job-lifecycle";
 import {
   type DuplicateJob,
   type Job,
   type JobPage,
   type JobQuery,
+  type JobSummary,
   jobSummary,
   type ReviewState,
   statusesFor,
@@ -178,6 +190,87 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
       };
     } catch (err) {
       this.handleError(err, "find", { ownerId });
+    }
+  }
+
+  async listDue(ownerId: string, day: string): Promise<JobSummary[]> {
+    try {
+      const rows = await this.joined()
+        .where(
+          and(
+            eq(jobs.ownerId, ownerId),
+            eq(jobs.reviewState, "accepted"),
+            inArray(jobs.status, [...OPEN_STATUSES]),
+            lte(jobs.nextDate, day),
+          ),
+        )
+        .orderBy(asc(jobs.nextDate), sql`${jobs.role} collate "C"`, jobs.id);
+      return rows.map(jobSummary);
+    } catch (err) {
+      this.handleError(err, "listDue", { ownerId });
+    }
+  }
+
+  async listAppliedBy(ownerId: string, day: string): Promise<JobSummary[]> {
+    try {
+      const rows = await this.joined()
+        .where(
+          and(
+            eq(jobs.ownerId, ownerId),
+            eq(jobs.reviewState, "accepted"),
+            eq(jobs.status, "applied"),
+            lte(jobs.appliedOn, day),
+          ),
+        )
+        .orderBy(asc(jobs.appliedOn), sql`${jobs.role} collate "C"`, jobs.id);
+      return rows.map(jobSummary);
+    } catch (err) {
+      this.handleError(err, "listAppliedBy", { ownerId });
+    }
+  }
+
+  async countApplied(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<number> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ applied: count() })
+        .from(jobs)
+        .where(
+          and(
+            eq(jobs.ownerId, ownerId),
+            eq(jobs.reviewState, "accepted"),
+            between(jobs.appliedOn, from, to),
+          ),
+        );
+      return row?.applied ?? 0;
+    } catch (err) {
+      this.handleError(err, "countApplied", { ownerId });
+    }
+  }
+
+  async countMovesInto(
+    ownerId: string,
+    statuses: readonly JobStatus[],
+    from: string,
+    to: string,
+  ): Promise<number> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ moves: count() })
+        .from(jobStatusChanges)
+        .where(
+          and(
+            eq(jobStatusChanges.ownerId, ownerId),
+            inArray(jobStatusChanges.toStatus, [...statuses]),
+            between(jobStatusChanges.occurredOn, from, to),
+          ),
+        );
+      return row?.moves ?? 0;
+    } catch (err) {
+      this.handleError(err, "countMovesInto", { ownerId });
     }
   }
 

@@ -4,6 +4,7 @@ import type {
 } from "@/src/entities/models/interaction.model";
 import type { PersonDates } from "@/src/entities/models/person.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+import type { WeeklyCounts } from "@/src/entities/weekly-counts";
 
 // An interaction as it's written.
 export type NewInteraction = Omit<Interaction, "id" | "createdAt">;
@@ -45,6 +46,15 @@ export interface IInteractionsRepository {
   ): Promise<Map<string, PersonDates>>;
   // The latest reply linked to a job, for the stale rule (R3).
   repliedOnFor(ownerId: string, jobId: string): Promise<string | null>;
+  // The conversations still scheduled, the earliest start first: This week lists those that have
+  // ended for a debrief (R9).
+  listScheduled(ownerId: string): Promise<Interaction[]>;
+  // Messages sent and conversations held on the days between from and to, both counted (R10).
+  countInRange(
+    ownerId: string,
+    from: string,
+    to: string,
+  ): Promise<Pick<WeeklyCounts, "messagesSent" | "conversationsHeld">>;
   // Every interaction a person has, with the person's delete.
   deleteForPerson(
     ownerId: string,

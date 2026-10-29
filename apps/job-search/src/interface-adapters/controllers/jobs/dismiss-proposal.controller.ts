@@ -31,6 +31,7 @@ export const dismissProposalController = (
     }
     return useCase(context, {
       id: data.id,
+      updatedAt: data.updatedAt,
       decision: "dismiss",
       reason: data.reason,
       note: data.note ?? null,
