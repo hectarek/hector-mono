@@ -238,6 +238,7 @@ describeEachBackend("updateJob", () => {
     });
     const dismissed = await app.reviewProposal(HECTOR, {
       id: proposal.id,
+      updatedAt: proposal.updatedAt,
       decision: "dismiss",
       reason: "not-hiring",
       note: null,

@@ -16,6 +16,7 @@ describeEachBackend("getJob", () => {
     const proposal = await jobs.propose(await jobs.company());
     const accepted = await app.reviewProposal(HECTOR, {
       id: proposal.id,
+      updatedAt: proposal.updatedAt,
       decision: "accept",
     });
     await app.moveJob(HECTOR, { id: proposal.id, status: "target" });

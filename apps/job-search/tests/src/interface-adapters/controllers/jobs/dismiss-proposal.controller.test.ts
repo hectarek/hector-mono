@@ -21,11 +21,16 @@ describe("dismissProposalController", () => {
   it("hands the use case who's deciding, and a dismissal with its reason", async () => {
     const { useCase, controller } = setup();
     await controller(
-      { id: "00000000-0000-4000-8000-0000000000c1", reason: "other" },
+      {
+        id: "00000000-0000-4000-8000-0000000000c1",
+        updatedAt: "2026-10-26T16:00:00.000Z",
+        reason: "other",
+      },
       HECTOR,
     ).catch(() => {});
     expect(useCase).toHaveBeenCalledWith(HECTOR, {
       id: "00000000-0000-4000-8000-0000000000c1",
+      updatedAt: new Date("2026-10-26T16:00:00.000Z"),
       decision: "dismiss",
       reason: "other",
       note: null,

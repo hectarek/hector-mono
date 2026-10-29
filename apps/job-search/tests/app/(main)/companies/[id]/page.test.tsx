@@ -129,7 +129,13 @@ describe("a company's page", () => {
     const waiting = await aProposal(company.id, { role: "Gadget designer" });
     const dismissed = await aProposal(company.id, { role: "Anvil tester" });
     signInAs("owner");
-    dataOf(await dismissProposal({ id: dismissed.id, reason: "wrong-level" }));
+    dataOf(
+      await dismissProposal({
+        id: dismissed.id,
+        updatedAt: dismissed.updatedAt.toISOString(),
+        reason: "wrong-level",
+      }),
+    );
 
     const page = await companyPage(company.id);
 

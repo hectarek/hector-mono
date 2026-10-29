@@ -124,6 +124,7 @@ describeEachBackend("deleteCompany", () => {
       const proposal = await jobs.propose(company.id);
       await app.reviewProposal(HECTOR, {
         id: proposal.id,
+        updatedAt: proposal.updatedAt,
         decision: "dismiss",
         reason: "not-hiring",
         note: null,

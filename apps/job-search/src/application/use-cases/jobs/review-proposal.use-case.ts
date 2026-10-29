@@ -7,7 +7,11 @@ import type { ILoggerService } from "@/src/application/services/logger.service.i
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { requireHuman } from "@/src/application/use-cases/access/require-human";
 import { recordChange } from "@/src/application/use-cases/activity/record-change";
-import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
+import {
+  ConflictError,
+  InputParseError,
+  NotFoundError,
+} from "@/src/entities/errors/common";
 import { acceptedStage } from "@/src/entities/job-lifecycle";
 import type {
   ChangeContext,
@@ -30,9 +34,11 @@ const FROM: Record<ProposalDecision["decision"], ReviewState> = {
 };
 
 // Hector's call on a proposal (R20), which only he makes (R21): Claude's try is refused, and
-// logged, before anything is read. Accepting puts it in the pipeline at verify, with checking it's
-// still hiring due today; dismissing keeps it, with the reason, so the posting stays refused as a
-// duplicate; reopening puts a dismissed one back in the queue.
+// logged, before anything is read. Each is made against the updatedAt he read (R22), so a proposal
+// Claude changed since is refused as a conflict, with the proposal as it is now. Accepting puts it
+// in the pipeline at verify, with checking it's still hiring due today; dismissing keeps it, with
+// the reason, so the posting stays refused as a duplicate; reopening puts a dismissed one back in
+// the queue.
 export const reviewProposalUseCase = (
   jobsRepository: IJobsRepository,
   activityRepository: IActivityRepository,
@@ -63,6 +69,9 @@ export const reviewProposalUseCase = (
       );
       if (!current) {
         throw new NotFoundError("Couldn't find that job.");
+      }
+      if (current.updatedAt.getTime() !== decided.updatedAt.getTime()) {
+        throw new ConflictError(current);
       }
       if (current.reviewState !== FROM[decided.decision]) {
         throw new InputParseError(

@@ -171,7 +171,13 @@ export default async function JobPage({
             </p>
           ) : null}
           {human ? (
-            <ProposalReview jobId={job.id} reviewState={job.reviewState} />
+            <ProposalReview
+              proposal={{
+                id: job.id,
+                reviewState: job.reviewState,
+                updatedAt: job.updatedAt,
+              }}
+            />
           ) : (
             <OnlyHector
               labels={

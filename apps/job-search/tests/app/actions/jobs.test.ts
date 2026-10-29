@@ -243,7 +243,12 @@ describe("Hector's review", () => {
     signInAs("agent");
     const job = dataOf(await proposeJob(proposal(companyId)));
 
-    expect(await acceptProposal({ id: job.id })).toEqual({
+    expect(
+      await acceptProposal({
+        id: job.id,
+        updatedAt: job.updatedAt.toISOString(),
+      }),
+    ).toEqual({
       ok: false,
       code: "human-only",
       message: "Only Hector can do this.",
@@ -265,16 +270,62 @@ describe("Hector's review", () => {
     const second = dataOf(await proposeJob(proposal(companyId)));
     signInAs("owner");
 
-    expect(dataOf(await acceptProposal({ id: first.id }))).toMatchObject({
+    expect(
+      dataOf(
+        await acceptProposal({
+          id: first.id,
+          updatedAt: first.updatedAt.toISOString(),
+        }),
+      ),
+    ).toMatchObject({
       reviewState: "accepted",
       nextStep: "Verify it's hiring",
     });
-    expect(
-      dataOf(await dismissProposal({ id: second.id, reason: "pay-too-low" })),
-    ).toMatchObject({ reviewState: "dismissed", dismissReason: "pay-too-low" });
-    expect(dataOf(await reopenProposal({ id: second.id }))).toMatchObject({
-      reviewState: "pending",
+    const dismissed = dataOf(
+      await dismissProposal({
+        id: second.id,
+        updatedAt: second.updatedAt.toISOString(),
+        reason: "pay-too-low",
+      }),
+    );
+    expect(dismissed).toMatchObject({
+      reviewState: "dismissed",
+      dismissReason: "pay-too-low",
     });
+    expect(
+      dataOf(
+        await reopenProposal({
+          id: second.id,
+          updatedAt: dismissed.updatedAt.toISOString(),
+        }),
+      ),
+    ).toMatchObject({ reviewState: "pending" });
+  });
+
+  // R22, revised 2026-10-29.
+  it("answers `conflict` with the proposal as it is now when Claude changed it since Hector read it", async () => {
+    const companyId = await aCompany();
+    signInAs("agent");
+    const job = dataOf(await proposeJob(proposal(companyId)));
+    const changed = dataOf(
+      await updateJob({
+        id: job.id,
+        updatedAt: job.updatedAt.toISOString(),
+        summary: "A fictional summary Claude added.",
+      }),
+    );
+    signInAs("owner");
+
+    const answer = await acceptProposal({
+      id: job.id,
+      updatedAt: job.updatedAt.toISOString(),
+    });
+
+    expect(answer).toMatchObject({ ok: false, code: "conflict" });
+    expect(answer.ok ? undefined : answer.current).toEqual(changed);
+    expect(dataOf(await getJob({ id: job.id })).job.reviewState).toBe(
+      "pending",
+    );
   });
 });
 
