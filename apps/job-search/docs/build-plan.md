@@ -107,7 +107,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **Pipeline**
 
-- R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size.
+- R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size. (Revised 2026-10-29, Hector's call: a job shows its company's tier and holds none of its own.)
 - R2. A job's status is `verify`, `target`, `applied`, `screen`, `onsite` or `offer`, or a closed status: `rejected`, `closed`, `stale`, `skipped`, `withdrawn`, `offer-accepted` or `offer-declined`. Any move is allowed, and each move records the date it happened, today by default.
 - R3. Status moves keep the follow-up rhythm:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
@@ -133,7 +133,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
   4. Claude's recent changes
   5. the week's counts against targets
 - R10. Weekly counts cover messages sent, conversations held, applications (applied-on in the week), practice sessions and moves into `screen` or beyond, by Eastern-time week starting Monday. Saving a weekly review stores a snapshot of the counts and targets with the build milestone and the one change, and the view shows live counts beside a snapshot they no longer match.
-- R11. A practice log records sessions (topic, date, type, pattern, AI used, minutes, result, notes) and schedules one review at a time: 2 days after a solved session, then 7 and then 21 days after each successful review, and none after the 21-day review. A failed or partial review is retried 2 days later at the same step.
+- R11. A practice log records sessions (topic, date, type, pattern, AI used, minutes, result, notes) and schedules one review at a time: 2 days after a solved session, then 7 and then 21 days after each successful review, and none after the 21-day review. A failed or partial review is retried 2 days later at the same step. (Revised 2026-10-29, Hector's call: the first review comes 2 days after the session whatever its result, as the sheet's formula did.)
 - R12. Settings, which only Hector changes, hold the weekly targets and the cap on pending proposals.
 
 **Calendar**
@@ -160,7 +160,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
   - the account pages and account endpoints: Claude's session can only read itself and sign out
 
   Claude's dated notes only append. Its fit note (R17) is replaced, with the old text kept in the activity log.
-- R22. Hector's open views pick up Claude's changes when shown and at least once a minute, and an edit made against a record that changed since it was read is caught, not silently overwritten.
+- R22. Hector's open views pick up Claude's changes when shown and at least once a minute, and an edit made against a record that changed since it was read is caught, not silently overwritten. (Revised 2026-10-29, Hector's call: so is accepting, dismissing or reopening a proposal that changed since it was read.)
 
 **Access and privacy**
 
@@ -575,6 +575,7 @@ Each phase is one branch and PR and leaves a usable app:
 - **Where the rules live:** the settings of the folder where search sessions start, plus Hector's user settings. The specifics stay in his private config.
 - **Secrets by environment:** local development and previews hold only test-project secrets; production secrets live only in Vercel's Production environment (KTD17).
 - **The combined risk:** one search session holds private data, outside text and ways to send data out. Deny the outbound tools it doesn't need, and treat record text as data (KTD21).
+- (Revised 2026-10-28, Hector's call: the ask and deny rules above wait for a lock-down pass after the app's core is built, through cutover. Until then Claude may use Claude in Chrome, the database connectors and the other tools the build needs. The app's own checks, R21 among them, still hold.)
 
 ### Documentation and Operational Notes
 
@@ -745,6 +746,8 @@ Each phase is one branch and PR and leaves a usable app:
      - the page doesn't navigate, and the result-size limit is known
      - a Claude Code `ask` rule fires on a tool marked consequential
      - each tool the deny rules name (System-Wide Impact) is refused in the permission mode Hector uses
+
+     (Revised 2026-10-28, Hector's call: no lock-down while the app's core is built, through cutover. The last two checks move to the lock-down pass after it, and the spike passes on the others.)
   3. If Playwright MCP fails, try Chrome DevTools MCP. If both fail, stop (Goal Capsule).
   4. Write `docs/agent-access.md`: the profile and output folders, the flag, signing Claude in (never Hector), the ask and deny rules in generic terms, one session at a time.
 - **Execution note:** prove the two tools in a real flag-enabled Chrome before writing any other tool.
@@ -1220,6 +1223,8 @@ Each need is a task in Hector's task tracker, assigned to him, where its status 
 | H4  | Create a Google OAuth web client (consent screen in production for personal use, scope `calendar.events.owned`), put its production values only in Vercel's Production environment, and set up a throwaway Google account for local testing                                                                                                                                                                                                                                                                                                                                                                                            | U13      | open                                                                                                                                                                                                                                                                                                                                                                   |
 | H5  | Enter the weekly targets and the queue cap in Settings                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | U11      | open                                                                                                                                                                                                                                                                                                                                                                   |
 | H6  | Review the import snapshot and confirm each job's status date, then run the production dry run and commit from your terminal over the weekend after a Friday review, so the app starts on a new week                                                                                                                                                                                                                                                                                                                                                                                                                                   | U11      | open                                                                                                                                                                                                                                                                                                                                                                   |
+
+Revised 2026-10-28, Hector's call: no lock-down while the app's core is built, through cutover. H1's localhost step, H2's sign-up step and H3's ask and deny rules move to a lock-down pass after it. Until then, H3 is the Playwright MCP server alone.
 
 ---
 
