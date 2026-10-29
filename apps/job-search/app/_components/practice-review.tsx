@@ -17,6 +17,7 @@ import {
   TryFields,
   tryInput,
 } from "@/app/_components/practice-fields";
+import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 import { callAction } from "@/app/_lib/call-action";
 import { logPractice } from "@/app/actions/practice";
 import type { ActionResult } from "@/app/actions/shared";
@@ -59,7 +60,12 @@ export function PracticeReview({
       >
         Log review
       </SheetTrigger>
-      <SheetContent side="bottom" className="max-h-dvh overflow-y-auto">
+      <SheetContent
+        side="bottom"
+        showCloseButton={false}
+        className="max-h-dvh overflow-y-auto"
+      >
+        <SheetCloseButton />
         <SheetHeader>
           <SheetTitle>
             Review {session.step} of {LADDER_STEPS}
