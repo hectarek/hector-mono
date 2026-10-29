@@ -34,7 +34,7 @@ describe("a conversation to debrief", () => {
       />,
     );
 
-    expect(screen.getByText("Conversation, Jan 5 at 2:00 PM")).toBeTruthy();
+    expect(screen.getByText("Conversation, Jan 5, 2:00 PM")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Save" })).toHaveProperty(
       "disabled",
       true,
