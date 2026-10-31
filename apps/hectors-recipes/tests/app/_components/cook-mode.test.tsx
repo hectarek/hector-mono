@@ -89,8 +89,8 @@ describe("CookMode", () => {
       JSON.stringify(progress),
     );
 
-  // D63: Gather, each step, then Done, with Back and Next.
-  it("goes from Gather through each step to Done, and back", async () => {
+  // D63: Gather, then each step, with Back and Next; the last step finishes (D95).
+  it("goes from Gather through each step to Finish, and back", async () => {
     const user = userEvent.setup();
     const view = cook();
     view.getByRole("heading", { name: "Ingredients" });
@@ -103,19 +103,13 @@ describe("CookMode", () => {
     await user.click(button(view, "Next"));
     view.getByText("Step 2 of 2");
     view.getByText("Simmer for 20 minutes.");
-
-    await user.click(button(view, "Finish"));
-    view.getByRole("heading", { name: "That's the last step" });
-    expect(
-      view
-        .getByRole("button", { name: "Back to the recipe" })
-        .closest("a")
-        ?.getAttribute("href"),
-    ).toBe(`/recipes/${RECIPE_ID}`);
+    expect(view.queryByRole("button", { name: "Next" })).toBe(null);
+    expect(button(view, "Finish").closest("a")?.getAttribute("href")).toBe(
+      `/recipes/${RECIPE_ID}`,
+    );
 
     await user.click(button(view, "Back"));
-    view.getByText("Step 2 of 2");
-    await user.click(button(view, "Back"));
+    view.getByText("Step 1 of 2");
     await user.click(button(view, "Back"));
     view.getByRole("heading", { name: "Ingredients" });
   });
@@ -215,19 +209,18 @@ describe("CookMode", () => {
     ]);
   });
 
-  // P25.1, fix 10: Done, and the last screen's way back, keep the servings chosen here.
+  // P25.1, fix 10: Done, and the last step's Finish, keep the servings chosen here.
   it("goes back to the recipe at the servings chosen in cook mode", async () => {
     const user = userEvent.setup();
-    save({ used: [], at: "done", timers: {} });
+    save({ used: [], at: 2, timers: {} });
     const view = cook(6);
-    await view.findByRole("heading", { name: "That's the last step" });
+    await view.findByText("Step 2 of 2");
     const href = (name: string) =>
       button(view, name).closest("a")?.getAttribute("href");
-    expect(href("Back to the recipe")).toBe(`/recipes/${RECIPE_ID}?servings=6`);
+    expect(href("Finish")).toBe(`/recipes/${RECIPE_ID}?servings=6`);
     expect(href("Done")).toBe(`/recipes/${RECIPE_ID}?servings=6`);
 
     // Back at the recipe's own servings, the link is the recipe's own.
-    await user.click(button(view, "Back"));
     await user.click(button(view, "Back"));
     await user.click(button(view, "Back"));
     await user.click(button(view, "Fewer servings"));
@@ -323,18 +316,19 @@ describe("CookMode", () => {
     await again.findByText(warning);
   });
 
-  it("starts over from Done: nothing ticked, back on Gather", async () => {
+  // D95: finished, nothing is kept, so cooking it again starts on Gather.
+  it("keeps nothing once the last step is finished", async () => {
     const user = userEvent.setup();
     const view = cook();
     await user.click(box(view, /onion/));
     await user.click(button(view, "Start cooking"));
     await user.click(button(view, "Next"));
-    await user.click(button(view, "Finish"));
+    expect(sessionStorage.getItem(cookProgressKey(RECIPE_ID))).not.toBe(null);
 
-    await user.click(button(view, "Start over"));
-    view.getByRole("heading", { name: "Ingredients" });
-    expect(ticked(view, /onion/)).toBe(false);
+    await user.click(button(view, "Finish"));
     expect(sessionStorage.getItem(cookProgressKey(RECIPE_ID))).toBe(null);
+    await view.findByRole("heading", { name: "Ingredients" });
+    expect(ticked(view, /onion/)).toBe(false);
   });
 
   it("runs a step's timer from its button, and stops it", async () => {

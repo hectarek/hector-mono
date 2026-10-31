@@ -13,6 +13,8 @@ const withData = `<html><head><script type="application/ld+json">${JSON.stringif
     "@type": "Recipe",
     name: "Toast",
     image: "https://example.com/toast.jpg",
+    recipeCategory: "Breakfast",
+    keywords: "easy, vegetarian",
     recipeIngredient: ["2 slices bread"],
     recipeInstructions: [{ "@type": "HowToStep", text: "Toast the bread." }],
   },
@@ -31,9 +33,28 @@ describe("readRecipeFromLink", () => {
       readRecipeUseCase(reader, reads, logger),
       logger,
     );
-    const read = (url: string) => readLink(url, OWNER);
+    const read = (url: string, tags?: string[]) => readLink(url, OWNER, tags);
     return { fetcher, reader, reads, read };
   };
+
+  // D97: tags from the page's own words, held to the ones the form offers.
+  it("suggests the offered tags the page's recipe data names", async () => {
+    const { fetcher, read } = setup();
+    fetcher.pages.set("https://example.com/toast", withData);
+    const offered = ["breakfast", "dinner", "vegetarian"];
+    const result = await read("https://example.com/toast", offered);
+    expect(result.draft.tags).toEqual(["breakfast", "vegetarian"]);
+    expect((await read("https://example.com/toast")).draft.tags).toEqual([]);
+  });
+
+  it("gives the AI reader the offered tags when the page has no recipe data", async () => {
+    const { fetcher, reader, read } = setup();
+    fetcher.pages.set("https://example.com/nana", withoutData);
+    reader.draft = { ...reader.draft, tags: ["breakfast", "brunch"] };
+    const result = await read("https://example.com/nana", ["breakfast"]);
+    expect(reader.offered).toEqual([["breakfast"]]);
+    expect(result.draft.tags).toEqual(["breakfast"]);
+  });
 
   it("reads a page's own recipe data without the AI reader", async () => {
     const { fetcher, reader, read } = setup();

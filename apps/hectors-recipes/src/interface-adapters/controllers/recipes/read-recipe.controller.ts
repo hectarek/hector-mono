@@ -29,7 +29,7 @@ const imageSchema = z.object({
   mediaType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
 });
 
-const inputSchema = z.discriminatedUnion("kind", [
+const sourceSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("text"),
     text: z.string().trim().min(1).max(MAX_RECIPE_TEXT),
@@ -68,6 +68,18 @@ const inputSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
+// The tags the new-recipe form offers, for the reader to suggest from (D97). The action loads
+// them, so these limits only stop what no form would offer.
+export const offeredTagsSchema = z
+  .array(z.string().max(100))
+  .max(500)
+  .default([]);
+
+const inputSchema = z.intersection(
+  sourceSchema,
+  z.object({ tags: offeredTagsSchema }),
+);
+
 export type IReadRecipeController = ReturnType<typeof readRecipeController>;
 
 export const readRecipeController = (
@@ -94,6 +106,7 @@ export const readRecipeController = (
       throw new InputParseError("Invalid input", { cause: parseError });
     }
 
-    return readRecipeUseCase(data, userId);
+    const { tags, ...source } = data;
+    return readRecipeUseCase(source, userId, tags);
   };
 };

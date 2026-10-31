@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-// Cook mode's screens, one at a time (docs/ux-plan.md D63): Gather, each step by its
-// position, then Done.
-const cookScreenSchema = z.union([
-  z.literal("gather"),
-  z.literal("done"),
-  z.number().int(),
-]);
+// Cook mode's screens, one at a time (docs/ux-plan.md D63): Gather, then each step by its
+// position. The last step finishes (D95); progress saved on the Done screen before that
+// reads as unreadable, so it starts fresh.
+const cookScreenSchema = z.union([z.literal("gather"), z.number().int()]);
 export type CookScreen = z.infer<typeof cookScreenSchema>;
 
 // Where you are in a recipe while cooking: the ingredients crossed off (by line position),
@@ -34,8 +31,8 @@ export function parseCookProgress(raw: string | null): CookProgress {
   }
 }
 
-// The screen `by` away (1 for Next, -1 for Back), stopping at Gather and Done. A step that's
-// no longer in the recipe (edited since) counts as Gather.
+// The screen `by` away (1 for Next, -1 for Back), stopping at Gather and the last step. A
+// step that's no longer in the recipe (edited since) counts as Gather.
 export function moveScreen(
   at: CookScreen,
   by: 1 | -1,
@@ -44,7 +41,6 @@ export function moveScreen(
   const screens: CookScreen[] = [
     "gather",
     ...steps.map((step) => step.position),
-    "done",
   ];
   const index = Math.max(0, screens.indexOf(at));
   return screens[Math.min(screens.length - 1, Math.max(0, index + by))] ?? at;

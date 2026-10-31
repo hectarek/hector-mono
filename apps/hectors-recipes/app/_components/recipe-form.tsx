@@ -119,8 +119,13 @@ type Props = {
   | { mode: "edit"; recipeId: string; values: RecipeFormValues }
 );
 
-// What the reader wasn't sure of, and the lines whose reading didn't match their words.
-export type DraftReview = { unsure: string[]; flagged: string[] };
+// What the reader wasn't sure of, the lines whose reading didn't match their words, and the
+// tags it suggested (D97).
+export type DraftReview = {
+  unsure: string[];
+  flagged: string[];
+  tags: string[];
+};
 
 export function RecipeForm(props: Props) {
   const action = props.mode === "create" ? createRecipe : updateRecipe;
@@ -350,25 +355,34 @@ export function RecipeForm(props: Props) {
             {state.error}
           </p>
         )}
-        {review && (review.flagged.length > 0 || review.unsure.length > 0) && (
-          <Alert>
-            <AlertTitle>Check before saving</AlertTitle>
-            <AlertDescription>
-              <ul className="list-disc pl-4">
-                {/* Two identical lines need saying once, and a key each. */}
-                {[...new Set(review.flagged)].map((raw) => (
-                  <li key={raw}>
-                    &ldquo;{raw}&rdquo; was split from its text: check its
-                    amount, unit and name.
-                  </li>
-                ))}
-                {[...new Set(review.unsure)].map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
+        {review &&
+          (review.flagged.length > 0 ||
+            review.unsure.length > 0 ||
+            review.tags.length > 0) && (
+            <Alert>
+              <AlertTitle>Check before saving</AlertTitle>
+              <AlertDescription>
+                <ul className="list-disc pl-4">
+                  {/* Two identical lines need saying once, and a key each. */}
+                  {[...new Set(review.flagged)].map((raw) => (
+                    <li key={raw}>
+                      &ldquo;{raw}&rdquo; was split from its text: check its
+                      amount, unit and name.
+                    </li>
+                  ))}
+                  {[...new Set(review.unsure)].map((note) => (
+                    <li key={note}>{note}</li>
+                  ))}
+                  {review.tags.length > 0 && (
+                    <li>
+                      Tags picked for it: {review.tags.join(", ")}. Remove any
+                      that don&apos;t fit.
+                    </li>
+                  )}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
 
         {props.mode === "edit" ? (
           <input type="hidden" name="recipeId" value={props.recipeId} />

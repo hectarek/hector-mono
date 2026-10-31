@@ -319,6 +319,7 @@ describe("checkDraft", () => {
     yieldServings: null,
     ingredients: [],
     steps: [],
+    tags: [],
     unsure: [],
     ...fields,
   });
@@ -416,6 +417,7 @@ Instructions
       aisle: null,
     })),
     steps: steps.map((text) => ({ text, timerMinutes: null, section: null })),
+    tags: [],
     unsure: [],
     flagged: [],
   });
