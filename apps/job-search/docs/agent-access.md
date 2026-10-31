@@ -72,7 +72,7 @@ Deferred on 2026-10-28 (Hector's call): no lock-down while the app's core is bui
 
 They go in the folder's Claude Code settings and in Hector's user settings. The specifics, such as each connector's server name, stay in his private config. Claude Code checks deny rules first, then ask, then allow. Deny rules are the boundary; ask rules only make Claude Code stop and ask.
 
-Ask before each tool the app marks consequential. The `/agent` page lists them as "Asks first". None exist yet; they arrive with their units (`close_job`, `set_profile` and the calendar writes):
+Ask before each tool the app marks consequential. The `/agent` page lists them as "Asks first", and Playwright MCP adds a warning to their descriptions. `close_job` is the first; `set_profile` and the calendar writes arrive with their units:
 
 ```json
 { "permissions": { "ask": ["mcp__playwright__webmcp_close_job"] } }

@@ -18,15 +18,21 @@ const section = async (name: string) =>
   );
 
 describe("Claude's page", () => {
-  it("lists Claude's page tools, each with its description", async () => {
+  it("lists Claude's page tools, each with its description and its hints", async () => {
     signInAs("agent");
     const tools = await section("Page tools");
     for (const { name, description } of AGENT_TOOLS) {
       expect(tools.getByText(name)).toBeTruthy();
       expect(tools.getByText(description)).toBeTruthy();
     }
-    expect(tools.getByText("Read-only")).toBeTruthy();
-    expect(tools.getByText("Outside text")).toBeTruthy();
+    const count = (hint: "readOnlyHint" | "untrustedContentHint") =>
+      AGENT_TOOLS.filter(({ annotations }) => annotations?.[hint]).length;
+    expect(tools.getAllByText("Read-only")).toHaveLength(count("readOnlyHint"));
+    expect(tools.getAllByText("Outside text")).toHaveLength(
+      count("untrustedContentHint"),
+    );
+    // close_job is the one step Claude Code asks about first (KTD5).
+    expect(tools.getAllByText("Asks first")).toHaveLength(1);
   });
 
   it("lists Claude's latest changes, its session's start among them, and not Hector's", async () => {

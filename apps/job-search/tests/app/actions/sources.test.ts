@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import type { ActionResult } from "@/app/actions/shared";
-import { addSource } from "@/app/actions/sources";
+import { addSource, listSources } from "@/app/actions/sources";
 import { getInjection } from "@/di/container";
 import type { CurrentActor } from "@/src/entities/models/actor.model";
 import { TEST_ACCOUNTS } from "@/src/infrastructure/services/mock-auth.service";
@@ -70,6 +70,20 @@ describe("addSource", () => {
     expect(nextState.revalidated).toEqual([]);
   });
 
+  it("lists the sources for Claude's read, and refreshes nothing", async () => {
+    signInAs("owner");
+    const listed = dataOf(await addSource({ name: fictional("Widget Jobs") }));
+    nextState.revalidated = [];
+
+    signInAs("agent");
+    expect(dataOf(await listSources({}))).toContainEqual(listed.source);
+    expect(nextState.revalidated).toEqual([]);
+    expect(await listSources("sources")).toMatchObject({
+      ok: false,
+      code: "validation",
+    });
+  });
+
   it("answers a blank name with `validation`", async () => {
     signInAs("owner");
     expect(await addSource({ name: "  " })).toEqual({
@@ -82,6 +96,10 @@ describe("addSource", () => {
 
   it("answers a session the app can't act for with its code", async () => {
     signInAs("stranger");
+    expect(await listSources({})).toMatchObject({
+      ok: false,
+      code: "not-allowed",
+    });
     expect(await addSource({ name: "Widget Jobs" })).toMatchObject({
       ok: false,
       code: "not-allowed",

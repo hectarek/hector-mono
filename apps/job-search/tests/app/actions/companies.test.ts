@@ -119,6 +119,11 @@ describe("saveCompany", () => {
       code: "validation",
       message:
         "Send the updatedAt read with the company, so a change made since isn't overwritten",
+      // Named, so a page tool's caller knows which field to send (U6's review).
+      fields: {
+        updatedAt:
+          "Send the updatedAt read with the company, so a change made since isn't overwritten",
+      },
     });
   });
 
@@ -247,9 +252,12 @@ describe("findCompanies and getCompany", () => {
       code: "not-found",
       message: "Couldn't find that company.",
     });
+    // The id is named, since a page tool sends it (U6's review).
     expect(await getCompany({ id: "x" })).toMatchObject({
       ok: false,
       code: "validation",
+      message: expect.stringMatching(/^Id: /),
+      fields: { id: expect.any(String) },
     });
     expect(await findCompanies({ limit: 51 })).toMatchObject({
       ok: false,

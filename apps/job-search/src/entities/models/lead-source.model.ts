@@ -4,6 +4,9 @@ import { z } from "zod";
 // add_source adds to and jobs pick from.
 export type LeadSource = { id: string; name: string };
 
+// list_sources takes nothing.
+export const listSourcesSchema = z.object({});
+
 // add_source's input: the source's name as it should show, with runs of spaces made one.
 export const addSourceSchema = z.object({
   name: z

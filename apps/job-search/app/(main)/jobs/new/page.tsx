@@ -28,7 +28,7 @@ export default async function NewJobPage({
   if (typeof params.company === "string") {
     const [{ company }, sources] = await Promise.all([
       loadCompany(params.company, actor),
-      getInjection("IListSourcesController")(actor),
+      getInjection("IListSourcesController")({}, actor),
     ]);
     return (
       <div className="flex max-w-2xl flex-col gap-6">

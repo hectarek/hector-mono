@@ -1,8 +1,11 @@
 // Inputs as the screens and tools name them, and a record's history names its fields: one list,
-// which validation messages (app/actions/shared.ts), forms and histories share. Anything not
-// listed (a hidden id) is never named in a message: no one sees it, so a code name would only
-// confuse. Each unit adds its own.
+// which validation messages (app/actions/shared.ts), forms and histories share. A validation
+// message names only a listed field. Each unit adds its own.
 export const FIELD_LABELS: Record<string, string> = {
+  // Which record, and the updatedAt read with it (R22): hidden in a form, but a page tool sends
+  // them, so its validation answer names them, updatedAt as the tool spells it (U6's review)
+  id: "Id",
+  updatedAt: "updatedAt",
   // list_activity's filters
   record: "Record",
   actor: "Actor",

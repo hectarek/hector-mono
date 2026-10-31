@@ -46,6 +46,7 @@ export function createSourcesModule() {
     .bind(DI_SYMBOLS.IListSourcesController)
     .toHigherOrderFunction(listSourcesController, [
       DI_SYMBOLS.IListSourcesUseCase,
+      DI_SYMBOLS.ILoggerService,
     ]);
 
   return sourcesModule;

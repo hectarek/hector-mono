@@ -334,6 +334,9 @@ export const findJobsSchema = z.object({
 });
 export type JobQuery = z.output<typeof findJobsSchema>;
 
+// list_proposals' input: find_jobs' filters but the review state, which is always the queue's.
+export const listProposalsSchema = findJobsSchema.omit({ reviewState: true });
+
 // The statuses a find_jobs filter names: a group, or one; null for every status.
 export function statusesFor(
   status: JobQuery["status"],
