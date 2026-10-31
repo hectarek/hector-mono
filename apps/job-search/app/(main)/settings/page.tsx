@@ -10,7 +10,7 @@ import { getInjection } from "@/di/container";
 export default async function SettingsPage() {
   const actor = await getPageActor();
   const [settings, sources] = await Promise.all([
-    getInjection("IGetSettingsController")(actor),
+    getInjection("IGetSettingsController")({}, actor),
     getInjection("IListSourcesController")({}, actor),
   ]);
 

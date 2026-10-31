@@ -7,10 +7,11 @@ import type {
   DeletedPracticeEntry,
   LoggedPractice,
   PracticePage,
+  PracticeSession,
 } from "@/src/entities/models/practice-entry.model";
 
-// The practice log (docs/build-plan.md U8, R11): list_practice and log_practice call the first two
-// once U4's gate passes; deleting a session or a review is Hector's alone (R21).
+// The practice log (docs/build-plan.md U8, R11): list_practice, get_practice_session and
+// log_practice call the first three; deleting a session or a review is Hector's alone (R21).
 
 export async function listPractice(
   input: unknown,
@@ -20,6 +21,21 @@ export async function listPractice(
     "Couldn't list the practice log. Try again.",
     async () =>
       getInjection("IListPracticeController")(input, await getActionActor()),
+  );
+}
+
+// One session with its reviews and its next review, as its page shows it (U10).
+export async function getPracticeSession(
+  input: unknown,
+): Promise<ActionResult<PracticeSession>> {
+  return answer(
+    "getPracticeSession",
+    "Couldn't read that practice session. Try again.",
+    async () =>
+      getInjection("IGetPracticeSessionController")(
+        input,
+        await getActionActor(),
+      ),
   );
 }
 

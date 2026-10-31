@@ -12,7 +12,7 @@ const HECTOR: CurrentActor = {
   ownerId: TEST_ACCOUNTS.owner.user.id,
 };
 
-const current = () => getInjection("IGetSettingsController")(HECTOR);
+const current = () => getInjection("IGetSettingsController")({}, HECTOR);
 
 const type = (field: HTMLElement, value: string) =>
   fireEvent.change(field, { target: { value } });

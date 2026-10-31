@@ -30,6 +30,7 @@ export function createSettingsModule() {
     .bind(DI_SYMBOLS.IGetSettingsController)
     .toHigherOrderFunction(getSettingsController, [
       DI_SYMBOLS.IGetSettingsUseCase,
+      DI_SYMBOLS.ILoggerService,
     ]);
 
   settingsModule

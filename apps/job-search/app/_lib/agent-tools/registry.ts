@@ -22,8 +22,13 @@ import {
   getPerson,
   updatePerson,
 } from "@/app/actions/people";
-import { listPractice, logPractice } from "@/app/actions/practice";
+import {
+  getPracticeSession,
+  listPractice,
+  logPractice,
+} from "@/app/actions/practice";
 import { startSession, whoami } from "@/app/actions/session";
+import { getSettings } from "@/app/actions/settings";
 import type { ActionResult } from "@/app/actions/shared";
 import { addSource, listSources } from "@/app/actions/sources";
 import {
@@ -66,7 +71,9 @@ import {
 import {
   listPracticeSchema,
   logPracticeSchema,
+  practiceEntryIdSchema,
 } from "@/src/entities/models/practice-entry.model";
+import { getSettingsSchema } from "@/src/entities/models/settings.model";
 import { getTodaySchema } from "@/src/entities/models/today.model";
 import {
   getWeekSchema,
@@ -131,6 +138,14 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
       "Saves a week's review: week is its Monday, with the build milestone and the one change, against the updatedAt read with the review from get_week (null when none is saved yet). The first save fixes the week's counts and Hector's targets as they stand; a later one changes only the milestone and the change. A week that hasn't started is refused.",
     inputSchema: inputSchemaOf(saveWeeklyReviewSchema),
     action: saveWeeklyReview,
+  },
+  {
+    name: "get_settings",
+    description:
+      "Hector's settings: a weekly target for each count (null where he set none) and the cap on proposals waiting for his review. Only Hector changes them. Takes nothing.",
+    inputSchema: inputSchemaOf(getSettingsSchema),
+    annotations: { readOnlyHint: true },
+    action: getSettings,
   },
   {
     name: "list_proposals",
@@ -282,6 +297,14 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
     inputSchema: inputSchemaOf(listPracticeSchema),
     annotations: { readOnlyHint: true },
     action: listPractice,
+  },
+  {
+    name: "get_practice_session",
+    description:
+      "One practice session by its id (from list_practice): its topic and details, its reviews in the order they happened, and when its next review is due.",
+    inputSchema: inputSchemaOf(practiceEntryIdSchema),
+    annotations: { readOnlyHint: true },
+    action: getPracticeSession,
   },
   {
     name: "log_practice",

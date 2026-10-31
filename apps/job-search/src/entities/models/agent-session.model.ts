@@ -5,7 +5,7 @@ import type { Actor } from "./actor.model";
 // The version of Claude's page tools (app/_lib/agent-tools/registry.ts), which whoami reports.
 // Bump it when a tool is added or removed, or its input or what it does changes, so a session can
 // tell that what it knows about the tools is out of date (docs/build-plan.md KTD5).
-export const TOOL_SET_VERSION = 2;
+export const TOOL_SET_VERSION = 3;
 
 // whoami takes nothing.
 export const whoamiSchema = z.object({});
