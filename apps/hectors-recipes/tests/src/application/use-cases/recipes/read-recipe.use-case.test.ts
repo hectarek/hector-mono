@@ -18,6 +18,18 @@ describe("readRecipe", () => {
   };
   const source = { kind: "text" as const, text: "Chili\n1 lb beans" };
 
+  // D97: the reader picks from the tags the form offers, and anything else is dropped.
+  it("suggests only the offered tags the reader picked", async () => {
+    const { reader, reads } = setup();
+    const readAs = readRecipeUseCase(reader, reads, new MockLoggerService());
+    reader.draft = { ...reader.draft, tags: ["Dinner", "soup", "mexican"] };
+
+    const draft = await readAs(source, OWNER, ["dinner", "mexican", "vegan"]);
+
+    expect(reader.offered).toEqual([["dinner", "mexican", "vegan"]]);
+    expect(draft.tags).toEqual(["dinner", "mexican"]);
+  });
+
   it("returns the reader's draft held to its own words (D30)", async () => {
     const { reader, read } = setup();
     reader.draft = {

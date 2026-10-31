@@ -33,7 +33,7 @@ The app is phone-first, built for people who share a recipe book and a plan. Six
 | Add a recipe           | Library's Add recipe                                       | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe                        | `plan-and-shop` (manually), `add-recipe` (photo or file) |
 | Plan the week          | A recipe's Add to meal plan                                | Recipe (Add to meal plan) → Meal plan                                                               | `plan-and-shop`                                          |
 | Shop                   | Meal plan's grocery button, or a recipe's Add to groceries | Meal plan → Groceries                                                                               | `plan-and-shop` (check off, Got it, Clear groceries)     |
-| Cook                   | A recipe's Cook                                            | Recipe → Cook mode (Gather → each step → Done) → Recipe                                             | `cook`                                                   |
+| Cook                   | A recipe's Cook                                            | Recipe → Cook mode (Gather → each step, the last one's Finish) → Recipe                             | `cook`                                                   |
 | Share a book or plan   | A tab's ⋯ → Invite                                         | ⋯ → the phone's share sheet; the person invited: Welcome → Create account → Join → the book or plan | none                                                     |
 
 Supporting screens: Books (default book, new books), Members (links, roles, leaving, deleting), Copy recipes, Account.
@@ -103,7 +103,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
   - Add to meal plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open meal plan.
   - Add to groceries: servings, the groceries picker; then Open groceries. "It's already in groceries" asks before adding again (D45).
 - **Bold:** the produce tile when there's no photo.
-- **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done, or a link to it.
+- **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done or Finish, or a link to it.
 - **Leads to:** Cook mode, Edit, Meal plan, Groceries, the library.
 - **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to groceries or Add to meal plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
 - **Room:** Cook, Add to meal plan and Add to groceries stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
@@ -224,7 +224,7 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Ingredients and Method:** rows and sections. A row's ⋯ opens its sheet: a line's note and Optional, a step's timer, Move up, Move down, Remove, Done. Pasting several lines into a row makes a row for each.
 - **Tags:** chips under their groups, your tags first and then the catalog's (so a new account has some, D78), and New tag (D33, D55).
 - **Edit only:** Delete recipe at the bottom, which asks first.
-- **Imports:** "Check before saving" lists the lines the reader was unsure of.
+- **Imports:** "Check before saving" lists the lines the reader was unsure of, and the tags it picked, which arrive chosen in Tags (D97).
 - **Leaving:** Cancel with changes asks "Discard your changes?".
 - **Reached from:** Add manually, a finished read, a recipe's Edit. **Leads to:** the recipe on Save; Cancel → the library (new) or the recipe (edit); Delete → the library.
 - **Room:** a long form already. A new field goes in a row's sheet when it belongs to one line or step, and among the fields at the top only when it belongs to the whole recipe.
@@ -233,12 +233,12 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 ### Cook mode — `/recipes/[id]/cook`
 
 - **Job:** cook from a phone at arm's length, one screen at a time (D63–D66).
-- **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next.
-- **Screens:** Gather ("Check off each ingredient as you get it out." above the list, the ingredients as rows you check off as on Groceries (P27.3), servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet) → Done (Start over, Back to the recipe).
+- **Surface:** Cook. Full-screen. Top bar: the name, or "Step 3 of 8" (opens every step, to jump to one), the screen-lock sun, Done (→ the recipe, at the servings chosen here). Bottom bar: Back and Next, which is Finish on the last step (D95: → the recipe, keeping nothing, so the next cook starts on Gather).
+- **Screens:** Gather ("Check off each ingredient as you get it out." above the list, the ingredients as rows you check off as on Groceries (P27.3), servings, Add to groceries, Start cooking) → each step (its words, the ingredients it uses, its timer, the full list in a sheet). There's no Done screen after the last step (D95); Start over is in the steps sheet.
 - **Also:** running timers stay pinned in the top bar on every screen (D66); a sideways swipe moves a screen; progress survives a reload.
 - **Reached from:** a recipe's Cook only. **Leads to:** the recipe; Groceries through Add to groceries's Open groceries.
-- **Room:** a step screen holds one step on purpose. Anything that isn't about the step in front of you goes on Gather, Done or a sheet.
-- **Motion (D89):** rises over the recipe from Cook, and Done or Back to the recipe lowers it. Its screens move as they already do (D63).
+- **Room:** a step screen holds one step on purpose. Anything that isn't about the step in front of you goes on Gather or a sheet.
+- **Motion (D89):** rises over the recipe from Cook, and Done or Finish lowers it. Its screens move as they already do (D63).
 
 ### Welcome — `/welcome`, and Sign in or Create account — `/auth/[path]`
 

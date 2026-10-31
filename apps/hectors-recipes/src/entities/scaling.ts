@@ -9,14 +9,19 @@ import {
 } from "./ingredient-line";
 import type { RecipeIngredient } from "./models/recipe-ingredient.model";
 
+// Every eighth, and the thirds recipes use: without ⅜, ⅝ and ⅞, a step in servings could
+// snap back to the amount it started at (¾ cup for 6 stayed ¾ cup for 7).
 const FRACTIONS: [number, string][] = [
   [0, ""],
   [1 / 8, "⅛"],
   [1 / 4, "¼"],
   [1 / 3, "⅓"],
+  [3 / 8, "⅜"],
   [1 / 2, "½"],
+  [5 / 8, "⅝"],
   [2 / 3, "⅔"],
   [3 / 4, "¾"],
+  [7 / 8, "⅞"],
   [1, ""],
 ];
 

@@ -6,7 +6,8 @@ import { rowsFromLines, stepRowsFrom } from "@/src/entities/editor-rows";
 import type { CheckedDraft } from "@/src/entities/itemizing-check";
 
 // An import's checked draft as the new-recipe form's starting values (ux-plan P10.1), and
-// what the form asks them to check. A link gives its page's address and photo too.
+// what the form asks them to check. A link gives its page's address and photo too. Its
+// suggested tags come chosen, and the review names them (D97).
 export function draftFormValues(
   draft: CheckedDraft,
   from: { sourceUrl?: string; imageUrl?: string | null } = {},
@@ -20,11 +21,11 @@ export function draftFormValues(
       yieldServings:
         draft.yieldServings === null ? "" : String(draft.yieldServings),
       timeMinutes: draft.timeMinutes === null ? "" : String(draft.timeMinutes),
-      tags: [],
+      tags: draft.tags,
       sourceUrl: from.sourceUrl ?? "",
       imageUrl: from.imageUrl ?? "",
       videoUrl: "",
     },
-    review: { unsure: draft.unsure, flagged: draft.flagged },
+    review: { unsure: draft.unsure, flagged: draft.flagged, tags: draft.tags },
   };
 }

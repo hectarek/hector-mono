@@ -64,6 +64,9 @@ const recipeDraftSchema = z.object({
       section: z.string().nullable(),
     }),
   ),
+  // Tags suggested for it (docs/ux-plan.md D97), only from the ones the form offers once the
+  // read is checked (offeredOnly).
+  tags: z.array(z.string()),
   unsure: z.array(z.string()),
 });
 export type RecipeDraft = z.infer<typeof recipeDraftSchema>;

@@ -8,9 +8,11 @@ import type {
   RecipeSource,
 } from "@/src/entities/models/recipe-draft.model";
 
-// Records what it was asked to read, and returns `draft` or fails with `failWith`.
+// Records what it was asked to read and the tags it was offered, and returns `draft` or fails
+// with `failWith`.
 export class MockRecipeReaderService implements IRecipeReaderService {
   readonly sources: RecipeSource[] = [];
+  readonly offered: string[][] = [];
   failWith: RecipeReadFailure | null = null;
   draft: RecipeDraft = {
     title: "Chili",
@@ -31,11 +33,13 @@ export class MockRecipeReaderService implements IRecipeReaderService {
       },
     ],
     steps: [{ text: "Simmer.", timerMinutes: null, section: null }],
+    tags: [],
     unsure: [],
   };
 
-  async read(source: RecipeSource): Promise<RecipeDraft> {
+  async read(source: RecipeSource, tags: string[]): Promise<RecipeDraft> {
     this.sources.push(source);
+    this.offered.push(tags);
     if (this.failWith) {
       throw new RecipeReadError(this.failWith);
     }

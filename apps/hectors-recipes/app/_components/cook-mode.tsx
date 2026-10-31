@@ -21,7 +21,13 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { CheckRow } from "@/app/_components/check-row";
 import { LineText } from "@/app/_components/line-text";
 import { InlineMarkdown } from "@/app/_components/markdown";
@@ -264,6 +270,20 @@ function useCookProgress(recipeId: string) {
       setProgress(NO_PROGRESS);
       setResumed(false);
     },
+    // Finish, on the last step (D95): nothing kept, so the next cook starts on Gather. The
+    // reset rides the way out to the recipe (a transition, as the link's is), so the step
+    // stays on screen as cook mode lowers; the saved copy goes at once.
+    finish: () => {
+      try {
+        sessionStorage.removeItem(cookProgressKey(recipeId));
+      } catch {
+        // Nothing was kept.
+      }
+      startTransition(() => {
+        setProgress(NO_PROGRESS);
+        setResumed(false);
+      });
+    },
   };
 }
 
@@ -368,11 +388,7 @@ function CookModeContent({
   // A saved step that's gone (the recipe was edited since) shows Gather.
   const index = steps.findIndex((step) => step.position === progress.at);
   const step = steps[index];
-  const screen: CookScreen = step
-    ? step.position
-    : progress.at === "done"
-      ? "done"
-      : "gather";
+  const screen: CookScreen = step ? step.position : "gather";
 
   function show(to: CookScreen) {
     progress.goTo(to);
@@ -384,8 +400,7 @@ function CookModeContent({
   const screenOk = wakeLock === "on" || wakeLock === "pending";
   const [warningDismissed, setWarningDismissed] = useWarningDismissed();
   // A new screen slides in from the side it came from, as the week does (D54).
-  const order =
-    screen === "gather" ? -1 : screen === "done" ? steps.length : index;
+  const order = screen === "gather" ? -1 : index;
   const shownOrder = useRef(order);
   const slideFrom =
     shownOrder.current === order
@@ -531,19 +546,6 @@ function CookModeContent({
               )
             }
           />
-        ) : screen === "done" ? (
-          <section className="flex flex-col items-start gap-2">
-            <h2 className="font-heading text-xl">That&apos;s the last step</h2>
-            <p className="text-muted-foreground text-lg">Enjoy it.</p>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="mt-4"
-              onClick={progress.startOver}
-            >
-              Start over
-            </Button>
-          </section>
         ) : (
           <GatherScreen
             lines={lines}
@@ -571,20 +573,24 @@ function CookModeContent({
             >
               Back
             </Button>
-            {screen === "done" ? (
+            {index === steps.length - 1 ? (
               <Button
                 size="lg"
                 className="flex-1"
                 nativeButton={false}
                 render={
-                  <Link href={backHref} transitionTypes={["close-cook-mode"]} />
+                  <Link
+                    href={backHref}
+                    transitionTypes={["close-cook-mode"]}
+                    onClick={progress.finish}
+                  />
                 }
               >
-                Back to the recipe
+                Finish
               </Button>
             ) : (
               <Button size="lg" className="flex-1" onClick={() => go(1)}>
-                {index === steps.length - 1 ? "Finish" : "Next"}
+                Next
               </Button>
             )}
           </>

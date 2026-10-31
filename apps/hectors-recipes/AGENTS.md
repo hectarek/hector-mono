@@ -32,7 +32,7 @@ app/
     plan/              # Week view: ?week= (any date → its Monday), ?plan=, ?show= (cook or eat days, D93); cook and eat rows (PlanWeek), then the grocery box (D50); Clear meal plan in the ⋯ sheet (D91)
     groceries/         # A plan's grocery list: ?plan=, ?group=recipe (By recipe, D60), add box, "Got it" section, clear checked, Copy groceries and Clear groceries in the ⋯ sheet (D94, D52); live (LiveList), refresh every 60s as a safety net
     account/[path]/    # Neon Auth account views; settings adds our Appearance card (light/dark/system)
-  (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), one screen at a time (Gather, each step, Done; D63), large type, wake lock
+  (cook)/recipes/[id]/cook/  # Cook mode: own layout (no header/tab bar), one screen at a time (Gather, then each step, the last one finishing; D63, D95), large type, wake lock
   (form)/recipes/new    # How to add one (docs/ux-plan.md D34): by link or text (new/link, D73), by photo or file (new/photo, D53, D74), or manually (new/manual, the form)
   (form)/recipes/new/manual, (form)/recipes/[id]/edit  # Add/edit a recipe: full-screen, with `TopBar` (Cancel, title, Save)
   _components/         # header, bottom-nav, recipe-card, recipe-form (+ ingredient-rows, step-rows, row-sheet),
@@ -192,7 +192,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
   - **A card grows into its recipe.** The card's picture (its photo or produce tile) and the recipe page's share a name (`recipe-picture-<id>`), so it moves and resizes into place, and back into the card by the recipe's back link. It plays only when the recipe is ready at the tap (opened in the last 5 minutes, D87); otherwise the page fades up.
   - **Deeper and back.** A link into a page with a back link under the tab bar (Recipe, Books, Copy recipes, Members, Join) carries `transitionTypes={["go-deeper"]}`, and the page slides in from the right. The back link (`BackLink`) carries `go-back`, and the page slides out to the right. The browser's Back and the iPhone's back swipe carry no type and play no slide: Safari animates the swipe itself.
   - **Tabs crossfade.** The tab bar, the logo, Open meal plan and Open groceries carry `switch-tab`: a crossfade with no direction, the quickest of the moves.
-  - **Cook mode rises** over the recipe (Cook carries `open-cook-mode`), and Done or Back to the recipe lowers it (`close-cook-mode`).
+  - **Cook mode rises** over the recipe (Cook carries `open-cook-mode`), and Done or Finish lowers it (`close-cook-mode`).
   - **A skeleton fades into its page** when the page arrives: a `loading.tsx` (inside `SkeletonMotion`) fades out over its page.
   - Any other link carries no type and moves nothing, and nor do the full-screen tasks' Cancel and Save.
   - `PageMotion` (`app/_components/page-motion.tsx`) turns a type into a move. It goes in each `page.tsx` that moves, around everything the page shows, because `(main)`'s layout never enters or leaves. Cook mode's layout is the exception: it comes and goes with its one page, so its `PageMotion` is there, around a `<main>` with a background, so it rises as a solid sheet. `RecipePicture` names the card's and the recipe's picture; in a grouped library only a recipe's first card has it, as two can't share a name. Every one has `default="none"`, so a refresh, a save or live updates move nothing.
@@ -241,6 +241,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
   - Flows sign up with `signUp` (`tests/flows/sign-up.ts`). Files are chosen through the picker (`page.waitForEvent("filechooser")`), from `tests/_support/files/`. Find a message by its text, not `getByRole("alert")`: Next's route announcer is an alert on every page.
   - A read with the real AI costs a few cents. So the AI key is left out of the dev server and flows tagged `@ai` are skipped, unless asked for: `FLOWS_AI=1 bun run test:flows`.
   - Next allows one `next dev` per folder, so a preview server from `.claude/launch.json` running in the same checkout stops the flows' server ("Another next dev server is already running"). Stop it first.
+  - From a Claude Code session, run the flows outside its sandbox (checked 2026-10-31). Inside it, Turbopack's dev server can't start ("unable to start FSEvent stream"), and the sandbox's network filter answers the test database with a 403, "Connection blocked by network allowlist", which reads like Neon's IP allowlist but isn't.
 - Browser-tool testing note: the automation's Enter key doesn't trigger implicit form submission (verified on a plain HTML form), so click submit buttons in automated checks.
 - Browser-tool testing note: at the mobile preset the pane scales the emulated screen, and taps land about 4% off, worse lower on the screen (a tap sent at y 640 arrived at 667), so a bottom sheet's buttons can be missed. Drive them with `element.click()` in `javascript_tool`, confirm where a tap arrived with a `pointerdown` listener, and leave finger taps to the real-phone check.
 

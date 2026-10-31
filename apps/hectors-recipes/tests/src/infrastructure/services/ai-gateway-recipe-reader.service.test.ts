@@ -75,6 +75,7 @@ const reading = {
     { text: "Simmer for 20 to 25 minutes.", timerMinutes: 19.6 },
     { text: " ", timerMinutes: null },
   ],
+  tags: [" Dinner ", "", "italian"],
   unsure: ["The yield is smudged.", ""],
 };
 
@@ -97,10 +98,13 @@ function recordingLogger() {
 describe("AiGatewayRecipeReaderService", () => {
   it("sends the pasted text with the instructions, and tidies the answer into a draft", async () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
-    const draft = await reader(model).read({
-      kind: "text",
-      text: "Tomato soup…",
-    });
+    const draft = await reader(model).read(
+      {
+        kind: "text",
+        text: "Tomato soup…",
+      },
+      ["dinner", "italian"],
+    );
 
     const [call] = model.doGenerateCalls;
     expect(call?.prompt[0]).toMatchObject({ role: "system" });
@@ -111,6 +115,8 @@ describe("AiGatewayRecipeReaderService", () => {
           type: "text",
           text: "<recipe_source>\nTomato soup…\n</recipe_source>",
         },
+        // The tags it may pick from, after the source (D97).
+        { type: "text", text: "Tags to pick from: dinner, italian" },
       ],
     });
     expect(draft).toEqual({
@@ -149,18 +155,28 @@ describe("AiGatewayRecipeReaderService", () => {
           section: null,
         },
       ],
+      // Only trimmed: the read holds them to the offered tags (offeredOnly).
+      tags: ["Dinner", "italian"],
       unsure: ["The yield is smudged."],
     });
   });
 
   it("sends a photo as an image file", async () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
-    await reader(model).read({
-      kind: "image",
-      photos: [
-        [{ data: new Uint8Array([0xff, 0xd8, 0xff]), mediaType: "image/jpeg" }],
-      ],
-    });
+    await reader(model).read(
+      {
+        kind: "image",
+        photos: [
+          [
+            {
+              data: new Uint8Array([0xff, 0xd8, 0xff]),
+              mediaType: "image/jpeg",
+            },
+          ],
+        ],
+      },
+      [],
+    );
 
     expect(model.doGenerateCalls[0]?.prompt[1]).toMatchObject({
       role: "user",
@@ -178,7 +194,7 @@ describe("AiGatewayRecipeReaderService", () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
     const pdf = pdfFile("chili-two-pages.pdf");
     const size = pdf.byteLength;
-    await reader(model).read({ kind: "document", pdf });
+    await reader(model).read({ kind: "document", pdf }, []);
 
     const user = model.doGenerateCalls[0]?.prompt[1];
     expect(user).toMatchObject({
@@ -198,13 +214,19 @@ describe("AiGatewayRecipeReaderService", () => {
   it("refuses a PDF over the page limit, or one that doesn't open, without asking the model", async () => {
     const model = fakeModel({ text: JSON.stringify(reading) });
     await expect(
-      reader(model).read({
-        kind: "document",
-        pdf: pdfFile("eleven-pages.pdf"),
-      }),
+      reader(model).read(
+        {
+          kind: "document",
+          pdf: pdfFile("eleven-pages.pdf"),
+        },
+        [],
+      ),
     ).rejects.toMatchObject({ reason: "too-many-pages" });
     await expect(
-      reader(model).read({ kind: "document", pdf: new Uint8Array([1, 2, 3]) }),
+      reader(model).read(
+        { kind: "document", pdf: new Uint8Array([1, 2, 3]) },
+        [],
+      ),
     ).rejects.toMatchObject({ reason: "unreadable-document" });
     expect(model.doGenerateCalls).toHaveLength(0);
   });
@@ -216,7 +238,7 @@ describe("AiGatewayRecipeReaderService", () => {
       data: new Uint8Array([0xff, 0xd8, 0xff]),
       mediaType: "image/jpeg",
     };
-    await reader(model).read({ kind: "image", photos: [[piece, piece]] });
+    await reader(model).read({ kind: "image", photos: [[piece, piece]] }, []);
 
     const [system, user] = model.doGenerateCalls[0]?.prompt ?? [];
     expect(JSON.stringify(system)).toContain("one long screenshot");
@@ -236,10 +258,13 @@ describe("AiGatewayRecipeReaderService", () => {
       data: new Uint8Array([0xff, 0xd8, 0xff]),
       mediaType: "image/jpeg",
     };
-    await reader(model).read({
-      kind: "image",
-      photos: [[image], [image, image]],
-    });
+    await reader(model).read(
+      {
+        kind: "image",
+        photos: [[image], [image, image]],
+      },
+      [],
+    );
 
     const [system, user] = model.doGenerateCalls[0]?.prompt ?? [];
     expect(JSON.stringify(system)).toContain("photos of one recipe");
@@ -267,10 +292,13 @@ describe("AiGatewayRecipeReaderService", () => {
       cause: { requestBodyValues: { prompt: "SECRET FAMILY RECIPE" } },
     });
     await expect(
-      new AiGatewayRecipeReaderService(logger, fakeModel({ error })).read({
-        kind: "text",
-        text: "SECRET FAMILY RECIPE",
-      }),
+      new AiGatewayRecipeReaderService(logger, fakeModel({ error })).read(
+        {
+          kind: "text",
+          text: "SECRET FAMILY RECIPE",
+        },
+        [],
+      ),
     ).rejects.toMatchObject({ reason: "service-unavailable" });
 
     expect(lines.join("\n")).toContain("Free tier users");
@@ -306,10 +334,13 @@ describe("AiGatewayRecipeReaderService", () => {
   ])(
     "$when fails with a reason the person can act on",
     async ({ answer, reason }) => {
-      const failed = reader(fakeModel(answer)).read({
-        kind: "text",
-        text: "x",
-      });
+      const failed = reader(fakeModel(answer)).read(
+        {
+          kind: "text",
+          text: "x",
+        },
+        [],
+      );
       await expect(failed).rejects.toBeInstanceOf(RecipeReadError);
       await expect(failed).rejects.toMatchObject({ reason });
     },

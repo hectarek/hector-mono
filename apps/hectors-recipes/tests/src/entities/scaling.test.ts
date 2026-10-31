@@ -17,6 +17,9 @@ describe("formatQuantity", () => {
     [2 / 3, "⅔"],
     [0.75, "¾"],
     [0.125, "⅛"],
+    [0.375, "⅜"],
+    [0.625, "⅝"],
+    [1.875, "1⅞"],
     [1.49, "1½"],
     [1.97, "2"],
     [0.01, "⅛"],
@@ -134,6 +137,10 @@ describe("showLine", () => {
     });
     expect(showLine({ ...line, quantity: 0.5 }, 1).text).toBe("½ clove garlic");
     expect(showLine(line, 0.5).text).toBe("2 cloves garlic");
+    // One more serving moves the amount: ¾ for 6 was still ¾ for 7 before eighths.
+    expect(showLine({ ...line, quantity: 0.75 }, 7 / 6).text).toBe(
+      "⅞ clove garlic",
+    );
     expect(
       showLine(
         { ...line, quantity: null, unit: null, name: "Salt", note: "to taste" },

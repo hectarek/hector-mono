@@ -7,10 +7,14 @@ describe("readRecipeFromLinkController", () => {
   controllerBasics({
     make: (useCase, logger) => readRecipeFromLinkController(useCase, logger),
     // Typed without https://, as people do.
-    valid: { url: "  budgetbytes.com/sweet-and-spicy-glazed-chicken-thighs/ " },
+    valid: {
+      url: "  budgetbytes.com/sweet-and-spicy-glazed-chicken-thighs/ ",
+      tags: ["dinner"],
+    },
     calledWith: [
       "https://budgetbytes.com/sweet-and-spicy-glazed-chicken-thighs/",
       OWNER,
+      ["dinner"],
     ],
     invalid: {
       "no link": { url: "  " },

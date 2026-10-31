@@ -23,10 +23,20 @@ const photo = (bytes: number, mediaType = "image/jpeg") => ({
 describe("readRecipeController", () => {
   controllerBasics({
     make: (useCase, logger) => readRecipeController(useCase, logger),
-    valid: { kind: "text", text: "  Chili\n1 lb beans  " },
-    calledWith: [{ kind: "text", text: "Chili\n1 lb beans" }, OWNER],
+    // With the tags the form offers, for the reader to suggest from (D97).
+    valid: { kind: "text", text: "  Chili\n1 lb beans  ", tags: ["dinner"] },
+    calledWith: [
+      { kind: "text", text: "Chili\n1 lb beans" },
+      OWNER,
+      ["dinner"],
+    ],
     invalid: {
       "blank text": { kind: "text", text: "   " },
+      "tags that aren't a list": {
+        kind: "text",
+        text: "Chili",
+        tags: "dinner",
+      },
       "text past the cap": {
         kind: "text",
         text: "x".repeat(MAX_RECIPE_TEXT + 1),
@@ -73,7 +83,7 @@ describe("readRecipeController, photos", () => {
   controllerBasics({
     make: (useCase, logger) => readRecipeController(useCase, logger),
     valid: { kind: "image", photos },
-    calledWith: [{ kind: "image", photos }, OWNER],
+    calledWith: [{ kind: "image", photos }, OWNER, []],
     invalid: {
       "a photo that isn't a list of images": {
         kind: "image",
@@ -89,7 +99,7 @@ describe("readRecipeController, a PDF", () => {
   controllerBasics({
     make: (useCase, logger) => readRecipeController(useCase, logger),
     valid: { kind: "document", pdf },
-    calledWith: [{ kind: "document", pdf }, OWNER],
+    calledWith: [{ kind: "document", pdf }, OWNER, []],
     invalid: {
       "a PDF that isn't bytes": { kind: "document", pdf: "%PDF" },
     },

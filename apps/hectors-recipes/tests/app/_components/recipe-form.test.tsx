@@ -116,6 +116,45 @@ describe("RecipeForm", () => {
     expect(chips("Other")).toEqual(["quick", "sheet pan"]);
   });
 
+  // D97: an import's suggested tags come chosen, and the review box names them.
+  it("opens an import with its suggested tags chosen, and says so", () => {
+    const tags = ["dinner", "mexican"];
+    const view = render(
+      <RecipeForm
+        mode="create"
+        heading="New recipe"
+        suggestedTags={["dinner", "lunch", "mexican"]}
+        tagGroups={{}}
+        spaceId={bookId}
+        books={[{ id: bookId, name: "Soups" }]}
+        cancelHref="/"
+        values={{
+          title: "Chili",
+          description: "",
+          ingredients: [],
+          steps: [],
+          yieldServings: "",
+          timeMinutes: "",
+          tags,
+          sourceUrl: "",
+          imageUrl: "",
+          videoUrl: "",
+        }}
+        review={{ unsure: [], flagged: [], tags }}
+      />,
+    );
+    const chosen = (name: string) =>
+      view.getByRole("button", { name }).getAttribute("aria-pressed");
+    expect([chosen("dinner"), chosen("lunch"), chosen("mexican")]).toEqual([
+      "true",
+      "false",
+      "true",
+    ]);
+    view.getByText(
+      "Tags picked for it: dinner, mexican. Remove any that don't fit.",
+    );
+  });
+
   // P14.7: a paste that brings its own sections puts the rows after it back in theirs.
   it("splits a pasted list into rows, keeping the rows after it in their section", () => {
     const view = newRecipe();

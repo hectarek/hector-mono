@@ -78,10 +78,7 @@ test("cook a recipe one step at a time", async ({ page }) => {
   await expect(page.getByText("Step 2 of 2")).toBeVisible();
   await expect(page.getByRole("timer")).toBeVisible();
 
+  // The last step finishes, back on the recipe (D95).
   await page.getByRole("button", { name: "Finish" }).click();
-  await expect(
-    page.getByRole("heading", { name: "That's the last step" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Back to the recipe" }).click();
   await page.waitForURL(recipe);
 });

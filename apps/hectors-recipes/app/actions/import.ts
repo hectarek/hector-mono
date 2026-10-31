@@ -1,6 +1,7 @@
 "use server";
 
 import { getCurrentUserId } from "@/app/_lib/current-user";
+import { suggestedTags } from "@/app/_lib/tag-choices";
 import { actionLogger, text, toActionError } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import { InputParseError } from "@/src/entities/errors/common";
@@ -12,6 +13,14 @@ import { MAX_PHOTOS } from "@/src/entities/models/recipe-draft.model";
 export type ReadRecipeResult =
   | { draft: CheckedDraft; sourceUrl?: string; imageUrl?: string | null }
   | { error: string };
+
+// The tags the new-recipe form offers them (their books' tags, then the starting ones), for the
+// read to suggest from (D97). Signed out, none: the read turns them away.
+async function offeredTags(userId: string | undefined): Promise<string[]> {
+  if (!userId) return [];
+  const { tags } = await getInjection("IGetAllRecipesController")({}, userId);
+  return suggestedTags(tags);
+}
 
 // Add by photo (P10.2): up to MAX_PHOTOS photos of one recipe (D53), in fields `photo-1`,
 // `photo-2` and so on, each already shrunk to JPEG on the phone: one image, or a long
@@ -38,9 +47,10 @@ export async function readRecipeFromPhoto(
         ),
       ),
     );
+    const userId = await getCurrentUserId();
     const draft = await getInjection("IReadRecipeController")(
-      { kind: "image", photos },
-      await getCurrentUserId(),
+      { kind: "image", photos, tags: await offeredTags(userId) },
+      userId,
     );
     return { draft };
   } catch (err) {
@@ -66,13 +76,15 @@ export async function readRecipeFromDocument(
   const logger = actionLogger("readRecipeFromDocument");
   const pdf = formData.get("pdf");
   try {
+    const userId = await getCurrentUserId();
     const draft = await getInjection("IReadRecipeController")(
       {
         kind: "document",
         pdf:
           pdf instanceof File ? new Uint8Array(await pdf.arrayBuffer()) : pdf,
+        tags: await offeredTags(userId),
       },
-      await getCurrentUserId(),
+      userId,
     );
     return { draft };
   } catch (err) {
@@ -90,9 +102,10 @@ export async function readRecipeFromLink(
 ): Promise<ReadRecipeResult> {
   const logger = actionLogger("readRecipeFromLink");
   try {
+    const userId = await getCurrentUserId();
     const { draft, sourceUrl, imageUrl } = await getInjection(
       "IReadRecipeFromLinkController",
-    )({ url: formData.get("url") }, await getCurrentUserId());
+    )({ url: formData.get("url"), tags: await offeredTags(userId) }, userId);
     return { draft, sourceUrl, imageUrl };
   } catch (err) {
     if (err instanceof InputParseError) {
@@ -113,9 +126,10 @@ export async function readRecipeFromText(
     return { error: "Paste the recipe's text first." };
   }
   try {
+    const userId = await getCurrentUserId();
     const draft = await getInjection("IReadRecipeController")(
-      { kind: "text", text: pasted },
-      await getCurrentUserId(),
+      { kind: "text", text: pasted, tags: await offeredTags(userId) },
+      userId,
     );
     return { draft };
   } catch (err) {

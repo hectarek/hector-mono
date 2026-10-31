@@ -25,6 +25,7 @@ describe("draftFormValues", () => {
     steps: [
       { text: "Simmer for 20 minutes.", timerMinutes: 20, section: "Soup" },
     ],
+    tags: ["dinner", "mexican"],
     unsure: ["The oven temperature is smudged."],
     flagged: [],
   };
@@ -39,7 +40,8 @@ describe("draftFormValues", () => {
       description: "",
       timeMinutes: "45",
       yieldServings: "",
-      tags: [],
+      // Suggested tags come chosen (D97).
+      tags: ["dinner", "mexican"],
       sourceUrl: "https://example.com/chili",
       imageUrl: "https://example.com/chili.jpg",
     });
@@ -60,6 +62,7 @@ describe("draftFormValues", () => {
     expect(review).toEqual({
       unsure: ["The oven temperature is smudged."],
       flagged: [],
+      tags: ["dinner", "mexican"],
     });
   });
 });

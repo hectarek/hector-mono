@@ -16,9 +16,13 @@ describe("parseCookProgress", () => {
         JSON.stringify({ used: [], at: 2, timers: { "2": 1_000_000 } }),
       ),
     ).toEqual({ used: [], at: 2, timers: { "2": 1_000_000 } });
-    expect(parseCookProgress(JSON.stringify({ used: [], at: "done" }))).toEqual(
-      { used: [], at: "done", timers: {} },
-    );
+  });
+
+  // Saved on the Done screen, before the last step finished (D95): cooking was over.
+  it("starts fresh from the Done screen", () => {
+    expect(
+      parseCookProgress(JSON.stringify({ used: [1], at: "done", timers: {} })),
+    ).toEqual({ used: [], at: "gather", timers: {} });
   });
 
   // Saved before Phase 21, with the highlighted step: its ticks and timers still count.
@@ -39,23 +43,22 @@ describe("parseCookProgress", () => {
   });
 });
 
-// D63: Gather, each step, then Done.
+// D63, D95: Gather, then each step; the last one finishes.
 describe("moveScreen", () => {
   const steps = [{ position: 4 }, { position: 7 }];
 
-  it("goes through Gather, each step and Done, in order, stopping at the ends", () => {
+  it("goes through Gather and each step, in order, stopping at the ends", () => {
     expect(moveScreen("gather", 1, steps)).toBe(4);
     expect(moveScreen(4, 1, steps)).toBe(7);
-    expect(moveScreen(7, 1, steps)).toBe("done");
-    expect(moveScreen("done", 1, steps)).toBe("done");
-    expect(moveScreen("done", -1, steps)).toBe(7);
+    expect(moveScreen(7, 1, steps)).toBe(7);
+    expect(moveScreen(7, -1, steps)).toBe(4);
     expect(moveScreen(4, -1, steps)).toBe("gather");
     expect(moveScreen("gather", -1, steps)).toBe("gather");
   });
 
   it("counts a step that's gone as Gather", () => {
     expect(moveScreen(99, 1, steps)).toBe(4);
-    expect(moveScreen("gather", 1, [])).toBe("done");
+    expect(moveScreen("gather", 1, [])).toBe("gather");
   });
 });
 

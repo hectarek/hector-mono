@@ -15,6 +15,7 @@ import {
   type RecipeSource,
   readWindowStart,
 } from "@/src/entities/models/recipe-draft.model";
+import { offeredOnly } from "@/src/entities/models/tag.model";
 
 export type IReadRecipeUseCase = ReturnType<typeof readRecipeUseCase>;
 
@@ -31,7 +32,8 @@ const FREE_FAILURES: ReadonlySet<RecipeReadFailure> = new Set([
 // nothing is saved here (ux-plan D29). The reader's draft is held to its own words, and a read
 // of text to that text too (D30). A photo or PDF has no text to hold it to. Each person gets
 // DAILY_RECIPE_READS reads in 24 hours (D48); a read counts as it starts, since a failed one
-// costs the same, except one refused before the model saw anything (FREE_FAILURES).
+// costs the same, except one refused before the model saw anything (FREE_FAILURES). `tags` are
+// the ones the new-recipe form offers, and the reader suggests only from them (D97).
 export const readRecipeUseCase = (
   recipeReaderService: IRecipeReaderService,
   recipeReadsRepository: IRecipeReadsRepository,
@@ -45,6 +47,7 @@ export const readRecipeUseCase = (
   return async (
     source: RecipeSource,
     userId: string,
+    tags: string[] = [],
   ): Promise<CheckedDraft> => {
     const readId = await recipeReadsRepository.record(userId, source.kind, {
       since: readWindowStart(),
@@ -56,20 +59,21 @@ export const readRecipeUseCase = (
     }
     let read: Awaited<ReturnType<IRecipeReaderService["read"]>>;
     try {
-      read = await recipeReaderService.read(source);
+      read = await recipeReaderService.read(source, tags);
     } catch (err) {
       if (err instanceof RecipeReadError && FREE_FAILURES.has(err.reason)) {
         await recipeReadsRepository.remove(readId);
       }
       throw err;
     }
-    const checked = checkDraft(read);
+    const checked = checkDraft({ ...read, tags: offeredOnly(read.tags, tags) });
     const draft =
       source.kind === "text" ? holdToSource(checked, source.text) : checked;
     logger.info("Read a recipe", {
       source: source.kind,
       lines: draft.ingredients.length,
       steps: draft.steps.length,
+      tags: draft.tags.length,
       flagged: draft.flagged.length,
       unsure: draft.unsure.length,
     });

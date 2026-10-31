@@ -279,6 +279,30 @@ describe("recipeFromPage", () => {
     ]);
   });
 
+  // D97: what the page says the recipe is, for the read to hold to the offered tags.
+  it("takes the category, cuisine and keywords as tag words", () => {
+    const tags = (fields: object) =>
+      recipeFromPage(
+        page({ "@type": "Recipe", recipeIngredient: ["1 egg"], ...fields }),
+      )?.draft.tags;
+    expect(
+      tags({
+        recipeCategory: "Main Course",
+        recipeCuisine: ["Mexican", "Tex-Mex"],
+        keywords: "weeknight, gluten free,  easy ",
+      }),
+    ).toEqual([
+      "Main Course",
+      "Mexican",
+      "Tex-Mex",
+      "weeknight",
+      "gluten free",
+      "easy",
+    ]);
+    expect(tags({ keywords: ["vegan", "soup"] })).toEqual(["vegan", "soup"]);
+    expect(tags({})).toEqual([]);
+  });
+
   it("finds nothing on a page without a recipe, or with only broken data", () => {
     expect(
       recipeFromPage(page({ "@type": "BreadcrumbList", itemListElement: [] })),

@@ -23,6 +23,8 @@ const LIMITS = {
   instructions: 30_000,
   text: 2_000,
   yield: 100,
+  tag: 100,
+  tags: 50,
 };
 
 // `pageUrl` is the page's address, for a photo given as a path relative to it.
@@ -55,11 +57,24 @@ export function recipeFromPage(
         aisle: null,
       })),
       steps: stepsFrom(recipe.recipeInstructions, null).slice(0, LIMITS.steps),
+      tags: tagWords(recipe),
       unsure: [],
       flagged: [],
     },
     imageUrl: imageUrl(recipe.image, pageUrl),
   };
+}
+
+// What the page says the recipe is (D97): its category ("Dinner"), cuisine ("Mexican") and
+// keywords, a list or one comma-separated string. Every word is a candidate; the read keeps
+// only the tags the form offers (offeredOnly).
+function tagWords(recipe: Json): string[] {
+  return [recipe.recipeCategory, recipe.recipeCuisine, recipe.keywords]
+    .flatMap(asList)
+    .flatMap((words) => words.slice(0, LIMITS.text).split(","))
+    .map((word) => plain(capped(word, LIMITS.tag)))
+    .filter(Boolean)
+    .slice(0, LIMITS.tags);
 }
 
 // An ISO 8601 duration ("PT1H5M", "P0DT2H30M") in whole minutes; null for none or nonsense.

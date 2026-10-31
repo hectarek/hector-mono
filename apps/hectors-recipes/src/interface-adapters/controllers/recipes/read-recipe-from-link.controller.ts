@@ -8,6 +8,7 @@ import {
   InputParseError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
+import { offeredTagsSchema } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
 
 // A link as typed: "budgetbytes.com/…" gets https:// in front.
 const inputSchema = z.object({
@@ -21,6 +22,7 @@ const inputSchema = z.object({
     // A web address has a dot in its host: "toast" is a word, not a site.
     z.url({ protocol: /^https?$/, hostname: /\.[^.]+$/ }).max(2_000),
   ),
+  tags: offeredTagsSchema,
 });
 
 export type IReadRecipeFromLinkController = ReturnType<
@@ -53,6 +55,6 @@ export const readRecipeFromLinkController = (
       throw new InputParseError("Invalid input", { cause: parseError });
     }
 
-    return readRecipeFromLinkUseCase(data.url, userId);
+    return readRecipeFromLinkUseCase(data.url, userId, data.tags);
   };
 };

@@ -136,4 +136,20 @@ describe("readRecipeFromText", () => {
       error: "Paste the recipe's text first.",
     });
   });
+
+  // D97: the reader is offered the form's tags (with no books yet, the starting ones), and
+  // only those it picks from them come back.
+  it("suggests tags only from the ones the form offers", async () => {
+    const draft = reader().draft;
+    reader().draft = { ...draft, tags: ["Dinner", "soup"] };
+    try {
+      const result = await readRecipeFromText(form({ text: "Chili" }));
+      expect(reader().offered.at(-1)).toEqual(
+        expect.arrayContaining(["dinner", "mexican", "vegan"]),
+      );
+      expect(result).toMatchObject({ draft: { tags: ["dinner"] } });
+    } finally {
+      reader().draft = draft;
+    }
+  });
 });
