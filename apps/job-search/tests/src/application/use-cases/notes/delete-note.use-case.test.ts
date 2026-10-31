@@ -30,7 +30,10 @@ describeEachBackend("deleteNote", () => {
     ).entries;
     expect(latest).toMatchObject({
       action: "deleted",
-      changes: [{ field: "body", before: "To delete.", after: null }],
+      changes: [
+        { field: "body", before: "To delete.", after: null },
+        { field: "jobId", before: job.id, after: null },
+      ],
     });
   });
 });

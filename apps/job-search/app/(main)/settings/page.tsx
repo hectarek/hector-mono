@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   const actor = await getPageActor();
   const [settings, sources] = await Promise.all([
     getInjection("IGetSettingsController")(actor),
-    getInjection("IListSourcesController")(actor),
+    getInjection("IListSourcesController")({}, actor),
   ]);
 
   return (

@@ -61,7 +61,7 @@ export const createJobUseCase = (
         const { pendingCap } =
           (await settingsRepository.get(ownerId, tx)) ?? DEFAULT_SETTINGS;
         if ((await jobsRepository.countPending(ownerId, tx)) >= pendingCap) {
-          throw new QueueFullError();
+          throw new QueueFullError(pendingCap);
         }
       }
       await requireCompany(companiesRepository, ownerId, input.companyId, tx);

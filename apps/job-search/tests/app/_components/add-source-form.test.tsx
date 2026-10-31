@@ -34,7 +34,7 @@ describe("adding a lead source", () => {
       ),
     );
     expect(
-      (await getInjection("IListSourcesController")(HECTOR)).map(
+      (await getInjection("IListSourcesController")({}, HECTOR)).map(
         (source) => source.name,
       ),
     ).toContain(name);

@@ -175,7 +175,10 @@ describeEachBackend("createJob", () => {
     await capAt(1);
     await jobs.propose(acme);
 
-    await expect(jobs.propose(acme)).rejects.toBeInstanceOf(QueueFullError);
+    const refusal = await jobs.propose(acme).catch((err: unknown) => err);
+    expect(refusal).toBeInstanceOf(QueueFullError);
+    // The answer names the cap, so Claude knows how many wait (U6's review).
+    expect((refusal as QueueFullError).message).toContain("cap of 1:");
     expect(await queue()).toHaveLength(1);
     await jobs.add(acme);
   });

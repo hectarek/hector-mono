@@ -127,10 +127,19 @@ function describeInputError(err: InputParseError): string {
   }
   const field = fieldOf(issue);
   const label = field ? FIELD_LABELS[field] : undefined;
-  const named =
-    label &&
-    issue.message.toLowerCase().includes(label.toLowerCase().replace(/s$/, ""));
-  return label && !named ? `${label}: ${issue.message}` : issue.message;
+  return label && !names(issue.message, label)
+    ? `${label}: ${issue.message}`
+    : issue.message;
+}
+
+// Whether a message names a label, singular or plural, at the start of a word: "Id" isn't named
+// by "Invalid UUID".
+function names(message: string, label: string): boolean {
+  const stem = label
+    .toLowerCase()
+    .replace(/s$/, "")
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`\\b${stem}`).test(message.toLowerCase());
 }
 
 // Each field's first message, to show under it.

@@ -14,7 +14,7 @@ export default async function EditJobPage({
   const { id } = await params;
   const [{ job }, sources] = await Promise.all([
     loadJob(id, actor),
-    getInjection("IListSourcesController")(actor),
+    getInjection("IListSourcesController")({}, actor),
   ]);
 
   return (

@@ -42,7 +42,7 @@ export const deleteNoteUseCase = (
       await recordChange(activityRepository, tx, context, {
         record,
         action: "deleted",
-        before: { body: note.body },
+        before: { body: note.body, jobId: note.record.id },
       });
       return { id, record: note.record };
     });

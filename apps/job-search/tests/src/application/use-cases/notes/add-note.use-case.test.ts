@@ -58,6 +58,8 @@ describeEachBackend("addNote", () => {
             before: null,
             after: "Saw the posting on a job board.",
           },
+          // Named, so a session's start can place the note (U6's review).
+          { field: "jobId", before: null, after: job.id },
         ],
       }),
     ]);

@@ -22,7 +22,7 @@ export type WeeklyReview = {
 };
 
 // The review's facts, as its history logs them.
-export function reviewLogged({
+export function weeklyReviewLogged({
   counts,
   targets,
   milestone,

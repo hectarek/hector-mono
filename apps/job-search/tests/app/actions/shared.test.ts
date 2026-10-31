@@ -131,10 +131,11 @@ describe("toActionError", () => {
       message: "This posting was dismissed (not hiring).",
       current: existing,
     });
-    expect(toActionError(new QueueFullError(), logger, FALLBACK)).toEqual({
+    expect(toActionError(new QueueFullError(10), logger, FALLBACK)).toEqual({
       ok: false,
       code: "queue-full",
-      message: "The review queue is full: Hector reviews what's waiting first.",
+      message:
+        "The review queue is full at Hector's cap of 10: he reviews what's waiting first.",
     });
     expect(logger.text).not.toContain("Acme Inc");
   });

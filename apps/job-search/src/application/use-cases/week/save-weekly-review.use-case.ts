@@ -12,9 +12,9 @@ import { ConflictError, InputParseError } from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
 import {
-  reviewLogged,
   type SaveWeeklyReviewInput,
   type WeeklyReview,
+  weeklyReviewLogged,
 } from "@/src/entities/models/weekly-review.model";
 import { mondayOf, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
@@ -89,7 +89,7 @@ export const saveWeeklyReviewUseCase = (
         await recordChange(activityRepository, tx, context, {
           record: { kind: "weekly-review", id: created.id },
           action: "created",
-          after: reviewLogged(created),
+          after: weeklyReviewLogged(created),
         });
         return created;
       }
