@@ -37,9 +37,11 @@ import type { IGetBookmarksUseCase } from "@/src/application/use-cases/recipes/g
 import type { IGetReadsLeftUseCase } from "@/src/application/use-cases/recipes/get-reads-left.use-case";
 import type { IGetRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import type { IGetRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
+import type { IGetSharedRecipeUseCase } from "@/src/application/use-cases/recipes/get-shared-recipe.use-case";
 import type { IReadRecipeUseCase } from "@/src/application/use-cases/recipes/read-recipe.use-case";
 import type { IReadRecipeFromLinkUseCase } from "@/src/application/use-cases/recipes/read-recipe-from-link.use-case";
 import type { ISetBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
+import type { ISetRecipeLinkUseCase } from "@/src/application/use-cases/recipes/set-recipe-link.use-case";
 import type { IUpdateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
 import type { IAcceptInviteUseCase } from "@/src/application/use-cases/spaces/accept-invite.use-case";
 import type { ICreateInviteUseCase } from "@/src/application/use-cases/spaces/create-invite.use-case";
@@ -81,9 +83,11 @@ import type { IGetBookmarksController } from "@/src/interface-adapters/controlle
 import type { IGetReadsLeftController } from "@/src/interface-adapters/controllers/recipes/get-reads-left.controller";
 import type { IGetRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import type { IGetRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
+import type { IGetSharedRecipeController } from "@/src/interface-adapters/controllers/recipes/get-shared-recipe.controller";
 import type { IReadRecipeController } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
 import type { IReadRecipeFromLinkController } from "@/src/interface-adapters/controllers/recipes/read-recipe-from-link.controller";
 import type { ISetBookmarkController } from "@/src/interface-adapters/controllers/recipes/set-bookmark.controller";
+import type { ISetRecipeLinkController } from "@/src/interface-adapters/controllers/recipes/set-recipe-link.controller";
 import type { IUpdateRecipeController } from "@/src/interface-adapters/controllers/recipes/update-recipe.controller";
 import type { IAcceptInviteController } from "@/src/interface-adapters/controllers/spaces/accept-invite.controller";
 import type { ICreateInviteController } from "@/src/interface-adapters/controllers/spaces/create-invite.controller";
@@ -163,6 +167,8 @@ export const DI_SYMBOLS = {
   IAdoptRecipesUseCase: Symbol.for("IAdoptRecipesUseCase"),
   ISetBookmarkUseCase: Symbol.for("ISetBookmarkUseCase"),
   IGetBookmarksUseCase: Symbol.for("IGetBookmarksUseCase"),
+  ISetRecipeLinkUseCase: Symbol.for("ISetRecipeLinkUseCase"),
+  IGetSharedRecipeUseCase: Symbol.for("IGetSharedRecipeUseCase"),
 
   IEnsurePersonalSpaceController: Symbol.for("IEnsurePersonalSpaceController"),
   ICreateRecipeController: Symbol.for("ICreateRecipeController"),
@@ -209,6 +215,8 @@ export const DI_SYMBOLS = {
   IAdoptRecipesController: Symbol.for("IAdoptRecipesController"),
   ISetBookmarkController: Symbol.for("ISetBookmarkController"),
   IGetBookmarksController: Symbol.for("IGetBookmarksController"),
+  ISetRecipeLinkController: Symbol.for("ISetRecipeLinkController"),
+  IGetSharedRecipeController: Symbol.for("IGetSharedRecipeController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -272,6 +280,8 @@ export interface DI_RETURN_TYPES {
   IAdoptRecipesUseCase: IAdoptRecipesUseCase;
   ISetBookmarkUseCase: ISetBookmarkUseCase;
   IGetBookmarksUseCase: IGetBookmarksUseCase;
+  ISetRecipeLinkUseCase: ISetRecipeLinkUseCase;
+  IGetSharedRecipeUseCase: IGetSharedRecipeUseCase;
 
   IEnsurePersonalSpaceController: IEnsurePersonalSpaceController;
   ICreateRecipeController: ICreateRecipeController;
@@ -316,4 +326,6 @@ export interface DI_RETURN_TYPES {
   IAdoptRecipesController: IAdoptRecipesController;
   ISetBookmarkController: ISetBookmarkController;
   IGetBookmarksController: IGetBookmarksController;
+  ISetRecipeLinkController: ISetRecipeLinkController;
+  IGetSharedRecipeController: IGetSharedRecipeController;
 }

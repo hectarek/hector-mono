@@ -196,3 +196,27 @@ export async function setBookmark(
   revalidatePath(`/recipes/${recipeId}`);
   return null;
 }
+
+// Turns a recipe's view-only public link on or off (docs/ux-plan.md D98), from its ⋯ sheet.
+// The page comes back with the link, or without it.
+export async function setRecipeLink(
+  recipeId: string,
+  shared: boolean,
+): Promise<ActionState> {
+  try {
+    await getInjection("ISetRecipeLinkController")(
+      { recipeId, shared },
+      await getCurrentUserId(),
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("setRecipeLink"),
+      shared
+        ? "Couldn't turn the link on. Try again."
+        : "Couldn't turn the link off. Try again.",
+    );
+  }
+  revalidatePath(`/recipes/${recipeId}`);
+  return null;
+}

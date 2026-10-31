@@ -4,6 +4,10 @@ import { safeRedirect } from "@/app/_lib/safe-redirect";
 // Where signed-out visitors start: the welcome screen, which leads to sign-up or sign-in.
 const WELCOME_PATH = "/welcome";
 
+// A recipe's view-only public link (docs/ux-plan.md D98, D99): it opens signed out. Signed in,
+// it goes through as any page does, and the page sends them on to the recipe.
+const SHARED_RECIPE = /^\/shared\/[^/]+$/;
+
 // Primary session cookie set by @neondatabase/auth (Better Auth under the hood), and its
 // signed 5-minute cache. See: node_modules/@neondatabase/auth/dist/server-*.mjs
 const SESSION_COOKIE = "__Secure-neon-auth.session_token";
@@ -29,7 +33,9 @@ export default async function proxy(
     return signedIn ? pastWelcome(request) : NextResponse.next();
   }
   if (!signedIn) {
-    return toWelcome(request);
+    return SHARED_RECIPE.test(request.nextUrl.pathname)
+      ? NextResponse.next()
+      : toWelcome(request);
   }
   if (!request.cookies.has(SESSION_DATA_COOKIE)) {
     return refreshSessionCache(request);

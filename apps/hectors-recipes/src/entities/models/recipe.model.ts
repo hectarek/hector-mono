@@ -40,6 +40,22 @@ const recipeWithIngredientsSchema = recipeSchema.extend({
 });
 export type RecipeWithIngredients = z.infer<typeof recipeWithIngredientsSchema>;
 
+// What a view-only public link shows someone who isn't signed in (docs/ux-plan.md D99): the
+// recipe itself, never its book, who wrote it, or its tags (the book's library's words).
+export type SharedRecipe = Pick<
+  RecipeWithIngredients,
+  | "id"
+  | "title"
+  | "description"
+  | "timeMinutes"
+  | "yieldServings"
+  | "sourceUrl"
+  | "imageUrl"
+  | "videoUrl"
+  | "ingredients"
+  | "steps"
+>;
+
 // A recipe as the library lists it: its row and, for search (ux-plan D56), the names of its
 // ingredients as written.
 export type ListedRecipe = Recipe & { ingredientNames: string[] };

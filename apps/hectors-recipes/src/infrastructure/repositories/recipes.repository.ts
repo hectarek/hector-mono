@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "@/db";
 import {
@@ -188,6 +188,53 @@ export class RecipesRepository
       this.logger.debug("Deleted recipe", { recipeId: id });
     } catch (err) {
       this.handleError(err, "delete", { id });
+    }
+  }
+
+  async getShareToken(id: string, tx?: ITransaction): Promise<string | null> {
+    try {
+      const [row] = await this.getDbContext(tx)
+        .select({ shareToken: recipes.shareToken })
+        .from(recipes)
+        .where(eq(recipes.id, id));
+      return row?.shareToken ?? null;
+    } catch (err) {
+      this.handleError(err, "getShareToken", { id });
+    }
+  }
+
+  // 18 random bytes, as an invite link's token: 24 characters, safe in a path.
+  async setShared(
+    id: string,
+    shared: boolean,
+    tx?: ITransaction,
+  ): Promise<string | null> {
+    try {
+      const [row] = await this.getDbContext(tx)
+        .update(recipes)
+        .set({
+          shareToken: shared
+            ? sql`coalesce(${recipes.shareToken}, ${randomBytes(18).toString("base64url")})`
+            : null,
+        })
+        .where(eq(recipes.id, id))
+        .returning({ shareToken: recipes.shareToken });
+      this.logger.debug("Set recipe link", { recipeId: id, shared });
+      return row?.shareToken ?? null;
+    } catch (err) {
+      this.handleError(err, "setShared", { id, shared });
+    }
+  }
+
+  async getIdByShareToken(token: string): Promise<string | undefined> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ id: recipes.id })
+        .from(recipes)
+        .where(eq(recipes.shareToken, token));
+      return row?.id;
+    } catch (err) {
+      this.handleError(err, "getIdByShareToken", {});
     }
   }
 
