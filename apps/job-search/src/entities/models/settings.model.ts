@@ -38,6 +38,9 @@ export const DEFAULT_SETTINGS: Settings = {
   updatedAt: null,
 };
 
+// get_settings takes nothing.
+export const getSettingsSchema = z.object({});
+
 const targetSchema = z
   .int({ error: "Use a whole number" })
   .min(0, { error: "At least 0" })

@@ -11,7 +11,7 @@ const OWNER_ID = TEST_ACCOUNTS.owner.user.id;
 const HECTOR: CurrentActor = { actor: "owner", ownerId: OWNER_ID };
 
 // The test container's settings live for the whole run, so each test reads them first.
-const current = () => getInjection("IGetSettingsController")(HECTOR);
+const current = () => getInjection("IGetSettingsController")({}, HECTOR);
 
 // The settings form's input: fictional targets, against what was read.
 const input = (read: Settings, pendingCap: number) => ({

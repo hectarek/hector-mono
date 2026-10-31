@@ -35,7 +35,9 @@ import {
 import {
   listPracticeSchema,
   logPracticeSchema,
+  practiceEntryIdSchema,
 } from "@/src/entities/models/practice-entry.model";
+import { getSettingsSchema } from "@/src/entities/models/settings.model";
 import { getTodaySchema } from "@/src/entities/models/today.model";
 import {
   getWeekSchema,
@@ -50,6 +52,7 @@ const PARSED_WITH: Record<string, z.ZodType> = {
   get_today: getTodaySchema,
   get_week: getWeekSchema,
   save_weekly_review: saveWeeklyReviewSchema,
+  get_settings: getSettingsSchema,
   list_proposals: listProposalsSchema,
   find_companies: findCompaniesSchema,
   get_company: companyIdSchema,
@@ -70,6 +73,7 @@ const PARSED_WITH: Record<string, z.ZodType> = {
   update_person: updatePersonSchema,
   log_interaction: logInteractionSchema,
   list_practice: listPracticeSchema,
+  get_practice_session: practiceEntryIdSchema,
   log_practice: logPracticeSchema,
 };
 

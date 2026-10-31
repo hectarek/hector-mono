@@ -38,7 +38,7 @@ function dataOf<T>(result: ActionResult<T>): T {
 // whatever another file left the cap at, and a company of each test's own.
 beforeAll(async () => {
   signInAs("owner");
-  const read = await getInjection("IGetSettingsController")(HECTOR);
+  const read = await getInjection("IGetSettingsController")({}, HECTOR);
   dataOf(
     await updateSettings({
       targets: read.targets,
