@@ -68,7 +68,7 @@ src/
                              # job-lifecycle.ts, practice-ladder.ts, posting-link.ts, code-point-order.ts,
                              # week.ts, weekly-counts.ts, claude-sessions.ts
   application/repositories/  # interfaces: activity, companies, lead-sources, settings, jobs, notes, people,
-                             # interactions, practice, weekly-reviews
+                             # interactions, practice, weekly-reviews, import-refs
   application/services/      # interfaces: authentication, logger, transaction-manager
   application/use-cases/     # access/ (resolve-actor, require-human), activity/ (record-change, list-activity),
                              # session/ (whoami, start-session), companies/ (find, get, save, delete),
@@ -77,11 +77,11 @@ src/
                              # edit, delete), people/ (find, get, add, update, delete, remove-contact,
                              # person-dates), interactions/ (log, delete), practice/ (list, get, log,
                              # delete, scheduled), week/ (get-today, get-week, save-weekly-review,
-                             # week-counts)
+                             # week-counts), import/ (import-snapshot, the script's only)
   interface-adapters/        # controllers, one per entry: activity/, session/, companies/, sources/, settings/,
                              # jobs/, notes/, people/, interactions/, practice/, week/
   infrastructure/repositories/  # base, activity, companies, lead-sources, settings, jobs, notes, people,
-                             # interactions, practice, weekly-reviews (each + mock)
+                             # interactions, practice, weekly-reviews, import-refs (each + mock)
   infrastructure/services/   # neon-auth, console-logger, transaction-manager (+ mocks)
 
 di/                          # container.ts, types.ts, modules: logger, authentication, access, transaction,
@@ -89,6 +89,8 @@ di/                          # container.ts, types.ts, modules: logger, authenti
                              # interactions, practice, week
 db/                          # schema.ts, index.ts, migrations/ (drizzle-kit generated)
 lib/                         # auth/server.ts, logger.ts
+scripts/                     # migrate-production.ts, import-snapshot.ts (Hector's terminal), check-test-database.ts;
+                             # lib/ (terminal.ts, the two's prompts; import-wiring.ts, the import's repositories)
 tests/                       # bun:test, mirroring the source tree; flows/ (Playwright)
 playwright.config.ts, proxy.ts
 ```
@@ -133,6 +135,7 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - **The practice log (R11, U8)** is one table, `practice_entries`: sessions and their reviews, a review pointing at its session and going with it (record kind `practice-entry`). When the next review is due is worked out each time by `practice-ladder.ts`'s `nextReview`, never stored: a pure replay of the session and its reviews in the order they happened, so a deleted review takes its step with it. The first review comes 2 days after the session whatever its result (as the sheet's formula did), a solved review moves to the next step 7 and then 21 days later, none follows the third, and a failed or partial one is retried 2 days later on the same step. The use cases add it with `scheduled` (`practice/scheduled.ts`). `log_practice` logs a session, or with a `sessionId` that session's next review: today by default and never after it, never before the try it follows, and refused once the third review is solved. A review reads its session locked, so two at once settle one at a time. `listOpen` leaves out sessions with `LADDER_STEPS` solved reviews in SQL, and `list_practice` keeps those due by today in Eastern time, the earliest first.
 - **This week's read (R9, R10, U9)** is `week/get-today.use-case.ts`, over the other repositories: pending proposals, scheduled conversations whose end has passed, jobs and people due by today in Eastern time (`listDue`), stale candidates (`listAppliedBy`, then each job's linked reply through `isStaleCandidate`; one shows once, as stale, not also as due), practice reviews due (`dueBy`, which the practice page shares), Claude's sessions of the last 7 days (`claudeSessions` groups its activity rows by each `agent-session` start), and the week's counts beside the targets. Each count is its repository's query over the days a thing happened, Monday to Sunday (`weekRange`, KTD9): messages sent and held conversations, accepted jobs whose applied-on falls in the week, sessions (not reviews), and moves into `SCREEN_OR_BEYOND` (`weekly-counts.ts`).
 - **The weekly review (R10, U9)** is one row per owner and week (`weekly_reviews`, record kind `weekly-review`), keyed by the week's Monday. Its first save, Hector's on the week page or Claude's through `save_weekly_review` (a page tool, not human-only), fixes the week's counts (`weekCounts`, which This week shares) and the targets of that day. A later save changes only the milestone and the change it gives, against the `updatedAt` read (a first save sends null, and one another save beat to it conflicts). A week that hasn't started is refused. The week page shows the snapshot with each live count that no longer matches beside it.
+- **The sheet's import (U11, KTD14)** is `scripts/import-snapshot.ts` over `import/import-snapshot.use-case.ts`, which no action or page tool calls. It reads a JSON snapshot from Hector's private docs (`import-snapshot.model.ts`), one record at a time, so a bad record is reported and the rest import. It writes each record in a transaction of its own, with actor `import`. A job lands with its applied-on and dated moves (`addStatusChange`) and the snapshot's next step and date, with none of R3's move defaults. The use case keeps each record's ref, by kind, in `import_refs` (unique per owner), so a rerun skips what already landed, a record deleted since included. A dry run lists the jobs past applied with no status date, and a commit doesn't start while there are any. The script stops before reading or writing unless the owner id is a user in the target's `neon_auth."user"`.
 - An error class thrown inside a transaction goes in the transaction manager's `DOMAIN_ERRORS`, or the action sees "Transaction failed" instead. Recipes' `UnauthorizedError` isn't here: nothing threw it, and `NotAllowedError` and `HumanOnlyError` are the refusals.
 - Every repository query takes the owner id (KTD2), with a PGlite test that another owner's rows stay out. A repository passes `handleError` record ids only.
 
@@ -205,6 +208,8 @@ bun run build --filter=job-search
 bun run --filter=job-search db:generate --name=<what>   # after editing db/schema.ts; review the SQL
 bun run --filter=job-search db:migrate    # the test project (.env); production migrates from Hector's terminal (KTD17)
 cd apps/job-search && bun run db:migrate:production   # production only, from Hector's own terminal, never Claude
+cd apps/job-search && bun scripts/import-snapshot.ts <snapshot.json> --owner=<test owner id> --test   # Claude's dry run, on .env's test project
+cd apps/job-search && bun --no-env-file scripts/import-snapshot.ts <snapshot.json> --owner=<owner id> [--commit]   # Hector's terminal: URL from a hidden prompt
 bun run test --filter=job-search          # both passes; or from apps/job-search: bun test tests/proxy.test.ts
 bun run --filter=job-search test:screens  # the screen tests (*.test.tsx) alone
 cd apps/job-search && bun run test:screens ./tests/app/_components/quick-log.test.tsx   # one screen file: a plain bun test skips *.test.tsx, and the path needs ./

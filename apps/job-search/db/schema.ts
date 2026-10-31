@@ -471,3 +471,23 @@ export const practiceEntries = pgTable(
     ),
   ],
 );
+
+// What the sheet's import wrote (docs/build-plan.md KTD14, U11): each record under the ref its
+// snapshot gives it, once per owner, so a rerun skips what already landed, a record deleted since
+// included.
+export const importRefs = pgTable(
+  "import_refs",
+  {
+    ownerId: uuid("owner_id").notNull(),
+    externalRef: text("external_ref").notNull(),
+    recordKind: text("record_kind").$type<RecordRef["kind"]>().notNull(),
+    recordId: uuid("record_id").notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    uniqueIndex("import_refs_owner_id_external_ref_idx").on(
+      table.ownerId,
+      table.externalRef,
+    ),
+  ],
+);

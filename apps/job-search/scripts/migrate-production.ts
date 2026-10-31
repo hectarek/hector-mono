@@ -9,6 +9,7 @@ import { readMigrationFiles } from "drizzle-orm/migrator";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { migrate } from "drizzle-orm/neon-serverless/migrator";
 import journal from "@/db/migrations/meta/_journal.json";
+import { ask, print, refuse, type Terminal } from "@/scripts/lib/terminal";
 import { loggable } from "@/src/entities/errors/loggable";
 
 // The test project's database carries this comment (scripts/check-test-database.ts checks it);
@@ -27,13 +28,6 @@ export type Recorded = { hash: string; createdAt: number };
 // untyped, and each read checks the fields it uses.
 type Database = {
   execute(query: SQL): PromiseLike<{ rows: Record<string, unknown>[] }>;
-};
-
-// What the wrapper says and asks: main passes the terminal, tests a scripted one.
-export type Terminal = {
-  print: (line: string) => void;
-  refuse: (reason: string) => number;
-  ask: (question: string) => Promise<string | null>;
 };
 
 // Why the URL typed can't be the target, or null when it can. Bun loads .env, which holds the test
@@ -94,66 +88,6 @@ export function migrationPlan(
 
 export function confirmed(answer: string | null): boolean {
   return answer === "migrate";
-}
-
-// What a chunk of raw-mode keys does to the line typed so far: Enter ends it, Ctrl-C aborts it,
-// Backspace deletes a character and any other control key does nothing.
-export function typeKeys(
-  line: string,
-  keys: string,
-): { line: string; end?: "enter" | "abort" } {
-  let typed = line;
-  for (const key of keys) {
-    if (key === "\r" || key === "\n") {
-      return { line: typed, end: "enter" };
-    }
-    if (key === "\u0003") {
-      return { line: typed, end: "abort" };
-    }
-    if (key === "\u007f" || key === "\b") {
-      typed = typed.slice(0, -1);
-    } else if (key >= " ") {
-      typed += key;
-    }
-  }
-  return { line: typed };
-}
-
-function print(line: string): void {
-  process.stdout.write(`${line}\n`);
-}
-
-function refuse(reason: string): number {
-  process.stderr.write(`${reason}\n`);
-  return 1;
-}
-
-// One line from the terminal, read in raw mode so the keys show only when `echo` is on. Null when
-// Ctrl-C aborts it.
-function ask(question: string, echo: boolean): Promise<string | null> {
-  const { stdin, stdout } = process;
-  stdin.setRawMode(true);
-  stdout.write(question);
-  return new Promise((resolve) => {
-    let line = "";
-    const onKeys = (keys: string): void => {
-      const typed = typeKeys(line, keys);
-      line = typed.line;
-      if (echo) {
-        stdout.write(`\r${question}${line}\u001b[K`);
-      }
-      if (typed.end) {
-        stdin.off("data", onKeys);
-        stdin.setRawMode(false);
-        stdin.pause();
-        stdout.write("\n");
-        resolve(typed.end === "enter" ? line : null);
-      }
-    };
-    stdin.setEncoding("utf8");
-    stdin.on("data", onKeys);
-    stdin.resume();
-  });
 }
 
 // The journal's migrations, hashed by drizzle's own reader, so they match what migrate() records.

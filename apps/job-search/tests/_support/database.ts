@@ -24,7 +24,7 @@ export async function resetDatabase(): Promise<void> {
   // All at once: jobs point at companies and sources, status moves at jobs, people at companies,
   // interactions and contact links at people and jobs, and practice reviews at their sessions.
   await client.exec(
-    "truncate activity, companies, lead_sources, settings, jobs, job_status_changes, notes, people, interactions, job_people, practice_entries, weekly_reviews restart identity;",
+    "truncate activity, companies, lead_sources, settings, jobs, job_status_changes, notes, people, interactions, job_people, practice_entries, weekly_reviews, import_refs restart identity;",
   );
 }
 

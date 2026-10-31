@@ -4,6 +4,7 @@
 import { beforeEach, describe } from "bun:test";
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
+import type { IImportRefsRepository } from "@/src/application/repositories/import-refs.repository.interface";
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
@@ -18,6 +19,7 @@ import { deleteCompanyUseCase } from "@/src/application/use-cases/companies/dele
 import { findCompaniesUseCase } from "@/src/application/use-cases/companies/find-companies.use-case";
 import { getCompanyUseCase } from "@/src/application/use-cases/companies/get-company.use-case";
 import { saveCompanyUseCase } from "@/src/application/use-cases/companies/save-company.use-case";
+import { importSnapshotUseCase } from "@/src/application/use-cases/import/import-snapshot.use-case";
 import { deleteInteractionUseCase } from "@/src/application/use-cases/interactions/delete-interaction.use-case";
 import { logInteractionUseCase } from "@/src/application/use-cases/interactions/log-interaction.use-case";
 import { createJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
@@ -52,6 +54,8 @@ import { ActivityRepository } from "@/src/infrastructure/repositories/activity.r
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { CompaniesRepository } from "@/src/infrastructure/repositories/companies.repository";
 import { MockCompaniesRepository } from "@/src/infrastructure/repositories/companies.repository.mock";
+import { ImportRefsRepository } from "@/src/infrastructure/repositories/import-refs.repository";
+import { MockImportRefsRepository } from "@/src/infrastructure/repositories/import-refs.repository.mock";
 import { InteractionsRepository } from "@/src/infrastructure/repositories/interactions.repository";
 import { MockInteractionsRepository } from "@/src/infrastructure/repositories/interactions.repository.mock";
 import { JobsRepository } from "@/src/infrastructure/repositories/jobs.repository";
@@ -88,6 +92,7 @@ type Repositories = {
   interactions: IInteractionsRepository;
   practice: IPracticeRepository;
   weeklyReviews: IWeeklyReviewsRepository;
+  importRefs: IImportRefsRepository;
   transactions: ITransactionManagerService;
 };
 
@@ -105,6 +110,7 @@ function mockRepositories(): Repositories {
     interactions: new MockInteractionsRepository(),
     practice: new MockPracticeRepository(),
     weeklyReviews: new MockWeeklyReviewsRepository(),
+    importRefs: new MockImportRefsRepository(),
     transactions: new MockTransactionManagerService(),
   };
 }
@@ -123,6 +129,7 @@ export function postgresRepositories(): Repositories {
     interactions: new InteractionsRepository(log),
     practice: new PracticeRepository(log),
     weeklyReviews: new WeeklyReviewsRepository(log),
+    importRefs: new ImportRefsRepository(log),
     transactions: new TransactionManagerService(log),
   };
 }
@@ -173,6 +180,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     interactions,
     practice,
     weeklyReviews,
+    importRefs,
     transactions,
   } = repos;
   return {
@@ -310,6 +318,18 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       practice,
       settings,
       activity,
+      transactions,
+      log,
+    ),
+    importSnapshot: importSnapshotUseCase(
+      companies,
+      sources,
+      jobs,
+      people,
+      interactions,
+      practice,
+      activity,
+      importRefs,
       transactions,
       log,
     ),

@@ -3,14 +3,13 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import journal from "@/db/migrations/meta/_journal.json";
+import { type Terminal, typeKeys } from "@/scripts/lib/terminal";
 import {
   confirmed,
   isTestDatabase,
   type Migration,
   migrateTarget,
   migrationPlan,
-  type Terminal,
-  typeKeys,
   urlRefusal,
 } from "@/scripts/migrate-production";
 
