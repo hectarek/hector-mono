@@ -37,7 +37,7 @@ Save this as `<config file>`, outside any repo:
 - `<agent profile folder>` sits outside iCloud and outside any repo. Playwright's Chromium keeps the profile's cookies in that folder rather than in the macOS keychain, so the folder is the sign-in.
 - `"channel": "chromium"` is Playwright's own Chromium. Install it with `bunx playwright@1.64.1 install chromium`. With neither a `browserName` nor a channel, Playwright MCP opens the installed Google Chrome instead.
 - `--enable-features=WebMCP` turns the page tools API on. Playwright 1.64's Chromium (156) has it with the flag (checked 2026-10-23).
-- `<output folder>` gets screenshots and traces, so it also sits outside any repo.
+- `<output folder>` gets screenshots and traces, so it also sits outside any repo. A screenshot Claude saves under a file name of its own goes to the session's working folder instead, which may be a repo: leave the name out, or give a path outside the repo.
 
 ### 2. Register the server
 
@@ -60,6 +60,11 @@ In that folder's `.mcp.json`:
 ### 3. Sign Claude in, once
 
 Start a search session and have Claude open `<app origin>` with Playwright MCP. In the window that opens, Hector signs in with Claude's account. Never sign in as Hector there: anything that drives Hector's session acts as Hector, as far as the app can tell. Claude never types a password.
+
+- Claude has two sign-ins, one per origin: its production account at `<app origin>`, and its test-project account at the local dev server (`http://localhost:3101`).
+- The window is Playwright's Chromium, which macOS lists as Google Chrome for Testing. It isn't Hector's Chrome, and it isn't the Claude desktop app's browser pane, which has no page tools API. When Claude asks for a sign-in, it names that window and doesn't have the app open in the pane too: on 2026-10-30 a sign-in meant for Claude's window went to the pane.
+- An account made in Neon's console has no password until one is set through the app's forgot-password page ([lesson](../../../docs/solutions/integration-issues/neon-console-users-have-no-password.md)).
+- To sign Claude in without a Claude session, close Claude's browser (a profile serves one browser at a time) and run `bunx playwright@1.64.1 open --user-data-dir "<agent profile folder>" <app origin>/auth/sign-in`. It opens the same Chromium on the same profile.
 
 ### 4. The folder's permission rules
 
@@ -95,6 +100,10 @@ Every tool answers with an envelope: `{ ok: true, data, asOf }`, or `{ ok: false
 - `human-only`: only Hector can do this. The attempt shows in the record's history.
 - `unexpected`: the server couldn't be reached, or the action failed. Try again.
 
+Claude Code lists the page tools of the page Playwright MCP has open, and updates the list after Claude's next browser call. While that tab is on a page without them, such as sign-in or an error page, the tools are gone.
+
+Claude Code keeps a tool's result in the conversation up to 50,000 characters or 25,000 tokens. A larger one it saves whole to a file in the session's `tool-results` folder, and Claude gets the file's path ([Claude Code's MCP output limits](https://code.claude.com/docs/en/mcp#mcp-output-limits-and-warnings)). A result of 3,000,000 characters arrived whole that way (2026-10-31). A tool answers a page at a time, so a page under 50,000 characters stays in the conversation, and a larger one still reaches Claude through the file.
+
 ## One session at a time
 
 A persistent profile serves one browser at a time. While one Claude Code session drives the app, a second session's Playwright MCP finds the profile in use and stops with "Browser is already in use". Run one search session at a time. Its suggestion, `--isolated`, keeps a profile in memory, so that browser starts without Claude's sign-in.
@@ -109,6 +118,6 @@ After setting up, and after any change to Playwright, Chrome or the settings:
 
 1. `bun run --filter=job-search test:flows` passes on the test project. It signs in as Claude's test-project account (`FLOW_AGENT_EMAIL` and `FLOW_AGENT_PASSWORD` in the app's `.env`), lists the tools in Playwright's Chromium, and calls them.
 2. In a search session, `webmcp_whoami` and `webmcp_start_session` are among Claude's tools and work, and `/agent` shows the session's start.
-3. A call with bad input answers `validation`, a call after signing out answers `unauthenticated`, and a call from a page loaded before a redeploy answers `reload-needed`. The page stays where it is through each.
+3. A call with bad input answers `validation`, a call after signing out answers `unauthenticated`, and a call from a page loaded before a redeploy answers `reload-needed`. The page stays where it is through each. Check the last one on the deployed app: under `next dev`, a restarted server makes Next's dev client reload the page. Next.js recalculates action ids between builds only periodically (its data security guide), so a call after a redeploy may still run.
 4. After the lock-down pass (step 4 of Setup), the ask rule fires on a consequential tool, and each denied tool is refused in the permission mode Hector uses.
-5. Note the largest result that reaches Claude whole: the tools answer a page at a time, and their page sizes stay under it.
+5. A result over 50,000 characters reaches Claude whole, as a saved file (A working session).
