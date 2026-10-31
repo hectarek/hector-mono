@@ -25,16 +25,17 @@ A change that adds, moves or removes a screen, an action, a sheet or a way betwe
 
 ## The jobs
 
-The app is phone-first, built for people who share a recipe book and a plan. Six jobs cover what people come to it for (Claude's grouping).
+The app is phone-first, built for people who share a recipe book and a plan. Seven jobs cover what people come to it for (Claude's grouping); the seventh, showing a recipe to someone without the app, is Phase 29's (D98).
 
-| Job                    | Starts at                                                  | Screens, in order                                                                                   | Browser flow                                             |
-| ---------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Find something to cook | Recipes tab                                                | Library → Recipe                                                                                    | `plan-and-shop` (search, Sort and group)                 |
-| Add a recipe           | Library's Add recipe                                       | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe                        | `plan-and-shop` (manually), `add-recipe` (photo or file) |
-| Plan the week          | A recipe's Add to meal plan                                | Recipe (Add to meal plan) → Meal plan                                                               | `plan-and-shop`                                          |
-| Shop                   | Meal plan's grocery button, or a recipe's Add to groceries | Meal plan → Groceries                                                                               | `plan-and-shop` (check off, Got it, Clear groceries)     |
-| Cook                   | A recipe's Cook                                            | Recipe → Cook mode (Gather → each step, the last one's Finish) → Recipe                             | `cook`                                                   |
-| Share a book or plan   | A tab's ⋯ → Invite                                         | ⋯ → the phone's share sheet; the person invited: Welcome → Create account → Join → the book or plan | none                                                     |
+| Job                                      | Starts at                                                  | Screens, in order                                                                                    | Browser flow                                             |
+| ---------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Find something to cook                   | Recipes tab                                                | Library → Recipe                                                                                     | `plan-and-shop` (search, Sort and group)                 |
+| Add a recipe                             | Library's Add recipe                                       | Add a recipe → by link, by photo or file, or manually → Recipe form → Recipe                         | `plan-and-shop` (manually), `add-recipe` (photo or file) |
+| Plan the week                            | A recipe's Add to meal plan                                | Recipe (Add to meal plan) → Meal plan                                                                | `plan-and-shop`                                          |
+| Shop                                     | Meal plan's grocery button, or a recipe's Add to groceries | Meal plan → Groceries                                                                                | `plan-and-shop` (check off, Got it, Clear groceries)     |
+| Cook                                     | A recipe's Cook                                            | Recipe → Cook mode (Gather → each step, the last one's Finish) → Recipe                              | `cook`                                                   |
+| Share a book or plan                     | A tab's ⋯ → Invite                                         | ⋯ → the phone's share sheet; the person invited: Welcome → Create account → Join → the book or plan  | none                                                     |
+| Show a recipe to someone without the app | A recipe's ⋯ → View-only link (editors)                    | ⋯ → Turn on → the phone's share sheet; the person sent it: Shared recipe → (Create account → Recipe) | `share`                                                  |
 
 Supporting screens: Books (default book, new books), Members (links, roles, leaving, deleting), Copy recipes, Account.
 
@@ -44,6 +45,7 @@ Supporting screens: Books (default book, new books), Members (links, roles, leav
 Signed out (own screens, no tab bar)
   Welcome                          /welcome
     Sign in, Create account        /auth/[path]      Neon's forms
+  Shared recipe                    /shared/[token]   a view-only public link; signed in, the recipe
 
 Signed in: header and tab bar
   Recipes tab
@@ -97,13 +99,13 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Surface:** Reading. Back link to its book: named for the book when you're in two or more (D82), else "Recipes"; the Recipes tab stays lit.
 - **Title:** photo (or a YouTube video's thumbnail) or produce tile, the name with its bookmark to the right (filled when saved, D72, D77), description, time, servings, a link to the source. A recipe with a video has Play video over the photo, which plays it there for YouTube and Vimeo, or Watch video, which opens another host's page (D81).
 - **Main action:** Cook (full width) → Cook mode, at the servings chosen.
-- **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), Copy to another book (when you can edit another book), whose book picker is a step in the sheet.
+- **⋯:** beside the back link (D72): Edit (editors), Share recipe (everyone; Copy recipe link where the browser has no share sheet), View-only link (editors, D98), Copy to another book (when you can edit another book). View-only link and Copy are each a step in the sheet: Copy's book picker; View-only link's Turn on view-only link, then Share view-only link (filled; Copy where there's no share sheet) and Turn off link, which asks in the sheet before turning it off (as Clear meal plan does).
 - **Also on it:** Add to meal plan and Add to groceries, in the tab bar's order (when you can plan; P27.2); tag chips (→ the library on that tag); the servings stepper (recipes with servings); Ingredients; Method.
 - **Opens:** bottom sheets.
   - Add to meal plan: cook day and eat days as day buttons (D38), the plan picker in two or more plans; then Open meal plan.
   - Add to groceries: servings, the groceries picker; then Open groceries. "It's already in groceries" asks before adding again (D45).
 - **Bold:** the produce tile when there's no photo.
-- **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done or Finish, or a link to it.
+- **Reached from:** a library card, a planned meal's title, Save in the recipe form, cook mode's Done or Finish, a link to it, or its view-only link opened signed in.
 - **Leads to:** Cook mode, Edit, Meal plan, Groceries, the library.
 - **Variants:** a viewer of the book has no Edit; someone who can only view plans has no Add to groceries or Add to meal plan. Anyone signed in can open a recipe from its link, even outside its book (get-recipe.use-case.ts), and can Cook, plan it or copy it into their own book; Share recipe sends that link (P23.5).
 - **Room:** Cook, Add to meal plan and Add to groceries stay in view; everything else goes in the ⋯ (D72). The bookmark comes beside the name (Phase 24).
@@ -246,6 +248,18 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 - **Sign in and Create account:** Neon's forms, with the app's wording; back link "Welcome".
 - **Bold:** Welcome's produce row.
 - **Leads to:** where you were going, or the library.
+- **Motion:** none.
+
+### Shared recipe — `/shared/[token]`
+
+- **Job:** show a recipe to someone without an account (D98, D99).
+- **Surface:** Reading, on its own screen: no header, tab bar or back link, as Welcome. The logo at the top.
+- **Title:** the recipe's photo, video or produce tile, its name, description, time, servings and source, as on the recipe page.
+- **Also on it:** the servings stepper, Ingredients and Method. No tags, Cook, Add to meal plan, Add to groceries, bookmark or ⋯.
+- **Main action:** Create account (filled), with Sign in beside it, in a box after the method, under a line saying where the recipe is from. Both bring them back here signed in, which goes on to the recipe.
+- **Bold:** the produce tile when there's no photo.
+- **Reached from:** a view-only link only. **Leads to:** Create account or Sign in, then the recipe.
+- **Variants:** signed in, it goes straight to the recipe (at `?servings=` when the link has it). A link that's off, or isn't one, is Not found.
 - **Motion:** none.
 
 ### Error and Not found

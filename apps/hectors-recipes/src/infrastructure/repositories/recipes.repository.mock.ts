@@ -21,6 +21,8 @@ export class MockRecipesRepository implements IRecipesRepository {
   private lines: RecipeIngredient[] = [];
   private steps: RecipeStep[] = [];
   private ingredientIds = new Map<string, string>();
+  // Each shared recipe's link token, by recipe id.
+  private shareTokens = new Map<string, string>();
 
   // Tests pass the mock plan entries' unlinkRecipe, standing in for the foreign key.
   constructor(private readonly onDelete?: (recipeId: string) => void) {}
@@ -123,6 +125,30 @@ export class MockRecipesRepository implements IRecipesRepository {
     this.recipes = this.recipes.filter((recipe) => recipe.id !== id);
     this.lines = this.lines.filter((line) => line.recipeId !== id);
     this.steps = this.steps.filter((step) => step.recipeId !== id);
+    this.shareTokens.delete(id);
+  }
+
+  async getShareToken(id: string): Promise<string | null> {
+    return this.shareTokens.get(id) ?? null;
+  }
+
+  async setShared(id: string, shared: boolean): Promise<string | null> {
+    if (!this.recipes.some((recipe) => recipe.id === id)) return null;
+    if (!shared) {
+      this.shareTokens.delete(id);
+      return null;
+    }
+    const token =
+      this.shareTokens.get(id) ??
+      Buffer.from(crypto.getRandomValues(new Uint8Array(18))).toString(
+        "base64url",
+      );
+    this.shareTokens.set(id, token);
+    return token;
+  }
+
+  async getIdByShareToken(token: string): Promise<string | undefined> {
+    return [...this.shareTokens].find(([, shared]) => shared === token)?.[0];
   }
 
   private replaceLines(recipeId: string, lines: RecipeLineWrite[]): void {

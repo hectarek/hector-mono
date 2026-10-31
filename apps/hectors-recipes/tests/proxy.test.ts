@@ -90,6 +90,17 @@ describe("proxy", () => {
     expect(location.search).toBe("");
   });
 
+  // D99: a recipe's view-only public link opens signed out, and nothing under it or beside it.
+  it("lets a signed-out visitor open a shared recipe, and nothing else new", async () => {
+    const opens = async (path: string) =>
+      (await proxy(request(path))).headers.get("location") === null;
+    expect(await opens("/shared/AbC-123_xyzAbC-123_xyz12")).toBe(true);
+    expect(await opens("/shared/abc?servings=6")).toBe(true);
+    expect(await opens("/shared")).toBe(false);
+    expect(await opens("/shared/abc/edit")).toBe(false);
+    expect(await opens("/recipes/abc")).toBe(false);
+  });
+
   it("shows the welcome screen to a signed-out visitor", async () => {
     const response = await proxy(request("/welcome?redirectTo=/plan"));
     expect(response.headers.get("location")).toBeNull();

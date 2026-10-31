@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import {
   createRecipe,
   deleteRecipe,
+  setRecipeLink,
   updateRecipe,
 } from "@/app/actions/recipes";
 import { getInjection } from "@/di/container";
@@ -10,6 +11,7 @@ import {
   nextState,
   Redirected,
   resetNextState,
+  signInAsNewUser,
   USER_ID,
 } from "@/tests/_support/next";
 
@@ -194,5 +196,41 @@ describe("recipe actions", () => {
       (err) => err,
     );
     expect((redirect as Redirected).url).toBe(`/?book=${bookId}`);
+  });
+});
+
+// D98: a recipe's view-only public link, from its ⋯ sheet.
+describe("setRecipeLink", () => {
+  beforeEach(() => {
+    signInAsNewUser();
+  });
+
+  it("turns the link on for an editor and refreshes the recipe", async () => {
+    const userId = nextState.userId ?? "";
+    const book = await getInjection("IEnsurePersonalSpaceController")(
+      "recipe-book",
+      userId,
+    );
+    const { id } = await getInjection("ICreateRecipeController")(
+      {
+        spaceId: book.id,
+        data: { title: "Chili", ingredients: [{ raw: "beans" }] },
+      },
+      userId,
+    );
+
+    expect(await setRecipeLink(id, true)).toBeNull();
+    expect(nextState.revalidated).toContain(`/recipes/${id}`);
+    const { shareToken } = await getInjection("IGetRecipeController")(
+      { recipeId: id },
+      userId,
+    );
+    expect(shareToken).toMatch(/^[\w-]{24}$/);
+
+    // Someone who can only read the book can't.
+    nextState.userId = crypto.randomUUID();
+    expect(await setRecipeLink(id, false)).toEqual(
+      expect.objectContaining({ error: expect.any(String) }),
+    );
   });
 });

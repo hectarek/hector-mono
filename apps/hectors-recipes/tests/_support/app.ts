@@ -34,7 +34,9 @@ import { getAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-al
 import { getBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
 import { getRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import { getRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
+import { getSharedRecipeUseCase } from "@/src/application/use-cases/recipes/get-shared-recipe.use-case";
 import { setBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
+import { setRecipeLinkUseCase } from "@/src/application/use-cases/recipes/set-recipe-link.use-case";
 import { updateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
 import { acceptInviteUseCase } from "@/src/application/use-cases/spaces/accept-invite.use-case";
 import { createInviteUseCase } from "@/src/application/use-cases/spaces/create-invite.use-case";
@@ -201,6 +203,8 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     adoptRecipes: adoptRecipesUseCase(recipes, spaces, transactions, log),
     setBookmark: setBookmarkUseCase(bookmarks, recipes, transactions, log),
     getBookmarks: getBookmarksUseCase(bookmarks, log),
+    setRecipeLink: setRecipeLinkUseCase(recipes, spaces, transactions, log),
+    getSharedRecipe: getSharedRecipeUseCase(recipes, log),
 
     getWeekPlan: getWeekPlanUseCase(planEntries, recipes, spaces, log),
     addPlanEntry: addPlanEntryUseCase(

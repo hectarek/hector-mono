@@ -8,6 +8,8 @@ import { hasRole } from "@/src/entities/models/space.model";
 export type RecipeDetail = {
   recipe: RecipeWithIngredients;
   canEdit: boolean;
+  // Its view-only public link's token while it's on (D98), for those who can edit only.
+  shareToken: string | null;
 };
 
 export type IGetRecipeUseCase = ReturnType<typeof getRecipeUseCase>;
@@ -31,8 +33,11 @@ export const getRecipeUseCase = (
 
     const access = await spacesRepository.getAccess(recipe.spaceId, userId);
     const canEdit = !!access?.role && hasRole(access.role, "editor");
+    const shareToken = canEdit
+      ? await recipesRepository.getShareToken(recipeId)
+      : null;
 
     logger.debug("Recipe fetched", { recipeId, canEdit });
-    return { recipe, canEdit };
+    return { recipe, canEdit, shareToken };
   };
 };

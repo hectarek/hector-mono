@@ -7,7 +7,9 @@ import { getAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-al
 import { getBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
 import { getRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import { getRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
+import { getSharedRecipeUseCase } from "@/src/application/use-cases/recipes/get-shared-recipe.use-case";
 import { setBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
+import { setRecipeLinkUseCase } from "@/src/application/use-cases/recipes/set-recipe-link.use-case";
 import { updateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
 import { BookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository";
 import { MockBookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository.mock";
@@ -22,7 +24,9 @@ import { getAllRecipesController } from "@/src/interface-adapters/controllers/re
 import { getBookmarksController } from "@/src/interface-adapters/controllers/recipes/get-bookmarks.controller";
 import { getRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import { getRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
+import { getSharedRecipeController } from "@/src/interface-adapters/controllers/recipes/get-shared-recipe.controller";
 import { setBookmarkController } from "@/src/interface-adapters/controllers/recipes/set-bookmark.controller";
+import { setRecipeLinkController } from "@/src/interface-adapters/controllers/recipes/set-recipe-link.controller";
 import { updateRecipeController } from "@/src/interface-adapters/controllers/recipes/update-recipe.controller";
 
 export function createRecipesModule() {
@@ -106,6 +110,32 @@ export function createRecipesModule() {
     .bind(DI_SYMBOLS.IGetRecipeController)
     .toHigherOrderFunction(getRecipeController, [
       DI_SYMBOLS.IGetRecipeUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+
+  // A recipe's view-only public link (docs/ux-plan.md D98, D99).
+  recipesModule
+    .bind(DI_SYMBOLS.ISetRecipeLinkUseCase)
+    .toHigherOrderFunction(setRecipeLinkUseCase, writeDeps);
+
+  recipesModule
+    .bind(DI_SYMBOLS.ISetRecipeLinkController)
+    .toHigherOrderFunction(setRecipeLinkController, [
+      DI_SYMBOLS.ISetRecipeLinkUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+
+  recipesModule
+    .bind(DI_SYMBOLS.IGetSharedRecipeUseCase)
+    .toHigherOrderFunction(getSharedRecipeUseCase, [
+      DI_SYMBOLS.IRecipesRepository,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+
+  recipesModule
+    .bind(DI_SYMBOLS.IGetSharedRecipeController)
+    .toHigherOrderFunction(getSharedRecipeController, [
+      DI_SYMBOLS.IGetSharedRecipeUseCase,
       DI_SYMBOLS.ILoggerService,
     ]);
 

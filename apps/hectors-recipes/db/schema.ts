@@ -139,6 +139,9 @@ export const recipes = pgTable(
       { onDelete: "set null" },
     ),
     externalRef: text("external_ref"),
+    // Its view-only public link while it's on (docs/ux-plan.md D98): the token in
+    // /shared/<token>. Null when off; turning it on again makes a new one.
+    shareToken: text("share_token"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -148,6 +151,7 @@ export const recipes = pgTable(
       foreignColumns: [spaces.id, spaces.type],
     }).onDelete("cascade"),
     check("recipes_space_type_check", sql`${table.spaceType} = 'recipe-book'`),
+    uniqueIndex("recipes_share_token_unique_idx").on(table.shareToken),
     index("recipes_space_idx").on(table.spaceId),
     index("recipes_tags_idx").using("gin", table.tags),
     uniqueIndex("recipes_space_external_ref_unique_idx")
