@@ -383,7 +383,7 @@ export const importSnapshotUseCase = (
       });
     }
 
-    logger.info("Snapshot imported", {
+    logger.info(commit ? "Snapshot imported" : "Snapshot dry-run", {
       commit,
       created: IMPORT_KINDS.map((kind) => report.created[kind].length).join(
         "/",
