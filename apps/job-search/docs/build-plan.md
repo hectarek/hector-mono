@@ -169,7 +169,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **Cutover**
 
-- R25. The sheet's data moves into the app once, with statuses and dates intact and contacts as people, on a week boundary after a weekly review. Afterwards the sheet is a read-only archive and no routine writes to it.
+- R25. The sheet's data moves into the app once, with statuses and dates intact and contacts as people, on a week boundary after a weekly review. Afterwards the sheet is a read-only archive and no routine writes to it. (Revised 2026-11-06, Hector's call: it moved on a Friday morning, before that day's review, so he could start using the app at once. The import keeps every record's dates, so the week's counts carried over mid-week.)
 
 ### Key Decisions
 
@@ -216,6 +216,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
   - **Trigger:** Phase 3 has merged and a Friday review is done.
   - **Actors:** A1, A2, A4
   - **Steps:** freeze the sheet, export it, build and review the snapshot, dry run, import with Hector's OK, compare the week's counts, switch the routines, archive the sheet.
+  - (Revised 2026-11-06, Hector's call: the cutover ran on a Friday morning before the review, and the snapshot went unreviewed. U11 has what changed.)
   - **Outcome:** the app is the only tracker.
   - **Covered by:** R25
 
@@ -390,6 +391,8 @@ None block planning. Deferred to implementation:
   - uses one transaction per record, with an `external_ref` unique index so a rerun skips what already landed
 
   (Revised 2026-10-31 in U11: the refs live in one `import_refs` table, with the unique index on owner and ref, rather than a column on each imported table, so the import needs no change to the other repositories. With `--test`, Claude's dry run reads `.env`'s database and runs only against the test project. `--test` never commits.)
+
+  (Revised 2026-11-06, Hector's call: the cutover's snapshot went unreviewed, because he said the data needn't be perfect. Claude took each closed job's status date from its notes, or from its found-on date where the notes had none. Hector's dry run and commit ran in the desktop app's Terminal panel, in a tab Claude opened with the command. He pasted the URL at the hidden prompt and typed `import`, so the URL still never reached Claude's session.)
 
   The pattern is `apps/hectors-recipes/scripts/seed-from-obsidian.ts`. Hector, not Claude, runs the commit, so the import doesn't count as Claude changing the tracker outside page tools (R18). Chosen over importing through page tools: status writes there take today's date unless told otherwise, accepting is human-only, and the cap would stop it.
 - KTD15. **Fresh views: AutoRefresh, plus patch writes with conflict checks on both sides.** Copy recipes' `app/_components/auto-refresh.tsx`, which refreshes when the page becomes visible, every 60 seconds and on reconnect. Every form and every Claude update sends only the fields it changes, with the `updatedAt` it read; a mismatch returns `conflict` with the current record. A form captures the record and its `updatedAt` when it opens and keeps both, and what Hector typed, across refreshes. On `conflict` it stays open, lists each field that changed since it opened with the current value beside his, and saves against the current `updatedAt` once he confirms. Chosen over letting Hector's patches win, which would let a stale form overwrite Claude's change (R22). Pages Hector watches during a session don't use `"use cache: private"`.
@@ -1037,6 +1040,12 @@ Each phase is one branch and PR and leaves a usable app:
   4. Compare the week's counts with the sheet.
   5. Switch the routines to page tools, and deny the spreadsheet connector's writes for this work.
   6. Archive the sheet read-only.
+
+  Revised 2026-11-06, Hector's call: the cutover ran on a Friday morning, before the review, with Claude doing every part it could.
+  - Claude built the snapshot from the sheet as it stood, while the sessions that log to it held their writes. Hector didn't review it (KTD14, revised).
+  - In place of a dry run on the test project, Claude committed the snapshot into PGlite through the import use case. After Hector's commit, production held the same counts.
+  - Hector's dry run and commit ran in a Terminal panel tab Claude opened.
+  - Denying the spreadsheet connector's writes waits for the lock-down pass, with the other deny rules (revised 2026-10-28).
 - **Test scenarios:**
   - A dry run on a fictional snapshot reports creates and skips and writes nothing.
   - Two commit runs: the second skips every record by external ref.
