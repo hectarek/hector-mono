@@ -3,11 +3,13 @@ import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import { Input } from "@repo/ui/components/input";
 import { UserPlus } from "lucide-react";
 import Link from "next/link";
+import { EmptySectors, PageTitle } from "@/app/_components/display";
 import { PersonList } from "@/app/_components/person-list";
 import { QuickLog } from "@/app/_components/quick-log";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -45,7 +47,7 @@ export default async function PeoplePage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">People</h1>
+        <PageTitle>People</PageTitle>
         <div className="flex flex-wrap items-center gap-2">
           <QuickLog companies={companies} />
           <Button
@@ -87,6 +89,9 @@ export default async function PeoplePage({
       ) : (
         <Empty>
           <EmptyHeader>
+            <EmptyMedia>
+              <EmptySectors />
+            </EmptyMedia>
             <EmptyTitle>
               {query ? "No one by that name" : "No people yet"}
             </EmptyTitle>

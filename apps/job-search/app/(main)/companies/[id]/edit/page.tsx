@@ -1,4 +1,5 @@
 import { CompanyForm } from "@/app/_components/company-form";
+import { RecordTitle } from "@/app/_components/display";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { loadCompany } from "@/app/_lib/load-company";
 
@@ -14,9 +15,7 @@ export default async function EditCompanyPage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <h1 className="text-xl font-semibold tracking-tight">
-        Edit {company.name}
-      </h1>
+      <RecordTitle>Edit {company.name}</RecordTitle>
       <CompanyForm company={company} />
     </div>
   );

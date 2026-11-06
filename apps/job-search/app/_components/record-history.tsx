@@ -1,21 +1,15 @@
+import { SectionTitle } from "@/app/_components/display";
+import { DriverCode } from "@/app/_components/driver-code";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { fieldLabel } from "@/app/_lib/field-labels";
 import { getInjection } from "@/di/container";
 import {
   ACTIVITY_PAGE_MAX,
   type ActivityEntry,
-  type ChangeActor,
   type FieldChange,
   type RecordRef,
 } from "@/src/entities/models/activity.model";
 import { PLAN_TIME_ZONE } from "@/src/entities/week";
-
-const ACTORS: Record<ChangeActor, string> = {
-  owner: "Hector",
-  agent: "Claude",
-  import: "Import",
-  system: "The app",
-};
 
 const ACTIONS: Record<ActivityEntry["action"], string> = {
   created: "Created",
@@ -33,8 +27,9 @@ const WHEN = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
-// A record's history (R19): its changes, newest first, each with who made it, the page tool when
-// one did, and each field it changed, before and after. The company, job, settings and person
+// A record's history (R19), as the design system's timing feed: its changes, newest first, each
+// with when, who made it (a driver code), the page tool when one did, and each field it changed,
+// before and after. The company, job, settings and person
 // pages mount it (U5 to U7). It shows the latest ACTIVITY_PAGE_MAX changes; list_activity pages through more.
 export async function RecordHistory({ record }: { record: RecordRef }) {
   const actor = await getPageActor();
@@ -45,11 +40,9 @@ export async function RecordHistory({ record }: { record: RecordRef }) {
 
   return (
     <section aria-labelledby="record-history" className="flex flex-col gap-2">
-      <h2 id="record-history" className="font-semibold">
-        History
-      </h2>
+      <SectionTitle id="record-history">History</SectionTitle>
       {entries.length ? (
-        <ol className="flex flex-col divide-y">
+        <ol className="bg-card flex flex-col divide-y rounded-xl border px-3">
           {entries.map((entry) => (
             <HistoryEntry key={entry.id} entry={entry} />
           ))}
@@ -63,20 +56,43 @@ export async function RecordHistory({ record }: { record: RecordRef }) {
 
 function HistoryEntry({ entry }: { entry: ActivityEntry }) {
   return (
-    <li className="flex flex-col gap-1.5 py-3 text-sm">
-      <p className="flex flex-wrap items-baseline gap-x-2">
-        <span className="font-medium">{ACTORS[entry.actor]}</span>
-        <span>{ACTIONS[entry.action]}</span>
-        {entry.tool ? (
-          <code className="text-muted-foreground text-xs">{entry.tool}</code>
-        ) : null}
+    <li className="flex flex-col gap-1.5 py-3 text-sm sm:flex-row sm:items-start sm:gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:w-40 sm:justify-between">
         <time
           dateTime={entry.createdAt.toISOString()}
-          className="text-muted-foreground ml-auto text-xs"
+          className="text-muted-foreground text-2xs font-mono"
         >
           {WHEN.format(entry.createdAt)}
         </time>
-      </p>
+        <DriverCode actor={entry.actor} />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <p className="flex flex-wrap items-baseline gap-x-2">
+          <span
+            className={
+              entry.action === "refused"
+                ? "text-destructive font-bold"
+                : "font-bold"
+            }
+          >
+            {ACTIONS[entry.action]}
+          </span>
+          {entry.tool ? (
+            <code className="text-muted-foreground font-mono text-xs break-all">
+              {entry.tool}
+            </code>
+          ) : null}
+        </p>
+        <HistoryDetails entry={entry} />
+      </div>
+    </li>
+  );
+}
+
+// What an entry changed, field by field, and its reason.
+function HistoryDetails({ entry }: { entry: ActivityEntry }) {
+  return (
+    <>
       {entry.changes.length ? (
         <dl className="flex flex-col gap-1">
           {entry.changes.map((change) => (
@@ -98,7 +114,7 @@ function HistoryEntry({ entry }: { entry: ActivityEntry }) {
             : `Reason: ${entry.reason}`}
         </p>
       ) : null}
-    </li>
+    </>
   );
 }
 

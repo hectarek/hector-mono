@@ -3,6 +3,7 @@ import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/app/_components/delete-button";
+import { RecordTitle, SectionTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { QuickLog } from "@/app/_components/quick-log";
@@ -58,9 +59,7 @@ export default async function PersonPage({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight">
-                {person.name}
-              </h1>
+              <RecordTitle>{person.name}</RecordTitle>
               {person.rank ? (
                 <Badge variant="secondary">{person.rank}</Badge>
               ) : null}
@@ -103,9 +102,7 @@ export default async function PersonPage({
       </div>
 
       <section aria-labelledby="person-facts" className="flex flex-col gap-2">
-        <h2 id="person-facts" className="font-semibold">
-          Facts
-        </h2>
+        <SectionTitle id="person-facts">Facts</SectionTitle>
         <dl className="flex flex-col gap-2 text-sm">
           {FACTS.map((fact) => (
             <Row key={fact} label={FIELD_LABELS[fact] ?? fact}>
@@ -125,9 +122,7 @@ export default async function PersonPage({
 
       {person.notes ? (
         <section aria-labelledby="person-notes" className="flex flex-col gap-2">
-          <h2 id="person-notes" className="font-semibold">
-            Notes
-          </h2>
+          <SectionTitle id="person-notes">Notes</SectionTitle>
           <p className="text-sm whitespace-pre-wrap">{person.notes}</p>
         </section>
       ) : null}
@@ -136,9 +131,7 @@ export default async function PersonPage({
         aria-labelledby="person-interactions"
         className="flex flex-col gap-2"
       >
-        <h2 id="person-interactions" className="font-semibold">
-          Interactions
-        </h2>
+        <SectionTitle id="person-interactions">Interactions</SectionTitle>
         {interactions.length ? (
           <ul className="flex flex-col gap-3">
             {interactions.map((interaction) => (
@@ -166,9 +159,7 @@ export default async function PersonPage({
       </section>
 
       <section aria-labelledby="person-jobs" className="flex flex-col gap-2">
-        <h2 id="person-jobs" className="font-semibold">
-          Jobs
-        </h2>
+        <SectionTitle id="person-jobs">Jobs</SectionTitle>
         {jobs.length ? (
           <JobList jobs={jobs} />
         ) : (

@@ -1,3 +1,4 @@
+import { RecordTitle } from "@/app/_components/display";
 import { JobForm } from "@/app/_components/job-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { loadJob } from "@/app/_lib/load-job";
@@ -19,7 +20,7 @@ export default async function EditJobPage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <h1 className="text-xl font-semibold tracking-tight">Edit {job.role}</h1>
+      <RecordTitle>Edit {job.role}</RecordTitle>
       <JobForm
         job={job}
         companyId={job.company.id}

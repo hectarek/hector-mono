@@ -43,6 +43,11 @@ const CONTRACT = [
   "warning-foreground",
   "info",
   "info-foreground",
+  "signal",
+  "signal-foreground",
+  "best",
+  "best-foreground",
+  "ghost",
 ];
 
 const STYLES = join(__dirname, "../../../src/styles");

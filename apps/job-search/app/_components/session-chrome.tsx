@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
-import { Bot } from "lucide-react";
 import { Suspense } from "react";
 import { AgentTools } from "@/app/_components/agent-tools";
+import { SectorMark } from "@/app/_components/display";
 import { getPageActor } from "@/app/_lib/current-actor";
 
 // The part of the signed-in frame that depends on who's acting: Claude's banner and page tools.
@@ -26,7 +26,7 @@ export async function ActorChrome() {
   return (
     <>
       <Alert className="mb-4">
-        <Bot />
+        <SectorMark className="fill-info" />
         <AlertTitle>Claude&apos;s session</AlertTitle>
         <AlertDescription>
           Signed in as Claude. Some actions are only for Hector.

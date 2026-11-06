@@ -1,0 +1,63 @@
+import { cn } from "@repo/ui/lib/utils";
+import Link from "next/link";
+import { DisplayLabel } from "@/app/_components/display";
+
+// The most words the instruction sets in the display face; a longer next step reads in Atkinson.
+const DISPLAY_WORDS = 5;
+
+// The one next action, held out on an orange plate (the design system's PitBoard): why it's first,
+// the instruction, and its record. It's the only signal fill on a screen, and the whole board
+// links to the record. The two holes at the top are the board's.
+export function PitBoard({
+  href,
+  reason,
+  instruction,
+  meta,
+}: {
+  href: string;
+  reason: string;
+  instruction: string;
+  meta: string;
+}) {
+  const short = instruction.trim().split(/\s+/).length <= DISPLAY_WORDS;
+  return (
+    <Link
+      href={href}
+      className="bg-signal text-signal-foreground focus-visible:outline-foreground relative grid min-h-11 gap-1 rounded-md px-4 pt-5 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+    >
+      <span
+        aria-hidden="true"
+        className="bg-background absolute top-2 left-2 size-1.5 rounded-full"
+      />
+      <span
+        aria-hidden="true"
+        className="bg-background absolute top-2 right-2 size-1.5 rounded-full"
+      />
+      <DisplayLabel>{reason}</DisplayLabel>
+      <span
+        className={cn(
+          "break-words",
+          short
+            ? "font-heading font-stretch-118% text-xl font-extrabold uppercase"
+            : "text-lg font-bold",
+        )}
+      >
+        {instruction}
+      </span>
+      {meta ? <span className="text-sm">{meta}</span> : null}
+    </Link>
+  );
+}
+
+// The board when nothing is due: a dashed outline that says so, and what to look at instead.
+export function ClearBoard({ instead }: { instead: string }) {
+  return (
+    <div className="border-input grid gap-1 rounded-md border border-dashed px-4 py-4">
+      <DisplayLabel className="text-muted-foreground">All clear</DisplayLabel>
+      <span className="font-heading font-stretch-118% text-xl font-extrabold uppercase">
+        Nothing due today
+      </span>
+      <span className="text-muted-foreground text-sm">{instead}</span>
+    </div>
+  );
+}

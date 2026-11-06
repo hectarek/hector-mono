@@ -4,6 +4,7 @@ import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import {
@@ -15,6 +16,11 @@ import {
 } from "@repo/ui/components/item";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import {
+  EmptySectors,
+  PageTitle,
+  SectionTitle,
+} from "@/app/_components/display";
 import { PracticeList } from "@/app/_components/practice-list";
 import { PracticeReview } from "@/app/_components/practice-review";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -37,7 +43,7 @@ export default async function PracticePage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Practice</h1>
+        <PageTitle>Practice</PageTitle>
         <Button
           size="lg"
           nativeButton={false}
@@ -50,9 +56,7 @@ export default async function PracticePage() {
       </div>
 
       <section aria-labelledby="practice-due" className="flex flex-col gap-2">
-        <h2 id="practice-due" className="font-semibold">
-          Reviews due
-        </h2>
+        <SectionTitle id="practice-due">Reviews due</SectionTitle>
         {due.length ? (
           <ul className="flex flex-col gap-2">
             {due.map(({ id, topic, nextReview }) => (
@@ -96,14 +100,15 @@ export default async function PracticePage() {
         aria-labelledby="practice-recent"
         className="flex flex-col gap-2"
       >
-        <h2 id="practice-recent" className="font-semibold">
-          Recent sessions
-        </h2>
+        <SectionTitle id="practice-recent">Recent sessions</SectionTitle>
         {recent.length ? (
           <PracticeList sessions={recent} />
         ) : (
           <Empty>
             <EmptyHeader>
+              <EmptyMedia>
+                <EmptySectors />
+              </EmptyMedia>
               <EmptyTitle>No practice yet</EmptyTitle>
               <EmptyDescription>
                 Log a session, and its reviews follow on a 2, 7 and 21 day

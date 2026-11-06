@@ -17,7 +17,9 @@ export default function WelcomePage({
   return (
     <main className="pt-safe-10 pb-safe-6 mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4">
       <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Job search</h1>
+        <h1 className="font-heading font-stretch-118% text-2xs font-bold tracking-widest uppercase">
+          Job search
+        </h1>
         <p className="text-muted-foreground text-balance">
           A private workspace. Sign in to continue.
         </p>

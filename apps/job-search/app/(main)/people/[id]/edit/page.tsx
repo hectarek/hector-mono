@@ -1,3 +1,4 @@
+import { RecordTitle } from "@/app/_components/display";
 import { PersonForm } from "@/app/_components/person-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { listCompanies } from "@/app/_lib/list-companies";
@@ -18,9 +19,7 @@ export default async function EditPersonPage({
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <h1 className="text-xl font-semibold tracking-tight">
-        Edit {person.name}
-      </h1>
+      <RecordTitle>Edit {person.name}</RecordTitle>
       <PersonForm person={person} companies={companies} />
     </div>
   );
