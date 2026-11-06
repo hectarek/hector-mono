@@ -1,4 +1,5 @@
 import { AddSourceForm } from "@/app/_components/add-source-form";
+import { PageTitle, SectionTitle } from "@/app/_components/display";
 import { RecordHistory } from "@/app/_components/record-history";
 import { SettingsForm } from "@/app/_components/settings-form";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -16,15 +17,13 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+      <PageTitle>Settings</PageTitle>
 
       <section
         aria-labelledby="settings-targets"
         className="flex flex-col gap-4"
       >
-        <h2 id="settings-targets" className="font-semibold">
-          Targets and the queue
-        </h2>
+        <SectionTitle id="settings-targets">Targets and the queue</SectionTitle>
         <SettingsForm settings={settings} humanOnly={actor.actor !== "owner"} />
       </section>
 
@@ -33,9 +32,7 @@ export default async function SettingsPage() {
         className="flex flex-col gap-4"
       >
         <div>
-          <h2 id="settings-sources" className="font-semibold">
-            Lead sources
-          </h2>
+          <SectionTitle id="settings-sources">Lead sources</SectionTitle>
           <p className="text-muted-foreground text-sm">
             Where jobs come from, each name listed once.
           </p>

@@ -1,10 +1,5 @@
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "@repo/ui/components/item";
 import Link from "next/link";
+import { DriverCode } from "@/app/_components/driver-code";
 import { formatMoment } from "@/app/_lib/format-day";
 import { STATUS_LABELS } from "@/app/_lib/job-labels";
 import type { ClaudeSession } from "@/src/entities/claude-sessions";
@@ -28,44 +23,53 @@ const KINDS: Record<RecordRef["kind"], [one: string, many: string]> = {
   "agent-session": ["session", "sessions"],
 };
 
-// Claude's sessions of the last 7 days on This week (R9): when each started, how many changes it
-// made to each kind of record, and its closing moves and refused attempts one by one. Each links
-// to Claude's page, which lists every change.
+// Claude's sessions of the last 7 days on This week (R9), in the design system's timing feed: a
+// header with Claude's driver code and when each started, how many changes it made to each kind
+// of record, and its closing moves and refused attempts one by one. Each links to Claude's page,
+// which lists every change.
 export function ClaudeSessions({ sessions }: { sessions: ClaudeSession[] }) {
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="bg-card divide-y overflow-hidden rounded-xl border">
       {sessions.map((session) => (
         <li key={session.id ?? session.startedAt.toISOString()}>
-          <Item variant="outline">
-            <ItemContent>
-              <ItemTitle>
-                <Link
-                  href="/agent"
-                  className="underline-offset-4 hover:underline"
-                >
-                  {session.id ? "Session" : "Earlier session"},{" "}
-                  {formatMoment(session.startedAt)}
-                </Link>
-              </ItemTitle>
-              <ItemDescription>
-                {session.counts.length
-                  ? session.counts
-                      .map(
-                        ({ kind, changes }) =>
-                          `${changes} ${KINDS[kind][changes === 1 ? 0 : 1]}`,
-                      )
-                      .join(", ")
-                  : "No changes"}
-              </ItemDescription>
-              {session.listed.length ? (
-                <ul className="text-sm">
-                  {session.listed.map((entry) => (
-                    <li key={entry.id}>{listed(entry)}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </ItemContent>
-          </Item>
+          <div className="bg-muted flex min-h-11 items-center gap-3 px-3 py-2 text-sm">
+            <DriverCode actor="agent" />
+            <Link
+              href="/agent"
+              className="font-bold underline-offset-4 hover:underline"
+            >
+              {session.id ? "Session" : "Earlier session"},{" "}
+              {formatMoment(session.startedAt)}
+            </Link>
+          </div>
+          <div className="flex flex-col gap-1 px-3 py-2 text-sm">
+            <p className="text-muted-foreground">
+              {session.counts.length
+                ? session.counts
+                    .map(
+                      ({ kind, changes }) =>
+                        `${changes} ${KINDS[kind][changes === 1 ? 0 : 1]}`,
+                    )
+                    .join(", ")
+                : "No changes"}
+            </p>
+            {session.listed.length ? (
+              <ul className="flex flex-col gap-1">
+                {session.listed.map((entry) => (
+                  <li
+                    key={entry.id}
+                    className={
+                      entry.action === "refused"
+                        ? "text-destructive"
+                        : undefined
+                    }
+                  >
+                    {listed(entry)}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
         </li>
       ))}
     </ul>

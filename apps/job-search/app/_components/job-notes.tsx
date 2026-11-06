@@ -5,10 +5,10 @@ import { Textarea } from "@repo/ui/components/textarea";
 import { type FormEvent, useState, useTransition } from "react";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { DeleteButton } from "@/app/_components/delete-button";
+import { DriverCode } from "@/app/_components/driver-code";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
-import { ACTOR_LABELS } from "@/app/_lib/job-labels";
 import { addNote, deleteNote, editNote } from "@/app/actions/notes";
 import type { ActionResult } from "@/app/actions/shared";
 import type { Note } from "@/src/entities/models/note.model";
@@ -158,7 +158,7 @@ function NoteEntry({ note, canEdit }: { note: Note; canEdit: boolean }) {
   return (
     <li className="flex flex-col gap-2 py-3 text-sm">
       <p className="flex flex-wrap items-baseline gap-x-2">
-        <span className="font-medium">{ACTOR_LABELS[note.author]}</span>
+        <DriverCode actor={note.author} />
         <time
           dateTime={note.createdAt.toISOString()}
           className="text-muted-foreground text-xs"

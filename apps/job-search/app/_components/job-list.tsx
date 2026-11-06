@@ -1,4 +1,3 @@
-import { Badge } from "@repo/ui/components/badge";
 import {
   Item,
   ItemActions,
@@ -15,12 +14,13 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import Link from "next/link";
+import { StatusChip } from "@/app/_components/status-chip";
 import { formatDay } from "@/app/_lib/format-day";
-import { DISMISS_LABELS, STATUS_LABELS } from "@/app/_lib/job-labels";
+import { DISMISS_LABELS } from "@/app/_lib/job-labels";
 import type { JobSummary } from "@/src/entities/models/job.model";
 
-// A page of jobs: a table on desktop, cards on phones (docs/build-plan.md KTD19). A dismissed
-// proposal shows why in place of its next step.
+// A page of jobs: a table on desktop, cards on phones (docs/build-plan.md KTD19), each job's status
+// as the design system's status chip. A dismissed proposal shows why in place of its next step.
 export function JobList({ jobs }: { jobs: JobSummary[] }) {
   return (
     <>
@@ -46,7 +46,12 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
                   </Link>
                 </TableCell>
                 <TableCell>{job.company.name}</TableCell>
-                <TableCell>{STATUS_LABELS[job.status]}</TableCell>
+                <TableCell>
+                  <StatusChip
+                    status={job.status}
+                    applied={job.appliedOn !== null}
+                  />
+                </TableCell>
                 <TableCell>{next(job) ?? "—"}</TableCell>
               </TableRow>
             ))}
@@ -64,7 +69,10 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Badge variant="secondary">{STATUS_LABELS[job.status]}</Badge>
+                <StatusChip
+                  status={job.status}
+                  applied={job.appliedOn !== null}
+                />
               </ItemActions>
             </Item>
           </li>

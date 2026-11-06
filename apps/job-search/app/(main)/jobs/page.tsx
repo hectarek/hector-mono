@@ -3,10 +3,12 @@ import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { EmptySectors, PageTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
@@ -63,7 +65,7 @@ export default async function JobsPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Jobs</h1>
+        <PageTitle>Jobs</PageTitle>
         <Button
           size="lg"
           nativeButton={false}
@@ -103,6 +105,9 @@ export default async function JobsPage({
       ) : (
         <Empty>
           <EmptyHeader>
+            <EmptyMedia>
+              <EmptySectors />
+            </EmptyMedia>
             <EmptyTitle>{VIEWS[view].label}</EmptyTitle>
             <EmptyDescription>{EMPTY[view]}</EmptyDescription>
           </EmptyHeader>

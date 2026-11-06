@@ -4,6 +4,8 @@
 @layer theme, base, neon-auth, components, utilities;
 
 @import "@repo/ui/styles/globals.css";
+/* The Job Search design system's theme; data-theme="job-search" on <html> turns it on. */
+@import "@repo/ui/styles/themes/job-search.css";
 /* After Tailwind (inside the line above), as Neon Auth requires. */
 @import "@neondatabase/auth/ui/tailwind";
 

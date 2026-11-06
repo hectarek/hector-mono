@@ -25,6 +25,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { DisplayLabel } from "@/app/_components/display";
 
 // The signed-in frame (docs/build-plan.md KTD19): a sidebar on desktop, an off-canvas sheet
 // opened from the header on phones. Each unit adds its section to the menu as it ships.
@@ -33,7 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <span className="px-2 py-1.5 text-sm font-semibold">Job search</span>
+          <DisplayLabel className="px-2 py-1.5">Job search</DisplayLabel>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>

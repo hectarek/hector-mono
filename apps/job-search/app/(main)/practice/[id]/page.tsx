@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/app/_components/delete-button";
+import { RecordTitle, SectionTitle } from "@/app/_components/display";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { nextReviewOf } from "@/app/_components/practice-list";
 import { PracticeReview } from "@/app/_components/practice-review";
@@ -39,9 +40,7 @@ export default async function PracticeSessionPage({
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-semibold tracking-tight break-words">
-              {session.topic}
-            </h1>
+            <RecordTitle className="break-words">{session.topic}</RecordTitle>
             {session.type || session.pattern ? (
               <p className="text-muted-foreground text-sm">
                 {[session.type, session.pattern].filter(Boolean).join(" · ")}
@@ -75,9 +74,7 @@ export default async function PracticeSessionPage({
         aria-labelledby="practice-session"
         className="flex flex-col gap-2"
       >
-        <h2 id="practice-session" className="font-semibold">
-          Session
-        </h2>
+        <SectionTitle id="practice-session">Session</SectionTitle>
         <dl className="flex flex-col gap-2 text-sm">
           <Row label={FIELD_LABELS.practicedOn ?? "Date"}>
             {formatDay(session.practicedOn)}
@@ -104,9 +101,7 @@ export default async function PracticeSessionPage({
         aria-labelledby="practice-reviews"
         className="flex flex-col gap-2"
       >
-        <h2 id="practice-reviews" className="font-semibold">
-          Reviews
-        </h2>
+        <SectionTitle id="practice-reviews">Reviews</SectionTitle>
         {session.reviews.length ? (
           <ul className="flex flex-col gap-3">
             {stepsOf(session.reviews).map(({ review, step }) => (

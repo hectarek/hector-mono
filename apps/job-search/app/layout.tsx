@@ -1,10 +1,28 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import {
+  Atkinson_Hyperlegible_Mono,
+  Atkinson_Hyperlegible_Next,
+  Saira,
+} from "next/font/google";
 import { Providers } from "@/app/_providers/providers";
 import "./globals.css";
 
-const geistSans = Geist({
+// The Job Search design system's three faces: Atkinson Hyperlegible Next for everything read,
+// Saira, set wide through its width axis, for the display layer (labels, codes, titles), and
+// Atkinson Hyperlegible Mono for counts, dates and times.
+const atkinson = Atkinson_Hyperlegible_Next({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+const saira = Saira({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  axes: ["wdth"],
+});
+
+const atkinsonMono = Atkinson_Hyperlegible_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -16,6 +34,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// The browser's bar takes the theme's background in each mode.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f3f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0c0f" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +51,8 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} font-sans antialiased`}
+      data-theme="job-search"
+      className={`${atkinson.variable} ${saira.variable} ${atkinsonMono.variable} font-sans antialiased`}
     >
       <body>
         <Providers>{children}</Providers>

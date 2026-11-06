@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { DriverCode } from "@/app/_components/driver-code";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { callAction } from "@/app/_lib/call-action";
 import { DISMISS_LABELS, WORK_MODE_LABELS } from "@/app/_lib/job-labels";
@@ -20,10 +21,10 @@ import type {
   JobSummary,
 } from "@/src/entities/models/job.model";
 
-// A proposal waiting for Hector on This week (R9, R20): Accept in one tap, or Dismiss and then a
-// tap on the reason (KTD8). Either way the page refreshes without it. A proposal Claude changed
-// since the page read it is refused, and the page refreshes, so he decides on the version he sees
-// (R22).
+// A proposal waiting for Hector on This week (R9, R20), marked as Claude's by its driver code
+// alone (the design system's ProposalCard): Accept in one tap, or Dismiss and then a tap on the
+// reason (KTD8). Either way the page refreshes without it. A proposal Claude changed since the
+// page read it is refused, and the page refreshes, so he decides on the version he sees (R22).
 export function ProposalCard({
   proposal,
   human,
@@ -67,6 +68,7 @@ export function ProposalCard({
       <Item variant="outline">
         <ItemContent>
           <ItemTitle>
+            <DriverCode actor="agent" />
             <Link
               href={`/jobs/${proposal.id}`}
               className="underline-offset-4 hover:underline"

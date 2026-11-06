@@ -1,4 +1,5 @@
 import { Badge } from "@repo/ui/components/badge";
+import { PageTitle, SectionTitle } from "@/app/_components/display";
 import { AGENT_TOOLS } from "@/app/_lib/agent-tools/registry";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
@@ -58,16 +59,14 @@ export default async function AgentPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">Claude</h1>
+        <PageTitle>Claude</PageTitle>
         <p className="text-muted-foreground text-sm">
           Page tools and recent activity
         </p>
       </div>
 
       <section aria-labelledby="agent-tools" className="flex flex-col gap-2">
-        <h2 id="agent-tools" className="font-semibold">
-          Page tools
-        </h2>
+        <SectionTitle id="agent-tools">Page tools</SectionTitle>
         <ul className="flex flex-col divide-y">
           {AGENT_TOOLS.map(({ name, description, annotations = {} }) => (
             <li key={name} className="flex flex-col gap-1.5 py-3 text-sm">
@@ -88,9 +87,7 @@ export default async function AgentPage() {
       </section>
 
       <section aria-labelledby="agent-activity" className="flex flex-col gap-2">
-        <h2 id="agent-activity" className="font-semibold">
-          Recent activity
-        </h2>
+        <SectionTitle id="agent-activity">Recent activity</SectionTitle>
         {entries.length ? (
           <ol className="flex flex-col divide-y">
             {entries.map((entry) => (

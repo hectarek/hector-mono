@@ -60,5 +60,9 @@ mock.module("next/cache", () => ({
 }));
 
 // next/font only works inside Next's compiler; the root layout calls it at import.
-const geist = () => ({ variable: "font-geist", className: "font-geist" });
-mock.module("next/font/google", () => ({ Geist: geist }));
+const font = (name: string) => () => ({ variable: name, className: name });
+mock.module("next/font/google", () => ({
+  Atkinson_Hyperlegible_Next: font("font-atkinson"),
+  Atkinson_Hyperlegible_Mono: font("font-atkinson-mono"),
+  Saira: font("font-saira"),
+}));

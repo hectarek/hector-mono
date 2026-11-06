@@ -7,6 +7,7 @@ import {
   ItemTitle,
 } from "@repo/ui/components/item";
 import Link from "next/link";
+import { PageTitle, RecordTitle } from "@/app/_components/display";
 import { JobForm } from "@/app/_components/job-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { loadCompany } from "@/app/_lib/load-company";
@@ -32,9 +33,7 @@ export default async function NewJobPage({
     ]);
     return (
       <div className="flex max-w-2xl flex-col gap-6">
-        <h1 className="text-xl font-semibold tracking-tight">
-          Add a job at {company.name}
-        </h1>
+        <RecordTitle>Add a job at {company.name}</RecordTitle>
         <JobForm
           companyId={company.id}
           sources={sources.map((source) => source.name)}
@@ -50,7 +49,7 @@ export default async function NewJobPage({
   );
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <h1 className="text-xl font-semibold tracking-tight">Add a job</h1>
+      <PageTitle>Add a job</PageTitle>
       <p className="text-muted-foreground text-sm">
         Which company is it at? For a role through an agency, the agency.
       </p>

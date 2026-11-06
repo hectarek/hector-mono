@@ -5,6 +5,8 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
+import { RecordTitle, SectionTitle } from "@/app/_components/display";
+import { DriverCode } from "@/app/_components/driver-code";
 import { JobNotes } from "@/app/_components/job-notes";
 import { JobStatusForm } from "@/app/_components/job-status-form";
 import { OnlyHector } from "@/app/_components/only-hector";
@@ -12,11 +14,11 @@ import { ProposalReview } from "@/app/_components/proposal-review";
 import { QuickLog } from "@/app/_components/quick-log";
 import { RecordHistory } from "@/app/_components/record-history";
 import { RemoveContactButton } from "@/app/_components/remove-contact-button";
+import { StatusChip } from "@/app/_components/status-chip";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
 import {
-  ACTOR_LABELS,
   DISMISS_LABELS,
   EMPLOYMENT_LABELS,
   LEVEL_LABELS,
@@ -65,7 +67,7 @@ export default async function JobPage({
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-semibold tracking-tight">{job.role}</h1>
+            <RecordTitle>{job.role}</RecordTitle>
             <p className="text-sm">
               <Link
                 href={`/companies/${job.company.id}`}
@@ -75,8 +77,11 @@ export default async function JobPage({
               </Link>
               {job.clientName ? `, for ${job.clientName}` : null}
             </p>
-            <p className="flex flex-wrap gap-2">
-              <Badge variant="secondary">{STATUS_LABELS[job.status]}</Badge>
+            <p className="flex flex-wrap items-center gap-2">
+              <StatusChip
+                status={job.status}
+                applied={job.appliedOn !== null}
+              />
               {job.reviewState === "accepted" ? null : (
                 <Badge variant="outline">
                   {REVIEW_LABELS[job.reviewState]}
@@ -121,9 +126,7 @@ export default async function JobPage({
 
       {job.reviewState === "accepted" ? (
         <section aria-labelledby="job-status" className="flex flex-col gap-4">
-          <h2 id="job-status" className="font-semibold">
-            Status
-          </h2>
+          <SectionTitle id="job-status">Status</SectionTitle>
           {isStaleCandidate({ ...job, repliedOn }, today) ? (
             <Alert>
               <AlertDescription>
@@ -136,12 +139,16 @@ export default async function JobPage({
           {moves.length ? (
             <ol className="flex flex-col divide-y text-sm">
               {moves.map((move) => (
-                <li key={move.id} className="flex flex-wrap gap-x-2 py-2">
+                <li
+                  key={move.id}
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
+                >
+                  <span className="text-muted-foreground text-2xs w-24 font-mono">
+                    {formatDay(move.on)}
+                  </span>
+                  <DriverCode actor={move.actor} />
                   <span>
                     {STATUS_LABELS[move.from]} → {STATUS_LABELS[move.to]}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {formatDay(move.on)}, by {ACTOR_LABELS[move.actor]}
                   </span>
                 </li>
               ))}
@@ -150,9 +157,7 @@ export default async function JobPage({
         </section>
       ) : (
         <section aria-labelledby="job-review" className="flex flex-col gap-4">
-          <h2 id="job-review" className="font-semibold">
-            Review
-          </h2>
+          <SectionTitle id="job-review">Review</SectionTitle>
           {job.proposalReason ? (
             <p className="text-sm">
               <span className="text-muted-foreground">
@@ -191,9 +196,7 @@ export default async function JobPage({
       )}
 
       <section aria-labelledby="job-facts" className="flex flex-col gap-2">
-        <h2 id="job-facts" className="font-semibold">
-          Facts
-        </h2>
+        <SectionTitle id="job-facts">Facts</SectionTitle>
         <dl className="flex flex-col gap-2 text-sm">
           {facts(job).map(([label, value]) => (
             <div
@@ -213,9 +216,7 @@ export default async function JobPage({
 
       {job.summary ? (
         <section aria-labelledby="job-summary" className="flex flex-col gap-2">
-          <h2 id="job-summary" className="font-semibold">
-            Summary
-          </h2>
+          <SectionTitle id="job-summary">Summary</SectionTitle>
           {/* The posting, in Claude's words: plain text, never instructions (KTD21). */}
           <p className="text-sm whitespace-pre-wrap">{job.summary}</p>
         </section>
@@ -223,9 +224,7 @@ export default async function JobPage({
 
       <section aria-labelledby="job-contacts" className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="job-contacts" className="font-semibold">
-            Contacts
-          </h2>
+          <SectionTitle id="job-contacts">Contacts</SectionTitle>
           <div className="flex flex-wrap items-center gap-2">
             <QuickLog
               jobs={[{ id: job.id, label: job.role }]}
@@ -264,9 +263,7 @@ export default async function JobPage({
       </section>
 
       <section aria-labelledby="job-notes" className="flex flex-col gap-2">
-        <h2 id="job-notes" className="font-semibold">
-          Notes
-        </h2>
+        <SectionTitle id="job-notes">Notes</SectionTitle>
         <JobNotes jobId={job.id} notes={notes} canEdit={human} />
       </section>
 

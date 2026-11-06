@@ -10,7 +10,8 @@
      accent(-foreground), destructive, border, input, ring, chart-1..5,
      chart-foreground, radius, sidebar(-foreground|-primary|-primary-foreground|-accent|
      -accent-foreground|-border|-ring), success(-foreground),
-     warning(-foreground), info(-foreground)
+     warning(-foreground), info(-foreground), signal(-foreground),
+     best(-foreground), ghost
    Fonts are not theme tokens: each app loads them with next/font as
    --font-sans (and optionally --font-heading, --font-mono) on <html>.
    ========================================================================== */
@@ -58,6 +59,13 @@
   --warning-foreground: oklch(0.28 0.07 46);
   --info: oklch(0.86 0.08 240);
   --info-foreground: oklch(0.28 0.08 250);
+  /* Now and next (a marker or a call-out), a best-ever result, and a reference mark drawn
+     behind a value (where something stood before). Text on signal or best is its -foreground. */
+  --signal: oklch(0.65 0.2 45);
+  --signal-foreground: oklch(0.145 0 0);
+  --best: oklch(0.55 0.22 295);
+  --best-foreground: oklch(0.985 0 0);
+  --ghost: oklch(0.556 0 0);
 }
 
 .dark {
@@ -100,4 +108,9 @@
   --warning-foreground: oklch(0.99 0.02 95);
   --info: oklch(0.42 0.12 255);
   --info-foreground: oklch(0.98 0.02 240);
+  --signal: oklch(0.72 0.17 50);
+  --signal-foreground: oklch(0.145 0 0);
+  --best: oklch(0.72 0.15 295);
+  --best-foreground: oklch(0.145 0 0);
+  --ghost: oklch(0.6 0 0);
 }

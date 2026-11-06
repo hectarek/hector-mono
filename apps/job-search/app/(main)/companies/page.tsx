@@ -3,12 +3,14 @@ import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import { Input } from "@repo/ui/components/input";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { CompanyList } from "@/app/_components/company-list";
+import { EmptySectors, PageTitle } from "@/app/_components/display";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
 import { COMPANY_PAGE_MAX } from "@/src/entities/models/company.model";
@@ -36,7 +38,7 @@ export default async function CompaniesPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Companies</h1>
+        <PageTitle>Companies</PageTitle>
         <Button
           size="lg"
           nativeButton={false}
@@ -74,6 +76,9 @@ export default async function CompaniesPage({
       ) : (
         <Empty>
           <EmptyHeader>
+            <EmptyMedia>
+              <EmptySectors />
+            </EmptyMedia>
             <EmptyTitle>
               {query ? "No company by that name" : "No companies yet"}
             </EmptyTitle>

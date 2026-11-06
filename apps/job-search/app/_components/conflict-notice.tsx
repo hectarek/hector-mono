@@ -1,4 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
+import { SectorMark } from "@/app/_components/display";
 
 // What a form shows when its save met a change made since it opened (R22, docs/build-plan.md
 // KTD15): each field that changed and its value now. The form holds the record as it is now, with
@@ -13,6 +14,7 @@ export function ConflictNotice({
 }) {
   return (
     <Alert>
+      <SectorMark className="fill-warning" />
       <AlertTitle>Changed since you opened this</AlertTitle>
       <AlertDescription>
         <p>

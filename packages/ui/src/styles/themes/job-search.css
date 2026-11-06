@@ -1,0 +1,111 @@
+/* ==========================================================================
+   JOB SEARCH THEME (job-search)
+   Generated from the "Job Search" design system
+   (https://claude.ai/artifact/7Ac49p5KB5tgFbw78EL6Vx): graphite and paper, one signal
+   orange for now and next, and timing colours for pace (best, success, warning). Change
+   the system, then regenerate, rather than hand-editing values. Token-only.
+
+   Opt in: @import "@repo/ui/styles/themes/job-search.css" and data-theme="job-search"
+   on <html>. Fonts: Atkinson Hyperlegible Next as --font-sans, Saira (with its width
+   axis) as --font-heading, Atkinson Hyperlegible Mono as --font-mono.
+
+   Radius 5px: buttons and fields round at 4px (rounded-md), cards at 7px (rounded-xl).
+   Only the shared contract's tokens are written: the system's destructive-foreground isn't
+   one, and its shape tokens are classes in the app (sector-slant is -skew-x-18,
+   display-stretch is font-stretch-118%).
+   ========================================================================== */
+
+[data-theme="job-search"] {
+  --background: oklch(0.964 0.003 264.5);
+  --foreground: oklch(0.187 0.011 268.1);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.187 0.011 268.1);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.933 0.007 260.7);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.949 0.006 264.5);
+  --muted-foreground: oklch(0.487 0.02 259.4);
+  --accent: oklch(0.933 0.007 260.7);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.896 0.009 258.3);
+  --input: oklch(0.614 0.019 256.3);
+  --ring: var(--signal);
+  --signal: oklch(0.628 0.186 41.5);
+  --signal-foreground: oklch(0.187 0.011 268.1);
+  --best: oklch(0.534 0.228 294);
+  --best-foreground: oklch(1 0 0);
+  --success: oklch(0.511 0.124 154.1);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.525 0.12 62.7);
+  --warning-foreground: oklch(1 0 0);
+  --info: oklch(0.514 0.192 265);
+  --info-foreground: oklch(1 0 0);
+  --destructive: oklch(0.536 0.191 30.1);
+  --ghost: oklch(0.566 0.02 256.3);
+  --chart-1: var(--signal);
+  --chart-2: var(--best);
+  --chart-3: var(--info);
+  --chart-4: var(--success);
+  --chart-5: var(--warning);
+  --chart-foreground: var(--foreground);
+  --sidebar: oklch(0.943 0.006 264.5);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.908 0.009 258.3);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --radius: 0.3125rem;
+}
+
+[data-theme="job-search"].dark,
+.dark [data-theme="job-search"] {
+  --background: oklch(0.155 0.007 271);
+  --foreground: oklch(0.954 0.005 258.3);
+  --card: oklch(0.2 0.01 268.2);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.222 0.013 264.3);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.954 0.005 258.3);
+  --primary-foreground: oklch(0.155 0.007 271);
+  --secondary: oklch(0.255 0.014 261.7);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.222 0.013 264.3);
+  --muted-foreground: oklch(0.707 0.019 261.3);
+  --accent: oklch(0.255 0.014 261.7);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.284 0.014 261.7);
+  --input: oklch(0.521 0.023 257.5);
+  --ring: var(--signal);
+  --signal: oklch(0.725 0.181 45.3);
+  --signal-foreground: oklch(0.17 0.032 53.6);
+  --best: oklch(0.725 0.165 298.2);
+  --best-foreground: oklch(0.194 0.076 292.4);
+  --success: oklch(0.774 0.177 153.9);
+  --success-foreground: oklch(0.22 0.05 153.1);
+  --warning: oklch(0.813 0.165 75);
+  --warning-foreground: oklch(0.213 0.044 78.3);
+  --info: oklch(0.723 0.143 265.4);
+  --info-foreground: oklch(0.201 0.057 267.6);
+  --destructive: oklch(0.693 0.197 27.9);
+  --ghost: oklch(0.581 0.022 260.2);
+  --chart-1: var(--signal);
+  --chart-2: var(--best);
+  --chart-3: var(--info);
+  --chart-4: var(--success);
+  --chart-5: var(--warning);
+  --chart-foreground: var(--foreground);
+  --sidebar: oklch(0.182 0.009 264.3);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.243 0.015 261.7);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --radius: 0.3125rem;
+}

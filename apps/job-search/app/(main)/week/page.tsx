@@ -1,6 +1,7 @@
 import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageTitle, SectionTitle } from "@/app/_components/display";
 import { WeekCounts } from "@/app/_components/week-counts";
 import { WeeklyReviewForm } from "@/app/_components/weekly-review-form";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -37,9 +38,7 @@ export default async function WeekPage({
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            Weekly review
-          </h1>
+          <PageTitle>Weekly review</PageTitle>
           <p className="text-muted-foreground text-sm">
             {formatWeekRange(view.week)}
           </p>
@@ -69,9 +68,9 @@ export default async function WeekPage({
       </div>
 
       <section aria-labelledby="week-counts" className="flex flex-col gap-3">
-        <h2 id="week-counts" className="font-semibold">
+        <SectionTitle id="week-counts">
           {review ? "The week as saved" : "The week so far"}
-        </h2>
+        </SectionTitle>
         <WeekCounts
           counts={review?.counts ?? view.counts}
           targets={review?.targets ?? view.targets}
@@ -86,9 +85,7 @@ export default async function WeekPage({
       </section>
 
       <section aria-labelledby="week-review" className="flex flex-col gap-3">
-        <h2 id="week-review" className="font-semibold">
-          Review
-        </h2>
+        <SectionTitle id="week-review">Review</SectionTitle>
         <WeeklyReviewForm week={view.week} review={review} />
       </section>
     </div>

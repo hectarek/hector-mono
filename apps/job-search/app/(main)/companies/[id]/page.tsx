@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
+import { RecordTitle, SectionTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { RecordHistory } from "@/app/_components/record-history";
@@ -53,9 +54,7 @@ export default async function CompanyPage({
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-semibold tracking-tight">
-              {company.name}
-            </h1>
+            <RecordTitle>{company.name}</RecordTitle>
             {company.tier ? (
               <Badge variant="secondary">Tier {company.tier}</Badge>
             ) : null}
@@ -109,9 +108,7 @@ export default async function CompanyPage({
       ) : null}
 
       <section aria-labelledby="company-facts" className="flex flex-col gap-2">
-        <h2 id="company-facts" className="font-semibold">
-          Facts
-        </h2>
+        <SectionTitle id="company-facts">Facts</SectionTitle>
         <dl className="flex flex-col gap-2 text-sm">
           {FACTS.map((fact) => (
             <div
@@ -133,9 +130,7 @@ export default async function CompanyPage({
         aria-labelledby="company-research"
         className="flex flex-col gap-2"
       >
-        <h2 id="company-research" className="font-semibold">
-          Research
-        </h2>
+        <SectionTitle id="company-research">Research</SectionTitle>
         {company.researchSummary ? (
           <p className="text-sm whitespace-pre-wrap">
             {company.researchSummary}
@@ -155,9 +150,7 @@ export default async function CompanyPage({
 
       <section aria-labelledby="company-jobs" className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="company-jobs" className="font-semibold">
-            Jobs
-          </h2>
+          <SectionTitle id="company-jobs">Jobs</SectionTitle>
           <Button
             variant="secondary"
             size="lg"
@@ -177,9 +170,7 @@ export default async function CompanyPage({
 
       <section aria-labelledby="company-people" className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="company-people" className="font-semibold">
-            People
-          </h2>
+          <SectionTitle id="company-people">People</SectionTitle>
           <Button
             variant="secondary"
             size="lg"
@@ -202,9 +193,7 @@ export default async function CompanyPage({
           aria-labelledby="company-waiting"
           className="flex flex-col gap-2"
         >
-          <h2 id="company-waiting" className="font-semibold">
-            To review
-          </h2>
+          <SectionTitle id="company-waiting">To review</SectionTitle>
           <JobList jobs={waiting.jobs} />
         </section>
       ) : null}
@@ -214,9 +203,7 @@ export default async function CompanyPage({
           aria-labelledby="company-dismissed"
           className="flex flex-col gap-2"
         >
-          <h2 id="company-dismissed" className="font-semibold">
-            Dismissed
-          </h2>
+          <SectionTitle id="company-dismissed">Dismissed</SectionTitle>
           <JobList jobs={dismissed.jobs} />
         </section>
       ) : null}
