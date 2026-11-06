@@ -3,6 +3,7 @@ import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { AUTH_PATHS, skipsWhenSignedIn } from "@/app/_lib/auth-paths";
 import { safeRedirect } from "@/app/_lib/safe-redirect";
@@ -58,7 +59,8 @@ export default async function AuthPage({
 
 // Where to go afterwards (?redirectTo=) and whether someone's already signed in are only
 // known at request time, so the screen waits for them: someone signed in goes on without
-// the form showing first.
+// the form showing first. A prefetch or a prerender stops at connection(), before Neon's
+// session fetch, which would otherwise fail and log once that render ends.
 async function AuthForm({
   path,
   searchParams,
@@ -66,6 +68,7 @@ async function AuthForm({
   path: string;
   searchParams: SearchParams;
 }) {
+  await connection();
   const redirectTo = safeRedirect((await searchParams).redirectTo);
   if (skipsWhenSignedIn(path)) {
     const { data: session } = await auth.getSession();

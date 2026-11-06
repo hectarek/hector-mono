@@ -84,6 +84,7 @@ src/
   infrastructure/repositories/  # base, activity, companies, lead-sources, settings, jobs, notes, people,
                              # interactions, practice, weekly-reviews, import-refs (each + mock)
   infrastructure/services/   # neon-auth, console-logger, transaction-manager (+ mocks)
+  infrastructure/drizzle-errors.ts  # names drizzle's query error for the logs (Logging Rules)
 
 di/                          # container.ts, types.ts, modules: logger, authentication, access, transaction,
                              # activity, session, companies, sources, settings, jobs, notes, people,
@@ -102,7 +103,7 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - `export const dynamic`, `revalidate` and `dynamicParams` fail the build. A page that reads the session, its address or the database in its body gets a `loading.tsx` in its own folder.
 - Read the session first, then the clock: This week does (`todayIn` runs at request time).
 - A page without a `loading.tsx` puts what it reads at request time inside `<Suspense>`: the welcome screen's Sign in, the auth pages' form and the private screen's account. So does the `(main)` layout's `SessionChrome`.
-- `experimental.hideLogsAfterAbort` keeps Neon Auth's own `catch` from logging the end of a prerender as a cookie validation error during `next build`.
+- Only a real request reads the session or the database. `getPageActor`, the auth pages' form and the private screen's account first `await connection()` (`next/server`), where a prefetch or a prerender stops, so a new session read goes behind one too. Partial prefetching renders each route's App Shell at request time, and without the stop a prefetch ran the page's session and database reads until its render ended. On Vercel the reads still running then failed and logged errors, and so did Neon Auth's session fetch; locally, `next start` let them finish (2026-11-06). Behind `connection()`, `next build` reaches neither, so `experimental.hideLogsAfterAbort` went.
 - `next build` needs `NEON_AUTH_BASE_URL` and `NEON_AUTH_COOKIE_SECRET` set (`lib/auth/server.ts` throws at import without them), but nothing at build time reaches Neon or the database, so placeholder values build.
 
 ## Auth Rules
@@ -157,7 +158,7 @@ Claude works in the app only through page tools (WebMCP, KTD5). Setting up its b
 - Never call `console.*` directly.
 - Use `ILoggerService` in server-side app code and the layers; `lib/logger.ts` in root files that wrap `lib/auth/server.ts` (the auth route).
 - Log error classes, codes and record ids, never a field value, an error's message, a response body or a token (KTD20): pass an error through `loggable(err)`.
-- A new error class sets `override name = "<ClassName>"`, as those in `src/entities/errors/common.ts` do: the production build renames classes (`class D extends Error`, checked in `.next/server` on 2026-10-23), and `loggable` names an error by its `name`.
+- A new error class sets `override name = "<ClassName>"`, as those in `src/entities/errors/common.ts` do: the production build renames classes (`class D extends Error`, checked in `.next/server` on 2026-10-23), and `loggable` names an error by its `name`. Drizzle's `DrizzleQueryError`, which wraps every failed query, sets none, so production logged it as `cX` until `src/infrastructure/drizzle-errors.ts` named it on its prototype (2026-11-06). A library error that logs under a short made-up name gets the same.
 
 ## Environments
 

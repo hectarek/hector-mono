@@ -1,6 +1,7 @@
 // Runs before every test file (bunfig.toml [test].preload).
 import { mock } from "bun:test";
 import { unstable_isUnrecognizedActionError } from "next/dist/client/components/unrecognized-action-error";
+import * as nextServer from "next/server";
 import { testDb } from "@/tests/_support/database";
 import { fakeNeonAuth } from "@/tests/_support/neon-auth";
 import { NotFoundPage, nextState, Redirected } from "@/tests/_support/next";
@@ -50,6 +51,13 @@ mock.module("next/navigation", () => ({
   // The real check: the page tools' wrapper (app/_lib/call-action.ts) tells by it that a deploy
   // removed an action.
   unstable_isUnrecognizedActionError,
+}));
+
+// Outside Next.js there's no request to wait for: a page's connection() goes on at once. The
+// rest of the module is the real one, which the proxy uses.
+mock.module("next/server", () => ({
+  ...nextServer,
+  connection: async () => {},
 }));
 
 // Outside Next.js there's no page to refresh: tests read the paths an action revalidated.

@@ -18,6 +18,7 @@ import {
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+import "@/src/infrastructure/drizzle-errors";
 
 const DOMAIN_ERRORS = [
   ConflictError,

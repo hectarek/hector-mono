@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { getInjection } from "@/di/container";
 import { NotAllowedError } from "@/src/entities/errors/common";
 import type { CurrentActor } from "@/src/entities/models/actor.model";
@@ -11,7 +12,12 @@ const PRIVATE_PATH = "/private";
 // it, as a layout doesn't stop its pages from rendering. No session throws
 // UnauthenticatedError into app/error.tsx (the proxy sends signed-out visitors to the welcome
 // screen before this runs), and so does a session that can't be read.
+//
+// Only a real request reads: a prefetch or a prerender stops at connection(), before the
+// session or the database. A prefetch's render ends before the reads it starts can finish,
+// and on Vercel those reads then fail and log as errors.
 export async function getPageActor(): Promise<CurrentActor> {
+  await connection();
   try {
     return await getInjection("IResolveActor")();
   } catch (err) {
