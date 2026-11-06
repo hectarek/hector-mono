@@ -2,6 +2,7 @@ import { authViewPaths } from "@neondatabase/auth/react/ui/server";
 import { Button } from "@repo/ui/components/button";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { getInjection } from "@/di/container";
 
@@ -37,8 +38,10 @@ export default function PrivatePage() {
 }
 
 // Which account this is, known only at request time; the rest of the screen is the same for
-// everyone, so it's prerendered.
+// everyone, so it's prerendered. A prefetch or a prerender stops at connection(), before the
+// session read.
 async function SignedInAs() {
+  await connection();
   const session = await getInjection("IAuthenticationService").getSession();
   return session ? (
     <p className="text-sm">Signed in as {session.user.email}</p>

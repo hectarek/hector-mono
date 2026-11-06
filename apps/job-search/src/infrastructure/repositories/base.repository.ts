@@ -5,6 +5,7 @@ import type { ILoggerService } from "@/src/application/services/logger.service.i
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+import "@/src/infrastructure/drizzle-errors";
 import { unwrapDrizzleTx } from "@/src/infrastructure/services/transaction-manager.service";
 
 // What an update sets updated_at to: now, or a millisecond on from the value it holds when now
