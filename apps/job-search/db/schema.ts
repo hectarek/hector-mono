@@ -336,9 +336,6 @@ export const people = pgTable(
     ask: text("ask"),
     nextStep: text("next_step"),
     nextDate: day("next_date"),
-    // Each person's text moved to their first note in 0008 (the UX plan's UX8), and nothing reads
-    // or writes it since. A later migration drops it, once 0008 has run in production.
-    notes: text("notes"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

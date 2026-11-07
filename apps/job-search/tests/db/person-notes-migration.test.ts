@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { OWNER } from "@/tests/_support/app";
 import { resetDatabase, sql } from "@/tests/_support/database";
 
 // 0008 (the UX plan's UX8): each person's notes, one text until then, become their first dated
 // note. The test database ran it while empty, so the test runs its SQL again over people as the
-// code before it wrote them.
+// code before it wrote them. 0009 dropped the column it reads, so the test puts it back for its
+// own run and drops it after.
 const MIGRATION = await Bun.file(
   `${import.meta.dir}/../../db/migrations/0008_person_notes.sql`,
 ).text();
@@ -25,7 +26,11 @@ const added = (id: string, actor: string) =>
   );
 
 describe("0008, a person's notes as their first note [postgres]", () => {
-  beforeEach(resetDatabase);
+  beforeEach(async () => {
+    await resetDatabase();
+    await sql("alter table people add column notes text");
+  });
+  afterEach(() => sql("alter table people drop column notes"));
 
   it("moves each person's text to a note signed by whoever added them, dated when they were", async () => {
     const imported = await aPerson("Pat Example", "Met at a meetup.");

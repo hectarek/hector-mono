@@ -64,6 +64,13 @@
       "when": 1794088861728,
       "tag": "0008_person_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794094298763,
+      "tag": "0009_drop_person_notes",
+      "breakpoints": true
     }
   ]
 }
