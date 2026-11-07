@@ -83,13 +83,18 @@ export function acceptedStage(
   return { status: "verify", nextStep: "Verify it's hiring", nextDate: today };
 }
 
-// What a follow-up message linked to the job leaves it at (R3): a job at applied has its next date
-// moved to 14 days after applied-on. Any other job stays as it was.
-export function afterFollowUp(job: JobStage): JobStage {
+// What a follow-up message linked to the job, sent on `sentOn`, leaves it at (R3): a job at applied
+// has its next date moved to 14 days after applied-on, or a week after the message went if that's
+// later, so a late follow-up doesn't leave the job due at once (revised 2026-11-07, the UX plan's
+// Q5). Any other job stays as it was.
+export function afterFollowUp(job: JobStage, sentOn: string): JobStage {
   if (job.status !== "applied" || !job.appliedOn) {
     return job;
   }
-  return { ...job, nextDate: addDays(job.appliedOn, SECOND_FOLLOW_UP_DAYS) };
+  const second = addDays(job.appliedOn, SECOND_FOLLOW_UP_DAYS);
+  // "YYYY-MM-DD" dates sort as text, so the later of the two is the last.
+  const [, later = second] = [second, addDays(sentOn, FOLLOW_UP_DAYS)].sort();
+  return { ...job, nextDate: later };
 }
 
 // The latest applied-on a job can have and be a stale candidate on the day given (R3).

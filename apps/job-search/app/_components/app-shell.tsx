@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@repo/ui/components/sidebar";
+import { Toaster } from "@repo/ui/components/sonner";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import {
@@ -64,6 +65,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </SidebarInset>
+      {/* What a save changed, with Undo where it can be taken back; its live region reads each
+          one out (the UX plan's UX3). */}
+      <Toaster position="bottom-center" />
     </SidebarProvider>
   );
 }

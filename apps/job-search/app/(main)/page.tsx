@@ -8,6 +8,7 @@ import { DueList } from "@/app/_components/due-list";
 import { ProposalCard } from "@/app/_components/proposal-card";
 import { WeekCounts } from "@/app/_components/week-counts";
 import { getPageActor } from "@/app/_lib/current-actor";
+import { formatWeekday } from "@/app/_lib/format-day";
 import { getInjection } from "@/di/container";
 import { formatWeekRange } from "@/src/entities/week";
 
@@ -22,10 +23,15 @@ export default async function ThisWeekPage() {
   // The session first: it keeps other accounts out, and it ends the prerender, so the clock
   // is read only at request time.
   const actor = await getPageActor();
-  const { today, monday, decisions, due, claude, counts, targets } =
+  const { today, monday, decisions, due, later, claude, counts, targets } =
     await getInjection("IGetTodayController")({}, actor);
   const human = actor.actor === "owner";
   const waiting = decisions.proposals.length + decisions.debriefs.length;
+  const dueCount =
+    due.jobs.length +
+    due.people.length +
+    due.stale.length +
+    due.practice.length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -33,7 +39,7 @@ export default async function ThisWeekPage() {
       <div className="flex flex-col gap-1">
         <PageTitle>This week</PageTitle>
         <p className="text-muted-foreground text-sm">
-          {formatWeekRange(monday)}
+          {formatWeekday(today)} · {formatWeekRange(monday)}
         </p>
       </div>
 
@@ -59,8 +65,10 @@ export default async function ThisWeekPage() {
       ) : null}
 
       <section aria-labelledby="week-due" className="flex flex-col gap-3">
-        <SectionTitle id="week-due">Due</SectionTitle>
-        <DueList due={due} today={today} waiting={waiting} />
+        <SectionTitle id="week-due">
+          Due today and late{dueCount ? ` · ${dueCount}` : ""}
+        </SectionTitle>
+        <DueList due={due} later={later} today={today} waiting={waiting} />
       </section>
 
       {claude.length ? (

@@ -21,7 +21,12 @@ import type {
   ConversationToDebrief,
   TodayView,
 } from "@/src/entities/models/today.model";
-import { mondayOf, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
+import {
+  addDays,
+  mondayOf,
+  PLAN_TIME_ZONE,
+  todayIn,
+} from "@/src/entities/week";
 
 export type IGetTodayUseCase = ReturnType<typeof getTodayUseCase>;
 
@@ -128,14 +133,16 @@ export const getTodayUseCase = (
     const now = new Date();
     const today = todayIn(PLAN_TIME_ZONE, now);
     const monday = mondayOf(today);
+    // Jobs and people are read due through Sunday, then split into due by today and later.
+    const sunday = addDays(monday, 6);
     const since = new Date(now.getTime() - CLAUDE_DAYS * 24 * 60 * 60 * 1000);
 
     const [
       pending,
       toDebrief,
-      dueJobs,
+      weekJobs,
       staleJobs,
-      people,
+      weekPeople,
       open,
       changes,
       settings,
@@ -143,9 +150,9 @@ export const getTodayUseCase = (
     ] = await Promise.all([
       proposals(ownerId),
       debriefs(ownerId, now),
-      jobsRepository.listDue(ownerId, today),
+      jobsRepository.listDue(ownerId, sunday),
       stale(ownerId, today),
-      duePeople(ownerId, today),
+      duePeople(ownerId, sunday),
       practiceRepository.listOpen(ownerId),
       claudeChanges(ownerId, since),
       settingsRepository.get(ownerId),
@@ -160,15 +167,30 @@ export const getTodayUseCase = (
       ),
     ]);
     const staleIds = new Set(staleJobs.map(({ id }) => id));
+    // Each job with its contacts, so its follow-up can be logged to one (the UX plan's UX3).
+    const jobs = await Promise.all(
+      weekJobs
+        .filter(({ id }: JobSummary) => !staleIds.has(id))
+        .map(async (job) => ({
+          ...job,
+          contacts: await peopleRepository.listForJob(ownerId, job.id),
+        })),
+    );
+    const byToday = ({ nextDate }: { nextDate: string | null }) =>
+      nextDate !== null && nextDate <= today;
     const view: TodayView = {
       today,
       monday,
       decisions: { proposals: pending, debriefs: toDebrief },
       due: {
-        jobs: dueJobs.filter(({ id }: JobSummary) => !staleIds.has(id)),
-        people,
+        jobs: jobs.filter(byToday),
+        people: weekPeople.filter(byToday),
         stale: staleJobs,
         practice: dueBy(open, today),
+      },
+      later: {
+        jobs: jobs.filter((job) => !byToday(job)),
+        people: weekPeople.filter((person) => !byToday(person)),
       },
       claude: claudeSessions(changes),
       counts,

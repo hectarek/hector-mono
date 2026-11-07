@@ -112,7 +112,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 - R3. Status moves keep the follow-up rhythm:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
   - a move to `applied` sets the next step "Follow up", due on applied-on + 7 days
-  - a follow-up message linked to the job moves the next date to applied-on + 14 days
+  - a follow-up message linked to the job moves the next date to applied-on + 14 days, or to a week after the message went if that's later (revised 2026-11-07 in UX3, Hector's call on the UX plan's Q5: a late follow-up had left the job due again at once)
   - an applied job with no reply by applied-on + 21 days is listed as a stale candidate, where a reply is any move past `applied` or a reply linked to the job
   - a move to a closed status takes a reason and clears the next step and next date
 - R4. Companies hold structured facts (website, location, headcount, industry, office policy, leave policy, tier) plus a short research summary and a reference to the long-form research kept in Hector's private docs. A company's page lists its jobs and people.
@@ -128,7 +128,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 - R9. This week works on a phone and shows its sections in this order, collapsing any that are empty:
   1. decisions: proposals to review and meetings to debrief
-  2. due and overdue next steps for jobs and people, stale candidates, and practice reviews due
+  2. due and overdue next steps for jobs and people, stale candidates, and practice reviews due (revised 2026-11-07 in UX4: grouped as late, today, stale candidates and reviews, with the next task on the pit board, picked by company tier, then person rank, then date until the timing tower's pace data exists; then what's due later this week, folded by weekday)
   3. today's and tomorrow's calendar, or its connection state (R15)
   4. Claude's recent changes
   5. the week's counts against targets
@@ -160,7 +160,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
   - the account pages and account endpoints: Claude's session can only read itself and sign out
 
   Claude's dated notes only append. Its fit note (R17) is replaced, with the old text kept in the activity log.
-- R22. Hector's open views pick up Claude's changes when shown and at least once a minute, and an edit made against a record that changed since it was read is caught, not silently overwritten. (Revised 2026-10-29, Hector's call: so is accepting, dismissing or reopening a proposal that changed since it was read.)
+- R22. Hector's open views pick up Claude's changes when shown and at least once a minute, and an edit made against a record that changed since it was read is caught, not silently overwritten. (Revised 2026-10-29, Hector's call: so is accepting, dismissing or reopening a proposal that changed since it was read.) (Revised 2026-11-07 in UX4, Hector's call on the UX plan's Q10: a refresh waits while a sheet is open or a field has focus, and catches up once they're done, so it never closes a sheet or moves a row under a finger.)
 
 **Access and privacy**
 

@@ -11,7 +11,8 @@ const thisWeek = async () => within(await renderOnServer(await ThisWeekPage()));
 
 describe("This week", () => {
   // R9: decisions first, then what's due. The job due today is on the pit board or in a row,
-  // whichever the run's other tests leave earliest, so its link is found by the role it carries.
+  // whichever the run's other tests leave first; either is a button that opens its sheet, found
+  // by the role the job carries.
   it("shows Claude's proposal under Decisions before what's due, and a job due today under Due", async () => {
     const companyId = await aCompany();
     const proposal = await aProposal(companyId, {
@@ -27,7 +28,9 @@ describe("This week", () => {
     const page = await thisWeek();
 
     const decisions = page.getByRole("region", { name: "Decisions" });
-    const dueSection = page.getByRole("region", { name: "Due" });
+    const dueSection = page.getByRole("region", {
+      name: /^Due today and late · \d+$/,
+    });
     expect(
       within(decisions).getByRole("link", { name: proposal.role }),
     ).toBeTruthy();
@@ -35,7 +38,7 @@ describe("This week", () => {
       within(decisions).getAllByRole("button", { name: "Accept" }).length,
     ).toBeGreaterThan(0);
     expect(
-      within(dueSection).getByRole("link", { name: new RegExp(due.role) }),
+      within(dueSection).getByRole("button", { name: new RegExp(due.role) }),
     ).toBeTruthy();
     expect(
       decisions.compareDocumentPosition(dueSection) &
@@ -79,7 +82,7 @@ describe("This week", () => {
 
     // Accepted, it's due today, to check it's still hiring (R20).
     expect(
-      page.queryByRole("link", { name: new RegExp(proposal.role) }),
+      page.queryByRole("button", { name: new RegExp(proposal.role) }),
     ).toBeTruthy();
     const decisions = page.queryByRole("region", { name: "Decisions" });
     expect(
@@ -87,8 +90,11 @@ describe("This week", () => {
         ? within(decisions).queryByRole("link", { name: proposal.role })
         : null,
     ).toBeNull();
-    expect(
-      page.queryByRole("link", { name: new RegExp(later.role) }),
-    ).toBeNull();
+    // Due tomorrow, it's under Later this week, folded, if tomorrow is this week; never due yet.
+    const rows = page.queryAllByRole("button", {
+      name: new RegExp(later.role),
+      hidden: true,
+    });
+    expect(rows.every((row) => row.closest("details"))).toBe(true);
   });
 });

@@ -109,19 +109,33 @@ describe("a follow-up message (R3)", () => {
     nextDate: "2026-10-08",
   };
 
-  it("moves an applied job's next date to 14 days after applied-on", () => {
-    expect(afterFollowUp(applied)).toEqual({
+  it("moves an applied job's next date to 14 days after applied-on, for a follow-up on time or early", () => {
+    expect(afterFollowUp(applied, "2026-10-08")).toEqual({
+      ...applied,
+      nextDate: "2026-10-15",
+    });
+    expect(afterFollowUp(applied, "2026-10-03")).toEqual({
       ...applied,
       nextDate: "2026-10-15",
     });
   });
 
+  // Revised 2026-11-07 (the UX plan's Q5): a late follow-up no longer leaves the job due at once.
+  it("moves it to a week after a late follow-up went, when that's later", () => {
+    expect(afterFollowUp(applied, "2026-10-13")).toEqual({
+      ...applied,
+      nextDate: "2026-10-20",
+    });
+  });
+
   it("leaves a job past applied, or never applied to, as it was", () => {
-    expect(afterFollowUp({ ...applied, status: "screen" })).toEqual({
+    expect(
+      afterFollowUp({ ...applied, status: "screen" }, "2026-10-08"),
+    ).toEqual({
       ...applied,
       status: "screen",
     });
-    expect(afterFollowUp(TARGET)).toEqual(TARGET);
+    expect(afterFollowUp(TARGET, "2026-10-08")).toEqual(TARGET);
   });
 });
 

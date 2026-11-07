@@ -16,10 +16,17 @@ export function dataOf<T>(result: ActionResult<T>): T {
   return result.data;
 }
 
-export async function aCompany(name = "Acme"): Promise<string> {
+// A company Hector adds, with any other facts given (its tier, say).
+export async function aCompany(
+  name = "Acme",
+  facts: Record<string, unknown> = {},
+): Promise<string> {
   signInAs("owner");
   const saved = dataOf(
-    await saveCompany({ name: `${name} ${crypto.randomUUID().slice(0, 8)}` }),
+    await saveCompany({
+      name: `${name} ${crypto.randomUUID().slice(0, 8)}`,
+      ...facts,
+    }),
   );
   return saved.company.id;
 }
