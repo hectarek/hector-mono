@@ -24,7 +24,9 @@ import {
   jobLogged,
   type UpdateJobInput,
 } from "@/src/entities/models/job.model";
+import { withStepDate } from "@/src/entities/next-step";
 import { postingKey } from "@/src/entities/posting-link";
+import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type IUpdateJobUseCase = ReturnType<typeof updateJobUseCase>;
 
@@ -90,8 +92,10 @@ export const updateJobUseCase = (
       }
 
       const changes: Partial<JobRow> = {};
+      // A step left with no date is a week out (R1 as revised 2026-11-07, the UX plan's Q1).
+      const dated = withStepDate(given, current, todayIn(PLAN_TIME_ZONE));
       for (const fact of PLAIN_FACTS) {
-        const value = given[fact];
+        const value = dated[fact];
         if (value !== undefined && value !== current[fact]) {
           Object.assign(changes, { [fact]: value });
         }

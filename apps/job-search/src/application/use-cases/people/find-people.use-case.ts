@@ -7,11 +7,13 @@ import {
   type PeopleQuery,
   personSummary,
 } from "@/src/entities/models/person.model";
+import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type IFindPeopleUseCase = ReturnType<typeof findPeopleUseCase>;
 
-// The owner's people by name, a page at a time (find_people, docs/build-plan.md U7), each with the
-// dates their interactions give them.
+// The owner's people by name or by next step, a page at a time (find_people, docs/build-plan.md U7,
+// the UX plan's UX6), each with the dates their interactions give them. The next-step order tells
+// late from due today and upcoming by today in Eastern time.
 export const findPeopleUseCase = (
   peopleRepository: IPeopleRepository,
   interactionsRepository: IInteractionsRepository,
@@ -20,7 +22,11 @@ export const findPeopleUseCase = (
   const logger = loggerService.child({ layer: "use-case", op: "findPeople" });
 
   return async (ownerId: string, query: PeopleQuery): Promise<PeoplePage> => {
-    const { people, nextOffset } = await peopleRepository.find(ownerId, query);
+    const { people, nextOffset } = await peopleRepository.find(
+      ownerId,
+      query,
+      todayIn(PLAN_TIME_ZONE),
+    );
     const dated = await withDates(interactionsRepository, ownerId, people);
     logger.debug("People found", { count: dated.length });
     return { people: dated.map(personSummary), nextOffset };

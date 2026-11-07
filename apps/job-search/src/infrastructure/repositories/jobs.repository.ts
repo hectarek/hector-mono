@@ -6,6 +6,8 @@ import {
   desc,
   eq,
   inArray,
+  isNotNull,
+  isNull,
   lte,
   sql,
 } from "drizzle-orm";
@@ -66,6 +68,9 @@ const JOB = {
   company: { id: companies.id, name: companies.name, tier: companies.tier },
   source: { id: leadSources.id, name: leadSources.name },
 };
+
+// A next step with no date.
+const UNDATED = and(isNotNull(jobs.nextStep), isNull(jobs.nextDate));
 
 export class JobsRepository extends BaseRepository implements IJobsRepository {
   constructor(logger: ILoggerService) {
@@ -162,7 +167,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
 
   async find(
     ownerId: string,
-    { status, reviewState, companyId, limit, offset }: JobQuery,
+    { status, reviewState, companyId, undated, limit, offset }: JobQuery,
   ): Promise<JobPage> {
     const statuses = statusesFor(status);
     try {
@@ -175,6 +180,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
             eq(jobs.reviewState, reviewState),
             statuses ? inArray(jobs.status, [...statuses]) : undefined,
             companyId ? eq(jobs.companyId, companyId) : undefined,
+            undated ? UNDATED : undefined,
           ),
         )
         .orderBy(
@@ -208,6 +214,25 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
       return rows.map(jobSummary);
     } catch (err) {
       this.handleError(err, "listDue", { ownerId });
+    }
+  }
+
+  async countUndated(ownerId: string): Promise<number> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ jobs: count() })
+        .from(jobs)
+        .where(
+          and(
+            eq(jobs.ownerId, ownerId),
+            eq(jobs.reviewState, "accepted"),
+            inArray(jobs.status, [...OPEN_STATUSES]),
+            UNDATED,
+          ),
+        );
+      return row?.jobs ?? 0;
+    } catch (err) {
+      this.handleError(err, "countUndated", { ownerId });
     }
   }
 

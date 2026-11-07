@@ -84,7 +84,11 @@ const FACTS: readonly {
   { fact: "targetRole", kind: "text", maxLength: 80 },
   { fact: "foundOn", kind: "date" },
   { fact: "nextStep", kind: "text", maxLength: 120 },
-  { fact: "nextDate", kind: "date" },
+  {
+    fact: "nextDate",
+    kind: "date",
+    description: "Left empty with a step, it's due a week from today",
+  },
   {
     fact: "appliedOn",
     kind: "date",

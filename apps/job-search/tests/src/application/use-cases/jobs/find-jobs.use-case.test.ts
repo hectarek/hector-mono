@@ -30,7 +30,7 @@ describeEachBackend("findJobs", () => {
   const roles = async (narrower?: Partial<JobQuery>) =>
     (await app.findJobs(OWNER, query(narrower))).jobs.map((job) => job.role);
 
-  it("lists accepted jobs by next date, none last, then role, as a list shows them", async () => {
+  it("lists accepted jobs by next date, then role, as a list shows them", async () => {
     await jobs.add(acme, { role: "Gadget designer" });
     await jobs.add(acme, { role: "Widget engineer", nextDate: "2026-11-02" });
     await jobs.add(acme, { role: "Anvil tester", nextDate: "2026-10-30" });
@@ -98,6 +98,24 @@ describeEachBackend("findJobs", () => {
     ]);
     expect(await roles({ status: "target" })).toEqual(["Open role"]);
     expect(await roles({ companyId: globex })).toEqual(["Globex role"]);
+  });
+
+  // The UX plan's UX6: the steps with no date, which This week never shows as due.
+  it("lists a job whose step has no date after the dated ones, and narrows to those alone", async () => {
+    await jobs.add(acme, { role: "Dated role" });
+    const undated = await jobs.add(acme, { role: "Undated role" });
+    // As an import left one, before the rule.
+    await app.repos.transactions.startTransaction((tx) =>
+      app.repos.jobs.update(
+        OWNER,
+        undated.id,
+        { nextStep: "Ask about the team", nextDate: null },
+        tx,
+      ),
+    );
+
+    expect(await roles()).toEqual(["Dated role", "Undated role"]);
+    expect(await roles({ undated: true })).toEqual(["Undated role"]);
   });
 
   it("answers a page at a time, and keeps another owner's jobs out", async () => {

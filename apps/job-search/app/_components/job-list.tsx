@@ -14,9 +14,11 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import Link from "next/link";
+import { DateChips } from "@/app/_components/date-chips";
 import { StatusChip } from "@/app/_components/status-chip";
 import { formatDay } from "@/app/_lib/format-day";
 import { DISMISS_LABELS } from "@/app/_lib/job-labels";
+import { isClosed } from "@/src/entities/job-lifecycle";
 import type { JobSummary } from "@/src/entities/models/job.model";
 
 // A page of jobs: a table on desktop, cards on phones (docs/build-plan.md KTD19), each job's status
@@ -52,7 +54,12 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
                     applied={job.appliedOn !== null}
                   />
                 </TableCell>
-                <TableCell>{next(job) ?? "—"}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-2">
+                    <span>{next(job) ?? "—"}</span>
+                    <JobDateChips job={job} />
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -60,7 +67,7 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
       </div>
       <ul className="flex flex-col gap-2 md:hidden">
         {jobs.map((job) => (
-          <li key={job.id}>
+          <li key={job.id} className="flex flex-col gap-2">
             <Item variant="outline" render={<Link href={`/jobs/${job.id}`} />}>
               <ItemContent>
                 <ItemTitle>{job.role}</ItemTitle>
@@ -75,11 +82,24 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
                 />
               </ItemActions>
             </Item>
+            {/* Outside the card, which is a link. */}
+            <JobDateChips job={job} />
           </li>
         ))}
       </ul>
     </>
   );
+}
+
+// An open job's step with no date gets one-tap date chips, so it can join This week (the UX plan's
+// UX6). A proposal waits on Hector's review, which sets its step.
+function JobDateChips({ job }: { job: JobSummary }) {
+  return job.reviewState === "accepted" &&
+    !isClosed(job.status) &&
+    job.nextStep &&
+    !job.nextDate ? (
+    <DateChips kind="job" record={job} name={job.role} />
+  ) : null;
 }
 
 // What's next for a job: its next step and when, or why it was dismissed.

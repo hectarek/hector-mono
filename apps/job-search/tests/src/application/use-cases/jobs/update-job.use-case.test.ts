@@ -7,6 +7,7 @@ import {
 } from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import { type Job, updateJobSchema } from "@/src/entities/models/job.model";
+import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import {
   ANOTHER_OWNER,
   describeEachBackend,
@@ -78,6 +79,41 @@ describeEachBackend("updateJob", () => {
       { field: "level", before: null, after: "staff" },
       { field: "location", before: "Springfield", after: "Shelbyville" },
     ]);
+  });
+
+  // R1 as revised 2026-11-07 (the UX plan's Q1): a next step always carries a date.
+  it("dates a step a change leaves with no date a week out", async () => {
+    const updated = await app.updateJob(
+      HECTOR,
+      changeTo(job, { nextStep: "Call the recruiter", nextDate: null }),
+    );
+
+    expect(updated).toMatchObject({
+      nextStep: "Call the recruiter",
+      nextDate: addDays(todayIn(PLAN_TIME_ZONE), 7),
+    });
+  });
+
+  it("leaves an old step with no date as it is when a change sets neither the step nor the date", async () => {
+    // As an import left one, before the rule.
+    const undated = await app.repos.transactions.startTransaction((tx) =>
+      app.repos.jobs.update(
+        OWNER,
+        job.id,
+        { nextStep: "Ask about the team", nextDate: null },
+        tx,
+      ),
+    );
+
+    const updated = await app.updateJob(
+      HECTOR,
+      changeTo(undated, { location: "Shelbyville" }),
+    );
+
+    expect(updated).toMatchObject({
+      nextStep: "Ask about the team",
+      nextDate: null,
+    });
   });
 
   it("refuses Claude's change against an old updatedAt with the job as it is now", async () => {

@@ -47,6 +47,8 @@ export interface IJobsRepository {
   // Accepted jobs at an open status whose next date is on or before the day given: due or
   // overdue, the earliest first, then by role (R9).
   listDue(ownerId: string, day: string): Promise<JobSummary[]>;
+  // Accepted jobs at an open status whose next step has no date.
+  countUndated(ownerId: string): Promise<number>;
   // Accepted jobs at applied since the day given or earlier, the earliest applied first: the stale
   // rule's candidates, before their replies are read (R3).
   listAppliedBy(ownerId: string, day: string): Promise<JobSummary[]>;

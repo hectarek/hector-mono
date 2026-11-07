@@ -21,6 +21,10 @@ const toggleVariants = cva(
           "h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         sm: "h-7 min-w-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        // A full-width option whose text wraps, for choices too long to share a row (job-search's
+        // job picks, "Role at Company").
+        block:
+          "h-auto w-full justify-start px-3 py-2 text-left whitespace-normal",
       },
     },
     defaultVariants: {

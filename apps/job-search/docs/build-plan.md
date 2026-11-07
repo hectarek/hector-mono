@@ -107,7 +107,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **Pipeline**
 
-- R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size. (Revised 2026-10-29, Hector's call: a job shows its company's tier and holds none of its own.)
+- R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size. (Revised 2026-10-29, Hector's call: a job shows its company's tier and holds none of its own.) (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given, and a job Hector adds with no step starts with checking it's hiring, due that day, as an accepted proposal does.)
 - R2. A job's status is `verify`, `target`, `applied`, `screen`, `onsite` or `offer`, or a closed status: `rejected`, `closed`, `stale`, `skipped`, `withdrawn`, `offer-accepted` or `offer-declined`. Any move is allowed, and each move records the date it happened, today by default.
 - R3. Status moves keep the follow-up rhythm:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
@@ -121,14 +121,14 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **People and outreach**
 
-- R7. Hector can add, view, edit and delete people with company, their role, how he knows them, rank A, B or C, the ask, next step and next date, and notes. Their messaged-on, replied-on and met-on dates come from logged interactions.
+- R7. Hector can add, view, edit and delete people with company, their role, how he knows them, rank A, B or C, the ask, next step and next date, and notes. Their messaged-on, replied-on and met-on dates come from logged interactions. (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given. People lists by next step: late, due today, upcoming, then steps with no date, then none, rank A first in each, with a view of the steps with no date.)
 - R8. Interactions log sent messages, replies and conversations on a date (today by default, earlier on request), optionally linked to a job, and several sent messages can be logged in one step. A scheduled conversation ends as held, cancelled or no-show, and only held ones count as conversations.
 
 **Daily and weekly views**
 
 - R9. This week works on a phone and shows its sections in this order, collapsing any that are empty:
   1. decisions: proposals to review and meetings to debrief
-  2. due and overdue next steps for jobs and people, stale candidates, and practice reviews due (revised 2026-11-07 in UX4: grouped as late, today, stale candidates and reviews, with the next task on the pit board, picked by company tier, then person rank, then date until the timing tower's pace data exists; then what's due later this week, folded by weekday)
+  2. due and overdue next steps for jobs and people, stale candidates, and practice reviews due (revised 2026-11-07 in UX4: grouped as late, today, stale candidates and reviews, with the next task on the pit board, picked by company tier, then person rank, then date until the timing tower's pace data exists; then what's due later this week, folded by weekday; and in UX6, a line counting the people and open jobs whose next step has no date, each count a link to the list that dates them)
   3. today's and tomorrow's calendar, or its connection state (R15)
   4. Claude's recent changes
   5. the week's counts against targets

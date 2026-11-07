@@ -110,8 +110,13 @@ export const personIdSchema = z.object({ id: z.uuid() });
 // The most people a page of find_people holds.
 const PEOPLE_PAGE_MAX = 50;
 
-// find_people's input: people whose names hold the query, ignoring case (everyone without one),
-// at the company given, if any, by name, a page at a time.
+// How find_people orders people: by name, or by their next steps (the UX plan's UX6): late, due
+// today, upcoming, then steps with no date, then everyone with none, rank A first within each.
+const PEOPLE_ORDERS = ["name", "next-step"] as const;
+
+// find_people's input: people whose names, or whose company's names, hold the query, ignoring
+// case (everyone without one), at the company given, if any, only those whose next step has no
+// date when undated is true, in the order asked, a page at a time.
 export const findPeopleSchema = z.object({
   query: z
     .string()
@@ -119,6 +124,10 @@ export const findPeopleSchema = z.object({
     .max(120, { error: "At most 120 characters" })
     .optional(),
   companyId: z.uuid().optional(),
+  undated: z.boolean().optional(),
+  order: z
+    .enum(PEOPLE_ORDERS, { error: `Use one of: ${PEOPLE_ORDERS.join(", ")}` })
+    .default("name"),
   limit: z.int().min(1).max(PEOPLE_PAGE_MAX).default(20),
   offset: z.int().min(0).default(0),
 });

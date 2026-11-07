@@ -1,4 +1,4 @@
-import { and, asc, count, eq, lte, sql } from "drizzle-orm";
+import { and, asc, count, eq, isNotNull, isNull, lte, sql } from "drizzle-orm";
 import { companies, jobPeople, people } from "@/db/schema";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -41,6 +41,19 @@ const PERSON_REF = {
 
 // Names sort by code point ("C"), then id, as the mock sorts them.
 const BY_NAME = [sql`${people.name} collate "C"`, people.id] as const;
+
+// By next step (the UX plan's UX6): late, due today, upcoming, then steps with no date, then no
+// step at all; rank A first within each, then by date and name, as the mock orders them.
+const byNextStep = (today: string) =>
+  [
+    sql`case when ${people.nextDate} < ${today} then 0 when ${people.nextDate} = ${today} then 1 when ${people.nextDate} > ${today} then 2 when ${people.nextStep} is not null then 3 else 4 end`,
+    sql`case ${people.rank} when 'A' then 0 when 'B' then 1 when 'C' then 2 else 3 end`,
+    sql`${people.nextDate} asc nulls last`,
+    ...BY_NAME,
+  ] as const;
+
+// A next step with no date.
+const UNDATED = and(isNotNull(people.nextStep), isNull(people.nextDate));
 
 export class PeopleRepository
   extends BaseRepository
@@ -132,7 +145,8 @@ export class PeopleRepository
 
   async find(
     ownerId: string,
-    { query, companyId, limit, offset }: PeopleQuery,
+    { query, companyId, undated, order, limit, offset }: PeopleQuery,
+    today: string,
   ): Promise<{ people: PersonRecord[]; nextOffset: number | null }> {
     try {
       // One more than the page, to tell whether another follows.
@@ -144,12 +158,13 @@ export class PeopleRepository
           and(
             eq(people.ownerId, ownerId),
             query
-              ? sql`strpos(lower(${people.name}), lower(${query})) > 0`
+              ? sql`(strpos(lower(${people.name}), lower(${query})) > 0 or strpos(lower(coalesce(${companies.name}, '')), lower(${query})) > 0)`
               : undefined,
             companyId ? eq(people.companyId, companyId) : undefined,
+            undated ? UNDATED : undefined,
           ),
         )
-        .orderBy(...BY_NAME)
+        .orderBy(...(order === "next-step" ? byNextStep(today) : BY_NAME))
         .limit(limit + 1)
         .offset(offset);
       return {
@@ -189,6 +204,18 @@ export class PeopleRepository
         .orderBy(...BY_NAME);
     } catch (err) {
       this.handleError(err, "listForCompany", { ownerId, companyId });
+    }
+  }
+
+  async countUndated(ownerId: string): Promise<number> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ people: count() })
+        .from(people)
+        .where(and(eq(people.ownerId, ownerId), UNDATED));
+      return row?.people ?? 0;
+    } catch (err) {
+      this.handleError(err, "countUndated", { ownerId });
     }
   }
 

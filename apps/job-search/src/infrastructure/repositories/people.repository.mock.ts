@@ -84,20 +84,36 @@ export class MockPeopleRepository implements IPeopleRepository {
 
   async find(
     ownerId: string,
-    { query, companyId, limit, offset }: PeopleQuery,
+    { query, companyId, undated, order, limit, offset }: PeopleQuery,
+    today: string,
   ): Promise<{ people: PersonRecord[]; nextOffset: number | null }> {
     const needle = (query ?? "").toLowerCase();
-    const matching = this.peopleOf(ownerId).filter(
-      (person) =>
-        person.name.toLowerCase().includes(needle) &&
-        (companyId === undefined || person.companyId === companyId),
+    const records = await Promise.all(
+      this.peopleOf(ownerId)
+        .filter(
+          (person) =>
+            (companyId === undefined || person.companyId === companyId) &&
+            (!undated || isUndated(person)),
+        )
+        .map((person) => this.recordOf(ownerId, person)),
     );
+    // A query matches part of the person's name or of their company's.
+    const matching = records.filter(
+      (person) =>
+        person.name.toLowerCase().includes(needle) ||
+        (person.company?.name.toLowerCase().includes(needle) ?? false),
+    );
+    if (order === "next-step") {
+      // A stable sort, so people the same in every key stay by name.
+      matching.sort(
+        (a, b) =>
+          stepGroup(a, today) - stepGroup(b, today) ||
+          rankOrder(a) - rankOrder(b) ||
+          byDate(a.nextDate, b.nextDate),
+      );
+    }
     return {
-      people: await Promise.all(
-        matching
-          .slice(offset, offset + limit)
-          .map((person) => this.recordOf(ownerId, person)),
-      ),
+      people: matching.slice(offset, offset + limit),
       nextOffset: matching.length > offset + limit ? offset + limit : null,
     };
   }
@@ -119,6 +135,10 @@ export class MockPeopleRepository implements IPeopleRepository {
     return this.peopleOf(ownerId)
       .filter((person) => person.companyId === companyId)
       .map(refOf);
+  }
+
+  async countUndated(ownerId: string): Promise<number> {
+    return this.peopleOf(ownerId).filter(isUndated).length;
   }
 
   async countForCompany(ownerId: string, companyId: string): Promise<number> {
@@ -221,4 +241,30 @@ export class MockPeopleRepository implements IPeopleRepository {
 
 function refOf({ id, name, role, rank }: StoredPerson): PersonRef {
   return { id, name, role, rank };
+}
+
+type Step = Pick<PersonRecord, "nextStep" | "nextDate">;
+
+const isUndated = ({ nextStep, nextDate }: Step) =>
+  nextStep !== null && nextDate === null;
+
+// The next-step order's groups, as the table's: late, due today, upcoming, a step with no date,
+// then no step at all.
+function stepGroup({ nextStep, nextDate }: Step, today: string): number {
+  if (nextDate !== null) {
+    return nextDate < today ? 0 : nextDate === today ? 1 : 2;
+  }
+  return nextStep !== null ? 3 : 4;
+}
+
+// Rank A first, then B and C, then none.
+const rankOrder = ({ rank }: Pick<PersonRecord, "rank">) =>
+  rank === null ? 3 : ["A", "B", "C"].indexOf(rank);
+
+// The earlier date first, and none last.
+function byDate(a: string | null, b: string | null): number {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return byCodePoint(a, b);
 }

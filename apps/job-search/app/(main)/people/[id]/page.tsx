@@ -12,7 +12,6 @@ import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
 import { CONVERSATION_LABELS, INTERACTION_LABELS } from "@/app/_lib/job-labels";
-import { listCompanies } from "@/app/_lib/list-companies";
 import { loadPerson } from "@/app/_lib/load-person";
 import { deleteInteraction } from "@/app/actions/interactions";
 import { deletePerson } from "@/app/actions/people";
@@ -40,10 +39,7 @@ export default async function PersonPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const [{ person, interactions, jobs }, companies] = await Promise.all([
-    loadPerson(id, actor),
-    listCompanies(actor),
-  ]);
+  const { person, interactions, jobs } = await loadPerson(id, actor);
   const human = actor.actor === "owner";
 
   return (
@@ -77,7 +73,6 @@ export default async function PersonPage({
             <QuickLog
               person={{ id: person.id, name: person.name }}
               jobs={jobs.map((job) => ({ id: job.id, label: jobLabel(job) }))}
-              companies={companies}
             />
             <Button
               variant="secondary"

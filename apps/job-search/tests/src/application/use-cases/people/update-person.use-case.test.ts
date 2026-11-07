@@ -7,6 +7,7 @@ import {
   type Person,
   updatePersonSchema,
 } from "@/src/entities/models/person.model";
+import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import {
   describeEachBackend,
   makeApp,
@@ -39,6 +40,50 @@ describeEachBackend("updatePerson", () => {
 
   const update = (input: Record<string, unknown>, context = CLAUDE) =>
     app.updatePerson(context, updatePersonSchema.parse(input));
+
+  // R7 as revised 2026-11-07 (the UX plan's Q1): a next step always carries a date.
+  it("dates a step a change gives with no date a week out, and keeps a date a change gives", async () => {
+    const weekOut = addDays(todayIn(PLAN_TIME_ZONE), 7);
+    const stepped = await update({
+      id: ada.id,
+      updatedAt: ada.updatedAt.toISOString(),
+      nextStep: "Send the deck",
+    });
+    expect(stepped).toMatchObject({
+      nextStep: "Send the deck",
+      nextDate: weekOut,
+    });
+
+    const cleared = await update({
+      id: ada.id,
+      updatedAt: stepped.updatedAt.toISOString(),
+      nextDate: null,
+    });
+    expect(cleared.nextDate).toBe(weekOut);
+  });
+
+  it("leaves an old step with no date as it is when a change sets neither the step nor the date", async () => {
+    // As an import left one, before the rule.
+    const undated = await app.repos.transactions.startTransaction((tx) =>
+      app.repos.people.update(
+        OWNER,
+        ada.id,
+        { nextStep: "Ask about the team", nextDate: null },
+        tx,
+      ),
+    );
+
+    const updated = await update({
+      id: ada.id,
+      updatedAt: undated.updatedAt.toISOString(),
+      rank: "A",
+    });
+
+    expect(updated).toMatchObject({
+      nextStep: "Ask about the team",
+      nextDate: null,
+    });
+  });
 
   it("changes only the fields sent, against the updatedAt read with the person, and logs each change (R22)", async () => {
     const updated = await update({

@@ -16,9 +16,14 @@ import { JOB_PAGE_MAX, type JobQuery } from "@/src/entities/models/job.model";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-// The pipeline's views: open and closed jobs, the review queue (R20) and dismissed proposals.
+// The pipeline's views: open jobs, those of them whose step has no date (the UX plan's UX6),
+// closed jobs, the review queue (R20) and dismissed proposals.
 const VIEWS = {
   open: { label: "Open", query: { status: "open", reviewState: "accepted" } },
+  "no-date": {
+    label: "No date",
+    query: { status: "open", reviewState: "accepted", undated: true },
+  },
   closed: {
     label: "Closed",
     query: { status: "closed", reviewState: "accepted" },
@@ -27,19 +32,23 @@ const VIEWS = {
   dismissed: { label: "Dismissed", query: { reviewState: "dismissed" } },
 } satisfies Record<
   string,
-  { label: string; query: Pick<JobQuery, "status" | "reviewState"> }
+  {
+    label: string;
+    query: Pick<JobQuery, "status" | "reviewState" | "undated">;
+  }
 >;
 type View = keyof typeof VIEWS;
 
 const EMPTY: Record<View, string> = {
   open: "No open jobs. Add one, or accept one of Claude's proposals.",
+  "no-date": "Every open job's next step has a date.",
   closed: "No closed jobs yet.",
   review: "Nothing to review: Claude's proposals wait here.",
   dismissed: "No dismissed proposals.",
 };
 
 // The pipeline (R1): one view at a time, by next date, a page at a time, with the number of
-// proposals waiting for review.
+// proposals waiting for review. A step with no date can be dated from its row.
 export default async function JobsPage({
   searchParams,
 }: {

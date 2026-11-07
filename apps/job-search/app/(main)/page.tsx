@@ -23,8 +23,17 @@ export default async function ThisWeekPage() {
   // The session first: it keeps other accounts out, and it ends the prerender, so the clock
   // is read only at request time.
   const actor = await getPageActor();
-  const { today, monday, decisions, due, later, claude, counts, targets } =
-    await getInjection("IGetTodayController")({}, actor);
+  const {
+    today,
+    monday,
+    decisions,
+    due,
+    later,
+    undated,
+    claude,
+    counts,
+    targets,
+  } = await getInjection("IGetTodayController")({}, actor);
   const human = actor.actor === "owner";
   const waiting = decisions.proposals.length + decisions.debriefs.length;
   const dueCount =
@@ -68,7 +77,13 @@ export default async function ThisWeekPage() {
         <SectionTitle id="week-due">
           Due today and late{dueCount ? ` · ${dueCount}` : ""}
         </SectionTitle>
-        <DueList due={due} later={later} today={today} waiting={waiting} />
+        <DueList
+          due={due}
+          later={later}
+          undated={undated}
+          today={today}
+          waiting={waiting}
+        />
       </section>
 
       {claude.length ? (

@@ -223,10 +223,12 @@ The biggest change to how the app feels: every due task can be finished, or move
 - **Fixes:** findings 13 and 35.
 - **Do:**
   - A Log button in the shell's top bar on every page. The sheet loads companies when it opens, through `findCompanies`, so the layout reads nothing more at request time.
+    (Revised 2026-11-07 in UX5: the add form's company field searches `findCompanies` as it's typed, so no page reads every company for the log, and the sheet reads none unless a person is added. People's own Log went, since the top bar's is the same sheet.)
   - Matches show each person's company and role, and the search matches company names too. Once a person is picked, their jobs show as chips to link.
   - On a job's page, its contacts are one-tap picks.
   - A conversation can be logged ahead of time with its start and end, so Hector's own coffees reach the debrief list (the log already takes `scheduled`).
   - What happened, who, and Save stay on a phone's first screen. Date, job, note and next step fold under More, open whenever one is set. Job choices are full-width options whose text wraps, and on a laptop the sheet stops at a reading width.
+    (Revised 2026-11-07 in UX5: the job's options show under who, outside More, whenever there's a job to link, since linking a sent message to an applied job moves its follow-up (R3) and a folded choice is easy to miss. More holds the date, note and next step, and opens when a save's answer names one of them.)
 - **Verify:** from This week on a phone, logging a sent message to one person takes four taps or fewer.
 - **Touches:** the quick log's line in the app's UI Rules. **Size:** M.
 
@@ -236,6 +238,7 @@ The biggest change to how the app feels: every due task can be finished, or move
 - **Do:**
   - People opens on its next steps: late, today, upcoming, then those with no date, rank A first within each, with a No date filter. Each undated row gets date chips that save in one tap.
   - Every sheet and form that takes a step gives it a date by default (Q1), and a job added with no step gets one too.
+    (Revised 2026-11-07 in UX6: the default is a rule in the use cases that write a step, so Claude's tools keep it too, and each form says what an empty date means. A job Hector adds with no step starts with checking it's hiring, due that day, as an accepted proposal does. Jobs gets a No date view as People does, since UX4's line counts jobs too. A dated step can't go back to no date, so the chips' toast has no Undo.)
 - **Verify:** every person with a step shows in one ordered list; a fixture job added with no step lands on This week on its default date.
 - **Touches:** `find_people` takes the filter and the order, an input change, so `TOOL_SET_VERSION` and the registry test move. The default is a rule in the use cases; R1 and R7 are revised. **Size:** M.
 

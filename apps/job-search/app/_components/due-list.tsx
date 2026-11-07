@@ -52,16 +52,19 @@ const byPriority = (a: StepTask, b: StepTask) =>
 
 // What's due on This week (R9, the design system's PitBoard and TaskRow): the next task on the pit
 // board, then the rest in groups (late, today, stale candidates and practice reviews), each row one
-// tap that opens its sheet or its record, and what's due later this week, folded by weekday. With
-// nothing due, the board says so and points at what's waiting instead.
+// tap that opens its sheet or its record, what's due later this week, folded by weekday, and how
+// many steps have no date. With nothing due, the board says so and points at what's waiting
+// instead.
 export function DueList({
   due,
   later,
+  undated,
   today,
   waiting,
 }: {
   due: TodayView["due"];
   later: TodayView["later"];
+  undated: TodayView["undated"];
   today: string;
   // How many decisions wait above, for the clear board's pointer.
   waiting: number;
@@ -91,6 +94,7 @@ export function DueList({
           }
         />
         <LaterThisWeek tasks={coming} today={today} />
+        <NoDateLine undated={undated} />
       </div>
     );
   }
@@ -155,6 +159,7 @@ export function DueList({
         </ul>
       </Group>
       <LaterThisWeek tasks={coming} today={today} />
+      <NoDateLine undated={undated} />
     </div>
   );
 }
@@ -366,6 +371,42 @@ function LaterThisWeek({ tasks, today }: { tasks: StepTask[]; today: string }) {
     </details>
   );
 }
+
+// How many next steps have no date, so never show as due, each count a link to the list that
+// dates them in one tap (R9 as revised 2026-11-07, the UX plan's UX6).
+function NoDateLine({ undated }: { undated: TodayView["undated"] }) {
+  const { people, jobs } = undated;
+  if (!people && !jobs) return null;
+  return (
+    <p className="flex flex-wrap items-center gap-x-4">
+      <DisplayLabel className="text-muted-foreground">No date</DisplayLabel>
+      {people ? (
+        <Link
+          href="/people?view=no-date"
+          aria-label={`${counted(people, "person", "people")} whose next step has no date`}
+          className={COUNT_LINK}
+        >
+          {counted(people, "person", "people")}
+        </Link>
+      ) : null}
+      {jobs ? (
+        <Link
+          href="/jobs?view=no-date"
+          aria-label={`${counted(jobs, "job", "jobs")} whose next step has no date`}
+          className={COUNT_LINK}
+        >
+          {counted(jobs, "job", "jobs")}
+        </Link>
+      ) : null}
+    </p>
+  );
+}
+
+const COUNT_LINK =
+  "inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4";
+
+const counted = (count: number, one: string, many: string) =>
+  `${count} ${count === 1 ? one : many}`;
 
 // When a task is due, the way a row says it: so many days late, today, or a later day's weekday.
 function when(due: string, today: string): string {

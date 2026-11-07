@@ -119,7 +119,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_today",
     description:
-      "Today's view, in Eastern time: the proposals waiting for Hector, conversations to debrief, jobs and people due, applications gone stale, practice reviews due, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
+      "Today's view, in Eastern time: the proposals waiting for Hector, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
     inputSchema: inputSchemaOf(getTodaySchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: getToday,
@@ -204,7 +204,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "find_jobs",
     description:
-      "Lists jobs: accepted ones unless reviewState asks for pending or dismissed (list_proposals reads the queue). Narrow by status (open, closed or one status) and companyId; ordered by next date, a page at a time (limit, offset). Each comes with the updatedAt that update_job sends back.",
+      "Lists jobs: accepted ones unless reviewState asks for pending or dismissed (list_proposals reads the queue). Narrow by status (open, closed or one status), companyId, and undated (true keeps those whose next step has no date); ordered by next date, a page at a time (limit, offset). Each comes with the updatedAt that update_job sends back.",
     inputSchema: inputSchemaOf(findJobsSchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: findJobs,
@@ -220,14 +220,14 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "propose_job",
     description:
-      "Proposes a job for Hector's review: companyId, role, the posting's link, its source by name (list_sources lists them; a new name is added) and Claude's reason, with any details. It waits as pending until Hector decides. A posting already on a job answers duplicate with that job, and a full queue answers queue-full. Dates are YYYY-MM-DD in Eastern time; pay is a posted yearly band in US dollars.",
+      "Proposes a job for Hector's review: companyId, role, the posting's link, its source by name (list_sources lists them; a new name is added) and Claude's reason, with any details. It waits as pending until Hector decides. A posting already on a job answers duplicate with that job, and a full queue answers queue-full. Dates are YYYY-MM-DD in Eastern time; pay is a posted yearly band in US dollars. A next step given no date is due a week from today.",
     inputSchema: inputSchemaOf(proposeJobSchema),
     action: proposeJob,
   },
   {
     name: "update_job",
     description:
-      "Changes the facts sent on a job, against the updatedAt read with it (get_job, find_jobs). null clears a fact, and a newer change answers conflict with the job as it is now. The status moves only through set_job_status or close_job. From Claude, applied-on moves only with a status move, and a dismissed proposal stays as Hector left it.",
+      "Changes the facts sent on a job, against the updatedAt read with it (get_job, find_jobs). null clears a fact, and a newer change answers conflict with the job as it is now. The status moves only through set_job_status or close_job. From Claude, applied-on moves only with a status move, and a dismissed proposal stays as Hector left it. A next step given no date is due a week from today.",
     inputSchema: inputSchemaOf(updateJobSchema),
     action: updateJob,
   },
@@ -256,7 +256,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "find_people",
     description:
-      "Lists people by name, a page at a time (limit, offset): query matches part of a name, ignoring case, and companyId narrows to one company. Each comes with the dates their interactions give them (latest message sent, reply and held conversation) and the updatedAt that update_person sends back.",
+      "Lists people a page at a time (limit, offset). query matches part of a name or of the company's name, ignoring case; companyId narrows to one company; undated (true) keeps those whose next step has no date. order is name (the default) or next-step: late, today, upcoming, no date, then none, rank A first in each. Each comes with the dates its interactions give (latest message sent, reply, held conversation) and the updatedAt that update_person sends back.",
     inputSchema: inputSchemaOf(findPeopleSchema),
     annotations: { readOnlyHint: true },
     action: findPeople,
@@ -272,21 +272,21 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "add_person",
     description:
-      "Adds a person: a name, whatever else is known, and jobId to make them that job's contact. Their message, reply and conversation dates come from log_interaction, not from here.",
+      "Adds a person: a name, whatever else is known, and jobId to make them that job's contact. Their message, reply and conversation dates come from log_interaction, not from here. A next step given no date is due a week from today.",
     inputSchema: inputSchemaOf(addPersonSchema),
     action: addPerson,
   },
   {
     name: "update_person",
     description:
-      "Changes the facts sent on a person, against the updatedAt read with them (get_person, find_people). null clears a fact, and a newer change answers conflict with the person as they are now. Their dates come from their interactions: log_interaction moves them.",
+      "Changes the facts sent on a person, against the updatedAt read with them (get_person, find_people). null clears a fact, and a newer change answers conflict with the person as they are now. Their dates come from their interactions: log_interaction moves them. A next step given no date is due a week from today.",
     inputSchema: inputSchemaOf(updatePersonSchema),
     action: updatePerson,
   },
   {
     name: "log_interaction",
     description:
-      "Logs one kind of interaction (a sent message, a reply or a conversation) with the people in personIds, on occurredOn (YYYY-MM-DD in Eastern time, today by default, never later); several people only for sent messages. jobId links them to a job. scheduled gives a conversation's start and end; with conversationId and outcome, it records how that conversation went. nextStep and nextDate set the people's next step.",
+      "Logs one kind of interaction (a sent message, a reply or a conversation) with the people in personIds, on occurredOn (YYYY-MM-DD in Eastern time, today by default, never later); several people only for sent messages. jobId links them to a job. scheduled gives a conversation's start and end; with conversationId and outcome, it records how that conversation went. nextStep and nextDate set the people's next step. A next step given no date is due a week from today.",
     inputSchema: inputSchemaOf(logInteractionSchema),
     action: logInteraction,
   },

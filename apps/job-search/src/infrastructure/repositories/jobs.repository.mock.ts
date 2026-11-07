@@ -103,7 +103,7 @@ export class MockJobsRepository implements IJobsRepository {
 
   async find(
     ownerId: string,
-    { status, reviewState, companyId, limit, offset }: JobQuery,
+    { status, reviewState, companyId, undated, limit, offset }: JobQuery,
   ): Promise<JobPage> {
     const statuses = statusesFor(status);
     const matching = this.rows
@@ -112,7 +112,8 @@ export class MockJobsRepository implements IJobsRepository {
           owner === ownerId &&
           job.reviewState === reviewState &&
           (!statuses || statuses.includes(job.status)) &&
-          (!companyId || job.companyId === companyId),
+          (!companyId || job.companyId === companyId) &&
+          (!undated || isUndated(job)),
       )
       .map(({ job }) => job)
       .sort(
@@ -139,6 +140,15 @@ export class MockJobsRepository implements IJobsRepository {
         !isClosed(job.status) && job.nextDate !== null && job.nextDate <= day,
       (a, b) => byNextDate(a.nextDate, b.nextDate),
     );
+  }
+
+  async countUndated(ownerId: string): Promise<number> {
+    const undated = await this.summaries(
+      ownerId,
+      (job) => !isClosed(job.status) && isUndated(job),
+      () => 0,
+    );
+    return undated.length;
   }
 
   async listAppliedBy(ownerId: string, day: string): Promise<JobSummary[]> {
@@ -306,3 +316,7 @@ function byNextDate(a: string | null, b: string | null): number {
   }
   return byCodePoint(a, b);
 }
+
+// A next step with no date.
+const isUndated = ({ nextStep, nextDate }: StoredJob) =>
+  nextStep !== null && nextDate === null;

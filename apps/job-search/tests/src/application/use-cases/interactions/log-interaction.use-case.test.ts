@@ -183,6 +183,23 @@ describeEachBackend("logInteraction", () => {
     expect((await personOf(ada)).metOn).toBe("2026-10-28");
   });
 
+  // R7 as revised 2026-11-07 (the UX plan's Q1): a next step always carries a date.
+  it("dates a next step the log gives with no date a week from today", async () => {
+    await app.logInteraction(
+      HECTOR,
+      log({
+        personIds: [ada],
+        kind: "message-sent",
+        nextStep: "Wait for a reply",
+      }),
+    );
+
+    expect(await personOf(ada)).toMatchObject({
+      nextStep: "Wait for a reply",
+      nextDate: "2026-11-05",
+    });
+  });
+
   it("takes the same outcome twice as once, and refuses another for a conversation that ended", async () => {
     const coffee = only(
       await app.logInteraction(
