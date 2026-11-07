@@ -19,6 +19,7 @@ import {
   type NextStepRecord,
   NextStepSheet,
 } from "@/app/_components/next-step-sheet";
+import { APP_TOASTER } from "@/app/_lib/notify";
 import { getJob, setJobStatus, updateJob } from "@/app/actions/jobs";
 import { addPerson, getPerson } from "@/app/actions/people";
 import { getToday } from "@/app/actions/week";
@@ -57,7 +58,7 @@ const theSheet = (
     >
       The row
     </NextStepSheet>
-    <Toaster />
+    <Toaster id={APP_TOASTER} />
   </>
 );
 const sheet = (...args: Parameters<typeof theSheet>) =>
