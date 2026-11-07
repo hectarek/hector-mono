@@ -87,17 +87,21 @@ export class MockPeopleRepository implements IPeopleRepository {
     { query, companyId, limit, offset }: PeopleQuery,
   ): Promise<{ people: PersonRecord[]; nextOffset: number | null }> {
     const needle = (query ?? "").toLowerCase();
-    const matching = this.peopleOf(ownerId).filter(
+    const records = await Promise.all(
+      this.peopleOf(ownerId)
+        .filter(
+          (person) => companyId === undefined || person.companyId === companyId,
+        )
+        .map((person) => this.recordOf(ownerId, person)),
+    );
+    // A query matches part of the person's name or of their company's.
+    const matching = records.filter(
       (person) =>
-        person.name.toLowerCase().includes(needle) &&
-        (companyId === undefined || person.companyId === companyId),
+        person.name.toLowerCase().includes(needle) ||
+        (person.company?.name.toLowerCase().includes(needle) ?? false),
     );
     return {
-      people: await Promise.all(
-        matching
-          .slice(offset, offset + limit)
-          .map((person) => this.recordOf(ownerId, person)),
-      ),
+      people: matching.slice(offset, offset + limit),
       nextOffset: matching.length > offset + limit ? offset + limit : null,
     };
   }

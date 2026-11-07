@@ -11,9 +11,7 @@ import { UserPlus } from "lucide-react";
 import Link from "next/link";
 import { EmptySectors, PageTitle } from "@/app/_components/display";
 import { PersonList } from "@/app/_components/person-list";
-import { QuickLog } from "@/app/_components/quick-log";
 import { getPageActor } from "@/app/_lib/current-actor";
-import { listCompanies } from "@/app/_lib/list-companies";
 import { getInjection } from "@/di/container";
 
 // How many people a page of the list holds.
@@ -21,8 +19,8 @@ const PAGE = 50;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-// The owner's people by name, a page at a time, with a search by name (R7), and the quick log for
-// a message, a reply or a conversation with anyone (R8).
+// The owner's people by name, a page at a time, with a search by name or company (R7). The quick
+// log for a message, a reply or a conversation with anyone is the shell's (R8).
 export default async function PeoplePage({
   searchParams,
 }: {
@@ -32,13 +30,10 @@ export default async function PeoplePage({
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q.slice(0, 120) : "";
   const offset = Math.max(0, Number.parseInt(String(params.offset), 10) || 0);
-  const [{ people, nextOffset }, companies] = await Promise.all([
-    getInjection("IFindPeopleController")(
-      { query, limit: PAGE, offset },
-      actor,
-    ),
-    listCompanies(actor),
-  ]);
+  const { people, nextOffset } = await getInjection("IFindPeopleController")(
+    { query, limit: PAGE, offset },
+    actor,
+  );
 
   // The same search, from another place in the list.
   const pageHref = (from: number) =>
@@ -48,19 +43,16 @@ export default async function PeoplePage({
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <PageTitle>People</PageTitle>
-        <div className="flex flex-wrap items-center gap-2">
-          <QuickLog companies={companies} />
-          <Button
-            variant="secondary"
-            size="lg"
-            nativeButton={false}
-            render={<Link href="/people/new" />}
-            className="min-h-11"
-          >
-            <UserPlus />
-            Add person
-          </Button>
-        </div>
+        <Button
+          variant="secondary"
+          size="lg"
+          nativeButton={false}
+          render={<Link href="/people/new" />}
+          className="min-h-11"
+        >
+          <UserPlus />
+          Add person
+        </Button>
       </div>
 
       <search>
@@ -69,8 +61,8 @@ export default async function PeoplePage({
             type="search"
             name="q"
             defaultValue={query}
-            placeholder="Search by name"
-            aria-label="Search people by name"
+            placeholder="Search by name or company"
+            aria-label="Search people by name or company"
             className="min-h-11"
           />
           <Button
@@ -93,7 +85,7 @@ export default async function PeoplePage({
               <EmptySectors />
             </EmptyMedia>
             <EmptyTitle>
-              {query ? "No one by that name" : "No people yet"}
+              {query ? "No one by that name or company" : "No people yet"}
             </EmptyTitle>
             <EmptyDescription>
               {query

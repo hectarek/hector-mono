@@ -26,7 +26,6 @@ import {
   STATUS_LABELS,
   WORK_MODE_LABELS,
 } from "@/app/_lib/job-labels";
-import { listCompanies } from "@/app/_lib/list-companies";
 import { loadJob } from "@/app/_lib/load-job";
 import { deleteJob } from "@/app/actions/jobs";
 import { isStaleCandidate } from "@/src/entities/job-lifecycle";
@@ -49,8 +48,7 @@ export default async function JobPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const [{ job, notes, moves, contacts, repliedOn }, companies] =
-    await Promise.all([loadJob(id, actor), listCompanies(actor)]);
+  const { job, notes, moves, contacts, repliedOn } = await loadJob(id, actor);
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
   const today = todayIn(PLAN_TIME_ZONE);
   const human = actor.actor === "owner";
@@ -229,7 +227,7 @@ export default async function JobPage({
             <QuickLog
               jobs={[{ id: job.id, label: job.role }]}
               jobId={job.id}
-              companies={companies}
+              contacts={contacts}
             />
             <Button
               variant="secondary"

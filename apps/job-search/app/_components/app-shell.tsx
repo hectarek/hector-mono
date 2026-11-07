@@ -22,11 +22,13 @@ import {
   TopBar,
 } from "@/app/_components/app-nav";
 import { DisplayLabel } from "@/app/_components/display";
+import { QuickLog } from "@/app/_components/quick-log";
 import { APP_TOASTER } from "@/app/_lib/notify";
 
 // The signed-in frame (docs/build-plan.md KTD19, the design system's AppShell): a sidebar on
 // desktop, an off-canvas sheet opened from the top bar on phones, and the top bar, which stays
-// put as the page scrolls. The sections, how the current one is marked and the tab's title are in
+// put as the page scrolls and holds the quick log, so outreach is logged from every page (the UX
+// plan's UX5). The sections, how the current one is marked and the tab's title are in
 // app-nav.tsx; Sign out stands apart at the foot, so it isn't tapped for the section above it.
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -61,6 +63,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <header className="bg-background sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <TopBar />
+          <div className="ml-auto">
+            <QuickLog />
+          </div>
         </header>
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col p-4 md:p-6">
           {children}

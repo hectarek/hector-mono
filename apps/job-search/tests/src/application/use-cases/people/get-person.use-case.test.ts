@@ -111,6 +111,27 @@ describeEachBackend("people", () => {
     ).toEqual(["Ada Lovelace", "ada example"]);
   });
 
+  // The quick log's search (the UX plan's UX5): a company's name finds its people.
+  it("finds people by their company's name too, ignoring case", async () => {
+    for (const [name, companyId] of [
+      ["Ada Lovelace", acme],
+      ["Grace Hopper", null],
+      ["Mae Acmesworth", null],
+    ] as const) {
+      await app.addPerson(HECTOR, addPersonSchema.parse({ name, companyId }));
+    }
+
+    const { people } = await app.findPeople(
+      OWNER,
+      findPeopleSchema.parse({ query: "ACME" }),
+    );
+
+    expect(people.map(({ name }) => name)).toEqual([
+      "Ada Lovelace",
+      "Mae Acmesworth",
+    ]);
+  });
+
   it("keeps another owner's people out of every read", async () => {
     const ada = await app.addPerson(
       { actor: "owner", ownerId: ANOTHER_OWNER },

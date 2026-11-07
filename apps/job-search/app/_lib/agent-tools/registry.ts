@@ -256,7 +256,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "find_people",
     description:
-      "Lists people by name, a page at a time (limit, offset): query matches part of a name, ignoring case, and companyId narrows to one company. Each comes with the dates their interactions give them (latest message sent, reply and held conversation) and the updatedAt that update_person sends back.",
+      "Lists people by name, a page at a time (limit, offset): query matches part of a name or of the person's company's name, ignoring case, and companyId narrows to one company. Each comes with the dates their interactions give them (latest message sent, reply and held conversation) and the updatedAt that update_person sends back.",
     inputSchema: inputSchemaOf(findPeopleSchema),
     annotations: { readOnlyHint: true },
     action: findPeople,

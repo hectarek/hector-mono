@@ -223,10 +223,12 @@ The biggest change to how the app feels: every due task can be finished, or move
 - **Fixes:** findings 13 and 35.
 - **Do:**
   - A Log button in the shell's top bar on every page. The sheet loads companies when it opens, through `findCompanies`, so the layout reads nothing more at request time.
+    (Revised 2026-11-07 in UX5: the add form's company field searches `findCompanies` as it's typed, so no page reads every company for the log, and the sheet reads none unless a person is added. People's own Log went, since the top bar's is the same sheet.)
   - Matches show each person's company and role, and the search matches company names too. Once a person is picked, their jobs show as chips to link.
   - On a job's page, its contacts are one-tap picks.
   - A conversation can be logged ahead of time with its start and end, so Hector's own coffees reach the debrief list (the log already takes `scheduled`).
   - What happened, who, and Save stay on a phone's first screen. Date, job, note and next step fold under More, open whenever one is set. Job choices are full-width options whose text wraps, and on a laptop the sheet stops at a reading width.
+    (Revised 2026-11-07 in UX5: the job's options show under who, outside More, whenever there's a job to link, since linking a sent message to an applied job moves its follow-up (R3) and a folded choice is easy to miss. More holds the date, note and next step, and opens when a save's answer names one of them.)
 - **Verify:** from This week on a phone, logging a sent message to one person takes four taps or fewer.
 - **Touches:** the quick log's line in the app's UI Rules. **Size:** M.
 

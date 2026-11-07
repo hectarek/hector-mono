@@ -144,7 +144,7 @@ export class PeopleRepository
           and(
             eq(people.ownerId, ownerId),
             query
-              ? sql`strpos(lower(${people.name}), lower(${query})) > 0`
+              ? sql`(strpos(lower(${people.name}), lower(${query})) > 0 or strpos(lower(coalesce(${companies.name}, '')), lower(${query})) > 0)`
               : undefined,
             companyId ? eq(people.companyId, companyId) : undefined,
           ),

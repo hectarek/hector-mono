@@ -10,15 +10,27 @@ import { Textarea } from "@repo/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Check } from "lucide-react";
 
-// How a field is typed: text, a link, a whole number, a date, long text, or one of a few choices,
-// shown as toggles ("" is none), since a native select can't reach a 44 px touch target.
+// How a field is typed: text, a link, a whole number, a date, a date and time, long text, or one
+// of a few choices, shown as toggles ("" is none), since a native select can't reach a 44 px touch
+// target. Stacked choices take a row each, full width, their text wrapping: a job's "Role at
+// Company" is too long to share a row on a phone.
 export type FieldKind =
   | "text"
   | "url"
   | "number"
   | "date"
+  | "datetime"
   | "long"
-  | { choices: readonly { value: string; label: string }[] };
+  | {
+      choices: readonly { value: string; label: string }[];
+      stacked?: boolean;
+    };
+
+const INPUT_TYPES = {
+  url: "url",
+  date: "date",
+  datetime: "datetime-local",
+} as const;
 
 // One field of a record's form, its text held by the form: the label, the control, what it's for,
 // and what the answer said of it.
@@ -61,7 +73,9 @@ export function FormField({
         <ToggleGroup
           aria-labelledby={id}
           variant="choice"
-          className="flex-wrap"
+          orientation={kind.stacked ? "vertical" : "horizontal"}
+          size={kind.stacked ? "block" : undefined}
+          className={kind.stacked ? "w-full" : "flex-wrap"}
           value={[value]}
           // Tapping the picked choice again keeps it; a field that can be empty offers None.
           onValueChange={([chosen]) => {
@@ -96,7 +110,9 @@ export function FormField({
       ) : (
         <Input
           id={id}
-          type={kind === "url" || kind === "date" ? kind : "text"}
+          type={
+            kind === "number" || kind === "text" ? "text" : INPUT_TYPES[kind]
+          }
           inputMode={kind === "number" ? "numeric" : undefined}
           value={value}
           onChange={(event) => onChange(event.target.value)}

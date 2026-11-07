@@ -110,8 +110,8 @@ export const personIdSchema = z.object({ id: z.uuid() });
 // The most people a page of find_people holds.
 const PEOPLE_PAGE_MAX = 50;
 
-// find_people's input: people whose names hold the query, ignoring case (everyone without one),
-// at the company given, if any, by name, a page at a time.
+// find_people's input: people whose names, or whose company's names, hold the query, ignoring
+// case (everyone without one), at the company given, if any, by name, a page at a time.
 export const findPeopleSchema = z.object({
   query: z
     .string()
