@@ -26,20 +26,29 @@ import { DisplayLabel } from "@/app/_components/display";
 import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 
 // A section: its menu item, the name the phone's top bar and the tab show on its pages, and for a
-// section of records what a record's page and its new page are called.
+// section of records what a record's page and its new page are called. A section whose records
+// live under another path names it: a Focus block's pages (/blocks) are the weekly review's.
 type Section = {
   href: string;
   name: string;
   Icon: LucideIcon;
   record?: string;
   add?: string;
+  records?: string;
 };
 
 // The app's sections, in the design system's order (its AppShell page). A unit that adds a section
 // adds it here.
 const SECTIONS: readonly Section[] = [
   { href: "/", name: "This week", Icon: CalendarDays },
-  { href: "/week", name: "Weekly review", Icon: CalendarCheck },
+  {
+    href: "/week",
+    name: "Weekly review",
+    Icon: CalendarCheck,
+    records: "/blocks",
+    record: "Block",
+    add: "Add a block",
+  },
   {
     href: "/jobs",
     name: "Jobs",
@@ -72,12 +81,17 @@ const SECTIONS: readonly Section[] = [
   { href: "/settings", name: "Settings", Icon: Settings },
 ];
 
-// The section a path is in: This week only at the root, any other from its first segment down.
+// Whether a path is a base path or under it.
+const isUnder = (pathname: string, base: string | undefined) =>
+  base !== undefined && (pathname === base || pathname.startsWith(`${base}/`));
+
+// The section a path is in: This week only at the root, any other from its first segment down,
+// or from its records' path.
 function sectionOf(pathname: string) {
-  return SECTIONS.find(({ href }) =>
+  return SECTIONS.find(({ href, records }) =>
     href === "/"
       ? pathname === "/"
-      : pathname === href || pathname.startsWith(`${href}/`),
+      : isUnder(pathname, href) || isUnder(pathname, records),
   );
 }
 
@@ -85,7 +99,11 @@ function sectionOf(pathname: string) {
 // job), never a record's own name, since a tab can be seen over a shoulder (the UX plan's Q9).
 function pageNameOf(pathname: string): string | undefined {
   const section = sectionOf(pathname);
-  const under = section ? pathname.slice(section.href.length) : "";
+  const base =
+    section?.records && isUnder(pathname, section.records)
+      ? section.records
+      : section?.href;
+  const under = base ? pathname.slice(base.length) : "";
   if (!section?.record || !under) return section?.name;
   if (under === "/new") return section.add;
   if (under.endsWith("/edit")) return `Edit ${section.record.toLowerCase()}`;

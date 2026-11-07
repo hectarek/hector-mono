@@ -2,6 +2,12 @@ import { z } from "zod";
 import type { PageTool } from "@/app/_lib/page-tools";
 import { listActivity } from "@/app/actions/activity";
 import {
+  addBlocks,
+  getBlock,
+  listBlocks,
+  updateBlock,
+} from "@/app/actions/blocks";
+import {
   findCompanies,
   getCompany,
   saveCompany,
@@ -42,6 +48,12 @@ import {
   startSessionSchema,
   whoamiSchema,
 } from "@/src/entities/models/agent-session.model";
+import {
+  addBlocksSchema,
+  blockIdSchema,
+  listBlocksSchema,
+  updateBlockSchema,
+} from "@/src/entities/models/block.model";
 import {
   companyIdSchema,
   findCompaniesSchema,
@@ -119,7 +131,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_today",
     description:
-      "Today's view, in Eastern time: the proposals waiting for Hector, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
+      "Today's view, in Eastern time: the proposals waiting for Hector, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
     inputSchema: inputSchemaOf(getTodaySchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: getToday,
@@ -312,5 +324,35 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
       "Logs a practice session (its topic, result and details, on practicedOn: YYYY-MM-DD in Eastern time, today by default, never later), or with sessionId that session's next review, which takes the topic, type and pattern from the session. A review can't come before the try it follows, and none follows a third solved review.",
     inputSchema: inputSchemaOf(logPracticeSchema),
     action: logPractice,
+  },
+  {
+    name: "add_blocks",
+    description:
+      "Adds Focus blocks: one, or a week's as drafted (up to 40), all or none. Each has startsAt and endsAt (ISO times with an offset; its day is its start's in Eastern time), the effort it feeds (upkeep for planning and reviews), a title and doneWhen, the outcome that makes it done. A block is planned unless given a state: one added after the fact can be done, with whatHappened.",
+    inputSchema: inputSchemaOf(addBlocksSchema),
+    action: addBlocks,
+  },
+  {
+    name: "update_block",
+    description:
+      "Changes a Focus block by its id, against the updatedAt read with it (from list_blocks, get_block or get_today): how it went (state and whatHappened) or its plan. A rescheduled block takes new times and keeps its record; moved is for one taken off its slot, with whatHappened saying where its outcome went. Null clears doneWhen or whatHappened.",
+    inputSchema: inputSchemaOf(updateBlockSchema),
+    action: updateBlock,
+  },
+  {
+    name: "list_blocks",
+    description:
+      "A week's Focus blocks by start: the week holding the day given (YYYY-MM-DD; this week in Eastern time when not given), by its Monday, with each effort's blocks done, partly done and planned. A moved block counts in none of them.",
+    inputSchema: inputSchemaOf(listBlocksSchema),
+    annotations: { readOnlyHint: true },
+    action: listBlocks,
+  },
+  {
+    name: "get_block",
+    description:
+      "One Focus block by its id (from list_blocks or get_today), with its updatedAt for update_block.",
+    inputSchema: inputSchemaOf(blockIdSchema),
+    annotations: { readOnlyHint: true },
+    action: getBlock,
   },
 ];

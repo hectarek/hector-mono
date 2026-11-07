@@ -37,6 +37,7 @@ const recordKindSchema = z.enum([
   "interaction",
   "practice-entry",
   "weekly-review",
+  "block",
   "agent-session",
 ]);
 export type RecordRef = { kind: z.infer<typeof recordKindSchema>; id: string };

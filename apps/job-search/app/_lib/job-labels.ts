@@ -1,5 +1,6 @@
 import type { JobStatus } from "@/src/entities/job-lifecycle";
 import type { ChangeActor } from "@/src/entities/models/activity.model";
+import type { BlockState, Effort } from "@/src/entities/models/block.model";
 import type {
   ConversationState,
   InteractionKind,
@@ -98,4 +99,21 @@ export const PRACTICE_RESULT_LABELS: Record<PracticeResult, string> = {
   solved: "Solved",
   partial: "Partial",
   failed: "Failed",
+};
+
+// What a Focus block feeds, and how it went (R26, U17).
+export const EFFORT_LABELS: Record<Effort, string> = {
+  networking: "Networking",
+  applying: "Applying",
+  practice: "Practice",
+  projects: "Projects",
+  upkeep: "Upkeep",
+};
+
+export const BLOCK_STATE_LABELS: Record<BlockState, string> = {
+  planned: "Planned",
+  done: "Done",
+  partial: "Partial",
+  moved: "Moved",
+  skipped: "Skipped",
 };

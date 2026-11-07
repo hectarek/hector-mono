@@ -25,6 +25,7 @@ import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { INTERACTION_LABELS } from "@/app/_lib/job-labels";
+import { minutesAfter, momentOf } from "@/app/_lib/local-time";
 import { notify } from "@/app/_lib/notify";
 import { useToday } from "@/app/_lib/use-today";
 import { findCompanies } from "@/app/actions/companies";
@@ -284,6 +285,7 @@ export function QuickLog({
                           }),
                       })
                     }
+                    error={failure?.fields?.startsAt}
                     required
                   />
                   <FormField
@@ -292,7 +294,10 @@ export function QuickLog({
                     kind="datetime"
                     value={entry.endsAt}
                     onChange={(endsAt) => set({ endsAt })}
-                    error={failure?.fields?.scheduled}
+                    // The order is checked on `scheduled`, a time that won't read on its own field.
+                    error={
+                      failure?.fields?.scheduled ?? failure?.fields?.endsAt
+                    }
                     required
                   />
                 </>
@@ -725,16 +730,6 @@ const jobChoice = (job: JobSummary): JobChoice => ({
 // A match's role and company, which tell two people of one name apart.
 const whereFrom = ({ role, company }: PersonSummary) =>
   [role, company?.name].filter(Boolean).join(" · ");
-
-// A datetime-local value, in the browser's time zone, as the moment it names.
-const momentOf = (local: string) => new Date(local).toISOString();
-
-// A datetime-local value some minutes later.
-function minutesAfter(local: string, minutes: number): string {
-  const at = new Date(new Date(local).getTime() + minutes * 60_000);
-  const two = (n: number) => String(n).padStart(2, "0");
-  return `${at.getFullYear()}-${two(at.getMonth() + 1)}-${two(at.getDate())}T${two(at.getHours())}:${two(at.getMinutes())}`;
-}
 
 // What a log says it did, with Undo when deleting what it logged takes it all back. A log that
 // linked a job or set a next step changed more than its interactions (R3 may have moved the

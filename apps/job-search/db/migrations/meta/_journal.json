@@ -50,6 +50,13 @@
       "when": 1793485329722,
       "tag": "0006_import_refs",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794079753123,
+      "tag": "0007_blocks",
+      "breakpoints": true
     }
   ]
 }

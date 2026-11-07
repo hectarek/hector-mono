@@ -15,6 +15,11 @@ const REVIEWING =
 // The exported actions in app/actions/, as "<file>.<export>".
 export const ACTION_REACH: Record<string, Reach> = {
   "activity.listActivity": { tool: "list_activity" },
+  "blocks.addBlocks": { tool: "add_blocks" },
+  "blocks.updateBlock": { tool: "update_block" },
+  "blocks.listBlocks": { tool: "list_blocks" },
+  "blocks.getBlock": { tool: "get_block" },
+  "blocks.deleteBlock": { humanOnly: DELETING },
   "companies.findCompanies": { tool: "find_companies" },
   "companies.getCompany": { tool: "get_company" },
   "companies.saveCompany": { tool: "save_company" },
@@ -79,6 +84,7 @@ export const ROUTE_REACH: Record<string, Reach> = {
 // that gives Claude the same read.
 export const PAGE_READS: Record<string, string> = {
   IFindCompaniesController: "find_companies",
+  IGetBlockController: "get_block",
   IFindJobsController: "find_jobs",
   IFindPeopleController: "find_people",
   IGetCompanyController: "get_company",
@@ -89,6 +95,7 @@ export const PAGE_READS: Record<string, string> = {
   IGetTodayController: "get_today",
   IGetWeekController: "get_week",
   IListActivityController: "list_activity",
+  IListBlocksController: "list_blocks",
   IListPracticeController: "list_practice",
   IListSourcesController: "list_sources",
 };

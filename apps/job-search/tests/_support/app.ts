@@ -3,6 +3,7 @@
 // and on the real repositories over PGlite (preload.ts points "@/db" at it). Recipes' harness.
 import { beforeEach, describe } from "bun:test";
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
+import type { IBlocksRepository } from "@/src/application/repositories/blocks.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
 import type { IImportRefsRepository } from "@/src/application/repositories/import-refs.repository.interface";
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
@@ -15,6 +16,11 @@ import type { ISettingsRepository } from "@/src/application/repositories/setting
 import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
+import { addBlocksUseCase } from "@/src/application/use-cases/blocks/add-blocks.use-case";
+import { deleteBlockUseCase } from "@/src/application/use-cases/blocks/delete-block.use-case";
+import { getBlockUseCase } from "@/src/application/use-cases/blocks/get-block.use-case";
+import { listBlocksUseCase } from "@/src/application/use-cases/blocks/list-blocks.use-case";
+import { updateBlockUseCase } from "@/src/application/use-cases/blocks/update-block.use-case";
 import { deleteCompanyUseCase } from "@/src/application/use-cases/companies/delete-company.use-case";
 import { findCompaniesUseCase } from "@/src/application/use-cases/companies/find-companies.use-case";
 import { getCompanyUseCase } from "@/src/application/use-cases/companies/get-company.use-case";
@@ -52,6 +58,8 @@ import { getWeekUseCase } from "@/src/application/use-cases/week/get-week.use-ca
 import { saveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
 import { ActivityRepository } from "@/src/infrastructure/repositories/activity.repository";
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
+import { BlocksRepository } from "@/src/infrastructure/repositories/blocks.repository";
+import { MockBlocksRepository } from "@/src/infrastructure/repositories/blocks.repository.mock";
 import { CompaniesRepository } from "@/src/infrastructure/repositories/companies.repository";
 import { MockCompaniesRepository } from "@/src/infrastructure/repositories/companies.repository.mock";
 import { ImportRefsRepository } from "@/src/infrastructure/repositories/import-refs.repository";
@@ -92,6 +100,7 @@ type Repositories = {
   interactions: IInteractionsRepository;
   practice: IPracticeRepository;
   weeklyReviews: IWeeklyReviewsRepository;
+  blocks: IBlocksRepository;
   importRefs: IImportRefsRepository;
   transactions: ITransactionManagerService;
 };
@@ -110,6 +119,7 @@ function mockRepositories(): Repositories {
     interactions: new MockInteractionsRepository(),
     practice: new MockPracticeRepository(),
     weeklyReviews: new MockWeeklyReviewsRepository(),
+    blocks: new MockBlocksRepository(),
     importRefs: new MockImportRefsRepository(),
     transactions: new MockTransactionManagerService(),
   };
@@ -129,6 +139,7 @@ export function postgresRepositories(): Repositories {
     interactions: new InteractionsRepository(log),
     practice: new PracticeRepository(log),
     weeklyReviews: new WeeklyReviewsRepository(log),
+    blocks: new BlocksRepository(log),
     importRefs: new ImportRefsRepository(log),
     transactions: new TransactionManagerService(log),
   };
@@ -180,6 +191,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     interactions,
     practice,
     weeklyReviews,
+    blocks,
     importRefs,
     transactions,
   } = repos;
@@ -300,10 +312,16 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       people,
       interactions,
       practice,
+      blocks,
       activity,
       settings,
       log,
     ),
+    addBlocks: addBlocksUseCase(blocks, activity, transactions, log),
+    updateBlock: updateBlockUseCase(blocks, activity, transactions, log),
+    listBlocks: listBlocksUseCase(blocks),
+    getBlock: getBlockUseCase(blocks),
+    deleteBlock: deleteBlockUseCase(blocks, activity, transactions, log),
     getWeek: getWeekUseCase(
       jobs,
       interactions,

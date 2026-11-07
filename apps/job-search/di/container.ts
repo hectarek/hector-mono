@@ -2,6 +2,7 @@ import { createContainer } from "@evyweb/ioctopus";
 import { createAccessModule } from "@/di/modules/access.module";
 import { createActivityModule } from "@/di/modules/activity.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
+import { createBlocksModule } from "@/di/modules/blocks.module";
 import { createCompaniesModule } from "@/di/modules/companies.module";
 import { createInteractionsModule } from "@/di/modules/interactions.module";
 import { createJobsModule } from "@/di/modules/jobs.module";
@@ -41,6 +42,7 @@ ApplicationContainer.load(
   createInteractionsModule(),
 );
 ApplicationContainer.load(Symbol("PracticeModule"), createPracticeModule());
+ApplicationContainer.load(Symbol("BlocksModule"), createBlocksModule());
 ApplicationContainer.load(Symbol("WeekModule"), createWeekModule());
 
 export function getInjection<K extends keyof typeof DI_SYMBOLS>(

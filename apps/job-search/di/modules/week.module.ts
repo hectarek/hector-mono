@@ -31,6 +31,7 @@ export function createWeekModule() {
       DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.IInteractionsRepository,
       DI_SYMBOLS.IPracticeRepository,
+      DI_SYMBOLS.IBlocksRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ISettingsRepository,
       DI_SYMBOLS.ILoggerService,
