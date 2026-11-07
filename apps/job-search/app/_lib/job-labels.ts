@@ -1,4 +1,4 @@
-import type { JobStatus } from "@/src/entities/job-lifecycle";
+import type { ClosedStatus, JobStatus } from "@/src/entities/job-lifecycle";
 import type { ChangeActor } from "@/src/entities/models/activity.model";
 import type { BlockState, Effort } from "@/src/entities/models/block.model";
 import type {
@@ -99,6 +99,18 @@ export const PRACTICE_RESULT_LABELS: Record<PracticeResult, string> = {
   solved: "Solved",
   partial: "Partial",
   failed: "Failed",
+};
+
+// The reasons a close offers as one tap, by the status it closes as (the UX plan's UX9). Any
+// other is typed.
+export const CLOSE_REASONS: Record<ClosedStatus, readonly string[]> = {
+  rejected: ["After applying", "After the screen", "After the onsite"],
+  closed: ["Posting closed", "Role filled"],
+  stale: ["No reply after 21 days"],
+  skipped: ["Not a fit", "Applied there already"],
+  withdrawn: ["Lost interest", "Chose another role"],
+  "offer-accepted": ["Accepted the offer"],
+  "offer-declined": ["Declined the offer"],
 };
 
 // What a Focus block feeds, and how it went (R26, U17).

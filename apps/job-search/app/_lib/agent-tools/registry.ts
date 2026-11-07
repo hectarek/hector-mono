@@ -246,7 +246,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "set_job_status",
     description:
-      "Moves an accepted job to an open status on a date (YYYY-MM-DD in Eastern time, today by default), and records the move. A move to applied sets applied-on and the follow-up. A move to the status the job holds changes nothing. A closed status goes through close_job.",
+      "Moves an accepted job to an open status on a date (YYYY-MM-DD in Eastern time, today by default), and records the move. A move sets the new stage's next step and date in place of the old ones (applied's is the follow-up, and it sets applied-on), unless nextStep and nextDate are given; a step given no date is due a week out. A move to the status the job holds changes nothing. A closed status goes through close_job.",
     inputSchema: inputSchemaOf(setJobStatusSchema),
     action: setJobStatus,
   },

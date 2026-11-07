@@ -113,6 +113,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 - R3. Status moves keep the follow-up rhythm:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
   - a move to `applied` sets the next step "Follow up", due on applied-on + 7 days
+  - a move to another open status sets that stage's next step in place of the old one: "Verify it's hiring" that day, "Apply" in 2 days, "Prepare for the screen" in 2, "Prepare for the onsite" in 3 and "Decide on the offer" in 3; a move that gives its own step and date sets those instead (added 2026-11-07 in UX9: an old "Follow up" had stayed due past applied)
   - a follow-up message linked to the job moves the next date to applied-on + 14 days, or to a week after the message went if that's later (revised 2026-11-07 in UX3, Hector's call on the UX plan's Q5: a late follow-up had left the job due again at once)
   - an applied job with no reply by applied-on + 21 days is listed as a stale candidate, where a reply is any move past `applied` or a reply linked to the job
   - a move to a closed status takes a reason and clears the next step and next date

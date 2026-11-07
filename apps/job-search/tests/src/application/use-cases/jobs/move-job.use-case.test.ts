@@ -92,11 +92,64 @@ describeEachBackend("moveJob", () => {
       changes: [
         { field: "status", before: "target", after: "applied" },
         { field: "appliedOn", before: null, after: YESTERDAY },
-        // A job Hector adds with no step starts by checking it's hiring, that day (R1).
-        { field: "nextStep", before: "Verify it's hiring", after: "Follow up" },
-        { field: "nextDate", before: TODAY, after: "2026-11-01" },
+        // The move to target set that stage's step, Apply, two days out (UX9).
+        { field: "nextStep", before: "Apply", after: "Follow up" },
+        { field: "nextDate", before: "2026-10-28", after: "2026-11-01" },
       ],
     });
+  });
+
+  // Finding 21 of the UX plan: an old Follow up no longer stays due past applied.
+  it("replaces the step the job had with the new stage's", async () => {
+    await move("applied", YESTERDAY);
+    const screen = await move("screen");
+
+    expect(screen).toMatchObject({
+      status: "screen",
+      nextStep: "Prepare for the screen",
+      nextDate: "2026-10-28",
+    });
+  });
+
+  it("takes the step and date given in place of the stage's: a step alone keeps the stage's date, a null date is a week out, and no step clears the date", async () => {
+    const given = await app.moveJob(CLAUDE, {
+      id: job.id,
+      status: "screen",
+      nextStep: "Send the portfolio",
+      nextDate: "2026-10-30",
+    });
+    expect(given).toMatchObject({
+      nextStep: "Send the portfolio",
+      nextDate: "2026-10-30",
+    });
+
+    const alone = await app.moveJob(CLAUDE, {
+      id: job.id,
+      status: "onsite",
+      nextStep: "Book the travel",
+    });
+    expect(alone).toMatchObject({
+      nextStep: "Book the travel",
+      nextDate: "2026-10-29",
+    });
+
+    const undated = await app.moveJob(CLAUDE, {
+      id: job.id,
+      status: "offer",
+      nextStep: "Read the offer",
+      nextDate: null,
+    });
+    expect(undated).toMatchObject({
+      nextStep: "Read the offer",
+      nextDate: "2026-11-02",
+    });
+
+    const none = await app.moveJob(CLAUDE, {
+      id: job.id,
+      status: "screen",
+      nextStep: null,
+    });
+    expect(none).toMatchObject({ nextStep: null, nextDate: null });
   });
 
   it("to applied keeps an applied-on already set", async () => {
