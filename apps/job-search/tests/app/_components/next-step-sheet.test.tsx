@@ -37,30 +37,35 @@ const fictional = (name: string) =>
   `${name} ${crypto.randomUUID().slice(0, 8)}`;
 
 // The sheet as This week's row opens it, with the toaster the shell mounts.
-const sheet = (
+const theSheet = (
   kind: "job" | "person",
   record: NextStepRecord,
   extra: {
     job?: Pick<JobStage, "status" | "appliedOn">;
     contacts?: PersonRef[];
   } = {},
-) =>
-  render(
-    <>
-      <NextStepSheet
-        kind={kind}
-        record={record}
-        title="A task"
-        detail={`${record.nextStep} · due`}
-        {...extra}
-      />
-      <Toaster />
-    </>,
-  );
+) => (
+  <>
+    <NextStepSheet
+      kind={kind}
+      record={record}
+      title="A task"
+      detail={`${record.nextStep} · due`}
+      href={`/somewhere/${record.id}`}
+      trigger={<button type="button" />}
+      {...extra}
+    >
+      The row
+    </NextStepSheet>
+    <Toaster />
+  </>
+);
+const sheet = (...args: Parameters<typeof theSheet>) =>
+  render(theSheet(...args));
 
 // The sheet renders in a portal, outside the trigger's container.
 const open = () =>
-  fireEvent.click(screen.getByRole("button", { name: "Change" }));
+  fireEvent.click(screen.getByRole("button", { name: "The row" }));
 const tap = (name: string | RegExp) =>
   fireEvent.click(screen.getByRole("button", { name }));
 
@@ -315,17 +320,7 @@ describe("a due row's sheet given another record", () => {
     });
     signInAs("owner");
     const view = sheet("job", before);
-    view.rerender(
-      <>
-        <NextStepSheet
-          kind="job"
-          record={after}
-          title="A task"
-          detail={`${after.nextStep} · due`}
-        />
-        <Toaster />
-      </>,
-    );
+    view.rerender(theSheet("job", after));
 
     open();
     expect(

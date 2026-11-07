@@ -11,7 +11,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@repo/ui/components/sheet";
-import { type FormEvent, useState, useTransition } from "react";
+import Link from "next/link";
+import {
+  type FormEvent,
+  type ReactElement,
+  type ReactNode,
+  useState,
+  useTransition,
+} from "react";
 import { toast } from "sonner";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { FormField } from "@/app/_components/form-field";
@@ -101,8 +108,11 @@ export function NextStepSheet({
   record,
   title,
   detail,
+  href,
   job,
   contacts = [],
+  trigger,
+  children,
 }: {
   kind: "job" | "person";
   record: NextStepRecord;
@@ -110,9 +120,14 @@ export function NextStepSheet({
   title: string;
   // The task and when it's due.
   detail: string;
+  // The record's page, which the sheet links to.
+  href: string;
   // A job's stage, for R3's follow-up rule.
   job?: Pick<JobStage, "status" | "appliedOn">;
   contacts?: PersonRef[];
+  // What opens the sheet (This week's row or its pit board), and what it shows.
+  trigger: ReactElement;
+  children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"push" | "done">("push");
@@ -326,11 +341,7 @@ export function NextStepSheet({
 
   return (
     <Sheet open={open} onOpenChange={opening}>
-      <SheetTrigger
-        render={<Button variant="secondary" size="lg" className="min-h-11" />}
-      >
-        Change
-      </SheetTrigger>
+      <SheetTrigger render={trigger}>{children}</SheetTrigger>
       <SheetContent side="bottom" showCloseButton={false} className="max-h-dvh">
         {/* Only the fields scroll, so the header and the buttons stay on screen. */}
         <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
@@ -338,6 +349,12 @@ export function NextStepSheet({
           <SheetHeader className="mr-10">
             <SheetTitle>{title}</SheetTitle>
             <SheetDescription>{detail}</SheetDescription>
+            <Link
+              href={href}
+              className="inline-flex min-h-11 w-fit items-center text-sm font-medium underline underline-offset-4"
+            >
+              Go to the {kind === "job" ? "job" : "person"}
+            </Link>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4">
             {form.failure?.code === "conflict" ? (

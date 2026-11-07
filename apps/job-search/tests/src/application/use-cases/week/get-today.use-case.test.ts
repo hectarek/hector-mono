@@ -86,6 +86,31 @@ describeEachBackend("getToday", () => {
     expect(view.due.people.map(({ id }) => id)).toEqual([dueNow]);
   });
 
+  // R9 as revised 2026-11-07 (the UX plan's UX4).
+  it("lists what's due later this week, through Sunday, apart from what's due by today", async () => {
+    const thursday = await jobs.add(companyId, {
+      role: "Thursday",
+      nextStep: "Prepare",
+      nextDate: "2026-10-29",
+    });
+    await jobs.add(companyId, {
+      role: "Next Monday",
+      nextStep: "Call",
+      nextDate: "2026-11-02",
+    });
+    const sunday = await person({
+      name: "Sunday Example",
+      nextStep: "Follow up",
+      nextDate: "2026-11-01",
+    });
+
+    const view = await app.getToday(OWNER);
+
+    expect(view.later.jobs.map(({ id }) => id)).toEqual([thursday.id]);
+    expect(view.later.people.map(({ id }) => id)).toEqual([sunday]);
+    expect(view.due.jobs).toEqual([]);
+  });
+
   it("gives each due job its contacts, so its follow-up can name one (the UX plan's UX3)", async () => {
     const job = await jobs.add(companyId, {
       role: "With contacts",

@@ -13,6 +13,20 @@ export function formatDay(day: string): string {
   return DAY.format(new Date(`${day}T00:00:00Z`));
 }
 
+const WEEKDAY = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  timeZone: "UTC",
+});
+const SHORT_WEEKDAY = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  timeZone: "UTC",
+});
+
+// A date's day of the week, "Saturday", or "Sat" when `short`.
+export function formatWeekday(day: string, short = false): string {
+  return (short ? SHORT_WEEKDAY : WEEKDAY).format(new Date(`${day}T00:00:00Z`));
+}
+
 // A moment as the screens show it, in Eastern time: "Oct 28, 2:00 PM". The day and the time are
 // formatted apart and joined here, since ICU builds join them differently: Bun on macOS says
 // "Oct 28 at 2:00 PM", Bun on CI's Linux runner and Chrome "Oct 28, 2:00 PM" (2026-10-29).

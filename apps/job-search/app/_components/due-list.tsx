@@ -1,185 +1,376 @@
 import { cn } from "@repo/ui/lib/utils";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { DisplayLabel } from "@/app/_components/display";
 import { MarkStaleButton } from "@/app/_components/mark-stale-button";
 import { NextStepSheet } from "@/app/_components/next-step-sheet";
-import { ClearBoard, PitBoard } from "@/app/_components/pit-board";
+import {
+  ClearBoard,
+  PIT_BOARD,
+  PitBoard,
+  PitBoardFace,
+} from "@/app/_components/pit-board";
 import { PracticeReview } from "@/app/_components/practice-review";
-import { formatDay } from "@/app/_lib/format-day";
-import type { TodayView } from "@/src/entities/models/today.model";
+import { formatDay, formatWeekday } from "@/app/_lib/format-day";
+import type { JobSummary } from "@/src/entities/models/job.model";
+import type { PersonSummary } from "@/src/entities/models/person.model";
+import type { DueSession } from "@/src/entities/models/practice-entry.model";
+import type { DueJob, TodayView } from "@/src/entities/models/today.model";
 import { LADDER_STEPS } from "@/src/entities/practice-ladder";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+// How many late tasks show before the rest fold under Show more.
+const LATE_SHOWN = 5;
+// A person's rank as the pit board ranks it, beside a company's tier: A with tier 1.
+const RANK_PRIORITY: Record<string, number> = { A: 1, B: 2, C: 3 };
+// A record with no tier or rank comes after every one that has one.
+const UNRANKED = 4;
 
-// One thing due: what to do, the record it's for, the day it's due (none for a stale candidate,
-// which waits on no date), and the one action that clears it.
-type Task = {
+// A row's tap target: the whole row, 44 px or taller (the design system's TaskRow).
+const ROW =
+  "hover:bg-accent focus-visible:outline-ring flex min-h-11 w-full items-start gap-3 px-3 py-3 text-left focus-visible:outline-2 focus-visible:-outline-offset-2";
+
+// A job's or a person's next step: its record, the step, when it's due, and its sheet, which its
+// row or the pit board opens.
+type StepTask = {
   key: string;
-  href: string;
-  title: string;
-  meta: string;
-  due: string | null;
-  action: ReactNode;
+  kind: "Job" | "Person";
+  name: string;
+  step: string | null;
+  due: string;
+  // How much the record matters to the pit board: a job's company tier or a person's rank.
+  priority: number;
+  sheet: (trigger: ReactElement, face: ReactNode) => ReactNode;
 };
 
-// What's due on This week (R9), as the design system's pit board and task rows: the earliest
-// task goes on the board, and the rest follow earliest first, stale candidates last. Each row
-// opens its record, with its one action under it: a stale candidate marks stale, a job's or
-// person's next step opens its sheet, a practice review opens its log. With nothing due, the
-// board says so, and points at what's waiting instead.
+const byDue = (a: StepTask, b: StepTask) => a.due.localeCompare(b.due);
+// The pit board's pick until the timing tower's pace data exists (the UX plan's UX4): the record
+// that matters most, then the earliest due.
+const byPriority = (a: StepTask, b: StepTask) =>
+  a.priority - b.priority || byDue(a, b);
+
+// What's due on This week (R9, the design system's PitBoard and TaskRow): the next task on the pit
+// board, then the rest in groups (late, today, stale candidates and practice reviews), each row one
+// tap that opens its sheet or its record, and what's due later this week, folded by weekday. With
+// nothing due, the board says so and points at what's waiting instead.
 export function DueList({
   due,
+  later,
   today,
   waiting,
 }: {
   due: TodayView["due"];
+  later: TodayView["later"];
   today: string;
   // How many decisions wait above, for the clear board's pointer.
   waiting: number;
 }) {
-  const tasks = tasksOf(due, today);
-  if (!tasks.length) {
+  const steps = [
+    ...due.jobs.map((job) => jobTask(job, today)),
+    ...due.people.map((person) => personTask(person, today)),
+  ].sort(byDue);
+  const board = [...steps].sort(byPriority)[0];
+  const rest = steps.filter((task) => task !== board);
+  // With no step due, the earliest practice review takes the board.
+  const reviewOnBoard = board ? undefined : due.practice[0];
+  const reviews = reviewOnBoard ? due.practice.slice(1) : due.practice;
+  const coming = [
+    ...later.jobs.map((job) => jobTask(job, today)),
+    ...later.people.map((person) => personTask(person, today)),
+  ].sort(byDue);
+
+  if (!board && !reviewOnBoard && !due.stale.length) {
     return (
-      <ClearBoard
-        instead={
-          waiting
-            ? `${waiting} ${waiting === 1 ? "decision waits" : "decisions wait"} for you above.`
-            : "Nothing needs a decision either."
-        }
-      />
+      <div className="flex flex-col gap-4">
+        <ClearBoard
+          instead={
+            waiting
+              ? `${waiting} ${waiting === 1 ? "decision waits" : "decisions wait"} for you above.`
+              : "Nothing needs a decision either."
+          }
+        />
+        <LaterThisWeek tasks={coming} today={today} />
+      </div>
     );
   }
-  const next = tasks[0]?.due ? tasks[0] : undefined;
-  const rest = next ? tasks.slice(1) : tasks;
 
+  const late = rest.filter(({ due: day }) => day < today);
+  const onToday = rest.filter(({ due: day }) => day >= today);
   return (
-    <div className="flex flex-col gap-3">
-      {next ? (
-        <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
+      {/* Keyed by its task: when the next task takes the board, its sheet starts afresh rather
+          than keeping the one before's record. */}
+      {board ? (
+        <div key={board.key}>
+          {board.sheet(
+            <button type="button" className={PIT_BOARD} />,
+            <PitBoardFace
+              reason={`Next up · ${when(board.due, today)}`}
+              instruction={board.step ?? board.name}
+              meta={board.step ? board.name : ""}
+            />,
+          )}
+        </div>
+      ) : null}
+      {reviewOnBoard ? (
+        <div key={reviewOnBoard.id} className="flex flex-col gap-2">
           <PitBoard
-            href={next.href}
-            reason={`Next up · ${when(next.due, today)}`}
-            instruction={next.title}
-            meta={next.meta}
+            href={`/practice/${reviewOnBoard.id}`}
+            reason={`Next up · ${when(reviewOnBoard.nextReview.dueOn, today)}`}
+            instruction={`Review: ${reviewOnBoard.topic}`}
+            meta={`Review ${reviewOnBoard.nextReview.step} of ${LADDER_STEPS}`}
           />
-          {/* Keyed by its task: when the next task takes the board, its sheet starts afresh
-              rather than keeping the one before's record. */}
-          <div key={next.key} className="flex flex-wrap gap-2">
-            {next.action}
+          <div className="flex flex-wrap gap-2">
+            <PracticeReview session={reviewSession(reviewOnBoard)} />
           </div>
         </div>
       ) : null}
-      {rest.length ? (
+      <Group label="Late" count={late.length}>
+        <StepRows tasks={late.slice(0, LATE_SHOWN)} today={today} />
+        {late.length > LATE_SHOWN ? (
+          <details className="group">
+            <summary className="text-muted-foreground flex min-h-11 cursor-pointer items-center px-3 text-sm font-medium group-open:hidden">
+              Show {late.length - LATE_SHOWN} more
+            </summary>
+            <StepRows tasks={late.slice(LATE_SHOWN)} today={today} />
+          </details>
+        ) : null}
+      </Group>
+      <Group label="Today" count={onToday.length}>
+        <StepRows tasks={onToday} today={today} />
+      </Group>
+      <Group label="Stale?" count={due.stale.length}>
         <ul className="bg-card divide-y overflow-hidden rounded-xl border">
-          {rest.map((task) => (
-            <TaskRow key={task.key} task={task} today={today} />
+          {due.stale.map((job) => (
+            <StaleRow key={job.id} job={job} />
           ))}
         </ul>
-      ) : null}
+      </Group>
+      <Group label="Reviews" count={reviews.length}>
+        <ul className="bg-card divide-y overflow-hidden rounded-xl border">
+          {reviews.map((session) => (
+            <ReviewRow key={session.id} session={session} today={today} />
+          ))}
+        </ul>
+      </Group>
+      <LaterThisWeek tasks={coming} today={today} />
     </div>
   );
 }
 
-function tasksOf(due: TodayView["due"], today: string): Task[] {
-  // What a task's sheet says under its title: the step, and when it's due.
-  const detail = (step: string | null, day: string | null) =>
-    joined([step, when(day, today)]);
-  const dated: Task[] = [
-    ...due.jobs.map((job) => ({
-      key: `job-${job.id}`,
-      href: `/jobs/${job.id}`,
-      title: job.nextStep ?? job.role,
-      meta: joined([job.nextStep ? job.role : null, job.company.name]),
-      due: job.nextDate,
-      action: (
-        <NextStepSheet
-          kind="job"
-          record={job}
-          title={joined([job.role, job.company.name])}
-          detail={detail(job.nextStep, job.nextDate)}
-          job={job}
-          contacts={job.contacts}
-        />
-      ),
-    })),
-    ...due.people.map((person) => ({
-      key: `person-${person.id}`,
-      href: `/people/${person.id}`,
-      title: person.nextStep ?? person.name,
-      meta: joined([
-        person.nextStep ? person.name : null,
-        person.company?.name ?? null,
-      ]),
-      due: person.nextDate,
-      action: (
-        <NextStepSheet
-          kind="person"
-          record={person}
-          title={joined([person.name, person.company?.name ?? null])}
-          detail={detail(person.nextStep, person.nextDate)}
-        />
-      ),
-    })),
-    ...due.practice.map(({ id, topic, nextReview }) => ({
-      key: `practice-${id}`,
-      href: `/practice/${id}`,
-      title: `Review: ${topic}`,
-      meta: `Review ${nextReview.step} of ${LADDER_STEPS}`,
-      due: nextReview.dueOn,
-      action: <PracticeReview session={{ id, topic, step: nextReview.step }} />,
-    })),
-  ];
-  const stale: Task[] = due.stale.map((job) => ({
-    key: `stale-${job.id}`,
-    href: `/jobs/${job.id}`,
-    title: `${job.company.name} hasn't replied`,
-    meta: joined([
-      job.role,
-      job.appliedOn ? `Applied ${formatDay(job.appliedOn)}` : null,
-    ]),
-    due: null,
-    action: <MarkStaleButton jobId={job.id} />,
-  }));
-  // Earliest first; the sort is stable, so a day's tasks keep the order above.
-  return [
-    ...dated.sort((a, b) => (a.due ?? "").localeCompare(b.due ?? "")),
-    ...stale,
-  ];
+function jobTask(job: DueJob, today: string): StepTask {
+  const name = joined([job.role, job.company.name]);
+  const due = job.nextDate ?? today;
+  return {
+    key: `job-${job.id}`,
+    kind: "Job",
+    name,
+    step: job.nextStep,
+    due,
+    priority: job.company.tier ?? UNRANKED,
+    sheet: (trigger, face) => (
+      <NextStepSheet
+        kind="job"
+        record={job}
+        title={name}
+        detail={joined([job.nextStep, when(due, today)])}
+        href={`/jobs/${job.id}`}
+        job={job}
+        contacts={job.contacts}
+        trigger={trigger}
+      >
+        {face}
+      </NextStepSheet>
+    ),
+  };
 }
 
-function TaskRow({ task, today }: { task: Task; today: string }) {
-  const late = task.due !== null && task.due < today;
+function personTask(person: PersonSummary, today: string): StepTask {
+  const name = joined([person.name, person.company?.name ?? null]);
+  const due = person.nextDate ?? today;
+  return {
+    key: `person-${person.id}`,
+    kind: "Person",
+    name,
+    step: person.nextStep,
+    due,
+    priority: (person.rank && RANK_PRIORITY[person.rank]) || UNRANKED,
+    sheet: (trigger, face) => (
+      <NextStepSheet
+        kind="person"
+        record={person}
+        title={name}
+        detail={joined([person.nextStep, when(due, today)])}
+        href={`/people/${person.id}`}
+        trigger={trigger}
+      >
+        {face}
+      </NextStepSheet>
+    ),
+  };
+}
+
+const reviewSession = ({ id, topic, nextReview }: DueSession) => ({
+  id,
+  topic,
+  step: nextReview.step,
+});
+
+// A group of due tasks under its label and count; an empty group isn't shown.
+function Group({
+  label,
+  count,
+  children,
+}: {
+  label: string;
+  count: number;
+  children: ReactNode;
+}) {
+  if (!count) return null;
+  return (
+    <section className="flex flex-col gap-2">
+      <h3>
+        <DisplayLabel className="text-muted-foreground">
+          {label} · {count}
+        </DisplayLabel>
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+// Steps in rows, each one tap that opens its sheet: the record in bold, marked as a job or a
+// person, with the step under it, when it's due on the right, and a chevron to say it opens.
+function StepRows({ tasks, today }: { tasks: StepTask[]; today: string }) {
+  if (!tasks.length) return null;
+  return (
+    <ul className="bg-card divide-y overflow-hidden rounded-xl border">
+      {tasks.map((task) => (
+        <li key={task.key}>
+          {task.sheet(
+            <button type="button" className={ROW} />,
+            <RowFace
+              name={task.name}
+              meta={joined([task.kind, task.step])}
+              when={when(task.due, today)}
+              late={task.due < today}
+            />,
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function RowFace({
+  name,
+  meta,
+  when: label,
+  late,
+}: {
+  name: string;
+  meta: string;
+  when: string;
+  late: boolean;
+}) {
+  return (
+    <>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="font-bold break-words">{name}</span>
+        <span className="text-muted-foreground text-sm break-words">
+          {meta}
+        </span>
+      </span>
+      <DisplayLabel
+        className={cn("shrink-0 pt-1", late ? "text-warning" : undefined)}
+      >
+        {label}
+      </DisplayLabel>
+      <ChevronRight
+        aria-hidden="true"
+        className="text-muted-foreground mt-0.5 size-4 shrink-0"
+      />
+    </>
+  );
+}
+
+// A stale candidate: its row opens the job, and Mark stale sits on its own line under it.
+function StaleRow({ job }: { job: JobSummary }) {
   return (
     <li>
-      <Link
-        href={task.href}
-        className="hover:bg-accent focus-visible:outline-ring flex min-h-11 items-start justify-between gap-3 px-3 pt-3 pb-2 focus-visible:outline-2 focus-visible:-outline-offset-2"
-      >
-        <span className="flex min-w-0 flex-col">
-          <span className="font-bold break-words">{task.title}</span>
-          {task.meta ? (
-            <span className="text-muted-foreground text-sm break-words">
-              {task.meta}
-            </span>
-          ) : null}
-        </span>
-        <DisplayLabel
-          className={cn("shrink-0 pt-1", late ? "text-warning" : undefined)}
-        >
-          {when(task.due, today)}
-        </DisplayLabel>
+      <Link href={`/jobs/${job.id}`} className={ROW}>
+        <RowFace
+          name={`${job.company.name} hasn't replied`}
+          meta={joined([
+            job.role,
+            job.appliedOn ? `Applied ${formatDay(job.appliedOn)}` : null,
+          ])}
+          when="Stale?"
+          late={false}
+        />
       </Link>
-      <div className="flex flex-wrap gap-2 px-3 pb-3">{task.action}</div>
+      <div className="flex flex-wrap gap-2 px-3 pb-3">
+        <MarkStaleButton jobId={job.id} />
+      </div>
     </li>
   );
 }
 
-// When a task is due, the way a task row says it: today, so many days late, or a stale
-// candidate's question.
-function when(due: string | null, today: string): string {
-  if (due === null) return "Stale?";
-  if (due >= today) return "Today";
+// A practice review due: its row opens the session, and Log review sits on its own line under it.
+function ReviewRow({ session, today }: { session: DueSession; today: string }) {
+  return (
+    <li>
+      <Link href={`/practice/${session.id}`} className={ROW}>
+        <RowFace
+          name={`Review: ${session.topic}`}
+          meta={`Review ${session.nextReview.step} of ${LADDER_STEPS}`}
+          when={when(session.nextReview.dueOn, today)}
+          late={session.nextReview.dueOn < today}
+        />
+      </Link>
+      <div className="flex flex-wrap gap-2 px-3 pb-3">
+        <PracticeReview session={reviewSession(session)} />
+      </div>
+    </li>
+  );
+}
+
+// What's due after today, through Sunday, folded until it's opened, by weekday (R9 as revised
+// 2026-11-07).
+function LaterThisWeek({ tasks, today }: { tasks: StepTask[]; today: string }) {
+  if (!tasks.length) return null;
+  const days = [...new Set(tasks.map(({ due }) => due))];
+  return (
+    <details className="flex flex-col gap-2">
+      <summary className="flex min-h-11 cursor-pointer items-center">
+        <DisplayLabel className="text-muted-foreground">
+          Later this week · {tasks.length}
+        </DisplayLabel>
+      </summary>
+      <div className="flex flex-col gap-3">
+        {days.map((day) => (
+          <section key={day} className="flex flex-col gap-2">
+            <h3>
+              <DisplayLabel className="text-muted-foreground">
+                {formatWeekday(day)}
+              </DisplayLabel>
+            </h3>
+            <StepRows
+              tasks={tasks.filter(({ due }) => due === day)}
+              today={today}
+            />
+          </section>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+// When a task is due, the way a row says it: so many days late, today, or a later day's weekday.
+function when(due: string, today: string): string {
+  if (due === today) return "Today";
+  if (due > today) return formatWeekday(due, true);
   const days = Math.round((Date.parse(today) - Date.parse(due)) / DAY_MS);
   return `${days} ${days === 1 ? "day" : "days"} late`;
 }

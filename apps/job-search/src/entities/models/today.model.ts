@@ -36,6 +36,11 @@ export type TodayView = {
     stale: JobSummary[];
     practice: DueSession[];
   };
+  // Jobs and people due after today, through Sunday (R9 as revised 2026-11-07, the UX plan's UX4).
+  later: {
+    jobs: DueJob[];
+    people: PersonSummary[];
+  };
   claude: ClaudeSession[];
   counts: WeeklyCounts;
   targets: Settings["targets"];

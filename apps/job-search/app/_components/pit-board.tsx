@@ -5,26 +5,25 @@ import { DisplayLabel } from "@/app/_components/display";
 // The most words the instruction sets in the display face; a longer next step reads in Atkinson.
 const DISPLAY_WORDS = 5;
 
-// The one next action, held out on an orange plate (the design system's PitBoard): why it's first,
-// the instruction, and its record. It's the only signal fill on a screen, and the whole board
-// links to the record. The two holes at the top are the board's.
-export function PitBoard({
-  href,
+// The board's orange plate, on the link or the button that holds it (the design system's
+// PitBoard): it's the only signal fill on a screen, and the whole board is one tap target.
+export const PIT_BOARD =
+  "bg-signal text-signal-foreground focus-visible:outline-foreground relative grid min-h-11 w-full gap-1 rounded-md px-4 pt-5 pb-4 text-left focus-visible:outline-2 focus-visible:outline-offset-2";
+
+// What the board says: why it's first, the instruction and its record. The two holes at the top
+// are the board's.
+export function PitBoardFace({
   reason,
   instruction,
   meta,
 }: {
-  href: string;
   reason: string;
   instruction: string;
   meta: string;
 }) {
   const short = instruction.trim().split(/\s+/).length <= DISPLAY_WORDS;
   return (
-    <Link
-      href={href}
-      className="bg-signal text-signal-foreground focus-visible:outline-foreground relative grid min-h-11 gap-1 rounded-md px-4 pt-5 pb-4 focus-visible:outline-2 focus-visible:outline-offset-2"
-    >
+    <>
       <span
         aria-hidden="true"
         className="bg-background absolute top-2 left-2 size-1.5 rounded-full"
@@ -45,6 +44,23 @@ export function PitBoard({
         {instruction}
       </span>
       {meta ? <span className="text-sm">{meta}</span> : null}
+    </>
+  );
+}
+
+// The board as a link to its task's record, for a task with no sheet of its own to open.
+export function PitBoard({
+  href,
+  ...face
+}: {
+  href: string;
+  reason: string;
+  instruction: string;
+  meta: string;
+}) {
+  return (
+    <Link href={href} className={PIT_BOARD}>
+      <PitBoardFace {...face} />
     </Link>
   );
 }

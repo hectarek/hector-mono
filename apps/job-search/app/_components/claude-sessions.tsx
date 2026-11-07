@@ -30,49 +30,60 @@ const KINDS: Record<RecordRef["kind"], [one: string, many: string]> = {
 export function ClaudeSessions({ sessions }: { sessions: ClaudeSession[] }) {
   return (
     <ul className="bg-card divide-y overflow-hidden rounded-xl border">
-      {sessions.map((session) => (
-        <li key={session.id ?? session.startedAt.toISOString()}>
-          <div className="bg-muted flex min-h-11 items-center gap-3 px-3 py-2 text-sm">
-            <DriverCode actor="agent" />
-            <Link
-              href="/agent"
-              className="font-bold underline-offset-4 hover:underline"
-            >
-              {session.id ? "Session" : "Earlier session"},{" "}
-              {formatMoment(session.startedAt)}
-            </Link>
-          </div>
-          <div className="flex flex-col gap-1 px-3 py-2 text-sm">
-            <p className="text-muted-foreground">
-              {session.counts.length
-                ? session.counts
-                    .map(
-                      ({ kind, changes }) =>
-                        `${changes} ${KINDS[kind][changes === 1 ? 0 : 1]}`,
-                    )
-                    .join(", ")
-                : "No changes"}
-            </p>
-            {session.listed.length ? (
-              <ul className="flex flex-col gap-1">
-                {session.listed.map((entry) => (
-                  <li
-                    key={entry.id}
-                    className={
-                      entry.action === "refused"
-                        ? "text-destructive"
-                        : undefined
-                    }
-                  >
-                    {listed(entry)}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        </li>
-      ))}
+      {sessions.map((session) => {
+        // A session that changed nothing folds into its header's one line (the UX plan's UX4).
+        const empty = !session.counts.length && !session.listed.length;
+        return (
+          <li key={session.id ?? session.startedAt.toISOString()}>
+            <div className="bg-muted flex min-h-11 items-center gap-3 px-3 py-2 text-sm">
+              <DriverCode actor="agent" />
+              <Link
+                href="/agent"
+                className="font-bold underline-offset-4 hover:underline"
+              >
+                {session.id ? "Session" : "Earlier session"},{" "}
+                {formatMoment(session.startedAt)}
+              </Link>
+              {empty ? (
+                <span className="text-muted-foreground">No changes</span>
+              ) : null}
+            </div>
+            {empty ? null : <SessionChanges session={session} />}
+          </li>
+        );
+      })}
     </ul>
+  );
+}
+
+// What a session changed: how many records of each kind, then its closing moves and refused
+// attempts one by one.
+function SessionChanges({ session }: { session: ClaudeSession }) {
+  return (
+    <div className="flex flex-col gap-1 px-3 py-2 text-sm">
+      <p className="text-muted-foreground">
+        {session.counts
+          .map(
+            ({ kind, changes }) =>
+              `${changes} ${KINDS[kind][changes === 1 ? 0 : 1]}`,
+          )
+          .join(", ")}
+      </p>
+      {session.listed.length ? (
+        <ul className="flex flex-col gap-1">
+          {session.listed.map((entry) => (
+            <li
+              key={entry.id}
+              className={
+                entry.action === "refused" ? "text-destructive" : undefined
+              }
+            >
+              {listed(entry)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 
