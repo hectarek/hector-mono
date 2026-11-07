@@ -11,7 +11,7 @@ execution: code
 
 # Job Search App - Spec
 
-The initial spec for building `apps/job-search`: its requirements (R1 to R25), decisions (KTD1 to KTD21) and units (U1 to U16). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H6) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
+The initial spec for building `apps/job-search`: its requirements (R1 to R26), decisions (KTD1 to KTD21) and units (U1 to U17; R26 and U17 added 2026-11-07). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H6) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
 
 ---
 
@@ -53,6 +53,7 @@ Each unit is one task in Hector's task tracker, where its state lives (see Conve
 
 **Phase 4: Cutover**
 - **U11** Import and cutover — C+H · KTD14 · needs H5, H6
+- **U17** Focus blocks and how each went — C · KTD3, KTD7, KTD15, KTD18 (added 2026-11-07)
 
 **Phase 5: Interviews and lead-source yield**
 - **U12** Interview rounds and lead-source yield — C · KTD7
@@ -129,7 +130,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 - R9. This week works on a phone and shows its sections in this order, collapsing any that are empty:
   1. decisions: proposals to review and meetings to debrief
   2. due and overdue next steps for jobs and people, stale candidates, and practice reviews due (revised 2026-11-07 in UX4: grouped as late, today, stale candidates and reviews, with the next task on the pit board, picked by company tier, then person rank, then date until the timing tower's pace data exists; then what's due later this week, folded by weekday; and in UX6, a line counting the people and open jobs whose next step has no date, each count a link to the list that dates them)
-  3. today's and tomorrow's calendar, or its connection state (R15)
+  3. today's and tomorrow's calendar, or its connection state (R15) (revised 2026-11-07 in U17: today's Focus blocks come first here, in time order, each with how it went, R26)
   4. Claude's recent changes
   5. the week's counts against targets
 - R10. Weekly counts cover messages sent, conversations held, applications (applied-on in the week), practice sessions and moves into `screen` or beyond, by Eastern-time week starting Monday. Saving a weekly review stores a snapshot of the counts and targets with the build milestone and the one change, and the view shows live counts beside a snapshot they no longer match.
@@ -170,6 +171,10 @@ Hector wants one place for the whole search that he and Claude both work in dire
 **Cutover**
 
 - R25. The sheet's data moves into the app once, with statuses and dates intact and contacts as people, on a week boundary after a weekly review. Afterwards the sheet is a read-only archive and no routine writes to it. (Revised 2026-11-06, Hector's call: it moved on a Friday morning, before that day's review, so he could start using the app at once. The import keeps every record's dates, so the week's counts carried over mid-week.)
+
+**Blocks** (added 2026-11-07 in U17: the sheet's Blocks tab didn't move at the cutover, so the blocks lived only on the calendar, where none could be marked done)
+
+- R26. A week's Focus blocks are records. Each has its day, its start and end times, the effort it feeds (Networking, Applying, Practice, Projects, or Upkeep for planning and reviews), a title and a "done when" line, the outcome that makes it done. Hector or Claude sets each block's state (planned, done, partial, moved or skipped) and what happened, and can add a block that wasn't planned. This week shows today's blocks and how each went (R9), and the week page shows the week's, with each effort's blocks done against those planned.
 
 ### Key Decisions
 
@@ -260,6 +265,8 @@ Hector wants one place for the whole search that he and Claude both work in dire
 - Extracting the Neon, Drizzle and logging infrastructure that stash, hectors-recipes and job-search share into a package.
 - Importing a LinkedIn connections export.
 - Merging duplicate companies and lead sources.
+- Blocks in the weekly review's snapshot (R10): the week page shows them live (U17, added 2026-11-07).
+- Linking a block to its Focus calendar event, once the calendar is connected (U13, U14; added 2026-11-07).
 
 #### Considered and not built
 
@@ -593,24 +600,25 @@ Each phase is one branch and PR and leaves a usable app:
 
 ## Implementation Units
 
-| U-ID | Title                                        | Key files                                                                                                           | Depends on                |
-| ---- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| U1   | Scaffold the app                             | `apps/job-search/` config, `app/` shell, copied infrastructure; root lint, Fallow and launch config                 | none                      |
-| U2   | Identity, access and the private screen      | `app/_lib/current-actor.ts`, `neon-auth.service.ts`, `(auth)/private/page.tsx`                                      | U1                        |
-| U3   | Action envelope and activity log             | `app/actions/shared.ts`, `activity` table, `use-cases/activity/`                                                    | U2                        |
-| U4   | WebMCP adapter and the agent-path spike      | `app/_lib/page-tools.ts`, `agent-tools/registry.ts`, `_components/agent-tools.tsx`, `(main)/agent/`, `tests/flows/` | U3                        |
-| U5   | Companies, lead sources and settings         | `companies`, `lead_sources`, `settings` tables and pages                                                            | U3; U4 for its page tools |
-| U6   | Jobs, status lifecycle and the review queue  | `job-lifecycle.ts`, `posting-link.ts`, `jobs`, `job_status_changes`, `notes`                                        | U5; U4 for its page tools |
-| U7   | People, interactions and outreach logging    | `people`, `interactions`, `quick-log.tsx`                                                                           | U6                        |
-| U8   | Practice log                                 | `practice-ladder.ts`, `practice_entries`                                                                            | U3, U4                    |
-| U9   | This week, the weekly review and fresh views | `weekly-counts.ts`, `(main)/page.tsx`, `(main)/week/`, `auto-refresh.tsx`                                           | U6, U7, U8                |
-| U10  | Tool parity check and agent docs             | `agent-tools/parity.ts`, parity test, app `AGENTS.md`, `docs/agent-access.md`                                       | U5–U9                     |
-| U11  | Import and cutover                           | `scripts/import-snapshot.ts`, `import-snapshot.model.ts`                                                            | U9, U10                   |
-| U12  | Interview rounds and lead-source yield       | `interview_rounds`, `(main)/sources/`                                                                               | U9                        |
-| U13  | Google Calendar connection                   | `google-oauth.service.ts`, `calendar_connections`, `(api)/api/calendar/`                                            | U2                        |
-| U14  | Calendar view, scheduling and linking        | `google-calendar.gateway.ts`, `eastern-time.ts`, `(main)/calendar/`                                                 | U12, U13                  |
-| U15  | Profile, fit checklist and fit notes         | `fit.ts`, `profiles`, `(main)/profile/`                                                                             | U6, U9                    |
-| U16  | Public README and demo                       | `apps/job-search/README.md`                                                                                         | U10                       |
+| U-ID | Title                                             | Key files                                                                                                           | Depends on                |
+| ---- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| U1   | Scaffold the app                                  | `apps/job-search/` config, `app/` shell, copied infrastructure; root lint, Fallow and launch config                 | none                      |
+| U2   | Identity, access and the private screen           | `app/_lib/current-actor.ts`, `neon-auth.service.ts`, `(auth)/private/page.tsx`                                      | U1                        |
+| U3   | Action envelope and activity log                  | `app/actions/shared.ts`, `activity` table, `use-cases/activity/`                                                    | U2                        |
+| U4   | WebMCP adapter and the agent-path spike           | `app/_lib/page-tools.ts`, `agent-tools/registry.ts`, `_components/agent-tools.tsx`, `(main)/agent/`, `tests/flows/` | U3                        |
+| U5   | Companies, lead sources and settings              | `companies`, `lead_sources`, `settings` tables and pages                                                            | U3; U4 for its page tools |
+| U6   | Jobs, status lifecycle and the review queue       | `job-lifecycle.ts`, `posting-link.ts`, `jobs`, `job_status_changes`, `notes`                                        | U5; U4 for its page tools |
+| U7   | People, interactions and outreach logging         | `people`, `interactions`, `quick-log.tsx`                                                                           | U6                        |
+| U8   | Practice log                                      | `practice-ladder.ts`, `practice_entries`                                                                            | U3, U4                    |
+| U9   | This week, the weekly review and fresh views      | `weekly-counts.ts`, `(main)/page.tsx`, `(main)/week/`, `auto-refresh.tsx`                                           | U6, U7, U8                |
+| U10  | Tool parity check and agent docs                  | `agent-tools/parity.ts`, parity test, app `AGENTS.md`, `docs/agent-access.md`                                       | U5–U9                     |
+| U11  | Import and cutover                                | `scripts/import-snapshot.ts`, `import-snapshot.model.ts`                                                            | U9, U10                   |
+| U12  | Interview rounds and lead-source yield            | `interview_rounds`, `(main)/sources/`                                                                               | U9                        |
+| U13  | Google Calendar connection                        | `google-oauth.service.ts`, `calendar_connections`, `(api)/api/calendar/`                                            | U2                        |
+| U14  | Calendar view, scheduling and linking             | `google-calendar.gateway.ts`, `eastern-time.ts`, `(main)/calendar/`                                                 | U12, U13                  |
+| U15  | Profile, fit checklist and fit notes              | `fit.ts`, `profiles`, `(main)/profile/`                                                                             | U6, U9                    |
+| U16  | Public README and demo                            | `apps/job-search/README.md`                                                                                         | U10                       |
+| U17  | Focus blocks and how each went (added 2026-11-07) | `block.model.ts`, `blocks`, `block-row.tsx`, `(main)/blocks/`                                                       | U9, U10                   |
 
 ### Phase 1: Foundation and the agent path
 
@@ -1060,6 +1068,36 @@ Each phase is one branch and PR and leaves a usable app:
 - **Verification:**
   - After the commit run, the app's counts for the cutover week match the sheet's, and no routine references the sheet.
   - In the first week after cutover, Hector's part of a daily session takes about 10 minutes; if it takes longer, its task's notes record what slowed it.
+
+### U17. Focus blocks and how each went
+
+Added 2026-11-07. The cutover on 2026-11-06 left the sheet's Blocks tab behind, so a block couldn't be marked done or moved, and the morning brief had no outcomes to read.
+
+- **Goal:** the week's Focus blocks in the app, each with how it went, in place of the sheet's Blocks tab.
+- **Requirements:** R26, R9, R19, R21, R22.
+- **Dependencies:** U9, U10.
+- **Files:**
+  - `apps/job-search/src/entities/models/block.model.ts` (the efforts, the states and the tools' schemas), the `blocks` table, repository and mock
+  - Use cases in `src/application/use-cases/blocks/` (add, update, list, get, delete), controllers alongside, `apps/job-search/app/actions/blocks.ts`
+  - Pages: `app/(main)/blocks/new/`, `app/(main)/blocks/[id]/` and its `edit/`; today's blocks on This week, and the week's on `app/(main)/week/page.tsx`
+  - Components: `app/_components/block-row.tsx` (the design system's BlockRow), `block-sheet.tsx` (how it went), `block-form.tsx`
+  - Tests: the use cases on both backends; screen tests for the rows, the sheet and the form
+- **Approach:**
+  - A block has a start and an end (ISO times with an offset in tool inputs, KTD18), and its day is its start's in Eastern time. It also has an effort, a title, a "done when" line, a state, which starts at planned, and what happened. A block rescheduled within the plan keeps its record and takes the new times. `moved` is for a block taken off its slot, with what happened saying where its outcome went.
+  - Claude adds the week's blocks when it drafts the week, from the same plan as the calendar holds, through `add_blocks`: up to 40 at once, all or none, each logged. Hector adds one from the app, and a block can be added already done, for work that wasn't planned.
+  - Tools: `add_blocks`, `update_block` (against the `updatedAt` read, R22), `list_blocks` (a week's blocks with each effort's counts, this week by default) and `get_block`. Deleting a block is human-only (R21). `get_today` carries today's blocks, so the morning brief can read them. Rewriting the brief's prompt to do so happens outside the repo, with Hector's OK on its wording. `TOOL_SET_VERSION` goes to 5.
+  - This week shows today's blocks in time order before the calendar (R9 as revised), each as a BlockRow, with the signal border on the block happening now. A tap opens a sheet, a form as UX3's are, that sets the state and what happened, with Undo. The week page lists the week's blocks by day, with each effort's blocks done and partly done against those planned. A moved block counts in none of them, since its outcome went to another.
+  - Google Calendar stays the calendar of record (Key Decisions), and the app neither reads nor writes the Focus calendar. Linking a block to its event waits for U13 and U14.
+- **Test scenarios:**
+  - A block's day is its start's in Eastern time: one starting at 11:30 pm Eastern on a Sunday is in the week that began the Monday before, though the server runs in UTC.
+  - A block that ends before it starts is refused, and so is an effort or a state outside the lists.
+  - `add_blocks` with one bad block adds none.
+  - Setting a block's state and what happened logs one change with both fields; setting the same state again logs nothing.
+  - A change against an old `updatedAt`: `conflict`, with the block as it is now.
+  - Claude deletes a block: `human-only`, refused and logged.
+  - `get_today` lists today's blocks in time order. `list_blocks` counts each effort's blocks done, partly done and planned, leaving moved ones out.
+  - Screen tests: today's blocks show as rows with their states; a tap, Done and a line of what happened save the block; the form adds a block.
+- **Verification:** from its browser on the test project, Claude adds a week's blocks through `add_blocks`. At 375 px, marking a block done with a line takes three taps and the typing.
 
 ### Phase 5: Interviews and lead-source yield
 
