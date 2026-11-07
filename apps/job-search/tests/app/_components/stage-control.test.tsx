@@ -141,7 +141,7 @@ describe("the stage control (the UX plan's UX9)", () => {
     control(job);
 
     tap("Archive…");
-    tap(/^After the screen: close as rejected/);
+    tap(/^After the screen: archive as rejected/);
 
     await waitFor(async () =>
       expect(await jobOf(job.id)).toMatchObject({
@@ -188,7 +188,7 @@ describe("the stage control (the UX plan's UX9)", () => {
     ]);
 
     tap("Archive…");
-    tap(/^Posting closed: close as closed/);
+    tap(/^Posting closed: archive as closed/);
 
     expect(
       await screen.findByText("Ask about the team · Nov 12, 2026"),
