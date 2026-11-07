@@ -48,6 +48,7 @@ mock.module("next/navigation", () => ({
       nextState.refreshed += 1;
     },
   }),
+  usePathname: () => nextState.pathname,
   // The real check: the page tools' wrapper (app/_lib/call-action.ts) tells by it that a deploy
   // removed an action.
   unstable_isUnrecognizedActionError,

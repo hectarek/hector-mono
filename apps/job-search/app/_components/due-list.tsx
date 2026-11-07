@@ -63,7 +63,11 @@ export function DueList({
             instruction={next.title}
             meta={next.meta}
           />
-          <div className="flex flex-wrap gap-2">{next.action}</div>
+          {/* Keyed by its task: when the next task takes the board, its sheet starts afresh
+              rather than keeping the one before's record. */}
+          <div key={next.key} className="flex flex-wrap gap-2">
+            {next.action}
+          </div>
         </div>
       ) : null}
       {rest.length ? (

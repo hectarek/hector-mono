@@ -181,6 +181,7 @@ Small and safe, shipped before the rest. One PR.
   - The menu becomes a small client component inside `<nav aria-label="Main">`. It marks the current item by path with `aria-current` and a mark that holds 3:1 (`hectors-tools`' sidebar sets the item by path), and on a phone it closes on a tap and has the 44 px close button every sheet has.
   - The top bar stays put as the page scrolls. On a phone it shows the section's name, as the design system's AppShell page says, and its button is labeled Menu. Sign out gets space above it.
   - Each section's page sets its title ("Jobs · Job search"); a record's page sets its section's name or the record's, as Q9 settles. Signed-out pages keep the bare name (R23).
+    (Revised 2026-11-07 in UX2: the shell sets each page's title from its path, not the page's metadata. A metadata title was swapped a moment after the route changed, so on a return to the first page the tab loaded, Next's route announcer spoke the page left behind.)
 - **Verify:** a picked choice holds at least 3:1 against an unpicked one in both themes; on a phone, a section is two taps away and the menu closes; the current item carries `aria-current`; a screen reader announces each page change.
 - **Touches:** `packages/ui` (a new variant), the shell, each page's metadata. **Size:** S.
 
@@ -377,19 +378,19 @@ The biggest change to how the app feels: every due task can be finished, or move
 
 ## Open questions
 
-Each is Hector's call, made before its unit is built and recorded here as decided, with its date. Claude's pick comes with each, where the evidence supports one.
+Each is Hector's call, made before its unit is built and recorded here as decided, with its date. Claude's pick comes with each, where the evidence supports one. On 2026-11-07 Hector took Claude's pick on every question that had one, so each is marked decided below. Q6, which had none, is still open.
 
-- **Q1. Should every next step carry a date?** (UX6) A step with no date never reaches This week. Pick: yes, a week out by default when none is given; a step for someday becomes No next step with a note.
-- **Q2. After a person's task is done, what's next by default?** (UX3) Pick: "Follow up" in a week, changed with one tap.
-- **Q3. Does a follow-up sent through a portal count as a message sent?** (UX3) Counting it means interactions without a person, a migration. Pick: no; the job's date moves and a note records it, so the week's messages stay messages to people.
-- **Q4. Does a future next date hold off a stale candidate?** (UX13) Yes is an R3 change with nothing stored; no needs a stored date, a migration. Pick: yes.
-- **Q5. Does a late follow-up date the next one from the day it went?** (UX3) Today R3 dates it from applied-on, so a late follow-up leaves its row late. Pick: yes, a week from the day it went.
+- **Q1. Should every next step carry a date?** (UX6) A step with no date never reaches This week. **Decided 2026-11-07:** yes, a week out by default when none is given; a step for someday becomes No next step with a note.
+- **Q2. After a person's task is done, what's next by default?** (UX3) **Decided 2026-11-07:** "Follow up" in a week, changed with one tap.
+- **Q3. Does a follow-up sent through a portal count as a message sent?** (UX3) Counting it means interactions without a person, a migration. **Decided 2026-11-07:** no; the job's date moves and a note records it, so the week's messages stay messages to people.
+- **Q4. Does a future next date hold off a stale candidate?** (UX13) Yes is an R3 change with nothing stored; no needs a stored date, a migration. **Decided 2026-11-07:** yes.
+- **Q5. Does a late follow-up date the next one from the day it went?** (UX3) Today R3 dates it from applied-on, so a late follow-up leaves its row late. **Decided 2026-11-07:** yes, a week from the day it went.
 - **Q6. What does the `closed` status mean, and what should it be called?** (UX10) It shares its name with the tab that lists every closed job. Hector's meaning decides.
-- **Q7. Should a person's notes become dated entries, with the imported text as the first one?** (UX8) Pick: yes, as a job's are.
-- **Q8. Where do the phases sit among U12 to U17?** Pick: Phase 1 at once; Phase 2; then U17 (blocks), which adds to This week after UX4 has reshaped it; then Phases 3 to 7; then U12, U15, U13 and U14. Daily friction first, since it costs time every day; new sections after.
-- **Q9. May a record's page title carry its name (a role, a company, a person)?** (UX2) It would show in the tab switcher and history on both devices, and in Claude's browser. Pick: no, the section's name only ("Job · Job search"), since the search is discreet and a tab can be seen over a shoulder.
-- **Q10. May This week's refresh wait while a sheet is open or a field has focus?** (UX4) R22 asks for a refresh at least once a minute; waiting while he types, then catching up, revises it. Pick: yes.
-- **Q11. Is a bottom tab bar worth a change to KTD19?** (after UX2) KTD19 names one as the remedy if the phone's menu costs too many taps. Pick: not yet; UX2 brings a section to two taps, and a week of use with it decides.
+- **Q7. Should a person's notes become dated entries, with the imported text as the first one?** (UX8) **Decided 2026-11-07:** yes, as a job's are.
+- **Q8. Where do the phases sit among U12 to U17?** **Decided 2026-11-07:** Phase 1 at once; Phase 2; then U17 (blocks), which adds to This week after UX4 has reshaped it; then Phases 3 to 7; then U12, U15, U13 and U14. Daily friction first, since it costs time every day; new sections after.
+- **Q9. May a record's page title carry its name (a role, a company, a person)?** (UX2) It would show in the tab switcher and history on both devices, and in Claude's browser. **Decided 2026-11-07:** no, the section's name only ("Job · Job search"), since the search is discreet and a tab can be seen over a shoulder.
+- **Q10. May This week's refresh wait while a sheet is open or a field has focus?** (UX4) R22 asks for a refresh at least once a minute; waiting while he types, then catching up, revises it. **Decided 2026-11-07:** yes.
+- **Q11. Is a bottom tab bar worth a change to KTD19?** (after UX2) KTD19 names one as the remedy if the phone's menu costs too many taps. **Decided 2026-11-07:** not yet; UX2 brings a section to two taps, and a week of use with it decides.
 
 ## Definition of done: a UI unit
 

@@ -83,6 +83,40 @@ describe("a due row's next step", () => {
     );
   });
 
+  it("starts over on another record when it's given one, so it can't save to the one before", async () => {
+    const companyId = await aCompany();
+    const before = await aJob(companyId, {
+      nextStep: "Call back",
+      nextDate: "2026-01-05",
+    });
+    const after = await aJob(companyId, {
+      nextStep: "Send the portfolio",
+      nextDate: "2026-01-06",
+    });
+    signInAs("owner");
+    const view = render(
+      <NextStepSheet kind="job" record={before} name={before.role} />,
+    );
+    view.rerender(
+      <NextStepSheet kind="job" record={after} name={after.role} />,
+    );
+
+    open();
+    expect(screen.getByLabelText("Next step")).toHaveProperty(
+      "value",
+      "Send the portfolio",
+    );
+    fireEvent.change(screen.getByLabelText("Next date"), {
+      target: { value: "2026-01-12" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(async () =>
+      expect((await jobOf(after.id)).nextDate).toBe("2026-01-12"),
+    );
+    expect((await jobOf(before.id)).nextDate).toBe("2026-01-05");
+  });
+
   // KTD15: Claude changes the job while Hector's sheet is open.
   it("keeps what Hector typed on a conflict, and shows Claude's change beside it", async () => {
     const job = await aJob(await aCompany(), {
