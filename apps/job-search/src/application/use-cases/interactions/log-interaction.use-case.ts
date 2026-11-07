@@ -119,7 +119,7 @@ export const logInteractionUseCase = (
     }
 
     if (job && request.kind === "message-sent") {
-      await followUp(context, job, tx);
+      await followUp(context, job, occurredOn, tx);
     }
     return { interactions };
   }
@@ -199,14 +199,15 @@ export const logInteractionUseCase = (
     });
   }
 
-  // A follow-up message linked to an applied job moves its next date (R3), once however many people
-  // the message went to.
+  // A follow-up message linked to an applied job, sent on the day given, moves its next date (R3),
+  // once however many people the message went to.
   async function followUp(
     context: ChangeContext,
     job: Job,
+    sentOn: string,
     tx: ITransaction,
   ): Promise<void> {
-    const { nextDate } = afterFollowUp(job);
+    const { nextDate } = afterFollowUp(job, sentOn);
     if (nextDate === job.nextDate) {
       return;
     }

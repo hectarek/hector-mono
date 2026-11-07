@@ -160,12 +160,21 @@ export const getTodayUseCase = (
       ),
     ]);
     const staleIds = new Set(staleJobs.map(({ id }) => id));
+    // Each due job with its contacts, so its follow-up can be logged to one (the UX plan's UX3).
+    const jobsDue = await Promise.all(
+      dueJobs
+        .filter(({ id }: JobSummary) => !staleIds.has(id))
+        .map(async (job) => ({
+          ...job,
+          contacts: await peopleRepository.listForJob(ownerId, job.id),
+        })),
+    );
     const view: TodayView = {
       today,
       monday,
       decisions: { proposals: pending, debriefs: toDebrief },
       due: {
-        jobs: dueJobs.filter(({ id }: JobSummary) => !staleIds.has(id)),
+        jobs: jobsDue,
         people,
         stale: staleJobs,
         practice: dueBy(open, today),

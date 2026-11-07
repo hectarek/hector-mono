@@ -7,6 +7,10 @@ import type { PersonRef, PersonSummary } from "./person.model";
 import type { DueSession } from "./practice-entry.model";
 import type { Settings } from "./settings.model";
 
+// A job that's due, with its contacts, so its follow-up can be logged to one of them (the UX
+// plan's UX3).
+export type DueJob = JobSummary & { contacts: PersonRef[] };
+
 // A scheduled conversation whose end has passed, with the person it was with, for Hector to say
 // how it went (R8, R9).
 export type ConversationToDebrief = {
@@ -27,7 +31,7 @@ export type TodayView = {
     debriefs: ConversationToDebrief[];
   };
   due: {
-    jobs: JobSummary[];
+    jobs: DueJob[];
     people: PersonSummary[];
     stale: JobSummary[];
     practice: DueSession[];

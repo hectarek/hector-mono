@@ -112,7 +112,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 - R3. Status moves keep the follow-up rhythm:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
   - a move to `applied` sets the next step "Follow up", due on applied-on + 7 days
-  - a follow-up message linked to the job moves the next date to applied-on + 14 days
+  - a follow-up message linked to the job moves the next date to applied-on + 14 days, or to a week after the message went if that's later (revised 2026-11-07 in UX3, Hector's call on the UX plan's Q5: a late follow-up had left the job due again at once)
   - an applied job with no reply by applied-on + 21 days is listed as a stale candidate, where a reply is any move past `applied` or a reply linked to the job
   - a move to a closed status takes a reason and clears the next step and next date
 - R4. Companies hold structured facts (website, location, headcount, industry, office policy, leave policy, tier) plus a short research summary and a reference to the long-form research kept in Hector's private docs. A company's page lists its jobs and people.

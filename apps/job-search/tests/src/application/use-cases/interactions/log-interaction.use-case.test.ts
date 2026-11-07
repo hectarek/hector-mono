@@ -215,7 +215,7 @@ describeEachBackend("logInteraction", () => {
     ).rejects.toThrow(InputParseError);
   });
 
-  it("moves an applied job's follow-up to 14 days after applied-on for a message linked to it, and makes the person its contact (R3, R1)", async () => {
+  it("moves an applied job's follow-up to 14 days after applied-on for a message linked to it, sent on time, and makes the person its contact (R3, R1)", async () => {
     const jobs = jobFixtures(app);
     const job = await jobs.add(await jobs.company());
     await app.moveJob(HECTOR, {
@@ -226,7 +226,12 @@ describeEachBackend("logInteraction", () => {
 
     await app.logInteraction(
       CLAUDE,
-      log({ personIds: [ada], kind: "message-sent", jobId: job.id }),
+      log({
+        personIds: [ada],
+        kind: "message-sent",
+        jobId: job.id,
+        occurredOn: "2026-10-27",
+      }),
     );
 
     const detail = await app.getJob(OWNER, { id: job.id });
@@ -239,6 +244,27 @@ describeEachBackend("logInteraction", () => {
         { field: "nextDate", before: "2026-10-27", after: "2026-11-03" },
       ],
     });
+  });
+
+  // R3, revised 2026-11-07 (the UX plan's Q5).
+  it("moves the follow-up to a week after a late message went, so the job isn't due again at once", async () => {
+    const jobs = jobFixtures(app);
+    const job = await jobs.add(await jobs.company());
+    await app.moveJob(HECTOR, {
+      id: job.id,
+      status: "applied",
+      on: "2026-10-20",
+    });
+
+    // Due on Oct 27, sent today, Oct 29.
+    await app.logInteraction(
+      HECTOR,
+      log({ personIds: [ada], kind: "message-sent", jobId: job.id }),
+    );
+
+    expect((await app.getJob(OWNER, { id: job.id })).job.nextDate).toBe(
+      "2026-11-05",
+    );
   });
 
   it("takes a reply linked to an applied job as the job's reply, so it's no longer a stale candidate (R3)", async () => {

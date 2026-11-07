@@ -38,7 +38,7 @@ export function DueList({
   // How many decisions wait above, for the clear board's pointer.
   waiting: number;
 }) {
-  const tasks = tasksOf(due);
+  const tasks = tasksOf(due, today);
   if (!tasks.length) {
     return (
       <ClearBoard
@@ -81,7 +81,10 @@ export function DueList({
   );
 }
 
-function tasksOf(due: TodayView["due"]): Task[] {
+function tasksOf(due: TodayView["due"], today: string): Task[] {
+  // What a task's sheet says under its title: the step, and when it's due.
+  const detail = (step: string | null, day: string | null) =>
+    joined([step, when(day, today)]);
   const dated: Task[] = [
     ...due.jobs.map((job) => ({
       key: `job-${job.id}`,
@@ -89,7 +92,16 @@ function tasksOf(due: TodayView["due"]): Task[] {
       title: job.nextStep ?? job.role,
       meta: joined([job.nextStep ? job.role : null, job.company.name]),
       due: job.nextDate,
-      action: <NextStepSheet kind="job" record={job} name={job.role} />,
+      action: (
+        <NextStepSheet
+          kind="job"
+          record={job}
+          title={joined([job.role, job.company.name])}
+          detail={detail(job.nextStep, job.nextDate)}
+          job={job}
+          contacts={job.contacts}
+        />
+      ),
     })),
     ...due.people.map((person) => ({
       key: `person-${person.id}`,
@@ -101,7 +113,12 @@ function tasksOf(due: TodayView["due"]): Task[] {
       ]),
       due: person.nextDate,
       action: (
-        <NextStepSheet kind="person" record={person} name={person.name} />
+        <NextStepSheet
+          kind="person"
+          record={person}
+          title={joined([person.name, person.company?.name ?? null])}
+          detail={detail(person.nextStep, person.nextDate)}
+        />
       ),
     })),
     ...due.practice.map(({ id, topic, nextReview }) => ({

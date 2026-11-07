@@ -86,6 +86,29 @@ describeEachBackend("getToday", () => {
     expect(view.due.people.map(({ id }) => id)).toEqual([dueNow]);
   });
 
+  it("gives each due job its contacts, so its follow-up can name one (the UX plan's UX3)", async () => {
+    const job = await jobs.add(companyId, {
+      role: "With contacts",
+      nextStep: "Follow up",
+      nextDate: "2026-10-28",
+    });
+    const ada = await person({ name: "Ada Example", jobId: job.id });
+    const bo = await person({ name: "Bo Example", jobId: job.id });
+    await person({ name: "Cy Example" });
+
+    const { due } = await app.getToday(OWNER);
+
+    expect(due.jobs).toEqual([
+      expect.objectContaining({
+        id: job.id,
+        contacts: [
+          expect.objectContaining({ id: ada, name: "Ada Example" }),
+          expect.objectContaining({ id: bo, name: "Bo Example" }),
+        ],
+      }),
+    ]);
+  });
+
   it("lists a job applied 21 days ago with no reply once, as a stale candidate, and keeps one with a reply as due", async () => {
     const stale = await appliedOn("2026-10-01");
     const replied = await appliedOn("2026-10-02");

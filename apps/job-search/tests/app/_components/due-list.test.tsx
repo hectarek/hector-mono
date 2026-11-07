@@ -1,8 +1,14 @@
 import { describe, expect, it } from "bun:test";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { DueList } from "@/app/_components/due-list";
 import { getJob } from "@/app/actions/jobs";
-import { jobSummary } from "@/src/entities/models/job.model";
+import { type Job, jobSummary } from "@/src/entities/models/job.model";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { aCompany, aJob, dataOf } from "@/tests/_support/screens";
 import { signInAs } from "@/tests/_support/session";
@@ -10,6 +16,9 @@ import { signInAs } from "@/tests/_support/session";
 const NOTHING_DUE = { jobs: [], people: [], stale: [], practice: [] };
 
 const jobOf = async (id: string) => dataOf(await getJob({ id })).job;
+
+// A job as This week lists it: due, with its contacts (none here).
+const due = (job: Job) => ({ ...jobSummary(job), contacts: [] });
 
 describe("what's due on This week", () => {
   it("puts the earliest task on the pit board, and the rest in rows that say when they're due", async () => {
@@ -29,7 +38,7 @@ describe("what's due on This week", () => {
       <DueList
         due={{
           ...NOTHING_DUE,
-          jobs: [jobSummary(dueToday), jobSummary(late)],
+          jobs: [due(dueToday), due(late)],
         }}
         today={today}
         waiting={0}
@@ -60,7 +69,7 @@ describe("what's due on This week", () => {
     signInAs("owner");
     const view = render(
       <DueList
-        due={{ ...NOTHING_DUE, jobs: [jobSummary(first), jobSummary(second)] }}
+        due={{ ...NOTHING_DUE, jobs: [due(first), due(second)] }}
         today={today}
         waiting={0}
       />,
@@ -69,7 +78,7 @@ describe("what's due on This week", () => {
     // The first task is done, so the page refreshes with the second on the board.
     view.rerender(
       <DueList
-        due={{ ...NOTHING_DUE, jobs: [jobSummary(second)] }}
+        due={{ ...NOTHING_DUE, jobs: [due(second)] }}
         today={today}
         waiting={0}
       />,
@@ -77,14 +86,13 @@ describe("what's due on This week", () => {
     fireEvent.click(view.getByRole("button", { name: "Change" }));
 
     // The sheet renders in a portal, outside the board's container.
-    expect(screen.getByLabelText("Next step")).toHaveProperty(
-      "value",
-      "Send the portfolio",
-    );
-    fireEvent.change(screen.getByLabelText("Next date"), {
+    expect(
+      within(screen.getByRole("dialog")).getByText(/^Send the portfolio/),
+    ).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Another day"), {
       target: { value: addDays(today, 3) },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "Push to that day" }));
 
     await waitFor(async () =>
       expect((await jobOf(second.id)).nextDate).toBe(addDays(today, 3)),
