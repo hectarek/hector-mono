@@ -269,11 +269,11 @@ export const updateJobSchema = jobDetailsSchema
   .superRefine(bandInOrder);
 export type UpdateJobInput = z.output<typeof updateJobSchema>;
 
-// set_job_status' input: an open status, on a date (today by default). Closing takes close_job.
+// set_job_status' input: an open status, on a date (today by default). Archiving takes close_job.
 export const setJobStatusSchema = z.object({
   id: z.uuid(),
   status: z.enum(OPEN_STATUSES, {
-    error: `Use one of: ${OPEN_STATUSES.join(", ")}. A closed status goes through close_job, with a reason`,
+    error: `Use one of: ${OPEN_STATUSES.join(", ")}. The statuses that archive a job go through close_job, with a reason`,
   }),
   on: dateSchema.optional(),
   // What comes next, in place of the step the move sets for the new stage (R3 as revised
@@ -282,14 +282,14 @@ export const setJobStatusSchema = z.object({
   nextDate: dateSchema.nullable().optional(),
 });
 
-// close_job's input (KTD5): a closed status, on a date (today by default), and why.
+// close_job's input (KTD5): a status that archives the job, on a date (today by default), and why.
 export const closeJobSchema = z.object({
   id: z.uuid(),
   status: z.enum(CLOSED_STATUSES, {
     error: `Use one of: ${CLOSED_STATUSES.join(", ")}`,
   }),
   on: dateSchema.optional(),
-  reason: requiredText(200, "Say why it's closing"),
+  reason: requiredText(200, "Say why it's archived"),
 });
 
 // A status move, as either input reads.
@@ -332,12 +332,12 @@ export type ProposalDecision = { id: string; updatedAt: Date } & (
 export const JOB_PAGE_MAX = 50;
 
 // find_jobs' input: the owner's jobs, accepted ones unless asked otherwise (KTD8), narrowed to
-// open or closed ones or one status, to one company, and to those whose next step has no date,
-// by next date, a page at a time.
+// open or archived ones (every ended status, the UX plan's Q6, so closed is the one status) or one
+// status, to one company, and to those whose next step has no date, by next date, a page at a time.
 export const findJobsSchema = z.object({
   status: z
-    .enum(["open", "closed", ...OPEN_STATUSES, ...CLOSED_STATUSES], {
-      error: "Use open, closed or a status",
+    .enum(["open", "archived", ...OPEN_STATUSES, ...CLOSED_STATUSES], {
+      error: "Use open, archived or a status",
     })
     .optional(),
   reviewState: z
@@ -364,7 +364,7 @@ export function statusesFor(
   if (status === "open") {
     return OPEN_STATUSES;
   }
-  return status === "closed" ? CLOSED_STATUSES : [status];
+  return status === "archived" ? CLOSED_STATUSES : [status];
 }
 
 // nextOffset: where the next page starts, or null on the last one.

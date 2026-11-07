@@ -298,7 +298,7 @@ function CloseSheet({
         setFailure(result);
         return;
       }
-      notify(`Closed as ${STATUS_LABELS[status]}: ${reason}.`);
+      notify(`Archived as ${STATUS_LABELS[status]}: ${reason}.`);
       const withSteps = await contactsWithSteps(contacts);
       if (withSteps.length === 0) {
         setOpen(false);
@@ -346,7 +346,7 @@ function CloseSheet({
             />
           }
         >
-          Close…
+          Archive…
         </SheetTrigger>
       )}
       <SheetContent side="bottom" showCloseButton={false} className={SHEET}>
@@ -356,11 +356,11 @@ function CloseSheet({
         >
           <SheetCloseButton />
           <SheetHeader className="mr-10">
-            <SheetTitle>{steps ? "Closed" : "Close this job"}</SheetTitle>
+            <SheetTitle>{steps ? "Archived" : "Archive this job"}</SheetTitle>
             <SheetDescription>
               {steps
                 ? "Its contacts still have next steps. Clear any that were about this job."
-                : "Pick why. A close clears the job's next step."}
+                : "Pick why. Archiving clears the job's next step."}
             </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4">
@@ -406,7 +406,7 @@ function CloseSheet({
               <>
                 <FormField
                   id="close-on"
-                  label="Closed on"
+                  label="Archived on"
                   kind="date"
                   value={on ?? day}
                   onChange={(value) => setOn(value || null)}
@@ -490,7 +490,7 @@ function CloseSheet({
                 disabled={isPending || !other.status || !other.reason.trim()}
                 className="min-h-11"
               >
-                {isPending ? "Closing…" : "Close with that reason"}
+                {isPending ? "Archiving…" : "Archive with that reason"}
               </Button>
             )}
           </SheetFooter>

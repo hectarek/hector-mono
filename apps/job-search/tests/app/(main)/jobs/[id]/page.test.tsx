@@ -46,7 +46,7 @@ describe("a job's page", () => {
         .getByRole("button", { name: "Target" })
         .getAttribute("aria-current"),
     ).toBe("step");
-    expect(status.getByRole("button", { name: "Close…" })).toBeTruthy();
+    expect(status.getByRole("button", { name: "Archive…" })).toBeTruthy();
     // The record header (the UX plan's UX8): who added it, and its key facts on one line.
     expect(page.getByText(/added /)).toBeTruthy();
     // Next comes right after the header, with Done, Push and Change.

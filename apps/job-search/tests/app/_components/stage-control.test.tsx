@@ -46,7 +46,7 @@ const tap = (name: string | RegExp) =>
   fireEvent.click(screen.getByRole("button", { name }));
 const submitSheet = () => {
   const form = within(screen.getByRole("dialog")).getByRole("button", {
-    name: /^Move to|^Close with/,
+    name: /^Move to|^Archive with/,
   });
   const element = form.closest("form");
   if (!element) throw new Error("The sheet isn't a form");
@@ -140,7 +140,7 @@ describe("the stage control (the UX plan's UX9)", () => {
     const job = await aJob(await aCompany());
     control(job);
 
-    tap("Close…");
+    tap("Archive…");
     tap(/^After the screen: close as rejected/);
 
     await waitFor(async () =>
@@ -150,7 +150,7 @@ describe("the stage control (the UX plan's UX9)", () => {
       }),
     );
     expect(
-      await screen.findByText("Closed as Rejected: After the screen."),
+      await screen.findByText("Archived as Rejected: After the screen."),
     ).toBeTruthy();
   });
 
@@ -158,7 +158,7 @@ describe("the stage control (the UX plan's UX9)", () => {
     const job = await aJob(await aCompany());
     control(job);
 
-    tap("Close…");
+    tap("Archive…");
     tap("Withdrawn");
     fireEvent.change(screen.getByLabelText("Another reason"), {
       target: { value: "The team was reorganized" },
@@ -187,7 +187,7 @@ describe("the stage control (the UX plan's UX9)", () => {
       { id: person.id, name: person.name, role: null, rank: null },
     ]);
 
-    tap("Close…");
+    tap("Archive…");
     tap(/^Posting closed: close as closed/);
 
     expect(
