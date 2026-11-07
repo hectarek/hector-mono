@@ -42,6 +42,7 @@ export function createPeopleModule() {
       DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.IInteractionsRepository,
       DI_SYMBOLS.IJobsRepository,
+      DI_SYMBOLS.INotesRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
@@ -51,6 +52,7 @@ export function createPeopleModule() {
       DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.ICompaniesRepository,
       DI_SYMBOLS.IJobsRepository,
+      DI_SYMBOLS.INotesRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,
@@ -70,6 +72,7 @@ export function createPeopleModule() {
     .toHigherOrderFunction(deletePersonUseCase, [
       DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.IInteractionsRepository,
+      DI_SYMBOLS.INotesRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,

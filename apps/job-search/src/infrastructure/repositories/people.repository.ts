@@ -26,7 +26,6 @@ const PERSON = {
   ask: people.ask,
   nextStep: people.nextStep,
   nextDate: people.nextDate,
-  notes: people.notes,
   updatedAt: people.updatedAt,
   companyId: companies.id,
   companyName: companies.name,

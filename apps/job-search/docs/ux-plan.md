@@ -262,6 +262,7 @@ The biggest change to how the app feels: every due task can be finished, or move
   - Back links name where you came from and return there: the link carries a `from` path, checked as `safe-redirect.ts` checks paths, and falls back to the section's list.
 - **Verify:** at 375 px, a record's next step and its actions are on the first screen of its page.
 - **Touches:** `get_job` reads the job's interactions (its answer grows). People's notes reuse the notes table, which points at a record by kind and id; confirm no migration is needed before building. **Size:** L.
+- **Revised 2026-11-07, in its build:** the notes table took a person's notes with no change, but each person's text, until then a column of theirs, had to become their first note, so a data-only migration (0008) copies it, signed by whoever added the person and dated then, and a later one drops the column. `add_note` takes a person, `get_person` answers with their notes, `add_person`'s notes become their first, and `update_person` takes none, so `TOOL_SET_VERSION` is 7. The person form asks for a note only when adding someone.
 
 ### UX9. Moving a job, and what comes next
 

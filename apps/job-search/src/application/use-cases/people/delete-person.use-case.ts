@@ -1,5 +1,6 @@
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
+import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
@@ -17,12 +18,13 @@ import {
 
 export type IDeletePersonUseCase = ReturnType<typeof deletePersonUseCase>;
 
-// Deletes a person, with their interactions and their links to jobs, which only Hector may do
-// (R21): Claude's try is refused, and logged, before anything is read. The history keeps the
+// Deletes a person, with their interactions, their notes and their links to jobs, which only Hector
+// may do (R21): Claude's try is refused, and logged, before anything is read. The history keeps the
 // person's facts as they were.
 export const deletePersonUseCase = (
   peopleRepository: IPeopleRepository,
   interactionsRepository: IInteractionsRepository,
+  notesRepository: INotesRepository,
   activityRepository: IActivityRepository,
   transactionManager: ITransactionManagerService,
   loggerService: ILoggerService,
@@ -49,6 +51,7 @@ export const deletePersonUseCase = (
       }
       const jobIds = await peopleRepository.jobIdsFor(ownerId, id, tx);
       await interactionsRepository.deleteForPerson(ownerId, id, tx);
+      await notesRepository.deleteFor(ownerId, { kind: "person", id }, tx);
       await peopleRepository.delete(ownerId, id, tx);
       await recordChange(activityRepository, tx, context, {
         record,

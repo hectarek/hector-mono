@@ -1,6 +1,7 @@
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
+import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import { datedPerson } from "@/src/application/use-cases/people/person-dates";
@@ -11,11 +12,13 @@ import type { PersonDetail } from "@/src/entities/models/person.model";
 export type IGetPersonUseCase = ReturnType<typeof getPersonUseCase>;
 
 // A person as their page and get_person show them (docs/build-plan.md U7): with their dates, their
-// interactions, the latest first, the jobs they're a contact for, and who added them (UX8).
+// interactions, the latest first, the jobs they're a contact for, their notes, the newest first,
+// and who added them (the UX plan's UX8).
 export const getPersonUseCase = (
   peopleRepository: IPeopleRepository,
   interactionsRepository: IInteractionsRepository,
   jobsRepository: IJobsRepository,
+  notesRepository: INotesRepository,
   activityRepository: IActivityRepository,
   loggerService: ILoggerService,
 ) => {
@@ -29,10 +32,11 @@ export const getPersonUseCase = (
     if (!record) {
       throw new NotFoundError("Couldn't find that person.");
     }
-    const [person, interactions, jobIds, added] = await Promise.all([
+    const [person, interactions, jobIds, notes, added] = await Promise.all([
       datedPerson(interactionsRepository, ownerId, record),
       interactionsRepository.listForPerson(ownerId, id),
       peopleRepository.jobIdsFor(ownerId, id),
+      notesRepository.list(ownerId, { kind: "person", id }),
       activityRepository.addedOf(ownerId, { kind: "person", id }),
     ]);
     const jobs = await Promise.all(
@@ -43,6 +47,7 @@ export const getPersonUseCase = (
       person,
       interactions,
       jobs: jobs.filter((job): job is Job => job !== undefined).map(jobSummary),
+      notes,
       added,
     };
   };

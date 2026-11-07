@@ -57,6 +57,13 @@
       "when": 1794079753123,
       "tag": "0007_blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794088861728,
+      "tag": "0008_person_notes",
+      "breakpoints": true
     }
   ]
 }

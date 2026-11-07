@@ -8,6 +8,7 @@ import { ImportRefsRepository } from "@/src/infrastructure/repositories/import-r
 import { InteractionsRepository } from "@/src/infrastructure/repositories/interactions.repository";
 import { JobsRepository } from "@/src/infrastructure/repositories/jobs.repository";
 import { LeadSourcesRepository } from "@/src/infrastructure/repositories/lead-sources.repository";
+import { NotesRepository } from "@/src/infrastructure/repositories/notes.repository";
 import { PeopleRepository } from "@/src/infrastructure/repositories/people.repository";
 import { PracticeRepository } from "@/src/infrastructure/repositories/practice.repository";
 import { ConsoleLoggerService } from "@/src/infrastructure/services/console-logger.service";
@@ -20,6 +21,7 @@ export const importSnapshotWithRepositories = importSnapshotUseCase(
   new LeadSourcesRepository(log),
   new JobsRepository(log),
   new PeopleRepository(log),
+  new NotesRepository(log),
   new InteractionsRepository(log),
   new PracticeRepository(log),
   new ActivityRepository(log),

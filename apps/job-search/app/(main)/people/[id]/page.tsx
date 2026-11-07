@@ -10,6 +10,7 @@ import { QuickLog } from "@/app/_components/quick-log";
 import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
 import { RecordNext } from "@/app/_components/record-next";
+import { RecordNotes } from "@/app/_components/record-notes";
 import { backTo, withFrom } from "@/app/_lib/back-link";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
@@ -34,9 +35,9 @@ const DATES = [
 
 // A person (R7), in the order every record's page takes (the UX plan's UX8): their header (who
 // added them, role, company and how Hector knows them, rank, and actions); what's next; their
-// interactions, the latest first, each with its note; the jobs they're a contact for; their notes;
-// their facts, the filled ones first; and their history (R19). The quick log opens on them.
-// Claude's session sees what only Hector may do off (KTD3).
+// interactions, the latest first, each with its note; the jobs they're a contact for; their dated
+// notes, the newest first; their facts, the filled ones first; and their history (R19). The quick
+// log opens on them. Claude's session sees what only Hector may do off (KTD3).
 export default async function PersonPage({
   params,
   searchParams,
@@ -52,7 +53,10 @@ export default async function PersonPage({
   });
   // Where this page sends the records it links to back to.
   const here = `/people/${id}`;
-  const { person, interactions, jobs, added } = await loadPerson(id, actor);
+  const { person, interactions, jobs, notes, added } = await loadPerson(
+    id,
+    actor,
+  );
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
   const today = todayIn(PLAN_TIME_ZONE);
   const human = actor.actor === "owner";
@@ -177,12 +181,14 @@ export default async function PersonPage({
         )}
       </section>
 
-      {person.notes ? (
-        <section aria-labelledby="person-notes" className="flex flex-col gap-2">
-          <SectionTitle id="person-notes">Notes</SectionTitle>
-          <p className="text-sm whitespace-pre-wrap">{person.notes}</p>
-        </section>
-      ) : null}
+      <section aria-labelledby="person-notes" className="flex flex-col gap-2">
+        <SectionTitle id="person-notes">Notes</SectionTitle>
+        <RecordNotes
+          record={{ kind: "person", id: person.id }}
+          notes={notes}
+          canEdit={human}
+        />
+      </section>
 
       <section aria-labelledby="person-facts" className="flex flex-col gap-2">
         <SectionTitle id="person-facts">Facts</SectionTitle>

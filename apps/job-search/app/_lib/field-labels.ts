@@ -62,8 +62,9 @@ export const FIELD_LABELS: Record<string, string> = {
   on: "Date",
   reason: "Reason",
   note: "Note",
-  // A note's text
+  // A note's text, and the person a note is on (its job is `jobId`, below)
   body: "Note",
+  personId: "Person",
   // A person's facts (their `name`, `role`, `nextStep` and `nextDate` are above), and a job's
   // contacts as its history names them
   howKnown: "Known from",

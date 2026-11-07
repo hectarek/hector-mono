@@ -37,13 +37,14 @@ describe("addNoteController", () => {
     });
   });
 
-  it("rejects a record that isn't a job before the use case runs", async () => {
+  // A note goes on a job or a person (the UX plan's UX8), nothing else.
+  it("rejects a record that's neither a job nor a person before the use case runs", async () => {
     const { useCase, controller } = setup();
     await expect(
       controller(
         {
           record: {
-            kind: "person",
+            kind: "company",
             id: "00000000-0000-4000-8000-0000000000c1",
           },
           body: "A note",

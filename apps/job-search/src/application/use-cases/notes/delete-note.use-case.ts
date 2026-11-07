@@ -9,7 +9,7 @@ import type {
   ChangeContext,
   RecordRef,
 } from "@/src/entities/models/activity.model";
-import type { NoteRecord } from "@/src/entities/models/note.model";
+import { type NoteRecord, noteOn } from "@/src/entities/models/note.model";
 
 export type IDeleteNoteUseCase = ReturnType<typeof deleteNoteUseCase>;
 
@@ -42,7 +42,7 @@ export const deleteNoteUseCase = (
       await recordChange(activityRepository, tx, context, {
         record,
         action: "deleted",
-        before: { body: note.body, jobId: note.record.id },
+        before: { body: note.body, ...noteOn(note.record) },
       });
       return { id, record: note.record };
     });
