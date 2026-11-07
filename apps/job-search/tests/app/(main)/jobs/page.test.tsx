@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
+import { withFrom } from "@/app/_lib/back-link";
 import JobsPage from "@/app/(main)/jobs/page";
 import type { Redirected } from "@/tests/_support/next";
 import { aCompany, aJob, aProposal } from "@/tests/_support/screens";
@@ -28,7 +29,7 @@ describe("the jobs page", () => {
     const table = within(page.getByRole("table"));
     expect(
       table.getByRole("link", { name: "Widget engineer" }).getAttribute("href"),
-    ).toBe(`/jobs/${job.id}`);
+    ).toBe(withFrom(`/jobs/${job.id}`, "/jobs"));
     expect(table.getByText("Ask for a referral, due Nov 2, 2026")).toBeTruthy();
     expect(table.queryByText("Gadget designer")).toBeNull();
     expect(page.getByRole("button", { name: "To review (1)" })).toBeTruthy();
@@ -54,7 +55,7 @@ describe("the jobs page", () => {
       within(queue.getByRole("table"))
         .getByRole("link", { name: "Bolt fitter" })
         .getAttribute("href"),
-    ).toBe(`/jobs/${proposal.id}`);
+    ).toBe(withFrom(`/jobs/${proposal.id}`, "/jobs?view=review"));
   });
 
   it("sends an account that isn't one of the app's two to the private screen", async () => {

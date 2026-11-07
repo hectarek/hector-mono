@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
+import { withFrom } from "@/app/_lib/back-link";
 import PersonPage from "@/app/(main)/people/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
 import { logInteraction } from "@/app/actions/interactions";
@@ -11,7 +12,12 @@ import { signInAs } from "@/tests/_support/session";
 
 const personPage = async (id: string) =>
   within(
-    await renderOnServer(await PersonPage({ params: Promise.resolve({ id }) })),
+    await renderOnServer(
+      await PersonPage({
+        params: Promise.resolve({ id }),
+        searchParams: Promise.resolve({}),
+      }),
+    ),
   );
 
 const tag = () => crypto.randomUUID().slice(0, 8);
@@ -65,7 +71,7 @@ describe("a person's page", () => {
     expect(page.getByRole("heading", { name: person.name })).toBeTruthy();
     expect(
       page.getByRole("link", { name: company.name }).getAttribute("href"),
-    ).toBe(`/companies/${company.id}`);
+    ).toBe(withFrom(`/companies/${company.id}`, `/people/${person.id}`));
     // The record header (the UX plan's UX8): the role in the facts line, and the rank.
     expect(page.getByText(/^· Engineering manager$/)).toBeTruthy();
     expect(page.getByText("Rank A")).toBeTruthy();
@@ -85,7 +91,7 @@ describe("a person's page", () => {
       interactions
         .getByRole("link", { name: `Widget engineer at ${company.name}` })
         .getAttribute("href"),
-    ).toBe(`/jobs/${job.id}`);
+    ).toBe(withFrom(`/jobs/${job.id}`, `/people/${person.id}`));
     expect(
       interactions.getAllByRole("button", { name: "Delete" }),
     ).toHaveLength(2);

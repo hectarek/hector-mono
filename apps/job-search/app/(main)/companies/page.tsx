@@ -72,7 +72,12 @@ export default async function CompaniesPage({
       </search>
 
       {companies.length ? (
-        <CompanyList companies={companies} />
+        <CompanyList
+          companies={companies}
+          from={
+            query ? `/companies?q=${encodeURIComponent(query)}` : "/companies"
+          }
+        />
       ) : (
         <Empty>
           <EmptyHeader>

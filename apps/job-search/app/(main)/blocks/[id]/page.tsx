@@ -1,12 +1,14 @@
 import { Button } from "@repo/ui/components/button";
-import { ChevronLeft } from "lucide-react";
+
 import Link from "next/link";
+import { BackLink } from "@/app/_components/back-link";
 import { blockNow } from "@/app/_components/block-row";
 import { BlockSheet } from "@/app/_components/block-sheet";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { RecordTitle } from "@/app/_components/display";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { RecordHistory } from "@/app/_components/record-history";
+import { backTo } from "@/app/_lib/back-link";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { formatDay, formatWeekday } from "@/app/_lib/format-day";
 import { loadBlock } from "@/app/_lib/load-block";
@@ -17,12 +19,19 @@ import { mondayOf } from "@/src/entities/week";
 // history (R19). Editing its plan opens its form; deleting it is Hector's alone (KTD3).
 export default async function BlockPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const actor = await getPageActor();
   const { id } = await params;
+  const { from } = await searchParams;
   const block = await loadBlock(id, actor);
+  const back = backTo(from, {
+    href: `/week?week=${mondayOf(block.day)}`,
+    label: "Weekly review",
+  });
   const human = actor.actor === "owner";
   // Read after the session: the block happening now takes the signal border.
   const now = blockNow([block], new Date()) === block.id;
@@ -30,13 +39,7 @@ export default async function BlockPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Link
-          href={`/week?week=${mondayOf(block.day)}`}
-          className="text-muted-foreground flex min-h-11 w-fit items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" />
-          Weekly review
-        </Link>
+        <BackLink back={back} />
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
             <RecordTitle className="break-words">{block.title}</RecordTitle>

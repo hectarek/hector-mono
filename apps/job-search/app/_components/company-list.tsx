@@ -15,10 +15,18 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import Link from "next/link";
+import { withFrom } from "@/app/_lib/back-link";
 import type { CompanySummary } from "@/src/entities/models/company.model";
 
-// A page of companies: a table on desktop, cards on phones (docs/build-plan.md KTD19).
-export function CompanyList({ companies }: { companies: CompanySummary[] }) {
+// A page of companies: a table on desktop, cards on phones (docs/build-plan.md KTD19). `from`, the
+// page the list is on, is where a company's back link returns (the UX plan's UX8).
+export function CompanyList({
+  companies,
+  from,
+}: {
+  companies: CompanySummary[];
+  from?: string;
+}) {
   return (
     <>
       <div className="hidden md:block">
@@ -36,7 +44,7 @@ export function CompanyList({ companies }: { companies: CompanySummary[] }) {
               <TableRow key={company.id}>
                 <TableCell>
                   <Link
-                    href={`/companies/${company.id}`}
+                    href={withFrom(`/companies/${company.id}`, from)}
                     className="font-medium underline-offset-4 hover:underline"
                   >
                     {company.name}
@@ -55,7 +63,9 @@ export function CompanyList({ companies }: { companies: CompanySummary[] }) {
           <li key={company.id}>
             <Item
               variant="outline"
-              render={<Link href={`/companies/${company.id}`} />}
+              render={
+                <Link href={withFrom(`/companies/${company.id}`, from)} />
+              }
             >
               <ItemContent>
                 <ItemTitle>{company.name}</ItemTitle>

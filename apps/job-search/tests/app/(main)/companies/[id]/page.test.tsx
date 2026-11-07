@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
+import { withFrom } from "@/app/_lib/back-link";
 import CompanyPage from "@/app/(main)/companies/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
 import { addJob, dismissProposal } from "@/app/actions/jobs";
@@ -11,7 +12,10 @@ import { signInAs } from "@/tests/_support/session";
 const companyPage = async (id: string) =>
   within(
     await renderOnServer(
-      await CompanyPage({ params: Promise.resolve({ id }) }),
+      await CompanyPage({
+        params: Promise.resolve({ id }),
+        searchParams: Promise.resolve({}),
+      }),
     ),
   );
 
@@ -53,7 +57,7 @@ describe("a company's page", () => {
     expect(research.getByText("notes/acme-inc.md")).toBeTruthy();
     expect(
       page.getByRole("link", { name: similar.name }).getAttribute("href"),
-    ).toBe(`/companies/${similar.id}`);
+    ).toBe(withFrom(`/companies/${similar.id}`, `/companies/${company.id}`));
     const history = within(page.getByRole("region", { name: "History" }));
     expect(history.getByText("Created")).toBeTruthy();
     expect(
@@ -82,9 +86,10 @@ describe("a company's page", () => {
     signInAs("owner");
     for (const id of [crypto.randomUUID(), "not-an-id"]) {
       expect(
-        await CompanyPage({ params: Promise.resolve({ id }) }).catch(
-          (err: unknown) => err,
-        ),
+        await CompanyPage({
+          params: Promise.resolve({ id }),
+          searchParams: Promise.resolve({}),
+        }).catch((err: unknown) => err),
       ).toBeInstanceOf(NotFoundPage);
     }
   });
@@ -93,6 +98,7 @@ describe("a company's page", () => {
     signInAs("stranger");
     const outcome = await CompanyPage({
       params: Promise.resolve({ id: crypto.randomUUID() }),
+      searchParams: Promise.resolve({}),
     }).catch((err: unknown) => err);
     expect((outcome as Redirected).url).toBe("/private");
   });
@@ -114,7 +120,7 @@ describe("a company's page", () => {
       within(jobs.getByRole("table"))
         .getByRole("link", { name: "Widget engineer" })
         .getAttribute("href"),
-    ).toBe(`/jobs/${job.data.id}`);
+    ).toBe(withFrom(`/jobs/${job.data.id}`, `/companies/${company.id}`));
     expect(
       jobs.getByRole("button", { name: "Add a job" }).getAttribute("href"),
     ).toBe(`/jobs/new?company=${company.id}`);
@@ -148,7 +154,7 @@ describe("a company's page", () => {
       within(page.getByRole("region", { name: "To review" }))
         .getAllByRole("link", { name: "Gadget designer" })[0]
         ?.getAttribute("href"),
-    ).toBe(`/jobs/${waiting.id}`);
+    ).toBe(withFrom(`/jobs/${waiting.id}`, `/companies/${company.id}`));
     expect(
       within(page.getByRole("region", { name: "Dismissed" })).getAllByText(
         "Wrong level",

@@ -1,9 +1,9 @@
 import { Alert, AlertDescription } from "@repo/ui/components/alert";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
-import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BackLink } from "@/app/_components/back-link";
 import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { SectionTitle } from "@/app/_components/display";
@@ -18,6 +18,7 @@ import { RecordNext } from "@/app/_components/record-next";
 import { RemoveContactButton } from "@/app/_components/remove-contact-button";
 import { StageControl } from "@/app/_components/stage-control";
 import { StatusChip } from "@/app/_components/status-chip";
+import { backTo, withFrom } from "@/app/_lib/back-link";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
@@ -50,11 +51,19 @@ const DOLLARS = new Intl.NumberFormat("en-US", {
 // (KTD3).
 export default async function JobPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const actor = await getPageActor();
   const { id } = await params;
+  const back = backTo((await searchParams).from, {
+    href: "/jobs",
+    label: "Jobs",
+  });
+  // Where this page sends the records it links to back to.
+  const here = `/jobs/${id}`;
   const { job, notes, moves, contacts, repliedOn, added, outreach } =
     await loadJob(id, actor);
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
@@ -75,13 +84,7 @@ export default async function JobPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Link
-          href="/jobs"
-          className="text-muted-foreground flex min-h-11 w-fit items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" />
-          Jobs
-        </Link>
+        <BackLink back={back} />
         <RecordHeader
           kind="Job"
           added={added}
@@ -89,7 +92,7 @@ export default async function JobPage({
           facts={
             <>
               <Link
-                href={`/companies/${job.company.id}`}
+                href={withFrom(`/companies/${job.company.id}`, here)}
                 className="underline underline-offset-4"
               >
                 {job.company.name}
@@ -225,6 +228,7 @@ export default async function JobPage({
         {contacts.length ? (
           <ContactList
             people={contacts}
+            from={here}
             action={(person) =>
               human ? (
                 <RemoveContactButton personId={person.id} jobId={job.id} />
@@ -240,7 +244,7 @@ export default async function JobPage({
           <ul aria-label="Outreach" className="flex flex-col divide-y">
             {outreach.map((entry) => (
               <li key={entry.interaction.id} className="py-2">
-                <OutreachLine entry={entry} />
+                <OutreachLine entry={entry} from={here} />
               </li>
             ))}
           </ul>
@@ -328,8 +332,10 @@ export default async function JobPage({
 // (docs/build-plan.md KTD21).
 function OutreachLine({
   entry: { interaction, person },
+  from,
 }: {
   entry: JobOutreach;
+  from: string;
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5 text-sm">
@@ -341,7 +347,7 @@ function OutreachLine({
             : null}
         </span>{" "}
         <Link
-          href={`/people/${person.id}`}
+          href={withFrom(`/people/${person.id}`, from)}
           className="underline underline-offset-4"
         >
           {person.name}

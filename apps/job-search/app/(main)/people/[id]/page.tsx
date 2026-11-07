@@ -1,7 +1,7 @@
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
-import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { BackLink } from "@/app/_components/back-link";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { SectionTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
@@ -10,6 +10,7 @@ import { QuickLog } from "@/app/_components/quick-log";
 import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
 import { RecordNext } from "@/app/_components/record-next";
+import { backTo, withFrom } from "@/app/_lib/back-link";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
@@ -38,11 +39,19 @@ const DATES = [
 // Claude's session sees what only Hector may do off (KTD3).
 export default async function PersonPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const actor = await getPageActor();
   const { id } = await params;
+  const back = backTo((await searchParams).from, {
+    href: "/people",
+    label: "People",
+  });
+  // Where this page sends the records it links to back to.
+  const here = `/people/${id}`;
   const { person, interactions, jobs, added } = await loadPerson(id, actor);
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
   const today = todayIn(PLAN_TIME_ZONE);
@@ -55,13 +64,7 @@ export default async function PersonPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Link
-          href="/people"
-          className="text-muted-foreground flex min-h-11 w-fit items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" />
-          People
-        </Link>
+        <BackLink back={back} />
         <RecordHeader
           kind="Person"
           added={added}
@@ -71,7 +74,7 @@ export default async function PersonPage({
               <>
                 {person.company ? (
                   <Link
-                    href={`/companies/${person.company.id}`}
+                    href={withFrom(`/companies/${person.company.id}`, here)}
                     className="underline underline-offset-4"
                   >
                     {person.company.name}
@@ -139,7 +142,11 @@ export default async function PersonPage({
                 key={interaction.id}
                 className="flex flex-wrap items-start justify-between gap-2 py-2"
               >
-                <InteractionLine interaction={interaction} jobs={jobs} />
+                <InteractionLine
+                  interaction={interaction}
+                  jobs={jobs}
+                  from={here}
+                />
                 {human ? (
                   <DeleteButton
                     what="this interaction"
@@ -162,7 +169,7 @@ export default async function PersonPage({
       <section aria-labelledby="person-jobs" className="flex flex-col gap-2">
         <SectionTitle id="person-jobs">Jobs</SectionTitle>
         {jobs.length ? (
-          <JobList jobs={jobs} />
+          <JobList jobs={jobs} from={here} />
         ) : (
           <p className="text-muted-foreground text-sm">
             Not a contact for any job yet.
@@ -228,9 +235,11 @@ function jobLabel(job: JobSummary): string {
 function InteractionLine({
   interaction,
   jobs,
+  from,
 }: {
   interaction: Interaction;
   jobs: JobSummary[];
+  from: string;
 }) {
   const job = jobs.find(({ id }) => id === interaction.jobId);
   return (
@@ -247,7 +256,7 @@ function InteractionLine({
       </span>
       {job ? (
         <Link
-          href={`/jobs/${job.id}`}
+          href={withFrom(`/jobs/${job.id}`, from)}
           className="text-muted-foreground w-fit underline underline-offset-4"
         >
           {jobLabel(job)}

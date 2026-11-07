@@ -12,6 +12,7 @@ import {
   PitBoardFace,
 } from "@/app/_components/pit-board";
 import { PracticeReview } from "@/app/_components/practice-review";
+import { withFrom } from "@/app/_lib/back-link";
 import { dueLabel, formatDay, formatWeekday } from "@/app/_lib/format-day";
 import type { JobSummary } from "@/src/entities/models/job.model";
 import type { PersonSummary } from "@/src/entities/models/person.model";
@@ -179,7 +180,7 @@ function jobTask(job: DueJob, today: string): StepTask {
         record={job}
         title={name}
         detail={joined([job.nextStep, dueLabel(due, today)])}
-        href={`/jobs/${job.id}`}
+        href={withFrom(`/jobs/${job.id}`, "/")}
         job={job}
         contacts={job.contacts}
         trigger={trigger}
@@ -206,7 +207,7 @@ function personTask(person: PersonSummary, today: string): StepTask {
         record={person}
         title={name}
         detail={joined([person.nextStep, dueLabel(due, today)])}
-        href={`/people/${person.id}`}
+        href={withFrom(`/people/${person.id}`, "/")}
         trigger={trigger}
       >
         {face}
@@ -303,7 +304,7 @@ function RowFace({
 function StaleRow({ job }: { job: JobSummary }) {
   return (
     <li>
-      <Link href={`/jobs/${job.id}`} className={ROW}>
+      <Link href={withFrom(`/jobs/${job.id}`, "/")} className={ROW}>
         <RowFace
           name={`${job.company.name} hasn't replied`}
           meta={joined([

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
+import { withFrom } from "@/app/_lib/back-link";
 import CompaniesPage from "@/app/(main)/companies/page";
 import { saveCompany } from "@/app/actions/companies";
 import { Redirected } from "@/tests/_support/next";
@@ -35,12 +36,15 @@ describe("the companies page", () => {
     signInAs("agent");
     const page = await companiesPage({ q: tag });
 
-    // The table's link, and the card's, which is the whole card.
+    // The table's link, and the card's, which is the whole card, each saying the search it came
+    // from, where the company's back link returns (the UX plan's UX8).
+    const href = withFrom(
+      `/companies/${company.id}`,
+      `/companies?q=${encodeURIComponent(tag)}`,
+    );
     const links = page
       .getAllByRole("link")
-      .filter(
-        (link) => link.getAttribute("href") === `/companies/${company.id}`,
-      );
+      .filter((link) => link.getAttribute("href") === href);
     expect(links).toHaveLength(2);
     expect(
       within(page.getByRole("table")).getByRole("link", { name: company.name }),

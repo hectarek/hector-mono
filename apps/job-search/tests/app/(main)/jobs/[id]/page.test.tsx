@@ -10,7 +10,12 @@ import { signInAs } from "@/tests/_support/session";
 
 const jobPage = async (id: string) =>
   within(
-    await renderOnServer(await JobPage({ params: Promise.resolve({ id }) })),
+    await renderOnServer(
+      await JobPage({
+        params: Promise.resolve({ id }),
+        searchParams: Promise.resolve({}),
+      }),
+    ),
   );
 
 afterEach(() => {
@@ -70,6 +75,29 @@ describe("a job's page", () => {
     expect(notes.getByText("A note.")).toBeTruthy();
     expect(notes.getByRole("button", { name: "Edit" })).toBeTruthy();
     expect(page.getByRole("region", { name: "History" })).toBeTruthy();
+  });
+
+  // The UX plan's UX8: a back link returns where the page was opened from.
+  it("links back to the page it was opened from, and to Jobs when that would leave the app", async () => {
+    const job = await aJob(await aCompany());
+    const opened = async (from: string) =>
+      within(
+        await renderOnServer(
+          await JobPage({
+            params: Promise.resolve({ id: job.id }),
+            searchParams: Promise.resolve({ from }),
+          }),
+        ),
+      );
+
+    const fromPeople = await opened("/people?view=no-date");
+    expect(
+      fromPeople.getByRole("link", { name: "People" }).getAttribute("href"),
+    ).toBe("/people?view=no-date");
+    const fromAway = await opened("//evil.example/jobs");
+    expect(
+      fromAway.getByRole("link", { name: "Jobs" }).getAttribute("href"),
+    ).toBe("/jobs");
   });
 
   it("tells a job applied to 21 days ago with no move since it's a stale candidate", async () => {
@@ -146,9 +174,10 @@ describe("a job's page", () => {
     signInAs("owner");
     for (const id of [crypto.randomUUID(), "not-an-id"]) {
       expect(
-        await JobPage({ params: Promise.resolve({ id }) }).catch(
-          (err: unknown) => err,
-        ),
+        await JobPage({
+          params: Promise.resolve({ id }),
+          searchParams: Promise.resolve({}),
+        }).catch((err: unknown) => err),
       ).toBeInstanceOf(NotFoundPage);
     }
   });

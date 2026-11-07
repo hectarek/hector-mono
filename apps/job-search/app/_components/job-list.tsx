@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { DateChips } from "@/app/_components/date-chips";
 import { StatusChip } from "@/app/_components/status-chip";
+import { withFrom } from "@/app/_lib/back-link";
 import { formatDay } from "@/app/_lib/format-day";
 import { DISMISS_LABELS } from "@/app/_lib/job-labels";
 import { isClosed } from "@/src/entities/job-lifecycle";
@@ -23,13 +24,16 @@ import type { JobSummary } from "@/src/entities/models/job.model";
 
 // A page of jobs: a table on desktop, cards on phones (docs/build-plan.md KTD19), each job's status
 // as the design system's status chip. A dismissed proposal shows why in place of its next step.
-// On a company's own page the company goes unsaid (the UX plan's UX8).
+// On a company's own page the company goes unsaid, and `from`, the page the list is on, is where
+// a job's back link returns (the UX plan's UX8).
 export function JobList({
   jobs,
   atCompany = false,
+  from,
 }: {
   jobs: JobSummary[];
   atCompany?: boolean;
+  from?: string;
 }) {
   return (
     <>
@@ -48,7 +52,7 @@ export function JobList({
               <TableRow key={job.id}>
                 <TableCell>
                   <Link
-                    href={`/jobs/${job.id}`}
+                    href={withFrom(`/jobs/${job.id}`, from)}
                     className="font-medium underline-offset-4 hover:underline"
                   >
                     {job.role}
@@ -75,7 +79,10 @@ export function JobList({
       <ul className="flex flex-col gap-2 md:hidden">
         {jobs.map((job) => (
           <li key={job.id} className="flex flex-col gap-2">
-            <Item variant="outline" render={<Link href={`/jobs/${job.id}`} />}>
+            <Item
+              variant="outline"
+              render={<Link href={withFrom(`/jobs/${job.id}`, from)} />}
+            >
               <ItemContent>
                 <ItemTitle>{job.role}</ItemTitle>
                 <ItemDescription>

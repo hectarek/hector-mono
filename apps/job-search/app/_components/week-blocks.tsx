@@ -2,13 +2,15 @@ import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { BLOCK_ROW, BlockFace } from "@/app/_components/block-row";
 import { DisplayLabel } from "@/app/_components/display";
+import { withFrom } from "@/app/_lib/back-link";
 import { formatWeekday } from "@/app/_lib/format-day";
 import { EFFORT_LABELS } from "@/app/_lib/job-labels";
 import type { BlocksWeek } from "@/src/entities/models/block.model";
 
 // The week's Focus blocks on the week page (R26, docs/build-plan.md U17): each effort's blocks done
-// and partly done against those planned, then the blocks by day, each opening its page.
-export function WeekBlocks({ week }: { week: BlocksWeek }) {
+// and partly done against those planned, then the blocks by day, each opening its page, whose back
+// link returns to `from`, the week page as it is (the UX plan's UX8).
+export function WeekBlocks({ week, from }: { week: BlocksWeek; from: string }) {
   const days = [...new Set(week.blocks.map(({ day }) => day))];
   return (
     <div className="flex flex-col gap-4">
@@ -39,7 +41,10 @@ export function WeekBlocks({ week }: { week: BlocksWeek }) {
               .filter((block) => block.day === day)
               .map((block) => (
                 <li key={block.id}>
-                  <Link href={`/blocks/${block.id}`} className={BLOCK_ROW}>
+                  <Link
+                    href={withFrom(`/blocks/${block.id}`, from)}
+                    className={BLOCK_ROW}
+                  >
                     <BlockFace block={block} now={false} />
                   </Link>
                 </li>

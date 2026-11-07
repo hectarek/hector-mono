@@ -17,6 +17,7 @@ import { BLOCK_ROW, BlockFace, NOW_ROW } from "@/app/_components/block-row";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { FormField } from "@/app/_components/form-field";
 import { SheetCloseButton } from "@/app/_components/sheet-close-button";
+import { withFrom } from "@/app/_lib/back-link";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatTime } from "@/app/_lib/format-day";
@@ -109,7 +110,7 @@ export function BlockSheet({ block, now }: { block: Block; now: boolean }) {
               {opened.doneWhen ? `. Done when ${opened.doneWhen}` : ""}
             </SheetDescription>
             <Link
-              href={`/blocks/${opened.id}`}
+              href={withFrom(`/blocks/${opened.id}`, "/")}
               className="inline-flex min-h-11 w-fit items-center text-sm font-medium underline underline-offset-4"
             >
               Go to the block

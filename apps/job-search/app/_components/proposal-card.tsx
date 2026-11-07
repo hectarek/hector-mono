@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { DriverCode } from "@/app/_components/driver-code";
 import { OnlyHector } from "@/app/_components/only-hector";
+import { withFrom } from "@/app/_lib/back-link";
 import { callAction } from "@/app/_lib/call-action";
 import { DISMISS_LABELS, WORK_MODE_LABELS } from "@/app/_lib/job-labels";
 import { acceptProposal, dismissProposal } from "@/app/actions/jobs";
@@ -70,7 +71,7 @@ export function ProposalCard({
           <ItemTitle>
             <DriverCode actor="agent" />
             <Link
-              href={`/jobs/${proposal.id}`}
+              href={withFrom(`/jobs/${proposal.id}`, "/")}
               className="underline-offset-4 hover:underline"
             >
               {proposal.role}

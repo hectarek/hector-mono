@@ -1,9 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
-import { ChevronLeft } from "lucide-react";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BackLink } from "@/app/_components/back-link";
 import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { SectionTitle } from "@/app/_components/display";
@@ -11,6 +12,7 @@ import { JobList } from "@/app/_components/job-list";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
+import { backTo, withFrom } from "@/app/_lib/back-link";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { loadCompany } from "@/app/_lib/load-company";
@@ -28,11 +30,19 @@ const HEADCOUNT = new Intl.NumberFormat("en-US");
 // its research, and its history (R19).
 export default async function CompanyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const actor = await getPageActor();
   const { id } = await params;
+  const back = backTo((await searchParams).from, {
+    href: "/companies",
+    label: "Companies",
+  });
+  // Where this page sends the records it links to back to.
+  const here = `/companies/${id}`;
   const { company, similar, jobs, people, added } = await loadCompany(
     id,
     actor,
@@ -58,13 +68,7 @@ export default async function CompanyPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Link
-          href="/companies"
-          className="text-muted-foreground flex min-h-11 w-fit items-center gap-1 text-sm"
-        >
-          <ChevronLeft className="size-4" />
-          Companies
-        </Link>
+        <BackLink back={back} />
         <RecordHeader
           kind="Company"
           added={added}
@@ -121,7 +125,7 @@ export default async function CompanyPage({
               {similar.map((other) => (
                 <li key={other.id}>
                   <Link
-                    href={`/companies/${other.id}`}
+                    href={withFrom(`/companies/${other.id}`, here)}
                     className="underline underline-offset-4"
                   >
                     {other.name}
@@ -147,7 +151,7 @@ export default async function CompanyPage({
           </Button>
         </div>
         {jobs.length ? (
-          <JobList jobs={jobs} atCompany />
+          <JobList jobs={jobs} atCompany from={here} />
         ) : (
           <p className="text-muted-foreground text-sm">No jobs here yet.</p>
         )}
@@ -167,7 +171,7 @@ export default async function CompanyPage({
           </Button>
         </div>
         {people.length ? (
-          <ContactList people={people} />
+          <ContactList people={people} from={here} />
         ) : (
           <p className="text-muted-foreground text-sm">No one here yet.</p>
         )}
@@ -179,7 +183,7 @@ export default async function CompanyPage({
           className="flex flex-col gap-2"
         >
           <SectionTitle id="company-waiting">To review</SectionTitle>
-          <JobList jobs={waiting.jobs} atCompany />
+          <JobList jobs={waiting.jobs} atCompany from={here} />
         </section>
       ) : null}
 
@@ -189,7 +193,7 @@ export default async function CompanyPage({
           className="flex flex-col gap-2"
         >
           <SectionTitle id="company-dismissed">Dismissed</SectionTitle>
-          <JobList jobs={dismissed.jobs} atCompany />
+          <JobList jobs={dismissed.jobs} atCompany from={here} />
         </section>
       ) : null}
 
