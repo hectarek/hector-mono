@@ -19,13 +19,13 @@ import {
   useState,
   useTransition,
 } from "react";
-import { toast } from "sonner";
 import { ConflictNotice } from "@/app/_components/conflict-notice";
 import { FormField } from "@/app/_components/form-field";
 import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
+import { notify } from "@/app/_lib/notify";
 import { useRecordForm } from "@/app/_lib/use-record-form";
 import { useToday } from "@/app/_lib/use-today";
 import { deleteInteraction, logInteraction } from "@/app/actions/interactions";
@@ -188,7 +188,7 @@ export function NextStepSheet({
   // A toast that says what changed, with Undo: it takes back what was written and puts the step
   // and date back as they were.
   function tell(message: string, before: Step, made: Wrote) {
-    toast(message, {
+    notify(message, {
       action: { label: "Undo", onClick: () => undo(before, made) },
     });
   }
@@ -202,7 +202,7 @@ export function NextStepSheet({
       await callAction(() => deleteNote({ id: noteId }));
     }
     const back = await putBack(before);
-    toast(back ? "Put back as it was." : "Couldn't undo it.");
+    notify(back ? "Put back as it was." : "Couldn't undo it.");
   }
 
   // The step and date as they were, against the record as it is now.

@@ -22,6 +22,7 @@ import {
   TopBar,
 } from "@/app/_components/app-nav";
 import { DisplayLabel } from "@/app/_components/display";
+import { APP_TOASTER } from "@/app/_lib/notify";
 
 // The signed-in frame (docs/build-plan.md KTD19, the design system's AppShell): a sidebar on
 // desktop, an off-canvas sheet opened from the top bar on phones, and the top bar, which stays
@@ -66,8 +67,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </SidebarInset>
       {/* What a save changed, with Undo where it can be taken back; its live region reads each
-          one out (the UX plan's UX3). */}
-      <Toaster position="bottom-center" />
+          one out (the UX plan's UX3). The app's toasts come here by its id (notify.ts). */}
+      <Toaster id={APP_TOASTER} position="bottom-center" />
     </SidebarProvider>
   );
 }
