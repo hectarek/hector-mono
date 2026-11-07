@@ -1,6 +1,7 @@
 import { beforeEach, expect, it } from "bun:test";
 import { NotFoundError } from "@/src/entities/errors/common";
 import { saveCompanySchema } from "@/src/entities/models/company.model";
+import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import {
   ANOTHER_OWNER,
   describeEachBackend,
@@ -72,8 +73,9 @@ describeEachBackend("getCompany", () => {
         role: "Widget engineer",
         company: { id: company.id, name: "Acme Inc", tier: null },
         status: "target",
-        nextStep: null,
-        nextDate: null,
+        // Added with no step, it starts by checking it's hiring, that day (R1).
+        nextStep: "Verify it's hiring",
+        nextDate: todayIn(PLAN_TIME_ZONE),
         appliedOn: null,
         location: null,
         workMode: null,

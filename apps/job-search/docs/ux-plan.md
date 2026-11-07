@@ -238,6 +238,7 @@ The biggest change to how the app feels: every due task can be finished, or move
 - **Do:**
   - People opens on its next steps: late, today, upcoming, then those with no date, rank A first within each, with a No date filter. Each undated row gets date chips that save in one tap.
   - Every sheet and form that takes a step gives it a date by default (Q1), and a job added with no step gets one too.
+    (Revised 2026-11-07 in UX6: the default is a rule in the use cases that write a step, so Claude's tools keep it too, and each form says what an empty date means. A job Hector adds with no step starts with checking it's hiring, due that day, as an accepted proposal does. Jobs gets a No date view as People does, since UX4's line counts jobs too. A dated step can't go back to no date, so the chips' toast has no Undo.)
 - **Verify:** every person with a step shows in one ordered list; a fixture job added with no step lands on This week on its default date.
 - **Touches:** `find_people` takes the filter and the order, an input change, so `TOOL_SET_VERSION` and the registry test move. The default is a rule in the use cases; R1 and R7 are revised. **Size:** M.
 

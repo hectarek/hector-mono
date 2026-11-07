@@ -41,6 +41,9 @@ export type TodayView = {
     jobs: DueJob[];
     people: PersonSummary[];
   };
+  // How many open jobs and people have a next step with no date, which This week never shows as
+  // due (R9 as revised 2026-11-07, the UX plan's UX6).
+  undated: { jobs: number; people: number };
   claude: ClaudeSession[];
   counts: WeeklyCounts;
   targets: Settings["targets"];

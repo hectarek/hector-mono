@@ -55,7 +55,11 @@ const FACTS: readonly {
   },
   { fact: "ask", kind: "text", maxLength: 300 },
   { fact: "nextStep", kind: "text", maxLength: 120 },
-  { fact: "nextDate", kind: "date" },
+  {
+    fact: "nextDate",
+    kind: "date",
+    description: "Left empty with a step, it's due a week from today",
+  },
   { fact: "notes", kind: "long", maxLength: 2000 },
 ];
 

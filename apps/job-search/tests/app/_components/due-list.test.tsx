@@ -15,6 +15,7 @@ import { signInAs } from "@/tests/_support/session";
 
 const NOTHING_DUE = { jobs: [], people: [], stale: [], practice: [] };
 const NOTHING_LATER = { jobs: [], people: [] };
+const NONE_UNDATED = { jobs: 0, people: 0 };
 
 const jobOf = async (id: string) => dataOf(await getJob({ id })).job;
 
@@ -45,6 +46,7 @@ describe("what's due on This week", () => {
       <DueList
         due={{ ...NOTHING_DUE, jobs: [listed(onToday), listed(late)] }}
         later={NOTHING_LATER}
+        undated={NONE_UNDATED}
         today={today}
         waiting={0}
       />,
@@ -75,6 +77,7 @@ describe("what's due on This week", () => {
       <DueList
         due={{ ...NOTHING_DUE, jobs: [listed(late), listed(wanted)] }}
         later={NOTHING_LATER}
+        undated={NONE_UNDATED}
         today={today}
         waiting={0}
       />,
@@ -93,6 +96,7 @@ describe("what's due on This week", () => {
       <DueList
         due={{ ...NOTHING_DUE, jobs: late.map(listed) }}
         later={NOTHING_LATER}
+        undated={NONE_UNDATED}
         today={today}
         waiting={0}
       />,
@@ -113,6 +117,7 @@ describe("what's due on This week", () => {
       <DueList
         due={NOTHING_DUE}
         later={{ jobs: [listed(soon)], people: [] }}
+        undated={NONE_UNDATED}
         today={today}
         waiting={0}
       />,
@@ -131,6 +136,7 @@ describe("what's due on This week", () => {
       <DueList
         due={{ ...NOTHING_DUE, jobs: [listed(first), listed(second)] }}
         later={NOTHING_LATER}
+        undated={NONE_UNDATED}
         today={today}
         waiting={0}
       />,
@@ -141,6 +147,7 @@ describe("what's due on This week", () => {
       <DueList
         due={{ ...NOTHING_DUE, jobs: [listed(second)] }}
         later={NOTHING_LATER}
+        undated={NONE_UNDATED}
         today={today}
         waiting={0}
       />,
@@ -169,6 +176,7 @@ describe("what's due on This week", () => {
       <DueList
         due={NOTHING_DUE}
         later={NOTHING_LATER}
+        undated={NONE_UNDATED}
         today="2026-11-06"
         waiting={1}
       />,
@@ -177,5 +185,40 @@ describe("what's due on This week", () => {
     expect(view.getByText("Nothing due today")).toBeTruthy();
     expect(view.getByText("1 decision waits for you above.")).toBeTruthy();
     expect(view.queryByRole("button")).toBeNull();
+  });
+
+  // R9 as revised 2026-11-07 (the UX plan's UX6).
+  it("counts the steps with no date, each count a link to the list that dates them, and says nothing when there are none", () => {
+    const view = render(
+      <DueList
+        due={NOTHING_DUE}
+        later={NOTHING_LATER}
+        undated={{ jobs: 1, people: 3 }}
+        today="2026-11-06"
+        waiting={0}
+      />,
+    );
+
+    expect(
+      view
+        .getByRole("link", { name: "3 people whose next step has no date" })
+        .getAttribute("href"),
+    ).toBe("/people?view=no-date");
+    expect(
+      view
+        .getByRole("link", { name: "1 job whose next step has no date" })
+        .getAttribute("href"),
+    ).toBe("/jobs?view=no-date");
+
+    view.rerender(
+      <DueList
+        due={NOTHING_DUE}
+        later={NOTHING_LATER}
+        undated={NONE_UNDATED}
+        today="2026-11-06"
+        waiting={0}
+      />,
+    );
+    expect(view.queryByText("No date")).toBeNull();
   });
 });

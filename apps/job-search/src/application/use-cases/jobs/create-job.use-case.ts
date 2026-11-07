@@ -12,6 +12,7 @@ import {
 } from "@/src/application/use-cases/jobs/job-checks";
 import { sourceNamed } from "@/src/application/use-cases/sources/source-named";
 import { InputParseError, QueueFullError } from "@/src/entities/errors/common";
+import { acceptedStage } from "@/src/entities/job-lifecycle";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import {
   type Job,
@@ -19,6 +20,7 @@ import {
   type NewJobInput,
 } from "@/src/entities/models/job.model";
 import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
+import { NO_STEP, withStepDate } from "@/src/entities/next-step";
 import { postingKey } from "@/src/entities/posting-link";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
@@ -51,6 +53,20 @@ export const createJobUseCase = (
     }
     const today = todayIn(PLAN_TIME_ZONE);
     const key = input.postingUrl ? postingKey(input.postingUrl) : null;
+    // A step given no date is a week out, and a job Hector adds with neither starts as an accepted
+    // proposal does, checking it's hiring that day, so it stays in the loop (R1 as revised
+    // 2026-11-07, the UX plan's Q1).
+    const { nextStep, nextDate } =
+      !proposal && !input.nextStep && !input.nextDate
+        ? acceptedStage(today)
+        : withStepDate(
+            {
+              nextStep: input.nextStep ?? null,
+              nextDate: input.nextDate ?? null,
+            },
+            NO_STEP,
+            today,
+          );
 
     const job = await transactionManager.startTransaction(async (tx) => {
       await jobsRepository.lockQueue(ownerId, tx);
@@ -78,8 +94,8 @@ export const createJobUseCase = (
           companyId: input.companyId,
           clientName: input.clientName ?? null,
           role: input.role,
-          nextStep: input.nextStep ?? null,
-          nextDate: input.nextDate ?? null,
+          nextStep,
+          nextDate,
           appliedOn: null,
           targetRole: input.targetRole ?? null,
           level: input.level ?? null,

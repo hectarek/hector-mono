@@ -26,6 +26,7 @@ import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
 import { notify } from "@/app/_lib/notify";
+import { pushDays } from "@/app/_lib/push-days";
 import { useRecordForm } from "@/app/_lib/use-record-form";
 import { useToday } from "@/app/_lib/use-today";
 import { deleteInteraction, logInteraction } from "@/app/actions/interactions";
@@ -36,7 +37,7 @@ import type { ActionResult } from "@/app/actions/shared";
 import { afterFollowUp, type JobStage } from "@/src/entities/job-lifecycle";
 import type { InteractionKind } from "@/src/entities/models/interaction.model";
 import type { PersonRef } from "@/src/entities/models/person.model";
-import { addDays, mondayOf } from "@/src/entities/week";
+import { addDays } from "@/src/entities/week";
 
 // What a next step's sheet changes: a job's or a person's next step and date, read with the
 // record's updatedAt.
@@ -80,16 +81,6 @@ const HOW_IT_WENT: { value: InteractionKind; label: string }[] = [
   { value: "reply-received", label: "Reply" },
   { value: "conversation", label: "Conversation held" },
 ];
-
-// The days a task can be pushed to in one tap, from today.
-function pushDays(today: string) {
-  return [
-    { label: "Tomorrow", day: addDays(today, 1) },
-    { label: "In 3 days", day: addDays(today, 3) },
-    { label: "Next Monday", day: addDays(mondayOf(today), 7) },
-    { label: "In a week", day: addDays(today, 7) },
-  ];
-}
 
 const said = ({ nextStep, nextDate }: Step) =>
   nextStep

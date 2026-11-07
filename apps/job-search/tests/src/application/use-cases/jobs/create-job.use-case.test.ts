@@ -6,7 +6,7 @@ import {
   QueueFullError,
 } from "@/src/entities/errors/common";
 import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
-import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
+import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import {
   ANOTHER_OWNER,
   describeEachBackend,
@@ -110,6 +110,37 @@ describeEachBackend("createJob", () => {
       proposalReason: null,
     });
     expect(await pipeline()).toEqual([added.id]);
+  });
+
+  // R1 as revised 2026-11-07 (the UX plan's UX6): a job never drops out of the loop.
+  it("starts a job Hector adds with no step on checking it's hiring, due that day, so it lands on This week", async () => {
+    const added = await jobs.add(acme);
+    const today = todayIn(PLAN_TIME_ZONE);
+
+    expect(added).toMatchObject({
+      nextStep: "Verify it's hiring",
+      nextDate: today,
+    });
+    const { due } = await app.getToday(OWNER);
+    expect(due.jobs.map(({ id }) => id)).toContain(added.id);
+  });
+
+  it("dates a step given with no date a week out, for Hector's job and Claude's proposal alike", async () => {
+    const today = todayIn(PLAN_TIME_ZONE);
+    const weekOut = (await jobs.add(acme, { nextStep: "Ask for a referral" }))
+      .nextDate;
+    const proposed = await jobs.propose(acme, {
+      nextStep: "Read the team page",
+    });
+
+    expect(weekOut).toBe(addDays(today, 7));
+    expect(proposed.nextDate).toBe(addDays(today, 7));
+  });
+
+  it("leaves a proposal with no step without one, since accepting it sets its stage", async () => {
+    const proposed = await jobs.propose(acme);
+
+    expect(proposed).toMatchObject({ nextStep: null, nextDate: null });
   });
 
   // AE1.

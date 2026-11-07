@@ -92,8 +92,9 @@ describeEachBackend("moveJob", () => {
       changes: [
         { field: "status", before: "target", after: "applied" },
         { field: "appliedOn", before: null, after: YESTERDAY },
-        { field: "nextStep", before: null, after: "Follow up" },
-        { field: "nextDate", before: null, after: "2026-11-01" },
+        // A job Hector adds with no step starts by checking it's hiring, that day (R1).
+        { field: "nextStep", before: "Verify it's hiring", after: "Follow up" },
+        { field: "nextDate", before: TODAY, after: "2026-11-01" },
       ],
     });
   });

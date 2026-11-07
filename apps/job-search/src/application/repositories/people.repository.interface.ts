@@ -35,11 +35,15 @@ export interface IPeopleRepository {
   ): Promise<PersonRecord>;
   // Deletes the person and their links to jobs.
   delete(ownerId: string, id: string, tx: ITransaction): Promise<void>;
-  // By name, a page at a time.
+  // In the query's order, a page at a time: by name, or by next step, which tells late from due
+  // and upcoming by the day given.
   find(
     ownerId: string,
     query: PeopleQuery,
+    today: string,
   ): Promise<{ people: PersonRecord[]; nextOffset: number | null }>;
+  // People whose next step has no date.
+  countUndated(ownerId: string): Promise<number>;
   // People whose next date is on or before the day given: due or overdue, the earliest first,
   // then by name (R9).
   listDue(ownerId: string, day: string): Promise<PersonRecord[]>;

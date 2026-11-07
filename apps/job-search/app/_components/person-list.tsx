@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import Link from "next/link";
+import { DateChips } from "@/app/_components/date-chips";
 import { formatDay } from "@/app/_lib/format-day";
 import type { PersonSummary } from "@/src/entities/models/person.model";
 
@@ -40,6 +41,13 @@ function nextOf({ nextStep, nextDate }: PersonSummary): string | null {
   return [nextStep, nextDate && formatDay(nextDate)]
     .filter(Boolean)
     .join(" · ");
+}
+
+// A step with no date gets one-tap date chips, so it can join This week (the UX plan's UX6).
+function PersonDateChips({ person }: { person: PersonSummary }) {
+  return person.nextStep && !person.nextDate ? (
+    <DateChips kind="person" record={person} name={person.name} />
+  ) : null;
 }
 
 // A page of people: a table on desktop, cards on phones (docs/build-plan.md KTD19).
@@ -72,7 +80,12 @@ export function PersonList({ people }: { people: PersonSummary[] }) {
                   </TableCell>
                   <TableCell>{person.company?.name ?? "—"}</TableCell>
                   <TableCell>{person.rank ?? "—"}</TableCell>
-                  <TableCell>{nextOf(person) ?? "—"}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-2">
+                      <span>{nextOf(person) ?? "—"}</span>
+                      <PersonDateChips person={person} />
+                    </div>
+                  </TableCell>
                   <TableCell>{last ? formatDay(last) : "—"}</TableCell>
                 </TableRow>
               );
@@ -84,7 +97,7 @@ export function PersonList({ people }: { people: PersonSummary[] }) {
         {people.map((person) => {
           const next = nextOf(person);
           return (
-            <li key={person.id}>
+            <li key={person.id} className="flex flex-col gap-2">
               <Item
                 variant="outline"
                 render={<Link href={`/people/${person.id}`} />}
@@ -103,6 +116,8 @@ export function PersonList({ people }: { people: PersonSummary[] }) {
                   </ItemActions>
                 ) : null}
               </Item>
+              {/* Outside the card, which is a link. */}
+              <PersonDateChips person={person} />
             </li>
           );
         })}

@@ -5,6 +5,7 @@ import {
   addPersonSchema,
   findPeopleSchema,
 } from "@/src/entities/models/person.model";
+import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import {
   ANOTHER_OWNER,
   describeEachBackend,
@@ -130,6 +131,62 @@ describeEachBackend("people", () => {
       "Ada Lovelace",
       "Mae Acmesworth",
     ]);
+  });
+
+  // R7 as revised 2026-11-07 (the UX plan's Q1): a next step always carries a date.
+  it("dates a step given with no date a week out", async () => {
+    const ada = await app.addPerson(
+      HECTOR,
+      addPersonSchema.parse({
+        name: "Ada Lovelace",
+        nextStep: "Ask for intro",
+      }),
+    );
+
+    expect(ada.nextDate).toBe(addDays(todayIn(PLAN_TIME_ZONE), 7));
+  });
+
+  // The UX plan's UX6: People opens on its next steps, and lists the steps with no date apart.
+  it("lists people by next step: late, today, upcoming, no date, then none, rank A first in each; and only the undated ones when asked", async () => {
+    const today = todayIn(PLAN_TIME_ZONE);
+    const add = (name: string, facts: Record<string, unknown> = {}) =>
+      app.addPerson(HECTOR, addPersonSchema.parse({ name, ...facts }));
+    const step = (rank: string | null, days: number) => ({
+      rank,
+      nextStep: "Call",
+      nextDate: addDays(today, days),
+    });
+    await add("Ann", step("B", -2));
+    await add("Bea", step("A", -1));
+    await add("Cal", step("C", 0));
+    await add("Dee", step(null, 3));
+    await add("Eve", step("A", 5));
+    const fay = await add("Fay", { rank: "B" });
+    await add("Gus");
+    // A step with no date, as the import left some, before the rule.
+    await app.repos.transactions.startTransaction((tx) =>
+      app.repos.people.update(
+        OWNER,
+        fay.id,
+        { nextStep: "Call", nextDate: null },
+        tx,
+      ),
+    );
+    const names = async (query: Record<string, unknown>) =>
+      (await app.findPeople(OWNER, findPeopleSchema.parse(query))).people.map(
+        ({ name }) => name,
+      );
+
+    expect(await names({ order: "next-step" })).toEqual([
+      "Bea",
+      "Ann",
+      "Cal",
+      "Eve",
+      "Dee",
+      "Fay",
+      "Gus",
+    ]);
+    expect(await names({ undated: true })).toEqual(["Fay"]);
   });
 
   it("keeps another owner's people out of every read", async () => {

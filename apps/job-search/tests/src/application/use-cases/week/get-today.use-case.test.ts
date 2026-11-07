@@ -111,6 +111,39 @@ describeEachBackend("getToday", () => {
     expect(view.due.jobs).toEqual([]);
   });
 
+  // R9 as revised 2026-11-07 (the UX plan's UX6): the steps with no date never show as due.
+  it("counts the open jobs and the people whose next step has no date, and not closed jobs or proposals", async () => {
+    const open = await jobs.add(companyId, { role: "Open" });
+    const closed = await jobs.add(companyId, { role: "Closed" });
+    await app.moveJob(HECTOR, {
+      id: closed.id,
+      status: "withdrawn",
+      reason: "Took another path",
+    });
+    const proposed = await jobs.propose(companyId, { role: "Proposed" });
+    const ada = await person({ name: "Ada Example" });
+    await person({ name: "Grace Example" });
+    // Steps with no date, as an import left some, before the rule.
+    await app.repos.transactions.startTransaction(async (tx) => {
+      for (const id of [open.id, closed.id, proposed.id]) {
+        await app.repos.jobs.update(
+          OWNER,
+          id,
+          { nextStep: "Ask about the team", nextDate: null },
+          tx,
+        );
+      }
+      await app.repos.people.update(
+        OWNER,
+        ada,
+        { nextStep: "Call", nextDate: null },
+        tx,
+      );
+    });
+
+    expect((await app.getToday(OWNER)).undated).toEqual({ jobs: 1, people: 1 });
+  });
+
   it("gives each due job its contacts, so its follow-up can name one (the UX plan's UX3)", async () => {
     const job = await jobs.add(companyId, {
       role: "With contacts",

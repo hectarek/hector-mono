@@ -318,7 +318,8 @@ export type ProposalDecision = { id: string; updatedAt: Date } & (
 export const JOB_PAGE_MAX = 50;
 
 // find_jobs' input: the owner's jobs, accepted ones unless asked otherwise (KTD8), narrowed to
-// open or closed ones or one status, and to one company, by next date, a page at a time.
+// open or closed ones or one status, to one company, and to those whose next step has no date,
+// by next date, a page at a time.
 export const findJobsSchema = z.object({
   status: z
     .enum(["open", "closed", ...OPEN_STATUSES, ...CLOSED_STATUSES], {
@@ -329,6 +330,8 @@ export const findJobsSchema = z.object({
     .enum(REVIEW_STATES, { error: `Use one of: ${REVIEW_STATES.join(", ")}` })
     .default("accepted"),
   companyId: z.uuid().optional(),
+  // Only jobs whose next step has no date (the UX plan's UX6).
+  undated: z.boolean().optional(),
   limit: z.int().min(1).max(JOB_PAGE_MAX).default(20),
   offset: z.int().min(0).default(0),
 });

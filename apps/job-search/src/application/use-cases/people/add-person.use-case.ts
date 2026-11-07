@@ -15,6 +15,8 @@ import {
   type PersonFacts,
   personLogged,
 } from "@/src/entities/models/person.model";
+import { NO_STEP, withStepDate } from "@/src/entities/next-step";
+import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type IAddPersonUseCase = ReturnType<typeof addPersonUseCase>;
 
@@ -36,6 +38,12 @@ export const addPersonUseCase = (
     { jobId, ...given }: AddPersonInput,
   ): Promise<Person> => {
     const { ownerId } = context;
+    // A step given no date is a week out (R7 as revised 2026-11-07, the UX plan's Q1).
+    const { nextStep, nextDate } = withStepDate(
+      { nextStep: given.nextStep ?? null, nextDate: given.nextDate ?? null },
+      NO_STEP,
+      todayIn(PLAN_TIME_ZONE),
+    );
     const facts: PersonFacts = {
       name: given.name,
       companyId: given.companyId ?? null,
@@ -43,8 +51,8 @@ export const addPersonUseCase = (
       howKnown: given.howKnown ?? null,
       rank: given.rank ?? null,
       ask: given.ask ?? null,
-      nextStep: given.nextStep ?? null,
-      nextDate: given.nextDate ?? null,
+      nextStep,
+      nextDate,
       notes: given.notes ?? null,
     };
     const person = await transactionManager.startTransaction(async (tx) => {

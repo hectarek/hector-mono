@@ -379,6 +379,7 @@ export function QuickLog({
                     id="quick-log-next-date"
                     label={FIELD_LABELS.nextDate ?? "Next date"}
                     kind="date"
+                    description="Left empty with a step, it's due a week from today"
                     value={entry.nextDate}
                     onChange={(nextDate) => set({ nextDate })}
                     error={failure?.fields?.nextDate}

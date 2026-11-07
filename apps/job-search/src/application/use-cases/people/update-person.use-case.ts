@@ -16,6 +16,8 @@ import {
   personLogged,
   type UpdatePersonInput,
 } from "@/src/entities/models/person.model";
+import { withStepDate } from "@/src/entities/next-step";
+import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type IUpdatePersonUseCase = ReturnType<typeof updatePersonUseCase>;
 
@@ -50,7 +52,11 @@ export const updatePersonUseCase = (
           await datedPerson(interactionsRepository, ownerId, current, tx),
         );
       }
-      const changed = differences(current, changes);
+      // A step left with no date is a week out (R7 as revised 2026-11-07, the UX plan's Q1).
+      const changed = differences(
+        current,
+        withStepDate(changes, current, todayIn(PLAN_TIME_ZONE)),
+      );
       if (Object.keys(changed).length === 0) {
         return current;
       }

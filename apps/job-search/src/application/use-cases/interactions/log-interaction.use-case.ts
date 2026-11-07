@@ -18,6 +18,7 @@ import {
 import type { Job } from "@/src/entities/models/job.model";
 import type { PersonRecord } from "@/src/entities/models/person.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+import { withStepDate } from "@/src/entities/next-step";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type ILogInteractionUseCase = ReturnType<typeof logInteractionUseCase>;
@@ -171,15 +172,17 @@ export const logInteractionUseCase = (
     return { interactions: [ended] };
   }
 
-  // A person's next step and date, as the log gives them: written and logged when they change.
+  // A person's next step and date, as the log gives them: written and logged when they change. A
+  // step left with no date is a week out (R7 as revised 2026-11-07, the UX plan's Q1).
   async function setNext(
     context: ChangeContext,
     person: PersonRecord,
     next: NextStep,
     tx: ITransaction,
   ): Promise<void> {
+    const dated = withStepDate(next, person, todayIn(PLAN_TIME_ZONE));
     const changed = Object.fromEntries(
-      Object.entries(next).filter(
+      Object.entries(dated).filter(
         ([field, value]) => value !== person[field as keyof NextStep],
       ),
     );
