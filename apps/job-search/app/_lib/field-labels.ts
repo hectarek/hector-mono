@@ -100,6 +100,15 @@ export const FIELD_LABELS: Record<string, string> = {
   change: "The one change",
   counts: "Counts",
   targets: "Targets",
+  // A Focus block, as add_blocks, update_block and the block form take it and its history names
+  // it (`state` is above). A scheduled conversation's times are these two too.
+  blocks: "Blocks",
+  startsAt: "Starts",
+  endsAt: "Ends",
+  effort: "Effort",
+  title: "Title",
+  doneWhen: "Done when",
+  whatHappened: "What happened",
 };
 
 // A field's label, or its name in words ("nextStep" is "Next step"): a history names every field

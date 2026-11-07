@@ -192,9 +192,10 @@ describe("the quick log", () => {
     );
     save();
 
-    // The times are the browser's, read as the moments they name.
-    const startsAt = new Date("2026-11-10T12:00");
-    const endsAt = new Date("2026-11-10T12:30");
+    // The times are wall times in Eastern time (KTD18), whatever the browser's zone, read as the
+    // moments they name.
+    const startsAt = new Date("2026-11-10T12:00:00-05:00");
+    const endsAt = new Date("2026-11-10T12:30:00-05:00");
     await waitFor(async () =>
       expect(await interactionsOf(ada.id)).toEqual([
         expect.objectContaining({

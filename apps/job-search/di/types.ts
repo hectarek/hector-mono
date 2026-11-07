@@ -1,4 +1,5 @@
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
+import type { IBlocksRepository } from "@/src/application/repositories/blocks.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
@@ -16,6 +17,11 @@ import type {
   IResolveActor,
 } from "@/src/application/use-cases/access/resolve-actor";
 import type { IListActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
+import type { IAddBlocksUseCase } from "@/src/application/use-cases/blocks/add-blocks.use-case";
+import type { IDeleteBlockUseCase } from "@/src/application/use-cases/blocks/delete-block.use-case";
+import type { IGetBlockUseCase } from "@/src/application/use-cases/blocks/get-block.use-case";
+import type { IListBlocksUseCase } from "@/src/application/use-cases/blocks/list-blocks.use-case";
+import type { IUpdateBlockUseCase } from "@/src/application/use-cases/blocks/update-block.use-case";
 import type { IDeleteCompanyUseCase } from "@/src/application/use-cases/companies/delete-company.use-case";
 import type { IFindCompaniesUseCase } from "@/src/application/use-cases/companies/find-companies.use-case";
 import type { IGetCompanyUseCase } from "@/src/application/use-cases/companies/get-company.use-case";
@@ -52,6 +58,11 @@ import type { IGetTodayUseCase } from "@/src/application/use-cases/week/get-toda
 import type { IGetWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
 import type { ISaveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
 import type { IListActivityController } from "@/src/interface-adapters/controllers/activity/list-activity.controller";
+import type { IAddBlocksController } from "@/src/interface-adapters/controllers/blocks/add-blocks.controller";
+import type { IDeleteBlockController } from "@/src/interface-adapters/controllers/blocks/delete-block.controller";
+import type { IGetBlockController } from "@/src/interface-adapters/controllers/blocks/get-block.controller";
+import type { IListBlocksController } from "@/src/interface-adapters/controllers/blocks/list-blocks.controller";
+import type { IUpdateBlockController } from "@/src/interface-adapters/controllers/blocks/update-block.controller";
 import type { IDeleteCompanyController } from "@/src/interface-adapters/controllers/companies/delete-company.controller";
 import type { IFindCompaniesController } from "@/src/interface-adapters/controllers/companies/find-companies.controller";
 import type { IGetCompanyController } from "@/src/interface-adapters/controllers/companies/get-company.controller";
@@ -184,6 +195,17 @@ export const DI_SYMBOLS = {
   IGetWeekController: Symbol.for("IGetWeekController"),
   ISaveWeeklyReviewUseCase: Symbol.for("ISaveWeeklyReviewUseCase"),
   ISaveWeeklyReviewController: Symbol.for("ISaveWeeklyReviewController"),
+  IBlocksRepository: Symbol.for("IBlocksRepository"),
+  IAddBlocksUseCase: Symbol.for("IAddBlocksUseCase"),
+  IAddBlocksController: Symbol.for("IAddBlocksController"),
+  IUpdateBlockUseCase: Symbol.for("IUpdateBlockUseCase"),
+  IUpdateBlockController: Symbol.for("IUpdateBlockController"),
+  IListBlocksUseCase: Symbol.for("IListBlocksUseCase"),
+  IListBlocksController: Symbol.for("IListBlocksController"),
+  IGetBlockUseCase: Symbol.for("IGetBlockUseCase"),
+  IGetBlockController: Symbol.for("IGetBlockController"),
+  IDeleteBlockUseCase: Symbol.for("IDeleteBlockUseCase"),
+  IDeleteBlockController: Symbol.for("IDeleteBlockController"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -278,4 +300,15 @@ export interface DI_RETURN_TYPES {
   IGetWeekController: IGetWeekController;
   ISaveWeeklyReviewUseCase: ISaveWeeklyReviewUseCase;
   ISaveWeeklyReviewController: ISaveWeeklyReviewController;
+  IBlocksRepository: IBlocksRepository;
+  IAddBlocksUseCase: IAddBlocksUseCase;
+  IAddBlocksController: IAddBlocksController;
+  IUpdateBlockUseCase: IUpdateBlockUseCase;
+  IUpdateBlockController: IUpdateBlockController;
+  IListBlocksUseCase: IListBlocksUseCase;
+  IListBlocksController: IListBlocksController;
+  IGetBlockUseCase: IGetBlockUseCase;
+  IGetBlockController: IGetBlockController;
+  IDeleteBlockUseCase: IDeleteBlockUseCase;
+  IDeleteBlockController: IDeleteBlockController;
 }

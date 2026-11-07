@@ -2,6 +2,7 @@ import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageTitle, SectionTitle } from "@/app/_components/display";
+import { WeekBlocks } from "@/app/_components/week-blocks";
 import { WeekCounts } from "@/app/_components/week-counts";
 import { WeeklyReviewForm } from "@/app/_components/weekly-review-form";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -14,7 +15,7 @@ import { formatWeekRange } from "@/src/entities/week";
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 // The weekly review (R10, U9): a week's counts beside its targets, a way to the weeks before and
-// after, and its review. With no review saved, the counts are live and the form is empty. Once
+// after, its Focus blocks (U17), and its review. With no review saved, the counts are live and the form is empty. Once
 // saved, the counts and targets are the review's snapshot, any live count that no longer matches
 // shows beside it, and the form edits only the milestone and the change. This week unless
 // `?week=` names another week's Monday.
@@ -31,7 +32,11 @@ export default async function WeekPage({
   if (!query.success) {
     notFound();
   }
-  const view = await getInjection("IGetWeekController")(query.data, actor);
+  // Both read this week when none is named.
+  const [view, blocks] = await Promise.all([
+    getInjection("IGetWeekController")(query.data, actor),
+    getInjection("IListBlocksController")({ week: query.data.week }, actor),
+  ]);
   const { review } = view;
 
   return (
@@ -82,6 +87,11 @@ export default async function WeekPage({
             {ACTOR_LABELS[review.author]}, with the targets of that day.
           </p>
         ) : null}
+      </section>
+
+      <section aria-labelledby="week-blocks" className="flex flex-col gap-3">
+        <SectionTitle id="week-blocks">Focus blocks</SectionTitle>
+        <WeekBlocks week={blocks} />
       </section>
 
       <section aria-labelledby="week-review" className="flex flex-col gap-3">

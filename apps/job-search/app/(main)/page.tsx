@@ -6,6 +6,7 @@ import { DebriefCard } from "@/app/_components/debrief-card";
 import { PageTitle, SectionTitle } from "@/app/_components/display";
 import { DueList } from "@/app/_components/due-list";
 import { ProposalCard } from "@/app/_components/proposal-card";
+import { TodayBlocks } from "@/app/_components/today-blocks";
 import { WeekCounts } from "@/app/_components/week-counts";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { formatWeekday } from "@/app/_lib/format-day";
@@ -15,10 +16,11 @@ import { formatWeekRange } from "@/src/entities/week";
 // How often the page refreshes while it's on screen (docs/build-plan.md KTD15).
 const REFRESH_MS = 60_000;
 
-// This week (R9): what needs Hector's decision first, then what's due, Claude's recent sessions,
-// and the week's counts against his targets. Due always shows, with the next task on the pit
-// board or the board's clear state; any other section with nothing in it collapses. The calendar
-// joins with U13. The page refreshes while it's on screen, so Claude's changes show (KTD15).
+// This week (R9): what needs Hector's decision first, then what's due, today's Focus blocks
+// (U17), Claude's recent sessions, and the week's counts against his targets. Due always shows,
+// with the next task on the pit board or the board's clear state; any other section with nothing
+// in it collapses. The calendar joins with U13. The page refreshes while it's on screen, so
+// Claude's changes show (KTD15).
 export default async function ThisWeekPage() {
   // The session first: it keeps other accounts out, and it ends the prerender, so the clock
   // is read only at request time.
@@ -30,10 +32,13 @@ export default async function ThisWeekPage() {
     due,
     later,
     undated,
+    blocks,
     claude,
     counts,
     targets,
   } = await getInjection("IGetTodayController")({}, actor);
+  // Read after the session, as today is: the block happening now takes the signal border.
+  const now = new Date();
   const human = actor.actor === "owner";
   const waiting = decisions.proposals.length + decisions.debriefs.length;
   const dueCount =
@@ -85,6 +90,8 @@ export default async function ThisWeekPage() {
           waiting={waiting}
         />
       </section>
+
+      {blocks.length ? <TodayBlocks blocks={blocks} now={now} /> : null}
 
       {claude.length ? (
         <section aria-labelledby="week-claude" className="flex flex-col gap-3">

@@ -44,3 +44,8 @@ const MOMENT_TIME = new Intl.DateTimeFormat("en-US", {
 export function formatMoment(at: Date): string {
   return `${MOMENT_DAY.format(at)}, ${MOMENT_TIME.format(at)}`;
 }
+
+// A moment's time of day, in Eastern time: "9:30 AM".
+export function formatTime(at: Date): string {
+  return MOMENT_TIME.format(at);
+}

@@ -7,6 +7,12 @@ import {
   whoamiSchema,
 } from "@/src/entities/models/agent-session.model";
 import {
+  addBlocksSchema,
+  blockIdSchema,
+  listBlocksSchema,
+  updateBlockSchema,
+} from "@/src/entities/models/block.model";
+import {
   companyIdSchema,
   findCompaniesSchema,
   saveCompanySchema,
@@ -75,6 +81,10 @@ const PARSED_WITH: Record<string, z.ZodType> = {
   list_practice: listPracticeSchema,
   get_practice_session: practiceEntryIdSchema,
   log_practice: logPracticeSchema,
+  add_blocks: addBlocksSchema,
+  update_block: updateBlockSchema,
+  list_blocks: listBlocksSchema,
+  get_block: blockIdSchema,
 };
 
 // The steps Claude Code asks about first (KTD5): closing a job, until U15 and the calendar add theirs.

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, it, setSystemTime } from "bun:test";
+import { addBlocksSchema } from "@/src/entities/models/block.model";
 import { logInteractionSchema } from "@/src/entities/models/interaction.model";
 import { addPersonSchema } from "@/src/entities/models/person.model";
 import { logPracticeSchema } from "@/src/entities/models/practice-entry.model";
@@ -142,6 +143,32 @@ describeEachBackend("getToday", () => {
     });
 
     expect((await app.getToday(OWNER)).undated).toEqual({ jobs: 1, people: 1 });
+  });
+
+  it("lists today's Focus blocks as Eastern time has it, by start, and no other day's (U17)", async () => {
+    const block = (startsAt: string, title: string) => ({
+      startsAt,
+      endsAt: "2026-10-29T03:59:00Z",
+      effort: "practice",
+      title,
+    });
+    await app.addBlocks(
+      HECTOR,
+      addBlocksSchema.parse({
+        blocks: [
+          block("2026-10-28T14:00:00-04:00", "Afternoon"),
+          block("2026-10-28T09:30:00-04:00", "Morning"),
+          block("2026-10-27T09:30:00-04:00", "Yesterday"),
+        ],
+      }),
+    );
+
+    const view = await app.getToday(OWNER);
+
+    expect(view.blocks.map(({ title }) => title)).toEqual([
+      "Morning",
+      "Afternoon",
+    ]);
   });
 
   it("gives each due job its contacts, so its follow-up can name one (the UX plan's UX3)", async () => {

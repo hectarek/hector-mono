@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ClaudeSession } from "../claude-sessions";
 import type { WeeklyCounts } from "../weekly-counts";
+import type { Block } from "./block.model";
 import type { Interaction } from "./interaction.model";
 import type { JobSummary } from "./job.model";
 import type { PersonRef, PersonSummary } from "./person.model";
@@ -44,6 +45,8 @@ export type TodayView = {
   // How many open jobs and people have a next step with no date, which This week never shows as
   // due (R9 as revised 2026-11-07, the UX plan's UX6).
   undated: { jobs: number; people: number };
+  // Today's Focus blocks, by start, each with how it went (R9 and R26 as added 2026-11-07, U17).
+  blocks: Block[];
   claude: ClaudeSession[];
   counts: WeeklyCounts;
   targets: Settings["targets"];

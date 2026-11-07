@@ -27,6 +27,12 @@ import type {
   RecordRef,
 } from "@/src/entities/models/activity.model";
 import {
+  BLOCK_STATES,
+  type BlockState,
+  EFFORTS,
+  type Effort,
+} from "@/src/entities/models/block.model";
+import {
   CONVERSATION_STATES,
   type ConversationState,
   INTERACTION_KINDS,
@@ -469,6 +475,36 @@ export const practiceEntries = pgTable(
       "practice_entries_minutes_check",
       sql`${table.minutes} between 1 and 600`,
     ),
+  ],
+);
+
+// Focus blocks (R26, U17): the week's planned blocks and how each went. A block's day is its
+// start's in Eastern time (KTD18), kept beside its times so a day's or a week's blocks read by date.
+export const blocks = pgTable(
+  "blocks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    day: day("day").notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    effort: text("effort").$type<Effort>().notNull(),
+    title: text("title").notNull(),
+    doneWhen: text("done_when"),
+    state: text("state").$type<BlockState>().notNull(),
+    whatHappened: text("what_happened"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("blocks_owner_id_day_idx").on(
+      table.ownerId,
+      table.day,
+      table.startsAt,
+    ),
+    check("blocks_effort_check", oneOf(table.effort, EFFORTS)),
+    check("blocks_state_check", oneOf(table.state, BLOCK_STATES)),
+    check("blocks_times_check", sql`${table.endsAt} > ${table.startsAt}`),
   ],
 );
 
