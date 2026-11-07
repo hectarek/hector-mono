@@ -54,6 +54,16 @@ export function BlockSheet({ block, now }: { block: Block; now: boolean }) {
   const { opened } = form;
   const busy = form.isPending;
 
+  // The sheet opens on the block as its row has it now. After an Undo, or a change of Claude's
+  // that the page has refreshed in, the row's block is newer than the one the form last saved,
+  // and a save from that would meet a conflict of the sheet's own making.
+  function opening(next: boolean) {
+    if (next && block.updatedAt.getTime() > opened.updatedAt.getTime()) {
+      form.reopen(block);
+    }
+    setOpen(next);
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const before: Outcome = {
@@ -81,7 +91,7 @@ export function BlockSheet({ block, now }: { block: Block; now: boolean }) {
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={opening}>
       <SheetTrigger
         render={
           now ? (
