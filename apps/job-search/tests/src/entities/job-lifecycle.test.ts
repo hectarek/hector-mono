@@ -6,6 +6,7 @@ import {
   isClosed,
   isStaleCandidate,
   type JobStage,
+  stepAfterMove,
 } from "@/src/entities/job-lifecycle";
 
 const TARGET: JobStage = {
@@ -41,11 +42,34 @@ describe("a status move", () => {
     });
   });
 
-  it("past applied for the first time fills applied-on too, and leaves the next step as it was", () => {
+  it("past applied for the first time fills applied-on too, and sets the new stage's step in place of the old one (UX9)", () => {
     expect(afterMove(TARGET, "screen", "2026-10-25")).toEqual({
-      ...TARGET,
       status: "screen",
       appliedOn: "2026-10-25",
+      nextStep: "Prepare for the screen",
+      nextDate: "2026-10-27",
+    });
+  });
+
+  it("sets each open stage's step, due that many days after the move", () => {
+    const at = (to: Parameters<typeof stepAfterMove>[0]) =>
+      stepAfterMove(to, "2026-10-25", "2026-10-20");
+    expect(at("verify")).toEqual({
+      nextStep: "Verify it's hiring",
+      nextDate: "2026-10-25",
+    });
+    expect(at("target")).toEqual({ nextStep: "Apply", nextDate: "2026-10-27" });
+    expect(at("applied")).toEqual({
+      nextStep: "Follow up",
+      nextDate: "2026-10-27",
+    });
+    expect(at("onsite")).toEqual({
+      nextStep: "Prepare for the onsite",
+      nextDate: "2026-10-28",
+    });
+    expect(at("offer")).toEqual({
+      nextStep: "Decide on the offer",
+      nextDate: "2026-10-28",
     });
   });
 
@@ -69,6 +93,8 @@ describe("a status move", () => {
     expect(afterMove(stale, "screen", "2026-10-25")).toEqual({
       ...stale,
       status: "screen",
+      nextStep: "Prepare for the screen",
+      nextDate: "2026-10-27",
     });
     expect(
       afterMove({ ...TARGET, status: "offer" }, "verify", "2026-10-25"),

@@ -272,6 +272,7 @@ The biggest change to how the app feels: every due task can be finished, or move
   - After a close, the job's contacts with a next step about it are listed, each with No next step.
 - **Verify:** a move to Screen leaves no old "Follow up"; closing with a reason chip takes two taps.
 - **Touches:** the client moves the job, then calls `updateJob` against the moved job's `updatedAt`, so no tool changes. **Size:** M.
+- **Revised 2026-11-07, in its build:** the server sets each open stage's step with the move (R3 as revised), and `set_job_status` takes a step and date to set instead, so the move and its step are one write and Claude's moves leave no old "Follow up" either. That changes the tool, so `TOOL_SET_VERSION` is 6. Close's reasons are fixed chips per closed status, and the job's contacts are read as the close ends.
 
 ### UX10. Values in words, said one way
 

@@ -268,6 +268,10 @@ export const setJobStatusSchema = z.object({
     error: `Use one of: ${OPEN_STATUSES.join(", ")}. A closed status goes through close_job, with a reason`,
   }),
   on: dateSchema.optional(),
+  // What comes next, in place of the step the move sets for the new stage (R3 as revised
+  // 2026-11-07, the UX plan's UX9). A step given no date is due a week out.
+  nextStep: optionalText(120).optional(),
+  nextDate: dateSchema.nullable().optional(),
 });
 
 // close_job's input (KTD5): a closed status, on a date (today by default), and why.
@@ -286,6 +290,8 @@ export type StatusMoveInput = {
   status: JobStatus;
   on?: string;
   reason?: string;
+  nextStep?: string | null;
+  nextDate?: string | null;
 };
 
 // Accepting or reopening a proposal: which one, and the updatedAt read with it, so Hector never

@@ -50,37 +50,55 @@ export function isClosed(status: JobStatus): status is ClosedStatus {
   return (CLOSED_STATUSES as readonly JobStatus[]).includes(status);
 }
 
+// What comes next at each open stage but applied, and how many days after the move it's due (R3
+// as revised 2026-11-07, the UX plan's UX9): a move replaces the step the job had, which was about
+// the stage it left.
+const STEP_AT: Record<
+  Exclude<OpenStatus, "applied">,
+  { step: string; days: number }
+> = {
+  verify: { step: "Verify it's hiring", days: 0 },
+  target: { step: "Apply", days: 2 },
+  screen: { step: "Prepare for the screen", days: 2 },
+  onsite: { step: "Prepare for the onsite", days: 3 },
+  offer: { step: "Decide on the offer", days: 3 },
+};
+
+// The next step and date a move to an open status, made on `on`, sets (R3): at applied, "Follow
+// up" due 7 days after applied-on; at any other stage, that stage's step.
+export function stepAfterMove(
+  to: OpenStatus,
+  on: string,
+  appliedOn: string | null,
+): Pick<JobStage, "nextStep" | "nextDate"> {
+  if (to === "applied") {
+    return {
+      nextStep: "Follow up",
+      nextDate: addDays(appliedOn ?? on, FOLLOW_UP_DAYS),
+    };
+  }
+  const { step, days } = STEP_AT[to];
+  return { nextStep: step, nextDate: addDays(on, days) };
+}
+
 // What a move to `to`, made on `on`, leaves the job at (R3): the first move to applied or beyond
-// fills an empty applied-on with the move's date; a move to applied sets "Follow up" due 7 days
-// after applied-on; a move to a closed status clears the next step and date (the move's reason
-// goes in its log). Anything else stays as it was.
+// fills an empty applied-on with the move's date; a move to an open status sets that stage's next
+// step (stepAfterMove); a move to a closed status clears the next step and date (the move's reason
+// goes in its log).
 export function afterMove(job: JobStage, to: JobStatus, on: string): JobStage {
   const appliedOn =
     job.appliedOn ?? (APPLIED_OR_BEYOND.includes(to) ? on : null);
   if (isClosed(to)) {
     return { status: to, appliedOn, nextStep: null, nextDate: null };
   }
-  if (to === "applied" && appliedOn) {
-    return {
-      status: to,
-      appliedOn,
-      nextStep: "Follow up",
-      nextDate: addDays(appliedOn, FOLLOW_UP_DAYS),
-    };
-  }
-  return {
-    status: to,
-    appliedOn,
-    nextStep: job.nextStep,
-    nextDate: job.nextDate,
-  };
+  return { status: to, appliedOn, ...stepAfterMove(to, on, appliedOn) };
 }
 
 // An accepted proposal (R20): in verify, with checking it's still hiring due the day it's accepted.
 export function acceptedStage(
   today: string,
 ): Pick<JobStage, "status" | "nextStep" | "nextDate"> {
-  return { status: "verify", nextStep: "Verify it's hiring", nextDate: today };
+  return { status: "verify", ...stepAfterMove("verify", today, null) };
 }
 
 // What a follow-up message linked to the job, sent on `sentOn`, leaves it at (R3): a job at applied

@@ -8,12 +8,12 @@ import { DeleteButton } from "@/app/_components/delete-button";
 import { RecordTitle, SectionTitle } from "@/app/_components/display";
 import { DriverCode } from "@/app/_components/driver-code";
 import { JobNotes } from "@/app/_components/job-notes";
-import { JobStatusForm } from "@/app/_components/job-status-form";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { ProposalReview } from "@/app/_components/proposal-review";
 import { QuickLog } from "@/app/_components/quick-log";
 import { RecordHistory } from "@/app/_components/record-history";
 import { RemoveContactButton } from "@/app/_components/remove-contact-button";
+import { StageControl } from "@/app/_components/stage-control";
 import { StatusChip } from "@/app/_components/status-chip";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
@@ -133,7 +133,11 @@ export default async function JobPage({
               </AlertDescription>
             </Alert>
           ) : null}
-          <JobStatusForm jobId={job.id} today={today} />
+          <StageControl
+            job={{ id: job.id, status: job.status, appliedOn: job.appliedOn }}
+            contacts={contacts}
+            today={today}
+          />
           {moves.length ? (
             <ol className="flex flex-col divide-y text-sm">
               {moves.map((move) => (

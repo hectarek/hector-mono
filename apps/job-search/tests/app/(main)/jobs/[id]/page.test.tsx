@@ -35,7 +35,13 @@ describe("a job's page", () => {
     expect(page.getByRole("heading", { name: "Widget engineer" })).toBeTruthy();
     const status = within(page.getByRole("region", { name: "Status" }));
     expect(status.getByText("Verify → Target")).toBeTruthy();
-    expect(status.getByRole("button", { name: "Move" })).toBeTruthy();
+    // The stage control (the UX plan's UX9): the job's stage marked, and Close behind its button.
+    expect(
+      status
+        .getByRole("button", { name: "Target" })
+        .getAttribute("aria-current"),
+    ).toBe("step");
+    expect(status.getByRole("button", { name: "Close…" })).toBeTruthy();
     const facts = within(page.getByRole("region", { name: "Facts" }));
     expect(
       facts
