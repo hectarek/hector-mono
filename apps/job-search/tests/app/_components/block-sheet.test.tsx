@@ -99,6 +99,41 @@ describe("a block's row and its sheet (U17)", () => {
     );
   });
 
+  it("opens again on the block as its row has it now, so a save after Undo meets no conflict", async () => {
+    const block = await aBlock();
+    const sheetOn = (shown: Block) => (
+      <>
+        <BlockSheet block={shown} now={false} />
+        <Toaster id={APP_TOASTER} />
+      </>
+    );
+    const view = render(sheetOn(block));
+    fireEvent.click(rowOf(block));
+    tap("Done");
+    tap("Save");
+    await screen.findByText(`Marked done: ${block.title}.`);
+    tap("Undo");
+    await waitFor(async () =>
+      expect((await blockOf(block.id)).state).toBe("planned"),
+    );
+
+    // The page refreshes the row with the block as it is now.
+    view.rerender(sheetOn(await blockOf(block.id)));
+    fireEvent.click(rowOf(block));
+
+    expect(
+      screen
+        .getByRole("button", { name: "Planned" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    tap("Partial");
+    tap("Save");
+    await waitFor(async () =>
+      expect((await blockOf(block.id)).state).toBe("partial"),
+    );
+    expect(screen.queryByText(/changed since/i)).toBeNull();
+  });
+
   it("saves on the form's submit, so Enter or the phone's Go saves", async () => {
     const block = await aBlock();
     render(<BlockSheet block={block} now={false} />);
