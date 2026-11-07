@@ -13,7 +13,7 @@ import {
   OWNER,
   type TestApp,
 } from "@/tests/_support/app";
-import { HECTOR, jobFixtures } from "@/tests/_support/jobs";
+import { CLAUDE, HECTOR, jobFixtures } from "@/tests/_support/jobs";
 
 describeEachBackend("people", () => {
   let app: TestApp;
@@ -86,6 +86,45 @@ describeEachBackend("people", () => {
     expect(
       (await app.getJob(OWNER, { id: job.id })).contacts.map(({ id }) => id),
     ).toEqual([ada.id]);
+  });
+
+  // The UX plan's UX8: a person's notes are dated entries, and a note given with a new person is
+  // their first.
+  it("adds a person's note as their first, logged, and lists their notes newest first", async () => {
+    const ada = await app.addPerson(
+      CLAUDE,
+      addPersonSchema.parse({ name: "Ada Example", notes: "Met at a meetup." }),
+    );
+    await Bun.sleep(5);
+    const later = await app.addNote(HECTOR, {
+      record: { kind: "person", id: ada.id },
+      body: "Asked about the platform team.",
+    });
+
+    const { notes } = await app.getPerson(OWNER, { id: ada.id });
+
+    expect(notes.map(({ body, author }) => ({ body, author }))).toEqual([
+      { body: "Asked about the platform team.", author: "owner" },
+      { body: "Met at a meetup.", author: "agent" },
+    ]);
+    expect(notes[0]?.id).toBe(later.id);
+    const first = notes[1];
+    if (!first) throw new Error("No first note");
+    const { entries } = await app.listActivity(OWNER, {
+      record: { kind: "note", id: first.id },
+      limit: 20,
+      offset: 0,
+    });
+    expect(entries).toEqual([
+      expect.objectContaining({
+        actor: "agent",
+        action: "created",
+        changes: [
+          { field: "body", before: null, after: "Met at a meetup." },
+          { field: "personId", before: null, after: ada.id },
+        ],
+      }),
+    ]);
   });
 
   it("finds people by name ignoring case, at a company, a page at a time", async () => {

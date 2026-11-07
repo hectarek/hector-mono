@@ -4,8 +4,8 @@ import { type ActionResult, answer, changeContext } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type { Note, NoteRecord } from "@/src/entities/models/note.model";
 
-// Notes on jobs (docs/build-plan.md U6). add_note calls the first once U4's gate passes; editing
-// and deleting a note are Hector's alone (R21).
+// Notes on jobs and people (docs/build-plan.md U6; a person's since the UX plan's UX8). add_note
+// calls the first; editing and deleting a note are Hector's alone (R21).
 
 // `tool` is the page tool's name.
 export async function addNote(
@@ -45,5 +45,7 @@ export async function deleteNote(
 
 // The page that lists the record's notes, and Claude's page, which lists its changes.
 function notePages({ record }: { record: NoteRecord }): string[] {
-  return [`/jobs/${record.id}`, "/agent"];
+  const page =
+    record.kind === "job" ? `/jobs/${record.id}` : `/people/${record.id}`;
+  return [page, "/agent"];
 }

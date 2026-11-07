@@ -65,6 +65,42 @@ describeEachBackend("addNote", () => {
     ]);
   });
 
+  // The UX plan's UX8: a person's notes are dated entries, as a job's are.
+  it("takes a note on a person, logged with the person it's on", async () => {
+    const person = await app.addPerson(HECTOR, { name: "Pat Example" });
+    const note = await app.addNote(CLAUDE, {
+      record: { kind: "person", id: person.id },
+      body: "Met at a meetup.",
+    });
+
+    expect(note).toMatchObject({
+      record: { kind: "person", id: person.id },
+      author: "agent",
+      body: "Met at a meetup.",
+    });
+    expect(
+      await app.repos.notes.list(OWNER, { kind: "person", id: person.id }),
+    ).toEqual([note]);
+    const { entries } = await app.listActivity(OWNER, {
+      record: { kind: "note", id: note.id },
+      limit: 20,
+      offset: 0,
+    });
+    expect(entries[0]?.changes).toEqual([
+      { field: "body", before: null, after: "Met at a meetup." },
+      { field: "personId", before: null, after: person.id },
+    ]);
+  });
+
+  it("can't go on a person who isn't the owner's", async () => {
+    await expect(
+      app.addNote(CLAUDE, {
+        record: { kind: "person", id: crypto.randomUUID() },
+        body: "Nowhere",
+      }),
+    ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
   it("can't go on a job that isn't the owner's", async () => {
     await expect(
       app.addNote(CLAUDE, {

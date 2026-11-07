@@ -64,7 +64,12 @@ describeEachBackend("deleting people and contacts", () => {
     expect(entries[0]).toMatchObject({ action: "refused", reason: "delete" });
   });
 
-  it("deletes Hector's way, with the person's interactions and contact links, and keeps their facts in the history", async () => {
+  it("deletes Hector's way, with the person's interactions, notes and contact links, and keeps their facts in the history", async () => {
+    await app.addNote(HECTOR, {
+      record: { kind: "person", id: ada.id },
+      body: "Met at a meetup.",
+    });
+
     const deleted = await app.deletePerson(HECTOR, { id: ada.id });
 
     expect(deleted).toEqual({
@@ -79,6 +84,9 @@ describeEachBackend("deleting people and contacts", () => {
     expect(await app.repos.interactions.listForPerson(OWNER, ada.id)).toEqual(
       [],
     );
+    expect(
+      await app.repos.notes.list(OWNER, { kind: "person", id: ada.id }),
+    ).toEqual([]);
     expect((await app.getJob(OWNER, { id: job.id })).contacts).toEqual([]);
     const { entries } = await app.listActivity(OWNER, {
       record: { kind: "person", id: ada.id },

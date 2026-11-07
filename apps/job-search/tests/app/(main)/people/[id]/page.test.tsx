@@ -5,6 +5,7 @@ import PersonPage from "@/app/(main)/people/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
 import { logInteraction } from "@/app/actions/interactions";
 import { addJob } from "@/app/actions/jobs";
+import { addNote } from "@/app/actions/notes";
 import { addPerson } from "@/app/actions/people";
 import { dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
@@ -63,8 +64,14 @@ async function aPerson() {
 }
 
 describe("a person's page", () => {
-  it("shows their facts, the dates their interactions give them, their interactions and jobs, and their history", async () => {
+  it("shows their facts, the dates their interactions give them, their interactions and jobs, their notes, and their history", async () => {
     const { company, job, person } = await aPerson();
+    dataOf(
+      await addNote({
+        record: { kind: "person", id: person.id },
+        body: "A dated note.",
+      }),
+    );
 
     const page = await personPage(person.id);
 
@@ -95,6 +102,11 @@ describe("a person's page", () => {
     expect(
       interactions.getAllByRole("button", { name: "Delete" }),
     ).toHaveLength(2);
+    // Their notes are dated entries, as a job's are (the UX plan's UX8).
+    const notes = within(page.getByRole("region", { name: "Notes" }));
+    expect(notes.getByText("A dated note.")).toBeTruthy();
+    expect(notes.getByRole("button", { name: "Edit" })).toBeTruthy();
+    expect(notes.getByRole("button", { name: "Add note" })).toBeTruthy();
     const history = within(page.getByRole("region", { name: "History" }));
     expect(history.getByText("Created")).toBeTruthy();
   });

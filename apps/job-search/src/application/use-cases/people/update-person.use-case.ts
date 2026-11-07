@@ -96,7 +96,6 @@ function differences(
     ask: person.ask,
     nextStep: person.nextStep,
     nextDate: person.nextDate,
-    notes: person.notes,
   };
   return Object.fromEntries(
     Object.entries(changes).filter(

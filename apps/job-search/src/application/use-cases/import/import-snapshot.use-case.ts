@@ -5,6 +5,7 @@ import type { IImportRefsRepository } from "@/src/application/repositories/impor
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
+import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -37,6 +38,7 @@ import {
   interactionLogged,
 } from "@/src/entities/models/interaction.model";
 import { jobLogged } from "@/src/entities/models/job.model";
+import { type NoteRecord, noteOn } from "@/src/entities/models/note.model";
 import { personLogged } from "@/src/entities/models/person.model";
 import {
   reviewLogged,
@@ -56,6 +58,7 @@ export const importSnapshotUseCase = (
   leadSourcesRepository: ILeadSourcesRepository,
   jobsRepository: IJobsRepository,
   peopleRepository: IPeopleRepository,
+  notesRepository: INotesRepository,
   interactionsRepository: IInteractionsRepository,
   practiceRepository: IPracticeRepository,
   activityRepository: IActivityRepository,
@@ -294,7 +297,6 @@ export const importSnapshotUseCase = (
             ask: person.ask ?? null,
             nextStep: person.nextStep ?? null,
             nextDate: person.nextDate ?? null,
-            notes: person.notes ?? null,
           },
           tx,
         );
@@ -303,6 +305,20 @@ export const importSnapshotUseCase = (
           action: "created",
           after: personLogged(created),
         });
+        // The sheet's notes on a person land as their first note (the UX plan's UX8).
+        if (person.notes) {
+          const record: NoteRecord = { kind: "person", id: created.id };
+          const note = await notesRepository.add(
+            ownerId,
+            { record, author: "import", body: person.notes },
+            tx,
+          );
+          await recordChange(activityRepository, tx, context, {
+            record: { kind: "note", id: note.id },
+            action: "created",
+            after: { body: person.notes, ...noteOn(record) },
+          });
+        }
         for (const jobRef of person.jobRefs) {
           await peopleRepository.linkJob(
             ownerId,

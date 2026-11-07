@@ -2,9 +2,19 @@ import { z } from "zod";
 import type { ChangeActor } from "./activity.model";
 import { requiredText, timeSchema } from "./input.model";
 
-// What notes can be about: jobs for now; people come with U7.
-const noteRecordSchema = z.object({ kind: z.enum(["job"]), id: z.uuid() });
+// What notes can be about: a job, or a person (the UX plan's UX8, Q7).
+const noteRecordSchema = z.object({
+  kind: z.enum(["job", "person"]),
+  id: z.uuid(),
+});
 export type NoteRecord = z.infer<typeof noteRecordSchema>;
+
+// Where a note's change in the log says it was: its job's id, or its person's.
+export function noteOn(
+  record: NoteRecord,
+): { jobId: string } | { personId: string } {
+  return record.kind === "job" ? { jobId: record.id } : { personId: record.id };
+}
 
 // A dated note on a record (R1, R21). Claude only adds notes; Hector also edits and deletes them.
 export type Note = {

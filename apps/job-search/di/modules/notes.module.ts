@@ -26,6 +26,7 @@ export function createNotesModule() {
     .toHigherOrderFunction(addNoteUseCase, [
       DI_SYMBOLS.INotesRepository,
       DI_SYMBOLS.IJobsRepository,
+      DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ITransactionManagerService,
       DI_SYMBOLS.ILoggerService,

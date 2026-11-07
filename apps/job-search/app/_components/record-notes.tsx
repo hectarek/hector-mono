@@ -11,7 +11,7 @@ import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { addNote, deleteNote, editNote } from "@/app/actions/notes";
 import type { ActionResult } from "@/app/actions/shared";
-import type { Note } from "@/src/entities/models/note.model";
+import type { Note, NoteRecord } from "@/src/entities/models/note.model";
 import { PLAN_TIME_ZONE } from "@/src/entities/week";
 
 type Failure = Extract<ActionResult<unknown>, { ok: false }>;
@@ -25,20 +25,21 @@ const WHEN = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
-// A job's dated notes, newest first, each signed, with a box to add one. Claude's notes only
-// append (R21): editing and deleting are Hector's, and Claude's session sees both off (KTD3).
-export function JobNotes({
-  jobId,
+// A record's dated notes, a job's or a person's, newest first, each signed, with a box to add
+// one. Claude's notes only append (R21): editing and deleting are Hector's, and Claude's session
+// sees both off (KTD3).
+export function RecordNotes({
+  record,
   notes,
   canEdit,
 }: {
-  jobId: string;
+  record: NoteRecord;
   notes: Note[];
   canEdit: boolean;
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <AddNote jobId={jobId} />
+      <AddNote record={record} />
       {notes.length ? (
         <ol className="flex flex-col divide-y">
           {notes.map((note) => (
@@ -52,7 +53,7 @@ export function JobNotes({
   );
 }
 
-function AddNote({ jobId }: { jobId: string }) {
+function AddNote({ record }: { record: NoteRecord }) {
   const [body, setBody] = useState("");
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
@@ -60,9 +61,7 @@ function AddNote({ jobId }: { jobId: string }) {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await callAction(() =>
-        addNote({ record: { kind: "job", id: jobId }, body }),
-      );
+      const result = await callAction(() => addNote({ record, body }));
       if (result.ok) {
         setBody("");
         setError(undefined);

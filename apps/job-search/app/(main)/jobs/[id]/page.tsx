@@ -8,13 +8,13 @@ import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { SectionTitle } from "@/app/_components/display";
 import { DriverCode } from "@/app/_components/driver-code";
-import { JobNotes } from "@/app/_components/job-notes";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { ProposalReview } from "@/app/_components/proposal-review";
 import { QuickLog } from "@/app/_components/quick-log";
 import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
 import { RecordNext } from "@/app/_components/record-next";
+import { RecordNotes } from "@/app/_components/record-notes";
 import { RemoveContactButton } from "@/app/_components/remove-contact-button";
 import { StageControl } from "@/app/_components/stage-control";
 import { StatusChip } from "@/app/_components/status-chip";
@@ -253,7 +253,11 @@ export default async function JobPage({
 
       <section aria-labelledby="job-notes" className="flex flex-col gap-2">
         <SectionTitle id="job-notes">Notes</SectionTitle>
-        <JobNotes jobId={job.id} notes={notes} canEdit={human} />
+        <RecordNotes
+          record={{ kind: "job", id: job.id }}
+          notes={notes}
+          canEdit={human}
+        />
       </section>
 
       <section aria-labelledby="job-facts" className="flex flex-col gap-2">

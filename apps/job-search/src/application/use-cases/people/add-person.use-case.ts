@@ -1,6 +1,7 @@
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
+import type { INotesRepository } from "@/src/application/repositories/notes.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
@@ -9,6 +10,7 @@ import { requireCompany } from "@/src/application/use-cases/jobs/job-checks";
 import { NO_DATES } from "@/src/application/use-cases/people/person-dates";
 import { NotFoundError } from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
+import { type NoteRecord, noteOn } from "@/src/entities/models/note.model";
 import {
   type AddPersonInput,
   type Person,
@@ -21,12 +23,14 @@ import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 export type IAddPersonUseCase = ReturnType<typeof addPersonUseCase>;
 
 // Adds a person (add_person, docs/build-plan.md U7), at a company if one is named, and as a job's
-// contact if a job is (R1). The person and their history share one transaction (KTD7). A new
-// person has no interactions, so none of their dates.
+// contact if a job is (R1), with a note given as their first (the UX plan's UX8). The person,
+// the note and their history share one transaction (KTD7). A new person has no interactions, so
+// none of their dates.
 export const addPersonUseCase = (
   peopleRepository: IPeopleRepository,
   companiesRepository: ICompaniesRepository,
   jobsRepository: IJobsRepository,
+  notesRepository: INotesRepository,
   activityRepository: IActivityRepository,
   transactionManager: ITransactionManagerService,
   loggerService: ILoggerService,
@@ -35,7 +39,7 @@ export const addPersonUseCase = (
 
   return async (
     context: ChangeContext,
-    { jobId, ...given }: AddPersonInput,
+    { jobId, notes, ...given }: AddPersonInput,
   ): Promise<Person> => {
     const { ownerId } = context;
     // A step given no date is a week out (R7 as revised 2026-11-07, the UX plan's Q1).
@@ -53,7 +57,6 @@ export const addPersonUseCase = (
       ask: given.ask ?? null,
       nextStep,
       nextDate,
-      notes: given.notes ?? null,
     };
     const person = await transactionManager.startTransaction(async (tx) => {
       if (facts.companyId) {
@@ -74,6 +77,19 @@ export const addPersonUseCase = (
         action: "created",
         after: { ...personLogged(added), ...(job && { contactFor: job.role }) },
       });
+      if (notes) {
+        const record: NoteRecord = { kind: "person", id: added.id };
+        const note = await notesRepository.add(
+          ownerId,
+          { record, author: context.actor, body: notes },
+          tx,
+        );
+        await recordChange(activityRepository, tx, context, {
+          record: { kind: "note", id: note.id },
+          action: "created",
+          after: { body: notes, ...noteOn(record) },
+        });
+      }
       return added;
     });
     logger.info("Person added", { personId: person.id });

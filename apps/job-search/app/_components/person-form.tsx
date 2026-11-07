@@ -60,8 +60,17 @@ const FACTS: readonly {
     kind: "date",
     description: "Left empty with a step, it's due a week from today",
   },
-  { fact: "notes", kind: "long", maxLength: 2000 },
+  {
+    fact: "notes",
+    kind: "long",
+    maxLength: 4000,
+    description: "Saved as their first note",
+  },
 ];
+
+// The facts a change can edit: a person's notes are dated entries on their page once they're
+// added (the UX plan's UX8), so only adding one takes a note.
+const EDITABLE = FACTS.filter(({ fact }) => fact !== "notes");
 
 // What a field's text saves: blank is none. A blank name stays blank, for the answer to say a
 // person needs one.
@@ -108,11 +117,12 @@ export function PersonForm({
     ask: shown?.ask ?? "",
     nextStep: shown?.nextStep ?? "",
     nextDate: shown?.nextDate ?? "",
-    notes: shown?.notes ?? "",
+    notes: "",
   });
   const form = useRecordForm(person, fieldsOf, isPerson);
   const { failure } = form;
   const [companyError, setCompanyError] = useState<string>();
+  const facts = person ? EDITABLE : FACTS;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -126,8 +136,8 @@ export function PersonForm({
       return;
     }
     setCompanyError(undefined);
-    const saving = opened ? form.edited : FACTS.map(({ fact }) => fact);
-    const facts = Object.fromEntries(
+    const saving = opened ? form.edited : facts.map(({ fact }) => fact);
+    const values = Object.fromEntries(
       saving.map((fact) =>
         fact === "company"
           ? ["companyId", company?.id ?? null]
@@ -140,9 +150,9 @@ export function PersonForm({
           ? updatePerson({
               id: opened.id,
               updatedAt: opened.updatedAt.toISOString(),
-              ...facts,
+              ...values,
             })
-          : addPerson({ ...facts, ...(jobId && { jobId }) }),
+          : addPerson({ ...values, ...(jobId && { jobId }) }),
       (saved) => router.push(`/people/${saved.id}`),
     );
   }
@@ -153,7 +163,7 @@ export function PersonForm({
         <ConflictNotice what="the person" changes={form.changes} />
       ) : null}
       <FieldGroup>
-        {FACTS.map(({ fact, kind, maxLength, description }) => (
+        {facts.map(({ fact, kind, maxLength, description }) => (
           <FormField
             key={fact}
             id={`person-${fact}`}

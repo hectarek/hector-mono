@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import { saveCompany } from "@/app/actions/companies";
 import { addJob } from "@/app/actions/jobs";
 import { addNote, deleteNote, editNote } from "@/app/actions/notes";
+import { addPerson } from "@/app/actions/people";
 import type { ActionResult } from "@/app/actions/shared";
 import { nextState } from "@/tests/_support/next";
 import { signInAs } from "@/tests/_support/session";
@@ -79,6 +80,30 @@ describe("a job's notes", () => {
       id: note.id,
       record: { kind: "job", id: jobId },
     });
+  });
+
+  // The UX plan's UX8: a person's notes are dated entries too.
+  it("take a note on a person, and refresh the person's page and Claude's, and on delete the same", async () => {
+    signInAs("owner");
+    const person = dataOf(
+      await addPerson({ name: `Pat ${crypto.randomUUID().slice(0, 8)}` }),
+    );
+    nextState.revalidated = [];
+
+    const note = dataOf(
+      await addNote({
+        record: { kind: "person", id: person.id },
+        body: "Met at a meetup.",
+      }),
+    );
+    expect(nextState.revalidated).toEqual([`/people/${person.id}`, "/agent"]);
+
+    nextState.revalidated = [];
+    expect(dataOf(await deleteNote({ id: note.id }))).toEqual({
+      id: note.id,
+      record: { kind: "person", id: person.id },
+    });
+    expect(nextState.revalidated).toEqual([`/people/${person.id}`, "/agent"]);
   });
 
   it("answer a blank note with `validation`", async () => {

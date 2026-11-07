@@ -54,6 +54,7 @@ const snapshot = () => ({
       messagedOn: "2026-10-20",
       repliedOn: "2026-10-21",
       metOn: "2026-10-23",
+      notes: "Met at a meetup.",
     },
     { ref: "p2", name: "Sam Example", messagedOn: "2026-10-22" },
   ],
@@ -207,6 +208,19 @@ describeEachBackend("the sheet's import", () => {
     const app = makeApp();
     await app.importSnapshot(OWNER, snapshot(), { commit: true });
     const pat = await idOf(app, "person:p1");
+
+    // A contact's notes land as their first note, the import's (the UX plan's UX8).
+    expect(
+      await app.repos.notes.list(OWNER, { kind: "person", id: pat }),
+    ).toEqual([
+      expect.objectContaining({ author: "import", body: "Met at a meetup." }),
+    ]);
+    expect(
+      await app.repos.notes.list(OWNER, {
+        kind: "person",
+        id: await idOf(app, "person:p2"),
+      }),
+    ).toEqual([]);
 
     expect(
       (await app.repos.people.listForJob(OWNER, await idOf(app, "job:j1"))).map(

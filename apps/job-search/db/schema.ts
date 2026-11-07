@@ -48,6 +48,7 @@ import {
   type ReviewState,
   WORK_MODES,
 } from "@/src/entities/models/job.model";
+import type { NoteRecord } from "@/src/entities/models/note.model";
 import { RANKS, type Rank } from "@/src/entities/models/person.model";
 import {
   PRACTICE_KINDS,
@@ -294,14 +295,15 @@ export const jobStatusChanges = pgTable(
   ],
 );
 
-// Dated notes on a record (R1, R21), which point at it by kind and id, as the activity log does.
-// A job's notes go with it, in its delete's transaction.
+// Dated notes on a record (R1, R21), which point at it by kind and id, as the activity log does: a
+// job's, or a person's (the UX plan's UX8). A record's notes go with it, in its delete's
+// transaction.
 export const notes = pgTable(
   "notes",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ownerId: uuid("owner_id").notNull(),
-    recordKind: text("record_kind").$type<"job">().notNull(),
+    recordKind: text("record_kind").$type<NoteRecord["kind"]>().notNull(),
     recordId: uuid("record_id").notNull(),
     author: text("author").$type<ChangeActor>().notNull(),
     body: text("body").notNull(),
@@ -334,6 +336,8 @@ export const people = pgTable(
     ask: text("ask"),
     nextStep: text("next_step"),
     nextDate: day("next_date"),
+    // Each person's text moved to their first note in 0008 (the UX plan's UX8), and nothing reads
+    // or writes it since. A later migration drops it, once 0008 has run in production.
     notes: text("notes"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

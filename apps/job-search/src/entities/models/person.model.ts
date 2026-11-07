@@ -9,13 +9,15 @@ import {
 } from "./input.model";
 import type { Interaction } from "./interaction.model";
 import type { JobSummary } from "./job.model";
+import type { Note } from "./note.model";
 
 // How close Hector is to a person (R7), A the closest.
 export const RANKS = ["A", "B", "C"] as const;
 export type Rank = (typeof RANKS)[number];
 
 // What a person holds that a change can set (R7): their company, by id, their role, how Hector
-// knows them, a rank, the ask, a next step and date, and notes. Dates are "YYYY-MM-DD" (KTD18).
+// knows them, a rank, the ask, and a next step and date. Dates are "YYYY-MM-DD" (KTD18). Their
+// notes are dated entries of their own, as a job's are (the UX plan's UX8, Q7).
 export type PersonFacts = {
   name: string;
   companyId: string | null;
@@ -25,7 +27,6 @@ export type PersonFacts = {
   ask: string | null;
   nextStep: string | null;
   nextDate: string | null;
-  notes: string | null;
 };
 
 // The dates a person's interactions give them (KTD9): the latest message sent, reply received and
@@ -86,13 +87,14 @@ const personDetailsSchema = z.object({
   ask: optionalText(300).optional(),
   nextStep: optionalText(120).optional(),
   nextDate: dateSchema.nullable().optional(),
-  notes: optionalText(2000).optional(),
 });
 
-// add_person's input: a name, whatever else is known, and the job they're a contact for, if any.
+// add_person's input: a name, whatever else is known, the job they're a contact for, if any, and
+// a note, which becomes their first.
 export const addPersonSchema = personDetailsSchema.extend({
   name: requiredText(120, "A person needs a name"),
   jobId: z.uuid().optional(),
+  notes: optionalText(4000).optional(),
 });
 export type AddPersonInput = z.output<typeof addPersonSchema>;
 
@@ -172,12 +174,13 @@ export type PeoplePage = {
   nextOffset: number | null;
 };
 
-// A person as their page and get_person show them: their interactions, the latest first, and the
-// jobs they're a contact for.
+// A person as their page and get_person show them: their interactions, the latest first, the jobs
+// they're a contact for, and their notes, the newest first.
 export type PersonDetail = {
   person: Person;
   interactions: Interaction[];
   jobs: JobSummary[];
+  notes: Note[];
   // Who added them and when (the UX plan's UX8).
   added: RecordAdded;
 };

@@ -123,7 +123,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **People and outreach**
 
-- R7. Hector can add, view, edit and delete people with company, their role, how he knows them, rank A, B or C, the ask, next step and next date, and notes. Their messaged-on, replied-on and met-on dates come from logged interactions. (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given. People lists by next step: late, due today, upcoming, then steps with no date, then none, rank A first in each, with a view of the steps with no date.)
+- R7. Hector can add, view, edit and delete people with company, their role, how he knows them, rank A, B or C, the ask, next step and next date, and notes. Their messaged-on, replied-on and met-on dates come from logged interactions. (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given. People lists by next step: late, due today, upcoming, then steps with no date, then none, rank A first in each, with a view of the steps with no date.) (Revised 2026-11-07 in UX8, Hector's call on the UX plan's Q7: a person's notes are dated entries, as a job's are, and each person's text from before became their first.)
 - R8. Interactions log sent messages, replies and conversations on a date (today by default, earlier on request), optionally linked to a job, and several sent messages can be logged in one step. A scheduled conversation ends as held, cancelled or no-show, and only held ones count as conversations.
 
 **Daily and weekly views**
