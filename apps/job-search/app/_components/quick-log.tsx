@@ -19,6 +19,7 @@ import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { INTERACTION_LABELS } from "@/app/_lib/job-labels";
+import { useToday } from "@/app/_lib/use-today";
 import { logInteraction } from "@/app/actions/interactions";
 import { addPerson, findPeople } from "@/app/actions/people";
 import type { ActionResult } from "@/app/actions/shared";
@@ -27,7 +28,6 @@ import {
   INTERACTION_KINDS,
   type InteractionKind,
 } from "@/src/entities/models/interaction.model";
-import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 type Picked = { id: string; name: string };
 type Failure = Extract<ActionResult<unknown>, { ok: false }>;
@@ -64,7 +64,8 @@ export function QuickLog({
   const fresh = () => ({
     people: person ? [person] : [],
     kind: "message-sent" as InteractionKind,
-    occurredOn: todayIn(PLAN_TIME_ZONE),
+    // The day it happened: null until changed, which logs it on the day it's saved.
+    occurredOn: null as string | null,
     jobId,
     note: "",
     nextStep: "",
@@ -72,6 +73,7 @@ export function QuickLog({
   });
   const [open, setOpen] = useState(false);
   const [entry, setEntry] = useState(fresh);
+  const day = useToday();
   const [failure, setFailure] = useState<Failure>();
   const [isPending, startTransition] = useTransition();
 
@@ -86,7 +88,7 @@ export function QuickLog({
         logInteraction({
           personIds: entry.people.map(({ id }) => id),
           kind: entry.kind,
-          occurredOn: entry.occurredOn,
+          ...(entry.occurredOn !== null && { occurredOn: entry.occurredOn }),
           ...(entry.jobId && { jobId: entry.jobId }),
           ...(entry.note.trim() && { note: entry.note }),
           ...(entry.nextStep.trim() && { nextStep: entry.nextStep }),
@@ -104,7 +106,13 @@ export function QuickLog({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(opening) => {
+        if (opening) day.refresh();
+        setOpen(opening);
+      }}
+    >
       <SheetTrigger render={<Button size="lg" className="min-h-11" />}>
         <Plus />
         Log
@@ -152,7 +160,7 @@ export function QuickLog({
               id="quick-log-date"
               label={FIELD_LABELS.occurredOn ?? "Date"}
               kind="date"
-              value={entry.occurredOn}
+              value={entry.occurredOn ?? day.today}
               onChange={(occurredOn) => set({ occurredOn })}
               error={failure?.fields?.occurredOn}
             />

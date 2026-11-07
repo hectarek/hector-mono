@@ -21,6 +21,17 @@ export function useRecordForm<R, K extends string>(
   const [changedSince, setChangedSince] = useState<K[]>([]);
   const [isPending, startTransition] = useTransition();
 
+  // Given another record in the same place (the next task on This week's board, say), the form
+  // starts over on it, so it can't save to the one it held before. A new record's form (none yet)
+  // and settings (no id) never do, and a save that lands after the swap is set right here too.
+  const id = idOf(record);
+  if (id !== undefined && id !== idOf(opened)) {
+    setOpened(record);
+    setFields(fieldsOf(record));
+    setChangedSince([]);
+    setResult(undefined);
+  }
+
   // Runs the save, then onSaved with what it saved; on a conflict, the form takes the record as
   // it is now.
   function save<T>(
@@ -71,4 +82,11 @@ export function useRecordForm<R, K extends string>(
       now: now[key],
     })),
   };
+}
+
+// What tells one record from another: its id, which settings, one per owner, don't have.
+function idOf(record: unknown): unknown {
+  return typeof record === "object" && record !== null && "id" in record
+    ? record.id
+    : undefined;
 }

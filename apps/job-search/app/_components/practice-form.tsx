@@ -12,6 +12,7 @@ import {
 } from "@/app/_components/practice-fields";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
+import { useToday } from "@/app/_lib/use-today";
 import { logPractice } from "@/app/actions/practice";
 import type { ActionResult } from "@/app/actions/shared";
 
@@ -24,6 +25,7 @@ export function PracticeForm() {
   const router = useRouter();
   const [session, setSession] = useState({ topic: "", type: "", pattern: "" });
   const [tried, setTried] = useState(freshTry);
+  const { today } = useToday();
   const [failure, setFailure] = useState<Failure>();
   const [isPending, startTransition] = useTransition();
 
@@ -83,6 +85,7 @@ export function PracticeForm() {
         <TryFields
           id="practice"
           values={tried}
+          today={today}
           onChange={setTried}
           errors={failure?.fields}
         />

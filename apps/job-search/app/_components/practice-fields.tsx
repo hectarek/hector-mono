@@ -2,7 +2,6 @@ import { FormField } from "@/app/_components/form-field";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { PRACTICE_RESULT_LABELS } from "@/app/_lib/job-labels";
 import { PRACTICE_RESULTS } from "@/src/entities/practice-ladder";
-import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 const RESULTS = PRACTICE_RESULTS.map((result) => ({
   value: result,
@@ -17,29 +16,30 @@ const AI_USED = [
 // A try's fields as typed (R11): how it went, the day, the minutes, whether AI was used, and notes.
 export type TryValues = {
   result: string;
-  practicedOn: string;
+  // Null until changed, which dates the try on the day it's saved.
+  practicedOn: string | null;
   minutes: string;
   aiUsed: string;
   notes: string;
 };
 
-// A try not yet typed: dated today, with no AI.
+// A try not yet typed: dated the day it's saved, with no AI.
 export function freshTry(): TryValues {
   return {
     result: "",
-    practicedOn: todayIn(PLAN_TIME_ZONE),
+    practicedOn: null,
     minutes: "",
     aiUsed: "no",
     notes: "",
   };
 }
 
-// What the fields send log_practice: blank minutes and notes are left out, and the minutes go as a
-// number, which the server checks.
+// What the fields send log_practice: a date only once it's changed, blank minutes and notes left
+// out, and the minutes as a number, which the server checks.
 export function tryInput(values: TryValues): Record<string, unknown> {
   return {
     result: values.result,
-    practicedOn: values.practicedOn,
+    ...(values.practicedOn !== null && { practicedOn: values.practicedOn }),
     aiUsed: values.aiUsed === "yes",
     ...(values.minutes.trim() && { minutes: Number(values.minutes.trim()) }),
     ...(values.notes.trim() && { notes: values.notes }),
@@ -50,11 +50,14 @@ export function tryInput(values: TryValues): Record<string, unknown> {
 export function TryFields({
   id,
   values,
+  today,
   onChange,
   errors,
 }: {
   id: string;
   values: TryValues;
+  // The day the date shows until it's changed (useToday).
+  today: string;
   onChange: (values: TryValues) => void;
   errors?: Partial<Record<string, string>>;
 }) {
@@ -74,7 +77,7 @@ export function TryFields({
         id={`${id}-date`}
         label={FIELD_LABELS.practicedOn ?? "Date"}
         kind="date"
-        value={values.practicedOn}
+        value={values.practicedOn ?? today}
         onChange={(practicedOn) => set({ practicedOn })}
         error={errors?.practicedOn}
       />

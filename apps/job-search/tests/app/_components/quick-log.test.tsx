@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, setSystemTime } from "bun:test";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QuickLog } from "@/app/_components/quick-log";
 import { addPerson } from "@/app/actions/people";
@@ -36,7 +36,45 @@ const open = () => fireEvent.click(screen.getByRole("button", { name: "Log" }));
 const save = () =>
   fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
+// 11:58 PM on Nov 6 in Eastern time, and four minutes later, past midnight.
+const BEFORE_MIDNIGHT = new Date("2026-11-07T04:58:00Z");
+const AFTER_MIDNIGHT = new Date("2026-11-07T05:02:00Z");
+
+afterEach(() => {
+  setSystemTime();
+});
+
 describe("the quick log", () => {
+  it("shows the day its sheet opens as the date, though the page loaded the day before", async () => {
+    setSystemTime(BEFORE_MIDNIGHT);
+    signInAs("owner");
+    const ada = await aPerson(fictional("Ada"));
+    render(<QuickLog person={ada} />);
+
+    setSystemTime(AFTER_MIDNIGHT);
+    open();
+
+    expect(screen.getByLabelText("Date")).toHaveProperty("value", "2026-11-07");
+  });
+
+  it("logs on the day it's saved when the date wasn't changed, though the sheet opened the day before", async () => {
+    setSystemTime(BEFORE_MIDNIGHT);
+    signInAs("owner");
+    const ada = await aPerson(fictional("Ada"));
+    render(<QuickLog person={ada} />);
+    open();
+    expect(screen.getByLabelText("Date")).toHaveProperty("value", "2026-11-06");
+
+    setSystemTime(AFTER_MIDNIGHT);
+    save();
+
+    await waitFor(async () =>
+      expect(await interactionsOf(ada.id)).toEqual([
+        expect.objectContaining({ occurredOn: "2026-11-07" }),
+      ]),
+    );
+  });
+
   it("logs a sent message to the person it opens on with one tap, dated today (R8)", async () => {
     signInAs("owner");
     const ada = await aPerson(fictional("Ada"));
