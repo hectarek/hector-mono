@@ -6,6 +6,7 @@ import { type FormEvent, useState, useTransition } from "react";
 import { FormField } from "@/app/_components/form-field";
 import { callAction } from "@/app/_lib/call-action";
 import { STATUS_LABELS } from "@/app/_lib/job-labels";
+import { useToday } from "@/app/_lib/use-today";
 import { closeJob, setJobStatus } from "@/app/actions/jobs";
 import type { ActionResult } from "@/app/actions/shared";
 import {
@@ -33,23 +34,33 @@ export function JobStatusForm({
   today,
 }: {
   jobId: string;
-  // Today's date in Eastern time, from the server (KTD18).
+  // The day the page was rendered, in Eastern time, from the server (KTD18): the date shown until
+  // a status is picked.
   today: string;
 }) {
   const [to, setTo] = useState("");
-  const [on, setOn] = useState(today);
+  // The move's date: null until changed, which dates the move on the day it's saved.
+  const [on, setOn] = useState<string | null>(null);
+  const day = useToday(today);
   const [reason, setReason] = useState("");
   const [failure, setFailure] = useState<Failure>();
   const [isPending, startTransition] = useTransition();
   const closing = isClosing(to);
 
+  // Picking a status starts a move, so the date's default is read again.
+  const pick = (status: string) => {
+    setTo(status);
+    day.refresh();
+  };
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const when = on !== null ? { on } : {};
     startTransition(async () => {
       const result = await callAction(() =>
         closing
-          ? closeJob({ id: jobId, status: to, on, reason })
-          : setJobStatus({ id: jobId, status: to, on }),
+          ? closeJob({ id: jobId, status: to, reason, ...when })
+          : setJobStatus({ id: jobId, status: to, ...when }),
       );
       if (result.ok) {
         setTo("");
@@ -69,7 +80,7 @@ export function JobStatusForm({
           label="Move to"
           kind={choices(OPEN_STATUSES)}
           value={closing ? "" : to}
-          onChange={setTo}
+          onChange={pick}
           error={closing ? undefined : failure?.fields?.status}
         />
         <FormField
@@ -77,13 +88,13 @@ export function JobStatusForm({
           label="Or close as"
           kind={choices(CLOSED_STATUSES)}
           value={closing ? to : ""}
-          onChange={setTo}
+          onChange={pick}
         />
         <FormField
           id="move-on"
           label="On"
           kind="date"
-          value={on}
+          value={on ?? day.today}
           onChange={setOn}
           error={failure?.fields?.on}
         />

@@ -19,6 +19,7 @@ import {
 } from "@/app/_components/practice-fields";
 import { SheetCloseButton } from "@/app/_components/sheet-close-button";
 import { callAction } from "@/app/_lib/call-action";
+import { useToday } from "@/app/_lib/use-today";
 import { logPractice } from "@/app/actions/practice";
 import type { ActionResult } from "@/app/actions/shared";
 import { LADDER_STEPS, type ReviewStep } from "@/src/entities/practice-ladder";
@@ -35,6 +36,7 @@ export function PracticeReview({
 }) {
   const [open, setOpen] = useState(false);
   const [tried, setTried] = useState(freshTry);
+  const day = useToday();
   const [failure, setFailure] = useState<Failure>();
   const [isPending, startTransition] = useTransition();
 
@@ -54,7 +56,13 @@ export function PracticeReview({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(opening) => {
+        if (opening) day.refresh();
+        setOpen(opening);
+      }}
+    >
       <SheetTrigger
         render={<Button variant="secondary" size="lg" className="min-h-11" />}
       >
@@ -79,6 +87,7 @@ export function PracticeReview({
             <TryFields
               id={`review-${session.id}`}
               values={tried}
+              today={day.today}
               onChange={setTried}
               errors={failure?.fields}
             />

@@ -11,6 +11,10 @@ const toggleVariants = cva(
       variant: {
         default: "bg-transparent",
         outline: "border border-input bg-transparent hover:bg-muted",
+        // One of a few choices in a form, where the picked one must show at a glance: it fills
+        // with primary, unlike a hovered one (job-search's forms).
+        choice:
+          "border border-input bg-transparent hover:bg-muted aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground",
       },
       size: {
         default:

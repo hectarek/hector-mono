@@ -27,7 +27,8 @@ const atkinsonMono = Atkinson_Hyperlegible_Mono({
 });
 
 // A generic name on every page, signed out included, and never indexed: the app is private
-// (docs/build-plan.md R23, KTD17). app/robots.ts asks crawlers to stay out as well.
+// (docs/build-plan.md R23, KTD17). app/robots.ts asks crawlers to stay out as well. A signed-in
+// page's title, "Jobs · Job search", comes from the shell instead (TabTitle in app-nav.tsx).
 export const metadata: Metadata = {
   title: "Job search",
   description: "A private job search workspace.",

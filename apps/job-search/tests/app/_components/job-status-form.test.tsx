@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, setSystemTime } from "bun:test";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { JobStatusForm } from "@/app/_components/job-status-form";
 import { getJob } from "@/app/actions/jobs";
@@ -12,6 +12,10 @@ const submit = (view: ReturnType<typeof render>) => {
 };
 
 const statusOf = async (id: string) => dataOf(await getJob({ id })).job;
+
+afterEach(() => {
+  setSystemTime();
+});
 
 describe("moving a job", () => {
   it("moves it to the status picked, on the date given", async () => {
@@ -53,6 +57,38 @@ describe("moving a job", () => {
     submit(view);
     await waitFor(async () =>
       expect((await statusOf(job.id)).status).toBe("withdrawn"),
+    );
+  });
+
+  it("moves it on the day a status is picked, though the page loaded the day before", async () => {
+    // 11:58 PM on Nov 6 in Eastern time, when the job's page loaded.
+    setSystemTime(new Date("2026-11-07T04:58:00Z"));
+    const job = await aJob(await aCompany());
+    signInAs("owner");
+    const view = render(<JobStatusForm jobId={job.id} today="2026-11-06" />);
+
+    setSystemTime(new Date("2026-11-07T05:02:00Z"));
+    fireEvent.click(view.getByRole("button", { name: "Applied" }));
+    expect(view.getByLabelText("On")).toHaveProperty("value", "2026-11-07");
+    submit(view);
+
+    await waitFor(async () =>
+      expect((await statusOf(job.id)).appliedOn).toBe("2026-11-07"),
+    );
+  });
+
+  it("moves it on the day it's saved when the date wasn't changed", async () => {
+    setSystemTime(new Date("2026-11-07T04:58:00Z"));
+    const job = await aJob(await aCompany());
+    signInAs("owner");
+    const view = render(<JobStatusForm jobId={job.id} today="2026-11-06" />);
+    fireEvent.click(view.getByRole("button", { name: "Applied" }));
+
+    setSystemTime(new Date("2026-11-07T05:02:00Z"));
+    submit(view);
+
+    await waitFor(async () =>
+      expect((await statusOf(job.id)).appliedOn).toBe("2026-11-07"),
     );
   });
 });
