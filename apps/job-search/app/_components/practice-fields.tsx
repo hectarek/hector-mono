@@ -95,7 +95,7 @@ export function TryFields({
         label={FIELD_LABELS.aiUsed ?? "AI used"}
         kind={{ choices: AI_USED }}
         value={values.aiUsed}
-        onChange={(aiUsed) => set({ aiUsed: aiUsed || "no" })}
+        onChange={(aiUsed) => set({ aiUsed })}
         error={errors?.aiUsed}
       />
       <FormField

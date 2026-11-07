@@ -138,7 +138,7 @@ export function QuickLog({
               kind={{ choices: KINDS }}
               value={entry.kind}
               onChange={(kind) => {
-                const next = (kind || "message-sent") as InteractionKind;
+                const next = kind as InteractionKind;
                 set({
                   kind: next,
                   people:

@@ -8,6 +8,7 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Textarea } from "@repo/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
+import { Check } from "lucide-react";
 
 // How a field is typed: text, a link, a whole number, a date, long text, or one of a few choices,
 // shown as toggles ("" is none), since a native select can't reach a 44 px touch target.
@@ -59,10 +60,13 @@ export function FormField({
       {typeof kind === "object" ? (
         <ToggleGroup
           aria-labelledby={id}
-          variant="outline"
+          variant="choice"
           className="flex-wrap"
           value={[value]}
-          onValueChange={([chosen]) => onChange(chosen ?? "")}
+          // Tapping the picked choice again keeps it; a field that can be empty offers None.
+          onValueChange={([chosen]) => {
+            if (chosen !== undefined) onChange(chosen);
+          }}
           disabled={disabled}
         >
           {kind.choices.map((choice) => (
@@ -71,6 +75,11 @@ export function FormField({
               value={choice.value}
               className="min-h-11 min-w-11"
             >
+              {/* The picked choice's check, so its fill isn't the only sign of it. */}
+              <Check
+                aria-hidden
+                className="hidden group-aria-pressed/toggle:block"
+              />
               {choice.label}
             </ToggleGroupItem>
           ))}

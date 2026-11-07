@@ -11,95 +11,39 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
 } from "@repo/ui/components/sidebar";
-import {
-  Bot,
-  Briefcase,
-  Building2,
-  CalendarCheck,
-  CalendarDays,
-  Dumbbell,
-  LogOut,
-  Settings,
-  Users,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
+import {
+  MainNav,
+  MenuClose,
+  TabTitle,
+  TopBar,
+} from "@/app/_components/app-nav";
 import { DisplayLabel } from "@/app/_components/display";
 
-// The signed-in frame (docs/build-plan.md KTD19): a sidebar on desktop, an off-canvas sheet
-// opened from the header on phones. Each unit adds its section to the menu as it ships.
+// The signed-in frame (docs/build-plan.md KTD19, the design system's AppShell): a sidebar on
+// desktop, an off-canvas sheet opened from the top bar on phones, and the top bar, which stays
+// put as the page scrolls. The sections, how the current one is marked and the tab's title are in
+// app-nav.tsx; Sign out stands apart at the foot, so it isn't tapped for the section above it.
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
+      <TabTitle />
       <Sidebar>
         <SidebarHeader>
           <DisplayLabel className="px-2 py-1.5">Job search</DisplayLabel>
+          <MenuClose />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" render={<Link href="/" />}>
-                    <CalendarDays />
-                    <span>This week</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" render={<Link href="/week" />}>
-                    <CalendarCheck />
-                    <span>Weekly review</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" render={<Link href="/jobs" />}>
-                    <Briefcase />
-                    <span>Jobs</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    size="lg"
-                    render={<Link href="/companies" />}
-                  >
-                    <Building2 />
-                    <span>Companies</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" render={<Link href="/people" />}>
-                    <Users />
-                    <span>People</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    size="lg"
-                    render={<Link href="/practice" />}
-                  >
-                    <Dumbbell />
-                    <span>Practice</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" render={<Link href="/agent" />}>
-                    <Bot />
-                    <span>Claude</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+              <MainNav />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" render={<Link href="/settings" />}>
-                <Settings />
-                <span>Settings</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
                 size="lg"
@@ -113,8 +57,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger size="icon-lg" className="min-h-11 min-w-11" />
+        <header className="bg-background sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <TopBar />
         </header>
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col p-4 md:p-6">
           {children}
