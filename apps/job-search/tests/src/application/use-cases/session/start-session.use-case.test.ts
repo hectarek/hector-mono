@@ -53,6 +53,7 @@ const withSecondReadFailing = (app: TestApp): TestApp => {
   let reads = 0;
   const failing: IActivityRepository = {
     add: (...args) => activity.add(...args),
+    addedOf: (...args) => activity.addedOf(...args),
     list: async (...args) => {
       reads += 1;
       if (reads === 2) {

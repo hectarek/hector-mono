@@ -4,7 +4,7 @@ import {
   type JobStatus,
   OPEN_STATUSES,
 } from "../job-lifecycle";
-import type { ActivityEntry } from "./activity.model";
+import type { ActivityEntry, RecordAdded } from "./activity.model";
 import type { CompanyRef } from "./company.model";
 import {
   dateSchema,
@@ -13,6 +13,7 @@ import {
   requiredText,
   timeSchema,
 } from "./input.model";
+import type { Interaction } from "./interaction.model";
 import type { LoggedStatusChange } from "./job-status-change.model";
 import type { LeadSource } from "./lead-source.model";
 import type { Note } from "./note.model";
@@ -111,7 +112,14 @@ export type JobDetail = {
   activity: ActivityEntry[];
   contacts: PersonRef[];
   repliedOn: string | null;
+  // Who added it and when (the UX plan's UX8).
+  added: RecordAdded;
+  // The interactions linked to it, the latest first, each with its person (UX8).
+  outreach: JobOutreach[];
 };
+
+// One interaction linked to a job, with the person it was with.
+export type JobOutreach = { interaction: Interaction; person: PersonRef };
 
 // A job as a list shows it, with the updatedAt a change from the list sends back (R22).
 export type JobSummary = Pick<

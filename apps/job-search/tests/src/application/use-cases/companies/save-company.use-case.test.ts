@@ -84,6 +84,8 @@ describeEachBackend("saveCompany", () => {
       similar: [],
       jobs: [],
       people: [],
+      // The log's first entry for it (the UX plan's UX8).
+      added: { by: "agent", at: expect.any(Date) },
     });
     expect(await history(saved.company.id)).toEqual([
       expect.objectContaining({

@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { FormField } from "@/app/_components/form-field";
+import { withFrom } from "@/app/_lib/back-link";
 import { callAction } from "@/app/_lib/call-action";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatMoment } from "@/app/_lib/format-day";
@@ -66,7 +67,7 @@ export function DebriefCard({ debrief }: { debrief: ConversationToDebrief }) {
         <ItemContent>
           <ItemTitle>
             <Link
-              href={`/people/${person.id}`}
+              href={withFrom(`/people/${person.id}`, "/")}
               className="underline-offset-4 hover:underline"
             >
               {person.name}

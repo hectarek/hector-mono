@@ -84,6 +84,21 @@ export class MockInteractionsRepository implements IInteractionsRepository {
       .map((row) => ({ ...row.interaction }));
   }
 
+  async listForJob(ownerId: string, jobId: string): Promise<Interaction[]> {
+    return this.rows
+      .filter(
+        (row) => row.ownerId === ownerId && row.interaction.jobId === jobId,
+      )
+      .sort(
+        (a, b) =>
+          byCodePoint(b.interaction.occurredOn, a.interaction.occurredOn) ||
+          b.interaction.createdAt.getTime() -
+            a.interaction.createdAt.getTime() ||
+          b.added - a.added,
+      )
+      .map((row) => ({ ...row.interaction }));
+  }
+
   async datesFor(
     ownerId: string,
     personIds: string[],

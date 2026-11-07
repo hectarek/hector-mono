@@ -17,16 +17,20 @@ import { callAction } from "@/app/_lib/call-action";
 import type { ActionResult } from "@/app/actions/shared";
 
 // Deleting something, which asks first: deleting is Hector's alone (R21), and the server refuses
-// anyone else. Deleted, it goes to `then`, or stays when the page still stands.
+// anyone else. Deleted, it goes to `then`, or stays when the page still stands. A delete beside
+// each item of a list is quiet (the UX plan's UX8), since a red button on every row shouts; it
+// still asks first.
 export function DeleteButton({
   what,
   action,
   then,
+  quiet = false,
 }: {
   // What's deleted, as the question names it: a company's name, a job's role, "this note".
   what: string;
   action: () => Promise<ActionResult<unknown>>;
   then?: string;
+  quiet?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -50,7 +54,13 @@ export function DeleteButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<Button variant="destructive" size="lg" className="min-h-11" />}
+        render={
+          <Button
+            variant={quiet ? "quiet" : "destructive"}
+            size="lg"
+            className="min-h-11"
+          />
+        }
       >
         Delete
       </DialogTrigger>

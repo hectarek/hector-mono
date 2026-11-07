@@ -102,6 +102,7 @@ export function NextStepSheet({
   href,
   job,
   contacts = [],
+  opensOn = "push",
   trigger,
   children,
 }: {
@@ -116,6 +117,8 @@ export function NextStepSheet({
   // A job's stage, for R3's follow-up rule.
   job?: Pick<JobStage, "status" | "appliedOn">;
   contacts?: PersonRef[];
+  // The view the sheet opens on: Push from a due row, Done or Push from a record's Next (UX8).
+  opensOn?: "push" | "done";
   // What opens the sheet (This week's row or its pit board), and what it shows.
   trigger: ReactElement;
   children: ReactNode;
@@ -137,10 +140,19 @@ export function NextStepSheet({
 
   function opening(next: boolean) {
     if (next) {
+      // A record's Next stays on its page through saves, so after an Undo, or a change the page
+      // refreshed in, its record is newer than the one the form last saved (as BlockSheet's is).
+      if (record.updatedAt.getTime() > form.opened.updatedAt.getTime()) {
+        form.reopen(record);
+      }
       day.refresh();
-      setView("push");
       setAnother("");
       setFailure(undefined);
+      if (opensOn === "done") {
+        startDone();
+      } else {
+        setView("push");
+      }
     }
     setOpen(next);
   }

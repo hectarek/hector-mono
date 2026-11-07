@@ -125,6 +125,25 @@ export class InteractionsRepository
     }
   }
 
+  async listForJob(ownerId: string, jobId: string): Promise<Interaction[]> {
+    try {
+      const rows = await this.getDbContext()
+        .select()
+        .from(interactions)
+        .where(
+          and(eq(interactions.ownerId, ownerId), eq(interactions.jobId, jobId)),
+        )
+        .orderBy(
+          desc(interactions.occurredOn),
+          desc(interactions.createdAt),
+          desc(interactions.id),
+        );
+      return rows.map(toInteraction);
+    } catch (err) {
+      this.handleError(err, "listForJob", { ownerId, jobId });
+    }
+  }
+
   async datesFor(
     ownerId: string,
     personIds: string[],

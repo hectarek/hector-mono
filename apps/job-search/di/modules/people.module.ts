@@ -42,6 +42,7 @@ export function createPeopleModule() {
       DI_SYMBOLS.IPeopleRepository,
       DI_SYMBOLS.IInteractionsRepository,
       DI_SYMBOLS.IJobsRepository,
+      DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
   peopleModule

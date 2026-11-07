@@ -110,7 +110,10 @@ export default async function JobsPage({
       </nav>
 
       {jobs.length ? (
-        <JobList jobs={jobs} />
+        <JobList
+          jobs={jobs}
+          from={view === "open" ? "/jobs" : `/jobs?view=${view}`}
+        />
       ) : (
         <Empty>
           <EmptyHeader>

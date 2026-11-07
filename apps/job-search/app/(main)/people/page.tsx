@@ -117,7 +117,10 @@ export default async function PeoplePage({
       </search>
 
       {people.length ? (
-        <PersonList people={people} />
+        <PersonList
+          people={people}
+          from={`/people?${new URLSearchParams({ view, ...(query && { q: query }) })}`}
+        />
       ) : (
         <Empty>
           <EmptyHeader>

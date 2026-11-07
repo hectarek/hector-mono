@@ -91,7 +91,7 @@ export default async function WeekPage({
 
       <section aria-labelledby="week-blocks" className="flex flex-col gap-3">
         <SectionTitle id="week-blocks">Focus blocks</SectionTitle>
-        <WeekBlocks week={blocks} />
+        <WeekBlocks week={blocks} from={`/week?week=${view.week}`} />
       </section>
 
       <section aria-labelledby="week-review" className="flex flex-col gap-3">

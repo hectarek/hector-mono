@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { RecordAdded } from "./activity.model";
 import {
   httpLink,
   optionalText,
@@ -139,6 +140,8 @@ export type CompanyDetail = {
   similar: CompanyRef[];
   jobs: JobSummary[];
   people: PersonRef[];
+  // Who added it and when (the UX plan's UX8).
+  added: RecordAdded;
 };
 
 // The most companies a page of find_companies holds.

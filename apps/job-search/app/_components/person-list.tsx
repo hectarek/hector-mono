@@ -16,6 +16,7 @@ import {
 } from "@repo/ui/components/table";
 import Link from "next/link";
 import { DateChips } from "@/app/_components/date-chips";
+import { withFrom } from "@/app/_lib/back-link";
 import { formatDay } from "@/app/_lib/format-day";
 import type { PersonSummary } from "@/src/entities/models/person.model";
 
@@ -50,8 +51,15 @@ function PersonDateChips({ person }: { person: PersonSummary }) {
   ) : null;
 }
 
-// A page of people: a table on desktop, cards on phones (docs/build-plan.md KTD19).
-export function PersonList({ people }: { people: PersonSummary[] }) {
+// A page of people: a table on desktop, cards on phones (docs/build-plan.md KTD19). `from`, the
+// page the list is on, is where a person's back link returns (the UX plan's UX8).
+export function PersonList({
+  people,
+  from,
+}: {
+  people: PersonSummary[];
+  from?: string;
+}) {
   return (
     <>
       <div className="hidden md:block">
@@ -72,7 +80,7 @@ export function PersonList({ people }: { people: PersonSummary[] }) {
                 <TableRow key={person.id}>
                   <TableCell>
                     <Link
-                      href={`/people/${person.id}`}
+                      href={withFrom(`/people/${person.id}`, from)}
                       className="font-medium underline-offset-4 hover:underline"
                     >
                       {person.name}
@@ -100,7 +108,7 @@ export function PersonList({ people }: { people: PersonSummary[] }) {
             <li key={person.id} className="flex flex-col gap-2">
               <Item
                 variant="outline"
-                render={<Link href={`/people/${person.id}`} />}
+                render={<Link href={withFrom(`/people/${person.id}`, from)} />}
               >
                 <ItemContent>
                   <ItemTitle>{person.name}</ItemTitle>

@@ -32,18 +32,51 @@ export const getJobUseCase = (
     if (!job) {
       throw new NotFoundError("Couldn't find that job.");
     }
-    const [notes, moves, { entries }, contacts, repliedOn] = await Promise.all([
-      notesRepository.list(ownerId, { kind: "job", id }),
-      jobsRepository.listStatusChanges(ownerId, id),
-      activityRepository.list(ownerId, {
-        record: { kind: "job", id },
-        limit: RECENT_CHANGES,
-        offset: 0,
+    const [notes, moves, { entries }, contacts, repliedOn, added, linked] =
+      await Promise.all([
+        notesRepository.list(ownerId, { kind: "job", id }),
+        jobsRepository.listStatusChanges(ownerId, id),
+        activityRepository.list(ownerId, {
+          record: { kind: "job", id },
+          limit: RECENT_CHANGES,
+          offset: 0,
+        }),
+        peopleRepository.listForJob(ownerId, id),
+        interactionsRepository.repliedOnFor(ownerId, id),
+        activityRepository.addedOf(ownerId, { kind: "job", id }),
+        interactionsRepository.listForJob(ownerId, id),
+      ]);
+    // Each interaction's person, most of them among the contacts (logging links them), and any
+    // taken off the job since read on their own.
+    const known = new Map(contacts.map((person) => [person.id, person]));
+    const outreach = await Promise.all(
+      linked.map(async (interaction) => {
+        const person =
+          known.get(interaction.personId) ??
+          (await peopleRepository.get(ownerId, interaction.personId));
+        return (
+          person && {
+            interaction,
+            person: {
+              id: person.id,
+              name: person.name,
+              role: person.role,
+              rank: person.rank,
+            },
+          }
+        );
       }),
-      peopleRepository.listForJob(ownerId, id),
-      interactionsRepository.repliedOnFor(ownerId, id),
-    ]);
+    );
     logger.debug("Job read", { jobId: id });
-    return { job, notes, moves, activity: entries, contacts, repliedOn };
+    return {
+      job,
+      notes,
+      moves,
+      activity: entries,
+      contacts,
+      repliedOn,
+      added,
+      outreach: outreach.filter((entry) => entry !== undefined),
+    };
   };
 };

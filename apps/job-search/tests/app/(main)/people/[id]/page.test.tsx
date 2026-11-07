@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
+import { withFrom } from "@/app/_lib/back-link";
 import PersonPage from "@/app/(main)/people/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
 import { logInteraction } from "@/app/actions/interactions";
@@ -11,7 +12,12 @@ import { signInAs } from "@/tests/_support/session";
 
 const personPage = async (id: string) =>
   within(
-    await renderOnServer(await PersonPage({ params: Promise.resolve({ id }) })),
+    await renderOnServer(
+      await PersonPage({
+        params: Promise.resolve({ id }),
+        searchParams: Promise.resolve({}),
+      }),
+    ),
   );
 
 const tag = () => crypto.randomUUID().slice(0, 8);
@@ -65,9 +71,15 @@ describe("a person's page", () => {
     expect(page.getByRole("heading", { name: person.name })).toBeTruthy();
     expect(
       page.getByRole("link", { name: company.name }).getAttribute("href"),
-    ).toBe(`/companies/${company.id}`);
+    ).toBe(withFrom(`/companies/${company.id}`, `/people/${person.id}`));
+    // The record header (the UX plan's UX8): the role in the facts line, and the rank.
+    expect(page.getByText(/^· Engineering manager$/)).toBeTruthy();
+    expect(page.getByText("Rank A")).toBeTruthy();
+    // Next, with no step yet: the form sets one.
+    const next = within(page.getByRole("region", { name: "Next" }));
+    expect(next.getByText("No next step.")).toBeTruthy();
+    expect(next.getByRole("button", { name: "Set one" })).toBeTruthy();
     const facts = within(page.getByRole("region", { name: "Facts" }));
-    expect(facts.getByText("Engineering manager")).toBeTruthy();
     expect(facts.getByText("An intro to the platform team")).toBeTruthy();
     expect(facts.getByText("Oct 20, 2026")).toBeTruthy();
     expect(facts.getByText("Oct 22, 2026")).toBeTruthy();
@@ -79,7 +91,7 @@ describe("a person's page", () => {
       interactions
         .getByRole("link", { name: `Widget engineer at ${company.name}` })
         .getAttribute("href"),
-    ).toBe(`/jobs/${job.id}`);
+    ).toBe(withFrom(`/jobs/${job.id}`, `/people/${person.id}`));
     expect(
       interactions.getAllByRole("button", { name: "Delete" }),
     ).toHaveLength(2);
