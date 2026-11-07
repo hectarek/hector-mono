@@ -65,6 +65,10 @@ export type NewActivityEntry = Omit<ActivityEntry, "id" | "createdAt"> & {
   ownerId: string;
 };
 
+// Who added a record and when, from its first entry in the log, which a record's header shows
+// (the UX plan's UX8). Null for a record the log has no entry for.
+export type RecordAdded = { by: ChangeActor; at: Date } | null;
+
 // The most a page holds, and so the most a record's history shows at once.
 export const ACTIVITY_PAGE_MAX = 50;
 

@@ -242,6 +242,7 @@ describe("findCompanies and getCompany", () => {
       similar: [{ id: similar.id, name: similar.name }],
       jobs: [],
       people: [],
+      added: { by: "owner", at: expect.any(Date) },
     });
   });
 

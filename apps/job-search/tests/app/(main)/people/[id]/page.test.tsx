@@ -66,8 +66,14 @@ describe("a person's page", () => {
     expect(
       page.getByRole("link", { name: company.name }).getAttribute("href"),
     ).toBe(`/companies/${company.id}`);
+    // The record header (the UX plan's UX8): the role in the facts line, and the rank.
+    expect(page.getByText(/^· Engineering manager$/)).toBeTruthy();
+    expect(page.getByText("Rank A")).toBeTruthy();
+    // Next, with no step yet: the form sets one.
+    const next = within(page.getByRole("region", { name: "Next" }));
+    expect(next.getByText("No next step.")).toBeTruthy();
+    expect(next.getByRole("button", { name: "Set one" })).toBeTruthy();
     const facts = within(page.getByRole("region", { name: "Facts" }));
-    expect(facts.getByText("Engineering manager")).toBeTruthy();
     expect(facts.getByText("An intro to the platform team")).toBeTruthy();
     expect(facts.getByText("Oct 20, 2026")).toBeTruthy();
     expect(facts.getByText("Oct 22, 2026")).toBeTruthy();

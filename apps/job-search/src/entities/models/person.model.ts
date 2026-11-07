@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { RecordAdded } from "./activity.model";
 import type { CompanyRef } from "./company.model";
 import {
   dateSchema,
@@ -177,4 +178,6 @@ export type PersonDetail = {
   person: Person;
   interactions: Interaction[];
   jobs: JobSummary[];
+  // Who added them and when (the UX plan's UX8).
+  added: RecordAdded;
 };

@@ -2,6 +2,8 @@ import type {
   ActivityFilter,
   ActivityPage,
   NewActivityEntry,
+  RecordAdded,
+  RecordRef,
 } from "@/src/entities/models/activity.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 
@@ -16,4 +18,6 @@ export interface IActivityRepository {
     filter: ActivityFilter,
     tx?: ITransaction,
   ): Promise<ActivityPage>;
+  // Who created the record and when: its earliest "created" entry.
+  addedOf(ownerId: string, record: RecordRef): Promise<RecordAdded>;
 }

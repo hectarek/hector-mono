@@ -37,6 +37,8 @@ export interface IInteractionsRepository {
     personId: string,
     tx?: ITransaction,
   ): Promise<Interaction[]>;
+  // The interactions linked to a job, in the same order: its outreach (the UX plan's UX8).
+  listForJob(ownerId: string, jobId: string): Promise<Interaction[]>;
   // Each given person's dates (KTD9): the latest message sent, reply received and conversation
   // held. A person with none has no entry.
   datesFor(

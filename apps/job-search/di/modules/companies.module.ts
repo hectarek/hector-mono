@@ -44,6 +44,7 @@ export function createCompaniesModule() {
       DI_SYMBOLS.ICompaniesRepository,
       DI_SYMBOLS.IJobsRepository,
       DI_SYMBOLS.IPeopleRepository,
+      DI_SYMBOLS.IActivityRepository,
       DI_SYMBOLS.ILoggerService,
     ]);
   companiesModule

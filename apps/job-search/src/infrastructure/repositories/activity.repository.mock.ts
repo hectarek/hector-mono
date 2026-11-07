@@ -4,6 +4,8 @@ import type {
   ActivityFilter,
   ActivityPage,
   NewActivityEntry,
+  RecordAdded,
+  RecordRef,
 } from "@/src/entities/models/activity.model";
 
 // The log in memory. Like the table, it orders by time and then by the order rows came in.
@@ -40,5 +42,16 @@ export class MockActivityRepository implements IActivityRepository {
       entries: matching.slice(offset, offset + limit),
       nextOffset: matching.length > offset + limit ? offset + limit : null,
     };
+  }
+
+  async addedOf(ownerId: string, record: RecordRef): Promise<RecordAdded> {
+    const first = this.rows.find(
+      (row) =>
+        row.ownerId === ownerId &&
+        row.entry.record.kind === record.kind &&
+        row.entry.record.id === record.id &&
+        row.entry.action === "created",
+    );
+    return first ? { by: first.entry.actor, at: first.entry.createdAt } : null;
   }
 }

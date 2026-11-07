@@ -3,11 +3,13 @@ import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
-import { RecordTitle, SectionTitle } from "@/app/_components/display";
+import { SectionTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
 import { OnlyHector } from "@/app/_components/only-hector";
+import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
@@ -19,9 +21,11 @@ import { JOB_PAGE_MAX } from "@/src/entities/models/job.model";
 
 const HEADCOUNT = new Intl.NumberFormat("en-US");
 
-// A company (R4): its facts and research, a warning when another company's name matches its own,
-// its jobs and people, the proposals that name it, waiting or dismissed (each keeps it from its
-// delete, as its people do), and its history (R19).
+// A company (R4), in the order every record's page takes (the UX plan's UX8): its header (who
+// added it, where it is and what it does, its tier, and actions), a warning when another
+// company's name matches its own, its jobs and people, the proposals that name it, waiting or
+// dismissed (each keeps it from its delete, as its people do), its facts, the filled ones first,
+// its research, and its history (R19).
 export default async function CompanyPage({
   params,
 }: {
@@ -29,7 +33,10 @@ export default async function CompanyPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const { company, similar, jobs, people } = await loadCompany(id, actor);
+  const { company, similar, jobs, people, added } = await loadCompany(
+    id,
+    actor,
+  );
   const find = getInjection("IFindJobsController");
   const [waiting, dismissed] = await Promise.all([
     find(
@@ -41,6 +48,12 @@ export default async function CompanyPage({
       actor,
     ),
   ]);
+  const facts = FACTS.map((fact): [string, ReactNode | null] => [
+    FIELD_LABELS[fact] ?? fact,
+    factOf(company, fact),
+  ]);
+  const filled = facts.filter(([, value]) => value !== null);
+  const empty = facts.filter(([, value]) => value === null);
 
   return (
     <div className="flex flex-col gap-8">
@@ -52,35 +65,48 @@ export default async function CompanyPage({
           <ChevronLeft className="size-4" />
           Companies
         </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <RecordTitle>{company.name}</RecordTitle>
-            {company.tier ? (
+        <RecordHeader
+          kind="Company"
+          added={added}
+          name={company.name}
+          facts={
+            factsLine([
+              company.location,
+              company.industry,
+              company.headcount === null
+                ? null
+                : `${HEADCOUNT.format(company.headcount)} people`,
+            ]) || undefined
+          }
+          status={
+            company.tier ? (
               <Badge variant="secondary">Tier {company.tier}</Badge>
-            ) : null}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="secondary"
-              size="lg"
-              nativeButton={false}
-              render={<Link href={`/companies/${company.id}/edit`} />}
-              className="min-h-11"
-            >
-              Edit
-            </Button>
-            {/* Deleting is Hector's alone (R21): Claude's session sees it off (KTD3). */}
-            {actor.actor === "owner" ? (
-              <DeleteButton
-                what={company.name}
-                action={deleteCompany.bind(null, { id: company.id })}
-                then="/companies"
-              />
-            ) : (
-              <OnlyHector labels={["Delete"]} />
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+          actions={
+            <>
+              <Button
+                variant="secondary"
+                size="lg"
+                nativeButton={false}
+                render={<Link href={`/companies/${company.id}/edit`} />}
+                className="min-h-11"
+              >
+                Edit
+              </Button>
+              {/* Deleting is Hector's alone (R21): Claude's session sees it off (KTD3). */}
+              {actor.actor === "owner" ? (
+                <DeleteButton
+                  what={company.name}
+                  action={deleteCompany.bind(null, { id: company.id })}
+                  then="/companies"
+                />
+              ) : (
+                <OnlyHector labels={["Delete"]} />
+              )}
+            </>
+          }
+        />
       </div>
 
       {similar.length ? (
@@ -107,47 +133,6 @@ export default async function CompanyPage({
         </Alert>
       ) : null}
 
-      <section aria-labelledby="company-facts" className="flex flex-col gap-2">
-        <SectionTitle id="company-facts">Facts</SectionTitle>
-        <dl className="flex flex-col gap-2 text-sm">
-          {FACTS.map((fact) => (
-            <div
-              key={fact}
-              className="flex flex-col gap-0.5 sm:flex-row sm:gap-6"
-            >
-              <dt className="text-muted-foreground shrink-0 sm:w-36">
-                {FIELD_LABELS[fact]}
-              </dt>
-              <dd className="min-w-0 break-words">
-                <Fact company={company} fact={fact} />
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <section
-        aria-labelledby="company-research"
-        className="flex flex-col gap-2"
-      >
-        <SectionTitle id="company-research">Research</SectionTitle>
-        {company.researchSummary ? (
-          <p className="text-sm whitespace-pre-wrap">
-            {company.researchSummary}
-          </p>
-        ) : (
-          <p className="text-muted-foreground text-sm">No summary yet.</p>
-        )}
-        {company.researchRef ? (
-          <p className="text-sm">
-            <span className="text-muted-foreground">
-              {FIELD_LABELS.researchRef}:{" "}
-            </span>
-            <span className="break-words">{company.researchRef}</span>
-          </p>
-        ) : null}
-      </section>
-
       <section aria-labelledby="company-jobs" className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <SectionTitle id="company-jobs">Jobs</SectionTitle>
@@ -162,7 +147,7 @@ export default async function CompanyPage({
           </Button>
         </div>
         {jobs.length ? (
-          <JobList jobs={jobs} />
+          <JobList jobs={jobs} atCompany />
         ) : (
           <p className="text-muted-foreground text-sm">No jobs here yet.</p>
         )}
@@ -194,7 +179,7 @@ export default async function CompanyPage({
           className="flex flex-col gap-2"
         >
           <SectionTitle id="company-waiting">To review</SectionTitle>
-          <JobList jobs={waiting.jobs} />
+          <JobList jobs={waiting.jobs} atCompany />
         </section>
       ) : null}
 
@@ -204,9 +189,53 @@ export default async function CompanyPage({
           className="flex flex-col gap-2"
         >
           <SectionTitle id="company-dismissed">Dismissed</SectionTitle>
-          <JobList jobs={dismissed.jobs} />
+          <JobList jobs={dismissed.jobs} atCompany />
         </section>
       ) : null}
+
+      <section aria-labelledby="company-facts" className="flex flex-col gap-2">
+        <SectionTitle id="company-facts">Facts</SectionTitle>
+        <dl className="flex flex-col gap-2 text-sm">
+          {filled.map(([label, value]) => (
+            <div
+              key={label}
+              className="flex flex-col gap-0.5 sm:flex-row sm:gap-6"
+            >
+              <dt className="text-muted-foreground shrink-0 sm:w-36">
+                {label}
+              </dt>
+              <dd className="min-w-0 break-words">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {empty.length ? (
+          <p className="text-muted-foreground text-sm">
+            Not set: {empty.map(([label]) => label).join(", ")}
+          </p>
+        ) : null}
+      </section>
+
+      <section
+        aria-labelledby="company-research"
+        className="flex flex-col gap-2"
+      >
+        <SectionTitle id="company-research">Research</SectionTitle>
+        {company.researchSummary ? (
+          <p className="text-sm whitespace-pre-wrap">
+            {company.researchSummary}
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-sm">No summary yet.</p>
+        )}
+        {company.researchRef ? (
+          <p className="text-sm">
+            <span className="text-muted-foreground">
+              {FIELD_LABELS.researchRef}:{" "}
+            </span>
+            <span className="break-words">{company.researchRef}</span>
+          </p>
+        ) : null}
+      </section>
 
       <RecordHistory record={{ kind: "company", id: company.id }} />
     </div>
@@ -224,16 +253,13 @@ const FACTS = [
 ] as const;
 
 // A fact as the page shows it: plain text (docs/build-plan.md KTD21), the website as a link out,
-// and a dash for none.
-function Fact({
-  company,
-  fact,
-}: {
-  company: Company;
-  fact: (typeof FACTS)[number];
-}) {
-  if (fact === "website" && company.website) {
-    return (
+// and null for none.
+function factOf(
+  company: Company,
+  fact: (typeof FACTS)[number],
+): ReactNode | null {
+  if (fact === "website") {
+    return company.website ? (
       <a
         href={company.website}
         target="_blank"
@@ -242,10 +268,12 @@ function Fact({
       >
         {company.website}
       </a>
-    );
+    ) : null;
   }
-  if (fact === "headcount" && company.headcount !== null) {
-    return HEADCOUNT.format(company.headcount);
+  if (fact === "headcount") {
+    return company.headcount === null
+      ? null
+      : HEADCOUNT.format(company.headcount);
   }
-  return company[fact] ?? <span className="text-muted-foreground">—</span>;
+  return company[fact];
 }

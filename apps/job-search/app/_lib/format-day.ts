@@ -45,6 +45,17 @@ export function formatMoment(at: Date): string {
   return `${MOMENT_DAY.format(at)}, ${MOMENT_TIME.format(at)}`;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// When a step is due, as a row or a record's page says it: so many days late, today, a weekday
+// within the week ahead, or the date further out (the UX plan's UX4 and UX8).
+export function dueLabel(due: string, today: string): string {
+  if (due === today) return "Today";
+  const days = Math.round((Date.parse(due) - Date.parse(today)) / DAY_MS);
+  if (days < 0) return `${-days} ${days === -1 ? "day" : "days"} late`;
+  return days < 7 ? formatWeekday(due, true) : formatDay(due);
+}
+
 // A moment's time of day, in Eastern time: "9:30 AM".
 export function formatTime(at: Date): string {
   return MOMENT_TIME.format(at);

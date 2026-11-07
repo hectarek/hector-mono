@@ -200,7 +200,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     listActivity: listActivityUseCase(activity, log),
     startSession: startSessionUseCase(activity, transactions, log),
     findCompanies: findCompaniesUseCase(companies, log),
-    getCompany: getCompanyUseCase(companies, jobs, people, log),
+    getCompany: getCompanyUseCase(companies, jobs, people, activity, log),
     saveCompany: saveCompanyUseCase(companies, activity, transactions, log),
     deleteCompany: deleteCompanyUseCase(
       companies,
@@ -253,7 +253,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     editNote: editNoteUseCase(notes, activity, transactions, log),
     deleteNote: deleteNoteUseCase(notes, activity, transactions, log),
     findPeople: findPeopleUseCase(people, interactions, log),
-    getPerson: getPersonUseCase(people, interactions, jobs, log),
+    getPerson: getPersonUseCase(people, interactions, jobs, activity, log),
     addPerson: addPersonUseCase(
       people,
       companies,

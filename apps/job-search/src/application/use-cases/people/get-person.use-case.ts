@@ -1,3 +1,4 @@
+import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { IInteractionsRepository } from "@/src/application/repositories/interactions.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
@@ -10,11 +11,12 @@ import type { PersonDetail } from "@/src/entities/models/person.model";
 export type IGetPersonUseCase = ReturnType<typeof getPersonUseCase>;
 
 // A person as their page and get_person show them (docs/build-plan.md U7): with their dates, their
-// interactions, the latest first, and the jobs they're a contact for.
+// interactions, the latest first, the jobs they're a contact for, and who added them (UX8).
 export const getPersonUseCase = (
   peopleRepository: IPeopleRepository,
   interactionsRepository: IInteractionsRepository,
   jobsRepository: IJobsRepository,
+  activityRepository: IActivityRepository,
   loggerService: ILoggerService,
 ) => {
   const logger = loggerService.child({ layer: "use-case", op: "getPerson" });
@@ -27,10 +29,11 @@ export const getPersonUseCase = (
     if (!record) {
       throw new NotFoundError("Couldn't find that person.");
     }
-    const [person, interactions, jobIds] = await Promise.all([
+    const [person, interactions, jobIds, added] = await Promise.all([
       datedPerson(interactionsRepository, ownerId, record),
       interactionsRepository.listForPerson(ownerId, id),
       peopleRepository.jobIdsFor(ownerId, id),
+      activityRepository.addedOf(ownerId, { kind: "person", id }),
     ]);
     const jobs = await Promise.all(
       jobIds.map((jobId) => jobsRepository.get(ownerId, jobId)),
@@ -40,6 +43,7 @@ export const getPersonUseCase = (
       person,
       interactions,
       jobs: jobs.filter((job): job is Job => job !== undefined).map(jobSummary),
+      added,
     };
   };
 };

@@ -12,14 +12,13 @@ import {
   PitBoardFace,
 } from "@/app/_components/pit-board";
 import { PracticeReview } from "@/app/_components/practice-review";
-import { formatDay, formatWeekday } from "@/app/_lib/format-day";
+import { dueLabel, formatDay, formatWeekday } from "@/app/_lib/format-day";
 import type { JobSummary } from "@/src/entities/models/job.model";
 import type { PersonSummary } from "@/src/entities/models/person.model";
 import type { DueSession } from "@/src/entities/models/practice-entry.model";
 import type { DueJob, TodayView } from "@/src/entities/models/today.model";
 import { LADDER_STEPS } from "@/src/entities/practice-ladder";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 // How many late tasks show before the rest fold under Show more.
 const LATE_SHOWN = 5;
 // A person's rank as the pit board ranks it, beside a company's tier: A with tier 1.
@@ -110,7 +109,7 @@ export function DueList({
           {board.sheet(
             <button type="button" className={PIT_BOARD} />,
             <PitBoardFace
-              reason={`Next up · ${when(board.due, today)}`}
+              reason={`Next up · ${dueLabel(board.due, today)}`}
               instruction={board.step ?? board.name}
               meta={board.step ? board.name : ""}
             />,
@@ -121,7 +120,7 @@ export function DueList({
         <div key={reviewOnBoard.id} className="flex flex-col gap-2">
           <PitBoard
             href={`/practice/${reviewOnBoard.id}`}
-            reason={`Next up · ${when(reviewOnBoard.nextReview.dueOn, today)}`}
+            reason={`Next up · ${dueLabel(reviewOnBoard.nextReview.dueOn, today)}`}
             instruction={`Review: ${reviewOnBoard.topic}`}
             meta={`Review ${reviewOnBoard.nextReview.step} of ${LADDER_STEPS}`}
           />
@@ -179,7 +178,7 @@ function jobTask(job: DueJob, today: string): StepTask {
         kind="job"
         record={job}
         title={name}
-        detail={joined([job.nextStep, when(due, today)])}
+        detail={joined([job.nextStep, dueLabel(due, today)])}
         href={`/jobs/${job.id}`}
         job={job}
         contacts={job.contacts}
@@ -206,7 +205,7 @@ function personTask(person: PersonSummary, today: string): StepTask {
         kind="person"
         record={person}
         title={name}
-        detail={joined([person.nextStep, when(due, today)])}
+        detail={joined([person.nextStep, dueLabel(due, today)])}
         href={`/people/${person.id}`}
         trigger={trigger}
       >
@@ -258,7 +257,7 @@ function StepRows({ tasks, today }: { tasks: StepTask[]; today: string }) {
             <RowFace
               name={task.name}
               meta={joined([task.kind, task.step])}
-              when={when(task.due, today)}
+              when={dueLabel(task.due, today)}
               late={task.due < today}
             />,
           )}
@@ -330,7 +329,7 @@ function ReviewRow({ session, today }: { session: DueSession; today: string }) {
         <RowFace
           name={`Review: ${session.topic}`}
           meta={`Review ${session.nextReview.step} of ${LADDER_STEPS}`}
-          when={when(session.nextReview.dueOn, today)}
+          when={dueLabel(session.nextReview.dueOn, today)}
           late={session.nextReview.dueOn < today}
         />
       </Link>
@@ -407,14 +406,6 @@ const COUNT_LINK =
 
 const counted = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`;
-
-// When a task is due, the way a row says it: so many days late, today, or a later day's weekday.
-function when(due: string, today: string): string {
-  if (due === today) return "Today";
-  if (due > today) return formatWeekday(due, true);
-  const days = Math.round((Date.parse(today) - Date.parse(due)) / DAY_MS);
-  return `${days} ${days === 1 ? "day" : "days"} late`;
-}
 
 function joined(parts: (string | null)[]): string {
   return parts.filter(Boolean).join(" · ");

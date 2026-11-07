@@ -3,11 +3,13 @@ import { Button } from "@repo/ui/components/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/app/_components/delete-button";
-import { RecordTitle, SectionTitle } from "@/app/_components/display";
+import { SectionTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
 import { OnlyHector } from "@/app/_components/only-hector";
 import { QuickLog } from "@/app/_components/quick-log";
+import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
+import { RecordNext } from "@/app/_components/record-next";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
@@ -18,20 +20,22 @@ import { deletePerson } from "@/app/actions/people";
 import type { Interaction } from "@/src/entities/models/interaction.model";
 import type { JobSummary } from "@/src/entities/models/job.model";
 import type { Person } from "@/src/entities/models/person.model";
+import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
-// The dates a person's interactions give them (KTD9), in the order outreach goes.
+// The facts the page lists, in order, then the dates a person's interactions give them (KTD9);
+// what's next and their notes have sections of their own.
+const FACTS = ["ask"] as const;
 const DATES = [
   ["messagedOn", "Messaged"],
   ["repliedOn", "Replied"],
   ["metOn", "Met"],
 ] as const;
 
-// The facts the page lists, in order; notes have their own section.
-const FACTS = ["role", "howKnown", "ask"] as const;
-
-// A person (R7): their facts, the dates their interactions give them, their interactions, the
-// latest first, the jobs they're a contact for, and their history (R19). The quick log opens on
-// them. Claude's session sees what only Hector may do off (KTD3).
+// A person (R7), in the order every record's page takes (the UX plan's UX8): their header (who
+// added them, role, company and how Hector knows them, rank, and actions); what's next; their
+// interactions, the latest first, each with its note; the jobs they're a contact for; their notes;
+// their facts, the filled ones first; and their history (R19). The quick log opens on them.
+// Claude's session sees what only Hector may do off (KTD3).
 export default async function PersonPage({
   params,
 }: {
@@ -39,8 +43,14 @@ export default async function PersonPage({
 }) {
   const actor = await getPageActor();
   const { id } = await params;
-  const { person, interactions, jobs } = await loadPerson(id, actor);
+  const { person, interactions, jobs, added } = await loadPerson(id, actor);
+  // The clock after the session (Cache Components): today in Eastern time (KTD18).
+  const today = todayIn(PLAN_TIME_ZONE);
   const human = actor.actor === "owner";
+  const facts = factsOf(person);
+  const filled = facts.filter(([, value]) => value !== null);
+  const empty = facts.filter(([, value]) => value === null);
+  const about = factsLine([person.role, person.howKnown]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -52,75 +62,70 @@ export default async function PersonPage({
           <ChevronLeft className="size-4" />
           People
         </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <RecordTitle>{person.name}</RecordTitle>
-              {person.rank ? (
-                <Badge variant="secondary">{person.rank}</Badge>
-              ) : null}
-            </div>
-            {person.company ? (
-              <Link
-                href={`/companies/${person.company.id}`}
-                className="text-muted-foreground w-fit text-sm underline underline-offset-4"
-              >
-                {person.company.name}
-              </Link>
-            ) : null}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <QuickLog
-              person={{ id: person.id, name: person.name }}
-              jobs={jobs.map((job) => ({ id: job.id, label: jobLabel(job) }))}
-            />
-            <Button
-              variant="secondary"
-              size="lg"
-              nativeButton={false}
-              render={<Link href={`/people/${person.id}/edit`} />}
-              className="min-h-11"
-            >
-              Edit
-            </Button>
-            {human ? (
-              <DeleteButton
-                what={person.name}
-                action={deletePerson.bind(null, { id: person.id })}
-                then="/people"
+        <RecordHeader
+          kind="Person"
+          added={added}
+          name={person.name}
+          facts={
+            person.company || about ? (
+              <>
+                {person.company ? (
+                  <Link
+                    href={`/companies/${person.company.id}`}
+                    className="underline underline-offset-4"
+                  >
+                    {person.company.name}
+                  </Link>
+                ) : null}
+                {person.company && about ? " · " : null}
+                {about}
+              </>
+            ) : undefined
+          }
+          status={
+            person.rank ? (
+              <Badge variant="secondary">Rank {person.rank}</Badge>
+            ) : undefined
+          }
+          actions={
+            <>
+              <QuickLog
+                person={{ id: person.id, name: person.name }}
+                jobs={jobs.map((job) => ({
+                  id: job.id,
+                  label: jobLabel(job),
+                }))}
               />
-            ) : (
-              <OnlyHector labels={["Delete"]} />
-            )}
-          </div>
-        </div>
+              <Button
+                variant="secondary"
+                size="lg"
+                nativeButton={false}
+                render={<Link href={`/people/${person.id}/edit`} />}
+                className="min-h-11"
+              >
+                Edit
+              </Button>
+              {human ? (
+                <DeleteButton
+                  what={person.name}
+                  action={deletePerson.bind(null, { id: person.id })}
+                  then="/people"
+                />
+              ) : (
+                <OnlyHector labels={["Delete"]} />
+              )}
+            </>
+          }
+        />
       </div>
 
-      <section aria-labelledby="person-facts" className="flex flex-col gap-2">
-        <SectionTitle id="person-facts">Facts</SectionTitle>
-        <dl className="flex flex-col gap-2 text-sm">
-          {FACTS.map((fact) => (
-            <Row key={fact} label={FIELD_LABELS[fact] ?? fact}>
-              {person[fact] ?? <None />}
-            </Row>
-          ))}
-          <Row label="Next">
-            <NextStep person={person} />
-          </Row>
-          {DATES.map(([date, label]) => (
-            <Row key={date} label={label}>
-              {person[date] ? formatDay(person[date]) : <None />}
-            </Row>
-          ))}
-        </dl>
-      </section>
-
-      {person.notes ? (
-        <section aria-labelledby="person-notes" className="flex flex-col gap-2">
-          <SectionTitle id="person-notes">Notes</SectionTitle>
-          <p className="text-sm whitespace-pre-wrap">{person.notes}</p>
-        </section>
-      ) : null}
+      <RecordNext
+        kind="person"
+        record={person}
+        title={factsLine([person.name, person.company?.name])}
+        href={`/people/${person.id}`}
+        today={today}
+      />
 
       <section
         aria-labelledby="person-interactions"
@@ -128,11 +133,11 @@ export default async function PersonPage({
       >
         <SectionTitle id="person-interactions">Interactions</SectionTitle>
         {interactions.length ? (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col divide-y">
             {interactions.map((interaction) => (
               <li
                 key={interaction.id}
-                className="flex flex-wrap items-start justify-between gap-2"
+                className="flex flex-wrap items-start justify-between gap-2 py-2"
               >
                 <InteractionLine interaction={interaction} jobs={jobs} />
                 {human ? (
@@ -141,6 +146,7 @@ export default async function PersonPage({
                     action={deleteInteraction.bind(null, {
                       id: interaction.id,
                     })}
+                    quiet
                   />
                 ) : null}
               </li>
@@ -164,37 +170,52 @@ export default async function PersonPage({
         )}
       </section>
 
+      {person.notes ? (
+        <section aria-labelledby="person-notes" className="flex flex-col gap-2">
+          <SectionTitle id="person-notes">Notes</SectionTitle>
+          <p className="text-sm whitespace-pre-wrap">{person.notes}</p>
+        </section>
+      ) : null}
+
+      <section aria-labelledby="person-facts" className="flex flex-col gap-2">
+        <SectionTitle id="person-facts">Facts</SectionTitle>
+        <dl className="flex flex-col gap-2 text-sm">
+          {filled.map(([label, value]) => (
+            <div
+              key={label}
+              className="flex flex-col gap-0.5 sm:flex-row sm:gap-6"
+            >
+              <dt className="text-muted-foreground shrink-0 sm:w-36">
+                {label}
+              </dt>
+              <dd className="min-w-0 break-words">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {empty.length ? (
+          <p className="text-muted-foreground text-sm">
+            Not set: {empty.map(([label]) => label).join(", ")}
+          </p>
+        ) : null}
+      </section>
+
       <RecordHistory record={{ kind: "person", id: person.id }} />
     </div>
   );
 }
 
-function Row({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-      <dt className="text-muted-foreground shrink-0 sm:w-36">{label}</dt>
-      <dd className="min-w-0 break-words">{children}</dd>
-    </div>
-  );
-}
-
-function None() {
-  return <span className="text-muted-foreground">—</span>;
-}
-
-function NextStep({ person }: { person: Person }) {
-  if (!person.nextStep && !person.nextDate) {
-    return <None />;
-  }
-  return [person.nextStep, person.nextDate && formatDay(person.nextDate)]
-    .filter(Boolean)
-    .join(" · ");
+// The person's facts as the page lists them, each by its label, and none as null.
+function factsOf(person: Person): [string, string | null][] {
+  return [
+    ...FACTS.map((fact): [string, string | null] => [
+      FIELD_LABELS[fact] ?? fact,
+      person[fact],
+    ]),
+    ...DATES.map(([date, label]): [string, string | null] => [
+      label,
+      person[date] ? formatDay(person[date]) : null,
+    ]),
+  ];
 }
 
 // A job as the quick log and an interaction name it.

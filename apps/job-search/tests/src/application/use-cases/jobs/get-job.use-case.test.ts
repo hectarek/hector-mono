@@ -1,5 +1,6 @@
 import { expect, it } from "bun:test";
 import { NotFoundError } from "@/src/entities/errors/common";
+import { logInteractionSchema } from "@/src/entities/models/interaction.model";
 import {
   ANOTHER_OWNER,
   describeEachBackend,
@@ -41,6 +42,45 @@ describeEachBackend("getJob", () => {
       "updated",
       "updated",
       "created",
+    ]);
+    // Claude proposed it (the UX plan's UX8).
+    expect(detail.added).toEqual({ by: "agent", at: expect.any(Date) });
+  });
+
+  // The UX plan's UX8: a job's page shows its outreach.
+  it("answers with the interactions linked to it, the latest first, each with its person", async () => {
+    const app = makeApp();
+    const jobs = jobFixtures(app);
+    const job = await jobs.add(await jobs.company());
+    const ada = await app.addPerson(HECTOR, {
+      name: "Ada Example",
+      jobId: job.id,
+    });
+    const bo = await app.addPerson(HECTOR, { name: "Bo Example" });
+    const log = (personId: string, occurredOn: string, linked: boolean) =>
+      app.logInteraction(
+        HECTOR,
+        logInteractionSchema.parse({
+          kind: "message-sent",
+          personIds: [personId],
+          occurredOn,
+          ...(linked && { jobId: job.id }),
+        }),
+      );
+    await log(ada.id, "2026-10-20", true);
+    await log(bo.id, "2026-10-22", true);
+    await log(ada.id, "2026-10-24", false);
+
+    const { outreach } = await app.getJob(OWNER, { id: job.id });
+
+    expect(
+      outreach.map(({ interaction, person }) => [
+        person.name,
+        interaction.occurredOn,
+      ]),
+    ).toEqual([
+      ["Bo Example", "2026-10-22"],
+      ["Ada Example", "2026-10-20"],
     ]);
   });
 

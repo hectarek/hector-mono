@@ -42,16 +42,25 @@ describe("a job's page", () => {
         .getAttribute("aria-current"),
     ).toBe("step");
     expect(status.getByRole("button", { name: "Close…" })).toBeTruthy();
+    // The record header (the UX plan's UX8): who added it, and its key facts on one line.
+    expect(page.getByText(/added /)).toBeTruthy();
+    // Next comes right after the header, with Done, Push and Change.
+    const next = within(page.getByRole("region", { name: "Next" }));
+    expect(next.getByText("Apply")).toBeTruthy();
+    for (const action of ["Done", "Push", "Change"]) {
+      expect(next.getByRole("button", { name: action })).toBeTruthy();
+    }
     const facts = within(page.getByRole("region", { name: "Facts" }));
-    expect(
-      facts
-        .getByRole("link", {
-          name: "https://boards.greenhouse.io/acme/jobs/77",
-        })
-        .getAttribute("rel"),
-    ).toBe("noopener noreferrer");
+    const posting = facts.getByRole("link", { name: "Open posting" });
+    expect(posting.getAttribute("href")).toBe(
+      "https://boards.greenhouse.io/acme/jobs/77",
+    );
+    expect(posting.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(facts.getByText("(boards.greenhouse.io)")).toBeTruthy();
     expect(facts.getByText("$12,345 – $67,890")).toBeTruthy();
     expect(facts.getByText("Referral")).toBeTruthy();
+    // Empty facts fold into one line.
+    expect(facts.getByText(/^Not set: .*Level/)).toBeTruthy();
     expect(
       within(page.getByRole("region", { name: "Summary" })).getByText(
         "A fictional posting.",

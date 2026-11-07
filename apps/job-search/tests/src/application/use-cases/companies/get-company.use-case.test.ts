@@ -48,6 +48,7 @@ describeEachBackend("getCompany", () => {
       similar: [{ id: similar.id, name: "ACME, inc" }],
       jobs: [],
       people: [],
+      added: { by: expect.any(String), at: expect.any(Date) },
     });
   });
 

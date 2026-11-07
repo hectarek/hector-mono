@@ -23,7 +23,14 @@ import type { JobSummary } from "@/src/entities/models/job.model";
 
 // A page of jobs: a table on desktop, cards on phones (docs/build-plan.md KTD19), each job's status
 // as the design system's status chip. A dismissed proposal shows why in place of its next step.
-export function JobList({ jobs }: { jobs: JobSummary[] }) {
+// On a company's own page the company goes unsaid (the UX plan's UX8).
+export function JobList({
+  jobs,
+  atCompany = false,
+}: {
+  jobs: JobSummary[];
+  atCompany?: boolean;
+}) {
   return (
     <>
       <div className="hidden md:block">
@@ -31,7 +38,7 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
           <TableHeader>
             <TableRow>
               <TableHead>Role</TableHead>
-              <TableHead>Company</TableHead>
+              {atCompany ? null : <TableHead>Company</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead>Next</TableHead>
             </TableRow>
@@ -47,7 +54,7 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
                     {job.role}
                   </Link>
                 </TableCell>
-                <TableCell>{job.company.name}</TableCell>
+                {atCompany ? null : <TableCell>{job.company.name}</TableCell>}
                 <TableCell>
                   <StatusChip
                     status={job.status}
@@ -72,7 +79,9 @@ export function JobList({ jobs }: { jobs: JobSummary[] }) {
               <ItemContent>
                 <ItemTitle>{job.role}</ItemTitle>
                 <ItemDescription>
-                  {[job.company.name, next(job)].filter(Boolean).join(" · ")}
+                  {[atCompany ? null : job.company.name, next(job)]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </ItemDescription>
               </ItemContent>
               <ItemActions>

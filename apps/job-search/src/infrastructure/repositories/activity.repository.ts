@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lt } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lt } from "drizzle-orm";
 import { activity } from "@/db/schema";
 import type { IActivityRepository } from "@/src/application/repositories/activity.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -7,6 +7,8 @@ import type {
   ActivityFilter,
   ActivityPage,
   NewActivityEntry,
+  RecordAdded,
+  RecordRef,
 } from "@/src/entities/models/activity.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
@@ -67,6 +69,27 @@ export class ActivityRepository
       };
     } catch (err) {
       this.handleError(err, "list", { ownerId });
+    }
+  }
+
+  async addedOf(ownerId: string, record: RecordRef): Promise<RecordAdded> {
+    try {
+      const [row] = await this.getDbContext()
+        .select({ actor: activity.actor, createdAt: activity.createdAt })
+        .from(activity)
+        .where(
+          and(
+            eq(activity.ownerId, ownerId),
+            eq(activity.recordKind, record.kind),
+            eq(activity.recordId, record.id),
+            eq(activity.action, "created"),
+          ),
+        )
+        .orderBy(asc(activity.createdAt), asc(activity.id))
+        .limit(1);
+      return row ? { by: row.actor, at: row.createdAt } : null;
+    } catch (err) {
+      this.handleError(err, "addedOf", { ownerId, recordId: record.id });
     }
   }
 }
