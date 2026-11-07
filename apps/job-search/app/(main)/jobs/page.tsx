@@ -17,16 +17,17 @@ import { JOB_PAGE_MAX, type JobQuery } from "@/src/entities/models/job.model";
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 // The pipeline's views: open jobs, those of them whose step has no date (the UX plan's UX6),
-// closed jobs, the review queue (R20) and dismissed proposals.
+// archived jobs (every ended status; Closed is one, the posting's, Q6), the review queue (R20) and
+// dismissed proposals.
 const VIEWS = {
   open: { label: "Open", query: { status: "open", reviewState: "accepted" } },
   "no-date": {
     label: "No date",
     query: { status: "open", reviewState: "accepted", undated: true },
   },
-  closed: {
-    label: "Closed",
-    query: { status: "closed", reviewState: "accepted" },
+  archived: {
+    label: "Archived",
+    query: { status: "archived", reviewState: "accepted" },
   },
   review: { label: "To review", query: { reviewState: "pending" } },
   dismissed: { label: "Dismissed", query: { reviewState: "dismissed" } },
@@ -42,7 +43,7 @@ type View = keyof typeof VIEWS;
 const EMPTY: Record<View, string> = {
   open: "No open jobs. Add one, or accept one of Claude's proposals.",
   "no-date": "Every open job's next step has a date.",
-  closed: "No closed jobs yet.",
+  archived: "No archived jobs yet.",
   review: "Nothing to review: Claude's proposals wait here.",
   dismissed: "No dismissed proposals.",
 };

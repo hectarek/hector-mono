@@ -31,7 +31,7 @@ Each unit is one task in Hector's task tracker. Owner C is Claude; C+H is Claude
 **Phase 3: Records**
 - **UX8** Record pages that lead with what's next — C · needs Q7
 - **UX9** Moving a job, and what comes next — C
-- **UX10** Values in words, said one way — C · needs Q6
+- **UX10** Values in words, said one way — C
 
 **Phase 4: Claude's work and decisions**
 - **UX11** Proposals decided from the card — C
@@ -282,7 +282,7 @@ The biggest change to how the app feels: every due task can be finished, or move
   - One formatter in `app/_lib` turns a field's value into words: the labels in `job-labels.ts`, `formatDay` for dates, dollars for pay. The history, the conflict notice and Claude's sessions use it.
   - One due label everywhere (Today, 2 days late, Tue). No year within the current year. "Tier 2" and "Rank A" everywhere, and one wording for adding things.
   - The timing tower names each row beside its code, changed first in the design system's TimingTower.
-  - The `closed` status gets the label Q6 settles.
+  - The `closed` status gets the label Q6 settles. **Revised 2026-11-07 (Q6):** the status keeps Closed and means the posting closed; the Jobs tab for every ended job is Archived, the stage control's Close… is Archive…, and `find_jobs` names the group `archived`, so `closed` asks for the one status (`TOOL_SET_VERSION` 8).
   - A record's "Created" entry shows a few fields and "Show all".
 - **Verify:** a test walks every field of a fixture job's history and finds no raw value.
 - **Touches:** UI only. **Size:** S.
@@ -383,14 +383,14 @@ The biggest change to how the app feels: every due task can be finished, or move
 
 ## Open questions
 
-Each is Hector's call, made before its unit is built and recorded here as decided, with its date. Claude's pick comes with each, where the evidence supports one. On 2026-11-07 Hector took Claude's pick on every question that had one, so each is marked decided below. Q6, which had none, is still open.
+Each is Hector's call, made before its unit is built and recorded here as decided, with its date. Claude's pick comes with each, where the evidence supports one. On 2026-11-07 Hector took Claude's pick on every question that had one, so each is marked decided below. Q6, which had none, he decided the same day.
 
 - **Q1. Should every next step carry a date?** (UX6) A step with no date never reaches This week. **Decided 2026-11-07:** yes, a week out by default when none is given; a step for someday becomes No next step with a note.
 - **Q2. After a person's task is done, what's next by default?** (UX3) **Decided 2026-11-07:** "Follow up" in a week, changed with one tap.
 - **Q3. Does a follow-up sent through a portal count as a message sent?** (UX3) Counting it means interactions without a person, a migration. **Decided 2026-11-07:** no; the job's date moves and a note records it, so the week's messages stay messages to people.
 - **Q4. Does a future next date hold off a stale candidate?** (UX13) Yes is an R3 change with nothing stored; no needs a stored date, a migration. **Decided 2026-11-07:** yes.
 - **Q5. Does a late follow-up date the next one from the day it went?** (UX3) Today R3 dates it from applied-on, so a late follow-up leaves its row late. **Decided 2026-11-07:** yes, a week from the day it went.
-- **Q6. What does the `closed` status mean, and what should it be called?** (UX10) It shares its name with the tab that lists every closed job. Hector's meaning decides.
+- **Q6. What does the `closed` status mean, and what should it be called?** (UX10) It shares its name with the tab that lists every closed job. Hector's meaning decides. **Decided 2026-11-07:** the status means the posting closed and keeps the name Closed; the Jobs list's tab for every ended job is Archived, Hector's pick of four names.
 - **Q7. Should a person's notes become dated entries, with the imported text as the first one?** (UX8) **Decided 2026-11-07:** yes, as a job's are.
 - **Q8. Where do the phases sit among U12 to U17?** **Decided 2026-11-07:** Phase 1 at once; Phase 2; then U17 (blocks), which adds to This week after UX4 has reshaped it; then Phases 3 to 7; then U12, U15, U13 and U14. Daily friction first, since it costs time every day; new sections after.
 - **Q9. May a record's page title carry its name (a role, a company, a person)?** (UX2) It would show in the tab switcher and history on both devices, and in Claude's browser. **Decided 2026-11-07:** no, the section's name only ("Job · Job search"), since the search is discreet and a tab can be seen over a shoulder.

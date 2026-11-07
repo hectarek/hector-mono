@@ -61,7 +61,7 @@ describe("a job's inputs", () => {
   it("point a closed status in set_job_status to close_job, and want a closing's reason", () => {
     expect(
       messageOf(setJobStatusSchema.safeParse({ id: ID, status: "rejected" })),
-    ).toContain("A closed status goes through close_job");
+    ).toContain("The statuses that archive a job go through close_job");
     expect(
       setJobStatusSchema.safeParse({ id: ID, status: "applied" }).success,
     ).toBe(true);

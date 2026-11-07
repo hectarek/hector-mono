@@ -79,19 +79,30 @@ describeEachBackend("findJobs", () => {
     ]);
   });
 
-  it("narrows to open or closed jobs, one status, or one company", async () => {
+  it("narrows to open or archived jobs, one status, or one company", async () => {
     const open = await jobs.add(acme, { role: "Open role" });
-    const closed = await jobs.add(acme, { role: "Closed role" });
+    const withdrawn = await jobs.add(acme, { role: "Withdrawn role" });
     await app.moveJob(HECTOR, {
-      id: closed.id,
+      id: withdrawn.id,
       status: "withdrawn",
       reason: "Took another path",
+    });
+    const filled = await jobs.add(acme, { role: "Filled role" });
+    await app.moveJob(HECTOR, {
+      id: filled.id,
+      status: "closed",
+      reason: "Role filled",
     });
     const globex = await jobs.company("Globex");
     await jobs.add(globex, { role: "Globex role" });
     await app.moveJob(HECTOR, { id: open.id, status: "target" });
 
-    expect(await roles({ status: "closed" })).toEqual(["Closed role"]);
+    // Archived is every ended status, and closed the one, the posting's (the UX plan's Q6).
+    expect(await roles({ status: "archived" })).toEqual([
+      "Filled role",
+      "Withdrawn role",
+    ]);
+    expect(await roles({ status: "closed" })).toEqual(["Filled role"]);
     expect(await roles({ status: "open" })).toEqual([
       "Globex role",
       "Open role",

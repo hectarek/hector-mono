@@ -216,7 +216,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "find_jobs",
     description:
-      "Lists jobs: accepted ones unless reviewState asks for pending or dismissed (list_proposals reads the queue). Narrow by status (open, closed or one status), companyId, and undated (true keeps those whose next step has no date); ordered by next date, a page at a time (limit, offset). Each comes with the updatedAt that update_job sends back.",
+      "Lists jobs: accepted ones unless reviewState asks for pending or dismissed (list_proposals reads the queue). Narrow by status (open, archived for every ended one, or one status), companyId, and undated (true keeps those whose next step has no date); ordered by next date, a page at a time (limit, offset). Each comes with the updatedAt that update_job sends back.",
     inputSchema: inputSchemaOf(findJobsSchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: findJobs,
@@ -246,14 +246,14 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "set_job_status",
     description:
-      "Moves an accepted job to an open status on a date (YYYY-MM-DD in Eastern time, today by default), and records the move. A move sets the new stage's next step and date in place of the old ones (applied's is the follow-up, and it sets applied-on), unless nextStep and nextDate are given; a step given no date is due a week out. A move to the status the job holds changes nothing. A closed status goes through close_job.",
+      "Moves an accepted job to an open status on a date (YYYY-MM-DD in Eastern time, today by default), and records the move. A move sets the new stage's next step and date in place of the old ones (applied's is the follow-up, and it sets applied-on), unless nextStep and nextDate are given; a step given no date is due a week out. A move to the status the job holds changes nothing. Archiving a job goes through close_job.",
     inputSchema: inputSchemaOf(setJobStatusSchema),
     action: setJobStatus,
   },
   {
     name: "close_job",
     description:
-      "Closes an accepted job with a closed status, on a date (YYYY-MM-DD in Eastern time, today by default), and the reason why. Its next step and date are cleared, and the move is recorded.",
+      "Archives an accepted job with the status that ends it: rejected, closed (the posting closed), stale, skipped, withdrawn, offer-accepted or offer-declined, on a date (YYYY-MM-DD in Eastern time, today by default), with the reason why. Its next step and date are cleared, and the move is recorded.",
     inputSchema: inputSchemaOf(closeJobSchema),
     annotations: { consequentialHint: true },
     action: closeJob,

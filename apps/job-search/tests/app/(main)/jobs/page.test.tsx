@@ -2,8 +2,9 @@ import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
 import { withFrom } from "@/app/_lib/back-link";
 import JobsPage from "@/app/(main)/jobs/page";
+import { closeJob } from "@/app/actions/jobs";
 import type { Redirected } from "@/tests/_support/next";
-import { aCompany, aJob, aProposal } from "@/tests/_support/screens";
+import { aCompany, aJob, aProposal, dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
 import { signInAs } from "@/tests/_support/session";
 
@@ -39,6 +40,31 @@ describe("the jobs page", () => {
     expect(
       page.getByRole("button", { name: "Add job" }).getAttribute("href"),
     ).toBe("/jobs/new");
+  });
+
+  // The UX plan's Q6: every ended job is under Archived, and Closed is the posting's status alone.
+  it("lists every ended job under Archived", async () => {
+    const role = `Bolt tester ${crypto.randomUUID().slice(0, 8)}`;
+    const job = await aJob(await aCompany(), { role });
+    signInAs("owner");
+    dataOf(
+      await closeJob({
+        id: job.id,
+        status: "closed",
+        reason: "Posting closed",
+      }),
+    );
+
+    const page = await jobsPage({ view: "archived" });
+
+    expect(
+      page
+        .getByRole("button", { name: "Archived" })
+        .getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      within(page.getByRole("table")).getByRole("link", { name: role }),
+    ).toBeTruthy();
   });
 
   it("shows the review queue, and says so when a view is empty", async () => {
