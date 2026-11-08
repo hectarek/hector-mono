@@ -426,7 +426,7 @@ function CloseSheet({
                           size="lg"
                           disabled={isPending}
                           onClick={() => close(status, reason)}
-                          aria-label={`${reason}: close as ${STATUS_LABELS[status].toLowerCase()}`}
+                          aria-label={`${reason}: archive as ${STATUS_LABELS[status].toLowerCase()}`}
                           className="min-h-11"
                         >
                           {reason}
@@ -438,7 +438,7 @@ function CloseSheet({
                 <FieldGroup>
                   <FormField
                     id="close-as"
-                    label="Or close as"
+                    label="Or archive as"
                     kind={{
                       choices: CLOSED_STATUSES.map((status) => ({
                         value: status,
