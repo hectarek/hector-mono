@@ -18,9 +18,15 @@ const section = async (name: string) =>
   );
 
 describe("Claude's page", () => {
-  it("lists Claude's page tools, each with its description and its hints", async () => {
+  it("gives the MCP endpoint's address, where Claude Code reaches the same tools", async () => {
     signInAs("agent");
-    const tools = await section("Page tools");
+    const endpoint = await section("MCP endpoint");
+    expect(endpoint.getByText("http://localhost:3101/mcp")).toBeTruthy();
+  });
+
+  it("lists Claude's tools, each with its description and its hints", async () => {
+    signInAs("agent");
+    const tools = await section("Tools");
     for (const { name, description } of AGENT_TOOLS) {
       expect(tools.getByText(name)).toBeTruthy();
       expect(tools.getByText(description)).toBeTruthy();

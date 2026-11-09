@@ -8,7 +8,11 @@ import type { CurrentActor } from "@/src/entities/models/actor.model";
 // branch's Neon Auth issued for this endpoint, or it gets a 401 that points to the discovery file,
 // and the token's account must be Claude's. Stateless: a server and a transport per request,
 // answering JSON rather than a stream.
-async function route(request: Request): Promise<Response> {
+//
+// POST only. GET would open a stream for messages the server never sends, which on Vercel keeps a
+// function running until its time limit, and DELETE would end a session a stateless server doesn't
+// keep. Next answers both with 405, as the MCP spec allows and the SDK's stateless examples do.
+export async function POST(request: Request): Promise<Response> {
   const caller = await getInjection("IMcpAuthService").authenticate(request);
   if (caller instanceof Response) {
     return caller;
@@ -35,5 +39,3 @@ async function route(request: Request): Promise<Response> {
   await mcpServerFor(actor).connect(transport);
   return transport.handleRequest(request, { authInfo: caller.authInfo });
 }
-
-export { route as DELETE, route as GET, route as POST };

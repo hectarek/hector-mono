@@ -80,12 +80,10 @@ export const ACTION_REACH: Record<string, Reach> = {
 const AUTH =
   "Neon Auth's endpoints: Hector signs Claude in, and Claude's session can only read itself, which whoami does, sign out, and take the OAuth steps that authorize the MCP endpoint (R21, R23).";
 const MCP =
-  "The MCP endpoint: the registry's tools, served to Claude's account alone on a token Neon issued it, through each tool's controller (KTD22, U18).";
+  "The MCP endpoint: the registry's tools, served to Claude's account alone on a token Neon issued it, each running its page tool's action (KTD22, U18).";
 export const ROUTE_REACH: Record<string, Reach> = {
   "api/auth/[...path] GET": { humanOnly: AUTH },
   "api/auth/[...path] POST": { humanOnly: AUTH },
-  "mcp DELETE": { agentEndpoint: MCP },
-  "mcp GET": { agentEndpoint: MCP },
   "mcp POST": { agentEndpoint: MCP },
 };
 
@@ -106,7 +104,5 @@ export const PAGE_READS: Record<string, string> = {
   IListActivityController: "list_activity",
   IListBlocksController: "list_blocks",
   IListPracticeController: "list_practice",
-  // The MCP endpoint's whoami (mcp-server.ts, KTD22), the tool itself.
-  IWhoamiController: "whoami",
   IListSourcesController: "list_sources",
 };

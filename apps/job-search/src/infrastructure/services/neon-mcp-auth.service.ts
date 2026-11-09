@@ -11,7 +11,9 @@ export type McpAuthConfig = { baseUrl?: string; resource?: string };
 // The MCP endpoint's sign-in through Neon Auth's OAuth server (docs/build-plan.md KTD22), with
 // @neon/oauth: each token's signature against the issuer's JWKS, its exact issuer and its
 // audience. Made on first use, not when the container is, since `next build` loads the routes
-// without the deployment's variables, and createMcpAuth throws without them.
+// without the deployment's variables, and createMcpAuth throws without them. A deployment that
+// sets no MCP_RESOURCE serves no endpoint: the endpoint answers 404, and so does the discovery
+// file, rather than throwing on every request.
 export class NeonMcpAuthService implements IMcpAuthService {
   private auth: McpAuth | undefined;
 
@@ -19,6 +21,9 @@ export class NeonMcpAuthService implements IMcpAuthService {
 
   async authenticate(request: Request): Promise<McpCaller | Response> {
     const auth = this.mcpAuth();
+    if (!auth) {
+      return new Response("Not found", { status: 404 });
+    }
     const result = await auth.requireBearerAuth()(request);
     if (result instanceof Response) {
       return result;
@@ -27,15 +32,19 @@ export class NeonMcpAuthService implements IMcpAuthService {
   }
 
   discovery(request: Request): Response | undefined {
-    return this.mcpAuth().handleMetadataRequest(request);
+    return this.mcpAuth()?.handleMetadataRequest(request);
   }
 
-  private mcpAuth(): McpAuth {
-    const { baseUrl, resource } = this.config;
+  // Set only where both settings are: the endpoint needs the issuer as well as its own address.
+  resource(): string | undefined {
+    return this.config.baseUrl ? this.config.resource : undefined;
+  }
+
+  private mcpAuth(): McpAuth | undefined {
+    const { baseUrl } = this.config;
+    const resource = this.resource();
     if (!baseUrl || !resource) {
-      throw new Error(
-        "Missing required env vars: NEON_AUTH_BASE_URL, MCP_RESOURCE",
-      );
+      return undefined;
     }
     this.auth ??= createMcpAuth({ baseUrl, resource });
     return this.auth;

@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { getInjection } from "@/di/container";
@@ -28,9 +29,23 @@ export async function getPageActor(): Promise<CurrentActor> {
   }
 }
 
+// The actor an MCP endpoint call acts as (docs/build-plan.md KTD22): the one its token resolved
+// to. Only the endpoint sets it, once the token has been checked, and only for that call's action.
+const tokenActor = new AsyncLocalStorage<CurrentActor>();
+
+// Runs a page tool's action for the MCP endpoint, as the actor the request's token resolved to:
+// inside it, getActionActor answers that actor and never reads the session.
+export function withTokenActor<T>(
+  actor: CurrentActor,
+  run: () => Promise<T>,
+): Promise<T> {
+  return tokenActor.run(actor, run);
+}
+
 // Server actions: never redirects (docs/build-plan.md KTD4), so a page tool always gets an
 // answer back. Throws UnauthenticatedError or NotAllowedError before the action runs a query;
-// the action turns them into `unauthenticated` and `not-allowed`.
+// the action turns them into `unauthenticated` and `not-allowed`. Inside an MCP endpoint call,
+// the token's actor (withTokenActor).
 export async function getActionActor(): Promise<CurrentActor> {
-  return getInjection("IResolveActor")();
+  return tokenActor.getStore() ?? getInjection("IResolveActor")();
 }

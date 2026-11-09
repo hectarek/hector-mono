@@ -47,27 +47,45 @@ const WHEN = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
-// Claude's working page (docs/build-plan.md KTD6): its page tools and what it did lately. Light
-// on purpose, with no calendar and no auto refresh, so the re-render after each of Claude's writes
-// reads only the log.
+// Claude's working page (docs/build-plan.md KTD6): its tools, where Claude Code reaches them, and
+// what it did lately. Light on purpose, with no calendar and no auto refresh, so the re-render
+// after each of Claude's writes reads only the log.
 export default async function AgentPage() {
   const actor = await getPageActor();
   const { entries } = await getInjection("IListActivityController")(
     { actor: "agent", limit: RECENT },
     actor,
   );
+  const endpoint = getInjection("IMcpAuthService").resource();
 
   return (
     <div className="flex flex-col gap-8">
       <div>
         <PageTitle>Claude</PageTitle>
         <p className="text-muted-foreground text-sm">
-          Page tools and recent activity
+          Tools and recent activity
         </p>
       </div>
 
+      <section aria-labelledby="agent-endpoint" className="flex flex-col gap-2">
+        <SectionTitle id="agent-endpoint">MCP endpoint</SectionTitle>
+        {endpoint ? (
+          <div className="flex flex-col gap-1.5 text-sm">
+            <code className="break-all">{endpoint}</code>
+            <p className="text-muted-foreground">
+              The same tools, for Claude Code, signed in as Claude&apos;s
+              account.
+            </p>
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            This deployment has no MCP endpoint set up yet.
+          </p>
+        )}
+      </section>
+
       <section aria-labelledby="agent-tools" className="flex flex-col gap-2">
-        <SectionTitle id="agent-tools">Page tools</SectionTitle>
+        <SectionTitle id="agent-tools">Tools</SectionTitle>
         <ul className="flex flex-col divide-y">
           {AGENT_TOOLS.map(({ name, description, annotations = {} }) => (
             <li key={name} className="flex flex-col gap-1.5 py-3 text-sm">

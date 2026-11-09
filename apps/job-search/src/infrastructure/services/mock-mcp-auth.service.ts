@@ -54,4 +54,8 @@ export class MockMcpAuthService implements IMcpAuthService {
       authorization_servers: ["https://auth.example.com/neondb/auth"],
     });
   }
+
+  resource(): string {
+    return RESOURCE;
+  }
 }

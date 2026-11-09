@@ -1,5 +1,9 @@
 import { describe, expect, it, mock } from "bun:test";
-import { getActionActor, getPageActor } from "@/app/_lib/current-actor";
+import {
+  getActionActor,
+  getPageActor,
+  withTokenActor,
+} from "@/app/_lib/current-actor";
 import {
   NotAllowedError,
   UnauthenticatedError,
@@ -65,5 +69,31 @@ describe("getActionActor", () => {
     const { outcome, queried } = await readsAfter(getActionActor);
     expect(outcome).toBeInstanceOf(UnauthenticatedError);
     expect(queried).toBe(false);
+  });
+});
+
+describe("withTokenActor", () => {
+  const agent = { actor: "agent", ownerId: OWNER_ID } as const;
+
+  it("gives an MCP call's action the token's actor, whatever session there is", async () => {
+    signInAs("stranger");
+    expect(await withTokenActor(agent, getActionActor)).toEqual(agent);
+  });
+
+  it("lasts only for its call: before and after, an action reads the session", async () => {
+    signInAs("stranger");
+    const calls = [
+      withTokenActor(agent, async () => {
+        await Promise.resolve();
+        return getActionActor();
+      }),
+      getActionActor().catch((err: unknown) => err),
+    ];
+    const [inside, outside] = await Promise.all(calls);
+    expect(inside).toEqual(agent);
+    expect(outside).toBeInstanceOf(NotAllowedError);
+    expect(await getActionActor().catch((err: unknown) => err)).toBeInstanceOf(
+      NotAllowedError,
+    );
   });
 });

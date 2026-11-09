@@ -93,8 +93,9 @@ import {
 } from "@/src/entities/models/weekly-review.model";
 
 // Claude's page tools (docs/build-plan.md KTD5), registered for Claude's session by
-// app/_components/agent-tools.tsx, and listed on Claude's page (/agent). A tool that's added,
-// removed or changed bumps TOOL_SET_VERSION (src/entities/models/agent-session.model.ts).
+// app/_components/agent-tools.tsx, served from the MCP endpoint by mcp-server.ts (KTD22), and
+// listed on Claude's page (/agent). A tool that's added, removed or changed bumps
+// TOOL_SET_VERSION (src/entities/models/agent-session.model.ts).
 //
 // - Names are snake_case and at most 30 characters (Playwright MCP adds `webmcp_`, Claude Code
 //   `mcp__playwright__`), and actions check the name they're given.
@@ -115,7 +116,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "whoami",
     description:
-      "Who this browser session acts as (agent or owner), today's date in Eastern time (YYYY-MM-DD) and the tool set's version. Call it first, to check the sign-in and the date.",
+      "Who this session acts as (agent or owner), today's date in Eastern time (YYYY-MM-DD) and the tool set's version. Call it first, to check the sign-in and the date.",
     inputSchema: inputSchemaOf(whoamiSchema),
     annotations: { readOnlyHint: true },
     action: whoami,
