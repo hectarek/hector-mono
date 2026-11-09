@@ -54,6 +54,7 @@ Each unit is one task in Hector's task tracker, where its state lives (see Conve
 **Phase 4: Cutover**
 - **U11** Import and cutover — C+H · KTD14 · needs H5, H6
 - **U17** Focus blocks and how each went — C · KTD3, KTD7, KTD15, KTD18 (added 2026-11-07)
+- **U18** Claude's MCP endpoint and its OAuth sign-in — C+H · KTD22, KTD5, KTD6 · needs H7 (added 2026-11-09)
 
 **Phase 5: Interviews and lead-source yield**
 - **U12** Interview rounds and lead-source yield — C · KTD7
@@ -151,7 +152,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **Working with Claude**
 
-- R18. Claude reads and changes the tracker only through WebMCP tools the app registers, with the same validation and access checks as Hector's clicks. There is no separate API and no key.
+- R18. Claude reads and changes the tracker only through WebMCP tools the app registers, with the same validation and access checks as Hector's clicks. There is no separate API and no key. (Revised 2026-11-09, Hector's call, U18: the same tools are also served from the app's MCP endpoint, to Claude's account alone, signed in through Neon Auth's OAuth server (KTD22). The endpoint takes only an access token Neon issued to Claude's account, so there's still no key. The page tools stay as the fallback until U18 has run for a week.)
 - R19. Every change records who made it (Hector, Claude, the import or the system), the tool when one was used, and the changed fields before and after. Each record shows its history.
 - R20. Jobs Claude adds wait in a review queue until Hector accepts them (status `verify`, next step "Verify it's hiring", due today) or dismisses them with a reason. A posting already on any job, dismissed ones included, is refused as a duplicate, and pending proposals stop at the cap.
 - R21. The server refuses these to Claude's sign-in, whatever the entry point:
@@ -159,7 +160,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
   - deleting anything
   - connecting or disconnecting the calendar
   - changing settings
-  - the account pages and account endpoints: Claude's session can only read itself and sign out
+  - the account pages and account endpoints: Claude's session can only read itself and sign out (revised 2026-11-09, U18: and take Neon's OAuth steps that authorize the MCP endpoint, which no other account may take, so Hector's account is never authorized there)
 
   Claude's dated notes only append. Its fit note (R17) is replaced, with the old text kept in the activity log.
 - R22. Hector's open views pick up Claude's changes when shown and at least once a minute, and an edit made against a record that changed since it was read is caught, not silently overwritten. (Revised 2026-10-29, Hector's call: so is accepting, dismissing or reopening a proposal that changed since it was read.) (Revised 2026-11-07 in UX4, Hector's call on the UX plan's Q10: a refresh waits while a sheet is open or a field has focus, and catches up once they're done, so it never closes a sheet or moves a row under a finger.)
@@ -180,7 +181,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 ### Key Decisions
 
 - **Public in hector-mono, with the search's specifics kept out of the repo.** (session-settled: user-directed — chosen over a private mirror of hector-mono and a standalone private repo: keeps the monorepo's shared UI, architecture and CI, with every search specific held in the database or Hector's private docs.) Governs R24.
-- **Claude works only through WebMCP tools.** (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI.) Governs R18.
+- **Claude works only through WebMCP tools.** (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI.) Governs R18. (Revised 2026-11-09, Hector's call after a research run that tested Neon's OAuth server with Claude Code: Claude works through the same tools served from the app's MCP endpoint, signed in as its own account through Neon Auth's OAuth server (KTD22, U18). The reason holds: the same checks as the UI, and no key. It's chosen over WebMCP alone because Claude's browser sign-in lapsed after a week and only Hector could renew it, one browser profile let one session in at a time, and WebMCP is an origin trial. It's also chosen over an app-issued token, which would be a long-lived secret on disk that claude.ai can't use.)
 - **Jobs Claude finds need Hector's accept.** (session-settled: user-approved — chosen over Claude adding jobs straight to the pipeline: keeps Hector's existing review rule.) Governs R20.
 - **The profile is a synced, read-only view; Hector's private docs stay the source.** (session-settled: user-approved — chosen over editing the profile in the app: one source for profile facts.) Governs R16.
 - **Fit comes from readable rules plus Claude's note, with no AI calls in the app.** (session-settled: user-approved — chosen over in-app AI scoring: the app makes no model calls.) Governs R17.
@@ -281,6 +282,8 @@ Hector wants one place for the whole search that he and Claude both work in dire
 - A server-side confirmation step for Claude's closing moves and profile replacement: both are reversible, Claude Code asks before them (KTD5), and they show in This week's list of Claude's changes.
 - Vercel Skew Protection: it would pin Claude's tab to an old build and its old tool set; `reload-needed` (KTD5) is simpler.
 - A go/no-go gate before each phase after cutover: it would hold back features Hector asked for, and he already starts each phase by merging the one before.
+- An app-issued token for Claude's account, sent as a header to the MCP endpoint (considered 2026-11-09 for U18). It needs no sign-in or consent page, but it's a long-lived secret on disk, the app would own making and revoking it, and claude.ai's connectors can't send one yet.
+- Vercel's `mcp-handler` for the endpoint: its auth wrapper lets a request without a token reach the tools unless told otherwise. `@neon/oauth`'s check and the MCP SDK's transport do the same job (KTD22).
 
 ### Open Questions
 
@@ -325,14 +328,14 @@ None block planning. Deferred to implementation:
   - `proxy.ts` lets requests carrying the `Next-Action` header past its signed-out redirect, so an action without a session returns `unauthenticated`. Recipes' proxy redirects them, and the redirect's HTML breaks the action client (`docs/proxy-auth-research.md`).
   - Tool reads use the same transport: one transport, one envelope mapper and one parity scan over `app/actions/*.ts` serve every tool, and R18 rules out a separate API. Each view has one controller that both its page and its read action call, and no invariant relies on the one-at-a-time dispatch Next.js uses today.
   - Chosen over GET route handlers (a second transport and error mapper, and an `/api` surface R18 excludes) and over handing page data to tools (only what the page rendered, stale between refreshes, no filters or paging). Next.js's docs aim server functions at mutations; this app accepts that for one agent working in sequence.
-- KTD5. **One page-tools adapter, registered at the layout for Claude's identity only.** Instantiates the WebMCP Key Decision (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI), R18.
+- KTD5. **One page-tools adapter, registered at the layout for Claude's identity only.** Instantiates the WebMCP Key Decision (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI), R18. (Revised 2026-11-09, U18: the registry's names, descriptions, schemas and annotations also define the MCP endpoint's tools (KTD22), so the two lists can't drift.)
   - `app/_lib/page-tools.ts` is the only module that touches `document.modelContext`. It is named neutrally, as recipes names its browser adapters (`live-updates.ts`), and typed by hand from the W3C draft of 20 October 2026: `registerTool(tool, { signal })`, `getTools()`, `executeTool()`. There is no `navigator.modelContext` and no `unregisterTool`; aborting the signal unregisters.
   - Tool definitions (name, description, input schema, annotations, handler) live in a plain registry module. Input schemas are the entity input schemas in `src/entities/models/`, which the controllers also parse with, converted by `z.toJSONSchema` with `io: "input"`; the lint rules bar `app/` from importing controllers.
   - One registrar in the signed-in layout registers every tool on mount and aborts on unmount, so Claude's tool list is the same whichever page its tab is on; per-page registration would also drop tools when React's `<Activity>` runs cleanups on hidden pages. It renders only for Claude's identity, decided on the server (KTD2), and only where `document.modelContext` exists; there is no polyfill. Chrome extensions can list and run page tools through content scripts, so Hector's everyday browser never exposes them.
   - Each handler calls its action inside `startTransition` through a wrapper like recipes' `app/_lib/call-action.ts`. When `unstable_isUnrecognizedActionError` from `next/navigation` matches (an action a deploy removed; checked in Next.js 16.4's types), the wrapper returns `reload-needed`: nothing ran, so Claude reloads and retries.
   - Names are snake_case and at most 30 characters, because Playwright MCP prefixes `webmcp_` and Claude Code adds `mcp__playwright__`. Descriptions stay under 500 characters and generic (R24). Results are compact and paged.
   - Annotations: `readOnlyHint` on reads; `consequentialHint` on calendar writes, `close_job` and `set_profile`; `untrustedContentHint` on reads that return outside text (KTD21). Annotations belong to a tool, not a call, so closing moves get their own `close_job` tool and `set_job_status` takes only open statuses.
-- KTD6. **Playwright MCP is the bridge, and Claude gets its own Chrome profile and page.** Instantiates the WebMCP Key Decision (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI), R18.
+- KTD6. **Playwright MCP is the bridge, and Claude gets its own Chrome profile and page.** Instantiates the WebMCP Key Decision (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI), R18. (Revised 2026-11-09, U18: this is the fallback once the MCP endpoint (KTD22) works, and retires after a week of U18 in use. Its last bullet's "later move to a server MCP endpoint" is that change.)
   - Playwright 1.64 exposes a page's tools to the agent as `webmcp_<tool>`, on by default, and launching Chromium with `--enable-features=WebMCP` turns the API on.
   - The Playwright MCP server is registered in the folder where search sessions start, not for every session. Its config file sets a fixed `userDataDir` (the default profile path depends on the workspace), the flag in `launchOptions.args`, and an output folder outside any repo. The profile folder sits outside iCloud and any repo, and Claude Code is denied reading it, because Playwright's Chromium keeps cookies outside the macOS keychain.
   - Hector signs Claude's account in once in that window and never signs in as himself there; Claude never types a password.
@@ -421,6 +424,12 @@ None block planning. Deferred to implementation:
   - the app stores Claude's summary of a posting with its link, not the posting's body
 
   Claude's damaging but reversible moves, `close_job` and `set_profile`, are consequential tools that Claude Code asks about (KTD5), and every Claude change shows in This week.
+- KTD22. **An MCP endpoint, signed in through Neon Auth's OAuth server, for Claude's account only.** (Added 2026-11-09, U18; instantiates the WebMCP Key Decision as revised, R18, R21.) The research behind it, with its tests and sources, is in [agent-mcp-research.md](agent-mcp-research.md).
+  - **The endpoint.** `/mcp` is a stateless Streamable HTTP route: the MCP TypeScript SDK's web-standard transport, with a server built per request. Its tools come from the page tools' registry (KTD5): the same names, descriptions, schemas and annotations. Each one calls the same controller as the page tool's server action, with Claude's actor, so validation, `human-only` refusals, conflicts (R22) and history (R19) are the same.
+  - **The sign-in.** Neon Auth's OAuth provider plugin is the authorization server, one per branch. Its settings are a login page, a consent page and the MCP resource (`MCP_RESOURCE`, the endpoint's own URL). Clients identify themselves by Client ID Metadata Document, and dynamic registration stays off. Claude Code identifies itself as `https://claude.ai/oauth/claude-code-client-metadata`, uses PKCE and a loopback redirect, and sends `resource`, so Neon issues JWTs (tested 2026-11-09). Access tokens last an hour. Refresh tokens last 30 days and rotate with a fresh 30 days on each use. Neither lifetime is configurable.
+  - **The check.** `@neon/oauth`'s `createMcpAuth` verifies each token's signature against the branch's JWKS, its issuer (the branch's `NEON_AUTH_BASE_URL`) and its audience (`MCP_RESOURCE`). The route then takes the token's `sub` as the acting account. It acts only when `sub` is `AGENT_USER_ID`, and refuses any other account's token, Hector's included. The discovery file, `/.well-known/oauth-protected-resource`, names the issuer. A request without a valid token gets a `401` that points to it. The proxy passes both paths, and Claude's session check never applies there.
+  - **The pages.** The app hosts both pages under `/auth/oauth/`. The sign-in page signs in through the auth client, which sends Neon's signed request with it, then follows the answer to the consent page. When someone is already signed in, it resumes the request. The consent page names the client, its redirect hosts, the scopes, the resource and the account signed in. It allows only Claude's account; any other session sees a refusal. The auth route lets only Claude's session take Neon's OAuth steps (R21 as revised).
+  - **Revoking.** Turning off the OAuth server, or its Client ID Metadata Documents, in Neon stops new tokens, and the last access token runs out within the hour. `claude mcp logout` clears the Mac's copy.
 
 ### High-Level Technical Design
 
@@ -1100,6 +1109,43 @@ Added 2026-11-07. The cutover on 2026-11-06 left the sheet's Blocks tab behind, 
   - Screen tests: today's blocks show as rows with their states; a tap, Done and a line of what happened save the block; the form adds a block.
 - **Verification:** from its browser on the test project, Claude adds a week's blocks through `add_blocks`. At 375 px, marking a block done with a line takes three taps and the typing.
 
+### U18. Claude's MCP endpoint and its OAuth sign-in
+
+Added 2026-11-09, Hector's call after a research run ([agent-mcp-research.md](agent-mcp-research.md)). Claude's browser sign-in lapsed after a week and only Hector could renew it. One browser profile let one session in at a time, so a scheduled run and a working session couldn't share it. And WebMCP is an origin trial.
+
+- **Goal:** Claude reaches the app's tools from any of its sessions with no browser, signed in as its own account once, and stays signed in while it uses the app.
+- **Requirements:** R18 and R21 as revised, R19, R22.
+- **Dependencies:** U4, U10, U17; H7.
+- **Files:**
+  - `app/(api)/mcp/route.ts` (the endpoint) and `app/.well-known/oauth-protected-resource/[[...path]]/route.ts` (the discovery file)
+  - `app/_lib/agent-tools/` gains the server side of each tool: the registry's entry with a call to its controller, given the actor
+  - `app/(auth)/auth/oauth/sign-in/` and `app/(auth)/auth/oauth/consent/`, the two pages
+  - `proxy.ts` (the endpoint's paths pass), `app/(api)/api/auth/[...path]/route.ts` (Neon's OAuth steps for Claude's session only)
+  - `MCP_RESOURCE` in `.env.example`, `turbo.json` and each Vercel environment
+  - Tests: the token check, the actor rule, each tool's call on both backends, the pages' screen tests, the auth route's refusals
+- **Approach:**
+  1. A spike on the test project, on localhost:
+     - Neon's OAuth server on, with Hector's OK at the time.
+     - The endpoint with `whoami` and `get_today`, plus the two pages.
+     - Hector signs in Claude's test-project account once (H7).
+     - It passes when the token is a JWT for the endpoint, a call answers as Claude, and a second session and a scheduled task reuse the sign-in. If a scheduled task can't, its Claude reaches the endpoint through a claude.ai connector instead, which needs the production address.
+  2. Every page tool on the endpoint, from the registry. `TOOL_SET_VERSION` goes up, and `/agent` lists the endpoint.
+  3. Production, with Hector's OK at the time: Neon's OAuth server on with production's pages and resource, `MCP_RESOURCE` set, and Claude signed in once (H7). Scheduled runs and working sessions move to the endpoint.
+  4. After a week in use, the page tools and Playwright MCP retire (KTD6 as revised), and the agent docs say so.
+- **Test scenarios:**
+  - A request with no token, an expired one, or one from another branch's issuer: `401` pointing to the discovery file, and nothing runs.
+  - A valid token for Hector's account, or any account but Claude's: refused, and nothing runs.
+  - A token for another resource: refused.
+  - `whoami` answers `agent`; `get_today` answers as the page tool does.
+  - A write answers as its page tool does, `conflict` and `human-only` included, and its history names Claude and the tool.
+  - The sign-in page with Neon's signed request: a sign-in follows Neon's answer to the consent page; someone already signed in is sent on without the form.
+  - The consent page: shows the client, its redirect hosts, the scopes, the resource and the signed-in account. It allows only Claude's account; Hector's session sees a refusal and can't allow.
+  - The auth route: Neon's OAuth steps pass for Claude's session and are refused for Hector's and any other.
+- **Verification:**
+  - On the test project, Hector signs Claude in once from a private window. Claude Code's token is a JWT for the endpoint.
+  - A second Claude Code session, and a scheduled task, call `get_today` with no new sign-in.
+  - On production, after a day of use, the sign-in hasn't asked again.
+
 ### Phase 5: Interviews and lead-source yield
 
 ### U12. Interview rounds and lead-source yield
@@ -1275,6 +1321,10 @@ Each need is a task in Hector's task tracker, assigned to him, where its status 
 | H6  | Review the import snapshot and confirm each job's status date, then run the production dry run and commit from your terminal over the weekend after a Friday review, so the app starts on a new week                                                                                                                                                                                                                                                                                                                                                                                                                                   | U11      | open                                                                                                                                                                                                                                                                                                                                                                   |
 
 Revised 2026-10-28, Hector's call: no lock-down while the app's core is built, through cutover. H1's localhost step, H2's sign-up step and H3's ask and deny rules move to a lock-down pass after it. Until then, H3 is the Playwright MCP server alone.
+
+Added 2026-11-09 with U18:
+
+- **H7.** Sign Claude's account in once through the MCP sign-in, from a private window so it isn't your own session. Do it first on the test project, as Claude's test-project account on localhost, then on production. Also, OK turning on Neon Auth's OAuth server on each project at the time. Unblocks U18.
 
 ---
 
