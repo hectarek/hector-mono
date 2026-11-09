@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
     turbopackRustReactCompiler: true,
     turbopackGc: true,
   },
+  // The MCP endpoint's sign-in and consent pages can't be framed by another site, where a click
+  // could be lifted onto Allow (docs/build-plan.md KTD22).
+  async headers() {
+    return [
+      {
+        source: "/auth/oauth/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

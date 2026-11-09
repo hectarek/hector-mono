@@ -11,11 +11,13 @@ import type { ISettingsRepository } from "@/src/application/repositories/setting
 import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
+import type { IMcpAuthService } from "@/src/application/services/mcp-auth.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import type {
   AllowedUserIds,
   IResolveActor,
 } from "@/src/application/use-cases/access/resolve-actor";
+import type { IResolveTokenActor } from "@/src/application/use-cases/access/resolve-token-actor";
 import type { IListActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
 import type { IAddBlocksUseCase } from "@/src/application/use-cases/blocks/add-blocks.use-case";
 import type { IDeleteBlockUseCase } from "@/src/application/use-cases/blocks/delete-block.use-case";
@@ -57,6 +59,7 @@ import type { IListSourcesUseCase } from "@/src/application/use-cases/sources/li
 import type { IGetTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
 import type { IGetWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
 import type { ISaveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
+import type { McpAuthConfig } from "@/src/infrastructure/services/neon-mcp-auth.service";
 import type { IListActivityController } from "@/src/interface-adapters/controllers/activity/list-activity.controller";
 import type { IAddBlocksController } from "@/src/interface-adapters/controllers/blocks/add-blocks.controller";
 import type { IDeleteBlockController } from "@/src/interface-adapters/controllers/blocks/delete-block.controller";
@@ -105,10 +108,13 @@ import type { ISaveWeeklyReviewController } from "@/src/interface-adapters/contr
 
 export const DI_SYMBOLS = {
   IAuthenticationService: Symbol.for("IAuthenticationService"),
+  IMcpAuthService: Symbol.for("IMcpAuthService"),
+  McpAuthConfig: Symbol.for("McpAuthConfig"),
   ILoggerService: Symbol.for("ILoggerService"),
   ITransactionManagerService: Symbol.for("ITransactionManagerService"),
   AllowedUserIds: Symbol.for("AllowedUserIds"),
   IResolveActor: Symbol.for("IResolveActor"),
+  IResolveTokenActor: Symbol.for("IResolveTokenActor"),
   IActivityRepository: Symbol.for("IActivityRepository"),
   IListActivityUseCase: Symbol.for("IListActivityUseCase"),
   IListActivityController: Symbol.for("IListActivityController"),
@@ -210,10 +216,13 @@ export const DI_SYMBOLS = {
 
 export interface DI_RETURN_TYPES {
   IAuthenticationService: IAuthenticationService;
+  IMcpAuthService: IMcpAuthService;
+  McpAuthConfig: McpAuthConfig;
   ILoggerService: ILoggerService;
   ITransactionManagerService: ITransactionManagerService;
   AllowedUserIds: AllowedUserIds;
   IResolveActor: IResolveActor;
+  IResolveTokenActor: IResolveTokenActor;
   IActivityRepository: IActivityRepository;
   IListActivityUseCase: IListActivityUseCase;
   IListActivityController: IListActivityController;

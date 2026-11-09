@@ -8,6 +8,7 @@
         "DATABASE_URL",
         "NEON_AUTH_BASE_URL",
         "NEON_AUTH_COOKIE_SECRET",
+        "MCP_RESOURCE",
         "OWNER_USER_ID",
         "AGENT_USER_ID",
         "GOOGLE_OAUTH_CLIENT_ID",

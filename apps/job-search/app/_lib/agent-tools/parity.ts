@@ -6,7 +6,11 @@
 // - `{ tool }`: the tool whose action this is.
 // - `{ tool, via }`: reached through another tool's action, and why.
 // - `{ humanOnly }`: no tool calls it, and why.
-export type Reach = { tool: string; via?: string } | { humanOnly: string };
+// - `{ agentEndpoint }`: it serves the tools themselves, and how (KTD22).
+export type Reach =
+  | { tool: string; via?: string }
+  | { humanOnly: string }
+  | { agentEndpoint: string };
 
 const DELETING = "Deleting anything is Hector's (R21).";
 const REVIEWING =
@@ -74,10 +78,15 @@ export const ACTION_REACH: Record<string, Reach> = {
 
 // The route handlers under app/(api)/, as "<path> <method>".
 const AUTH =
-  "Neon Auth's endpoints: Hector signs Claude in, and Claude's session can only read itself, which whoami does, and sign out (R21, R23).";
+  "Neon Auth's endpoints: Hector signs Claude in, and Claude's session can only read itself, which whoami does, sign out, and take the OAuth steps that authorize the MCP endpoint (R21, R23).";
+const MCP =
+  "The MCP endpoint: the registry's tools, served to Claude's account alone on a token Neon issued it, through each tool's controller (KTD22, U18).";
 export const ROUTE_REACH: Record<string, Reach> = {
   "api/auth/[...path] GET": { humanOnly: AUTH },
   "api/auth/[...path] POST": { humanOnly: AUTH },
+  "mcp DELETE": { agentEndpoint: MCP },
+  "mcp GET": { agentEndpoint: MCP },
+  "mcp POST": { agentEndpoint: MCP },
 };
 
 // The reads pages and their loaders make through a controller, without an action, and the tool
@@ -97,5 +106,7 @@ export const PAGE_READS: Record<string, string> = {
   IListActivityController: "list_activity",
   IListBlocksController: "list_blocks",
   IListPracticeController: "list_practice",
+  // The MCP endpoint's whoami (mcp-server.ts, KTD22), the tool itself.
+  IWhoamiController: "whoami",
   IListSourcesController: "list_sources",
 };
