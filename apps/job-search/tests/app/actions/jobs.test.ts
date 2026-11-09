@@ -193,7 +193,7 @@ describe("a job's changes", () => {
     ).toMatchObject({ ok: false, code: "validation" });
   });
 
-  it("move a job to applied with the follow-up, and point a closed status to close_job", async () => {
+  it("move a job to applied with no follow-up of its own, and point a closed status to close_job", async () => {
     const companyId = await aCompany();
     const job = dataOf(
       await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
@@ -205,7 +205,8 @@ describe("a job's changes", () => {
     );
     expect(applied).toMatchObject({
       status: "applied",
-      nextStep: "Follow up",
+      nextStep: null,
+      nextDate: null,
     });
     const pointed = await setJobStatus({ id: job.id, status: "rejected" });
     expect(pointed).toMatchObject({ ok: false, code: "validation" });

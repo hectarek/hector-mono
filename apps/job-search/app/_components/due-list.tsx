@@ -181,7 +181,6 @@ function jobTask(job: DueJob, today: string): StepTask {
         title={name}
         detail={joined([job.nextStep, dueLabel(due, today)])}
         href={withFrom(`/jobs/${job.id}`, "/")}
-        job={job}
         contacts={job.contacts}
         trigger={trigger}
       >

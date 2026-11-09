@@ -34,7 +34,7 @@ const control = (job: Job, contacts: PersonRef[] = []) =>
   render(
     <>
       <StageControl
-        job={{ id: job.id, status: job.status, appliedOn: job.appliedOn }}
+        job={{ id: job.id, status: job.status }}
         contacts={contacts}
         today={TODAY}
       />
@@ -107,6 +107,29 @@ describe("the stage control (the UX plan's UX9)", () => {
       await screen.findByText(
         "Moved to Screen. Next: Prepare for the screen, Nov 11, 2026.",
       ),
+    ).toBeTruthy();
+  });
+
+  // R3 as revised 2026-11-09: the app sets no follow-up Hector hasn't agreed to.
+  it("moves to Applied with no step prefilled, and leaves the job with none", async () => {
+    const job = await aJob(await aCompany());
+    control(job);
+
+    tap("Applied");
+    expect(screen.getByLabelText("Next step")).toHaveProperty("value", "");
+    expect(screen.getByLabelText("Next date")).toHaveProperty("value", "");
+    submitSheet();
+
+    await waitFor(async () =>
+      expect(await jobOf(job.id)).toMatchObject({
+        status: "applied",
+        appliedOn: TODAY,
+        nextStep: null,
+        nextDate: null,
+      }),
+    );
+    expect(
+      await screen.findByText("Moved to Applied. No next step."),
     ).toBeTruthy();
   });
 

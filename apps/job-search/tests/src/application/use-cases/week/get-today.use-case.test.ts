@@ -46,9 +46,16 @@ describeEachBackend("getToday", () => {
   const practice = async (input: Record<string, unknown>) =>
     (await app.logPractice(HECTOR, logPracticeSchema.parse(input))).session;
 
+  // A move to applied sets no step (R3 as revised 2026-11-09), so each gets one Hector agreed to.
   const appliedOn = async (on: string) => {
     const job = await jobs.add(companyId, { role: `Applied ${on}` });
-    await app.moveJob(HECTOR, { id: job.id, status: "applied", on });
+    await app.moveJob(HECTOR, {
+      id: job.id,
+      status: "applied",
+      on,
+      nextStep: "Follow up",
+      nextDate: on,
+    });
     return job.id;
   };
 

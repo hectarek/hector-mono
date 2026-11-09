@@ -158,7 +158,6 @@ export default async function JobPage({
           title={factsLine([job.role, job.company.name])}
           href={`/jobs/${job.id}`}
           today={today}
-          job={job}
           contacts={contacts}
         />
       ) : (
@@ -302,7 +301,7 @@ export default async function JobPage({
             </Alert>
           ) : null}
           <StageControl
-            job={{ id: job.id, status: job.status, appliedOn: job.appliedOn }}
+            job={{ id: job.id, status: job.status }}
             contacts={contacts}
             today={today}
           />

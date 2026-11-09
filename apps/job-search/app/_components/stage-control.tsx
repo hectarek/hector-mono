@@ -37,7 +37,7 @@ import type { Person, PersonRef } from "@/src/entities/models/person.model";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 type Failure = Extract<ActionResult<unknown>, { ok: false }>;
-type MovingJob = Pick<JobStage, "status" | "appliedOn"> & { id: string };
+type MovingJob = Pick<JobStage, "status"> & { id: string };
 
 // The stages before applying, and the four from applying to an offer.
 const BEFORE: readonly OpenStatus[] = ["verify", "target"];
@@ -122,7 +122,7 @@ function MoveSheet({
   today: string;
 }) {
   const prefilled = (day: string, on: string | null): MoveFields => {
-    const next = stepAfterMove(to, on ?? day, job.appliedOn);
+    const next = stepAfterMove(to, on ?? day);
     return {
       day,
       on,
