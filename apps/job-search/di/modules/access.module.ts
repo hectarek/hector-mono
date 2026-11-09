@@ -1,6 +1,7 @@
 import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
 import { resolveActor } from "@/src/application/use-cases/access/resolve-actor";
+import { resolveTokenActor } from "@/src/application/use-cases/access/resolve-token-actor";
 import { TEST_ACCOUNTS } from "@/src/infrastructure/services/mock-auth.service";
 
 export function createAccessModule() {
@@ -27,6 +28,11 @@ export function createAccessModule() {
       DI_SYMBOLS.AllowedUserIds,
       DI_SYMBOLS.ILoggerService,
     ]);
+
+  // The MCP endpoint's tokens act only as Claude (KTD22).
+  accessModule
+    .bind(DI_SYMBOLS.IResolveTokenActor)
+    .toHigherOrderFunction(resolveTokenActor, [DI_SYMBOLS.AllowedUserIds]);
 
   return accessModule;
 }

@@ -136,7 +136,8 @@ function withCookies(headers: Headers, cookies: Map<string, string>): Headers {
 
 export const config = {
   matcher: [
-    // robots.txt must load signed out: crawlers fetch it without cookies.
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|auth).*)",
+    // robots.txt must load signed out: crawlers fetch it without cookies. The MCP endpoint and its
+    // discovery file check a bearer token, never the session (docs/build-plan.md KTD22).
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|auth|mcp|\\.well-known).*)",
   ],
 };

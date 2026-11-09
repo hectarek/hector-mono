@@ -61,6 +61,35 @@ describe("the auth route", () => {
     expect(neonAuth.reached).toEqual(["POST sign-in/email"]);
   });
 
+  // R21 as revised and KTD22: only Claude's account authorizes the MCP endpoint.
+  const OAUTH_STEPS = [
+    ["POST", "oauth2/continue"],
+    ["POST", "oauth2/consent"],
+    ["GET", "oauth2/public-client"],
+  ] as const;
+
+  it("lets Claude's session take Neon's OAuth steps for the MCP endpoint", async () => {
+    signInAs("agent");
+    for (const [method, path] of OAUTH_STEPS) {
+      expect((await call(method, path)).status).toBe(200);
+    }
+    expect(neonAuth.reached).toEqual(
+      OAUTH_STEPS.map(([method, path]) => `${method} ${path}`),
+    );
+  });
+
+  it("refuses those steps to Hector's session, any other account and a signed-out browser", async () => {
+    for (const who of ["owner", "stranger", "signed-out"] as const) {
+      signInAs(who);
+      for (const [method, path] of OAUTH_STEPS) {
+        const response = await call(method, path);
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe("not-allowed");
+      }
+    }
+    expect(neonAuth.reached).toEqual([]);
+  });
+
   it("refuses when the session can't be read, rather than taking it as signed out", async () => {
     signInAs("agent");
     const unreadable = spyOn(testAuth(), "getSession").mockRejectedValue(

@@ -18,6 +18,14 @@ type AuthRouteContext = { params: Promise<{ path: string[] }> };
 // session, or any account but his, stops here (docs/build-plan.md R21, KTD2).
 const OPEN_TO_ANY_SESSION = new Set(["GET get-session", "POST sign-out"]);
 
+// Neon's OAuth steps that authorize the MCP endpoint: open to Claude's session alone, so no
+// other account, Hector's included, is ever authorized there (R21 as revised, KTD22).
+const CLAUDE_ONLY = new Set([
+  "POST oauth2/continue",
+  "POST oauth2/consent",
+  "GET oauth2/public-client",
+]);
+
 export async function GET(
   request: Request,
   context: AuthRouteContext,
@@ -40,9 +48,12 @@ async function handle(
   const params = await context.params;
   const path = params.path?.join("/");
   try {
-    const refusal = OPEN_TO_ANY_SESSION.has(`${method} ${path}`)
+    const step = `${method} ${path}`;
+    const refusal = OPEN_TO_ANY_SESSION.has(step)
       ? null
-      : await refusalFor(path);
+      : CLAUDE_ONLY.has(step)
+        ? await refusalUnlessClaude(path)
+        : await refusalFor(path);
     if (refusal) {
       return refusal;
     }
@@ -78,6 +89,33 @@ async function refusalFor(path: string | undefined): Promise<Response | null> {
     }
     throw err;
   }
+}
+
+// The MCP endpoint's OAuth steps go on to Neon only from Claude's session. Hector's, a stranger's
+// or none is refused, and a session that can't be read throws, as above.
+async function refusalUnlessClaude(
+  path: string | undefined,
+): Promise<Response | null> {
+  try {
+    const { actor } = await getInjection("IResolveActor")();
+    if (actor === "agent") {
+      return null;
+    }
+  } catch (err) {
+    if (
+      !(err instanceof UnauthenticatedError || err instanceof NotAllowedError)
+    ) {
+      throw err;
+    }
+  }
+  log.warn("Refused an OAuth step", { path, code: "not-allowed" });
+  return Response.json(
+    {
+      code: "not-allowed",
+      message: "Only Claude's account can allow access to the MCP endpoint.",
+    },
+    { status: 403 },
+  );
 }
 
 // The codes server actions answer with (docs/build-plan.md KTD4). A stranger's message never
