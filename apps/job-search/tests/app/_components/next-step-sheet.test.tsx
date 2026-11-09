@@ -23,7 +23,6 @@ import { APP_TOASTER } from "@/app/_lib/notify";
 import { getJob, setJobStatus, updateJob } from "@/app/actions/jobs";
 import { addPerson, getPerson } from "@/app/actions/people";
 import { getToday } from "@/app/actions/week";
-import type { JobStage } from "@/src/entities/job-lifecycle";
 import type { PersonRef } from "@/src/entities/models/person.model";
 import { aCompany, aJob, dataOf } from "@/tests/_support/screens";
 import { signInAs } from "@/tests/_support/session";
@@ -41,10 +40,7 @@ const fictional = (name: string) =>
 const theSheet = (
   kind: "job" | "person",
   record: NextStepRecord,
-  extra: {
-    job?: Pick<JobStage, "status" | "appliedOn">;
-    contacts?: PersonRef[];
-  } = {},
+  extra: { contacts?: PersonRef[] } = {},
 ) => (
   <>
     <NextStepSheet
@@ -204,12 +200,19 @@ describe("a due row's sheet: Done", () => {
     );
   });
 
+  // R3 as revised 2026-11-09: the app sets no follow-up Hector hasn't agreed to.
   describe("for an applied job", () => {
-    // Applied Oct 27, so its follow-up was due Nov 3 (R3).
+    // Applied Oct 27, with a follow-up Hector agreed to, due Nov 3.
     async function appliedJob() {
       const job = await aJob(await aCompany());
       dataOf(
-        await setJobStatus({ id: job.id, status: "applied", on: "2026-10-27" }),
+        await setJobStatus({
+          id: job.id,
+          status: "applied",
+          on: "2026-10-27",
+          nextStep: "Follow up",
+          nextDate: "2026-11-03",
+        }),
       );
       const pat = dataOf(
         await addPerson({ name: fictional("Pat"), jobId: job.id }),
@@ -217,29 +220,37 @@ describe("a due row's sheet: Done", () => {
       return { job: await jobOf(job.id), pat };
     }
 
-    it("logs a follow-up to a contact in one tap, linked to the job, which moves its date a week out (R3, Q5)", async () => {
+    it("logs a follow-up to a contact in one tap, linked to the job, and sets no next step of its own", async () => {
       signInAs("owner");
       const { job, pat } = await appliedJob();
-      sheet("job", job, { job, contacts: [pat] });
+      sheet("job", job, { contacts: [pat] });
 
       open();
       tap("Done");
+      expect(screen.getByLabelText("What's next?")).toHaveProperty("value", "");
       tap(pat.name);
 
-      // Applied-on + 14 is Nov 10; the follow-up went late, so a week after it is later.
       await waitFor(async () =>
-        expect((await jobOf(job.id)).nextDate).toBe("2026-11-12"),
+        expect(await jobOf(job.id)).toMatchObject({
+          nextStep: null,
+          nextDate: null,
+        }),
       );
+      expect(
+        await screen.findByText(
+          `Logged a follow-up to ${pat.name}. No next step.`,
+        ),
+      ).toBeTruthy();
       expect((await personOf(pat.id)).messagedOn).toBe("2026-11-05");
       expect(dataOf(await getPerson({ id: pat.id })).interactions).toEqual([
         expect.objectContaining({ jobId: job.id }),
       ]);
     });
 
-    it("deletes the follow-up and puts the job's date back on Undo", async () => {
+    it("deletes the follow-up and puts the job's step back on Undo", async () => {
       signInAs("owner");
       const { job, pat } = await appliedJob();
-      sheet("job", job, { job, contacts: [pat] });
+      sheet("job", job, { contacts: [pat] });
       open();
       tap("Done");
       tap(pat.name);
@@ -248,22 +259,32 @@ describe("a due row's sheet: Done", () => {
       tap("Undo");
 
       await waitFor(async () =>
-        expect((await jobOf(job.id)).nextDate).toBe("2026-11-03"),
+        expect(await jobOf(job.id)).toMatchObject({
+          nextStep: "Follow up",
+          nextDate: "2026-11-03",
+        }),
       );
       expect(dataOf(await getPerson({ id: pat.id })).interactions).toEqual([]);
     });
 
-    it("notes a follow-up sent through the portal and moves the date the same way (Q3)", async () => {
+    it("notes a follow-up sent through the portal, and saves the step Hector types (Q3)", async () => {
       signInAs("owner");
       const { job } = await appliedJob();
-      sheet("job", job, { job, contacts: [] });
+      sheet("job", job, { contacts: [] });
 
       open();
       tap("Done");
+      fireEvent.change(screen.getByLabelText("What's next?"), {
+        target: { value: "Ask about the timeline" },
+      });
       tap("Through the portal");
 
+      // A step given no date is due a week out.
       await waitFor(async () =>
-        expect((await jobOf(job.id)).nextDate).toBe("2026-11-12"),
+        expect(await jobOf(job.id)).toMatchObject({
+          nextStep: "Ask about the timeline",
+          nextDate: "2026-11-12",
+        }),
       );
       expect(dataOf(await getJob({ id: job.id })).notes).toEqual([
         expect.objectContaining({ body: "Followed up through the portal." }),

@@ -34,7 +34,6 @@ import { getJob, updateJob } from "@/app/actions/jobs";
 import { addNote, deleteNote } from "@/app/actions/notes";
 import { getPerson, updatePerson } from "@/app/actions/people";
 import type { ActionResult } from "@/app/actions/shared";
-import { afterFollowUp, type JobStage } from "@/src/entities/job-lifecycle";
 import type { InteractionKind } from "@/src/entities/models/interaction.model";
 import type { PersonRef } from "@/src/entities/models/person.model";
 import { addDays } from "@/src/entities/week";
@@ -70,7 +69,9 @@ function isNextStepRecord(value: unknown): value is NextStepRecord {
   );
 }
 
-// What's next once a task is done, unless changed: a follow-up a week out (the UX plan's Q2).
+// What's next once a person's task is done, unless changed: a follow-up a week out (the UX plan's
+// Q2). A job's Done starts with no step, as the app adds no follow-up to a job on its own (R3 as
+// revised 2026-11-09).
 const NEXT_STEP = "Follow up";
 // What a follow-up sent through a job's portal leaves in its notes, since it names no one to log
 // a message to (the UX plan's Q3).
@@ -89,8 +90,9 @@ const said = ({ nextStep, nextDate }: Step) =>
 
 // A due row's sheet (R9, the UX plan's UX3): Push moves the task to another day in one tap, and
 // Done records what happened and sets what's next, so the row always leaves or moves. A person's
-// Done logs how it went; a job's can log a follow-up to one of its contacts, which moves the date
-// by R3, or note one sent through the portal. Each save says what changed in a toast, with Undo.
+// Done logs how it went; a job's can log a follow-up to one of its contacts, or note one sent
+// through the portal, then saves only the step Hector gives, since the app sets no follow-up of
+// its own (R3 as revised 2026-11-09). Each save says what changed in a toast, with Undo.
 // A change is made against the updatedAt the row read (R22): on a conflict the sheet stays open on
 // the record as it is now, with what was typed kept (docs/build-plan.md KTD15). The sheet is a
 // form, so Enter and the phone keyboard's Go save.
@@ -100,7 +102,6 @@ export function NextStepSheet({
   title,
   detail,
   href,
-  job,
   contacts = [],
   opensOn = "push",
   trigger,
@@ -114,8 +115,6 @@ export function NextStepSheet({
   detail: string;
   // The record's page, which the sheet links to.
   href: string;
-  // A job's stage, for R3's follow-up rule.
-  job?: Pick<JobStage, "status" | "appliedOn">;
   contacts?: PersonRef[];
   // The view the sheet opens on: Push from a due row, Done or Push from a record's Next (UX8).
   opensOn?: "push" | "done";
@@ -134,9 +133,6 @@ export function NextStepSheet({
   const [isWriting, startWriting] = useTransition();
   const busy = form.isPending || isWriting;
   const shown = form.failure ?? failure;
-  // R3 moves an applied job's date after a follow-up, so its Done needs no date of its own.
-  const followsUp =
-    kind === "job" && job?.status === "applied" && job.appliedOn;
 
   function opening(next: boolean) {
     if (next) {
@@ -158,8 +154,9 @@ export function NextStepSheet({
   }
 
   function startDone() {
-    form.setField("nextStep", NEXT_STEP);
-    form.setField("nextDate", addDays(day.today, 7));
+    const person = kind === "person";
+    form.setField("nextStep", person ? NEXT_STEP : "");
+    form.setField("nextDate", person ? addDays(day.today, 7) : "");
     setView("done");
   }
 
@@ -262,8 +259,8 @@ export function NextStepSheet({
     });
   }
 
-  // A job's follow-up to one of its contacts: a sent message linked to the job, which moves an
-  // applied job's date by R3. A job at another stage saves what's next too.
+  // A job's follow-up to one of its contacts: a sent message linked to the job, then what's next as
+  // Hector gives it, none when he gives none.
   function followUpTo(contact: PersonRef) {
     startWriting(async () => {
       const result = await callAction(() =>
@@ -280,19 +277,12 @@ export function NextStepSheet({
       const made = { interactionId: result.data.interactions[0]?.id };
       setWrote(made);
       const message = `Logged a follow-up to ${contact.name}.`;
-      if (followsUp && job) {
-        const { nextStep, nextDate } = form.opened;
-        const moved = afterFollowUp({ ...job, nextStep, nextDate }, day.today);
-        setOpen(false);
-        tell(`${message} ${said(moved)}`, { nextStep, nextDate }, made);
-        return;
-      }
       saveStep(whatsNext(), (saved) => `${message} ${said(saved)}`, made);
     });
   }
 
-  // A follow-up sent through the job's portal names no one to log a message to, so the date moves
-  // as R3 would move it and a note records it (the UX plan's Q3).
+  // A follow-up sent through the job's portal names no one to log a message to, so a note records
+  // it (the UX plan's Q3), and what's next is what Hector gives.
   function followUpThroughPortal() {
     startWriting(async () => {
       const result = await callAction(() =>
@@ -304,16 +294,8 @@ export function NextStepSheet({
       }
       const made = { noteId: result.data.id };
       setWrote(made);
-      const { nextStep, nextDate } = form.opened;
-      const next =
-        followsUp && job
-          ? {
-              nextDate: afterFollowUp({ ...job, nextStep, nextDate }, day.today)
-                .nextDate,
-            }
-          : whatsNext();
       saveStep(
-        next,
+        whatsNext(),
         (saved) => `Noted a follow-up through the portal. ${said(saved)}`,
         made,
       );
@@ -383,7 +365,6 @@ export function NextStepSheet({
                 how={how}
                 onHow={setHow}
                 contacts={contacts}
-                followsUp={Boolean(followsUp)}
                 onFollowUp={followUpTo}
                 onPortal={followUpThroughPortal}
                 fields={form.fields}
@@ -513,7 +494,6 @@ function DonePanel({
   how,
   onHow,
   contacts,
-  followsUp,
   onFollowUp,
   onPortal,
   fields,
@@ -527,7 +507,6 @@ function DonePanel({
   how: InteractionKind;
   onHow: (how: InteractionKind) => void;
   contacts: PersonRef[];
-  followsUp: boolean;
   onFollowUp: (contact: PersonRef) => void;
   onPortal: () => void;
   fields: Record<NextStepField, string>;
@@ -573,12 +552,6 @@ function DonePanel({
               Through the portal
             </Button>
           </div>
-          {followsUp ? (
-            <span className="text-muted-foreground text-sm">
-              A follow-up moves the next date on its own. Or set what's next
-              below.
-            </span>
-          ) : null}
         </div>
       )}
       <FormField

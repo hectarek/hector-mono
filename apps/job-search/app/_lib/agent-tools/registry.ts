@@ -246,7 +246,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "set_job_status",
     description:
-      "Moves an accepted job to an open status on a date (YYYY-MM-DD in Eastern time, today by default), and records the move. A move sets the new stage's next step and date in place of the old ones (applied's is the follow-up, and it sets applied-on), unless nextStep and nextDate are given; a step given no date is due a week out. A move to the status the job holds changes nothing. Archiving a job goes through close_job.",
+      "Moves an accepted job to an open status on a date (YYYY-MM-DD in Eastern time, today by default), and records the move. A move to applied sets applied-on and no next step: give nextStep only for a follow-up Hector agreed to. Another open status sets its stage's step and date in place of the old ones, unless nextStep and nextDate are given; a step given no date is due a week out. A move to the status the job holds changes nothing. Archiving goes through close_job.",
     inputSchema: inputSchemaOf(setJobStatusSchema),
     action: setJobStatus,
   },
@@ -298,7 +298,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "log_interaction",
     description:
-      "Logs one kind of interaction (a sent message, a reply or a conversation) with the people in personIds, on occurredOn (YYYY-MM-DD in Eastern time, today by default, never later); several people only for sent messages. jobId links them to a job. scheduled gives a conversation's start and end; with conversationId and outcome, it records how that conversation went. nextStep and nextDate set the people's next step. A next step given no date is due a week from today.",
+      "Logs one kind of interaction (a sent message, a reply or a conversation) with the people in personIds, on occurredOn (YYYY-MM-DD in Eastern time, today by default, never later); several people only for sent messages. jobId links them to a job, whose next step stays as it was. scheduled gives a conversation's start and end; with conversationId and outcome, it records how that conversation went. nextStep and nextDate set the people's next step. A next step given no date is due a week from today.",
     inputSchema: inputSchemaOf(logInteractionSchema),
     action: logInteraction,
   },

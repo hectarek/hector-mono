@@ -6,7 +6,6 @@ import {
   NextStepSheet,
 } from "@/app/_components/next-step-sheet";
 import { dueLabel } from "@/app/_lib/format-day";
-import type { JobStage } from "@/src/entities/job-lifecycle";
 import type { PersonRef } from "@/src/entities/models/person.model";
 
 // A record's Next, right under its header (the UX plan's UX8): the step and when it's due, with
@@ -18,7 +17,6 @@ export function RecordNext({
   title,
   href,
   today,
-  job,
   contacts,
 }: {
   kind: "job" | "person";
@@ -29,7 +27,6 @@ export function RecordNext({
   href: string;
   // Today in Eastern time, from the server (KTD18).
   today: string;
-  job?: Pick<JobStage, "status" | "appliedOn">;
   contacts?: PersonRef[];
 }) {
   const { nextStep, nextDate } = record;
@@ -44,7 +41,6 @@ export function RecordNext({
       title={title}
       detail={[nextStep, due].filter(Boolean).join(" · ")}
       href={href}
-      job={job}
       contacts={contacts}
       opensOn={opensOn}
       trigger={<Button variant={variant} size="lg" className="min-h-11" />}

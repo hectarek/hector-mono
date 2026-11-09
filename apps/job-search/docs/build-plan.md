@@ -110,11 +110,11 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 - R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size. (Revised 2026-10-29, Hector's call: a job shows its company's tier and holds none of its own.) (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given, and a job Hector adds with no step starts with checking it's hiring, due that day, as an accepted proposal does.)
 - R2. A job's status is `verify`, `target`, `applied`, `screen`, `onsite` or `offer`, or a closed status: `rejected`, `closed`, `stale`, `skipped`, `withdrawn`, `offer-accepted` or `offer-declined`. Any move is allowed, and each move records the date it happened, today by default. (Revised 2026-11-07, Hector's call on the UX plan's Q6: `closed` means the posting closed, and the screens call the closed statuses together Archived, so the one word means one thing.)
-- R3. Status moves keep the follow-up rhythm:
+- R3. Status moves keep the stages' steps, and set no follow-up Hector hasn't agreed to:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
-  - a move to `applied` sets the next step "Follow up", due on applied-on + 7 days
+  - a move to `applied` sets no next step unless the move gives one (revised 2026-11-09, Hector's call: "yes we should stop auto adding these in the app". It had set "Follow up" due on applied-on + 7 days. A follow-up is now set only when he agreed to it in his own words, or it comes from something he did; the stale check below still lists the job.)
   - a move to another open status sets that stage's next step in place of the old one: "Verify it's hiring" that day, "Apply" in 2 days, "Prepare for the screen" in 2, "Prepare for the onsite" in 3 and "Decide on the offer" in 3; a move that gives its own step and date sets those instead (added 2026-11-07 in UX9: an old "Follow up" had stayed due past applied)
-  - a follow-up message linked to the job moves the next date to applied-on + 14 days, or to a week after the message went if that's later (revised 2026-11-07 in UX3, Hector's call on the UX plan's Q5: a late follow-up had left the job due again at once)
+  - a follow-up message linked to the job leaves the job's next step as it was (revised 2026-11-09, the same call: it had moved the next date to applied-on + 14 days, or a week after the message went, as a second follow-up; revised 2026-11-07 before that, in UX3, on the UX plan's Q5)
   - an applied job with no reply by applied-on + 21 days is listed as a stale candidate, where a reply is any move past `applied` or a reply linked to the job
   - a move to a closed status takes a reason and clears the next step and next date
 - R4. Companies hold structured facts (website, location, headcount, industry, office policy, leave policy, tier) plus a short research summary and a reference to the long-form research kept in Hector's private docs. A company's page lists its jobs and people.
@@ -230,7 +230,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 - AE1. **Covers R20.** Given a dismissed job for a posting, when Claude proposes the same posting with different tracking parameters, then it gets `duplicate` with the dismissal reason and no row is created.
 - AE2. **Covers R21.** Given Claude's session, when Claude clicks Accept on a proposal in its own window, then the server refuses with "Only Hector can do this", nothing changes, and the refusal appears in the activity log.
-- AE3. **Covers R2, R3.** Given a job in `target`, when it moves to `applied` dated yesterday, then applied-on is yesterday, the next step is "Follow up" due 7 days after that, and 21 days after applied-on with no reply it appears as a stale candidate.
+- AE3. **Covers R2, R3.** Given a job in `target`, when it moves to `applied` dated yesterday, then applied-on is yesterday, it has no next step unless the move gave one, and 21 days after applied-on with no reply it appears as a stale candidate. (Revised 2026-11-09 with R3: it had expected "Follow up" due 7 days after applied-on.)
 - AE4. **Covers R8, R10.** Given a server clock in UTC, when Hector logs a message at 9:30 pm Eastern on a Sunday, then it counts in the week that began the previous Monday.
 - AE5. **Covers R15.** Given a revoked Google token, when This week loads, then the calendar section says to reconnect and every other section renders.
 - AE6. **Covers R14.** Given a coffee scheduled from a person's page, when the request is retried after a timeout, then Google holds exactly one event, with no guests, titled "Coffee: Name (Company)".
@@ -880,7 +880,7 @@ Each phase is one branch and PR and leaves a usable app:
   - Pending proposals at the cap: `queue-full`.
   - Hector accepts: status `verify`, next step "Verify it's hiring" due today. He dismisses with a reason: listed under dismissed. He reopens: pending again.
   - Covers AE2. Claude accepts: `human-only`, the refusal logged, nothing changed.
-  - Covers AE3. `target` to `applied` dated yesterday: applied-on is yesterday; next step "Follow up" due 7 days after it.
+  - Covers AE3. `target` to `applied` dated yesterday: applied-on is yesterday, and no next step (revised 2026-11-09 with R3).
   - A move to `applied` when applied-on is already set: applied-on is kept.
   - Applied-on + 21 days with no reply: a stale candidate. A move past `applied` removes it.
   - Claude's `close_job` without a reason: `validation`. With a reason: next step and date cleared.

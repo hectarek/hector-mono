@@ -198,7 +198,7 @@ The biggest change to how the app feels: every due task can be finished, or move
   - **Push** shows chips that save on tap: Tomorrow, In 3 days, Next Monday, In a week. The date field stays for any other day.
   - **Done** asks "What's next?", with the next step prefilled (Q2), the same chips for its date, or No next step.
   - A person's Done first asks how it went: Message sent, Reply or Conversation held. It logs that, then saves the step against the `updatedAt` the row read (R22), so the row always leaves or moves.
-  - A job's Done offers **Follow-up sent**, with the job's contacts as one-tap chips. It logs a sent message linked to the job, so R3 moves the date and the week counts it. A follow-up with no one to name goes as Q3 decides.
+  - A job's Done offers **Follow-up sent**, with the job's contacts as one-tap chips. It logs a sent message linked to the job, so R3 moves the date and the week counts it. A follow-up with no one to name goes as Q3 decides. (Revised 2026-11-09, with R3 at Hector's call: R3 no longer moves the date. A job's Done starts with no step, and saves only the step Hector gives, so a follow-up sets no other follow-up.)
   - The sheet's title is "Role · Company", its step a two-line text area, and Clear becomes No next step.
   - Mount a toaster once. Each action says what changed, with Undo where an existing action reverses it: the step and date put back, a logged interaction deleted.
 - **Verify:** screen tests for each path; at 375 px, finishing a person's task takes three taps and a push two; a Done message counts in the week.
@@ -387,9 +387,9 @@ Each is Hector's call, made before its unit is built and recorded here as decide
 
 - **Q1. Should every next step carry a date?** (UX6) A step with no date never reaches This week. **Decided 2026-11-07:** yes, a week out by default when none is given; a step for someday becomes No next step with a note.
 - **Q2. After a person's task is done, what's next by default?** (UX3) **Decided 2026-11-07:** "Follow up" in a week, changed with one tap.
-- **Q3. Does a follow-up sent through a portal count as a message sent?** (UX3) Counting it means interactions without a person, a migration. **Decided 2026-11-07:** no; the job's date moves and a note records it, so the week's messages stay messages to people.
+- **Q3. Does a follow-up sent through a portal count as a message sent?** (UX3) Counting it means interactions without a person, a migration. **Decided 2026-11-07:** no; the job's date moves and a note records it, so the week's messages stay messages to people. (Revised 2026-11-09 with R3: the date no longer moves; the note stays.)
 - **Q4. Does a future next date hold off a stale candidate?** (UX13) Yes is an R3 change with nothing stored; no needs a stored date, a migration. **Decided 2026-11-07:** yes.
-- **Q5. Does a late follow-up date the next one from the day it went?** (UX3) Today R3 dates it from applied-on, so a late follow-up leaves its row late. **Decided 2026-11-07:** yes, a week from the day it went.
+- **Q5. Does a late follow-up date the next one from the day it went?** (UX3) Today R3 dates it from applied-on, so a late follow-up leaves its row late. **Decided 2026-11-07:** yes, a week from the day it went. (Superseded 2026-11-09, Hector's call: a follow-up dates no next one at all. R3 sets none he hasn't agreed to.)
 - **Q6. What does the `closed` status mean, and what should it be called?** (UX10) It shares its name with the tab that lists every closed job. Hector's meaning decides. **Decided 2026-11-07:** the status means the posting closed and keeps the name Closed; the Jobs list's tab for every ended job is Archived, Hector's pick of four names.
 - **Q7. Should a person's notes become dated entries, with the imported text as the first one?** (UX8) **Decided 2026-11-07:** yes, as a job's are.
 - **Q8. Where do the phases sit among U12 to U17?** **Decided 2026-11-07:** Phase 1 at once; Phase 2; then U17 (blocks), which adds to This week after UX4 has reshaped it; then Phases 3 to 7; then U12, U15, U13 and U14. Daily friction first, since it costs time every day; new sections after.

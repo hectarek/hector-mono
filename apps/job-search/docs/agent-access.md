@@ -93,6 +93,8 @@ Check each deny in the permission mode Hector uses: a denied tool is refused, or
 2. Call `webmcp_whoami`. It answers with who the session acts as (`agent`), today's date in Eastern time, and the tool set's version.
 3. Call `webmcp_start_session` once. It logs the session's start and answers with every change since the previous session started, newest first.
 
+Claude never sets a follow-up Hector hasn't agreed to (2026-11-09). A `nextStep` that Claude gives a job or a person comes from Hector's own words, or from something he did. Moving a job to applied, or logging a message linked to it, sets no step of its own.
+
 Every tool answers with an envelope: `{ ok: true, data, asOf }`, or `{ ok: false, code, message }` with `fields` (one message per field) on `validation` and `current` (the record as it is now) on `conflict`. Some codes call for a step from Claude:
 
 - `unauthenticated`: Claude's sign-in has ended. Hector signs Claude in again (setup step 3).

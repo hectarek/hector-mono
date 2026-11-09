@@ -6,7 +6,6 @@ import type { ILoggerService } from "@/src/application/services/logger.service.i
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { recordChange } from "@/src/application/use-cases/activity/record-change";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
-import { afterFollowUp } from "@/src/entities/job-lifecycle";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import {
   type Interaction,
@@ -15,7 +14,6 @@ import {
   type LogInteractionRequest,
   type NextStep,
 } from "@/src/entities/models/interaction.model";
-import type { Job } from "@/src/entities/models/job.model";
 import type { PersonRecord } from "@/src/entities/models/person.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { withStepDate } from "@/src/entities/next-step";
@@ -28,10 +26,10 @@ type Outcome = Extract<LogInteractionRequest, { type: "outcome" }>;
 
 // Logs interactions with people (log_interaction, docs/build-plan.md U7, KTD9; R8): one per person
 // named, on a day, today by default and never after it, except a scheduled conversation, whose
-// day is its start's. A job named links each person to it as a contact (R1), and a sent message
-// linked to an applied job moves its follow-up (R3). Or it records how a scheduled conversation
-// ended. Either way, a next step and date go on the people. Every write and its history share one
-// transaction (KTD7).
+// day is its start's. A job named links each person to it as a contact (R1), and leaves the job's
+// own step as it was: a sent message sets no follow-up on it (R3 as revised 2026-11-09). Or it
+// records how a scheduled conversation ended. Either way, a next step and date go on the people.
+// Every write and its history share one transaction (KTD7).
 export const logInteractionUseCase = (
   interactionsRepository: IInteractionsRepository,
   peopleRepository: IPeopleRepository,
@@ -118,10 +116,6 @@ export const logInteractionUseCase = (
       await setNext(context, person, request.next, tx);
       interactions.push(interaction);
     }
-
-    if (job && request.kind === "message-sent") {
-      await followUp(context, job, occurredOn, tx);
-    }
     return { interactions };
   }
 
@@ -199,27 +193,6 @@ export const logInteractionUseCase = (
         nextDate: person.nextDate,
         ...changed,
       },
-    });
-  }
-
-  // A follow-up message linked to an applied job, sent on the day given, moves its next date (R3),
-  // once however many people the message went to.
-  async function followUp(
-    context: ChangeContext,
-    job: Job,
-    sentOn: string,
-    tx: ITransaction,
-  ): Promise<void> {
-    const { nextDate } = afterFollowUp(job, sentOn);
-    if (nextDate === job.nextDate) {
-      return;
-    }
-    await jobsRepository.update(context.ownerId, job.id, { nextDate }, tx);
-    await recordChange(activityRepository, tx, context, {
-      record: { kind: "job", id: job.id },
-      action: "updated",
-      before: { nextDate: job.nextDate },
-      after: { nextDate },
     });
   }
 };

@@ -45,16 +45,30 @@ describeEachBackend("moveJob", () => {
   const move = (status: Job["status"], on?: string, reason?: string) =>
     app.moveJob(CLAUDE, { id: job.id, status, on, reason });
 
-  // AE3.
-  it("to applied dated yesterday: applied-on is yesterday, and Follow up is due 7 days after it", async () => {
+  // AE3, as revised 2026-11-09: the app sets no follow-up Hector hasn't agreed to.
+  it("to applied dated yesterday: applied-on is yesterday, and no next step is set", async () => {
     await move("target");
     const applied = await move("applied", YESTERDAY);
 
     expect(applied).toMatchObject({
       status: "applied",
       appliedOn: YESTERDAY,
-      nextStep: "Follow up",
-      nextDate: "2026-11-01",
+      nextStep: null,
+      nextDate: null,
+    });
+  });
+
+  it("to applied with a step given, sets that step, due a week out when it has no date", async () => {
+    const applied = await app.moveJob(CLAUDE, {
+      id: job.id,
+      status: "applied",
+      nextStep: "Follow up with the recruiter",
+    });
+
+    expect(applied).toMatchObject({
+      status: "applied",
+      nextStep: "Follow up with the recruiter",
+      nextDate: "2026-11-02",
     });
   });
 
@@ -92,9 +106,9 @@ describeEachBackend("moveJob", () => {
       changes: [
         { field: "status", before: "target", after: "applied" },
         { field: "appliedOn", before: null, after: YESTERDAY },
-        // The move to target set that stage's step, Apply, two days out (UX9).
-        { field: "nextStep", before: "Apply", after: "Follow up" },
-        { field: "nextDate", before: "2026-10-28", after: "2026-11-01" },
+        // The move to target set that stage's step, Apply, two days out (UX9); applied sets none.
+        { field: "nextStep", before: "Apply", after: null },
+        { field: "nextDate", before: "2026-10-28", after: null },
       ],
     });
   });
@@ -158,7 +172,8 @@ describeEachBackend("moveJob", () => {
 
     expect(applied).toMatchObject({
       appliedOn: "2026-10-20",
-      nextDate: "2026-10-27",
+      nextStep: null,
+      nextDate: null,
     });
   });
 

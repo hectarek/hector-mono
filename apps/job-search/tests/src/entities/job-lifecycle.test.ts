@@ -1,7 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import {
   acceptedStage,
-  afterFollowUp,
   afterMove,
   isClosed,
   isStaleCandidate,
@@ -17,17 +16,17 @@ const TARGET: JobStage = {
 };
 
 describe("a status move", () => {
-  // AE3.
-  it("to applied fills an empty applied-on with the move's date, and sets the follow-up 7 days after it", () => {
+  // AE3, as revised 2026-11-09: the app sets no follow-up Hector hasn't agreed to.
+  it("to applied fills an empty applied-on with the move's date, and sets no next step", () => {
     expect(afterMove(TARGET, "applied", "2026-10-25")).toEqual({
       status: "applied",
       appliedOn: "2026-10-25",
-      nextStep: "Follow up",
-      nextDate: "2026-11-01",
+      nextStep: null,
+      nextDate: null,
     });
   });
 
-  it("to applied keeps an applied-on already set, and follows up from it", () => {
+  it("to applied keeps an applied-on already set, and still sets no next step", () => {
     expect(
       afterMove(
         { ...TARGET, appliedOn: "2026-10-01" },
@@ -37,8 +36,8 @@ describe("a status move", () => {
     ).toEqual({
       status: "applied",
       appliedOn: "2026-10-01",
-      nextStep: "Follow up",
-      nextDate: "2026-10-08",
+      nextStep: null,
+      nextDate: null,
     });
   });
 
@@ -51,18 +50,15 @@ describe("a status move", () => {
     });
   });
 
-  it("sets each open stage's step, due that many days after the move", () => {
+  it("sets each open stage's step, due that many days after the move, and none at applied", () => {
     const at = (to: Parameters<typeof stepAfterMove>[0]) =>
-      stepAfterMove(to, "2026-10-25", "2026-10-20");
+      stepAfterMove(to, "2026-10-25");
     expect(at("verify")).toEqual({
       nextStep: "Verify it's hiring",
       nextDate: "2026-10-25",
     });
     expect(at("target")).toEqual({ nextStep: "Apply", nextDate: "2026-10-27" });
-    expect(at("applied")).toEqual({
-      nextStep: "Follow up",
-      nextDate: "2026-10-27",
-    });
+    expect(at("applied")).toEqual({ nextStep: null, nextDate: null });
     expect(at("onsite")).toEqual({
       nextStep: "Prepare for the onsite",
       nextDate: "2026-10-28",
@@ -124,44 +120,6 @@ describe("accepting a proposal (R20)", () => {
       nextStep: "Verify it's hiring",
       nextDate: "2026-10-26",
     });
-  });
-});
-
-describe("a follow-up message (R3)", () => {
-  const applied: JobStage = {
-    status: "applied",
-    appliedOn: "2026-10-01",
-    nextStep: "Follow up",
-    nextDate: "2026-10-08",
-  };
-
-  it("moves an applied job's next date to 14 days after applied-on, for a follow-up on time or early", () => {
-    expect(afterFollowUp(applied, "2026-10-08")).toEqual({
-      ...applied,
-      nextDate: "2026-10-15",
-    });
-    expect(afterFollowUp(applied, "2026-10-03")).toEqual({
-      ...applied,
-      nextDate: "2026-10-15",
-    });
-  });
-
-  // Revised 2026-11-07 (the UX plan's Q5): a late follow-up no longer leaves the job due at once.
-  it("moves it to a week after a late follow-up went, when that's later", () => {
-    expect(afterFollowUp(applied, "2026-10-13")).toEqual({
-      ...applied,
-      nextDate: "2026-10-20",
-    });
-  });
-
-  it("leaves a job past applied, or never applied to, as it was", () => {
-    expect(
-      afterFollowUp({ ...applied, status: "screen" }, "2026-10-08"),
-    ).toEqual({
-      ...applied,
-      status: "screen",
-    });
-    expect(afterFollowUp(TARGET, "2026-10-08")).toEqual(TARGET);
   });
 });
 

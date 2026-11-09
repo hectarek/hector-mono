@@ -42,8 +42,6 @@ const APPLIED_OR_BEYOND: readonly JobStatus[] = [
   "offer-declined",
 ];
 
-const FOLLOW_UP_DAYS = 7;
-const SECOND_FOLLOW_UP_DAYS = 14;
 const STALE_DAYS = 21;
 
 export function isClosed(status: JobStatus): status is ClosedStatus {
@@ -64,18 +62,15 @@ const STEP_AT: Record<
   offer: { step: "Decide on the offer", days: 3 },
 };
 
-// The next step and date a move to an open status, made on `on`, sets (R3): at applied, "Follow
-// up" due 7 days after applied-on; at any other stage, that stage's step.
+// The next step and date a move to an open status, made on `on`, sets (R3): at applied, none, since
+// a follow-up is set only when Hector agrees to one (revised 2026-11-09, his call) and the stale
+// check still lists the job at 21 days; at any other stage, that stage's step.
 export function stepAfterMove(
   to: OpenStatus,
   on: string,
-  appliedOn: string | null,
 ): Pick<JobStage, "nextStep" | "nextDate"> {
   if (to === "applied") {
-    return {
-      nextStep: "Follow up",
-      nextDate: addDays(appliedOn ?? on, FOLLOW_UP_DAYS),
-    };
+    return { nextStep: null, nextDate: null };
   }
   const { step, days } = STEP_AT[to];
   return { nextStep: step, nextDate: addDays(on, days) };
@@ -91,28 +86,14 @@ export function afterMove(job: JobStage, to: JobStatus, on: string): JobStage {
   if (isClosed(to)) {
     return { status: to, appliedOn, nextStep: null, nextDate: null };
   }
-  return { status: to, appliedOn, ...stepAfterMove(to, on, appliedOn) };
+  return { status: to, appliedOn, ...stepAfterMove(to, on) };
 }
 
 // An accepted proposal (R20): in verify, with checking it's still hiring due the day it's accepted.
 export function acceptedStage(
   today: string,
 ): Pick<JobStage, "status" | "nextStep" | "nextDate"> {
-  return { status: "verify", ...stepAfterMove("verify", today, null) };
-}
-
-// What a follow-up message linked to the job, sent on `sentOn`, leaves it at (R3): a job at applied
-// has its next date moved to 14 days after applied-on, or a week after the message went if that's
-// later, so a late follow-up doesn't leave the job due at once (revised 2026-11-07, the UX plan's
-// Q5). Any other job stays as it was.
-export function afterFollowUp(job: JobStage, sentOn: string): JobStage {
-  if (job.status !== "applied" || !job.appliedOn) {
-    return job;
-  }
-  const second = addDays(job.appliedOn, SECOND_FOLLOW_UP_DAYS);
-  // "YYYY-MM-DD" dates sort as text, so the later of the two is the last.
-  const [, later = second] = [second, addDays(sentOn, FOLLOW_UP_DAYS)].sort();
-  return { ...job, nextDate: later };
+  return { status: "verify", ...stepAfterMove("verify", today) };
 }
 
 // The latest applied-on a job can have and be a stale candidate on the day given (R3).
