@@ -33,7 +33,7 @@ Once per deployment, in this order:
    - Client ID Metadata Documents on, and dynamic client registration off
 
    For production, Claude does this through the Neon MCP, with Hector's OK at that moment.
-2. **`MCP_RESOURCE`.** Set it to `<app origin>/mcp` in the deployment's Vercel environment. Without it the endpoint and its discovery file answer 404. A changed variable reaches production only with the next commit that builds the app (the app's AGENTS.md, Environments). Under `next dev` it defaults to `http://localhost:3101/mcp`.
+2. **`MCP_RESOURCE`.** Set it to `<app origin>/mcp` in the deployment's Vercel environment. Without it the endpoint and its discovery file answer 404. A changed variable reaches production only with the next commit that builds the app (the app's AGENTS.md, Environments), so set it before that commit merges. On 2026-11-09 the merge meant to bring it in deployed three minutes before it was set, and production kept answering 404. Under `next dev` it defaults to `http://localhost:3101/mcp`.
 3. **Claude Code.** Hector adds the server to his user settings and signs Claude in, once:
 
    ```bash
