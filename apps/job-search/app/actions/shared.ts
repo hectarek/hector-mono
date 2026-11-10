@@ -10,7 +10,6 @@ import {
   InputParseError,
   NotAllowedError,
   NotFoundError,
-  QueueFullError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
@@ -31,7 +30,6 @@ type ActionErrorCode =
   | "not-found"
   | "conflict"
   | "duplicate"
-  | "queue-full"
   | "human-only"
   | "calendar-disconnected"
   | "reload-needed"
@@ -213,9 +211,6 @@ function expectedFailure(err: unknown): ActionFailure | undefined {
       message: err.message,
       current: err.existing,
     };
-  }
-  if (err instanceof QueueFullError) {
-    return { ok: false, code: "queue-full", message: err.message };
   }
   return undefined;
 }

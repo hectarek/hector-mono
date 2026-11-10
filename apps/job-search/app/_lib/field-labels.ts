@@ -25,15 +25,15 @@ export const FIELD_LABELS: Record<string, string> = {
   researchSummary: "Research summary",
   researchRef: "Research notes",
   query: "Search",
-  // The settings: a weekly target per count, and the queue cap
+  // The settings: a weekly target per count, and the pay floor the ranked list weighs
   messagesSent: "Messages sent",
   conversationsHeld: "Conversations held",
   applications: "Applications",
   practiceSessions: "Practice sessions",
   screensReached: "Moves to screen or beyond",
-  pendingCap: "Queue cap",
-  // A job's facts, where it stands and Hector's review, as inputs and its history name them
-  // (`company` and `source` are the history's names for the two)
+  payFloor: "Pay floor",
+  // A job's facts and where it stands, as inputs and its history name them (`company` and
+  // `source` are the history's names for the two)
   companyId: "Company",
   company: "Company",
   clientName: "Client",
@@ -48,17 +48,17 @@ export const FIELD_LABELS: Record<string, string> = {
   payMin: "Pay from",
   payMax: "Pay to",
   postingUrl: "Posting link",
+  postedOn: "Posted on",
   summary: "Summary",
+  score: "Fit score",
+  pinned: "Pinned",
   foundOn: "Found on",
   source: "Source",
   travelPercent: "Travel (%)",
   employmentType: "Employment type",
   teamSize: "Team size",
-  reviewState: "Review",
-  proposalReason: "Claude's reason",
-  dismissReason: "Dismissed because",
-  dismissNote: "Dismissal note",
-  // A status move's date and a closing's reason, a proposal's reason, and a dismissal's note
+  // A status move's date, a closing's reason or Claude's for adding a job, and an interaction's
+  // note
   on: "Date",
   reason: "Reason",
   note: "Note",

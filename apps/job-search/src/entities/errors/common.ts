@@ -82,16 +82,3 @@ export class DuplicateError extends Error {
     super(message, options);
   }
 }
-
-// Claude's proposals waiting for Hector's review are at the cap his settings set (KTD8). The
-// message names the cap, so Claude knows how many wait (U6's review).
-export class QueueFullError extends Error {
-  override name = "QueueFullError";
-
-  constructor(cap: number, options?: ErrorOptions) {
-    super(
-      `The review queue is full at Hector's cap of ${cap}: he reviews what's waiting first.`,
-      options,
-    );
-  }
-}

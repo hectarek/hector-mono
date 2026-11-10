@@ -50,7 +50,7 @@ describeEachBackend("addNote", () => {
     expect(entries).toEqual([
       expect.objectContaining({
         actor: "agent",
-        tool: "propose_job",
+        tool: "add_job",
         action: "created",
         changes: [
           {

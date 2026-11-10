@@ -89,13 +89,6 @@ export function afterMove(job: JobStage, to: JobStatus, on: string): JobStage {
   return { status: to, appliedOn, ...stepAfterMove(to, on) };
 }
 
-// An accepted proposal (R20): in verify, with checking it's still hiring due the day it's accepted.
-export function acceptedStage(
-  today: string,
-): Pick<JobStage, "status" | "nextStep" | "nextDate"> {
-  return { status: "verify", ...stepAfterMove("verify", today) };
-}
-
 // The latest applied-on a job can have and be a stale candidate on the day given (R3).
 export function staleAppliedBy(today: string): string {
   return addDays(today, -STALE_DAYS);

@@ -26,7 +26,6 @@ import {
   type JobQuery,
   type JobSummary,
   jobSummary,
-  type ReviewState,
   statusesFor,
 } from "@/src/entities/models/job.model";
 import type {
@@ -34,6 +33,7 @@ import type {
   LoggedStatusChange,
 } from "@/src/entities/models/job-status-change.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
+import { TO_APPLY_STATUSES } from "@/src/entities/rank";
 import {
   BaseRepository,
   nextUpdatedAt,
@@ -54,20 +54,26 @@ const JOB = {
   payMin: jobs.payMin,
   payMax: jobs.payMax,
   postingUrl: jobs.postingUrl,
+  postedOn: jobs.postedOn,
   summary: jobs.summary,
+  reason: jobs.proposalReason,
+  score: jobs.score,
   foundOn: jobs.foundOn,
   travelPercent: jobs.travelPercent,
   employmentType: jobs.employmentType,
   teamSize: jobs.teamSize,
   status: jobs.status,
-  reviewState: jobs.reviewState,
-  proposalReason: jobs.proposalReason,
-  dismissReason: jobs.dismissReason,
-  dismissNote: jobs.dismissNote,
+  pinnedAt: jobs.pinnedAt,
   updatedAt: jobs.updatedAt,
   company: { id: companies.id, name: companies.name, tier: companies.tier },
   source: { id: leadSources.id, name: leadSources.name },
 };
+
+// A job's row as the table holds it: Claude's reason sits in proposal_reason, the column it had
+// when only proposals carried one (U19).
+function columnsOf<T extends Partial<JobRow>>({ reason, ...rest }: T) {
+  return reason === undefined ? rest : { ...rest, proposalReason: reason };
+}
 
 // A next step with no date.
 const UNDATED = and(isNotNull(jobs.nextStep), isNull(jobs.nextDate));
@@ -77,13 +83,13 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
     super(logger, "jobs");
   }
 
-  async lockQueue(ownerId: string, tx: ITransaction): Promise<void> {
+  async lockPostings(ownerId: string, tx: ITransaction): Promise<void> {
     try {
       await this.getDbContext(tx).execute(
         sql`select pg_advisory_xact_lock(hashtext(${`jobs:${ownerId}`}))`,
       );
     } catch (err) {
-      this.handleError(err, "lockQueue", { ownerId });
+      this.handleError(err, "lockPostings", { ownerId });
     }
   }
 
@@ -91,7 +97,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
     try {
       const [created] = await this.getDbContext(tx)
         .insert(jobs)
-        .values({ ownerId, ...row })
+        .values({ ownerId, ...columnsOf(row) })
         .returning({ id: jobs.id });
       const job = created && (await this.read(ownerId, created.id, tx));
       if (!job) {
@@ -140,7 +146,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
       const [updated] = await this.getDbContext(tx)
         .update(jobs)
         .set({
-          ...changes,
+          ...columnsOf(changes),
           updatedAt: nextUpdatedAt(jobs.updatedAt),
         })
         .where(and(eq(jobs.ownerId, ownerId), eq(jobs.id, id)))
@@ -167,7 +173,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
 
   async find(
     ownerId: string,
-    { status, reviewState, companyId, undated, limit, offset }: JobQuery,
+    { status, companyId, undated, limit, offset }: JobQuery,
   ): Promise<JobPage> {
     const statuses = statusesFor(status);
     try {
@@ -177,7 +183,6 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
         .where(
           and(
             eq(jobs.ownerId, ownerId),
-            eq(jobs.reviewState, reviewState),
             statuses ? inArray(jobs.status, [...statuses]) : undefined,
             companyId ? eq(jobs.companyId, companyId) : undefined,
             undated ? UNDATED : undefined,
@@ -205,7 +210,6 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
         .where(
           and(
             eq(jobs.ownerId, ownerId),
-            eq(jobs.reviewState, "accepted"),
             inArray(jobs.status, [...OPEN_STATUSES]),
             lte(jobs.nextDate, day),
           ),
@@ -225,7 +229,6 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
         .where(
           and(
             eq(jobs.ownerId, ownerId),
-            eq(jobs.reviewState, "accepted"),
             inArray(jobs.status, [...OPEN_STATUSES]),
             UNDATED,
           ),
@@ -242,7 +245,6 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
         .where(
           and(
             eq(jobs.ownerId, ownerId),
-            eq(jobs.reviewState, "accepted"),
             eq(jobs.status, "applied"),
             lte(jobs.appliedOn, day),
           ),
@@ -264,11 +266,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
         .select({ applied: count() })
         .from(jobs)
         .where(
-          and(
-            eq(jobs.ownerId, ownerId),
-            eq(jobs.reviewState, "accepted"),
-            between(jobs.appliedOn, from, to),
-          ),
+          and(eq(jobs.ownerId, ownerId), between(jobs.appliedOn, from, to)),
         );
       return row?.applied ?? 0;
     } catch (err) {
@@ -310,8 +308,7 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
           id: jobs.id,
           role: jobs.role,
           company: companies.name,
-          reviewState: jobs.reviewState,
-          dismissReason: jobs.dismissReason,
+          status: jobs.status,
         })
         .from(jobs)
         .innerJoin(companies, eq(companies.id, jobs.companyId))
@@ -322,15 +319,16 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
     }
   }
 
-  async countPending(ownerId: string, tx: ITransaction): Promise<number> {
+  async listToApply(ownerId: string): Promise<Job[]> {
     try {
-      const [row] = await this.getDbContext(tx)
-        .select({ pending: count() })
-        .from(jobs)
-        .where(and(eq(jobs.ownerId, ownerId), eq(jobs.reviewState, "pending")));
-      return row?.pending ?? 0;
+      return await this.joined().where(
+        and(
+          eq(jobs.ownerId, ownerId),
+          inArray(jobs.status, [...TO_APPLY_STATUSES]),
+        ),
+      );
     } catch (err) {
-      this.handleError(err, "countPending", { ownerId });
+      this.handleError(err, "listToApply", { ownerId });
     }
   }
 
@@ -338,18 +336,13 @@ export class JobsRepository extends BaseRepository implements IJobsRepository {
     ownerId: string,
     companyId: string,
     tx: ITransaction,
-  ): Promise<Record<ReviewState, number>> {
+  ): Promise<number> {
     try {
-      const rows = await this.getDbContext(tx)
-        .select({ reviewState: jobs.reviewState, jobs: count() })
+      const [row] = await this.getDbContext(tx)
+        .select({ jobs: count() })
         .from(jobs)
-        .where(and(eq(jobs.ownerId, ownerId), eq(jobs.companyId, companyId)))
-        .groupBy(jobs.reviewState);
-      const counts = { pending: 0, accepted: 0, dismissed: 0 };
-      for (const row of rows) {
-        counts[row.reviewState] = row.jobs;
-      }
-      return counts;
+        .where(and(eq(jobs.ownerId, ownerId), eq(jobs.companyId, companyId)));
+      return row?.jobs ?? 0;
     } catch (err) {
       this.handleError(err, "countForCompany", { ownerId, companyId });
     }

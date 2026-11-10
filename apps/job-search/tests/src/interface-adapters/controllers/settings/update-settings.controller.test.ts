@@ -30,14 +30,14 @@ describe("updateSettingsController", () => {
     await controller(
       {
         targets: TARGETS,
-        pendingCap: 8,
+        payFloor: 123_456,
         updatedAt: "2026-10-26T15:00:00.123Z",
       },
       HECTOR,
     );
     expect(useCase).toHaveBeenCalledWith(HECTOR, {
       targets: TARGETS,
-      pendingCap: 8,
+      payFloor: 123_456,
       updatedAt: new Date("2026-10-26T15:00:00.123Z"),
     });
   });
@@ -45,12 +45,12 @@ describe("updateSettingsController", () => {
   it.each([
     {
       label: "a target below 0",
-      input: { targets: { ...TARGETS, applications: -1 }, pendingCap: 8 },
+      input: { targets: { ...TARGETS, applications: -1 }, payFloor: 123_456 },
     },
-    { label: "a queue cap of 0", input: { targets: TARGETS, pendingCap: 0 } },
+    { label: "a pay floor below 0", input: { targets: TARGETS, payFloor: -1 } },
     {
       label: "a target missing",
-      input: { targets: { messagesSent: 1 }, pendingCap: 8 },
+      input: { targets: { messagesSent: 1 }, payFloor: 123_456 },
     },
   ])("rejects $label before the use case runs", async ({ input }) => {
     const { useCase, controller } = setup();

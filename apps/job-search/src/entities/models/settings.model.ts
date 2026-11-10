@@ -11,14 +11,12 @@ export const WEEKLY_COUNTS = [
 ] as const;
 export type WeeklyCount = (typeof WEEKLY_COUNTS)[number];
 
-// The most proposals that wait for Hector's review at once, until he sets another (KTD8).
-const DEFAULT_PENDING_CAP = 10;
-
 // Hector's settings, which only he changes (R12, R21): a target for each weekly count, null where
-// he set none, and the cap on pending proposals.
+// he set none, and the yearly pay floor the ranked list weighs a posted band against (KTD23), null
+// when unset.
 export type Settings = {
   targets: Record<WeeklyCount, number | null>;
-  pendingCap: number;
+  payFloor: number | null;
   // When they were last saved, which a change sends back (R22): null before the first save.
   updatedAt: Date | null;
 };
@@ -34,7 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
     practiceSessions: null,
     screensReached: null,
   },
-  pendingCap: DEFAULT_PENDING_CAP,
+  payFloor: null,
   updatedAt: null,
 };
 
@@ -57,10 +55,11 @@ export const updateSettingsSchema = z.object({
     practiceSessions: targetSchema,
     screensReached: targetSchema,
   }),
-  pendingCap: z
-    .int({ error: "Use a whole number" })
-    .min(1, { error: "At least 1" })
-    .max(50, { error: "At most 50" }),
+  payFloor: z
+    .int({ error: "Use whole dollars a year" })
+    .min(0, { error: "At least 0" })
+    .max(10_000_000, { error: "At most 10,000,000" })
+    .nullable(),
   updatedAt: timeSchema.nullable(),
 });
 export type UpdateSettingsInput = z.output<typeof updateSettingsSchema>;

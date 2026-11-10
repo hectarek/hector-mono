@@ -149,7 +149,7 @@ describeEachBackend("the sheet's import", () => {
     expect(await app.repos.jobs.get(OWNER, screened)).toMatchObject({
       status: "screen",
       appliedOn: "2026-10-01",
-      reviewState: "accepted",
+      pinnedAt: null,
     });
     expect(
       (await app.repos.jobs.listStatusChanges(OWNER, screened)).map(

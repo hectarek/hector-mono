@@ -5,7 +5,7 @@ import { SettingsForm } from "@/app/_components/settings-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
 
-// Hector's settings (R12): the weekly targets and the queue cap, which only he changes (R21), the
+// Hector's settings (R12): the weekly targets and the pay floor, which only he changes (R21), the
 // lead sources jobs come from (R5), which Claude adds to as well, and the settings' history (R19),
 // Claude's refused tries included.
 export default async function SettingsPage() {
@@ -23,7 +23,7 @@ export default async function SettingsPage() {
         aria-labelledby="settings-targets"
         className="flex flex-col gap-4"
       >
-        <SectionTitle id="settings-targets">Targets and the queue</SectionTitle>
+        <SectionTitle id="settings-targets">Targets and pay</SectionTitle>
         <SettingsForm settings={settings} humanOnly={actor.actor !== "owner"} />
       </section>
 

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import {
-  acceptedStage,
   afterMove,
   isClosed,
   isStaleCandidate,
@@ -110,16 +109,6 @@ describe("a status move", () => {
   it("tells closed statuses from open ones", () => {
     expect(isClosed("offer-declined")).toBe(true);
     expect(isClosed("offer")).toBe(false);
-  });
-});
-
-describe("accepting a proposal (R20)", () => {
-  it("puts it in verify, with the next step to verify it's hiring, due the day it's accepted", () => {
-    expect(acceptedStage("2026-10-26")).toEqual({
-      status: "verify",
-      nextStep: "Verify it's hiring",
-      nextDate: "2026-10-26",
-    });
   });
 });
 

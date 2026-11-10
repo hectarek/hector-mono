@@ -48,11 +48,18 @@ for (const file of readdirSync(join(APP, "(api)"), { recursive: true })) {
   }
 }
 
-// The controllers pages and their loaders call for a read, outside the actions.
+// The controllers pages and their loaders call for a read, outside the actions and the route
+// handlers, which ROUTE_REACH maps.
 const pageReads = new Set<string>();
 for (const file of readdirSync(APP, { recursive: true })) {
   const path = String(file);
-  if (!/\.tsx?$/.test(path) || path.startsWith("actions/")) continue;
+  if (
+    !/\.tsx?$/.test(path) ||
+    path.startsWith("actions/") ||
+    path.startsWith("(api)/")
+  ) {
+    continue;
+  }
   const source = readFileSync(join(APP, path), "utf8");
   for (const [, controller] of source.matchAll(
     /getInjection\("(I\w+Controller)"\)/g,

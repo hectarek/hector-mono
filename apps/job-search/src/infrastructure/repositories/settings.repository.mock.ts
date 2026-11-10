@@ -36,10 +36,10 @@ export class MockSettingsRepository implements ISettingsRepository {
 
   private put(
     ownerId: string,
-    { targets, pendingCap }: SettingsValues,
+    { targets, payFloor }: SettingsValues,
     updatedAt: Date,
   ): Settings {
-    const row = { targets: { ...targets }, pendingCap, updatedAt };
+    const row = { targets: { ...targets }, payFloor, updatedAt };
     this.rows.set(ownerId, row);
     return { ...row, targets: { ...targets } };
   }

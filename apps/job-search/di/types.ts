@@ -30,12 +30,13 @@ import type { IGetCompanyUseCase } from "@/src/application/use-cases/companies/g
 import type { ISaveCompanyUseCase } from "@/src/application/use-cases/companies/save-company.use-case";
 import type { IDeleteInteractionUseCase } from "@/src/application/use-cases/interactions/delete-interaction.use-case";
 import type { ILogInteractionUseCase } from "@/src/application/use-cases/interactions/log-interaction.use-case";
+import type { IArchiveExpiredUseCase } from "@/src/application/use-cases/jobs/archive-expired.use-case";
 import type { ICreateJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
 import type { IDeleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
 import type { IFindJobsUseCase } from "@/src/application/use-cases/jobs/find-jobs.use-case";
 import type { IGetJobUseCase } from "@/src/application/use-cases/jobs/get-job.use-case";
 import type { IMoveJobUseCase } from "@/src/application/use-cases/jobs/move-job.use-case";
-import type { IReviewProposalUseCase } from "@/src/application/use-cases/jobs/review-proposal.use-case";
+import type { IPinJobUseCase } from "@/src/application/use-cases/jobs/pin-job.use-case";
 import type { IUpdateJobUseCase } from "@/src/application/use-cases/jobs/update-job.use-case";
 import type { IAddNoteUseCase } from "@/src/application/use-cases/notes/add-note.use-case";
 import type { IDeleteNoteUseCase } from "@/src/application/use-cases/notes/delete-note.use-case";
@@ -72,15 +73,13 @@ import type { IGetCompanyController } from "@/src/interface-adapters/controllers
 import type { ISaveCompanyController } from "@/src/interface-adapters/controllers/companies/save-company.controller";
 import type { IDeleteInteractionController } from "@/src/interface-adapters/controllers/interactions/delete-interaction.controller";
 import type { ILogInteractionController } from "@/src/interface-adapters/controllers/interactions/log-interaction.controller";
-import type { IAcceptProposalController } from "@/src/interface-adapters/controllers/jobs/accept-proposal.controller";
 import type { IAddJobController } from "@/src/interface-adapters/controllers/jobs/add-job.controller";
+import type { IArchiveExpiredController } from "@/src/interface-adapters/controllers/jobs/archive-expired.controller";
 import type { ICloseJobController } from "@/src/interface-adapters/controllers/jobs/close-job.controller";
 import type { IDeleteJobController } from "@/src/interface-adapters/controllers/jobs/delete-job.controller";
-import type { IDismissProposalController } from "@/src/interface-adapters/controllers/jobs/dismiss-proposal.controller";
 import type { IFindJobsController } from "@/src/interface-adapters/controllers/jobs/find-jobs.controller";
 import type { IGetJobController } from "@/src/interface-adapters/controllers/jobs/get-job.controller";
-import type { IProposeJobController } from "@/src/interface-adapters/controllers/jobs/propose-job.controller";
-import type { IReopenProposalController } from "@/src/interface-adapters/controllers/jobs/reopen-proposal.controller";
+import type { IPinJobController } from "@/src/interface-adapters/controllers/jobs/pin-job.controller";
 import type { ISetJobStatusController } from "@/src/interface-adapters/controllers/jobs/set-job-status.controller";
 import type { IUpdateJobController } from "@/src/interface-adapters/controllers/jobs/update-job.controller";
 import type { IAddNoteController } from "@/src/interface-adapters/controllers/notes/add-note.controller";
@@ -147,17 +146,16 @@ export const DI_SYMBOLS = {
   IGetJobUseCase: Symbol.for("IGetJobUseCase"),
   IGetJobController: Symbol.for("IGetJobController"),
   ICreateJobUseCase: Symbol.for("ICreateJobUseCase"),
-  IProposeJobController: Symbol.for("IProposeJobController"),
   IAddJobController: Symbol.for("IAddJobController"),
   IUpdateJobUseCase: Symbol.for("IUpdateJobUseCase"),
   IUpdateJobController: Symbol.for("IUpdateJobController"),
   IMoveJobUseCase: Symbol.for("IMoveJobUseCase"),
   ISetJobStatusController: Symbol.for("ISetJobStatusController"),
   ICloseJobController: Symbol.for("ICloseJobController"),
-  IReviewProposalUseCase: Symbol.for("IReviewProposalUseCase"),
-  IAcceptProposalController: Symbol.for("IAcceptProposalController"),
-  IDismissProposalController: Symbol.for("IDismissProposalController"),
-  IReopenProposalController: Symbol.for("IReopenProposalController"),
+  IPinJobUseCase: Symbol.for("IPinJobUseCase"),
+  IPinJobController: Symbol.for("IPinJobController"),
+  IArchiveExpiredUseCase: Symbol.for("IArchiveExpiredUseCase"),
+  IArchiveExpiredController: Symbol.for("IArchiveExpiredController"),
   IDeleteJobUseCase: Symbol.for("IDeleteJobUseCase"),
   IDeleteJobController: Symbol.for("IDeleteJobController"),
   INotesRepository: Symbol.for("INotesRepository"),
@@ -255,17 +253,16 @@ export interface DI_RETURN_TYPES {
   IGetJobUseCase: IGetJobUseCase;
   IGetJobController: IGetJobController;
   ICreateJobUseCase: ICreateJobUseCase;
-  IProposeJobController: IProposeJobController;
   IAddJobController: IAddJobController;
   IUpdateJobUseCase: IUpdateJobUseCase;
   IUpdateJobController: IUpdateJobController;
   IMoveJobUseCase: IMoveJobUseCase;
   ISetJobStatusController: ISetJobStatusController;
   ICloseJobController: ICloseJobController;
-  IReviewProposalUseCase: IReviewProposalUseCase;
-  IAcceptProposalController: IAcceptProposalController;
-  IDismissProposalController: IDismissProposalController;
-  IReopenProposalController: IReopenProposalController;
+  IPinJobUseCase: IPinJobUseCase;
+  IPinJobController: IPinJobController;
+  IArchiveExpiredUseCase: IArchiveExpiredUseCase;
+  IArchiveExpiredController: IArchiveExpiredController;
   IDeleteJobUseCase: IDeleteJobUseCase;
   IDeleteJobController: IDeleteJobController;
   INotesRepository: INotesRepository;

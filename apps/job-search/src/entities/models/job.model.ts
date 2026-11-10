@@ -4,6 +4,7 @@ import {
   type JobStatus,
   OPEN_STATUSES,
 } from "../job-lifecycle";
+import { TO_APPLY_STATUSES } from "../rank";
 import type { ActivityEntry, RecordAdded } from "./activity.model";
 import type { CompanyRef } from "./company.model";
 import {
@@ -35,12 +36,11 @@ export const EMPLOYMENT_TYPES = [
   "contract-to-hire",
 ] as const;
 
-// Where a job stands in Hector's review (KTD8): Claude's proposals wait as pending until he
-// accepts or dismisses them; the jobs he adds are accepted from the start.
+// The retired review queue's states and dismiss reasons (KTD8 as revised 2026-11-10, U19): only
+// the schema's columns and checks read them, until the migration that drops the columns.
 export const REVIEW_STATES = ["pending", "accepted", "dismissed"] as const;
 export type ReviewState = (typeof REVIEW_STATES)[number];
 
-// Why Hector dismissed a proposal (KTD8).
 export const DISMISS_REASONS = [
   "not-hiring",
   "wrong-level",
@@ -73,8 +73,13 @@ export type JobFacts = {
   payMin: number | null;
   payMax: number | null;
   postingUrl: string | null;
+  // The posting's own date, which the ranked list's freshness and expiry read (KTD23, KTD24).
+  postedOn: string | null;
   // Claude's summary of the posting, never the posting itself: outside text, kept short (KTD21).
   summary: string | null;
+  // Why Claude added it, when Claude did (R20 as revised), and the sweep's fit score, 1 to 10.
+  reason: string | null;
+  score: number | null;
   foundOn: string;
   sourceId: string;
   travelPercent: number | null;
@@ -82,14 +87,11 @@ export type JobFacts = {
   teamSize: number | null;
 };
 
-// Where a job stands: its status (job-lifecycle.ts) and Hector's review (KTD8). Claude's reason
-// comes with its proposal; a dismissal's reason and note with Hector's call.
+// Where a job stands: its status (job-lifecycle.ts), and when it was pinned to the top of the
+// ranked list (R27), or null.
 export type JobState = {
   status: JobStatus;
-  reviewState: ReviewState;
-  proposalReason: string | null;
-  dismissReason: DismissReason | null;
-  dismissNote: string | null;
+  pinnedAt: Date | null;
 };
 
 // A job as it's read: its company and lead source by name too.
@@ -121,7 +123,9 @@ export type JobDetail = {
 // One interaction linked to a job, with the person it was with.
 export type JobOutreach = { interaction: Interaction; person: PersonRef };
 
-// A job as a list shows it, with the updatedAt a change from the list sends back (R22).
+// A job as a list shows it, with the updatedAt a change from the list sends back (R22). The ranked
+// list's rows show its pay, score, posting date (or the day it was found), reason and pin too
+// (R27).
 export type JobSummary = Pick<
   Job,
   | "id"
@@ -133,8 +137,13 @@ export type JobSummary = Pick<
   | "appliedOn"
   | "location"
   | "workMode"
-  | "reviewState"
-  | "dismissReason"
+  | "payMin"
+  | "payMax"
+  | "postedOn"
+  | "foundOn"
+  | "score"
+  | "reason"
+  | "pinnedAt"
   | "updatedAt"
 >;
 
@@ -149,8 +158,13 @@ export function jobSummary(job: Job): JobSummary {
     appliedOn: job.appliedOn,
     location: job.location,
     workMode: job.workMode,
-    reviewState: job.reviewState,
-    dismissReason: job.dismissReason,
+    payMin: job.payMin,
+    payMax: job.payMax,
+    postedOn: job.postedOn,
+    foundOn: job.foundOn,
+    score: job.score,
+    reason: job.reason,
+    pinnedAt: job.pinnedAt,
     updatedAt: job.updatedAt,
   };
 }
@@ -158,16 +172,22 @@ export function jobSummary(job: Job): JobSummary {
 // A job that's gone, as its delete answers: which one, and the company whose page listed it.
 export type DeletedJob = { id: string; role: string; companyId: string };
 
-// Another job, as a duplicate names it (R20): which job holds the posting, and where it stands.
-export type DuplicateJob = Pick<
-  Job,
-  "id" | "role" | "reviewState" | "dismissReason"
-> & { company: string };
+// Another job, as a duplicate names it (R20): which job holds the posting, and its status, which
+// says when it's archived.
+export type DuplicateJob = Pick<Job, "id" | "role" | "status"> & {
+  company: string;
+};
 
-// A job as its history records it: the company and source by name.
+// A job as its history records it: the company and source by name, and whether it's pinned, as
+// pin_job logs it.
 export function jobLogged(job: Job): Record<string, unknown> {
-  const { id, company, source, updatedAt, ...rest } = job;
-  return { company: company.name, source: source.name, ...rest };
+  const { id, company, source, updatedAt, pinnedAt, ...rest } = job;
+  return {
+    company: company.name,
+    source: source.name,
+    ...rest,
+    pinned: pinnedAt !== null,
+  };
 }
 
 const levelSchema = z.enum(LEVELS, {
@@ -198,6 +218,14 @@ const jobDetailsSchema = z.object({
   payMin: paySchema.nullable().optional(),
   payMax: paySchema.nullable().optional(),
   summary: optionalText(2000).optional(),
+  postedOn: dateSchema.nullable().optional(),
+  reason: optionalText(500).optional(),
+  score: z
+    .int({ error: "Use a whole number from 1 to 10" })
+    .min(1, { error: "At least 1" })
+    .max(10, { error: "At most 10" })
+    .nullable()
+    .optional(),
   foundOn: dateSchema.optional(),
   travelPercent: z
     .int({ error: "Use a whole percentage" })
@@ -228,19 +256,9 @@ function bandInOrder(
   }
 }
 
-// propose_job's input (R20): Claude's find, with the posting's link, its source and Claude's reason.
-// It waits in Hector's review queue.
-export const proposeJobSchema = jobDetailsSchema
-  .extend({
-    companyId: z.uuid(),
-    role: requiredText(120, "A job needs its role"),
-    postingUrl: httpLink(2000),
-    source: sourceNameSchema,
-    reason: requiredText(500, "Say why it's worth Hector's look"),
-  })
-  .superRefine(bandInOrder);
-
-// The add-job form's input: a job Hector adds, the posting's link optional. It's accepted at once.
+// add_job's input and the add-job form's (R20 as revised 2026-11-10): a job for the ranked list,
+// Hector's or Claude's. Claude's also needs the posting's link and a reason, which the use case
+// checks, since only who is acting tells them apart (KTD3).
 export const addJobSchema = jobDetailsSchema
   .extend({
     companyId: z.uuid(),
@@ -249,13 +267,11 @@ export const addJobSchema = jobDetailsSchema
     source: sourceNameSchema,
   })
   .superRefine(bandInOrder);
-
-// A new job, as either input reads.
-export type NewJobInput = z.output<typeof addJobSchema> & { reason?: string };
+export type NewJobInput = z.output<typeof addJobSchema>;
 
 // update_job's input: a change to the facts given, against the updatedAt read with the job (R22).
-// Null clears a fact. A status moves only with set_job_status or close_job, the review only with
-// Hector's call, and applied-on, for Claude, only with a dated status move (KTD3).
+// Null clears a fact. A status moves only with set_job_status or close_job, and applied-on, for
+// Claude, only with a dated status move (KTD3).
 export const updateJobSchema = jobDetailsSchema
   .extend({
     id: z.uuid(),
@@ -292,7 +308,8 @@ export const closeJobSchema = z.object({
   reason: requiredText(200, "Say why it's archived"),
 });
 
-// A status move, as either input reads.
+// A status move, as either input reads, or the daily expiry run makes it against the updatedAt it
+// read (KTD24).
 export type StatusMoveInput = {
   id: string;
   status: JobStatus;
@@ -300,49 +317,33 @@ export type StatusMoveInput = {
   reason?: string;
   nextStep?: string | null;
   nextDate?: string | null;
+  updatedAt?: Date;
 };
-
-// Accepting or reopening a proposal: which one, and the updatedAt read with it, so Hector never
-// decides on a version he hasn't seen (R22, revised 2026-10-29).
-export const reviewProposalSchema = z.object({
-  id: z.uuid(),
-  updatedAt: timeSchema,
-});
-
-// Dismissing a proposal: one of the reasons, and a note if Hector adds one, against the updatedAt
-// read with it.
-export const dismissProposalSchema = reviewProposalSchema.extend({
-  reason: z.enum(DISMISS_REASONS, {
-    error: `Use one of: ${DISMISS_REASONS.join(", ")}`,
-  }),
-  note: optionalText(200).optional(),
-});
 
 // Which job: get_job's input, and deleting one's.
 export const jobIdSchema = z.object({ id: z.uuid() });
 
-// What Hector decides about a proposal (R20), against the updatedAt he read with it.
-export type ProposalDecision = { id: string; updatedAt: Date } & (
-  | { decision: "accept" }
-  | { decision: "reopen" }
-  | { decision: "dismiss"; reason: DismissReason; note: string | null }
-);
+// pin_job's input (R27): pin a job not yet applied to at the top of the ranked list, or unpin it.
+export const pinJobSchema = z.object({
+  id: z.uuid(),
+  pinned: z.boolean({ error: "Say true to pin, or false to unpin" }),
+});
+export type PinJobInput = z.output<typeof pinJobSchema>;
 
 // The most jobs a page of find_jobs holds.
 export const JOB_PAGE_MAX = 50;
 
-// find_jobs' input: the owner's jobs, accepted ones unless asked otherwise (KTD8), narrowed to
-// open or archived ones (every ended status, the UX plan's Q6, so closed is the one status) or one
-// status, to one company, and to those whose next step has no date, by next date, a page at a time.
+// find_jobs' input: the owner's jobs, narrowed to open or archived ones (every ended status, the
+// UX plan's Q6, so closed is the one status) or one status, to one company, and to those whose next
+// step has no date, by next date, a page at a time. `to-apply` is the ranked list instead (R27),
+// in the rank's order.
 export const findJobsSchema = z.object({
   status: z
-    .enum(["open", "archived", ...OPEN_STATUSES, ...CLOSED_STATUSES], {
-      error: "Use open, archived or a status",
-    })
+    .enum(
+      ["open", "archived", "to-apply", ...OPEN_STATUSES, ...CLOSED_STATUSES],
+      { error: "Use open, archived, to-apply or a status" },
+    )
     .optional(),
-  reviewState: z
-    .enum(REVIEW_STATES, { error: `Use one of: ${REVIEW_STATES.join(", ")}` })
-    .default("accepted"),
   companyId: z.uuid().optional(),
   // Only jobs whose next step has no date (the UX plan's UX6).
   undated: z.boolean().optional(),
@@ -350,9 +351,6 @@ export const findJobsSchema = z.object({
   offset: z.int().min(0).default(0),
 });
 export type JobQuery = z.output<typeof findJobsSchema>;
-
-// list_proposals' input: find_jobs' filters but the review state, which is always the queue's.
-export const listProposalsSchema = findJobsSchema.omit({ reviewState: true });
 
 // The statuses a find_jobs filter names: a group, or one; null for every status.
 export function statusesFor(
@@ -363,6 +361,9 @@ export function statusesFor(
   }
   if (status === "open") {
     return OPEN_STATUSES;
+  }
+  if (status === "to-apply") {
+    return TO_APPLY_STATUSES;
   }
   return status === "archived" ? CLOSED_STATUSES : [status];
 }

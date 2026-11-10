@@ -32,7 +32,7 @@ const save = (
   values: Partial<UpdateSettingsInput> = {},
 ): UpdateSettingsInput => ({
   targets: TARGETS,
-  pendingCap: 8,
+  payFloor: 123_456,
   updatedAt: read.updatedAt,
   ...values,
 });
@@ -65,7 +65,7 @@ describeEachBackend("updateSettings", () => {
 
     expect(saved).toEqual({
       targets: TARGETS,
-      pendingCap: 8,
+      payFloor: 123_456,
       updatedAt: expect.any(Date),
     });
     expect(await app.getSettings(OWNER)).toEqual(saved);
@@ -79,7 +79,7 @@ describeEachBackend("updateSettings", () => {
           { field: "conversationsHeld", before: null, after: 2 },
           { field: "applications", before: null, after: 5 },
           { field: "practiceSessions", before: null, after: 4 },
-          { field: "pendingCap", before: 10, after: 8 },
+          { field: "payFloor", before: null, after: 123_456 },
         ],
       }),
     ]);
@@ -128,12 +128,12 @@ describeEachBackend("updateSettings", () => {
     const other = await app.updateSettings(HECTOR, save(read));
 
     const refusal = await app
-      .updateSettings(HECTOR, save(read, { pendingCap: 20 }))
+      .updateSettings(HECTOR, save(read, { payFloor: 654_321 }))
       .catch((err: unknown) => err);
 
     expect(refusal).toBeInstanceOf(ConflictError);
     expect((refusal as ConflictError).current).toEqual(other);
-    expect((await app.getSettings(OWNER)).pendingCap).toBe(8);
+    expect((await app.getSettings(OWNER)).payFloor).toBe(123_456);
   });
 
   it("writes and logs nothing when nothing changed", async () => {

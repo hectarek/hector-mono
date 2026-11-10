@@ -6,7 +6,7 @@ import { getInjection } from "@/di/container";
 import type { Settings } from "@/src/entities/models/settings.model";
 
 // Hector's settings (docs/build-plan.md U5): get_settings reads them, so Claude sees the targets
-// and the queue's cap the settings page shows (U10).
+// and the pay floor the settings page shows (U10).
 export async function getSettings(
   input: unknown,
 ): Promise<ActionResult<Settings>> {

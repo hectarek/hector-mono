@@ -3,9 +3,9 @@ import { within } from "@testing-library/dom";
 import { withFrom } from "@/app/_lib/back-link";
 import CompanyPage from "@/app/(main)/companies/[id]/page";
 import { saveCompany } from "@/app/actions/companies";
-import { addJob, dismissProposal } from "@/app/actions/jobs";
+import { addJob, closeJob } from "@/app/actions/jobs";
 import { NotFoundPage, type Redirected } from "@/tests/_support/next";
-import { aProposal, dataOf } from "@/tests/_support/screens";
+import { aClaudeJob, dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
 import { signInAs } from "@/tests/_support/session";
 
@@ -124,41 +124,28 @@ describe("a company's page", () => {
     expect(
       jobs.getByRole("button", { name: "Add a job" }).getAttribute("href"),
     ).toBe(`/jobs/new?company=${company.id}`);
-    expect(page.queryByRole("region", { name: "To review" })).toBeNull();
-    expect(page.queryByRole("region", { name: "Dismissed" })).toBeNull();
   });
 
-  // Each keeps the company from its delete, so the page shows them.
-  it("lists the proposals that name the company, waiting or dismissed, under their own headings", async () => {
+  // An archived job keeps the company from its delete, so the page lists it with the rest.
+  it("lists Claude's finds and archived jobs among the company's jobs", async () => {
     signInAs("owner");
     const company = await add({ name: "Initech Labs" });
-    const waiting = await aProposal(company.id, { role: "Gadget designer" });
-    const dismissed = await aProposal(company.id, { role: "Anvil tester" });
+    const found = await aClaudeJob(company.id, { role: "Gadget designer" });
+    const passed = await aClaudeJob(company.id, { role: "Anvil tester" });
     signInAs("owner");
     dataOf(
-      await dismissProposal({
-        id: dismissed.id,
-        updatedAt: dismissed.updatedAt.toISOString(),
-        reason: "wrong-level",
-      }),
+      await closeJob({ id: passed.id, status: "skipped", reason: "Not a fit" }),
     );
 
     const page = await companyPage(company.id);
 
-    expect(
-      within(page.getByRole("region", { name: "Jobs" })).getByText(
-        "No jobs here yet.",
-      ),
-    ).toBeTruthy();
-    expect(
-      within(page.getByRole("region", { name: "To review" }))
-        .getAllByRole("link", { name: "Gadget designer" })[0]
-        ?.getAttribute("href"),
-    ).toBe(withFrom(`/jobs/${waiting.id}`, `/companies/${company.id}`));
-    expect(
-      within(page.getByRole("region", { name: "Dismissed" })).getAllByText(
-        "Wrong level",
-      ),
-    ).not.toHaveLength(0);
+    const jobs = within(
+      within(page.getByRole("region", { name: "Jobs" })).getByRole("table"),
+    );
+    for (const job of [found, passed]) {
+      expect(
+        jobs.getByRole("link", { name: job.role }).getAttribute("href"),
+      ).toBe(withFrom(`/jobs/${job.id}`, `/companies/${company.id}`));
+    }
   });
 });

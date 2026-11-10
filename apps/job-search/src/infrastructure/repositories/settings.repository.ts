@@ -94,14 +94,14 @@ export class SettingsRepository
   }
 }
 
-function toColumns({ targets, pendingCap }: SettingsValues) {
+function toColumns({ targets, payFloor }: SettingsValues) {
   return {
     messagesSentTarget: targets.messagesSent,
     conversationsHeldTarget: targets.conversationsHeld,
     applicationsTarget: targets.applications,
     practiceSessionsTarget: targets.practiceSessions,
     screensReachedTarget: targets.screensReached,
-    pendingCap,
+    payFloor,
   };
 }
 
@@ -114,7 +114,7 @@ function toSettings(row: SettingsRow): Settings {
       practiceSessions: row.practiceSessionsTarget,
       screensReached: row.screensReachedTarget,
     },
-    pendingCap: row.pendingCap,
+    payFloor: row.payFloor,
     updatedAt: row.updatedAt,
   };
 }

@@ -20,15 +20,15 @@ export type ConversationToDebrief = {
 };
 
 // What This week shows and get_today answers (R9), in R9's order; the calendar comes with U13 and
-// interview rounds' debriefs with U12. Decisions: proposals waiting for Hector and conversations
-// to debrief. Due: jobs and people whose next date is today or earlier (a stale candidate shows
-// once, as one), stale candidates, and practice reviews due. Claude's sessions of the last 7 days.
-// The week's counts so far, beside Hector's targets.
+// interview rounds' debriefs with U12. Apply next: the top three of the ranked list (R27).
+// Decisions: conversations to debrief. Due: jobs and people whose next date is today or earlier (a
+// stale candidate shows once, as one), stale candidates, and practice reviews due. Claude's
+// sessions of the last 7 days. The week's counts so far, beside Hector's targets.
 export type TodayView = {
   today: string;
   monday: string;
+  applyNext: JobSummary[];
   decisions: {
-    proposals: JobSummary[];
     debriefs: ConversationToDebrief[];
   };
   due: {

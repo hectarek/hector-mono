@@ -21,16 +21,16 @@ import {
   WEEKLY_COUNTS,
 } from "@/src/entities/models/settings.model";
 
-type Setting = (typeof WEEKLY_COUNTS)[number] | "pendingCap";
+type Setting = (typeof WEEKLY_COUNTS)[number] | "payFloor";
 type Fields = Record<Setting, string>;
 
-// Settings as the form's text: a blank target for none.
-function fieldsOf({ targets, pendingCap }: Settings): Fields {
+// Settings as the form's text: a blank target or floor for none.
+function fieldsOf({ targets, payFloor }: Settings): Fields {
   return {
     ...(Object.fromEntries(
       WEEKLY_COUNTS.map((count) => [count, targets[count]?.toString() ?? ""]),
     ) as Record<(typeof WEEKLY_COUNTS)[number], string>),
-    pendingCap: String(pendingCap),
+    payFloor: payFloor?.toString() ?? "",
   };
 }
 
@@ -44,11 +44,11 @@ function isSettings(value: unknown): value is Settings {
     typeof value === "object" &&
     value !== null &&
     "targets" in value &&
-    "pendingCap" in value
+    "payFloor" in value
   );
 }
 
-// Hector's weekly targets and queue cap (R12). Only he changes them (R21), so Claude's session
+// Hector's weekly targets and pay floor (R12 as revised 2026-11-10). Only he changes them (R21), so Claude's session
 // sees the form off. A save is made against the updatedAt read with them, and on a conflict the
 // form stays open on the settings as they are now, with what was typed kept (R22, KTD15).
 export function SettingsForm({
@@ -68,7 +68,7 @@ export function SettingsForm({
       targets: Object.fromEntries(
         WEEKLY_COUNTS.map((count) => [count, numberOf(fields[count])]),
       ),
-      pendingCap: numberOf(fields.pendingCap),
+      payFloor: numberOf(fields.payFloor),
       updatedAt: form.opened.updatedAt?.toISOString() ?? null,
     };
     // Saved, the form stays here, open on the settings as saved.
@@ -114,8 +114,8 @@ export function SettingsForm({
           <FieldGroup>{WEEKLY_COUNTS.map((count) => field(count))}</FieldGroup>
         </FieldSet>
         {field(
-          "pendingCap",
-          "The most proposals from Claude that wait for your review at once",
+          "payFloor",
+          "The yearly pay, in US dollars, the ranked list weighs a posted band against: a top under it ranks lower, a bottom at or over it higher. Blank for none.",
         )}
       </div>
       {failure && failure.code !== "conflict" ? (

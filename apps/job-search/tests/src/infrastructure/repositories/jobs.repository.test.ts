@@ -20,7 +20,7 @@ const THEM: ChangeContext = { actor: "owner", ownerId: ANOTHER_OWNER };
 const THEIR_CLAUDE: ChangeContext = {
   actor: "agent",
   ownerId: ANOTHER_OWNER,
-  tool: "propose_job",
+  tool: "add_job",
 };
 
 describeEachBackend("the jobs repository", () => {
@@ -42,18 +42,14 @@ describeEachBackend("the jobs repository", () => {
     const initech = await jobs.company("Initech", ANOTHER_OWNER);
     const theirs = await jobs.add(initech, { postingUrl: posting }, THEM);
     const moved = await app.moveJob(THEM, { id: theirs.id, status: "target" });
-    await jobs.propose(initech, {}, THEIR_CLAUDE);
+    await jobs.byClaude(initech, {}, THEIR_CLAUDE);
     const repo = app.repos.jobs;
 
+    expect(await repo.listToApply(OWNER)).toEqual([]);
     await app.repos.transactions.startTransaction(async (tx) => {
       expect(await repo.findByPostingKey(OWNER, key, tx)).toBeUndefined();
-      expect(await repo.countPending(OWNER, tx)).toBe(0);
       expect(await repo.getForUpdate(OWNER, theirs.id, tx)).toBeUndefined();
-      expect(await repo.countForCompany(OWNER, initech, tx)).toEqual({
-        pending: 0,
-        accepted: 0,
-        dismissed: 0,
-      });
+      expect(await repo.countForCompany(OWNER, initech, tx)).toBe(0);
       await repo.delete(OWNER, theirs.id, tx);
     });
     await expect(
@@ -98,8 +94,8 @@ describeEachBackend("the jobs repository", () => {
 });
 
 // What only the database shows: the lock itself (KTD8). On Neon each request has a connection of
-// its own, and two proposals at once are kept apart by this lock alone.
-describe("the queue's lock [postgres]", () => {
+// its own, and two adds of one posting at once are kept apart by this lock alone.
+describe("the posting lock [postgres]", () => {
   beforeEach(resetDatabase);
 
   // Read through the transaction's own connection: PGlite has one, so sql() would wait for it.
@@ -116,7 +112,7 @@ describe("the queue's lock [postgres]", () => {
     const repos = postgresRepositories();
 
     const held = await repos.transactions.startTransaction(async (tx) => {
-      await repos.jobs.lockQueue(OWNER, tx);
+      await repos.jobs.lockPostings(OWNER, tx);
       return advisoryLocks(tx);
     });
 

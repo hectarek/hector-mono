@@ -14,13 +14,13 @@ import {
   type JobQuery,
   type JobSummary,
   jobSummary,
-  type ReviewState,
   statusesFor,
 } from "@/src/entities/models/job.model";
 import type {
   JobStatusChange,
   LoggedStatusChange,
 } from "@/src/entities/models/job-status-change.model";
+import { TO_APPLY_STATUSES } from "@/src/entities/rank";
 import { nextUpdatedAt } from "@/src/infrastructure/repositories/updated-at.mock";
 
 type StoredJob = JobRow & { id: string; updatedAt: Date };
@@ -43,7 +43,7 @@ export class MockJobsRepository implements IJobsRepository {
   ) {}
 
   // The mock's transactions already run one at a time (MockTransactionManagerService).
-  async lockQueue(): Promise<void> {}
+  async lockPostings(): Promise<void> {}
 
   async create(ownerId: string, row: JobRow): Promise<Job> {
     if (
@@ -103,14 +103,13 @@ export class MockJobsRepository implements IJobsRepository {
 
   async find(
     ownerId: string,
-    { status, reviewState, companyId, undated, limit, offset }: JobQuery,
+    { status, companyId, undated, limit, offset }: JobQuery,
   ): Promise<JobPage> {
     const statuses = statusesFor(status);
     const matching = this.rows
       .filter(
         ({ ownerId: owner, job }) =>
           owner === ownerId &&
-          job.reviewState === reviewState &&
           (!statuses || statuses.includes(job.status)) &&
           (!companyId || job.companyId === companyId) &&
           (!undated || isUndated(job)),
@@ -131,6 +130,18 @@ export class MockJobsRepository implements IJobsRepository {
       jobs: page,
       nextOffset: matching.length > offset + limit ? offset + limit : null,
     };
+  }
+
+  async listToApply(ownerId: string): Promise<Job[]> {
+    return Promise.all(
+      this.rows
+        .filter(
+          ({ ownerId: owner, job }) =>
+            owner === ownerId &&
+            (TO_APPLY_STATUSES as readonly JobStatus[]).includes(job.status),
+        )
+        .map(({ job }) => this.read(ownerId, job)),
+    );
   }
 
   async listDue(ownerId: string, day: string): Promise<JobSummary[]> {
@@ -170,7 +181,6 @@ export class MockJobsRepository implements IJobsRepository {
     return this.rows.filter(
       ({ ownerId: owner, job }) =>
         owner === ownerId &&
-        job.reviewState === "accepted" &&
         job.appliedOn !== null &&
         job.appliedOn >= from &&
         job.appliedOn <= to,
@@ -203,31 +213,15 @@ export class MockJobsRepository implements IJobsRepository {
     if (!row) {
       return undefined;
     }
-    const { id, role, company, reviewState, dismissReason } = await this.read(
-      ownerId,
-      row.job,
-    );
-    return { id, role, company: company.name, reviewState, dismissReason };
+    const { id, role, company, status } = await this.read(ownerId, row.job);
+    return { id, role, company: company.name, status };
   }
 
-  async countPending(ownerId: string): Promise<number> {
+  async countForCompany(ownerId: string, companyId: string): Promise<number> {
     return this.rows.filter(
       ({ ownerId: owner, job }) =>
-        owner === ownerId && job.reviewState === "pending",
+        owner === ownerId && job.companyId === companyId,
     ).length;
-  }
-
-  async countForCompany(
-    ownerId: string,
-    companyId: string,
-  ): Promise<Record<ReviewState, number>> {
-    const counts = { pending: 0, accepted: 0, dismissed: 0 };
-    for (const { ownerId: owner, job } of this.rows) {
-      if (owner === ownerId && job.companyId === companyId) {
-        counts[job.reviewState] += 1;
-      }
-    }
-    return counts;
   }
 
   async addStatusChange(
@@ -261,8 +255,7 @@ export class MockJobsRepository implements IJobsRepository {
     );
   }
 
-  // The owner's accepted jobs that match, in the order given, then by role and id, as lists show
-  // them.
+  // The owner's jobs that match, in the order given, then by role and id, as lists show them.
   private summaries(
     ownerId: string,
     matches: (job: StoredJob) => boolean,
@@ -270,10 +263,7 @@ export class MockJobsRepository implements IJobsRepository {
   ): Promise<JobSummary[]> {
     return Promise.all(
       this.rows
-        .filter(
-          ({ ownerId: owner, job }) =>
-            owner === ownerId && job.reviewState === "accepted" && matches(job),
-        )
+        .filter(({ ownerId: owner, job }) => owner === ownerId && matches(job))
         .map(({ job }) => job)
         .sort(
           (a, b) =>

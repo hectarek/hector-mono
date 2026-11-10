@@ -28,12 +28,13 @@ import { saveCompanyUseCase } from "@/src/application/use-cases/companies/save-c
 import { importSnapshotUseCase } from "@/src/application/use-cases/import/import-snapshot.use-case";
 import { deleteInteractionUseCase } from "@/src/application/use-cases/interactions/delete-interaction.use-case";
 import { logInteractionUseCase } from "@/src/application/use-cases/interactions/log-interaction.use-case";
+import { archiveExpiredUseCase } from "@/src/application/use-cases/jobs/archive-expired.use-case";
 import { createJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
 import { deleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
 import { findJobsUseCase } from "@/src/application/use-cases/jobs/find-jobs.use-case";
 import { getJobUseCase } from "@/src/application/use-cases/jobs/get-job.use-case";
 import { moveJobUseCase } from "@/src/application/use-cases/jobs/move-job.use-case";
-import { reviewProposalUseCase } from "@/src/application/use-cases/jobs/review-proposal.use-case";
+import { pinJobUseCase } from "@/src/application/use-cases/jobs/pin-job.use-case";
 import { updateJobUseCase } from "@/src/application/use-cases/jobs/update-job.use-case";
 import { addNoteUseCase } from "@/src/application/use-cases/notes/add-note.use-case";
 import { deleteNoteUseCase } from "@/src/application/use-cases/notes/delete-note.use-case";
@@ -195,6 +196,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     importRefs,
     transactions,
   } = repos;
+  const moveJob = moveJobUseCase(jobs, activity, transactions, log);
   return {
     repos,
     listActivity: listActivityUseCase(activity, log),
@@ -219,13 +221,12 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    findJobs: findJobsUseCase(jobs, log),
+    findJobs: findJobsUseCase(jobs, settings, log),
     getJob: getJobUseCase(jobs, notes, activity, people, interactions, log),
     createJob: createJobUseCase(
       jobs,
       companies,
       sources,
-      settings,
       activity,
       transactions,
       log,
@@ -238,8 +239,9 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    moveJob: moveJobUseCase(jobs, activity, transactions, log),
-    reviewProposal: reviewProposalUseCase(jobs, activity, transactions, log),
+    moveJob,
+    pinJob: pinJobUseCase(jobs, activity, transactions, log),
+    archiveExpired: archiveExpiredUseCase(jobs, moveJob, log),
     deleteJob: deleteJobUseCase(
       jobs,
       notes,

@@ -3,13 +3,13 @@ import {
   addJobSchema,
   closeJobSchema,
   findJobsSchema,
-  proposeJobSchema,
+  pinJobSchema,
   setJobStatusSchema,
   updateJobSchema,
 } from "@/src/entities/models/job.model";
 
 const ID = "00000000-0000-4000-8000-0000000000c1";
-const PROPOSAL = {
+const CLAUDES_JOB = {
   companyId: ID,
   role: "Widget engineer",
   postingUrl: "https://boards.greenhouse.io/acme/jobs/4001",
@@ -21,14 +21,11 @@ const messageOf = (result: { error?: { issues: { message: string }[] } }) =>
   result.error?.issues[0]?.message;
 
 describe("a job's inputs", () => {
-  it("take a proposal with its link, source and reason, and a job Hector adds without a link", () => {
-    expect(proposeJobSchema.safeParse(PROPOSAL).success).toBe(true);
-    for (const missing of ["postingUrl", "source", "reason"]) {
-      const without = Object.fromEntries(
-        Object.entries(PROPOSAL).filter(([key]) => key !== missing),
-      );
-      expect(proposeJobSchema.safeParse(without).success).toBe(false);
-    }
+  // The use case checks Claude's link and reason, since only who's acting tells them apart (KTD3).
+  it("take Claude's job with its link, reason, score and posting date, and Hector's with its source alone", () => {
+    expect(
+      addJobSchema.parse({ ...CLAUDES_JOB, score: 8, postedOn: "2026-10-20" }),
+    ).toMatchObject({ score: 8, postedOn: "2026-10-20" });
     expect(
       addJobSchema.safeParse({
         companyId: ID,
@@ -36,21 +33,35 @@ describe("a job's inputs", () => {
         source: "Referral",
       }).success,
     ).toBe(true);
+    expect(
+      addJobSchema.safeParse({ ...CLAUDES_JOB, source: undefined }).success,
+    ).toBe(false);
+  });
+
+  it("take a fit score from 1 to 10, as a whole number", () => {
+    for (const score of [0, 11, 7.5]) {
+      expect(addJobSchema.safeParse({ ...CLAUDES_JOB, score }).success).toBe(
+        false,
+      );
+    }
+    expect(addJobSchema.safeParse({ ...CLAUDES_JOB, score: 10 }).success).toBe(
+      true,
+    );
   });
 
   it("refuse a link that isn't http or https, and a band whose top is below its bottom", () => {
     expect(
       messageOf(
-        proposeJobSchema.safeParse({
-          ...PROPOSAL,
+        addJobSchema.safeParse({
+          ...CLAUDES_JOB,
           postingUrl: "javascript:alert(1)",
         }),
       ),
     ).toBe("Use an http or https link, like https://example.com");
     expect(
       messageOf(
-        proposeJobSchema.safeParse({
-          ...PROPOSAL,
+        addJobSchema.safeParse({
+          ...CLAUDES_JOB,
           payMin: 67_890,
           payMax: 12_345,
         }),
@@ -74,14 +85,16 @@ describe("a job's inputs", () => {
     ).toBe(false);
   });
 
-  it("take a change only with the updatedAt read, and find accepted jobs unless told otherwise", () => {
+  it("take a change only with the updatedAt read, find every job unless told otherwise, and pin only with a yes or a no", () => {
     expect(
       updateJobSchema.safeParse({ id: ID, role: "Engineer" }).success,
     ).toBe(false);
-    expect(findJobsSchema.parse({})).toEqual({
-      reviewState: "accepted",
-      limit: 20,
-      offset: 0,
-    });
+    expect(findJobsSchema.parse({})).toEqual({ limit: 20, offset: 0 });
+    expect(findJobsSchema.parse({ status: "to-apply" }).status).toBe(
+      "to-apply",
+    );
+    expect(messageOf(pinJobSchema.safeParse({ id: ID, pinned: "yes" }))).toBe(
+      "Say true to pin, or false to unpin",
+    );
   });
 });

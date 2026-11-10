@@ -15,26 +15,22 @@ import {
   type CompanyRef,
   companyFacts,
 } from "@/src/entities/models/company.model";
-import type { ReviewState } from "@/src/entities/models/job.model";
 
 export type IDeleteCompanyUseCase = ReturnType<typeof deleteCompanyUseCase>;
 
-// What keeps a company from its delete: its jobs, one review state at a time, and its people.
-// "a job", "2 proposals", "a person".
-const HELD: Record<ReviewState | "people", [one: string, many: string]> = {
-  accepted: ["a job", "jobs"],
-  pending: ["a proposal", "proposals"],
-  dismissed: ["a dismissed proposal", "dismissed proposals"],
+// What keeps a company from its delete: its jobs and its people. "a job", "2 people".
+const HELD = {
+  jobs: ["a job", "jobs"],
   people: ["a person", "people"],
-};
+} as const satisfies Record<string, readonly [one: string, many: string]>;
 
-// "a job and a proposal": en-GB lists without the serial comma, as the app's copy does.
+// "2 jobs and a person": en-GB lists without the serial comma, as the app's copy does.
 const LIST = new Intl.ListFormat("en-GB", { type: "conjunction" });
 
 // Deletes a company, which only Hector may do (R21): Claude's try is refused, and logged, before
 // anything is read. A company that has jobs or people is refused, naming them: they'd lose their
-// employer. Proposals count too, dismissed ones included, since a dismissed proposal is what keeps
-// its posting from coming back (R20). The history keeps the company's facts as they were.
+// employer. Archived jobs count too, since an archived job is what keeps its posting from coming
+// back (R20). The history keeps the company's facts as they were.
 export const deleteCompanyUseCase = (
   companiesRepository: ICompaniesRepository,
   jobsRepository: IJobsRepository,
@@ -67,7 +63,7 @@ export const deleteCompanyUseCase = (
         throw new NotFoundError("Couldn't find that company.");
       }
       const counts = {
-        ...(await jobsRepository.countForCompany(context.ownerId, id, tx)),
+        jobs: await jobsRepository.countForCompany(context.ownerId, id, tx),
         people: await peopleRepository.countForCompany(context.ownerId, id, tx),
       };
       const kinds = Object.keys(HELD) as (keyof typeof HELD)[];

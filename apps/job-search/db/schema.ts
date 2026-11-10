@@ -177,7 +177,10 @@ export const settings = pgTable(
     applicationsTarget: integer("applications_target"),
     practiceSessionsTarget: integer("practice_sessions_target"),
     screensReachedTarget: integer("screens_reached_target"),
-    pendingCap: integer("pending_cap").notNull(),
+    // The yearly pay the ranked list weighs a posted band against (KTD23); null when unset.
+    payFloor: integer("pay_floor"),
+    // The review queue's cap, unread since the queue retired (U19); a later migration drops it.
+    pendingCap: integer("pending_cap").notNull().default(10),
     updatedAt: updatedAt(),
   },
   (table) => [
@@ -186,12 +189,13 @@ export const settings = pgTable(
       sql`${table.messagesSentTarget} >= 0 and ${table.conversationsHeldTarget} >= 0 and ${table.applicationsTarget} >= 0 and ${table.practiceSessionsTarget} >= 0 and ${table.screensReachedTarget} >= 0`,
     ),
     check("settings_pending_cap_check", sql`${table.pendingCap} >= 1`),
+    check("settings_pay_floor_check", sql`${table.payFloor} >= 0`),
   ],
 );
 
-// Jobs (R1, U6): Hector's pipeline and Claude's proposals in one table, told apart by review_state
-// (KTD8). posting_key is the posting's link as posting-link.ts keys it, unique per owner, so a
-// posting is on one job whatever its review. A company or lead source with jobs can't be deleted.
+// Jobs (R1, U6): Hector's pipeline, with the jobs not yet applied to forming the ranked list (R27,
+// U19). posting_key is the posting's link as posting-link.ts keys it, unique per owner, so a
+// posting is on one job, archived ones included, and never comes back once archived (KTD8). A company or lead source with jobs can't be deleted.
 export const jobs = pgTable(
   "jobs",
   {
@@ -223,7 +227,19 @@ export const jobs = pgTable(
     employmentType:
       text("employment_type").$type<NonNullable<JobFacts["employmentType"]>>(),
     teamSize: integer("team_size"),
-    reviewState: text("review_state").$type<ReviewState>().notNull(),
+    // The posting's own date, which the ranked list's freshness and expiry read (KTD23, KTD24).
+    postedOn: day("posted_on"),
+    // The sweep's fit score, 1 to 10, when it gave one.
+    score: integer("score"),
+    // When the job was pinned to the top of the ranked list; null when it isn't.
+    pinnedAt: timestamp("pinned_at", { withTimezone: true }),
+    // The review queue's columns, unread since the queue retired (R20 as revised 2026-11-10, U19).
+    // A later migration drops review_state, dismiss_reason and dismiss_note; until then a new job
+    // takes review_state's default. proposal_reason holds Claude's reason for any job it adds.
+    reviewState: text("review_state")
+      .$type<ReviewState>()
+      .notNull()
+      .default("accepted"),
     proposalReason: text("proposal_reason"),
     dismissReason: text("dismiss_reason").$type<DismissReason>(),
     dismissNote: text("dismiss_note"),
@@ -264,6 +280,7 @@ export const jobs = pgTable(
       sql`${table.travelPercent} between 0 and 100`,
     ),
     check("jobs_team_size_check", sql`${table.teamSize} > 0`),
+    check("jobs_score_check", sql`${table.score} between 1 and 10`),
   ],
 );
 
