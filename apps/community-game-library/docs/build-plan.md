@@ -172,7 +172,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 
 **The app**
 
-- R43. The app installs to the home screen on iPhone and Android, opens full screen, works in light and dark mode, and is built for phones first while still working on a laptop. *asked*
+- R43. The app installs to the home screen on iPhone and Android, opens full screen, and is built for phones first while still working on a laptop. It has a light theme only (D12). *asked* (Revised 2026-11-10, Hector on the first style tiles: it had a dark mode too.)
 - R44. Opening the installed app after a day away shows the member's content quickly. The technical half sets the target from the recipes performance review. *gap*
 
 **Privacy**
@@ -192,6 +192,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 - D9. **Notices start in the app, and push follows.** The first release has the in-app inbox only, with no push and no email. Push is a later phase: about as much work again as the inbox (a service worker, storing each phone's subscription, a scheduled sender, the iPhone home-screen step, and testing on real phones), so not the same effort, which was Hector's test. The inbox is built so push is one more way to deliver the same notices, not a rewrite. (Hector, 2026-11-10, on Q7)
 - D10. **Friends now, groups later.** Who sees what follows friendship (R10, R30). Groups can come later as a second place to share, as on Facebook, where a post goes to your friends or to a group, each with its own visibility. So a shelf's and a night's audience is stored as where it's shared (friends, or the people invited), and a group would be a new kind of audience, not a rewrite. Why: it fits a circle of about 12 now, and lets other circles join without seeing each other's shelves. (Hector, 2026-11-10, on Q1)
 - D11. **Games added by hand match BGG's.** A game BGG doesn't list, such as a card game it lacks, has the same fields as a BGG game, with no exceptions, and is marked as ours, so the weekly refresh leaves it alone. If BGG lists it later, the admin merges ours into BGG's and its copies move over. (Hector, 2026-11-10, on Q11)
+- D12. **Light mode only.** The app has one theme, a light one, and ignores the phone's dark setting. Why: none of the first round's dark versions worked for Hector, and the game box look is printed cardboard, which reads as light. (Hector, 2026-11-10, on the first style tiles)
 
 ### Key flows
 
@@ -316,3 +317,4 @@ For the session that writes the technical half, once the recipes performance rev
 - **2026-11-10:** Hector's first answers. Taken: our own weekly-refreshed copy of BGG's catalog, filled before launch (D7); BGG's attributes with no tags of our own (D8, R6 dropped); in-app notices only for now (D9); the host invites to a night, with a "guests can invite others" switch and a calendar file (R30, R35); a vote and a table split (R38, R46); the folder name. Q1 became the visibility model (one group, friends or groups), with Q5 and Q12 folded in. Q6, Q8 and Q11 were reworded, and Q7 asked again with what push costs. Hector suggested a tabletop theme for the design. **Next:** Q1, then Q6, Q7, Q8 and Q11.
 - **2026-11-10:** Hector's second answers. Friends now and groups later, for about 12 people to start (D10, with friend links R49 and unfriending R50). A line for a game that's out, plus pass-along between friends, which Hector proposed (R24, R48). Guests without accounts, behind a host's switch (R47). No catalog agent: the admin adds games BGG lacks with BGG's fields (D11). Push isn't the same effort as the inbox, so it's a later phase (D9). The design goes toward game box and cardboard. **Next:** Hector checks the proposed items, then the style tiles.
 - **2026-11-10:** Hector agreed the product half as it stands, the proposed details included (D2 to D5, D10, D11, R48, R49). **Next:** the design system's style tiles.
+- **2026-11-10:** Hector's take on the first style tiles: Box lid and Punchboard, leaning Punchboard, and light mode only (D12, R43 revised). **Next:** round two of the style tiles, around those two.
