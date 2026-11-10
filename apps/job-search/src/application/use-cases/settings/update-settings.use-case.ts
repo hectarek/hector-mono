@@ -74,10 +74,10 @@ export const updateSettingsUseCase = (
   };
 };
 
-// Settings as their history names them: each target by its count, then the cap.
+// Settings as their history names them: each target by its count, then the pay floor.
 function asLogged({
   targets,
-  pendingCap,
+  payFloor,
 }: SettingsValues): Record<string, number | null> {
-  return { ...targets, pendingCap };
+  return { ...targets, payFloor };
 }

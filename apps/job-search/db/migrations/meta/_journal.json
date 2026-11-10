@@ -71,6 +71,20 @@
       "when": 1794094298763,
       "tag": "0009_drop_person_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794324815799,
+      "tag": "0010_ranked_list",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794324850477,
+      "tag": "0011_queue_to_list",
+      "breakpoints": true
     }
   ]
 }

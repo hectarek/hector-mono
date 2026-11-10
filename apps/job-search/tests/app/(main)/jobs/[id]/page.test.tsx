@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, setSystemTime } from "bun:test";
 import { within } from "@testing-library/dom";
+import { formatDay } from "@/app/_lib/format-day";
 import JobPage from "@/app/(main)/jobs/[id]/page";
-import { dismissProposal, setJobStatus } from "@/app/actions/jobs";
+import { pinJob, setJobStatus } from "@/app/actions/jobs";
 import { addNote } from "@/app/actions/notes";
 import { NotFoundPage } from "@/tests/_support/next";
-import { aCompany, aJob, aProposal, dataOf } from "@/tests/_support/screens";
+import { aClaudeJob, aCompany, aJob, dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
 import { signInAs } from "@/tests/_support/session";
 
@@ -23,7 +24,7 @@ afterEach(() => {
 });
 
 describe("a job's page", () => {
-  it("shows an accepted job's status with its moves, its facts, summary and notes, and its history", async () => {
+  it("shows a job's status with its moves, its facts, summary and notes, and its history", async () => {
     const job = await aJob(await aCompany(), {
       postingUrl: "https://boards.greenhouse.io/acme/jobs/77",
       payMin: 12_345,
@@ -115,23 +116,32 @@ describe("a job's page", () => {
     ).toBeTruthy();
   });
 
-  it("shows Hector a proposal's reason and his review, and Claude's session the same off", async () => {
-    const proposal = await aProposal(await aCompany());
+  // R27: a job not yet applied to is on the ranked list, with Pin and Not for me.
+  it("shows a job Claude added with its reason, fit score and posting date, and Pin and Not for me for both sessions", async () => {
+    const job = await aClaudeJob(await aCompany(), {
+      score: 8,
+      postedOn: "2026-10-20",
+    });
 
     signInAs("owner");
-    const hectors = await jobPage(proposal.id);
-    const review = within(hectors.getByRole("region", { name: "Review" }));
-    expect(review.getByText("Matches the target role")).toBeTruthy();
-    expect(review.getByRole("button", { name: "Accept" })).toBeTruthy();
-    expect(hectors.queryByRole("region", { name: "Status" })).toBeNull();
+    const hectors = await jobPage(job.id);
+    const facts = within(hectors.getByRole("region", { name: "Facts" }));
+    expect(facts.getByText("Matches the target role")).toBeTruthy();
+    expect(facts.getByText("8/10")).toBeTruthy();
+    expect(facts.getByText(formatDay("2026-10-20"))).toBeTruthy();
+    expect(
+      hectors.getByRole("button", { name: `Pin ${job.role}` }),
+    ).toBeTruthy();
+    expect(
+      hectors.getByRole("button", { name: `Not for me: ${job.role}` }),
+    ).toBeTruthy();
+    expect(hectors.getByRole("region", { name: "Status" })).toBeTruthy();
 
     signInAs("agent");
-    const claudes = await jobPage(proposal.id);
-    const off = within(claudes.getByRole("region", { name: "Review" }));
+    const claudes = await jobPage(job.id);
     expect(
-      off.getByRole<HTMLButtonElement>("button", { name: "Accept" }).disabled,
-    ).toBe(true);
-    expect(off.getByText("Only Hector")).toBeTruthy();
+      claudes.getByRole("button", { name: `Pin ${job.role}` }),
+    ).toBeTruthy();
     expect(
       claudes.getByRole<HTMLButtonElement>("button", { name: "Delete" })
         .disabled,
@@ -144,30 +154,31 @@ describe("a job's page", () => {
     ).toBeNull();
   });
 
-  // R20: a dismissed proposal changes only once Hector reopens it.
-  it("shows Claude's session a dismissed proposal's Edit off, as only Hector's, and Hector his", async () => {
-    const proposal = await aProposal(await aCompany());
-    signInAs("owner");
-    dataOf(
-      await dismissProposal({
-        id: proposal.id,
-        updatedAt: proposal.updatedAt.toISOString(),
-        reason: "not-hiring",
-      }),
-    );
+  it("marks a pinned job, offers Unpin, and drops both once it's applied to", async () => {
+    const job = await aJob(await aCompany());
+    dataOf(await pinJob({ id: job.id, pinned: true }));
 
-    const hectors = await jobPage(proposal.id);
+    // The header's mark, apart from the history, which logs the pin too.
+    const marked = (page: Awaited<ReturnType<typeof jobPage>>) =>
+      page
+        .queryAllByText("Pinned")
+        .filter((element) => element.closest("header") !== null);
+
+    const pinned = await jobPage(job.id);
+    expect(marked(pinned)).toHaveLength(1);
     expect(
-      hectors.getByRole("button", { name: "Edit" }).getAttribute("href"),
-    ).toBe(`/jobs/${proposal.id}/edit`);
+      pinned.getByRole("button", { name: `Unpin ${job.role}` }),
+    ).toBeTruthy();
 
-    signInAs("agent");
-    const claudes = await jobPage(proposal.id);
-    const edit = claudes.getByRole<HTMLButtonElement>("button", {
-      name: "Edit",
-    });
-    expect(edit.disabled).toBe(true);
-    expect(edit.getAttribute("href")).toBeNull();
+    dataOf(await setJobStatus({ id: job.id, status: "applied" }));
+    const applied = await jobPage(job.id);
+    expect(marked(applied)).toEqual([]);
+    expect(
+      applied.queryByRole("button", { name: `Unpin ${job.role}` }),
+    ).toBeNull();
+    expect(
+      applied.queryByRole("button", { name: `Not for me: ${job.role}` }),
+    ).toBeNull();
   });
 
   it("is not found for an unknown or malformed id", async () => {

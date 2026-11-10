@@ -2,6 +2,7 @@ import { beforeEach, expect, it } from "bun:test";
 import {
   ConflictError,
   DuplicateError,
+  HumanOnlyError,
   InputParseError,
   NotFoundError,
 } from "@/src/entities/errors/common";
@@ -19,7 +20,7 @@ import {
   HECTOR,
   jobFixtures,
   newPosting,
-  watchQueueReads,
+  watchPostingReads,
 } from "@/tests/_support/jobs";
 
 const CLAUDE: ChangeContext = {
@@ -207,10 +208,12 @@ describeEachBackend("updateJob", () => {
 
     expect(moved.postingUrl).toBe(second);
     await expect(
-      jobs.propose(job.company.id, { postingUrl: `${second}?utm_source=feed` }),
+      jobs.byClaude(job.company.id, {
+        postingUrl: `${second}?utm_source=feed`,
+      }),
     ).rejects.toBeInstanceOf(DuplicateError);
     expect(
-      (await jobs.propose(job.company.id, { postingUrl: first })).postingUrl,
+      (await jobs.byClaude(job.company.id, { postingUrl: first })).postingUrl,
     ).toBe(first);
 
     const tracked = await app.updateJob(
@@ -225,7 +228,7 @@ describeEachBackend("updateJob", () => {
     );
     expect(cleared.postingUrl).toBeNull();
     expect(
-      (await jobs.propose(job.company.id, { postingUrl: second })).postingUrl,
+      (await jobs.byClaude(job.company.id, { postingUrl: second })).postingUrl,
     ).toBe(second);
   });
 
@@ -246,69 +249,99 @@ describeEachBackend("updateJob", () => {
     );
   });
 
-  // KTD3: update_job changes facts: a status or a review in its input goes.
-  it("takes no status or review from a change, so Claude's proposal stays pending", async () => {
-    const proposal = await jobs.propose(job.company.id);
-
+  // KTD3: update_job changes facts: a status or a pin in its input goes.
+  it("takes no status or pin from a change", async () => {
     expect(
       await app.updateJob(
         CLAUDE,
-        changeTo(proposal, {
+        changeTo(job, {
           role: "Gadget tester",
           status: "applied",
-          reviewState: "accepted",
+          pinnedAt: new Date().toISOString(),
         }),
       ),
     ).toMatchObject({
       role: "Gadget tester",
       status: "verify",
-      reviewState: "pending",
+      pinnedAt: null,
     });
   });
 
-  // R20, KTD3: a dismissed posting stays refused until Hector reopens its proposal.
-  it("refuses Claude's change to a dismissed proposal, so its posting stays refused, and takes Hector's", async () => {
-    const posting = newPosting();
-    const proposal = await jobs.propose(job.company.id, {
-      postingUrl: posting,
-    });
-    const dismissed = await app.reviewProposal(HECTOR, {
-      id: proposal.id,
-      updatedAt: proposal.updatedAt,
-      decision: "dismiss",
-      reason: "not-hiring",
-      note: null,
+  it("sets and clears the sweep's facts: the posting's date, the fit score and Claude's reason", async () => {
+    const scored = await app.updateJob(
+      CLAUDE,
+      changeTo(job, {
+        postedOn: "2026-01-02",
+        score: 9,
+        reason: "A closer match than first read",
+      }),
+    );
+    expect(scored).toMatchObject({
+      postedOn: "2026-01-02",
+      score: 9,
+      reason: "A closer match than first read",
     });
 
-    for (const change of [
-      { postingUrl: null },
-      { postingUrl: newPosting() },
-      { role: "Gadget tester" },
-    ]) {
-      await expect(
-        app.updateJob(CLAUDE, changeTo(dismissed, change)),
-      ).rejects.toThrow(
-        new InputParseError(
-          "A dismissed proposal changes once Hector reopens it.",
-        ),
-      );
-    }
-    await expect(
-      jobs.propose(job.company.id, { postingUrl: posting }),
-    ).rejects.toBeInstanceOf(DuplicateError);
     expect(
       await app.updateJob(
-        HECTOR,
-        changeTo(dismissed, { role: "Gadget tester" }),
+        CLAUDE,
+        changeTo(scored, { postedOn: null, score: null, reason: null }),
       ),
-    ).toMatchObject({ role: "Gadget tester", reviewState: "dismissed" });
+    ).toMatchObject({ postedOn: null, score: null, reason: null });
   });
 
-  it("takes the queue's lock before it looks for a duplicate of a new link", async () => {
-    const calls = watchQueueReads(app);
+  // R21 as revised 2026-11-10, KTD3: a posting Hector passed on stays refused unless he frees it.
+  it("refuses Claude's change to an archived job's posting link as Hector's, logging the refusal, and takes its other changes and Hector's", async () => {
+    const posting = newPosting();
+    const linked = await app.updateJob(
+      HECTOR,
+      changeTo(job, { postingUrl: posting }),
+    );
+    const archived = await app.moveJob(HECTOR, {
+      id: job.id,
+      status: "skipped",
+      reason: "Not a fit",
+    });
+
+    for (const change of [{ postingUrl: null }, { postingUrl: newPosting() }]) {
+      await expect(
+        app.updateJob(CLAUDE, changeTo(archived, change)),
+      ).rejects.toBeInstanceOf(HumanOnlyError);
+    }
+    const [refused] = (
+      await app.listActivity(OWNER, {
+        record: { kind: "job", id: job.id },
+        limit: 20,
+        offset: 0,
+      })
+    ).entries;
+    expect(refused).toMatchObject({
+      actor: "agent",
+      action: "refused",
+      reason: "relink",
+    });
+    await expect(
+      jobs.byClaude(job.company.id, { postingUrl: posting }),
+    ).rejects.toBeInstanceOf(DuplicateError);
+
+    const renamed = await app.updateJob(
+      CLAUDE,
+      changeTo(archived, { role: "Gadget tester", postingUrl: posting }),
+    );
+    expect(renamed).toMatchObject({
+      role: "Gadget tester",
+      postingUrl: linked.postingUrl,
+    });
+    expect(
+      await app.updateJob(HECTOR, changeTo(renamed, { postingUrl: null })),
+    ).toMatchObject({ postingUrl: null, status: "skipped" });
+  });
+
+  it("takes the posting lock before it looks for a duplicate of a new link", async () => {
+    const calls = watchPostingReads(app);
 
     await app.updateJob(HECTOR, changeTo(job, { postingUrl: newPosting() }));
 
-    expect(calls).toEqual(["lockQueue", "findByPostingKey"]);
+    expect(calls).toEqual(["lockPostings", "findByPostingKey"]);
   });
 });

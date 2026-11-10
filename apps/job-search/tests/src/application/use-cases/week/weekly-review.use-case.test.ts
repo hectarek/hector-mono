@@ -67,7 +67,7 @@ describeEachBackend("the weekly review", () => {
       HECTOR,
       updateSettingsSchema.parse({
         targets,
-        pendingCap: current.pendingCap,
+        payFloor: current.payFloor,
         updatedAt: current.updatedAt?.toISOString() ?? null,
       }),
     );

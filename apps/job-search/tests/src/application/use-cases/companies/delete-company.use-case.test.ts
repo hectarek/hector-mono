@@ -100,43 +100,33 @@ describeEachBackend("deleteCompany", () => {
   });
 
   // From U5's scenarios, once jobs exist (U6).
-  it("refuses Hector's delete of a company that has jobs, naming them by their review, and keeps it", async () => {
+  it("refuses Hector's delete of a company that has jobs, counting them, and keeps it", async () => {
     const jobs = jobFixtures(app);
     const company = await companyOf(OWNER, { name: "Fictional Widgets" });
     await jobs.add(company.id);
-    await jobs.propose(company.id);
+    await jobs.byClaude(company.id);
 
     await expect(app.deleteCompany(HECTOR, { id: company.id })).rejects.toThrow(
-      new InputParseError(
-        "Fictional Widgets has a job and a proposal. Delete them first.",
-      ),
+      new InputParseError("Fictional Widgets has 2 jobs. Delete them first."),
     );
     expect((await app.getCompany(OWNER, { id: company.id })).company).toEqual(
       company,
     );
   });
 
-  // A dismissed proposal keeps its posting from coming back (R20), so it keeps its company too.
-  it("refuses the delete of a company whose only jobs are dismissed proposals", async () => {
+  // An archived job keeps its posting from coming back (R20), so it keeps its company too.
+  it("refuses the delete of a company whose only job is archived", async () => {
     const jobs = jobFixtures(app);
     const company = await companyOf(OWNER, { name: "Fictional Widgets" });
-    const proposeAndDismiss = async () => {
-      const proposal = await jobs.propose(company.id);
-      await app.reviewProposal(HECTOR, {
-        id: proposal.id,
-        updatedAt: proposal.updatedAt,
-        decision: "dismiss",
-        reason: "not-hiring",
-        note: null,
-      });
-    };
-    await proposeAndDismiss();
-    await proposeAndDismiss();
+    const found = await jobs.byClaude(company.id);
+    await app.moveJob(HECTOR, {
+      id: found.id,
+      status: "skipped",
+      reason: "Not a fit",
+    });
 
     await expect(app.deleteCompany(HECTOR, { id: company.id })).rejects.toThrow(
-      new InputParseError(
-        "Fictional Widgets has 2 dismissed proposals. Delete them first.",
-      ),
+      new InputParseError("Fictional Widgets has a job. Delete it first."),
     );
   });
 });

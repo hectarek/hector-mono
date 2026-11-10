@@ -8,8 +8,9 @@ import { ContactList } from "@/app/_components/contact-list";
 import { DeleteButton } from "@/app/_components/delete-button";
 import { SectionTitle } from "@/app/_components/display";
 import { DriverCode } from "@/app/_components/driver-code";
+import { NotForMe } from "@/app/_components/not-for-me";
 import { OnlyHector } from "@/app/_components/only-hector";
-import { ProposalReview } from "@/app/_components/proposal-review";
+import { PinButton } from "@/app/_components/pin-button";
 import { QuickLog } from "@/app/_components/quick-log";
 import { factsLine, RecordHeader } from "@/app/_components/record-header";
 import { RecordHistory } from "@/app/_components/record-history";
@@ -22,13 +23,12 @@ import { backTo, withFrom } from "@/app/_lib/back-link";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { formatDay } from "@/app/_lib/format-day";
+import { payBand } from "@/app/_lib/format-pay";
 import {
   CONVERSATION_LABELS,
-  DISMISS_LABELS,
   EMPLOYMENT_LABELS,
   INTERACTION_LABELS,
   LEVEL_LABELS,
-  REVIEW_LABELS,
   STATUS_LABELS,
   WORK_MODE_LABELS,
 } from "@/app/_lib/job-labels";
@@ -36,19 +36,14 @@ import { loadJob } from "@/app/_lib/load-job";
 import { deleteJob } from "@/app/actions/jobs";
 import { isStaleCandidate } from "@/src/entities/job-lifecycle";
 import type { Job, JobOutreach } from "@/src/entities/models/job.model";
+import { isToApply } from "@/src/entities/rank";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
-const DOLLARS = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
 // A job (R1), in the order every record's page takes (the UX plan's UX8): its header (who added
-// it, its key facts, its status and actions); what's next, or for a proposal Hector's review
-// (R20); its contacts and outreach; its notes; its facts, the filled ones first; its stage, with
-// its moves (R2, R3); and its history (R19). Claude's session sees what only Hector may do off
-// (KTD3).
+// it, its key facts, its status and actions, with Pin and Not for me while it's on the ranked
+// list, R27); what's next; its contacts and outreach; its notes; its facts, the filled ones first;
+// its stage, with its moves (R2, R3); and its history (R19). Claude's session sees what only
+// Hector may do off (KTD3).
 export default async function JobPage({
   params,
   searchParams,
@@ -69,7 +64,7 @@ export default async function JobPage({
   // The clock after the session (Cache Components): today in Eastern time (KTD18).
   const today = todayIn(PLAN_TIME_ZONE);
   const human = actor.actor === "owner";
-  const accepted = job.reviewState === "accepted";
+  const toApply = isToApply(job.status);
   const facts = factsOf(job);
   const filled = facts.filter(([, value]) => value !== null);
   const empty = facts.filter(([, value]) => value === null);
@@ -77,7 +72,7 @@ export default async function JobPage({
     job.location,
     job.workMode && WORK_MODE_LABELS[job.workMode],
     job.level && LEVEL_LABELS[job.level],
-    bandOf(job),
+    payBand(job),
     `via ${job.source.name}`,
   ]);
 
@@ -107,11 +102,9 @@ export default async function JobPage({
                 status={job.status}
                 applied={job.appliedOn !== null}
               />
-              {accepted ? null : (
-                <Badge variant="outline">
-                  {REVIEW_LABELS[job.reviewState]}
-                </Badge>
-              )}
+              {toApply && job.pinnedAt ? (
+                <Badge variant="outline">Pinned</Badge>
+              ) : null}
               {job.company.tier ? (
                 <Badge variant="outline">Tier {job.company.tier}</Badge>
               ) : null}
@@ -119,17 +112,20 @@ export default async function JobPage({
           }
           actions={
             <>
-              {/* A dismissed proposal changes only once Hector reopens it (R20). */}
-              {human || job.reviewState !== "dismissed" ? (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  nativeButton={false}
-                  render={<Link href={`/jobs/${job.id}/edit`} />}
-                  className="min-h-11"
-                >
-                  Edit
-                </Button>
+              <Button
+                variant="secondary"
+                size="lg"
+                nativeButton={false}
+                render={<Link href={`/jobs/${job.id}/edit`} />}
+                className="min-h-11"
+              >
+                Edit
+              </Button>
+              {toApply ? (
+                <>
+                  <PinButton job={job} />
+                  <NotForMe job={job} human={human} />
+                </>
               ) : null}
               {human ? (
                 <DeleteButton
@@ -138,67 +134,21 @@ export default async function JobPage({
                   then="/jobs"
                 />
               ) : (
-                <OnlyHector
-                  labels={
-                    job.reviewState === "dismissed"
-                      ? ["Edit", "Delete"]
-                      : ["Delete"]
-                  }
-                />
+                <OnlyHector labels={["Delete"]} />
               )}
             </>
           }
         />
       </div>
 
-      {job.reviewState === "accepted" ? (
-        <RecordNext
-          kind="job"
-          record={job}
-          title={factsLine([job.role, job.company.name])}
-          href={`/jobs/${job.id}`}
-          today={today}
-          contacts={contacts}
-        />
-      ) : (
-        <section aria-labelledby="job-review" className="flex flex-col gap-4">
-          <SectionTitle id="job-review">Review</SectionTitle>
-          {job.proposalReason ? (
-            <p className="text-sm">
-              <span className="text-muted-foreground">
-                {FIELD_LABELS.proposalReason}:{" "}
-              </span>
-              {job.proposalReason}
-            </p>
-          ) : null}
-          {job.reviewState === "dismissed" && job.dismissReason ? (
-            <p className="text-sm">
-              <span className="text-muted-foreground">
-                {FIELD_LABELS.dismissReason}:{" "}
-              </span>
-              {DISMISS_LABELS[job.dismissReason]}
-              {job.dismissNote ? `. ${job.dismissNote}` : null}
-            </p>
-          ) : null}
-          {human ? (
-            <ProposalReview
-              proposal={{
-                id: job.id,
-                reviewState: job.reviewState,
-                updatedAt: job.updatedAt,
-              }}
-            />
-          ) : (
-            <OnlyHector
-              labels={
-                job.reviewState === "pending"
-                  ? ["Accept", "Dismiss"]
-                  : ["Reopen"]
-              }
-            />
-          )}
-        </section>
-      )}
+      <RecordNext
+        kind="job"
+        record={job}
+        title={factsLine([job.role, job.company.name])}
+        href={`/jobs/${job.id}`}
+        today={today}
+        contacts={contacts}
+      />
 
       <section aria-labelledby="job-contacts" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -289,42 +239,39 @@ export default async function JobPage({
         </section>
       ) : null}
 
-      {accepted ? (
-        <section aria-labelledby="job-status" className="flex flex-col gap-4">
-          <SectionTitle id="job-status">Status</SectionTitle>
-          {isStaleCandidate({ ...job, repliedOn }, today) ? (
-            <Alert>
-              <AlertDescription>
-                No reply 21 days after applying: close it as stale, or move it
-                on.
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          <StageControl
-            job={{ id: job.id, status: job.status }}
-            contacts={contacts}
-            today={today}
-          />
-          {moves.length ? (
-            <ol className="flex flex-col divide-y text-sm">
-              {moves.map((move) => (
-                <li
-                  key={move.id}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
-                >
-                  <span className="text-muted-foreground text-2xs w-24 font-mono">
-                    {formatDay(move.on)}
-                  </span>
-                  <DriverCode actor={move.actor} />
-                  <span>
-                    {STATUS_LABELS[move.from]} → {STATUS_LABELS[move.to]}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          ) : null}
-        </section>
-      ) : null}
+      <section aria-labelledby="job-status" className="flex flex-col gap-4">
+        <SectionTitle id="job-status">Status</SectionTitle>
+        {isStaleCandidate({ ...job, repliedOn }, today) ? (
+          <Alert>
+            <AlertDescription>
+              No reply 21 days after applying: close it as stale, or move it on.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        <StageControl
+          job={{ id: job.id, status: job.status }}
+          contacts={contacts}
+          today={today}
+        />
+        {moves.length ? (
+          <ol className="flex flex-col divide-y text-sm">
+            {moves.map((move) => (
+              <li
+                key={move.id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
+              >
+                <span className="text-muted-foreground text-2xs w-24 font-mono">
+                  {formatDay(move.on)}
+                </span>
+                <DriverCode actor={move.actor} />
+                <span>
+                  {STATUS_LABELS[move.from]} → {STATUS_LABELS[move.to]}
+                </span>
+              </li>
+            ))}
+          </ol>
+        ) : null}
+      </section>
 
       <RecordHistory record={{ kind: "job", id: job.id }} />
     </div>
@@ -369,14 +316,6 @@ function OutreachLine({
   );
 }
 
-// The posted pay band, a side unknown as "?".
-function bandOf(job: Job): string | null {
-  if (job.payMin === null && job.payMax === null) return null;
-  return [job.payMin, job.payMax]
-    .map((amount) => (amount === null ? "?" : DOLLARS.format(amount)))
-    .join(" – ");
-}
-
 // The posting's site, as a link says where it goes.
 function domainOf(link: string): string {
   return new URL(link).hostname.replace(/^www\./, "");
@@ -406,6 +345,9 @@ function factsOf(job: Job): [string, ReactNode | null][] {
         </span>
       ) : null,
     ],
+    ["Claude's reason", job.reason],
+    [FIELD_LABELS.score ?? "Fit score", job.score && `${job.score}/10`],
+    [FIELD_LABELS.postedOn ?? "Posted on", day(job.postedOn)],
     [FIELD_LABELS.source ?? "Source", job.source.name],
     [FIELD_LABELS.level ?? "Level", job.level && LEVEL_LABELS[job.level]],
     [
@@ -413,7 +355,7 @@ function factsOf(job: Job): [string, ReactNode | null][] {
       job.workMode && WORK_MODE_LABELS[job.workMode],
     ],
     [FIELD_LABELS.location ?? "Location", job.location],
-    ["Pay", bandOf(job)],
+    ["Pay", payBand(job)],
     [
       FIELD_LABELS.employmentType ?? "Employment type",
       job.employmentType && EMPLOYMENT_LABELS[job.employmentType],

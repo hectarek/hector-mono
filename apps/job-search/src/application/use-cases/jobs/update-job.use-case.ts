@@ -7,6 +7,7 @@ import type {
 import type { ILeadSourcesRepository } from "@/src/application/repositories/lead-sources.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
+import { requireHuman } from "@/src/application/use-cases/access/require-human";
 import { recordChange } from "@/src/application/use-cases/activity/record-change";
 import {
   refuseDuplicate,
@@ -18,6 +19,7 @@ import {
   InputParseError,
   NotFoundError,
 } from "@/src/entities/errors/common";
+import { isClosed } from "@/src/entities/job-lifecycle";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import {
   type Job,
@@ -43,7 +45,10 @@ const PLAIN_FACTS = [
   "workMode",
   "payMin",
   "payMax",
+  "postedOn",
   "summary",
+  "reason",
+  "score",
   "foundOn",
   "travelPercent",
   "employmentType",
@@ -51,11 +56,12 @@ const PLAIN_FACTS = [
 ] as const;
 
 // Changes a job's facts (update_job, the job form; R1), against the updatedAt read with it (R22).
-// Its status moves only with a status move and its review only with Hector's call; Claude sets
-// applied-on only with a dated status move, and leaves a dismissed proposal as Hector left it, so
-// its posting stays refused (KTD3, R20), whatever the entry point. A new posting link is checked
-// for a duplicate, and a source is found by name, or added. A change that sets what's already
-// there writes and logs nothing.
+// Its status moves only with a status move. Claude sets applied-on only with a dated status move,
+// and only Hector changes an archived job's posting link, which would free a posting he passed on
+// (KTD3, R21 as revised 2026-11-10), whatever the entry point: anyone else is refused, and logged,
+// before the change's transaction opens. A new posting link is checked for a duplicate, and a
+// source is found by name, or added. A change that sets what's already there writes and logs
+// nothing.
 export const updateJobUseCase = (
   jobsRepository: IJobsRepository,
   companiesRepository: ICompaniesRepository,
@@ -76,17 +82,27 @@ export const updateJobUseCase = (
         "Applied-on changes with a dated status move: use set_job_status.",
       );
     }
+    const read = await jobsRepository.get(ownerId, id);
+    if (!read) {
+      throw new NotFoundError("Couldn't find that job.");
+    }
+    if (
+      isClosed(read.status) &&
+      postingUrl !== undefined &&
+      postingUrl !== read.postingUrl
+    ) {
+      await requireHuman(activityRepository, transactionManager, context, {
+        record: { kind: "job", id },
+        operation: "relink",
+      });
+    }
 
     const job = await transactionManager.startTransaction(async (tx) => {
       const current = await jobsRepository.getForUpdate(ownerId, id, tx);
       if (!current) {
         throw new NotFoundError("Couldn't find that job.");
       }
-      if (current.reviewState === "dismissed" && context.actor !== "owner") {
-        throw new InputParseError(
-          "A dismissed proposal changes once Hector reopens it.",
-        );
-      }
+      // A job archived since the check above has a new updatedAt, so the change conflicts.
       if (current.updatedAt.getTime() !== updatedAt.getTime()) {
         throw new ConflictError(current);
       }
@@ -115,7 +131,7 @@ export const updateJobUseCase = (
       if (postingUrl !== undefined && postingUrl !== current.postingUrl) {
         const key = postingUrl ? postingKey(postingUrl) : null;
         if (key) {
-          await jobsRepository.lockQueue(ownerId, tx);
+          await jobsRepository.lockPostings(ownerId, tx);
           await refuseDuplicate(jobsRepository, ownerId, key, tx, id);
         }
         changes.postingUrl = postingUrl;

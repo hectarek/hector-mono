@@ -61,14 +61,24 @@ describeEachBackend("getCompany", () => {
   });
 
   // From U5's scenarios, once jobs exist (U6).
-  it("answers with the company's accepted jobs, compactly, and not its proposals", async () => {
+  it("answers with the company's jobs, compactly, Claude's finds and archived ones included", async () => {
     const jobs = jobFixtures(app);
     const company = await add(OWNER, { name: "Acme Inc" });
     const job = await jobs.add(company.id, { role: "Widget engineer" });
     await app.moveJob(HECTOR, { id: job.id, status: "target" });
-    await jobs.propose(company.id, { role: "Proposed role" });
+    const found = await jobs.byClaude(company.id, { role: "Found role" });
+    await app.moveJob(HECTOR, {
+      id: found.id,
+      status: "skipped",
+      reason: "Not a fit",
+    });
 
-    expect((await app.getCompany(OWNER, { id: company.id })).jobs).toEqual([
+    const listed = (await app.getCompany(OWNER, { id: company.id })).jobs;
+    expect(listed.map(({ role }) => role)).toEqual([
+      "Widget engineer",
+      "Found role",
+    ]);
+    expect(listed.slice(0, 1)).toEqual([
       {
         id: job.id,
         role: "Widget engineer",
@@ -80,8 +90,13 @@ describeEachBackend("getCompany", () => {
         appliedOn: null,
         location: null,
         workMode: null,
-        reviewState: "accepted",
-        dismissReason: null,
+        payMin: null,
+        payMax: null,
+        postedOn: null,
+        foundOn: todayIn(PLAN_TIME_ZONE),
+        score: null,
+        reason: null,
+        pinnedAt: null,
         updatedAt: expect.any(Date),
       },
     ]);

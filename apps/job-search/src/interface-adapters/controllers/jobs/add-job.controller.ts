@@ -6,7 +6,8 @@ import { addJobSchema, type Job } from "@/src/entities/models/job.model";
 
 export type IAddJobController = ReturnType<typeof addJobController>;
 
-// The add-job form's write: the posting's link is optional.
+// add_job's write and the add-job form's (R20 as revised 2026-11-10). The posting's link is
+// optional here; the use case requires it, and a reason, when Claude adds the job.
 export const addJobController = (
   useCase: ICreateJobUseCase,
   loggerService: ILoggerService,

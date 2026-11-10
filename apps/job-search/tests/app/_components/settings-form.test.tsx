@@ -24,7 +24,7 @@ const submit = (view: ReturnType<typeof render>) => {
 };
 
 describe("the settings form", () => {
-  it("saves the targets and cap typed, blank as none, and says so", async () => {
+  it("saves the targets and pay floor typed, blank as none, and says so", async () => {
     signInAs("owner");
     const view = render(
       <SettingsForm settings={await current()} humanOnly={false} />,
@@ -32,13 +32,13 @@ describe("the settings form", () => {
 
     type(view.getByLabelText("Messages sent"), "15");
     type(view.getByLabelText("Applications"), "");
-    type(view.getByLabelText("Queue cap"), "12");
+    type(view.getByLabelText("Pay floor"), "123456");
     submit(view);
 
     expect(await view.findByText("Saved.")).toBeTruthy();
     expect(await current()).toMatchObject({
       targets: { messagesSent: 15, applications: null },
-      pendingCap: 12,
+      payFloor: 123_456,
     });
   });
 
@@ -48,10 +48,10 @@ describe("the settings form", () => {
       <SettingsForm settings={await current()} humanOnly={false} />,
     );
 
-    type(view.getByLabelText("Queue cap"), "0");
+    type(view.getByLabelText("Pay floor"), "-1");
     submit(view);
 
-    expect(await view.findAllByText("At least 1")).not.toHaveLength(0);
+    expect(await view.findAllByText("At least 0")).not.toHaveLength(0);
   });
 
   // R22, KTD15.
@@ -62,7 +62,7 @@ describe("the settings form", () => {
     // Saved meanwhile, from another device.
     const other = await updateSettings({
       targets: { ...read.targets, practiceSessions: 9 },
-      pendingCap: read.pendingCap,
+      payFloor: read.payFloor,
       updatedAt: read.updatedAt?.toISOString() ?? null,
     });
     if (!other.ok) throw new Error(`The other save failed: ${other.code}`);
@@ -90,7 +90,7 @@ describe("the settings form", () => {
     signInAs("agent");
     const view = render(<SettingsForm settings={await current()} humanOnly />);
 
-    expect(view.getByLabelText("Queue cap")).toHaveProperty("disabled", true);
+    expect(view.getByLabelText("Pay floor")).toHaveProperty("disabled", true);
     expect(
       view.getByRole("button", { name: "Save" }).hasAttribute("disabled"),
     ).toBe(true);

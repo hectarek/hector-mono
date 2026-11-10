@@ -13,7 +13,6 @@ import {
   InputParseError,
   NotAllowedError,
   NotFoundError,
-  QueueFullError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
@@ -28,7 +27,6 @@ const DOMAIN_ERRORS = [
   InputParseError,
   NotAllowedError,
   NotFoundError,
-  QueueFullError,
   UnauthenticatedError,
 ];
 

@@ -10,7 +10,7 @@ const settingsPage = async () =>
   within(await renderOnServer(await SettingsPage()));
 
 describe("the settings page", () => {
-  it("shows Hector the targets and queue cap to change, and the lead sources", async () => {
+  it("shows Hector the targets and pay floor to change, and the lead sources", async () => {
     signInAs("owner");
     const name = `Gadget Board ${crypto.randomUUID().slice(0, 8)}`;
     await addSource({ name });
@@ -18,7 +18,7 @@ describe("the settings page", () => {
     const page = await settingsPage();
 
     const targets = within(
-      page.getByRole("region", { name: "Targets and the queue" }),
+      page.getByRole("region", { name: "Targets and pay" }),
     );
     for (const label of [
       "Messages sent",
@@ -26,7 +26,7 @@ describe("the settings page", () => {
       "Applications",
       "Practice sessions",
       "Moves to screen or beyond",
-      "Queue cap",
+      "Pay floor",
     ]) {
       expect(targets.getByLabelText<HTMLInputElement>(label).disabled).toBe(
         false,
@@ -44,9 +44,9 @@ describe("the settings page", () => {
     const page = await settingsPage();
 
     const targets = within(
-      page.getByRole("region", { name: "Targets and the queue" }),
+      page.getByRole("region", { name: "Targets and pay" }),
     );
-    expect(targets.getByLabelText<HTMLInputElement>("Queue cap").disabled).toBe(
+    expect(targets.getByLabelText<HTMLInputElement>("Pay floor").disabled).toBe(
       true,
     );
     expect(targets.getByText("Only Hector")).toBeTruthy();

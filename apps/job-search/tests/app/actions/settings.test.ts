@@ -14,7 +14,7 @@ const HECTOR: CurrentActor = { actor: "owner", ownerId: OWNER_ID };
 const current = () => getInjection("IGetSettingsController")({}, HECTOR);
 
 // The settings form's input: fictional targets, against what was read.
-const input = (read: Settings, pendingCap: number) => ({
+const input = (read: Settings, payFloor: number) => ({
   targets: {
     messagesSent: 12,
     conversationsHeld: 3,
@@ -22,7 +22,7 @@ const input = (read: Settings, pendingCap: number) => ({
     practiceSessions: 4,
     screensReached: 1,
   },
-  pendingCap,
+  payFloor,
   updatedAt: read.updatedAt?.toISOString() ?? null,
 });
 
@@ -42,15 +42,15 @@ describe("updateSettings", () => {
   it("stores the targets Hector saves, reads them back, and refreshes the settings page", async () => {
     signInAs("owner");
     const read = await current();
-    const pendingCap = read.pendingCap === 7 ? 8 : 7;
+    const payFloor = read.payFloor === 123_456 ? 654_321 : 123_456;
 
-    const result = await updateSettings(input(read, pendingCap));
+    const result = await updateSettings(input(read, payFloor));
 
     expect(result).toEqual({
       ok: true,
       data: {
-        targets: input(read, pendingCap).targets,
-        pendingCap,
+        targets: input(read, payFloor).targets,
+        payFloor,
         updatedAt: expect.any(Date),
       },
       asOf: expect.any(String),
@@ -68,11 +68,13 @@ describe("updateSettings", () => {
     const read = await current();
 
     signInAs("agent");
-    expect(await updateSettings(input(read, read.pendingCap + 1))).toEqual({
-      ok: false,
-      code: "human-only",
-      message: "Only Hector can do this.",
-    });
+    expect(await updateSettings(input(read, (read.payFloor ?? 0) + 1))).toEqual(
+      {
+        ok: false,
+        code: "human-only",
+        message: "Only Hector can do this.",
+      },
+    );
 
     expect(await current()).toEqual(read);
     expect(await latestChange()).toMatchObject({
@@ -87,7 +89,7 @@ describe("updateSettings", () => {
     signInAs("owner");
     const read = await current();
     const saved = await updateSettings(
-      input(read, read.pendingCap === 5 ? 6 : 5),
+      input(read, read.payFloor === 111_111 ? 222_222 : 111_111),
     );
     if (!saved.ok) throw new Error(`The first save failed: ${saved.code}`);
 
@@ -101,11 +103,11 @@ describe("updateSettings", () => {
 
   it("answers values it can't take with `validation`, naming the field", async () => {
     signInAs("owner");
-    expect(await updateSettings(input(await current(), 0))).toEqual({
+    expect(await updateSettings(input(await current(), -1))).toEqual({
       ok: false,
       code: "validation",
-      message: "Queue cap: At least 1",
-      fields: { pendingCap: "At least 1" },
+      message: "Pay floor: At least 0",
+      fields: { payFloor: "At least 0" },
     });
   });
 

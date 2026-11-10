@@ -1,19 +1,15 @@
-import { beforeAll, beforeEach, describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { saveCompany } from "@/app/actions/companies";
 import {
-  acceptProposal,
   addJob,
   closeJob,
   deleteJob,
-  dismissProposal,
   findJobs,
   getJob,
-  proposeJob,
-  reopenProposal,
+  pinJob,
   setJobStatus,
   updateJob,
 } from "@/app/actions/jobs";
-import { updateSettings } from "@/app/actions/settings";
 import type { ActionResult } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
 import type { CurrentActor } from "@/src/entities/models/actor.model";
@@ -34,24 +30,11 @@ function dataOf<T>(result: ActionResult<T>): T {
   return result.data;
 }
 
-// The test container lives for the whole run: room in the queue for this file's proposals,
-// whatever another file left the cap at, and a company of each test's own.
-beforeAll(async () => {
-  signInAs("owner");
-  const read = await getInjection("IGetSettingsController")({}, HECTOR);
-  dataOf(
-    await updateSettings({
-      targets: read.targets,
-      pendingCap: 50,
-      updatedAt: read.updatedAt?.toISOString() ?? null,
-    }),
-  );
-});
-
 beforeEach(() => {
   nextState.revalidated = [];
 });
 
+// The test container lives for the whole run, so each test has a company of its own.
 const aCompany = async () => {
   signInAs("owner");
   return dataOf(
@@ -59,7 +42,11 @@ const aCompany = async () => {
   ).company.id;
 };
 
-const proposal = (companyId: string, input: Record<string, unknown> = {}) => ({
+// add_job's input as Claude sends it.
+const claudesJob = (
+  companyId: string,
+  input: Record<string, unknown> = {},
+) => ({
   companyId,
   role: "Widget engineer",
   postingUrl: newPosting(),
@@ -76,19 +63,25 @@ const history = async (id: string) =>
     )
   ).entries;
 
-describe("proposeJob", () => {
-  it("leaves Claude's proposal pending, logged as Claude's through the tool, and refreshes the pages that show it", async () => {
+describe("addJob", () => {
+  it("puts Claude's job on the ranked list, logged as Claude's through the tool, and refreshes the pages that show it", async () => {
     const companyId = await aCompany();
     nextState.revalidated = [];
     signInAs("agent");
 
-    const job = dataOf(await proposeJob(proposal(companyId), "propose_job"));
+    const job = dataOf(
+      await addJob(claudesJob(companyId, { score: 8 }), "add_job"),
+    );
 
-    expect(job).toMatchObject({ reviewState: "pending", status: "verify" });
+    expect(job).toMatchObject({
+      status: "verify",
+      reason: "Matches the target role",
+      score: 8,
+    });
     expect(await history(job.id)).toEqual([
       expect.objectContaining({
         actor: "agent",
-        tool: "propose_job",
+        tool: "add_job",
         action: "created",
       }),
     ]);
@@ -99,6 +92,37 @@ describe("proposeJob", () => {
       `/companies/${companyId}`,
       "/agent",
     ]);
+    expect(
+      dataOf(await findJobs({ status: "to-apply", companyId })).jobs,
+    ).toEqual([expect.objectContaining({ id: job.id })]);
+  });
+
+  it("adds Hector's job from the form, its link and reason optional", async () => {
+    const companyId = await aCompany();
+
+    expect(
+      dataOf(
+        await addJob({
+          companyId,
+          role: "Widget engineer",
+          source: "Referral",
+        }),
+      ),
+    ).toMatchObject({ status: "verify", reason: null, nextStep: null });
+  });
+
+  // R20, KTD3: Claude's job always carries its posting's link and its reason.
+  it("answers Claude's add without a link or a reason with `validation`", async () => {
+    const companyId = await aCompany();
+    signInAs("agent");
+
+    expect(
+      await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
+    ).toMatchObject({
+      ok: false,
+      code: "validation",
+      message: "A job Claude adds needs the posting's link and a reason.",
+    });
   });
 
   it("answers a posting already on a job with `duplicate` and that job", async () => {
@@ -106,25 +130,25 @@ describe("proposeJob", () => {
     signInAs("agent");
     const posting = newPosting();
     const first = dataOf(
-      await proposeJob(proposal(companyId, { postingUrl: posting })),
+      await addJob(claudesJob(companyId, { postingUrl: posting })),
     );
 
     expect(
-      await proposeJob(
-        proposal(companyId, { postingUrl: `${posting}?utm_source=feed` }),
+      await addJob(
+        claudesJob(companyId, { postingUrl: `${posting}?utm_source=feed` }),
       ),
     ).toMatchObject({
       ok: false,
       code: "duplicate",
-      current: { id: first.id, reviewState: "pending" },
+      current: { id: first.id, status: "verify" },
     });
   });
 
   it("answers a link that isn't http or https with `validation`, naming the field", async () => {
     signInAs("agent");
     expect(
-      await proposeJob(
-        proposal(await aCompany(), { postingUrl: "javascript:alert(1)" }),
+      await addJob(
+        claudesJob(await aCompany(), { postingUrl: "javascript:alert(1)" }),
       ),
     ).toEqual({
       ok: false,
@@ -139,29 +163,6 @@ describe("proposeJob", () => {
 });
 
 describe("a job's changes", () => {
-  it("add Hector's job accepted at once", async () => {
-    const companyId = await aCompany();
-    const job = dataOf(
-      await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
-    );
-    expect(job.reviewState).toBe("accepted");
-  });
-
-  // R20, KTD3: the form's add from Claude's session would be a proposal with no link or reason.
-  it("answer Claude's add through the job form with `validation`, pointing to propose_job", async () => {
-    const companyId = await aCompany();
-    signInAs("agent");
-
-    expect(
-      await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
-    ).toMatchObject({
-      ok: false,
-      code: "validation",
-      message:
-        "A proposal needs the posting's link and a reason: use propose_job.",
-    });
-  });
-
   it("answer Claude's update against an old updatedAt with `conflict` and the job as it is now, and its applied-on with `validation`", async () => {
     const companyId = await aCompany();
     const job = dataOf(
@@ -238,96 +239,81 @@ describe("a job's changes", () => {
   });
 });
 
-describe("Hector's review", () => {
-  // AE2.
-  it("refuses Claude's accept with `human-only`, logs it, and changes nothing", async () => {
+describe("pinJob", () => {
+  it("pins Claude's way through the tool, refreshing the pages that show it, and unpins", async () => {
     const companyId = await aCompany();
     signInAs("agent");
-    const job = dataOf(await proposeJob(proposal(companyId)));
+    const job = dataOf(await addJob(claudesJob(companyId)));
+    nextState.revalidated = [];
 
+    const pinned = dataOf(
+      await pinJob({ id: job.id, pinned: true }, "pin_job"),
+    );
+
+    expect(pinned.pinnedAt).toBeInstanceOf(Date);
+    expect(nextState.revalidated).toContain("/jobs");
+    const [logged] = await history(job.id);
+    expect(logged).toMatchObject({ actor: "agent", tool: "pin_job" });
     expect(
-      await acceptProposal({
-        id: job.id,
-        updatedAt: job.updatedAt.toISOString(),
-      }),
+      dataOf(await pinJob({ id: job.id, pinned: false })).pinnedAt,
+    ).toBeNull();
+  });
+
+  it("answers a pin of a job applied to with `validation`", async () => {
+    const companyId = await aCompany();
+    const job = dataOf(
+      await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
+    );
+    dataOf(await setJobStatus({ id: job.id, status: "applied" }));
+
+    expect(await pinJob({ id: job.id, pinned: true })).toMatchObject({
+      ok: false,
+      code: "validation",
+    });
+  });
+});
+
+describe("an archived job", () => {
+  // AE2 as revised 2026-11-10.
+  it("refuses Claude's move back to an open status with `human-only`, logs it, and changes nothing", async () => {
+    const companyId = await aCompany();
+    signInAs("agent");
+    const job = dataOf(await addJob(claudesJob(companyId)));
+    signInAs("owner");
+    const archived = dataOf(
+      await closeJob({ id: job.id, status: "skipped", reason: "Not a fit" }),
+    );
+
+    signInAs("agent");
+    expect(
+      await setJobStatus({ id: job.id, status: "verify" }, "set_job_status"),
     ).toEqual({
       ok: false,
       code: "human-only",
       message: "Only Hector can do this.",
     });
     signInAs("owner");
-    expect(dataOf(await getJob({ id: job.id })).job).toEqual(job);
+    expect(dataOf(await getJob({ id: job.id })).job).toEqual(archived);
     const [refusal] = await history(job.id);
     expect(refusal).toMatchObject({
       actor: "agent",
       action: "refused",
-      reason: "accept",
+      reason: "reopen",
     });
   });
 
-  it("accepts, dismisses with a reason and reopens Hector's way", async () => {
+  it("moves back to the list Hector's way", async () => {
     const companyId = await aCompany();
-    signInAs("agent");
-    const first = dataOf(await proposeJob(proposal(companyId)));
-    const second = dataOf(await proposeJob(proposal(companyId)));
-    signInAs("owner");
+    const job = dataOf(
+      await addJob({ companyId, role: "Widget engineer", source: "Referral" }),
+    );
+    dataOf(
+      await closeJob({ id: job.id, status: "skipped", reason: "Not a fit" }),
+    );
 
     expect(
-      dataOf(
-        await acceptProposal({
-          id: first.id,
-          updatedAt: first.updatedAt.toISOString(),
-        }),
-      ),
-    ).toMatchObject({
-      reviewState: "accepted",
-      nextStep: "Verify it's hiring",
-    });
-    const dismissed = dataOf(
-      await dismissProposal({
-        id: second.id,
-        updatedAt: second.updatedAt.toISOString(),
-        reason: "pay-too-low",
-      }),
-    );
-    expect(dismissed).toMatchObject({
-      reviewState: "dismissed",
-      dismissReason: "pay-too-low",
-    });
-    expect(
-      dataOf(
-        await reopenProposal({
-          id: second.id,
-          updatedAt: dismissed.updatedAt.toISOString(),
-        }),
-      ),
-    ).toMatchObject({ reviewState: "pending" });
-  });
-
-  // R22, revised 2026-10-29.
-  it("answers `conflict` with the proposal as it is now when Claude changed it since Hector read it", async () => {
-    const companyId = await aCompany();
-    signInAs("agent");
-    const job = dataOf(await proposeJob(proposal(companyId)));
-    const changed = dataOf(
-      await updateJob({
-        id: job.id,
-        updatedAt: job.updatedAt.toISOString(),
-        summary: "A fictional summary Claude added.",
-      }),
-    );
-    signInAs("owner");
-
-    const answer = await acceptProposal({
-      id: job.id,
-      updatedAt: job.updatedAt.toISOString(),
-    });
-
-    expect(answer).toMatchObject({ ok: false, code: "conflict" });
-    expect(answer.ok ? undefined : answer.current).toEqual(changed);
-    expect(dataOf(await getJob({ id: job.id })).job.reviewState).toBe(
-      "pending",
-    );
+      dataOf(await setJobStatus({ id: job.id, status: "verify" })),
+    ).toMatchObject({ status: "verify" });
   });
 });
 

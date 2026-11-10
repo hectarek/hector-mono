@@ -6,6 +6,7 @@ import type { IPeopleRepository } from "@/src/application/repositories/people.re
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
+import { rankedList } from "@/src/application/use-cases/jobs/ranked-list";
 import { withDates } from "@/src/application/use-cases/people/person-dates";
 import { dueBy } from "@/src/application/use-cases/practice/scheduled";
 import { weekCounts } from "@/src/application/use-cases/week/week-counts";
@@ -15,7 +16,7 @@ import {
   ACTIVITY_PAGE_MAX,
   type ActivityEntry,
 } from "@/src/entities/models/activity.model";
-import { JOB_PAGE_MAX, type JobSummary } from "@/src/entities/models/job.model";
+import { type JobSummary, jobSummary } from "@/src/entities/models/job.model";
 import { personSummary } from "@/src/entities/models/person.model";
 import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
 import type {
@@ -34,10 +35,13 @@ export type IGetTodayUseCase = ReturnType<typeof getTodayUseCase>;
 // How far back Claude's sessions reach (R9), and the most of its changes the view reads.
 const CLAUDE_DAYS = 7;
 const CLAUDE_CHANGES_MAX = 4 * ACTIVITY_PAGE_MAX;
+// How many of the ranked list's jobs it shows (R27).
+const APPLY_NEXT = 3;
 
-// This week and get_today (docs/build-plan.md U9, R9, R10): what needs Hector's decision, what's
-// due by today in Eastern time and later this week, how many next steps have no date, today's
-// Focus blocks (U17), Claude's recent sessions, and the week's counts against his targets.
+// This week and get_today (docs/build-plan.md U9, R9, R10): the top of the ranked list (R27), the
+// conversations to debrief, what's due by today in Eastern time and later this week, how many next
+// steps have no date, today's Focus blocks (U17), Claude's recent sessions, and the week's counts
+// against his targets.
 export const getTodayUseCase = (
   jobsRepository: IJobsRepository,
   peopleRepository: IPeopleRepository,
@@ -50,15 +54,10 @@ export const getTodayUseCase = (
 ) => {
   const logger = loggerService.child({ layer: "use-case", op: "getToday" });
 
-  // The pending proposals, as many as the cap can hold (settings allow at most a page).
-  const proposals = async (ownerId: string) =>
-    (
-      await jobsRepository.find(ownerId, {
-        reviewState: "pending",
-        limit: JOB_PAGE_MAX,
-        offset: 0,
-      })
-    ).jobs;
+  const applyNext = async (ownerId: string, today: string) =>
+    (await rankedList(jobsRepository, settingsRepository, ownerId, today))
+      .slice(0, APPLY_NEXT)
+      .map(jobSummary);
 
   const debriefs = async (
     ownerId: string,
@@ -140,7 +139,7 @@ export const getTodayUseCase = (
     const since = new Date(now.getTime() - CLAUDE_DAYS * 24 * 60 * 60 * 1000);
 
     const [
-      pending,
+      topJobs,
       toDebrief,
       weekJobs,
       staleJobs,
@@ -153,7 +152,7 @@ export const getTodayUseCase = (
       undatedPeople,
       blocks,
     ] = await Promise.all([
-      proposals(ownerId),
+      applyNext(ownerId, today),
       debriefs(ownerId, now),
       jobsRepository.listDue(ownerId, sunday),
       stale(ownerId, today),
@@ -189,7 +188,8 @@ export const getTodayUseCase = (
     const view: TodayView = {
       today,
       monday,
-      decisions: { proposals: pending, debriefs: toDebrief },
+      applyNext: topJobs,
+      decisions: { debriefs: toDebrief },
       due: {
         jobs: jobs.filter(byToday),
         people: weekPeople.filter(byToday),
@@ -207,7 +207,7 @@ export const getTodayUseCase = (
       targets: (settings ?? DEFAULT_SETTINGS).targets,
     };
     logger.debug("Today read", {
-      proposals: view.decisions.proposals.length,
+      applyNext: view.applyNext.length,
       debriefs: view.decisions.debriefs.length,
       dueJobs: view.due.jobs.length,
       duePeople: view.due.people.length,

@@ -1,7 +1,7 @@
 // Records the screen tests make through the app's own actions, signed in as Hector unless said:
 // fictional companies and jobs, each named for the test that makes it.
 import { saveCompany } from "@/app/actions/companies";
-import { addJob, proposeJob } from "@/app/actions/jobs";
+import { addJob } from "@/app/actions/jobs";
 import type { ActionResult } from "@/app/actions/shared";
 import type { Job } from "@/src/entities/models/job.model";
 import { newPosting } from "@/tests/_support/jobs";
@@ -47,14 +47,14 @@ export async function aJob(
   );
 }
 
-// Claude's proposal.
-export async function aProposal(
+// A job Claude adds.
+export async function aClaudeJob(
   companyId: string,
   input: Record<string, unknown> = {},
 ): Promise<Job> {
   signInAs("agent");
   return dataOf(
-    await proposeJob({
+    await addJob({
       companyId,
       role: "Gadget designer",
       postingUrl: newPosting(),
