@@ -44,7 +44,8 @@ app/
                        # use-wake-lock, use-swipe (a sideways swipe, for the week and cook mode), space-href, app-icon (drawing for all generated icons)
   manifest.ts, apple-icon.tsx, pwa-icon/[size]/  # install to home screen; paths bypass auth in proxy.ts
   error.tsx, not-found.tsx; loading.tsx per page shape: (main)/ is the general one, (library)/, plan/, groceries/, recipes/[id]/ have their own; (form)/ and cook mode have theirs
-  _providers/          # Providers: @repo/ui ThemeProvider around AuthProvider
+  _providers/          # Providers: @repo/ui ThemeProvider. AuthProvider (Neon's sign-in kit) wraps only the
+                       # sign-in and account pages, in their own layouts (docs/ux-plan.md D102)
   actions/             # Server actions per domain: grocery, import, plan, recipes, spaces; shared.ts holds their helpers (not "use server")
 
 src/
@@ -90,7 +91,10 @@ db/
 lib/
   auth/server.ts, logger.ts
 
+service-worker/        # rules.ts, handlers.ts, worker.ts: the phone's saved copies (see Saved copies below)
+
 scripts/
+  build-service-worker.ts       # builds public/sw.js before next build
   seed-from-obsidian.ts         # one-off vault import; dry run by default, --commit --email=<account>
   lib/parse-obsidian-note.ts    # note -> recipe (frontmatter, sections, NYT clippings)
 
@@ -147,6 +151,16 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
   - A Server Action that changes what they show calls `revalidatePath`, which empties the browser's cache, so your own change shows at once. Someone else's can take 5 minutes.
   - No plain `'use cache'` (stored on the server) around anything that depends on who's signed in. Only the Recipes tab's link has `prefetch={true}`: one request per link on screen.
   - In tests, the preload's `cacheLife` does nothing, so every call reads afresh. `tests/flows/instant.flow.ts` checks the Recipes tab with `@next/playwright`'s `instant()`. A page opened again within 5 minutes shows at once only in a production build (`next dev`, which the flows run on, fetches it again), so check that by hand on `next start`.
+
+## Saved copies (the service worker)
+
+The phone keeps a copy of each page you read, and the next open shows it at once while the page brings itself up to date, with no sign (docs/ux-plan.md P31.2, D103). Written by hand, not Serwist: its Turbopack route is for apps without Cache Components.
+- `service-worker/rules.ts` decides each request: a saved page (the library, Meal plan, Groceries, Books, a recipe, cook mode), a build file under `/_next/static`, a way out (`/welcome`, `/auth/sign-out`, which deletes the saved pages), or the network for everything else: every RSC request, server action and API call, the forms (they read fresh, D87), sign-in and Account. A new page you read goes in `SAVED_PAGES`; a new form stays out.
+- `service-worker/handlers.ts` answers: a saved page at once, with `data-saved-copy` on `<html>` (the root layout's `suppressHydrationWarning` covers it), while the network's answer is saved for next time in the background, so a page with no saved copy still streams. Only a 200 HTML page that wasn't redirected is saved.
+- `scripts/build-service-worker.ts` builds `public/sw.js` (gitignored) before `next build`, stamped with `VERCEL_GIT_COMMIT_SHA` (listed in `turbo.json`, as is the file in the build's outputs). Each deploy's worker differs, so the browser installs it, and it deletes every other deploy's caches: a saved page never outlives the build files it needs. `proxy.ts` lets `/sw.js` through signed out, and `next.config.ts` serves it uncached.
+- `SavedCopy` (`app/_components/saved-copy.tsx`, in the `(main)` and `(cook)` layouts) registers the worker in production only, asks it to look for a new deploy when the app comes back to the front, and calls `router.refresh()` on a page marked as saved (`refreshIfSaved`, `app/_lib/saved-copy.ts`): not offline, and once per page in 30 seconds, because a failed refresh loads the whole page, which the worker answers with the saved copy again.
+- The switch: `SAVED_COPIES = false` in `rules.ts` makes the worker delete everything it saved and unregister itself, and the page stop registering it. One change and a deploy.
+- `next dev` never registers it. Its behaviour is tested through `tests/service-worker/` (the rules, and the handlers against an in-memory cache); a real phone checks the rest (H5).
 
 ## Feature Rules
 
@@ -261,6 +275,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - `proxy.ts` sends every signed-out request to `/welcome` except `/shared/<token>` (`SHARED_RECIPE`, one path segment, nothing under it). A new signed-out page needs its own line there and a proxy test.
 - Safari (including the iOS Simulator) can't sign in on `http://localhost`: Neon Auth always marks its cookies `Secure`, and WebKit drops Secure cookies over plain http (Chrome treats localhost as secure, so the browser pane works). Check iPhone Safari against the deployed HTTPS site instead (`https://recipes.hectorfgonzalez.com`, one database for both).
 - Neon's auth screens are styled through `AuthView`'s `classNames` (the card frame is removed) and `localization` (the app's wording), set in `app/(auth)/auth/[path]/page.tsx`.
+- Neon's sign-in kit (the components from `@neondatabase/auth/react` and the browser's auth client, `@neondatabase/auth/next`) is 870 KB of JavaScript, so it loads only on the pages that draw its views: `AuthProvider` sits in `app/(auth)/auth/layout.tsx` and `app/(main)/account/layout.tsx`, not the root (docs/ux-plan.md D102). The header's account button is a plain link to Account, where Sign out is a button. `tests/app/layout.test.ts` fails if the root or signed-in layout reaches the kit again; its path constants (`@neondatabase/auth/react/ui/server`) are plain strings and fine anywhere.
 
 ## Logging Rules
 

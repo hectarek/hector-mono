@@ -3,6 +3,7 @@
   "entry": [
     "apps/hectors-recipes/scripts/check-test-database.ts",
     "apps/hectors-recipes/scripts/seed-from-obsidian.ts",
+    "apps/hectors-recipes/service-worker/worker.ts",
     "apps/job-search/scripts/*.ts"
   ],
   "ignoreDependencies": ["@repo/biome-config"],
