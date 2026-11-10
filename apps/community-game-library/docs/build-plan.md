@@ -15,10 +15,10 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 | | |
 |---|---|
-| Phase | Spec: the product half, agreed 2026-11-10 |
-| Next | The design system: style tiles in the game box and cardboard direction, then the system |
+| Phase | Design: the look is chosen (D13), and every screen is being drawn in it before any code |
+| Next | Hector's review of the screens, then the design system the build uses |
 | Then | The technical half, once the recipes performance review is done |
-| Waiting on Hector | H1 (BoardGameGeek registration), and his pick of the style tiles |
+| Waiting on Hector | H1 (BoardGameGeek registration), and his review of the screens |
 | Updated | 2026-11-10 |
 
 ---
@@ -193,6 +193,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 - D10. **Friends now, groups later.** Who sees what follows friendship (R10, R30). Groups can come later as a second place to share, as on Facebook, where a post goes to your friends or to a group, each with its own visibility. So a shelf's and a night's audience is stored as where it's shared (friends, or the people invited), and a group would be a new kind of audience, not a rewrite. Why: it fits a circle of about 12 now, and lets other circles join without seeing each other's shelves. (Hector, 2026-11-10, on Q1)
 - D11. **Games added by hand match BGG's.** A game BGG doesn't list, such as a card game it lacks, has the same fields as a BGG game, with no exceptions, and is marked as ours, so the weekly refresh leaves it alone. If BGG lists it later, the admin merges ours into BGG's and its copies move over. (Hector, 2026-11-10, on Q11)
 - D12. **Light mode only.** The app has one theme, a light one, and ignores the phone's dark setting. Why: none of the first round's dark versions worked for Hector, and the game box look is printed cardboard, which reads as light. (Hector, 2026-11-10, on the first style tiles)
+- D13. **The look is Punchboard.** The inside of a game box: kraft and chipboard, navy ink, stencilled labels, rubber stamps and dashed die-cut edges. A stamp is a status, and a dashed edge marks something die-cut, a thing you can pick up. Color comes from game pieces, and each kind has one job on every screen: a pawn is a person, dice are a player count or a suggestion, a punch token is a copy, and a track with the borrower's pawn on it is the days on a loan. Why: of the eight style tiles it read most like a real board game, and the stamps and dashed edges were what people pointed to. One job per piece keeps the theme carrying information, not sitting on top of it. (Hector, 2026-11-10, on the style tiles)
 
 ### Key flows
 
@@ -318,3 +319,4 @@ For the session that writes the technical half, once the recipes performance rev
 - **2026-11-10:** Hector's second answers. Friends now and groups later, for about 12 people to start (D10, with friend links R49 and unfriending R50). A line for a game that's out, plus pass-along between friends, which Hector proposed (R24, R48). Guests without accounts, behind a host's switch (R47). No catalog agent: the admin adds games BGG lacks with BGG's fields (D11). Push isn't the same effort as the inbox, so it's a later phase (D9). The design goes toward game box and cardboard. **Next:** Hector checks the proposed items, then the style tiles.
 - **2026-11-10:** Hector agreed the product half as it stands, the proposed details included (D2 to D5, D10, D11, R48, R49). **Next:** the design system's style tiles.
 - **2026-11-10:** Hector's take on the first style tiles: Box lid and Punchboard, leaning Punchboard, and light mode only (D12, R43 revised). **Next:** round two of the style tiles, around those two.
+- **2026-11-10:** the look is chosen: Punchboard, with game pieces that each do one job (D13). It came out of eight style tiles, then a draft with its controls, its pieces and four phone screens, which Hector approved with no changes. He asked for every screen to be drawn before any code, so the layout can be judged first: 51 screens across getting in, the library, loans, game nights, friends, the inbox and admin, each tied to the requirements it covers. **Next:** Hector's review of the screens; what he changes there comes back into the requirements.
