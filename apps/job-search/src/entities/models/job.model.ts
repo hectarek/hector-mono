@@ -36,21 +36,6 @@ export const EMPLOYMENT_TYPES = [
   "contract-to-hire",
 ] as const;
 
-// The retired review queue's states and dismiss reasons (KTD8 as revised 2026-11-10, U19): only
-// the schema's columns and checks read them, until the migration that drops the columns.
-export const REVIEW_STATES = ["pending", "accepted", "dismissed"] as const;
-export type ReviewState = (typeof REVIEW_STATES)[number];
-
-export const DISMISS_REASONS = [
-  "not-hiring",
-  "wrong-level",
-  "wrong-location-or-mode",
-  "pay-too-low",
-  "company-too-small",
-  "other",
-] as const;
-export type DismissReason = (typeof DISMISS_REASONS)[number];
-
 type Level = (typeof LEVELS)[number];
 type WorkMode = (typeof WORK_MODES)[number];
 type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
