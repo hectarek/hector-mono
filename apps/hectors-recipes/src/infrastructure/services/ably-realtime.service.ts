@@ -1,4 +1,4 @@
-import { Rest, type TokenParams, type TokenRequest } from "ably";
+import type { TokenParams, TokenRequest } from "ably";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRealtimeService } from "@/src/application/services/realtime.service.interface";
 import { LiveUpdatesOffError } from "@/src/entities/errors/common";
@@ -12,9 +12,13 @@ export type AblyRestClient = {
   auth: { createTokenRequest(params: TokenParams): Promise<TokenRequest> };
 };
 
-function defaultClient(): AblyRestClient | null {
+// Ably's SDK loads on the first publish or pass, not when a server function starts: the DI
+// container builds this adapter for every request, and most requests never use it (P30.2).
+async function defaultClient(): Promise<AblyRestClient | null> {
   const key = process.env.ABLY_API_KEY;
-  return key ? new Rest({ key }) : null;
+  if (!key) return null;
+  const { Rest } = await import("ably");
+  return new Rest({ key });
 }
 
 // Ably, the only place that knows it's Ably (ux-plan D21). The key (server-only) is limited
@@ -23,19 +27,31 @@ function defaultClient(): AblyRestClient | null {
 // and pages fall back to refreshing on focus and on a timer.
 export class AblyRealtimeService implements IRealtimeService {
   private readonly logger: ILoggerService;
+  private client: Promise<AblyRestClient | null> | undefined;
 
   constructor(
     logger: ILoggerService,
-    // null: no key, so live updates are off.
-    private readonly client: AblyRestClient | null = defaultClient(),
+    // A stand-in for tests (null: no key, so live updates are off). Left out, Ably's own
+    // client, made on first use.
+    private readonly givenClient?: AblyRestClient | null,
   ) {
     this.logger = logger.child({ layer: "service", op: "realtime" });
   }
 
+  private getClient(): Promise<AblyRestClient | null> {
+    this.client ??=
+      this.givenClient === undefined
+        ? defaultClient()
+        : Promise.resolve(this.givenClient);
+    return this.client;
+  }
+
   async publish(channel: string, event: RealtimeEvent): Promise<void> {
-    if (!this.client) return;
     try {
-      await this.client.channels.get(channel).publish(event, null);
+      // Inside the try: not even a failure to load Ably may fail the write before it (D21).
+      const client = await this.getClient();
+      if (!client) return;
+      await client.channels.get(channel).publish(event, null);
     } catch (err) {
       this.logger.warn("Publish failed", {
         channel,
@@ -49,12 +65,13 @@ export class AblyRealtimeService implements IRealtimeService {
     channel: string,
     clientId: string,
   ): Promise<RealtimeGrant> {
-    if (!this.client) {
+    const client = await this.getClient();
+    if (!client) {
       throw new LiveUpdatesOffError(
         "Live updates aren't configured (ABLY_API_KEY)",
       );
     }
-    return this.client.auth.createTokenRequest({
+    return client.auth.createTokenRequest({
       clientId,
       capability: { [channel]: ["subscribe"] },
     });
