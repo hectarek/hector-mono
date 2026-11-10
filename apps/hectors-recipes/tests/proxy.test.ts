@@ -140,6 +140,8 @@ describe("proxy", () => {
       "/pwa-icon/192",
       "/auth/sign-in",
       "/api/auth/session",
+      // The service worker: the browser looks for a new one signed out too (P31.2).
+      "/sw.js",
     ]) {
       expect(guarded(path)).toBe(false);
     }

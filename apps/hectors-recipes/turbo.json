@@ -9,8 +9,10 @@
         "NEON_AUTH_BASE_URL",
         "NEON_AUTH_COOKIE_SECRET",
         "ABLY_API_KEY",
-        "LOG_LEVEL"
-      ]
+        "LOG_LEVEL",
+        "VERCEL_GIT_COMMIT_SHA"
+      ],
+      "outputs": ["$TURBO_EXTENDS$", "public/sw.js"]
     }
   }
 }

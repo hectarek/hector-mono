@@ -134,7 +134,8 @@ function withCookies(headers: Headers, cookies: Map<string, string>): Headers {
 export const config = {
   matcher: [
     // The manifest and icons must load signed out: browsers fetch them without cookies
-    // when installing to the home screen.
-    "/((?!api|_next/static|_next/image|favicon.ico|icon.svg|sitemap.xml|robots.txt|auth|manifest.webmanifest|apple-icon|pwa-icon).*)",
+    // when installing to the home screen. So must the service worker (docs/ux-plan.md
+    // P31.2): the browser looks for a new one signed out too, after Sign out.
+    "/((?!api|_next/static|_next/image|favicon.ico|icon.svg|sitemap.xml|robots.txt|auth|manifest.webmanifest|apple-icon|pwa-icon|sw.js).*)",
   ],
 };
