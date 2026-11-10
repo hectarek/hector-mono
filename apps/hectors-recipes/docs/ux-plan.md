@@ -2392,10 +2392,11 @@ Considered and left out: the HTTP driver for reads outside transactions (`neonCo
 
 Hector answered H38 and H39 on 2026-11-10 (D102, D103). Its own branch, `feat/recipes-p31-first-open-phone`, cut from `main` after Phase 30 merged (hectarek/hector-mono#105).
 
-- [ ] **P31.1** The sign-in kit only where it's used — C · D102
+- [x] **P31.1** The sign-in kit only where it's used — C · D102
   - Today: `NeonAuthUIProvider` wraps every page (`app/_providers/providers.tsx`), and the header's account button is Neon's `UserButton`, so the kit's JavaScript loads on every page: 871 KB to run, 250 KB compressed, 62% of what the library downloads. Its Tailwind safelist (`@neondatabase/auth/ui/tailwind`) is in `globals.css`, so its styles are in every page's CSS too.
   - Do: the provider moves into the layouts of the pages that draw Neon's views (sign-in, account). The header's account button becomes a link to the Account page, and the Account page gets a Sign out button (D102); the map changes with it. Measure the library's JavaScript and CSS from the build, before and after.
-- [ ] **P31.2** A service worker that shows a page's last copy at once — C · D103
+  - Evidence (2026-11-10): `AuthProvider` moved from `app/_providers/providers.tsx` into `app/(auth)/auth/layout.tsx` and `app/(main)/account/layout.tsx`. The header's button is a `secondary` icon link to Account (`ACCOUNT_HREF`, not prefetched), and Settings has a Sign out button, a plain link to `/auth/sign-out`. `tests/app/layout.test.ts` walks the root and signed-in layouts' static imports: it failed before the change, finding `@neondatabase/auth/react` and `@neondatabase/auth/next`, and passes after. The map's Account section and AGENTS.md's Auth Rules changed with it. Not yet measured: the library's JavaScript before and after (P31.3, on production after the deploy, since the build can't run in Claude Code's sandbox). The kit's Tailwind safelist is still in `globals.css`; whether moving it is worth it waits on that measurement.
+- [~] **P31.2** A service worker that shows a page's last copy at once — C · D103
   - Do: a page you've opened is kept on the phone; the next open shows the kept copy at once and brings it up to date where it stands. Never kept: the forms (they read fresh, so a save can't undo a newer edit, D87), the sign-in and account pages, API routes and server actions. Signing out clears everything kept.
   - How, from research on 2026-11-10 (sources in the session log, cj):
     - **Written by hand**, a small `sw.js`, not Serwist. Serwist's Turbopack route says it's for apps without Cache Components and exports `dynamic`, `dynamicParams` and `revalidate`, which fail the build here (AGENTS.md's Cache Components section); on Vercel the route also crashes at request time (serwist/serwist#360, open). Its default rules fetch pages from the network first, the opposite of what this needs.
@@ -2404,6 +2405,7 @@ Hector answered H38 and H39 on 2026-11-10 (D102, D103). Its own branch, `feat/re
     - **iPhone.** A home-screen app that comes back from the background doesn't navigate, so the page asks the worker to check for an update when it's shown again.
     - **Switching it off.** A worker that unregisters itself and clears what's kept, ready to deploy in one change if it misbehaves.
   - It gives a read-only copy of the pages already opened, part of the first level of offline access in Hector's tracker; the rest of that stays there.
+  - Evidence so far (2026-11-10): built as `service-worker/` (rules, handlers, the worker), `scripts/build-service-worker.ts` (a 2 KB `public/sw.js`, stamped with the commit) and `SavedCopy` in the `(main)` and `(cook)` layouts; AGENTS.md's Saved copies section has the rules. Tests: which requests it answers and how (`tests/service-worker/rules.test.ts`), the answers themselves against an in-memory cache, including the saved copy answering before the network and offline, a redirect never saved, and clearing (`tests/service-worker/handlers.test.ts`), and when a page refreshes itself (`tests/app/_lib/saved-copy.test.ts`). Still to check: in a browser on the PR's preview, signed in, before it's ticked.
 - [ ] **P31.3** Measured on the phone — H · H5
 
 ## Later (to-dos, not scheduled)
