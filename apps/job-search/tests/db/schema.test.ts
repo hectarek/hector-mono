@@ -28,15 +28,15 @@ describe("the tables [postgres]", () => {
     await expect(source()).rejects.toThrow();
   });
 
-  it("keep settings' targets at 0 or more and the queue cap at 1 or more", async () => {
-    const settings = (target: number, cap: number) =>
+  it("keep settings' targets and the pay floor at 0 or more", async () => {
+    const settings = (target: number, payFloor: number | null) =>
       sql(
-        "insert into settings (owner_id, messages_sent_target, pending_cap) values ($1, $2, $3)",
-        [OWNER, target, cap],
+        "insert into settings (owner_id, messages_sent_target, pay_floor) values ($1, $2, $3)",
+        [OWNER, target, payFloor],
       );
-    await expect(settings(-1, 10)).rejects.toThrow();
-    await expect(settings(0, 0)).rejects.toThrow();
-    await settings(0, 1);
+    await expect(settings(-1, null)).rejects.toThrow();
+    await expect(settings(0, -1)).rejects.toThrow();
+    await settings(0, 0);
   });
 
   it("keep when a row last changed to the millisecond, a JS Date's precision", async () => {
@@ -69,7 +69,6 @@ describe("the tables [postgres]", () => {
       lead_source_id: sourceId,
       role: "Widget engineer",
       status: "verify",
-      review_state: "accepted",
       found_on: "2026-10-26",
       ...columns,
     };
@@ -80,7 +79,7 @@ describe("the tables [postgres]", () => {
     );
   };
 
-  it("keep a posting's key to one job per owner, and statuses and the band to what the app knows", async () => {
+  it("keep a posting's key to one job per owner, and statuses, the band and the fit score to what the app knows", async () => {
     const [acme] = await aCompany();
     const [referral] = await aSource();
     if (!acme || !referral) throw new Error("No company or source");
@@ -100,6 +99,8 @@ describe("the tables [postgres]", () => {
       aJob(acme.id, referral.id, { pay_min: 100, pay_max: 50 }),
     ).rejects.toThrow();
     await expect(aJob(acme.id, referral.id, { pay_max: -1 })).rejects.toThrow();
+    await expect(aJob(acme.id, referral.id, { score: 11 })).rejects.toThrow();
+    await aJob(acme.id, referral.id, { score: 10 });
   });
 
   it("refuse to delete a company that has jobs, and take a job's status moves with it", async () => {

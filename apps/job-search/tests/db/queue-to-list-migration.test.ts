@@ -1,16 +1,60 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterAll, beforeEach, describe, expect, it } from "bun:test";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { PGlite } from "@electric-sql/pglite";
+import { drizzle } from "drizzle-orm/pglite";
+import { migrate } from "drizzle-orm/pglite/migrator";
 import { OWNER } from "@/tests/_support/app";
-import { resetDatabase, sql } from "@/tests/_support/database";
 
-// 0011 (U19): the review queue retires. The test database ran it while empty, so the test runs
-// its SQL again over jobs as the queue left them.
+// 0011 (U19): the review queue retires. 0012 later dropped the columns it reads, so the test runs
+// on a database of its own, migrated through 0011 only, then runs 0011's SQL again over jobs as
+// the queue left them.
+const MIGRATIONS = `${import.meta.dir}/../../db/migrations`;
 const STATEMENTS = (
-  await Bun.file(
-    `${import.meta.dir}/../../db/migrations/0011_queue_to_list.sql`,
-  ).text()
+  await Bun.file(`${MIGRATIONS}/0011_queue_to_list.sql`).text()
 ).split("--> statement-breakpoint");
 
-const migrate = async () => {
+// The migrations folder cut off after 0011, journal and all.
+function throughQueueToList(): string {
+  const folder = mkdtempSync(join(tmpdir(), "migrations-through-0011-"));
+  mkdirSync(join(folder, "meta"));
+  const journal = JSON.parse(
+    readFileSync(`${MIGRATIONS}/meta/_journal.json`, "utf8"),
+  ) as { entries: { idx: number; tag: string }[] };
+  const kept = journal.entries.filter(({ idx }) => idx <= 11);
+  for (const { tag } of kept) {
+    cpSync(`${MIGRATIONS}/${tag}.sql`, join(folder, `${tag}.sql`));
+  }
+  writeFileSync(
+    join(folder, "meta/_journal.json"),
+    JSON.stringify({ ...journal, entries: kept }),
+  );
+  return folder;
+}
+
+const client = new PGlite();
+await migrate(drizzle({ client }), { migrationsFolder: throughQueueToList() });
+
+afterAll(async () => {
+  await client.close();
+});
+
+const sql = async <T>(query: string, params: unknown[] = []): Promise<T[]> =>
+  (await client.query<T>(query, params)).rows;
+
+const resetDatabase = () =>
+  client.exec(
+    "truncate activity, companies, lead_sources, jobs, job_status_changes restart identity cascade;",
+  );
+
+const migrate0011 = async () => {
   for (const statement of STATEMENTS) {
     await sql(statement);
   }
@@ -80,7 +124,7 @@ describe("0011, the review queue's jobs join the ranked list [postgres]", () => 
       nextStep: "Check it's hiring",
     });
 
-    await migrate();
+    await migrate0011();
 
     expect(await jobRow(id)).toEqual({
       status: "verify",
@@ -106,7 +150,7 @@ describe("0011, the review queue's jobs join the ranked list [postgres]", () => 
       dismissReason: "wrong-level",
     });
 
-    await migrate();
+    await migrate0011();
 
     expect(await jobRow(id)).toEqual({
       status: "skipped",
@@ -136,8 +180,8 @@ describe("0011, the review queue's jobs join the ranked list [postgres]", () => 
     const accepted = await aJob("Accepted Engineer", "accepted");
     const pending = await aJob("Pending Engineer", "pending");
 
-    await migrate();
-    await migrate();
+    await migrate0011();
+    await migrate0011();
 
     expect((await jobRow(accepted))?.status).toBe("verify");
     expect(await history(accepted)).toEqual([]);
