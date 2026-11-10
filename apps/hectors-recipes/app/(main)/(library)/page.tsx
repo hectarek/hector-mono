@@ -180,15 +180,16 @@ async function loadLibrary(
   cacheLife({ stale: 300 });
 
   const userId = await getCurrentUserId();
-  // This person's saved recipes (D77): first by default, and the Saved chip's filter. They
-  // need only who's asking, so they load alongside the books (P30.3).
-  const [{ books, current }, saved] = await Promise.all([
-    loadBooks(
-      userId,
-      requestedBook === ALL_RECIPES ? undefined : requestedBook,
-    ),
-    getInjection("IGetBookmarksController")(userId),
-  ]);
+  // In a row on purpose, not side by side (P30.4). Each read run alongside another opens its
+  // own database connection, and on a cold open (2026-11-10, production) the bookmarks read's
+  // second connection finished 0.46 s after the books' reads, holding up the recipes read.
+  // Warm, side by side saved nothing.
+  const { books, current } = await loadBooks(
+    userId,
+    requestedBook === ALL_RECIPES ? undefined : requestedBook,
+  );
+  // This person's saved recipes (D77): first by default, and the Saved chip's filter.
+  const saved = await getInjection("IGetBookmarksController")(userId);
   // With no book asked for, their default book; without one, All recipes once they're in
   // two or more (D17).
   const showAll =
