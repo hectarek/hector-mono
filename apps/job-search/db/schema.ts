@@ -39,13 +39,9 @@ import {
   type InteractionKind,
 } from "@/src/entities/models/interaction.model";
 import {
-  DISMISS_REASONS,
-  type DismissReason,
   EMPLOYMENT_TYPES,
   type JobFacts,
   LEVELS,
-  REVIEW_STATES,
-  type ReviewState,
   WORK_MODES,
 } from "@/src/entities/models/job.model";
 import type { NoteRecord } from "@/src/entities/models/note.model";
@@ -179,8 +175,6 @@ export const settings = pgTable(
     screensReachedTarget: integer("screens_reached_target"),
     // The yearly pay the ranked list weighs a posted band against (KTD23); null when unset.
     payFloor: integer("pay_floor"),
-    // The review queue's cap, unread since the queue retired (U19); a later migration drops it.
-    pendingCap: integer("pending_cap").notNull().default(10),
     updatedAt: updatedAt(),
   },
   (table) => [
@@ -188,7 +182,6 @@ export const settings = pgTable(
       "settings_targets_check",
       sql`${table.messagesSentTarget} >= 0 and ${table.conversationsHeldTarget} >= 0 and ${table.applicationsTarget} >= 0 and ${table.practiceSessionsTarget} >= 0 and ${table.screensReachedTarget} >= 0`,
     ),
-    check("settings_pending_cap_check", sql`${table.pendingCap} >= 1`),
     check("settings_pay_floor_check", sql`${table.payFloor} >= 0`),
   ],
 );
@@ -233,16 +226,9 @@ export const jobs = pgTable(
     score: integer("score"),
     // When the job was pinned to the top of the ranked list; null when it isn't.
     pinnedAt: timestamp("pinned_at", { withTimezone: true }),
-    // The review queue's columns, unread since the queue retired (R20 as revised 2026-11-10, U19).
-    // A later migration drops review_state, dismiss_reason and dismiss_note; until then a new job
-    // takes review_state's default. proposal_reason holds Claude's reason for any job it adds.
-    reviewState: text("review_state")
-      .$type<ReviewState>()
-      .notNull()
-      .default("accepted"),
+    // Claude's reason for a job it adds. The column kept its name from the review queue, which
+    // retired in U19 (R20 as revised 2026-11-10); the code calls it reason.
     proposalReason: text("proposal_reason"),
-    dismissReason: text("dismiss_reason").$type<DismissReason>(),
-    dismissNote: text("dismiss_note"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -250,26 +236,16 @@ export const jobs = pgTable(
     uniqueIndex("jobs_owner_id_posting_key_idx")
       .on(table.ownerId, table.postingKey)
       .where(sql`${table.postingKey} is not null`),
-    index("jobs_owner_id_review_state_idx").on(
-      table.ownerId,
-      table.reviewState,
-      table.nextDate,
-    ),
     index("jobs_company_id_idx").on(table.companyId),
     check(
       "jobs_status_check",
       oneOf(table.status, [...OPEN_STATUSES, ...CLOSED_STATUSES]),
     ),
-    check("jobs_review_state_check", oneOf(table.reviewState, REVIEW_STATES)),
     check("jobs_level_check", oneOf(table.level, LEVELS)),
     check("jobs_work_mode_check", oneOf(table.workMode, WORK_MODES)),
     check(
       "jobs_employment_type_check",
       oneOf(table.employmentType, EMPLOYMENT_TYPES),
-    ),
-    check(
-      "jobs_dismiss_reason_check",
-      oneOf(table.dismissReason, DISMISS_REASONS),
     ),
     check(
       "jobs_pay_check",
