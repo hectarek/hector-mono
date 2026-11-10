@@ -11,7 +11,7 @@ execution: code
 
 # Job Search App - Spec
 
-The initial spec for building `apps/job-search`: its requirements (R1 to R27), decisions (KTD1 to KTD25) and units (U1 to U21; R26 and U17 added 2026-11-07, KTD22 and U18 on 2026-11-09, and R27, KTD23 to KTD25 and U19 to U21 on 2026-11-10). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H8) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
+The initial spec for building `apps/job-search`: its requirements (R1 to R27), decisions (KTD1 to KTD25) and units (U1 to U21; R26 and U17 added 2026-11-07, KTD22 and U18 on 2026-11-09, and R27, KTD23 to KTD25 and U19 to U21 on 2026-11-10). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H9) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
 
 ---
 
@@ -1539,6 +1539,10 @@ Revised and added 2026-11-10 with Phase 9:
 
 - **H4, revised.** The OAuth client's scope is `calendar.readonly` in place of `calendar.events.owned`, since the app writes nothing to Google. The rest stands: a web client with its consent screen in production for personal use, its production values only in Vercel's Production environment, and a throwaway Google account for local testing. Then connect your Google account from Settings once on each deployment. Unblocks U13, U14 and U21.
 - **H8.** In Settings, enter what's yours to set: the pay floor the rank weighs, and the search season's start, finish and checkpoints. Once Google is connected, choose which calendars show, which one is Focus and which ones Claude may read by title, and map event colors to efforts. Unblocks U20 and U21.
+
+Added 2026-11-10 with U19's build:
+
+- **H9.** Set `CRON_SECRET` in Vercel's Production environment, as a sensitive variable: a long random string, such as `openssl rand -hex 32` prints. Set it before U19's merge. A variable reaches production only with a deploy that builds the app, and until one does, the daily run answers 401 and archives nothing, though the list still leaves expired jobs out. Unblocks U19's daily run (KTD24).
 
 ---
 
