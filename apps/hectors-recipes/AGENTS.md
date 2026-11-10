@@ -44,7 +44,8 @@ app/
                        # use-wake-lock, use-swipe (a sideways swipe, for the week and cook mode), space-href, app-icon (drawing for all generated icons)
   manifest.ts, apple-icon.tsx, pwa-icon/[size]/  # install to home screen; paths bypass auth in proxy.ts
   error.tsx, not-found.tsx; loading.tsx per page shape: (main)/ is the general one, (library)/, plan/, groceries/, recipes/[id]/ have their own; (form)/ and cook mode have theirs
-  _providers/          # Providers: @repo/ui ThemeProvider around AuthProvider
+  _providers/          # Providers: @repo/ui ThemeProvider. AuthProvider (Neon's sign-in kit) wraps only the
+                       # sign-in and account pages, in their own layouts (docs/ux-plan.md D102)
   actions/             # Server actions per domain: grocery, import, plan, recipes, spaces; shared.ts holds their helpers (not "use server")
 
 src/
@@ -261,6 +262,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - `proxy.ts` sends every signed-out request to `/welcome` except `/shared/<token>` (`SHARED_RECIPE`, one path segment, nothing under it). A new signed-out page needs its own line there and a proxy test.
 - Safari (including the iOS Simulator) can't sign in on `http://localhost`: Neon Auth always marks its cookies `Secure`, and WebKit drops Secure cookies over plain http (Chrome treats localhost as secure, so the browser pane works). Check iPhone Safari against the deployed HTTPS site instead (`https://recipes.hectorfgonzalez.com`, one database for both).
 - Neon's auth screens are styled through `AuthView`'s `classNames` (the card frame is removed) and `localization` (the app's wording), set in `app/(auth)/auth/[path]/page.tsx`.
+- Neon's sign-in kit (the components from `@neondatabase/auth/react` and the browser's auth client, `@neondatabase/auth/next`) is 870 KB of JavaScript, so it loads only on the pages that draw its views: `AuthProvider` sits in `app/(auth)/auth/layout.tsx` and `app/(main)/account/layout.tsx`, not the root (docs/ux-plan.md D102). The header's account button is a plain link to Account, where Sign out is a button. `tests/app/layout.test.ts` fails if the root or signed-in layout reaches the kit again; its path constants (`@neondatabase/auth/react/ui/server`) are plain strings and fine anywhere.
 
 ## Logging Rules
 
