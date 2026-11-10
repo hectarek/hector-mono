@@ -2372,13 +2372,19 @@ What a cold open waited on, in order, read from the code and measured where it s
   - Do: `AiGatewayRecipeReaderService` imports `ai`, `@ai-sdk/gateway` and `unpdf` inside the methods that use them, and `AblyRealtimeService` imports `ably` the same way, with `type` imports at the top; each makes its client on first use, and tests still pass a stand-in through the constructor. A publish still never fails a write, even if Ably can't load (D21). A test walks the container's static imports. The rule goes in AGENTS.md's Backend Rules and [clean-architecture.md](../../../docs/clean-architecture.md) §3.4, for the next app.
   - Verify: the new test fails before the change and passes after; the adapters' own tests pass unchanged; the container's cold import, timed before and after.
   - Evidence (2026-11-10): `tests/di/container.test.ts` failed before the change, naming `ai`, `@ai-sdk/gateway`, `ably` and `unpdf`, and passes after; a second test checks the walk still finds the database driver and the auth SDK. The container's cold import, five runs each with Bun on a Mac: about 110 ms before, about 77 ms after. Not timed on Vercel.
-- [x] **P30.3** The library's reads side by side — C
+- [-] **P30.3** The library's reads side by side — C. Dropped after P30.4: reads run alongside each other open a database connection each, and on a cold open that made the library slower, not faster.
   - Do: `loadLibrary` loads the saved recipes alongside the books, as the plan and recipe pages already do with their reads: three reads in a row instead of four.
   - Verify: the library's page and screen tests pass.
-  - Evidence (2026-11-10): the library's page tests pass, with the whole suite (session log, ci).
-- [ ] **P30.4** Measured on production — C+H · H5
+  - Evidence (2026-11-10): the library's page tests pass, with the whole suite (session log, ci). Undone in Phase 31's branch, with the reason beside the code, once P30.4 had timed it.
+- [x] **P30.4** Measured on production — C+H · H5
   - Do: after the deploy, open the library signed in, in the browser pane, within a day of the last open and again after a quiet spell, reading the navigation timing and whether `/api/auth/get-session` was called. Hector's look on his phone.
   - Verify: no refresh call on an open within a day; the timings written here beside this phase's starting point.
+  - Evidence (2026-11-10, the Tester account, the browser pane on a Mac; the pane was hidden, so paint times are unreliable and only network and server times count):
+    - **The session copy held.** Production's runtime logs for the 40 minutes after the deploy have no request to `/api/auth/get-session`, from these opens or anyone else's. Before, an open after 5 minutes called it, which took 0.19–0.48 s with the database awake.
+    - **Warm** (database awake, function warm), 16:16: first byte in 37 ms. On the server, 99 ms to the session and 236 ms more to the recipes.
+    - **Cold** (database asleep 16.5 minutes, function cold), 16:44: first byte in 87 ms, since the proxy no longer waits on Neon Auth. The page's data streamed in by 3.5 s. Its runtime logs split that: about 1.8 s before the function's first line (Vercel starting it), then 1.35 s of reads, which include the database's 314 ms wake (Neon's operations log).
+    - **A new function is the biggest cost left**, about 1.8 s, which the explainer had guessed at 0.2 s. Phase 31's saved copy is what hides it.
+    - **Reads side by side cost a connection each.** Cold, the bookmarks read (P30.3) finished 0.46 s after the books' reads that ran beside it, holding up the recipes read; warm, the two finished together (178 and 180 ms), so it saved nothing. P30.3 is undone. The plan and recipe pages read side by side too (`Promise.all`); they weren't timed.
 
 Considered and left out: the HTTP driver for reads outside transactions (`neonConfig.poolQueryViaFetch`, experimental; it would save a WebSocket handshake on a new function); keeping the database awake on a timer (all day would use more than Neon Free's 100 CU-hours a month, and Neon then suspends the database until the next month); and paid plans (D100).
 
