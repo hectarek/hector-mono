@@ -117,7 +117,11 @@ Remove these files/folders (use monorepo equivalents):
 - [ ] An `AGENTS.md` for the app, modelled on an app of the same complexity (`apps/relationship-meter/AGENTS.md` for a simple one, `apps/hectors-recipes/AGENTS.md` for one with a backend), with its scoped check commands
 - [ ] The app in the root `AGENTS.md` "Monorepo Structure" block and in the README's app table
 
-## 9. Final Steps
+## 9. A Fast First Open (apps with a backend)
+
+An app on Vercel Hobby, Neon Free and Neon Auth that people open from a phone works through the checklist in `docs/fast-first-open.md`: the day-long session copy, SDKs loaded on first use, reads in a row, the sign-in kit only in its own layouts, and saved copies in a service worker (copied from `apps/hectors-recipes/service-worker/`).
+
+## 10. Final Steps
 
 1. Run `bun install` from root
 2. Run `bun check && bun ts` to verify
