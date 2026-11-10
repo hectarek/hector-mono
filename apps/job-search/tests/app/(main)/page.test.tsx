@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { within } from "@testing-library/dom";
 import TodayPage from "@/app/(main)/page";
 import { closeJob, pinJob } from "@/app/actions/jobs";
+import { getSettings, updateSettings } from "@/app/actions/settings";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { aClaudeJob, aCompany, aJob, dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
@@ -67,6 +68,33 @@ describe("Today", () => {
     }
     expect(follows(nextTask, applyNext)).toBe(true);
     expect(follows(applyNext, counts)).toBe(true);
+  });
+
+  // R9 and R12 as revised 2026-11-10: once Hector sets a season, its track leads the page.
+  it("shows the season's track above the week's line once a season is set", async () => {
+    signInAs("owner");
+    const day = todayIn(PLAN_TIME_ZONE);
+    const read = dataOf(await getSettings({}));
+    dataOf(
+      await updateSettings({
+        targets: read.targets,
+        payFloor: read.payFloor,
+        seasonStart: addDays(day, -10),
+        seasonFinish: addDays(day, 80),
+        checkpoints: [{ on: addDays(day, 20), name: "Five screens" }],
+        updatedAt: read.updatedAt?.toISOString() ?? null,
+      }),
+    );
+
+    const page = await today();
+
+    const track = page.getByRole("img", { name: /^The season as a track/ });
+    expect(track.getAttribute("aria-label")).toContain(
+      "Today is day 11 of sector 1 of 2, which ends at",
+    );
+    expect(
+      follows(track, page.getByRole("region", { name: "This week" })),
+    ).toBe(true);
   });
 
   // R27: Hector pins, and Claude on his word, so its session has both.

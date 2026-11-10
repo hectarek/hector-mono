@@ -94,7 +94,7 @@ export class SettingsRepository
   }
 }
 
-function toColumns({ targets, payFloor }: SettingsValues) {
+function toColumns({ targets, payFloor, season }: SettingsValues) {
   return {
     messagesSentTarget: targets.messagesSent,
     conversationsHeldTarget: targets.conversationsHeld,
@@ -102,6 +102,9 @@ function toColumns({ targets, payFloor }: SettingsValues) {
     practiceSessionsTarget: targets.practiceSessions,
     screensReachedTarget: targets.screensReached,
     payFloor,
+    seasonStart: season?.start ?? null,
+    seasonFinish: season?.finish ?? null,
+    seasonCheckpoints: season?.checkpoints ?? [],
   };
 }
 
@@ -115,6 +118,14 @@ function toSettings(row: SettingsRow): Settings {
       screensReached: row.screensReachedTarget,
     },
     payFloor: row.payFloor,
+    season:
+      row.seasonStart && row.seasonFinish
+        ? {
+            start: row.seasonStart,
+            finish: row.seasonFinish,
+            checkpoints: row.seasonCheckpoints,
+          }
+        : null,
     updatedAt: row.updatedAt,
   };
 }

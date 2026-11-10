@@ -207,6 +207,7 @@ export const getTodayUseCase = (
       claude: claudeSessions(changes),
       counts,
       targets: (settings ?? DEFAULT_SETTINGS).targets,
+      season: (settings ?? DEFAULT_SETTINGS).season,
     };
     logger.debug("Today read", {
       applyNext: view.applyNext.length,

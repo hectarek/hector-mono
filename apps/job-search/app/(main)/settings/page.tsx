@@ -5,9 +5,9 @@ import { SettingsForm } from "@/app/_components/settings-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
 
-// Hector's settings (R12): the weekly targets and the pay floor, which only he changes (R21), the
-// lead sources jobs come from (R5), which Claude adds to as well, and the settings' history (R19),
-// Claude's refused tries included.
+// Hector's settings (R12 as revised 2026-11-10): the weekly targets, the pay floor and the search
+// season, which only he changes (R21), the lead sources jobs come from (R5), which Claude adds to
+// as well, and the settings' history (R19), Claude's refused tries included.
 export default async function SettingsPage() {
   const actor = await getPageActor();
   const [settings, sources] = await Promise.all([
@@ -23,7 +23,9 @@ export default async function SettingsPage() {
         aria-labelledby="settings-targets"
         className="flex flex-col gap-4"
       >
-        <SectionTitle id="settings-targets">Targets and pay</SectionTitle>
+        <SectionTitle id="settings-targets">
+          Targets, pay and season
+        </SectionTitle>
         <SettingsForm settings={settings} humanOnly={actor.actor !== "owner"} />
       </section>
 

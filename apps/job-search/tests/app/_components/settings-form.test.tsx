@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render, waitFor, within } from "@testing-library/react";
 import { SettingsForm } from "@/app/_components/settings-form";
 import { updateSettings } from "@/app/actions/settings";
 import { getInjection } from "@/di/container";
@@ -42,6 +42,56 @@ describe("the settings form", () => {
     });
   });
 
+  // R12 as revised 2026-11-10: the season Today tracks toward.
+  it("saves the season's start, finish and checkpoints typed, leaving a blank row out", async () => {
+    signInAs("owner");
+    const view = render(
+      <SettingsForm settings={await current()} humanOnly={false} />,
+    );
+    const checkpoint = (row: number) =>
+      within(view.getByRole("group", { name: `Checkpoint ${row}` }));
+
+    type(view.getByLabelText("Season start"), "2026-11-02");
+    type(view.getByLabelText("Season finish"), "2027-02-01");
+    type(checkpoint(1).getByLabelText("Date"), "2026-12-18");
+    type(checkpoint(1).getByLabelText("Name"), "Five screens");
+    type(checkpoint(3).getByLabelText("Date"), "2026-11-13");
+    type(checkpoint(3).getByLabelText("Name"), "Portfolio live");
+    submit(view);
+
+    expect(await view.findByText("Saved.")).toBeTruthy();
+    expect((await current()).season).toEqual({
+      start: "2026-11-02",
+      finish: "2027-02-01",
+      checkpoints: [
+        { on: "2026-11-13", name: "Portfolio live" },
+        { on: "2026-12-18", name: "Five screens" },
+      ],
+    });
+  });
+
+  it("shows the checkpoints' check under them", async () => {
+    signInAs("owner");
+    const view = render(
+      <SettingsForm settings={await current()} humanOnly={false} />,
+    );
+
+    type(view.getByLabelText("Season start"), "2026-11-02");
+    type(view.getByLabelText("Season finish"), "2027-02-01");
+    // Row 3, which the season saved above leaves blank: the test container keeps it for the run.
+    type(
+      within(view.getByRole("group", { name: "Checkpoint 3" })).getByLabelText(
+        "Date",
+      ),
+      "2027-03-01",
+    );
+    submit(view);
+
+    expect(
+      await view.findAllByText("Checkpoint 3 needs a short name"),
+    ).not.toHaveLength(0);
+  });
+
   it("shows what it can't take under the field", async () => {
     signInAs("owner");
     const view = render(
@@ -63,6 +113,9 @@ describe("the settings form", () => {
     const other = await updateSettings({
       targets: { ...read.targets, practiceSessions: 9 },
       payFloor: read.payFloor,
+      seasonStart: read.season?.start ?? null,
+      seasonFinish: read.season?.finish ?? null,
+      checkpoints: read.season?.checkpoints ?? [],
       updatedAt: read.updatedAt?.toISOString() ?? null,
     });
     if (!other.ok) throw new Error(`The other save failed: ${other.code}`);

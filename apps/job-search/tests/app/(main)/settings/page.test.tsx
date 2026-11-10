@@ -18,7 +18,7 @@ describe("the settings page", () => {
     const page = await settingsPage();
 
     const targets = within(
-      page.getByRole("region", { name: "Targets and pay" }),
+      page.getByRole("region", { name: "Targets, pay and season" }),
     );
     for (const label of [
       "Messages sent",
@@ -27,6 +27,8 @@ describe("the settings page", () => {
       "Practice sessions",
       "Moves to screen or beyond",
       "Pay floor",
+      "Season start",
+      "Season finish",
     ]) {
       expect(targets.getByLabelText<HTMLInputElement>(label).disabled).toBe(
         false,
@@ -44,11 +46,14 @@ describe("the settings page", () => {
     const page = await settingsPage();
 
     const targets = within(
-      page.getByRole("region", { name: "Targets and pay" }),
+      page.getByRole("region", { name: "Targets, pay and season" }),
     );
     expect(targets.getByLabelText<HTMLInputElement>("Pay floor").disabled).toBe(
       true,
     );
+    expect(
+      targets.getByLabelText<HTMLInputElement>("Season start").disabled,
+    ).toBe(true);
     expect(targets.getByText("Only Hector")).toBeTruthy();
     const sources = within(page.getByRole("region", { name: "Lead sources" }));
     expect(

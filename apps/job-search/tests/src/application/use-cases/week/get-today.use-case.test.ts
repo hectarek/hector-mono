@@ -489,6 +489,9 @@ describeEachBackend("getToday", () => {
           screensReached: 1,
         },
         payFloor: null,
+        seasonStart: null,
+        seasonFinish: null,
+        checkpoints: [],
         updatedAt: null,
       }),
     );
@@ -499,6 +502,35 @@ describeEachBackend("getToday", () => {
       applications: 3,
       practiceSessions: 6,
       screensReached: 1,
+    });
+  });
+
+  // R9 and R12 as revised 2026-11-10 (U20): the season Today tracks toward.
+  it("answers the search season from Settings, none until Hector sets it", async () => {
+    expect((await app.getToday(OWNER)).season).toBeNull();
+
+    await app.updateSettings(
+      HECTOR,
+      updateSettingsSchema.parse({
+        targets: {
+          messagesSent: null,
+          conversationsHeld: null,
+          applications: null,
+          practiceSessions: null,
+          screensReached: null,
+        },
+        payFloor: null,
+        seasonStart: "2026-10-05",
+        seasonFinish: "2027-01-04",
+        checkpoints: [{ on: "2026-11-16", name: "Five screens" }],
+        updatedAt: null,
+      }),
+    );
+
+    expect((await app.getToday(OWNER)).season).toEqual({
+      start: "2026-10-05",
+      finish: "2027-01-04",
+      checkpoints: [{ on: "2026-11-16", name: "Five screens" }],
     });
   });
 });
