@@ -20,7 +20,8 @@
       "dependsOn": ["^check-types"]
     },
     "test": {
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["TMPDIR"]
     },
     "dev": {
       "cache": false,
