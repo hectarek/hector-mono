@@ -16,7 +16,8 @@
         "GOOGLE_OAUTH_CLIENT_SECRET",
         "GOOGLE_CALENDAR_ACCOUNT_EMAIL",
         "CALENDAR_TOKEN_KEY",
-        "LOG_LEVEL"
+        "LOG_LEVEL",
+        "VERCEL_ENV"
       ]
     }
   }
