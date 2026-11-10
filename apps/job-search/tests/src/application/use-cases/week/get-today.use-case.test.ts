@@ -177,6 +177,38 @@ describeEachBackend("getToday", () => {
     ]);
   });
 
+  // R9 as revised 2026-11-10 (U20): the week's line counts the whole week's blocks.
+  it("counts the week's Focus blocks done against those planned, a moved one in neither, and no other week's", async () => {
+    const block = (
+      startsAt: string,
+      state: "planned" | "done" | "partial" | "moved",
+    ) => ({
+      startsAt,
+      endsAt: "2026-10-29T03:59:00Z",
+      effort: "practice",
+      title: `${state} ${startsAt}`,
+      state,
+    });
+    await app.addBlocks(
+      HECTOR,
+      addBlocksSchema.parse({
+        blocks: [
+          block("2026-10-26T09:30:00-04:00", "done"),
+          block("2026-10-27T09:30:00-04:00", "partial"),
+          block("2026-10-28T09:30:00-04:00", "moved"),
+          block("2026-10-28T11:00:00-04:00", "planned"),
+          // The Sunday before is last week's.
+          block("2026-10-25T09:30:00-04:00", "done"),
+        ],
+      }),
+    );
+
+    const view = await app.getToday(OWNER);
+
+    expect(view.weekBlocks).toEqual({ done: 1, planned: 3 });
+    expect(view.blocks).toHaveLength(2);
+  });
+
   it("gives each due job its contacts, so its follow-up can name one (the UX plan's UX3)", async () => {
     const job = await jobs.add(companyId, {
       role: "With contacts",

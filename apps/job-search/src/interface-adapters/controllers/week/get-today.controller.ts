@@ -9,7 +9,7 @@ import {
 
 export type IGetTodayController = ReturnType<typeof getTodayController>;
 
-// The read behind This week and get_today (docs/build-plan.md KTD4, U9).
+// The read behind Today and get_today (docs/build-plan.md KTD4, U9, U20).
 export const getTodayController = (
   useCase: IGetTodayUseCase,
   loggerService: ILoggerService,

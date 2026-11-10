@@ -36,7 +36,7 @@ const personOf = async (id: string) => dataOf(await getPerson({ id })).person;
 const fictional = (name: string) =>
   `${name} ${crypto.randomUUID().slice(0, 8)}`;
 
-// The sheet as This week's row opens it, with the toaster the shell mounts.
+// The sheet as Today's row opens it, with the toaster the shell mounts.
 const theSheet = (
   kind: "job" | "person",
   record: NextStepRecord,

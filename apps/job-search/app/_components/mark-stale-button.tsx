@@ -8,7 +8,7 @@ import { closeJob } from "@/app/actions/jobs";
 // The reason a stale candidate closes with, as the sheet's rule words it (R3).
 const NO_REPLY = "No reply after 21 days";
 
-// A stale candidate's one tap on This week (R3, R9): close the job as stale, with the reason
+// A stale candidate's one tap on Today (R3, R9): close the job as stale, with the reason
 // filled in. Closed, the page refreshes without it.
 export function MarkStaleButton({ jobId }: { jobId: string }) {
   const [error, setError] = useState<string>();

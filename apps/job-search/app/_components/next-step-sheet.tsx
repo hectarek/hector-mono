@@ -118,7 +118,7 @@ export function NextStepSheet({
   contacts?: PersonRef[];
   // The view the sheet opens on: Push from a due row, Done or Push from a record's Next (UX8).
   opensOn?: "push" | "done";
-  // What opens the sheet (This week's row or its pit board), and what it shows.
+  // What opens the sheet (Today's row or its pit board), and what it shows.
   trigger: ReactElement;
   children: ReactNode;
 }) {

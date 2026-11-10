@@ -5,8 +5,8 @@ import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
 import { rankJobs } from "@/src/entities/rank";
 
 // The ranked list (R27): the owner's jobs not yet applied to, the expired left out, in the rank's
-// order, weighed against Hector's pay floor (KTD23, KTD24). find_jobs' `to-apply` and This week's
-// apply next read it.
+// order, weighed against Hector's pay floor (KTD23, KTD24). find_jobs' `to-apply` and Today's apply
+// next read it.
 export async function rankedList(
   jobsRepository: IJobsRepository,
   settingsRepository: ISettingsRepository,

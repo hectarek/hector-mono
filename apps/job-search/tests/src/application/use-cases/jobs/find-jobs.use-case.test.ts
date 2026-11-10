@@ -117,7 +117,7 @@ describeEachBackend("findJobs", () => {
     expect(await roles({ companyId: globex })).toEqual(["Globex role"]);
   });
 
-  // The UX plan's UX6: the steps with no date, which This week never shows as due.
+  // The UX plan's UX6: the steps with no date, which Today never shows as due.
   it("lists a job whose step has no date after the dated ones, and narrows to those alone", async () => {
     await jobs.add(acme, { role: "Dated role" });
     const undated = await jobs.add(acme, { role: "Undated role" });

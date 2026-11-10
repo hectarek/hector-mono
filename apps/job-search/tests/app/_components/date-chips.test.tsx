@@ -35,7 +35,7 @@ afterEach(() => {
   toast.dismiss();
 });
 
-// The UX plan's UX6: a step with no date joins This week in one tap.
+// The UX plan's UX6: a step with no date joins Today in one tap.
 describe("a step's date chips", () => {
   it("date the step in one tap, against the updatedAt the list read, and say so", async () => {
     const ada = await anUndatedPerson();

@@ -1,19 +1,19 @@
 import { blockNow } from "@/app/_components/block-row";
 import { BlockSheet } from "@/app/_components/block-sheet";
 import { SectionTitle } from "@/app/_components/display";
-import type { Block } from "@/src/entities/models/block.model";
+import { type Block, blocksDone } from "@/src/entities/models/block.model";
 
-// This week's Focus blocks (R9 as revised 2026-11-07, R26, docs/build-plan.md U17): today's, by
-// start, each opening how it went, with how many are done of those planned (a moved one counts in
-// neither). The block happening now takes the signal border.
+// Today's schedule (R9's third section as revised 2026-11-10, R26, docs/build-plan.md U17): today's
+// Focus blocks by start, each opening how it went, with how many are done of those planned (a
+// moved one counts in neither). The block happening now takes the signal border. The calendar's
+// events join it with U14.
 export function TodayBlocks({ blocks, now }: { blocks: Block[]; now: Date }) {
   const current = blockNow(blocks, now);
-  const planned = blocks.filter(({ state }) => state !== "moved");
-  const done = planned.filter(({ state }) => state === "done").length;
+  const { done, planned } = blocksDone(blocks);
   return (
-    <section aria-labelledby="week-blocks" className="flex flex-col gap-3">
-      <SectionTitle id="week-blocks">
-        Today&apos;s blocks · {done} of {planned.length} done
+    <section aria-labelledby="today-schedule" className="flex flex-col gap-3">
+      <SectionTitle id="today-schedule">
+        Schedule · {done} of {planned} done
       </SectionTitle>
       <ul className="bg-card divide-y overflow-hidden rounded-xl border">
         {blocks.map((block) => (

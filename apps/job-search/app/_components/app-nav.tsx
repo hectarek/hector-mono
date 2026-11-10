@@ -12,8 +12,8 @@ import {
   Briefcase,
   Building2,
   CalendarCheck,
-  CalendarDays,
   Dumbbell,
+  House,
   type LucideIcon,
   Menu,
   Settings,
@@ -40,7 +40,7 @@ type Section = {
 // The app's sections, in the design system's order (its AppShell page). A unit that adds a section
 // adds it here.
 const SECTIONS: readonly Section[] = [
-  { href: "/", name: "This week", Icon: CalendarDays },
+  { href: "/", name: "Today", Icon: House },
   {
     href: "/week",
     name: "Weekly review",
@@ -85,7 +85,7 @@ const SECTIONS: readonly Section[] = [
 const isUnder = (pathname: string, base: string | undefined) =>
   base !== undefined && (pathname === base || pathname.startsWith(`${base}/`));
 
-// The section a path is in: This week only at the root, any other from its first segment down,
+// The section a path is in: Today only at the root, any other from its first segment down,
 // or from its records' path.
 function sectionOf(pathname: string) {
   return SECTIONS.find(({ href, records }) =>

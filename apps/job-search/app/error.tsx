@@ -23,7 +23,7 @@ export default function ErrorPage({
         <EmptyHeader>
           <EmptyTitle>Something went wrong</EmptyTitle>
           <EmptyDescription>
-            It may be a bad connection. Try again, or go back to This week.
+            It may be a bad connection. Try again, or go back to Today.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex-row justify-center">
@@ -37,7 +37,7 @@ export default function ErrorPage({
             nativeButton={false}
             render={<Link href="/" />}
           >
-            This week
+            Today
           </Button>
         </EmptyContent>
       </Empty>

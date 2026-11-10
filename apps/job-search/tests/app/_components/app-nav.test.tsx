@@ -65,7 +65,7 @@ describe("the tab's title", () => {
     );
 
     expect(titles).toEqual({
-      "/": "This week · Job search",
+      "/": "Today · Job search",
       "/week": "Weekly review · Job search",
       "/jobs": "Jobs · Job search",
       "/jobs/new": "Add a job · Job search",
@@ -108,7 +108,7 @@ describe("the menu", () => {
     expect(current[0]?.getAttribute("aria-current")).toBe("true");
   });
 
-  it("marks This week only on its own page, not on every path under it", () => {
+  it("marks Today only on its own page, not on every path under it", () => {
     nextState.pathname = "/week";
     shell();
 

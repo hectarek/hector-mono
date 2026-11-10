@@ -1404,7 +1404,7 @@ Built next, before Phases 5 to 8, in this order: U19, U20, U13 and U14 (revised,
   - The name: the section's name and the tab's title in `app-nav.tsx`, back links in `back-link.ts`, the error and not-found pages' links, and the tests that name "This week".
   - `week/get-today.use-case.ts` and `today.model.ts`: the proposals give way to Apply next (U19's ranked read), and the season and the week's milestone join.
   - `track-map.tsx`, the design system's TrackMap.
-  - `apply-next.tsx`, a ranked job's row: role, company, pay, score and Claude's reason, with Pin and Not for me. It follows ProposalCard's pattern, which it replaces.
+  - `apply-next.tsx`, a ranked job's row: role, company, pay, score and Claude's reason, with Pin and Not for me. It follows ProposalCard's pattern, which it replaces. (Revised 2026-11-10 in U20: U19 built the row as `to-apply-list.tsx`, which the jobs page's To apply view and Today share, so there's no `apply-next.tsx`.)
   - Settings gain the season's start, finish and up to three checkpoints, each with a date and a short name, all human-only (R21).
   - The week's milestone: a `week_plans` row per owner and Monday, set during Monday planning from the week page or the tool `set_week_milestone`. The weekly review shows it, and setting it fixes no counts.
 - **Approach:**

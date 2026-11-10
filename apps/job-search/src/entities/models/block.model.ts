@@ -181,5 +181,17 @@ export function effortCounts(blocks: Block[]): EffortCount[] {
   });
 }
 
+// How many of the blocks given are done, of those planned (R26): a moved block counts in neither,
+// as in effortCounts.
+export type BlocksDone = { done: number; planned: number };
+
+export function blocksDone(blocks: Block[]): BlocksDone {
+  const planned = blocks.filter(({ state }) => state !== "moved");
+  return {
+    done: planned.filter(({ state }) => state === "done").length,
+    planned: planned.length,
+  };
+}
+
 // What a delete answers: the block and its day, whose pages listed it.
 export type DeletedBlock = { id: string; day: string };

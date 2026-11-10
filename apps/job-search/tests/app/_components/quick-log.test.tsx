@@ -173,7 +173,7 @@ describe("the quick log", () => {
     );
   });
 
-  it("logs a conversation ahead of time with its start and end, which reaches This week's debriefs once it's over", async () => {
+  it("logs a conversation ahead of time with its start and end, which reaches Today's debriefs once it's over", async () => {
     // Monday, Nov 9, 10 am Eastern.
     setSystemTime(new Date("2026-11-09T15:00:00Z"));
     const ada = await aPerson(fictional("Ada"));
