@@ -1,14 +1,4 @@
-import { GatewayError } from "@ai-sdk/gateway";
-import {
-  gateway,
-  generateText,
-  type LanguageModel,
-  type LanguageModelUsage,
-  NoObjectGeneratedError,
-  NoOutputGeneratedError,
-  Output,
-} from "ai";
-import { getDocumentProxy } from "unpdf";
+import type { LanguageModel, LanguageModelUsage } from "ai";
 import { z } from "zod";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { IRecipeReaderService } from "@/src/application/services/recipe-reader.service.interface";
@@ -156,14 +146,15 @@ type Reading = z.infer<typeof readingSchema>;
 
 // AI SDK 7 through the Vercel AI Gateway, the only place that knows either (ux-plan D27,
 // D28). Locally the Gateway key comes from AI_GATEWAY_API_KEY; on Vercel, from OIDC.
+// The SDK and pdf.js load on the first read, not when a server function starts: the DI
+// container builds this adapter for every request, and most never read a recipe (P30.2).
 export class AiGatewayRecipeReaderService implements IRecipeReaderService {
   private readonly logger: ILoggerService;
 
   constructor(
     logger: ILoggerService,
-    private readonly model: LanguageModel = gateway(
-      AI_GATEWAY_MODELS.recipeReader,
-    ),
+    // A stand-in for tests. Left out, the Gateway's model, made on the first read.
+    private readonly model?: LanguageModel,
   ) {
     this.logger = logger.child({ layer: "service", op: "readRecipe" });
   }
@@ -172,12 +163,14 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
     if (source.kind === "document") {
       await checkPdf(source.pdf);
     }
+    const { gateway, generateText, Output } = await import("ai");
+    const model = this.model ?? gateway(AI_GATEWAY_MODELS.recipeReader);
     const reading = await this.generate(
       "Read a recipe",
       { source: source.kind },
       () =>
         generateText({
-          model: this.model,
+          model,
           instructions: instructionsFor(source),
           messages: [
             {
@@ -210,28 +203,42 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
       });
       return result.output;
     } catch (err) {
-      throw this.toReadError(err);
+      throw await this.toReadError(err);
     }
   }
 
-  private toReadError(err: unknown): RecipeReadError {
+  private async toReadError(err: unknown): Promise<RecipeReadError> {
+    // Already loaded by the read that failed, so these cost nothing here.
+    const { NoObjectGeneratedError, NoOutputGeneratedError } = await import(
+      "ai"
+    );
+    const { GatewayError } = await import("@ai-sdk/gateway");
+    const statusCode = GatewayError.isInstance(err)
+      ? err.statusCode
+      : undefined;
     if (
       NoObjectGeneratedError.isInstance(err) ||
       NoOutputGeneratedError.isInstance(err)
     ) {
-      this.logger.warn("The model's answer wasn't a recipe", errorFields(err));
+      this.logger.warn(
+        "The model's answer wasn't a recipe",
+        errorFields(err, statusCode),
+      );
       return new RecipeReadError("no-recipe-found", "No recipe in the answer", {
         cause: err,
       });
     }
     // The Gateway answers 402 when a key's budget or the account's credit is spent (D86).
-    if (GatewayError.isInstance(err) && err.statusCode === 402) {
-      this.logger.warn("AI Gateway credit or budget spent", errorFields(err));
+    if (statusCode === 402) {
+      this.logger.warn(
+        "AI Gateway credit or budget spent",
+        errorFields(err, statusCode),
+      );
       return new RecipeReadError("budget-paused", "AI budget reached", {
         cause: err,
       });
     }
-    this.logger.error("Reading a recipe failed", errorFields(err));
+    this.logger.error("Reading a recipe failed", errorFields(err, statusCode));
     return new RecipeReadError(
       "service-unavailable",
       "Reading a recipe failed",
@@ -241,22 +248,22 @@ export class AiGatewayRecipeReaderService implements IRecipeReaderService {
 }
 
 // Just enough to diagnose. The SDK's errors carry the whole request, so logging them as they
-// are would log the recipe, or a photo as base64.
-function errorFields(err: unknown): Record<string, unknown> {
+// are would log the recipe, or a photo as base64. `statusCode` is the Gateway's, if it answered.
+function errorFields(
+  err: unknown,
+  statusCode: number | undefined,
+): Record<string, unknown> {
   if (!(err instanceof Error)) {
     return { error: String(err) };
   }
-  return {
-    name: err.name,
-    message: err.message,
-    statusCode: GatewayError.isInstance(err) ? err.statusCode : undefined,
-  };
+  return { name: err.name, message: err.message, statusCode };
 }
 
 // A PDF is opened before it's sent, so one that's too long, locked or broken is refused before
 // the model sees it, and costs nothing (D53). pdf.js may take over the bytes it's given, so it
 // gets a copy and the original goes to the model.
 async function checkPdf(pdf: Uint8Array): Promise<void> {
+  const { getDocumentProxy } = await import("unpdf");
   let pages: number;
   try {
     const document = await getDocumentProxy(pdf.slice(), { verbosity: 0 });

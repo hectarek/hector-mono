@@ -11,7 +11,7 @@ execution: code
 
 # Job Search App - Spec
 
-The initial spec for building `apps/job-search`: its requirements (R1 to R26), decisions (KTD1 to KTD21) and units (U1 to U17; R26 and U17 added 2026-11-07). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H6) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
+The initial spec for building `apps/job-search`: its requirements (R1 to R27), decisions (KTD1 to KTD25) and units (U1 to U21; R26 and U17 added 2026-11-07, KTD22 and U18 on 2026-11-09, and R27, KTD23 to KTD25 and U19 to U21 on 2026-11-10). It was the plan of record from 2026-10-23 to 2026-10-27. Since then, what's done and what's left lives in Hector's private task tracker, one task per unit, per need from Hector (H1 to H8) and per open decision, under the same U and H numbers, and this doc isn't updated with status ([agent-context playbook](../../../docs/development/agent-context-playbook.md#a-spec-and-live-tasks)). A decision that changes it is still marked revised here, with its date (Conventions). A path that starts with `app/`, `src/`, `db/`, `di/`, `scripts/`, `tests/` or `docs/agent-access.md` is inside `apps/job-search/`; every other path is from the repo root.
 
 ---
 
@@ -59,7 +59,7 @@ Each unit is one task in Hector's task tracker, where its state lives (see Conve
 **Phase 5: Interviews and lead-source yield**
 - **U12** Interview rounds and lead-source yield — C · KTD7
 
-**Phase 6: Calendar**
+**Phase 6: Calendar** (revised 2026-11-10: U13 and U14, read-only now, are built in Phase 9's order)
 - **U13** Google Calendar connection — C+H · KTD10 · needs H4
 - **U14** Calendar view, scheduling and linking — C · KTD11, KTD12
 
@@ -68,6 +68,11 @@ Each unit is one task in Hector's task tracker, where its state lives (see Conve
 
 **Phase 8: Public write-up**
 - **U16** Public README and demo — C · KTD16
+
+**Phase 9: Today as home** (added 2026-11-10; built next, before Phases 5 to 8, in the order U19, U20, U13, U14, U21)
+- **U19** The ranked list, in place of the review queue — C+H · KTD8, KTD23, KTD24
+- **U20** Today as home — C · KTD9, KTD15 · needs H8
+- **U21** Focus blocks from the calendar — C+H · KTD11, KTD25 · needs H4
 
 ---
 
@@ -109,7 +114,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **Pipeline**
 
-- R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size. (Revised 2026-10-29, Hector's call: a job shows its company's tier and holds none of its own.) (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given, and a job Hector adds with no step starts with checking it's hiring, due that day, as an accepted proposal does.)
+- R1. Hector can add, view, edit and delete jobs. A job holds the sheet's fields: company, role, status, next step and next date, applied-on date, target role, tier, level, location and work mode, posted pay band, posting link, contacts, found-on date and notes. It also holds a lead source (R5) and, for the fit checklist (R17), optional travel, employment type and team size. (Revised 2026-10-29, Hector's call: a job shows its company's tier and holds none of its own.) (Revised 2026-11-07 in UX6, Hector's call on the UX plan's Q1: a next step always carries a date, a week out when none is given, and a job Hector adds with no step starts with checking it's hiring, due that day, as an accepted proposal does.) (Revised 2026-11-10, Hector's call: a job also holds its posting's date, a fit score from 1 to 10 when the sweep gave one, Claude's reason when Claude added it, and whether it's pinned. A new job, Hector's or Claude's, starts in `verify` with no next step, since the ranked list is where it waits (R27); moving it to `target` or beyond sets the stage's step as before.)
 - R2. A job's status is `verify`, `target`, `applied`, `screen`, `onsite` or `offer`, or a closed status: `rejected`, `closed`, `stale`, `skipped`, `withdrawn`, `offer-accepted` or `offer-declined`. Any move is allowed, and each move records the date it happened, today by default. (Revised 2026-11-07, Hector's call on the UX plan's Q6: `closed` means the posting closed, and the screens call the closed statuses together Archived, so the one word means one thing.)
 - R3. Status moves keep the stages' steps, and set no follow-up Hector hasn't agreed to:
   - the first move to `applied` or beyond fills an empty applied-on date with the move's date
@@ -135,15 +140,27 @@ Hector wants one place for the whole search that he and Claude both work in dire
   3. today's and tomorrow's calendar, or its connection state (R15) (revised 2026-11-07 in U17: today's Focus blocks come first here, in time order, each with how it went, R26)
   4. Claude's recent changes
   5. the week's counts against targets
-- R10. Weekly counts cover messages sent, conversations held, applications (applied-on in the week), practice sessions and moves into `screen` or beyond, by Eastern-time week starting Monday. Saving a weekly review stores a snapshot of the counts and targets with the build milestone and the one change, and the view shows live counts beside a snapshot they no longer match.
+
+  (Revised 2026-11-10, Hector's call: This week becomes **Today**, the app's home page, which shows everything Hector needs to know. Every other page is a branch from it, for detail (a job, a person) or reference (all his people). It works on a phone and shows its sections in this order, collapsing any that are empty:
+  1. tracking toward: the search season as a track, from its start to its finish, with up to three checkpoints and today marked on it (the design system's TrackMap), and beneath it the week's line: applications against the target, the week's milestone, and blocks done against those planned
+  2. the next task, on the pit board (UX4)
+  3. today's schedule: Focus blocks, each with its done-when line and how it went, and the events of the calendars Hector shows, in time order. It shows the connection's state when Google isn't connected (R15)
+  4. needs you: what's late, due today or gone quiet, conversations to debrief, and practice reviews, in UX4's groups, with the people and jobs whose next step has no date counted beneath
+  5. apply next: the top three of the ranked list (R27), each with its pay, score and Claude's reason, and Pin and Not for me
+  6. the rest of the week: what's due later this week, by weekday, and tomorrow's events
+  7. the week's counts against targets
+  8. Claude's recent work
+
+  The morning brief retires, since Today is the brief. Its parts land here: the calendar in section 3, the sweep's finds in section 5, and what builds toward the season in section 1. Follow-ups that need Hector to write to someone stay to-dos, as next steps on the person or the job, and the app doesn't send email.)
+- R10. Weekly counts cover messages sent, conversations held, applications (applied-on in the week), practice sessions and moves into `screen` or beyond, by Eastern-time week starting Monday. Saving a weekly review stores a snapshot of the counts and targets with the build milestone and the one change, and the view shows live counts beside a snapshot they no longer match. (Revised 2026-11-10, U20: the week's milestone is set at Monday planning, on a record of its own per week, from the week page or through `set_week_milestone`, and setting it fixes no counts or targets. The review's first save, at the week's end, still fixes the counts and targets as they stand then, and shows the milestone that planning set beside the one change. `get_week` and Today's week line show the milestone.)
 - R11. A practice log records sessions (topic, date, type, pattern, AI used, minutes, result, notes) and schedules one review at a time: 2 days after a solved session, then 7 and then 21 days after each successful review, and none after the 21-day review. A failed or partial review is retried 2 days later at the same step. (Revised 2026-10-29, Hector's call: the first review comes 2 days after the session whatever its result, as the sheet's formula did.)
-- R12. Settings, which only Hector changes, hold the weekly targets and the cap on pending proposals.
+- R12. Settings, which only Hector changes, hold the weekly targets and the cap on pending proposals. (Revised 2026-11-10, Hector's call: the cap goes with the queue (R20). Settings also hold the pay floor the rank weighs (R27), the search season's start, finish and up to three checkpoints that Today tracks toward (R9), and which of his Google calendars the app shows and which Claude may read by title (R13).)
 
 **Calendar**
 
-- R13. A week calendar shows events from Hector's primary Google calendar beside next-step dates, interview rounds, scheduled conversations and practice reviews.
-- R14. Scheduling a coffee, call or interview from a record creates one event on the primary calendar, titled from the record ("Coffee: Name (Company)", "Call: Name (Company)", "Interview: Company, round"), unless an existing event such as a recruiter's invite is linked instead. The app never adds guests, never writes another calendar and changes only events it created.
-- R15. When Google is disconnected, needs reconnecting or is unavailable, the calendar parts of a page say so and every other part still works.
+- R13. A week calendar shows events from Hector's primary Google calendar beside next-step dates, interview rounds, scheduled conversations and practice reviews. (Revised 2026-11-10, Hector's call: a calendar page shows a day and a week as time grids, like a calendar app, read-only. It holds the events of every calendar Hector chooses to show, each in its Google color, with the app's dated items beside them: next steps, scheduled conversations, practice reviews and, with U12, interview rounds. Settings list all of his Google calendars, the ones he owns and the ones he subscribes to, so a calendar he adds later shows up there to choose. An event can be linked to a person, a job or a round in the app, which writes nothing to Google, and a linked event shows its record.)
+- R14. Scheduling a coffee, call or interview from a record creates one event on the primary calendar, titled from the record ("Coffee: Name (Company)", "Call: Name (Company)", "Interview: Company, round"), unless an existing event such as a recruiter's invite is linked instead. The app never adds guests, never writes another calendar and changes only events it created. (Revised 2026-11-10, Hector's call: dropped. The app writes nothing to Google. Hector schedules in Google Calendar, and the app shows the event and lets him link it to its record (R13 as revised).)
+- R15. When Google is disconnected, needs reconnecting or is unavailable, the calendar parts of a page say so and every other part still works. (Revised 2026-11-10: the calendar parts now include Today's schedule and Focus blocks (R26 as revised). A block's done-when line and how it went stay saved in the app while Google is unreachable.)
 
 **Profile and fit**
 
@@ -154,9 +171,9 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 - R18. Claude reads and changes the tracker only through WebMCP tools the app registers, with the same validation and access checks as Hector's clicks. There is no separate API and no key. (Revised 2026-11-09, Hector's call, U18: the same tools are also served from the app's MCP endpoint, to Claude's account alone, signed in through Neon Auth's OAuth server (KTD22). The endpoint takes only an access token Neon issued to Claude's account, so there's still no key. The page tools stay as the fallback until U18 has run for a week.)
 - R19. Every change records who made it (Hector, Claude, the import or the system), the tool when one was used, and the changed fields before and after. Each record shows its history.
-- R20. Jobs Claude adds wait in a review queue until Hector accepts them (status `verify`, next step "Verify it's hiring", due today) or dismisses them with a reason. A posting already on any job, dismissed ones included, is refused as a duplicate, and pending proposals stop at the cap.
+- R20. Jobs Claude adds wait in a review queue until Hector accepts them (status `verify`, next step "Verify it's hiring", due today) or dismisses them with a reason. A posting already on any job, dismissed ones included, is refused as a duplicate, and pending proposals stop at the cap. (Revised 2026-11-10, Hector's call: there is no review queue. A job Claude adds is in Hector's ranked list at once (R27), in `verify` with no next step, carrying its posting's date, its fit score when the sweep gave one, and Claude's reason. "Not for me", from Hector or from Claude on his word, archives any job not yet applied to as `skipped` with a reason. A posting already on any job, archived ones included, is still refused as a duplicate. There is no cap: the rank orders the list, and untouched jobs leave it on their own (R27).)
 - R21. The server refuses these to Claude's sign-in, whatever the entry point:
-  - accepting, dismissing or reopening proposals
+  - accepting, dismissing or reopening proposals (revised 2026-11-10: gone with the queue; in their place, moving an archived job back to an open status, or changing an archived job's posting link, which would free the posting)
   - deleting anything
   - connecting or disconnecting the calendar
   - changing settings
@@ -176,17 +193,26 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 **Blocks** (added 2026-11-07 in U17: the sheet's Blocks tab didn't move at the cutover, so the blocks lived only on the calendar, where none could be marked done)
 
-- R26. A week's Focus blocks are records. Each has its day, its start and end times, the effort it feeds (Networking, Applying, Practice, Projects, or Upkeep for planning and reviews), a title and a "done when" line, the outcome that makes it done. Hector or Claude sets each block's state (planned, done, partial, moved or skipped) and what happened, and can add a block that wasn't planned. This week shows today's blocks and how each went (R9), and the week page shows the week's, with each effort's blocks done against those planned.
+- R26. A week's Focus blocks are records. Each has its day, its start and end times, the effort it feeds (Networking, Applying, Practice, Projects, or Upkeep for planning and reviews), a title and a "done when" line, the outcome that makes it done. Hector or Claude sets each block's state (planned, done, partial, moved or skipped) and what happened, and can add a block that wasn't planned. This week shows today's blocks and how each went (R9), and the week page shows the week's, with each effort's blocks done against those planned. (Revised 2026-11-10, Hector's call: a block is an event on Hector's Focus calendar, and he plans there. The event gives the block its day, times and title. The app adds what a calendar can't hold, matched to the event: the done-when line, the state and what happened (KTD25).
+  - The done-when line is the one the app saved, else the event description's line that starts "Done when:".
+  - The effort is the one the app saved, else the one the event's color stands for in Settings.
+  - A block that wasn't planned is added in Google Calendar, like any other.
+  - Moving a block is moving its event. A block whose event is deleted keeps its saved outcome in the app's history.)
+- R27. The jobs not yet applied to (`verify` and `target`) form one ranked list, the list of what to apply to next. (Added 2026-11-10, Hector's call.)
+  - The order is automatic: pinned jobs first, then `target` jobs (Hector's own pick), then the rest by a priority worked out on every read from the job's fit score, its company's tier, its posting's age and its posted pay against Hector's floor (KTD23). Hector can pin or unpin any job, and so can Claude on his word.
+  - A job that nobody touched leaves the list on its own: when its posting closes, it's archived as `closed`; when its posting is 21 days old and it's still unpinned and in `verify` or `target`, it's archived as `skipped` with the reason "Not picked in time" (KTD24). Either way the job, its history and its posting stay, so the posting can't come back.
+  - Today shows the top three (R9), and the jobs page has the whole list.
+  - Claude's scheduled sweep, outside the app, finds postings and adds the ones that pass its rules through the app's tools. The app ranks them as they arrive.
 
 ### Key Decisions
 
 - **Public in hector-mono, with the search's specifics kept out of the repo.** (session-settled: user-directed — chosen over a private mirror of hector-mono and a standalone private repo: keeps the monorepo's shared UI, architecture and CI, with every search specific held in the database or Hector's private docs.) Governs R24.
 - **Claude works only through WebMCP tools.** (session-settled: user-directed — chosen over a direct API: Claude acts inside the signed-in app with the same checks as the UI.) Governs R18. (Revised 2026-11-09, Hector's call after a research run that tested Neon's OAuth server with Claude Code: Claude works through the same tools served from the app's MCP endpoint, signed in as its own account through Neon Auth's OAuth server (KTD22, U18). The reason holds: the same checks as the UI, and no key. It's chosen over WebMCP alone because Claude's browser sign-in lapsed after a week and only Hector could renew it, one browser profile let one session in at a time, and WebMCP is an origin trial. It's also chosen over an app-issued token, which would be a long-lived secret on disk that claude.ai can't use.)
-- **Jobs Claude finds need Hector's accept.** (session-settled: user-approved — chosen over Claude adding jobs straight to the pipeline: keeps Hector's existing review rule.) Governs R20.
+- **Jobs Claude finds need Hector's accept.** (session-settled: user-approved — chosen over Claude adding jobs straight to the pipeline: keeps Hector's existing review rule.) Governs R20. (Revised 2026-11-10, Hector's call: Claude's finds go straight into a ranked list of jobs to apply to, with no accept step. Leaving a job alone is his decision: it leaves the list on its own once its posting closes or is 21 days old, and "Not for me" archives it at once (R20 and R27 as revised, KTD23, KTD24). Chosen over the queue because a pass the sweep found waited on two reviews, Hector's pick in chat and then his accept in the app, and the waiting passes went undecided.)
 - **The profile is a synced, read-only view; Hector's private docs stay the source.** (session-settled: user-approved — chosen over editing the profile in the app: one source for profile facts.) Governs R16.
 - **Fit comes from readable rules plus Claude's note, with no AI calls in the app.** (session-settled: user-approved — chosen over in-app AI scoring: the app makes no model calls.) Governs R17.
 - **The sheet is replaced before the calendar and profile work.** (session-settled: user-approved — chosen over building everything before the switch: the sheet retires as early as possible.) Governs R25.
-- **Google Calendar stays the calendar of record.** The app reads and writes Hector's primary calendar rather than keeping a calendar of its own. Governs R13, R14.
+- **Google Calendar stays the calendar of record.** The app reads and writes Hector's primary calendar rather than keeping a calendar of its own. Governs R13, R14. (Revised 2026-11-10, Hector's call: the app reads all of Hector's calendars and writes none. He plans in Google Calendar, and the app shows his calendars in day and week grids like a calendar app's. His Focus calendar is where blocks come from: the app keeps only what a calendar can't hold, each block's done-when line, how it went and what happened (R13, R26 as revised, KTD10, KTD11, KTD25). It's chosen over the app writing events because one place to plan is simpler than two kept in step, and over the primary calendar alone because his time is split across several calendars, which change.)
 
 ### Key Flows
 
@@ -229,8 +255,8 @@ Hector wants one place for the whole search that he and Claude both work in dire
 
 ### Acceptance Examples
 
-- AE1. **Covers R20.** Given a dismissed job for a posting, when Claude proposes the same posting with different tracking parameters, then it gets `duplicate` with the dismissal reason and no row is created.
-- AE2. **Covers R21.** Given Claude's session, when Claude clicks Accept on a proposal in its own window, then the server refuses with "Only Hector can do this", nothing changes, and the refusal appears in the activity log.
+- AE1. **Covers R20.** Given a dismissed job for a posting, when Claude proposes the same posting with different tracking parameters, then it gets `duplicate` with the dismissal reason and no row is created. (Revised 2026-11-10: given a job Hector archived as "Not for me", when Claude adds the same posting with different tracking parameters, then it gets `duplicate` naming the archived job, and no row is created.)
+- AE2. **Covers R21.** Given Claude's session, when Claude clicks Accept on a proposal in its own window, then the server refuses with "Only Hector can do this", nothing changes, and the refusal appears in the activity log. (Revised 2026-11-10: given Claude's session, when Claude moves a job Hector archived back to `verify`, then the server refuses with "Only Hector can do this", nothing changes, and the refusal appears in the activity log.)
 - AE3. **Covers R2, R3.** Given a job in `target`, when it moves to `applied` dated yesterday, then applied-on is yesterday, it has no next step unless the move gave one, and 21 days after applied-on with no reply it appears as a stale candidate. (Revised 2026-11-09 with R3: it had expected "Follow up" due 7 days after applied-on.)
 - AE4. **Covers R8, R10.** Given a server clock in UTC, when Hector logs a message at 9:30 pm Eastern on a Sunday, then it counts in the week that began the previous Monday.
 - AE5. **Covers R15.** Given a revoked Google token, when This week loads, then the calendar section says to reconnect and every other section renders.
@@ -273,7 +299,7 @@ Hector wants one place for the whole search that he and Claude both work in dire
 #### Considered and not built
 
 - Auto-expiring proposals: the cap is the valve. Revisit if the queue fills during interview weeks.
-- Marking jobs stale automatically: there is no scheduler, so stale candidates are listed and Hector or Claude marks them. Revisit if candidates pile up.
+- Marking jobs stale automatically: there is no scheduler, so stale candidates are listed and Hector or Claude marks them. Revisit if candidates pile up. (Revised 2026-11-10: the app gains a daily schedule for the ranked list (KTD24), which archives jobs not yet applied to. Applications that go quiet are still listed for Hector or Claude to mark stale.)
 - Google push notifications (`events.watch`): one user's windowed reads are enough, and channels need a public webhook and renewal.
 - A calendar library with drag and resize: an agenda covers the need (KTD12).
 - An origin-trial token so everyday browsers expose tools: tools register only for Claude's identity (KTD5).
@@ -317,7 +343,7 @@ None block planning. Deferred to implementation:
   - The auth UI hides sign-up, and both accounts are created before first use.
   - Chosen over a marked session of Hector's own user: a separate identity makes attribution and refusals server facts, keeps Claude's browser least-privileged, and needs no custom marking flow.
 - KTD3. **Use cases enforce Claude's limits by actor.** Actions and route handlers pass one `{ actor, tool }` context through the controller to the use case. A `require-human.ts` helper beside the use cases, like recipes' `require-owner.ts`, checks human-only operations (R21) first: for Claude it records the refusal in its own transaction and throws `HumanOnlyError`, added to the transaction manager's `DOMAIN_ERRORS`, before the main transaction opens. Refusals are therefore logged from every entry point, and the action only maps the error. The other limits hold whatever the entry point:
-  - a job created from Claude's session is always pending
+  - a job created from Claude's session is always pending (revised 2026-11-10: there's no queue; instead, an archived job stays archived, and its posting link stays, unless Hector himself changes them)
   - Claude's writes to the dated notes append; its fit note is replaced instead (KTD13)
   - person dates always derive from interactions, and Claude sets applied-on only through a dated status move; Hector's edits (R1) and the import (KTD14) may set it directly
 
@@ -366,6 +392,13 @@ None block planning. Deferred to implementation:
   - A same-company, similar-title match is a soft warning only.
   - Dismiss reasons are a fixed list in `src/entities/`: `not-hiring`, `wrong-level`, `wrong-location-or-mode`, `pay-too-low`, `company-too-small`, `other`, with an optional note. A `duplicate` result returns the dismissal reason.
   - The pending cap lives in settings, 10 by default. The check runs under a per-owner `pg_advisory_xact_lock`, as recipes' daily-read cap does in `src/infrastructure/repositories/recipe-reads.repository.ts`.
+  - (Revised 2026-11-10, U19: the review state retires with the queue (R20 as revised).
+    - A migration that only adds moves each `pending` job to `accepted` and each `dismissed` one to `skipped`, keeping its posting key, with an activity row per job (actor `system`). It also adds `posted_on`, `score` (1 to 10), `reason` (from `proposal_reason`) and `pinned_at`. It runs on production before the merge.
+    - A later migration drops `review_state`, its index and check, `dismiss_reason`, `dismiss_note` and `settings.pending_cap`, once the code that stops reading them is live, as AGENTS.md orders a drop.
+    - The posting key and its partial unique index stay as they are: an archived job already blocks its posting, so "Not for me" keeps a posting from coming back with no new rule. The duplicate answer names the job and, when it's archived, says so.
+    - `lockQueue` stays as the posting lock: a new job, or a new posting link, takes it before the duplicate check, as before.
+    - "Not for me" archives a job as `skipped`, with a reason from the old dismiss list (now `skipped`'s reasons) or a typed one, in the activity row as a close's reason is today. Moving an archived job back to an open status, and changing an archived job's posting link, are human-only (R21 as revised): `move-job` and `update-job` check them before their transactions open.
+    - The settings cap, `QueueFullError`, `queue-full`, the review use case and its three actions, `list_proposals`, `ProposalCard` and `ProposalReview` go. `proposeJob` and Hector's `addJob` become one `addJob`, whose page tool is `add_job` in place of `propose_job`: Claude's call still needs the posting's link and a reason, and it takes the posting's date and the fit score. This week's proposals give way to Today's "Apply next" (R9 as revised).)
 - KTD9. **Interactions are dated events; person dates and weekly counts derive from them.** `interactions` holds kind (`message-sent`, `reply-received`, `conversation`), occurred-on date, an optional job link and notes. A scheduled conversation also has start and end times, an optional calendar link and a state (`scheduled`, `held`, `cancelled`, `no-show`). A person's messaged, replied and met dates are the latest matching events at read time. Counts use occurred-on dates in Eastern-time weeks keyed by Monday (`mondayOf`), never `created_at`. Chosen over the sheet's date columns on the person: the counts need every dated event, derived dates can't drift after a backfill or a delete, and deriving them is cheap for one person's records.
 - KTD10. **The app runs its own Google OAuth, keyed to Hector.** Instantiates the Google Calendar Key Decision, R13, R14.
   - Authorization-code flow with PKCE, `access_type=offline` and `prompt=consent`, and scope `calendar.events.owned`, which reads and writes events on calendars Hector owns, the primary one included. The `state` is bound to Hector's session, and the connect and callback routes are owner-only.
@@ -376,6 +409,7 @@ None block planning. Deferred to implementation:
   - `invalid_grant` means Hector reconnects. `invalid_client` means Google deleted the client after six idle months, which reconnecting can't fix: restore it within 30 days or redo H4. It gets its own state (KTD11).
   - Chosen over Neon Auth's `linkSocial` and `getAccessToken`, which Neon's docs don't cover. In the installed better-auth 1.6.23 that HTTP call resolves to the session's own user, so Claude's identity would look for a Google account of its own. Also chosen over a service account (a long-lived key) and the calendar's secret iCal address (read-only, hours of lag).
   - Not a bake-off: KTD11's gateway interface keeps the token source swappable.
+  - (Revised 2026-11-10, U13 as revised: read-only. The scope is `calendar.readonly`, which reads the calendar list and every calendar Hector owns or subscribes to, and writes nothing. After connecting, the check asks for that scope. The rest stands: the app's own OAuth with PKCE and offline access, the encrypted refresh token keyed to the owner, the account check, the client kept "In production", owner-only connect and disconnect, and the states.)
 - KTD11. **The calendar gateway: windowed reads, idempotent writes, isolated failures.**
   - `ICalendarGateway` sits in application, with Google named only on the infrastructure adapter, following recipes' vendor-naming rule.
   - The server pins the primary calendar's id; no tool or form input names a calendar. On 2026-10-23 the calendar Hector schedules on was confirmed to be the account's primary.
@@ -387,7 +421,18 @@ None block planning. Deferred to implementation:
   - Only events the app created can be changed; other events are linked. A linked event outside the window is fetched by id and shown as moved or cancelled.
   - Controllers return a calendar state (`connected`, `not-connected`, `reconnect-needed`, `setup-needed`, `unavailable`), and each calendar section has its own Suspense and error boundaries, so a Google failure degrades one section.
   - Scheduling checks the slot first and returns overlapping events, so Claude can link an invite instead of duplicating it.
-- KTD12. **A hand-built week agenda, no calendar library.** The calendar is a Monday-keyed week of day lists in recipes' pattern (`plan-week.tsx`, `week-swipe.tsx`, `?week=`), with `@repo/ui`'s `calendar` for jumping to a date. An event the app created, or one linked to a record, renders once, as the record's row with Google's time and a calendar mark; unlinked Google events render as plain rows. Chosen over FullCalendar 7: the design lint's restyle and arbitrary-value rules would fight its copied components, and drag or resize isn't needed. FullCalendar stays the fallback if a time grid becomes necessary.
+  - (Revised 2026-11-10, U14 as revised: no writes, all calendars.)
+    - Settings keep Hector's choices from his calendar list: which calendars show, which one is Focus, and which ones Claude may read by title. The server reads only those, by the ids Settings hold, and still no tool or form input names a calendar.
+    - Reads: one `events.list` per shown calendar for the window, run in parallel and cached for 60 seconds per owner, calendar and window, so Today's minute refresh and a page's renders share one read. The window is today on Today, the day or week on the calendar page, and the week for blocks.
+    - In Claude's identity, an event shows its title when its calendar is one Claude may read by title (Focus always is), or when it's linked to a record. Any other event shows only its time and its organizer's domain, as before. Titles that reach Claude stay marked `untrustedContentHint` (KTD21).
+    - Writes go: the meeting rows, the idempotent inserts, `schedule_meeting`, `change_meeting` and the slot check. Linking stays and writes only to the app: `calendar_links` holds an event's calendar and id with its record.
+    - The calendar states, and each section's own Suspense and error boundaries, stand.
+- KTD12. **A hand-built week agenda, no calendar library.** The calendar is a Monday-keyed week of day lists in recipes' pattern (`plan-week.tsx`, `week-swipe.tsx`, `?week=`), with `@repo/ui`'s `calendar` for jumping to a date. An event the app created, or one linked to a record, renders once, as the record's row with Google's time and a calendar mark; unlinked Google events render as plain rows. Chosen over FullCalendar 7: the design lint's restyle and arbitrary-value rules would fight its copied components, and drag or resize isn't needed. FullCalendar stays the fallback if a time grid becomes necessary. (Revised 2026-11-10, U14 as revised: a time grid, still hand-built.)
+  - Each day is a column of 15-minute rows (`auto-rows-3`, 48 px an hour). An event sits in its column through `row-start-(--start)` and `row-span-(--span)`, with the two numbers set as CSS custom properties in its `style`.
+  - The design lint allows this, as checked on 2026-11-10 against `@shadcn/lint` 0.2.3 and Tailwind 4.3.3. Its no-inline-styles rule lets a custom property through when it holds no raw color, and its arbitrary-value rule doesn't apply to the `(--var)` form. The app's AGENTS.md line that says the lint allows no inline styles is corrected with U14. If Hector would rather keep that line, written-out lookups (`"row-start-1"` to `"row-span-96"`) do the same job.
+  - Overlapping events split their column. All-day events sit in a strip above the grid.
+  - A phone shows one day, and a wider screen shows the week. The design system gains the grid as a component before U14 builds it.
+  - FullCalendar stays out: this grid meets the need without fighting the lint.
 - KTD13. **The profile is one validated document, and fit rules are pure functions over it.** Instantiates the profile and fit Key Decisions, R16, R17. `profiles` holds one Zod-validated JSON document per owner with its source version and sync time; `set_profile` replaces it whole and returns how many jobs' fit changed. Chosen over profile tables: the document is replaced whole at each sync and never queried by field. Fit rules live in `src/entities/fit.ts`, read every threshold from the profile and return each rule's result with its inputs, so public code holds the logic and the database holds Hector's values. Level, work mode and employment type are fixed value sets in `src/entities/`, with level ordered, so the profile's ranges and lists compare against the job's fields (R1). Claude's fit note is a field on the job, replaced by `set_fit_note`, with its history in the activity log.
 - KTD14. **The import runs as a dry-run script over a reviewed private snapshot, and Hector runs it against production.** Claude turns the sheet export into a JSON snapshot kept in Hector's private docs, and Hector reviews it. The snapshot holds:
   - jobs with their status, next step, next date, applied-on date, and the date each job reached its current status, which Claude proposes and Hector confirms
@@ -430,6 +475,32 @@ None block planning. Deferred to implementation:
   - **The check.** `@neon/oauth`'s `createMcpAuth` verifies each token's signature against the branch's JWKS, its issuer (the branch's `NEON_AUTH_BASE_URL`) and its audience (`MCP_RESOURCE`). The route then takes the token's `sub` as the acting account. It acts only when `sub` is `AGENT_USER_ID`, and refuses any other account's token, Hector's included. The discovery file, `/.well-known/oauth-protected-resource`, names the issuer. A request without a valid token gets a `401` that points to it. The proxy passes both paths, and Claude's session check never applies there.
   - **The pages.** The app hosts both pages under `/auth/oauth/`. The sign-in page signs in through the auth client, which sends Neon's signed request with it, then follows the answer to the consent page. When someone is already signed in, it resumes the request. The consent page names the client, its redirect hosts, the scopes, the resource and the account signed in. It allows only Claude's account; any other session sees a refusal. The auth route lets only Claude's session take Neon's OAuth steps (R21 as revised).
   - **Revoking.** Turning off the OAuth server, or its Client ID Metadata Documents, in Neon stops new tokens, and the last access token runs out within the hour. `claude mcp logout` clears the Mac's copy.
+- KTD23. **The rank is a pure function, worked out on every read.** (Added 2026-11-10, U19; R27.)
+  - `src/entities/rank.ts` orders the list: pinned jobs first, the latest pin first; then `target` jobs; then the rest by priority, highest first.
+  - Priority adds four parts:
+    - the fit score, 1 to 10, or 7 when the job has none, as Hector's own adds don't
+    - the company's tier: tier 1 adds 2, tier 2 adds 1, others 0
+    - freshness, by the posting's age in Eastern days: 0 to 3 days adds 1, 4 to 10 days 0, 11 to 21 days subtracts 1
+    - pay: a posted top under the floor subtracts 2, a posted bottom at or over it adds 1, and no band or no floor adds 0
+  - Ties go to the newer posting, then the higher posted top, then the job's id, so the order is stable.
+  - Nothing is stored: changing a weight is a code change with its tests, and the list re-sorts at once. The floor is a setting (R12 as revised), so the repo holds the rule and the database holds Hector's value.
+  - The repository reads the list's candidates (open, in `verify` or `target`, not expired) in one query with their companies' tiers, and the rank sorts them in JS, as `practice-ladder.ts` works out the next review. The list holds tens of jobs, so it needs no SQL ordering.
+  - Chosen over a stored rank the sweep recomputes, which would go stale between runs, and which a pin or a tier change would have to recompute. Chosen over manual ordering alone, since Hector asked for automatic with pins.
+- KTD24. **Untouched jobs leave the list by a read rule, and a daily run records it.** (Added 2026-11-10, U19; R27.)
+  - The rule sits beside the rank, in `src/entities/rank.ts`. A job is expired when it's in `verify` or `target`, unpinned, and its posting's date (`posted_on`, else `found_on`) is more than 21 days before today in Eastern time. The list's read leaves expired jobs out at once, whether or not the daily run has happened.
+  - A daily run in the app archives each expired job as `skipped`, reason "Not picked in time". It goes through the move use case, as any status move does, with actor `system`, so the history, the status change row and the counts record it.
+  - It runs at 5 AM Eastern from a Vercel schedule with a function target, which has no public URL. If the project's plan can't run one, it's a cron route that checks `CRON_SECRET`, which Hector sets in Vercel, since production secrets never pass through Claude's session.
+  - A closed posting is the sweep's to find. It checks each listed job's posting daily, through the boards it already reads, and closes a gone one as `closed`, reason "Posting closed", through `close_job`.
+  - Chosen over archiving only from the sweep: the sweep runs on Hector's Mac while the desktop app is open, and the list has to be right when it isn't. Chosen over the read rule alone: the archive belongs in each job's history and in the counts.
+- KTD25. **A block is a Focus event plus the app's outcome row.** (Added 2026-11-10, U21; R26 as revised.)
+  - `block_outcomes` holds, per owner and event: the event's calendar and id, unique per owner; its own uuid, so the activity log's record id stays a uuid; the done-when line, the effort, the state, what happened, and `updated_at`. A row exists once something is saved. Until then the block shows as planned, with the description's done-when line and its color's effort.
+  - The week's blocks are the Focus calendar's events in the window, read through the gateway (KTD11) and joined to their rows by event id. Each instance of a recurring event has its own id, so each day's block keeps its own outcome.
+  - `update_block` saves the done-when line, the effort, the state and what happened, against the row's `updatedAt`, or null for a block with no row yet, as a weekly review's first save does. Times and titles change only in Google Calendar.
+  - `add_blocks` goes. Claude puts the week's blocks on Focus during Monday planning, outside the app, with a "Done when:" line in each description.
+  - The effort comes from Settings' map of Google event colors to efforts, unless the row holds one. An event whose color maps to nothing shows "No effort", and counts in none of the week's effort counts until one is set.
+  - Deleting a block is still human-only, and clears only its row. The event is Hector's to delete in Google.
+  - The move: a migration that only adds creates `block_outcomes`. Then a one-time step, which Claude runs with Hector's OK at that moment, matches each existing block to its Focus event by start time and title, and copies its done-when line, state and what happened. A block with no matching event is listed for Hector, not guessed at. The old `blocks` table is dropped after the deploy.
+  - Chosen over the app writing blocks to Focus, since Hector wants one place to plan and the app read-only. Chosen over extended properties on the event, because Google Calendar's own interface can't set them, so a block planned by hand would have none.
 
 ### High-Level Technical Design
 
@@ -1187,6 +1258,11 @@ Added 2026-11-09, Hector's call after a research run ([agent-mcp-research.md](ag
   - Claude's session calls connect or disconnect: `human-only`.
   - Disconnecting keeps event links on records.
 - **Verification:** Hector connects from Settings on production, and a refresh still works the next day.
+- **Revised 2026-11-10** (Hector's call; built in Phase 9's order, after U20): read-only, all calendars.
+  - The scope is `calendar.readonly` (KTD10 as revised), and the check after connecting asks for it.
+  - Once connected, Settings list every calendar from Google's calendar list, the ones Hector owns and the ones he subscribes to, each in its Google color. For each, Hector chooses whether it shows and whether Claude may read its titles, and he picks which one is Focus. He also maps Google's event colors to the five efforts (KTD25). A calendar that appears later is listed, hidden, until he chooses. Choosing is a settings change, so it's human-only (R21).
+  - New in Files: `calendar_choices` (per owner and calendar: shown, Claude may read titles, is Focus) and the color-to-effort map, beside `calendar_connections`.
+  - New test scenarios: the list after connecting holds every calendar, new ones hidden. Hiding a calendar takes its events off every page. Claude's session can't change the choices. A connection whose token lacks `calendar.readonly` answers `not-connected`, with a message.
 
 ### U14. Calendar view, scheduling and linking
 
@@ -1220,6 +1296,22 @@ Added 2026-11-09, Hector's call after a research run ([agent-mcp-research.md](ag
   - In the week of 2026-11-01, Eastern dates map to the right UTC instants on both sides of the change.
   - Scheduling into an occupied slot returns the overlapping events.
 - **Verification:** Hector schedules a coffee from a person's page and sees it in Google Calendar with the right title and no guests.
+- **Revised 2026-11-10** (Hector's call; built in Phase 9's order, after U13): the calendar views, read-only.
+  - **Goal:** Hector sees his day and week as a calendar app shows them, with every calendar he chose, and links events to the people, jobs and rounds they belong to.
+  - **Requirements:** R13 and R15 as revised, R9 section 3, R8, R6.
+  - **Dependencies:** U13 as revised, U20. It no longer waits on U12: rounds join the grid when U12 lands.
+  - **Design first:** the design system gains a day and week grid component, with its event block, all-day strip, now line and the app's own dated items. Hector picks among the variants before the build, since how it looks is his call.
+  - **Files:** the gateway's reads (`calendar-gateway.interface.ts`, `google-calendar.gateway.ts` and a fake), `app/(main)/calendar/page.tsx` (`?day=` and `?week=`), the grid components, Today's schedule section, `calendar_links` with its use cases and controllers, the tools `get_calendar` (the window's events, as KTD11 as revised shows them to Claude) and `link_calendar_event`, a "Calendar" section in `app-nav.tsx`, and the app's AGENTS.md line on inline styles (KTD12 as revised).
+  - **Dropped:** `schedule_meeting`, `change_meeting`, the schedule sheet, the slot check and the calendar fields on `interactions` and `interview_rounds`. Linking replaces them.
+  - **Test scenarios:**
+    - A day's events from three shown calendars render in time order, each in its color, with overlapping events side by side, and an all-day event once.
+    - A hidden calendar's events appear nowhere.
+    - In Claude's identity, `get_calendar` returns titles for Focus and the calendars Claude may read, and only the time and organizer's domain for the rest, unless the event is linked.
+    - Linking an event to a person shows it on the person's page and the person on the event.
+    - Google down: the grid and Today's schedule show the state, and Today's other sections render.
+    - Two renders within a minute make one Google read per calendar (the cache).
+    - In the week of 2026-11-01, Eastern times map to the right instants on both sides of the clock change.
+  - **Verification:** on production, the calendar page shows Hector's week as Google Calendar does for the calendars he chose, on a phone and a laptop.
 
 ### Phase 7: Profile and fit
 
@@ -1253,6 +1345,122 @@ Added 2026-11-09, Hector's call after a research run ([agent-mcp-research.md](ag
 - **Approach:** explain the identity model, the tool surface, the review queue and the activity log in generic terms; show a Claude Code session calling page tools; link `docs/agent-access.md`.
 - **Test expectation:** none -- documentation.
 - **Verification:** a reader can tell how Claude works in the app, and every name, company and number shown is fictional.
+
+### Phase 9: Today as home
+
+Added 2026-11-10, Hector's call: "This week" becomes "Today", the home page that shows everything he needs to know, and every other page is a branch from it for detail or reference. The scheduled automations stay, as feeds that put data in the app: the sweep's finds go straight into a ranked list, and the morning brief retires, because Today is the brief. The calendar becomes part of the app: all of Hector's Google calendars, read-only, in day and week grids like a calendar app's. Focus blocks come from his Focus calendar. Follow-ups stay to-dos, as next steps on people and jobs, with no email in the app.
+
+Built next, before Phases 5 to 8, in this order: U19, U20, U13 and U14 (revised, from Phase 6), then U21. Outside the repo, in Hector's private setup, Claude's sweep adds its passes through `add_job` and checks listed postings for closing, Monday planning puts the week's blocks on Focus, and the morning brief's scheduled task is deleted once Today shows the calendar.
+
+### U19. The ranked list, in place of the review queue
+
+- **Goal:** every job Claude finds goes straight into one list of what to apply to, ordered automatically, with pins. Untouched jobs leave on their own, and the review queue goes.
+- **Requirements:** R27; R1, R12, R20, R21, AE1 and AE2 as revised.
+- **Dependencies:** U6, U9, U18.
+- **Files:**
+  - `db/schema.ts` and two migrations. The first adds `posted_on`, `score`, `reason`, `pinned_at` and `settings.pay_floor`, and moves the queue's jobs out (KTD8 as revised). The second drops `review_state`, `proposal_reason`, `dismiss_reason`, `dismiss_note` and `settings.pending_cap`.
+  - `src/entities/rank.ts`, the rank and the expiry rule (KTD23, KTD24). In `src/entities/models/job.model.ts`, the schemas lose the review state, one `addJobSchema` serves both actors, and a pin schema joins them. `skipped`'s close reasons take in the old dismiss reasons and "Not picked in time".
+  - Use cases in `src/application/use-cases/jobs/`:
+    - `create-job` is one path for both actors. Claude's call needs a link and a reason, and no new job gets a cap check or a first step.
+    - New: the ranked read, `pin-job` and `archive-expired`.
+    - `move-job` and `update-job` get the human-only guards for archived jobs.
+    - `review-proposal` goes.
+    - `companies/delete-company`, `companies/get-company` and `week/get-today` stop reading the review state.
+  - Controllers, DI and `app/actions/jobs.ts`.
+  - The registry: `add_job` replaces `propose_job`, `pin_job` is new, `find_jobs` gains the `to-apply` group in the rank's order, and `list_proposals` goes. Descriptions that mention the queue change, `TOOL_SET_VERSION` goes up, and the parity map follows.
+  - The daily run: a scheduled function, or a cron route, and its entry in `vercel.json`.
+  - UI:
+    - The jobs page gets a "To apply" view: the ranked list, with Pin and Not for me.
+    - The job page loses its review section, and gains Pin and Not for me.
+    - This week's proposals section goes; Today's "Apply next" replaces it in U20.
+    - Settings lose the cap and gain the pay floor.
+  - The import script drops the review state.
+  - Tests: about 38 files touch the queue today and change with it. New: `tests/src/entities/rank.test.ts`, and tests for the use cases on both backends, the guards, the daily run and the screens.
+- **Approach:**
+  1. The first migration, on production with Hector's OK at that moment, before the merge (AGENTS.md's order for data that moves).
+  2. Inward-out: the rank and the expiry rule, the schemas, the repositories, the use cases, the actions and tools, then the screens.
+  3. The daily run and its schedule (KTD24).
+  4. After the deploy, the drop migration, with Hector's OK at that moment.
+
+  The sweep's side changes outside the repo at the same time: it adds through `add_job` with the posting's date, the score and the reason, and checks listed postings for closing.
+- **Test scenarios:**
+  - The rank puts pinned jobs first, then `target`, then the rest by priority. Each part of the priority moves a job as KTD23 says, and ties keep a stable order.
+  - A job in `verify` whose posting is 22 days old and unpinned is left out of the list. The daily run archives it as `skipped`, "Not picked in time", actor `system`, and a second run changes nothing. A pinned job of the same age stays.
+  - Claude adds a job: it's accepted in `verify` with no next step, keeping its score and reason. Without a link or a reason, Claude's call answers `validation`.
+  - A posting already on an archived job answers `duplicate`, naming the job as archived (AE1 as revised).
+  - Claude moves an archived job back to `verify`, or changes its link: `human-only`, and the refusal is logged (AE2 as revised). Hector can do both.
+  - Not for me archives the job as `skipped` with its reason, and its posting stays blocked.
+  - The first migration, on PGlite: a pending job becomes accepted, and a dismissed one becomes `skipped`, keeping its posting key and gaining an activity row.
+- **Verification:** on production after the merge, the sweep's next run adds its passes through `add_job`, and the To apply view shows them ranked. A pin moves one to the top, and the daily run's first archive shows in the job's history.
+
+### U20. Today as home
+
+- **Goal:** the home page shows everything Hector needs to know today and what today tracks toward, and every other page is a branch from it.
+- **Requirements:** R9 and R12 as revised, R10, R22, R27.
+- **Dependencies:** U9, U17, U19.
+- **Files:**
+  - `app/(main)/page.tsx`, in R9's revised order.
+  - The name: the section's name and the tab's title in `app-nav.tsx`, back links in `back-link.ts`, the error and not-found pages' links, and the tests that name "This week".
+  - `week/get-today.use-case.ts` and `today.model.ts`: the proposals give way to Apply next (U19's ranked read), and the season and the week's milestone join.
+  - `track-map.tsx`, the design system's TrackMap.
+  - `apply-next.tsx`, a ranked job's row: role, company, pay, score and Claude's reason, with Pin and Not for me. It follows ProposalCard's pattern, which it replaces.
+  - Settings gain the season's start, finish and up to three checkpoints, each with a date and a short name, all human-only (R21).
+  - The week's milestone: a `week_plans` row per owner and Monday, set during Monday planning from the week page or the tool `set_week_milestone`. The weekly review shows it, and setting it fixes no counts.
+- **Approach:**
+  1. The name and the order. The sections' components already exist; tomorrow's events join section 6 with U14.
+  2. Apply next from U19's ranked read.
+  3. The season in Settings, then the TrackMap. Its text alternative says where today falls ("Day 4 of sector 1, which ends at the second checkpoint").
+  4. The week's line: applications against the target, the milestone, and blocks done against those planned.
+- **Test scenarios:**
+  - Today renders its sections in R9's revised order, and an empty one collapses.
+  - Apply next shows the ranked list's top three. Pin and Not for me work from it, and Claude's session sees Not for me ask first, as `close_job` does.
+  - With no season set, the track is left out. With one, the car sits at the share of days elapsed.
+  - The week's line counts applications in the week, and leaves the milestone out until it's set.
+  - The tab reads "Today · Job search", and a record's back link from Today reads "Back to Today".
+- **Verification:** on a phone, Today shows the season, the next task, today's blocks, what needs Hector, the top three to apply to and the week's counts. Each row opens its record and comes back.
+
+### U21. Focus blocks from the calendar
+
+- **Goal:** blocks come from Hector's Focus calendar, where he plans. The app keeps only each block's done-when line, effort, state and what happened.
+- **Requirements:** R26 and R15 as revised.
+- **Dependencies:** U13 and U14 as revised, U17.
+- **Files:**
+  - `block_outcomes` and its migration (KTD25).
+  - `block.model.ts`: a block is an event plus its outcome, and `blockIdSchema` takes an event id.
+  - The repository and mock: a lookup by event ids, and an upsert.
+  - The use cases:
+    - list and get read Focus through the gateway, and join the outcomes
+    - update upserts the outcome
+    - add goes
+    - delete clears the outcome
+  - The tools:
+    - `add_blocks` goes
+    - `update_block` loses times and title
+    - `list_blocks` and `get_block` read Focus
+    - `get_today`'s blocks come with the calendar's state
+  - The UI:
+    - the block sheet gains the done-when line and the effort
+    - the block form loses times and title
+    - `/blocks/new` goes, and `/blocks/[id]` keys by event id
+  - `effortCounts` reads each block's effort.
+  - The one-time matching step.
+  - `TOOL_SET_VERSION` goes up.
+- **Approach:**
+  1. The migration that only adds, on production with Hector's OK at that moment.
+  2. Inward-out: the model, the repository, the use cases and tools, then the screens.
+  3. The one-time step that matches this week's existing blocks to their Focus events, with Hector's OK at that moment. A block with no match is listed for him.
+  4. After the deploy, dropping `blocks`, with Hector's OK at that moment.
+
+  Outside the repo, Monday planning puts the week's blocks on Focus, each with a "Done when:" line and its effort's color.
+- **Test scenarios:**
+  - A Focus event whose description holds "Done when: …" shows that line, and a line saved in the app wins over it.
+  - An event's color maps to its effort. A color that maps to nothing shows "No effort", and counts in no effort.
+  - The first save, with a null `updatedAt`, creates the outcome. A save against an old `updatedAt` answers `conflict`, with the outcome as it is now.
+  - Two instances of a recurring event keep separate outcomes.
+  - A deleted event's saved outcome stays in the block's history.
+  - Google down: Today and the week page show the state, and saved outcomes are kept.
+  - The matching step copies a block's outcome to its event, and lists a block with no event.
+- **Verification:** on production, this week's blocks come from Focus with their outcomes, and a block marked done in the app shows as done on Today and on the week page.
 
 ---
 
@@ -1325,6 +1533,11 @@ Revised 2026-10-28, Hector's call: no lock-down while the app's core is built, t
 Added 2026-11-09 with U18:
 
 - **H7.** Sign Claude's account in once through the MCP sign-in, from a private window so it isn't your own session. Do it first on the test project, as Claude's test-project account on localhost, then on production. Also, OK turning on Neon Auth's OAuth server on each project at the time. Unblocks U18.
+
+Revised and added 2026-11-10 with Phase 9:
+
+- **H4, revised.** The OAuth client's scope is `calendar.readonly` in place of `calendar.events.owned`, since the app writes nothing to Google. The rest stands: a web client with its consent screen in production for personal use, its production values only in Vercel's Production environment, and a throwaway Google account for local testing. Then connect your Google account from Settings once on each deployment. Unblocks U13, U14 and U21.
+- **H8.** In Settings, enter what's yours to set: the pay floor the rank weighs, and the search season's start, finish and checkpoints. Once Google is connected, choose which calendars show, which one is Focus and which ones Claude may read by title, and map event colors to efforts. Unblocks U20 and U21.
 
 ---
 

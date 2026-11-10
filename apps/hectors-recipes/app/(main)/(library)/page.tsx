@@ -180,10 +180,15 @@ async function loadLibrary(
   cacheLife({ stale: 300 });
 
   const userId = await getCurrentUserId();
-  const { books, current } = await loadBooks(
-    userId,
-    requestedBook === ALL_RECIPES ? undefined : requestedBook,
-  );
+  // This person's saved recipes (D77): first by default, and the Saved chip's filter. They
+  // need only who's asking, so they load alongside the books (P30.3).
+  const [{ books, current }, saved] = await Promise.all([
+    loadBooks(
+      userId,
+      requestedBook === ALL_RECIPES ? undefined : requestedBook,
+    ),
+    getInjection("IGetBookmarksController")(userId),
+  ]);
   // With no book asked for, their default book; without one, All recipes once they're in
   // two or more (D17).
   const showAll =
@@ -192,8 +197,6 @@ async function loadLibrary(
       books.length > 1 &&
       !books.some((book) => book.isDefault));
   // Every card the tag allows: the search narrows them in the page as you type (P10.4).
-  // This person's saved recipes (D77): first by default, and the Saved chip's filter.
-  const saved = await getInjection("IGetBookmarksController")(userId);
   const library = showAll
     ? await getInjection("IGetAllRecipesController")({ tag }, userId)
     : await getInjection("IGetRecipesController")(

@@ -273,6 +273,20 @@ export class StashItemsRepository extends BaseRepository implements IStashItemsR
 
 Every interface has a **mock** implementation (`*.repository.mock.ts`, `mock-*.service.ts`), bound in place of the real one when `NODE_ENV === "test"` (see §4 and §6). Recipes' use-case tests run against both the mock and the real repository, so a mock must behave like the SQL. Edge-safe services (e.g. `ConsoleLoggerService`) avoid Node-only APIs.
 
+**A vendor SDK that only some requests use loads on first use.** `di/container.ts` imports every module, so every adapter's top-level imports load when a server function starts, on every route. A cold start then pays for SDKs the request never touches. An adapter for a feature most requests skip (an AI SDK, a realtime client, a PDF parser) imports its SDK inside the method that needs it, with `type` imports at the top, and makes its client on first use. The interface, the DI binding and the tests don't change: tests pass a stand-in through the constructor, as before. What every request needs (the database driver, the auth SDK) stays a plain import.
+
+```typescript
+// Before: `import { Rest } from "ably"` at the top loaded Ably on every cold start.
+async function defaultClient(): Promise<AblyRestClient | null> {
+  const key = process.env.ABLY_API_KEY;
+  if (!key) return null;
+  const { Rest } = await import("ably"); // loads on the first publish, not at start-up
+  return new Rest({ key });
+}
+```
+
+In hectors-recipes (P30.2, 2026-11-10) moving the AI SDK and Ably this way took the container's cold import from about 110 ms to about 77 ms, timed with Bun on a Mac (not timed on Vercel). Its `tests/di/container.test.ts` walks the container's static imports and fails if one of those packages comes back.
+
 ### 3.5 App layer (`app/`, `proxy.ts`)
 
 **Server actions** are split per domain in `app/actions/<domain>.ts` (`"use server"` files). Each resolves the user with `getCurrentUserId()` (`app/_lib/current-user.ts`, which reads the session through `IAuthenticationService`), reads form fields with `text(formData, key)` (trimmed; blank or missing is `undefined`), calls a controller through `getInjection`, and on failure returns `toActionError(err, logger, fallback)`. After a successful mutation it calls `revalidatePath`, then `redirect`s when the form should land on another page.
