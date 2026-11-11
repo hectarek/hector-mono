@@ -11,6 +11,7 @@ import {
 } from "@/app/_components/due-list";
 import { ToApplyList } from "@/app/_components/to-apply-list";
 import { TodayBlocks } from "@/app/_components/today-blocks";
+import { TrackMap } from "@/app/_components/track-map";
 import { WeekCounts } from "@/app/_components/week-counts";
 import { WeekLine } from "@/app/_components/week-line";
 import { getPageActor } from "@/app/_lib/current-actor";
@@ -21,13 +22,14 @@ import { formatWeekRange } from "@/src/entities/week";
 // How often the page refreshes while it's on screen (docs/build-plan.md KTD15).
 const REFRESH_MS = 60_000;
 
-// Today, the home page (R9 as revised 2026-11-10, U20), in R9's order: the week's line, the next
-// task on the pit board, today's schedule (its Focus blocks), what needs Hector, the top three jobs
-// to apply to (R27), what's due later this week, the week's counts against his targets, and
-// Claude's recent work. The next task always shows, as the pit board or its clear state; any other
-// section with nothing in it collapses. The season's track and the week's milestone join the
-// week's line with the rest of U20, and the calendar's events the schedule with U14. The page
-// refreshes while it's on screen, so Claude's changes show (KTD15).
+// Today, the home page (R9 as revised 2026-11-10, U20), in R9's order: the season's track and the
+// week's line under it, the next task on the pit board, today's schedule (its Focus blocks), what
+// needs Hector, the top three jobs to apply to (R27), what's due later this week, the week's counts
+// against his targets, and Claude's recent work. The next task always shows, as the pit board or
+// its clear state; any other section with nothing in it collapses, and so does the track until a
+// season is set. The week's milestone joins the week's line with the rest of U20, and the
+// calendar's events the schedule with U14. The page refreshes while it's on screen, so Claude's
+// changes show (KTD15).
 export default async function TodayPage() {
   // The session first: it keeps other accounts out, and it ends the prerender, so the clock
   // is read only at request time.
@@ -45,6 +47,7 @@ export default async function TodayPage() {
     claude,
     counts,
     targets,
+    season,
   } = await getInjection("IGetTodayController")({}, actor);
   // Read after the session, as today is: the block happening now takes the signal border.
   const now = new Date();
@@ -61,6 +64,7 @@ export default async function TodayPage() {
             {formatWeekday(today)} · {formatWeekRange(monday)}
           </p>
         </div>
+        {season ? <TrackMap season={season} today={today} /> : null}
         <WeekLine
           applications={counts.applications}
           target={targets.applications}

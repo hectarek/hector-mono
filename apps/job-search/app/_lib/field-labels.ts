@@ -25,13 +25,24 @@ export const FIELD_LABELS: Record<string, string> = {
   researchSummary: "Research summary",
   researchRef: "Research notes",
   query: "Search",
-  // The settings: a weekly target per count, and the pay floor the ranked list weighs
+  // The settings: a weekly target per count, the pay floor the ranked list weighs, and the
+  // search season
   messagesSent: "Messages sent",
   conversationsHeld: "Conversations held",
   applications: "Applications",
   practiceSessions: "Practice sessions",
   screensReached: "Moves to screen or beyond",
   payFloor: "Pay floor",
+  seasonStart: "Season start",
+  seasonFinish: "Season finish",
+  checkpoints: "Checkpoints",
+  // The settings form's checkpoint rows, as its conflict notice names them
+  checkpoint1On: "Checkpoint 1's date",
+  checkpoint1Name: "Checkpoint 1's name",
+  checkpoint2On: "Checkpoint 2's date",
+  checkpoint2Name: "Checkpoint 2's name",
+  checkpoint3On: "Checkpoint 3's date",
+  checkpoint3Name: "Checkpoint 3's name",
   // A job's facts and where it stands, as inputs and its history name them (`company` and
   // `source` are the history's names for the two)
   companyId: "Company",

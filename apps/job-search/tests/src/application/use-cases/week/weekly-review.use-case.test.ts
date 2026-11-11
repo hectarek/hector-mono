@@ -68,6 +68,9 @@ describeEachBackend("the weekly review", () => {
       updateSettingsSchema.parse({
         targets,
         payFloor: current.payFloor,
+        seasonStart: null,
+        seasonFinish: null,
+        checkpoints: [],
         updatedAt: current.updatedAt?.toISOString() ?? null,
       }),
     );

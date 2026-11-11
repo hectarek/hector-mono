@@ -128,7 +128,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_today",
     description:
-      "The home page's view, in Eastern time: the ranked list's top three to apply to, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, the week's blocks done of those planned, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
+      "The home page's view, in Eastern time: the ranked list's top three to apply to, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, the week's blocks done of those planned, Claude's sessions of the last 7 days, the week's counts beside Hector's targets, and the search season. Takes nothing.",
     inputSchema: inputSchemaOf(getTodaySchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: getToday,
@@ -151,7 +151,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_settings",
     description:
-      "Hector's settings: a weekly target for each count (null where he set none) and the pay floor the ranked list weighs (yearly US dollars, or null). Only Hector changes them. Takes nothing.",
+      "Hector's settings: a weekly target for each count (null where he set none), the pay floor the ranked list weighs (yearly US dollars, or null), and the search season (its start, finish and up to three named checkpoints, or null). Only Hector changes them. Takes nothing.",
     inputSchema: inputSchemaOf(getSettingsSchema),
     annotations: { readOnlyHint: true },
     action: getSettings,

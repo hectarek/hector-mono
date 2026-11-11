@@ -50,7 +50,10 @@ import {
   PRACTICE_KINDS,
   type PracticeKind,
 } from "@/src/entities/models/practice-entry.model";
-import type { Settings } from "@/src/entities/models/settings.model";
+import type {
+  Checkpoint,
+  Settings,
+} from "@/src/entities/models/settings.model";
 import {
   PRACTICE_RESULTS,
   type PracticeResult,
@@ -175,6 +178,14 @@ export const settings = pgTable(
     screensReachedTarget: integer("screens_reached_target"),
     // The yearly pay the ranked list weighs a posted band against (KTD23); null when unset.
     payFloor: integer("pay_floor"),
+    // The search season Today tracks toward (R9 and R12 as revised 2026-11-10): its start and
+    // finish, both or neither, and up to three checkpoints between them, in date order.
+    seasonStart: day("season_start"),
+    seasonFinish: day("season_finish"),
+    seasonCheckpoints: jsonb("season_checkpoints")
+      .$type<Checkpoint[]>()
+      .notNull()
+      .default([]),
     updatedAt: updatedAt(),
   },
   (table) => [
@@ -183,6 +194,14 @@ export const settings = pgTable(
       sql`${table.messagesSentTarget} >= 0 and ${table.conversationsHeldTarget} >= 0 and ${table.applicationsTarget} >= 0 and ${table.practiceSessionsTarget} >= 0 and ${table.screensReachedTarget} >= 0`,
     ),
     check("settings_pay_floor_check", sql`${table.payFloor} >= 0`),
+    check(
+      "settings_season_check",
+      sql`(${table.seasonStart} is null) = (${table.seasonFinish} is null) and (${table.seasonFinish} is null or ${table.seasonFinish} > ${table.seasonStart})`,
+    ),
+    check(
+      "settings_season_checkpoints_check",
+      sql`case when jsonb_typeof(${table.seasonCheckpoints}) = 'array' then jsonb_array_length(${table.seasonCheckpoints}) <= 3 else false end`,
+    ),
   ],
 );
 

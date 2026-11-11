@@ -53,6 +53,9 @@ export type TodayView = {
   claude: ClaudeSession[];
   counts: WeeklyCounts;
   targets: Settings["targets"];
+  // The search season Today tracks toward, from Settings, null until Hector sets it (R9 and R12
+  // as revised 2026-11-10).
+  season: Settings["season"];
 };
 
 // get_today's input: there's nothing to give.

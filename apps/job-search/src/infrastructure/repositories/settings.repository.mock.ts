@@ -12,7 +12,8 @@ export class MockSettingsRepository implements ISettingsRepository {
   private readonly rows = new Map<string, Settings>();
 
   async get(ownerId: string): Promise<Settings | undefined> {
-    return copyOf(this.rows.get(ownerId));
+    const row = this.rows.get(ownerId);
+    return row && copyOf(row);
   }
 
   async getForUpdate(ownerId: string): Promise<Settings | undefined> {
@@ -36,15 +37,25 @@ export class MockSettingsRepository implements ISettingsRepository {
 
   private put(
     ownerId: string,
-    { targets, payFloor }: SettingsValues,
+    { targets, payFloor, season }: SettingsValues,
     updatedAt: Date,
   ): Settings {
-    const row = { targets: { ...targets }, payFloor, updatedAt };
-    this.rows.set(ownerId, row);
-    return { ...row, targets: { ...targets } };
+    const row = { targets, payFloor, season, updatedAt };
+    this.rows.set(ownerId, copyOf(row));
+    return copyOf(row);
   }
 }
 
-function copyOf(row: Settings | undefined): Settings | undefined {
-  return row && { ...row, targets: { ...row.targets } };
+// A copy that shares nothing with the row it's made from, as a read from the table would.
+function copyOf(row: Settings): Settings {
+  return {
+    ...row,
+    targets: { ...row.targets },
+    season: row.season && {
+      ...row.season,
+      checkpoints: row.season.checkpoints.map((checkpoint) => ({
+        ...checkpoint,
+      })),
+    },
+  };
 }

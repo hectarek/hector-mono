@@ -224,6 +224,7 @@ describeEachBackend("findJobs, the ranked list", () => {
     await app.updateSettings(HECTOR, {
       targets: DEFAULT_SETTINGS.targets,
       payFloor: 100_000,
+      season: null,
       updatedAt: null,
     });
 

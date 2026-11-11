@@ -39,6 +39,30 @@ describe("the tables [postgres]", () => {
     await settings(0, 0);
   });
 
+  // R12 as revised 2026-11-10 (U20).
+  it("keep a season's start and finish together, the finish after the start, and its checkpoints a list of at most three", async () => {
+    const season = (
+      start: string | null,
+      finish: string | null,
+      checkpoints = "[]",
+    ) =>
+      sql(
+        "insert into settings (owner_id, season_start, season_finish, season_checkpoints) values ($1, $2, $3, $4::jsonb)",
+        [OWNER, start, finish, checkpoints],
+      );
+    const checkpoint = '{"on": "2026-11-13", "name": "A checkpoint"}';
+    await expect(season("2026-11-02", null)).rejects.toThrow();
+    await expect(season(null, "2027-02-01")).rejects.toThrow();
+    await expect(season("2026-11-02", "2026-11-02")).rejects.toThrow();
+    await expect(
+      season("2026-11-02", "2027-02-01", `[${Array(4).fill(checkpoint)}]`),
+    ).rejects.toThrow();
+    await expect(
+      season("2026-11-02", "2027-02-01", checkpoint),
+    ).rejects.toThrow();
+    await season("2026-11-02", "2027-02-01", `[${checkpoint}]`);
+  });
+
   it("keep when a row last changed to the millisecond, a JS Date's precision", async () => {
     await company(null, null);
     const [row] = await sql<{ fraction: string }>(

@@ -23,6 +23,9 @@ const input = (read: Settings, payFloor: number) => ({
     screensReached: 1,
   },
   payFloor,
+  seasonStart: null,
+  seasonFinish: null,
+  checkpoints: [],
   updatedAt: read.updatedAt?.toISOString() ?? null,
 });
 
@@ -51,6 +54,7 @@ describe("updateSettings", () => {
       data: {
         targets: input(read, payFloor).targets,
         payFloor,
+        season: null,
         updatedAt: expect.any(Date),
       },
       asOf: expect.any(String),
@@ -108,6 +112,24 @@ describe("updateSettings", () => {
       code: "validation",
       message: "Pay floor: At least 0",
       fields: { payFloor: "At least 0" },
+    });
+  });
+
+  // R12 as revised 2026-11-10: the season's checks name the field they're about.
+  it("answers a season that finishes before it starts with `validation`, under the finish", async () => {
+    signInAs("owner");
+    const read = await current();
+    expect(
+      await updateSettings({
+        ...input(read, 1),
+        seasonStart: "2026-11-02",
+        seasonFinish: "2026-11-01",
+      }),
+    ).toEqual({
+      ok: false,
+      code: "validation",
+      message: "Season finish: After the season's start",
+      fields: { seasonFinish: "After the season's start" },
     });
   });
 
