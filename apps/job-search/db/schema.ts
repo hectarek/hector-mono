@@ -417,7 +417,9 @@ export const jobPeople = pgTable(
 );
 
 // Weekly reviews (R10, U9): a week's counts and targets as they stood at its first save, fixed from
-// then on, and its build milestone and one change. One per owner and week, keyed by its Monday.
+// then on, and its one change. One per owner and week, keyed by its Monday. The week's milestone
+// moved to its plan (week_plans, U20): 0015 copied it there, and the milestone column, out of this
+// schema and unread, waits for the migration that drops it.
 export const weeklyReviews = pgTable(
   "weekly_reviews",
   {
@@ -426,7 +428,6 @@ export const weeklyReviews = pgTable(
     week: day("week").notNull(),
     counts: jsonb("counts").$type<WeeklyCounts>().notNull(),
     targets: jsonb("targets").$type<Settings["targets"]>().notNull(),
-    milestone: text("milestone"),
     change: text("change"),
     author: text("author").$type<ChangeActor>().notNull(),
     createdAt: createdAt(),
@@ -437,6 +438,25 @@ export const weeklyReviews = pgTable(
       table.ownerId,
       table.week,
     ),
+  ],
+);
+
+// A week's plan (R10 as revised 2026-11-10, U20): the milestone Monday's planning sets, which fixes
+// no counts, and which the week's review shows beside its one change. One per owner and week, keyed
+// by its Monday.
+export const weekPlans = pgTable(
+  "week_plans",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    week: day("week").notNull(),
+    milestone: text("milestone"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("week_plans_owner_id_week_idx").on(table.ownerId, table.week),
+    check("week_plans_week_check", sql`extract(isodow from ${table.week}) = 1`),
   ],
 );
 

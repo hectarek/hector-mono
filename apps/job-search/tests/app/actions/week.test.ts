@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { addJob, pinJob } from "@/app/actions/jobs";
-import { getToday, getWeek, saveWeeklyReview } from "@/app/actions/week";
+import {
+  getToday,
+  getWeek,
+  saveWeeklyReview,
+  setWeekMilestone,
+} from "@/app/actions/week";
 import { newPosting } from "@/tests/_support/jobs";
 import { nextState } from "@/tests/_support/next";
 import { aCompany, dataOf } from "@/tests/_support/screens";
@@ -61,7 +66,7 @@ describe("the weekly review", () => {
 
     const review = dataOf(
       await saveWeeklyReview(
-        { week: previous, milestone: "A fictional milestone", updatedAt: null },
+        { week: previous, change: "A fictional change", updatedAt: null },
         "save_weekly_review",
       ),
     );
@@ -88,5 +93,41 @@ describe("the weekly review", () => {
 
     expect(answer).toMatchObject({ ok: false, code: "conflict" });
     expect(answer.ok ? undefined : answer.current).toEqual(first);
+  });
+});
+
+// R10 as revised 2026-11-10 (U20). Weeks of their own, far back, since the container keeps every
+// record for the whole run.
+describe("the week's milestone", () => {
+  it("sets Claude's through the tool, refreshes the week's pages, and shows it on the week", async () => {
+    signInAs("agent");
+    const week = "2026-01-05";
+
+    const plan = dataOf(
+      await setWeekMilestone(
+        { week, milestone: "A fictional milestone", updatedAt: null },
+        "set_week_milestone",
+      ),
+    );
+
+    expect(plan).toMatchObject({ week, milestone: "A fictional milestone" });
+    expect(nextState.revalidated).toEqual([
+      "/",
+      "/week",
+      `/week?week=${week}`,
+      "/agent",
+    ]);
+    expect(dataOf(await getWeek({ week })).plan).toEqual(plan);
+  });
+
+  it("answers `validation` for a blank on a week with no plan, and saves nothing", async () => {
+    signInAs("owner");
+    const week = "2026-01-12";
+
+    expect(
+      await setWeekMilestone({ week, milestone: "", updatedAt: null }),
+    ).toMatchObject({ ok: false, code: "validation" });
+    expect(dataOf(await getWeek({ week })).plan).toBeNull();
+    expect(nextState.revalidated).toEqual([]);
   });
 });

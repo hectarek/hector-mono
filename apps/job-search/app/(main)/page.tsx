@@ -27,9 +27,9 @@ const REFRESH_MS = 60_000;
 // needs Hector, the top three jobs to apply to (R27), what's due later this week, the week's counts
 // against his targets, and Claude's recent work. The next task always shows, as the pit board or
 // its clear state; any other section with nothing in it collapses, and so does the track until a
-// season is set. The week's milestone joins the week's line with the rest of U20, and the
-// calendar's events the schedule with U14. The page refreshes while it's on screen, so Claude's
-// changes show (KTD15).
+// season is set. The week's line shows the milestone once planning sets it. The calendar's events
+// join the schedule with U14. The page refreshes while it's on screen, so Claude's changes show
+// (KTD15).
 export default async function TodayPage() {
   // The session first: it keeps other accounts out, and it ends the prerender, so the clock
   // is read only at request time.
@@ -44,6 +44,7 @@ export default async function TodayPage() {
     undated,
     blocks,
     weekBlocks,
+    milestone,
     claude,
     counts,
     targets,
@@ -68,6 +69,7 @@ export default async function TodayPage() {
         <WeekLine
           applications={counts.applications}
           target={targets.applications}
+          milestone={milestone}
           blocks={weekBlocks}
         />
       </div>

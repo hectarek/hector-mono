@@ -99,6 +99,20 @@
       "when": 1794354348129,
       "tag": "0013_season",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794398089072,
+      "tag": "0014_week_plans",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1794398093493,
+      "tag": "0015_week_milestones",
+      "breakpoints": true
     }
   ]
 }

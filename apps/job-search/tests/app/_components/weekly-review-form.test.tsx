@@ -12,14 +12,13 @@ const aPastWeek = async (weeksBack: number) =>
 const reviewOf = async (week: string) => dataOf(await getWeek({ week })).review;
 
 describe("the weekly review form", () => {
-  it("saves a first review with its milestone and change, and then edits it", async () => {
+  it("saves a first review with its one change, and then edits it", async () => {
     signInAs("owner");
     const week = await aPastWeek(6);
     render(<WeeklyReviewForm week={week} review={null} />);
 
-    fireEvent.change(screen.getByLabelText("Build milestone"), {
-      target: { value: "A fictional milestone" },
-    });
+    // The milestone is the week's plan's, set on its own (WeekMilestoneForm).
+    expect(screen.queryByLabelText("Milestone")).toBeNull();
     fireEvent.change(screen.getByLabelText("The one change"), {
       target: { value: "Send messages earlier" },
     });
@@ -31,7 +30,6 @@ describe("the weekly review form", () => {
 
     await waitFor(async () =>
       expect(await reviewOf(week)).toMatchObject({
-        milestone: "A fictional milestone",
         change: "Send messages earlier",
       }),
     );
@@ -64,7 +62,7 @@ describe("the weekly review form", () => {
     dataOf(
       await saveWeeklyReview({
         week,
-        milestone: "Claude's milestone",
+        change: "Claude's change",
         updatedAt: review.updatedAt.toISOString(),
       }),
     );
@@ -79,7 +77,7 @@ describe("the weekly review form", () => {
       await screen.findByText("Changed since you opened this"),
     ).toBeTruthy();
     expect(
-      screen.getByText("Build milestone is now Claude's milestone"),
+      screen.getByText("The one change is now Claude's change"),
     ).toBeTruthy();
     expect(screen.getByLabelText("The one change")).toHaveProperty(
       "value",

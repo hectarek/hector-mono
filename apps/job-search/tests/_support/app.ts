@@ -13,6 +13,7 @@ import type { INotesRepository } from "@/src/application/repositories/notes.repo
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
+import type { IWeekPlansRepository } from "@/src/application/repositories/week-plans.repository.interface";
 import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
@@ -57,6 +58,7 @@ import { listSourcesUseCase } from "@/src/application/use-cases/sources/list-sou
 import { getTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
 import { getWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
 import { saveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
+import { setWeekMilestoneUseCase } from "@/src/application/use-cases/week/set-week-milestone.use-case";
 import { ActivityRepository } from "@/src/infrastructure/repositories/activity.repository";
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { BlocksRepository } from "@/src/infrastructure/repositories/blocks.repository";
@@ -79,6 +81,8 @@ import { PracticeRepository } from "@/src/infrastructure/repositories/practice.r
 import { MockPracticeRepository } from "@/src/infrastructure/repositories/practice.repository.mock";
 import { SettingsRepository } from "@/src/infrastructure/repositories/settings.repository";
 import { MockSettingsRepository } from "@/src/infrastructure/repositories/settings.repository.mock";
+import { WeekPlansRepository } from "@/src/infrastructure/repositories/week-plans.repository";
+import { MockWeekPlansRepository } from "@/src/infrastructure/repositories/week-plans.repository.mock";
 import { WeeklyReviewsRepository } from "@/src/infrastructure/repositories/weekly-reviews.repository";
 import { MockWeeklyReviewsRepository } from "@/src/infrastructure/repositories/weekly-reviews.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
@@ -101,6 +105,7 @@ type Repositories = {
   interactions: IInteractionsRepository;
   practice: IPracticeRepository;
   weeklyReviews: IWeeklyReviewsRepository;
+  weekPlans: IWeekPlansRepository;
   blocks: IBlocksRepository;
   importRefs: IImportRefsRepository;
   transactions: ITransactionManagerService;
@@ -120,6 +125,7 @@ function mockRepositories(): Repositories {
     interactions: new MockInteractionsRepository(),
     practice: new MockPracticeRepository(),
     weeklyReviews: new MockWeeklyReviewsRepository(),
+    weekPlans: new MockWeekPlansRepository(),
     blocks: new MockBlocksRepository(),
     importRefs: new MockImportRefsRepository(),
     transactions: new MockTransactionManagerService(),
@@ -140,6 +146,7 @@ export function postgresRepositories(): Repositories {
     interactions: new InteractionsRepository(log),
     practice: new PracticeRepository(log),
     weeklyReviews: new WeeklyReviewsRepository(log),
+    weekPlans: new WeekPlansRepository(log),
     blocks: new BlocksRepository(log),
     importRefs: new ImportRefsRepository(log),
     transactions: new TransactionManagerService(log),
@@ -192,6 +199,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     interactions,
     practice,
     weeklyReviews,
+    weekPlans,
     blocks,
     importRefs,
     transactions,
@@ -326,6 +334,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       blocks,
       activity,
       settings,
+      weekPlans,
       log,
     ),
     addBlocks: addBlocksUseCase(blocks, activity, transactions, log),
@@ -338,7 +347,14 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       interactions,
       practice,
       settings,
+      weekPlans,
       weeklyReviews,
+    ),
+    setWeekMilestone: setWeekMilestoneUseCase(
+      weekPlans,
+      activity,
+      transactions,
+      log,
     ),
     saveWeeklyReview: saveWeeklyReviewUseCase(
       weeklyReviews,

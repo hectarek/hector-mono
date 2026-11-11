@@ -9,29 +9,38 @@ const factsOf = (line: HTMLElement) =>
   );
 
 describe("the week's line on Today", () => {
-  // R9 as revised 2026-11-10: applications against the target, and blocks done against planned.
-  it("shows the week's applications against the target, and its blocks done of those planned", () => {
+  // R9 and R10 as revised 2026-11-10: applications against the target, the week's milestone, and
+  // blocks done against planned.
+  it("shows the week's applications against the target, its milestone, and its blocks done of those planned", () => {
     const view = render(
-      <WeekLine applications={2} target={5} blocks={{ done: 3, planned: 8 }} />,
+      <WeekLine
+        applications={2}
+        target={5}
+        milestone="Ship the fictional widget"
+        blocks={{ done: 3, planned: 8 }}
+      />,
     );
 
     expect(factsOf(view.getByRole("region", { name: "This week" }))).toEqual([
       "Applications 2/5",
+      "Milestone Ship the fictional widget",
       "Blocks done 3/8",
     ]);
   });
 
-  it("shows the applications alone where there's no target, and leaves blocks out while none are planned", () => {
+  it("shows the applications alone where there's no target, and leaves the milestone out until it's set and blocks out while none are planned", () => {
     const view = render(
       <WeekLine
         applications={1}
         target={null}
+        milestone={null}
         blocks={{ done: 0, planned: 0 }}
       />,
     );
 
     const line = view.getByRole("region", { name: "This week" });
     expect(factsOf(line)).toEqual(["Applications 1"]);
+    expect(within(line).queryByText("Milestone")).toBeNull();
     expect(within(line).queryByText("Blocks done")).toBeNull();
   });
 });

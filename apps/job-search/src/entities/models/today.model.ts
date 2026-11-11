@@ -50,6 +50,9 @@ export type TodayView = {
   // The week's Focus blocks done against those planned, for the week's line (R9 as revised
   // 2026-11-10).
   weekBlocks: BlocksDone;
+  // The week's milestone, from its plan, for the week's line: null until planning sets it (R10 as
+  // revised 2026-11-10).
+  milestone: string | null;
   claude: ClaudeSession[];
   counts: WeeklyCounts;
   targets: Settings["targets"];

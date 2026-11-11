@@ -5,6 +5,7 @@ import type { IJobsRepository } from "@/src/application/repositories/jobs.reposi
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
+import type { IWeekPlansRepository } from "@/src/application/repositories/week-plans.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import { rankedList } from "@/src/application/use-cases/jobs/ranked-list";
 import { withDates } from "@/src/application/use-cases/people/person-dates";
@@ -42,7 +43,8 @@ const APPLY_NEXT = 3;
 // Today and get_today (docs/build-plan.md U9 and U20, R9, R10): the top of the ranked list (R27),
 // the conversations to debrief, what's due by today in Eastern time and later this week, how many
 // next steps have no date, today's Focus blocks and the week's done against those planned (U17),
-// Claude's recent sessions, and the week's counts against his targets.
+// the week's milestone from its plan, Claude's recent sessions, and the week's counts against his
+// targets.
 export const getTodayUseCase = (
   jobsRepository: IJobsRepository,
   peopleRepository: IPeopleRepository,
@@ -51,6 +53,7 @@ export const getTodayUseCase = (
   blocksRepository: IBlocksRepository,
   activityRepository: IActivityRepository,
   settingsRepository: ISettingsRepository,
+  weekPlansRepository: IWeekPlansRepository,
   loggerService: ILoggerService,
 ) => {
   const logger = loggerService.child({ layer: "use-case", op: "getToday" });
@@ -152,6 +155,7 @@ export const getTodayUseCase = (
       undatedJobs,
       undatedPeople,
       weekBlocks,
+      plan,
     ] = await Promise.all([
       applyNext(ownerId, today),
       debriefs(ownerId, now),
@@ -173,6 +177,7 @@ export const getTodayUseCase = (
       jobsRepository.countUndated(ownerId),
       peopleRepository.countUndated(ownerId),
       blocksRepository.listBetween(ownerId, monday, sunday),
+      weekPlansRepository.get(ownerId, monday),
     ]);
     const staleIds = new Set(staleJobs.map(({ id }) => id));
     // Each job with its contacts, so its follow-up can be logged to one (the UX plan's UX3).
@@ -204,6 +209,7 @@ export const getTodayUseCase = (
       undated: { jobs: undatedJobs, people: undatedPeople },
       blocks: weekBlocks.filter(({ day }) => day === today),
       weekBlocks: blocksDone(weekBlocks),
+      milestone: plan?.milestone ?? null,
       claude: claudeSessions(changes),
       counts,
       targets: (settings ?? DEFAULT_SETTINGS).targets,

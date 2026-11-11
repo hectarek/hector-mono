@@ -48,6 +48,7 @@ import { getTodaySchema } from "@/src/entities/models/today.model";
 import {
   getWeekSchema,
   saveWeeklyReviewSchema,
+  setWeekMilestoneSchema,
 } from "@/src/entities/models/weekly-review.model";
 
 // The entity schema each tool's controller parses its input with.
@@ -56,6 +57,7 @@ const PARSED_WITH: Record<string, z.ZodType> = {
   start_session: startSessionSchema,
   get_today: getTodaySchema,
   get_week: getWeekSchema,
+  set_week_milestone: setWeekMilestoneSchema,
   save_weekly_review: saveWeeklyReviewSchema,
   get_settings: getSettingsSchema,
   find_companies: findCompaniesSchema,

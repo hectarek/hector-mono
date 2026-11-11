@@ -106,9 +106,10 @@ export const FIELD_LABELS: Record<string, string> = {
   result: "Result",
   aiUsed: "AI used",
   minutes: "Minutes",
-  // A weekly review, as save_weekly_review and the week page take it and its history names it.
+  // A week's plan and its review, as set_week_milestone, save_weekly_review and the week page take
+  // them and their history names them.
   week: "Week",
-  milestone: "Build milestone",
+  milestone: "Milestone",
   change: "The one change",
   counts: "Counts",
   targets: "Targets",

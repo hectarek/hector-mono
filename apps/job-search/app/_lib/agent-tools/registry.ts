@@ -38,7 +38,12 @@ import { startSession, whoami } from "@/app/actions/session";
 import { getSettings } from "@/app/actions/settings";
 import type { ActionResult } from "@/app/actions/shared";
 import { addSource, listSources } from "@/app/actions/sources";
-import { getToday, getWeek, saveWeeklyReview } from "@/app/actions/week";
+import {
+  getToday,
+  getWeek,
+  saveWeeklyReview,
+  setWeekMilestone,
+} from "@/app/actions/week";
 import { listActivitySchema } from "@/src/entities/models/activity.model";
 import {
   startSessionSchema,
@@ -86,6 +91,7 @@ import { getTodaySchema } from "@/src/entities/models/today.model";
 import {
   getWeekSchema,
   saveWeeklyReviewSchema,
+  setWeekMilestoneSchema,
 } from "@/src/entities/models/weekly-review.model";
 
 // Claude's page tools (docs/build-plan.md KTD5), registered for Claude's session by
@@ -128,7 +134,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_today",
     description:
-      "The home page's view, in Eastern time: the ranked list's top three to apply to, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, the week's blocks done of those planned, Claude's sessions of the last 7 days, the week's counts beside Hector's targets, and the search season. Takes nothing.",
+      "The home page's view, in Eastern time: the ranked list's top three to apply to, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, the week's blocks done of those planned, the week's milestone, Claude's sessions of the last 7 days, the week's counts beside Hector's targets, and the search season. Takes nothing.",
     inputSchema: inputSchemaOf(getTodaySchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: getToday,
@@ -136,15 +142,22 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_week",
     description:
-      "A week by its Monday (YYYY-MM-DD; this week when not given): its counts beside the targets, its saved review if any, with the counts and targets fixed at the review's first save, and the Mondays before and after (next is null until that week starts). The review's updatedAt is what save_weekly_review sends back.",
+      "A week by its Monday (YYYY-MM-DD; this week when not given): its counts beside the targets, its plan with the milestone if one is set, its saved review if any, with the counts and targets fixed at the review's first save, and the Mondays before and after (next is null until that week starts). The plan's updatedAt is what set_week_milestone sends back, and the review's what save_weekly_review does.",
     inputSchema: inputSchemaOf(getWeekSchema),
     annotations: { readOnlyHint: true },
     action: getWeek,
   },
   {
+    name: "set_week_milestone",
+    description:
+      "Sets a week's milestone, at Monday's planning: week is its Monday, milestone the text (blank or null clears it), against the plan's updatedAt from get_week (null when none is set yet). It fixes no counts or targets; the review's first save still does. A week with no plan yet needs a milestone, not a blank.",
+    inputSchema: inputSchemaOf(setWeekMilestoneSchema),
+    action: setWeekMilestone,
+  },
+  {
     name: "save_weekly_review",
     description:
-      "Saves a week's review: week is its Monday, with the build milestone and the one change, against the updatedAt read with the review from get_week (null when none is saved yet). The first save fixes the week's counts and Hector's targets as they stand; a later one changes only the milestone and the change. A week that hasn't started is refused.",
+      "Saves a week's review: week is its Monday, with the one change, against the updatedAt read with the review from get_week (null when none is saved yet). The first save fixes the week's counts and Hector's targets as they stand; a later one changes only the change. A week that hasn't started is refused. The week's milestone is set_week_milestone's.",
     inputSchema: inputSchemaOf(saveWeeklyReviewSchema),
     action: saveWeeklyReview,
   },

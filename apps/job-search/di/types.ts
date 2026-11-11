@@ -8,6 +8,7 @@ import type { INotesRepository } from "@/src/application/repositories/notes.repo
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
+import type { IWeekPlansRepository } from "@/src/application/repositories/week-plans.repository.interface";
 import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -60,6 +61,7 @@ import type { IListSourcesUseCase } from "@/src/application/use-cases/sources/li
 import type { IGetTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
 import type { IGetWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
 import type { ISaveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
+import type { ISetWeekMilestoneUseCase } from "@/src/application/use-cases/week/set-week-milestone.use-case";
 import type { McpAuthConfig } from "@/src/infrastructure/services/neon-mcp-auth.service";
 import type { IListActivityController } from "@/src/interface-adapters/controllers/activity/list-activity.controller";
 import type { IAddBlocksController } from "@/src/interface-adapters/controllers/blocks/add-blocks.controller";
@@ -104,6 +106,7 @@ import type { IListSourcesController } from "@/src/interface-adapters/controller
 import type { IGetTodayController } from "@/src/interface-adapters/controllers/week/get-today.controller";
 import type { IGetWeekController } from "@/src/interface-adapters/controllers/week/get-week.controller";
 import type { ISaveWeeklyReviewController } from "@/src/interface-adapters/controllers/week/save-weekly-review.controller";
+import type { ISetWeekMilestoneController } from "@/src/interface-adapters/controllers/week/set-week-milestone.controller";
 
 export const DI_SYMBOLS = {
   IAuthenticationService: Symbol.for("IAuthenticationService"),
@@ -199,6 +202,9 @@ export const DI_SYMBOLS = {
   IGetWeekController: Symbol.for("IGetWeekController"),
   ISaveWeeklyReviewUseCase: Symbol.for("ISaveWeeklyReviewUseCase"),
   ISaveWeeklyReviewController: Symbol.for("ISaveWeeklyReviewController"),
+  IWeekPlansRepository: Symbol.for("IWeekPlansRepository"),
+  ISetWeekMilestoneUseCase: Symbol.for("ISetWeekMilestoneUseCase"),
+  ISetWeekMilestoneController: Symbol.for("ISetWeekMilestoneController"),
   IBlocksRepository: Symbol.for("IBlocksRepository"),
   IAddBlocksUseCase: Symbol.for("IAddBlocksUseCase"),
   IAddBlocksController: Symbol.for("IAddBlocksController"),
@@ -306,6 +312,9 @@ export interface DI_RETURN_TYPES {
   IGetWeekController: IGetWeekController;
   ISaveWeeklyReviewUseCase: ISaveWeeklyReviewUseCase;
   ISaveWeeklyReviewController: ISaveWeeklyReviewController;
+  IWeekPlansRepository: IWeekPlansRepository;
+  ISetWeekMilestoneUseCase: ISetWeekMilestoneUseCase;
+  ISetWeekMilestoneController: ISetWeekMilestoneController;
   IBlocksRepository: IBlocksRepository;
   IAddBlocksUseCase: IAddBlocksUseCase;
   IAddBlocksController: IAddBlocksController;

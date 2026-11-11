@@ -24,9 +24,9 @@ export type ISaveWeeklyReviewUseCase = ReturnType<
 
 // Saves a week's review (R10, docs/build-plan.md U9), Hector's on the week page or Claude's
 // through save_weekly_review, logged as whoever saved it. The first save fixes the week's counts
-// and the targets as they are then; a later one changes only the milestone and the change it
-// gives. Each is made against the updatedAt read with the review, null before the first (R22). A
-// week that hasn't started can't be reviewed.
+// and the targets as they are then; a later one changes only the change. Each is made against the
+// updatedAt read with the review, null before the first (R22). A week that hasn't started can't be
+// reviewed. The week's milestone is its plan's, which set_week_milestone sets.
 export const saveWeeklyReviewUseCase = (
   weeklyReviewsRepository: IWeeklyReviewsRepository,
   jobsRepository: IJobsRepository,
@@ -44,7 +44,7 @@ export const saveWeeklyReviewUseCase = (
 
   return async (
     context: ChangeContext,
-    { week, updatedAt, milestone, change }: SaveWeeklyReviewInput,
+    { week, updatedAt, change }: SaveWeeklyReviewInput,
   ): Promise<WeeklyReview> => {
     const { ownerId } = context;
     if (week > mondayOf(todayIn(PLAN_TIME_ZONE))) {
@@ -80,7 +80,6 @@ export const saveWeeklyReviewUseCase = (
             week,
             counts,
             targets: (settings ?? DEFAULT_SETTINGS).targets,
-            milestone: milestone ?? null,
             change: change ?? null,
             author: context.actor,
           },
@@ -93,29 +92,21 @@ export const saveWeeklyReviewUseCase = (
         });
         return created;
       }
-      const changes = {
-        ...(milestone !== undefined && { milestone }),
-        ...(change !== undefined && { change }),
-      };
       // Nothing changed: nothing to save or log.
-      if (
-        (changes.milestone === undefined ||
-          changes.milestone === current.milestone) &&
-        (changes.change === undefined || changes.change === current.change)
-      ) {
+      if (change === undefined || change === current.change) {
         return current;
       }
       const updated = await weeklyReviewsRepository.update(
         ownerId,
         current.id,
-        changes,
+        { change },
         tx,
       );
       await recordChange(activityRepository, tx, context, {
         record: { kind: "weekly-review", id: current.id },
         action: "updated",
-        before: { milestone: current.milestone, change: current.change },
-        after: { milestone: updated.milestone, change: updated.change },
+        before: { change: current.change },
+        after: { change: updated.change },
       });
       return updated;
     });
