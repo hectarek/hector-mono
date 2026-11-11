@@ -104,7 +104,7 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | Screen | What it is | Serves |
 |---|---|---|
 | F1 | Inbox | R25, R26, R27 |
-| F2 | Nothing new | R27 |
+| F2 | Nothing here yet | R27 |
 
 **G · Admin, under You**
 
@@ -114,8 +114,8 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | G2 | A suggestion to answer | R4 |
 | G3 | Add a game by hand | R1, R5 |
 | G4 | A game's record, and its video | R5, R7 |
-| G5 | Find a game to correct | R5 |
-| G6 | Merge one of ours into BGG's | R5 |
+| G5 | Find a game to edit | R5 |
+| G6 | Merge a hand-added game into BGG's | R5 |
 | G7 | Answered suggestions | R4 |
 | G8 | Remove an account | R41 |
 
