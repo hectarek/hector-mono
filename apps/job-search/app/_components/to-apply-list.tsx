@@ -25,7 +25,7 @@ import { payBand } from "@/app/_lib/format-pay";
 import type { JobSummary } from "@/src/entities/models/job.model";
 
 // The ranked list's jobs in its order (R27): the jobs page's To apply view, and the top three on
-// This week. Each shows its place, its fit score, when it was posted, its posted pay and Claude's
+// Today. Each shows its place, its fit score, when it was posted, its posted pay and Claude's
 // reason, with Pin and Not for me. A table on desktop, cards on phones (KTD19). `start` is the
 // place of the first job shown, for a page after the first.
 export function ToApplyList({

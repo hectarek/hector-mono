@@ -23,7 +23,7 @@ export default function NotFound() {
             nativeButton={false}
             render={<Link href="/" />}
           >
-            This week
+            Today
           </Button>
         </EmptyContent>
       </Empty>

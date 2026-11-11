@@ -13,7 +13,7 @@ export function scheduled(session: PracticeSessionRecord): PracticeSession {
 }
 
 // The open sessions whose next review is due by the day given, the earliest due first, then by
-// problem: the practice page's and This week's reviews due.
+// problem: the practice page's and Today's reviews due.
 export function dueBy(
   open: PracticeSessionRecord[],
   day: string,

@@ -24,7 +24,7 @@ const KINDS: Record<RecordRef["kind"], [one: string, many: string]> = {
   "agent-session": ["session", "sessions"],
 };
 
-// Claude's sessions of the last 7 days on This week (R9), in the design system's timing feed: a
+// Claude's sessions of the last 7 days on Today (R9), in the design system's timing feed: a
 // header with Claude's driver code and when each started, how many changes it made to each kind
 // of record, and its closing moves and refused attempts one by one. Each links to Claude's page,
 // which lists every change.
@@ -88,7 +88,7 @@ function SessionChanges({ session }: { session: ClaudeSession }) {
   );
 }
 
-// A change This week lists one by one: a refused attempt, or a job's closing move.
+// A change Today lists one by one: a refused attempt, or a job's closing move.
 function listed(entry: ActivityEntry): string {
   if (entry.action === "refused") {
     return `Refused: ${entry.reason ?? "a change"} on a ${KINDS[entry.record.kind][0]}`;

@@ -9,7 +9,7 @@ const layoutAroundAPage = async () =>
   within(
     await renderOnServer(
       <MainLayout>
-        <h1>This week</h1>
+        <h1>Today</h1>
       </MainLayout>,
     ),
   );
@@ -19,13 +19,13 @@ describe("the session chrome", () => {
     signInAs("agent");
     const view = await layoutAroundAPage();
     expect(view.getByText("Claude's session")).toBeTruthy();
-    expect(view.getByRole("heading", { name: "This week" })).toBeTruthy();
+    expect(view.getByRole("heading", { name: "Today" })).toBeTruthy();
   });
 
   it("shows Hector's session no banner", async () => {
     signInAs("owner");
     const view = await layoutAroundAPage();
     expect(view.queryByText("Claude's session")).toBeNull();
-    expect(view.getByRole("heading", { name: "This week" })).toBeTruthy();
+    expect(view.getByRole("heading", { name: "Today" })).toBeTruthy();
   });
 });

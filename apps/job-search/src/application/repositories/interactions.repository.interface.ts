@@ -48,7 +48,7 @@ export interface IInteractionsRepository {
   ): Promise<Map<string, PersonDates>>;
   // The latest reply linked to a job, for the stale rule (R3).
   repliedOnFor(ownerId: string, jobId: string): Promise<string | null>;
-  // The conversations still scheduled, the earliest start first: This week lists those that have
+  // The conversations still scheduled, the earliest start first: Today lists those that have
   // ended for a debrief (R9).
   listScheduled(ownerId: string): Promise<Interaction[]>;
   // Messages sent and conversations held on the days between from and to, both counted (R10).

@@ -6,9 +6,20 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { DueList } from "@/app/_components/due-list";
+import {
+  dueTasks,
+  LaterThisWeek,
+  NeedsYou,
+  NextTask,
+} from "@/app/_components/due-list";
+import { logInteraction } from "@/app/actions/interactions";
 import { getJob } from "@/app/actions/jobs";
+import { addPerson } from "@/app/actions/people";
 import { type Job, jobSummary } from "@/src/entities/models/job.model";
+import type {
+  ConversationToDebrief,
+  TodayView,
+} from "@/src/entities/models/today.model";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { aCompany, aJob, dataOf } from "@/tests/_support/screens";
 import { signInAs } from "@/tests/_support/session";
@@ -19,8 +30,43 @@ const NONE_UNDATED = { jobs: 0, people: 0 };
 
 const jobOf = async (id: string) => dataOf(await getJob({ id })).job;
 
-// A job as This week lists it, with its contacts (none here).
+// A job as Today lists it, with its contacts (none here).
 const listed = (job: Job) => ({ ...jobSummary(job), contacts: [] });
+
+// Today's three sections of what's due, as the page puts them: the next task, what needs Hector
+// and the rest of the week.
+function DueSections({
+  due,
+  later,
+  undated,
+  today,
+  waiting,
+  stale = [],
+  debriefs = [],
+}: {
+  due: TodayView["due"];
+  later: TodayView["later"];
+  undated: TodayView["undated"];
+  today: string;
+  waiting: number;
+  stale?: TodayView["due"]["stale"];
+  debriefs?: ConversationToDebrief[];
+}) {
+  const tasks = dueTasks(due, later, today);
+  return (
+    <>
+      <NextTask tasks={tasks} today={today} waiting={waiting} />
+      <NeedsYou
+        tasks={tasks}
+        stale={stale}
+        debriefs={debriefs}
+        undated={undated}
+        today={today}
+      />
+      <LaterThisWeek tasks={tasks} today={today} />
+    </>
+  );
+}
 
 // Jobs due on the days given, from today, each with a next step that names its day.
 async function jobsDue(offsets: number[]) {
@@ -36,14 +82,14 @@ async function jobsDue(offsets: number[]) {
   );
 }
 
-describe("what's due on This week", () => {
+describe("what's due on Today", () => {
   it("puts the earliest task on the pit board when none matters more, and the rest in rows grouped late and today", async () => {
     const today = todayIn(PLAN_TIME_ZONE);
     const [late, onToday] = await jobsDue([-2, 0]);
     if (!late || !onToday) throw new Error("No jobs");
 
     const view = render(
-      <DueList
+      <DueSections
         due={{ ...NOTHING_DUE, jobs: [listed(onToday), listed(late)] }}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}
@@ -74,7 +120,7 @@ describe("what's due on This week", () => {
     if (!late) throw new Error("No job");
 
     const view = render(
-      <DueList
+      <DueSections
         due={{ ...NOTHING_DUE, jobs: [listed(late), listed(wanted)] }}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}
@@ -93,7 +139,7 @@ describe("what's due on This week", () => {
     const late = await jobsDue([-8, -7, -6, -5, -4, -3, -2]);
 
     const view = render(
-      <DueList
+      <DueSections
         due={{ ...NOTHING_DUE, jobs: late.map(listed) }}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}
@@ -114,7 +160,7 @@ describe("what's due on This week", () => {
     if (!soon) throw new Error("No job");
 
     const view = render(
-      <DueList
+      <DueSections
         due={NOTHING_DUE}
         later={{ jobs: [listed(soon)], people: [] }}
         undated={NONE_UNDATED}
@@ -133,7 +179,7 @@ describe("what's due on This week", () => {
     if (!first || !second) throw new Error("No jobs");
     signInAs("owner");
     const view = render(
-      <DueList
+      <DueSections
         due={{ ...NOTHING_DUE, jobs: [listed(first), listed(second)] }}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}
@@ -144,7 +190,7 @@ describe("what's due on This week", () => {
 
     // The first task is done, so the page refreshes with the second on the board.
     view.rerender(
-      <DueList
+      <DueSections
         due={{ ...NOTHING_DUE, jobs: [listed(second)] }}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}
@@ -173,7 +219,7 @@ describe("what's due on This week", () => {
 
   it("says when nothing is due, and points at the decisions waiting", () => {
     const view = render(
-      <DueList
+      <DueSections
         due={NOTHING_DUE}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}
@@ -183,14 +229,89 @@ describe("what's due on This week", () => {
     );
 
     expect(view.getByText("Nothing due today")).toBeTruthy();
-    expect(view.getByText("1 decision waits for you above.")).toBeTruthy();
+    expect(view.getByText("1 decision waits for you below.")).toBeTruthy();
+    expect(view.queryByRole("region", { name: /^Needs you/ })).toBeNull();
     expect(view.queryByRole("button")).toBeNull();
+  });
+
+  // R9 as revised 2026-11-10: the steps the board doesn't hold, under Needs you with its count.
+  it("lists under Needs you what the board doesn't hold, and leaves the board's task out", async () => {
+    const today = todayIn(PLAN_TIME_ZONE);
+    const [late, onToday] = await jobsDue([-2, 0]);
+    if (!late || !onToday) throw new Error("No jobs");
+
+    const view = render(
+      <DueSections
+        due={{ ...NOTHING_DUE, jobs: [listed(late), listed(onToday)] }}
+        later={NOTHING_LATER}
+        undated={NONE_UNDATED}
+        today={today}
+        waiting={0}
+      />,
+    );
+
+    const nextTask = view.getByRole("region", { name: "Next task" });
+    const needsYou = view.getByRole("region", { name: "Needs you · 1" });
+    expect(within(nextTask).getByRole("button").textContent).toContain(
+      "Step 1",
+    );
+    expect(within(needsYou).getAllByRole("button")).toHaveLength(1);
+    expect(within(needsYou).getByRole("button").textContent).toContain(
+      "Step 2",
+    );
+  });
+
+  // R9 as revised 2026-11-10: a conversation to debrief is something that needs Hector.
+  it("puts a conversation to debrief under Needs you, and counts it", async () => {
+    signInAs("owner");
+    const person = dataOf(
+      await addPerson({ name: `Grace ${crypto.randomUUID().slice(0, 8)}` }),
+    );
+    const [conversation] = dataOf(
+      await logInteraction({
+        personIds: [person.id],
+        kind: "conversation",
+        scheduled: {
+          startsAt: "2026-01-05T14:00:00-05:00",
+          endsAt: "2026-01-05T14:30:00-05:00",
+        },
+      }),
+    ).interactions;
+    if (!conversation) throw new Error("No conversation was logged");
+
+    const view = render(
+      <DueSections
+        due={NOTHING_DUE}
+        later={NOTHING_LATER}
+        undated={NONE_UNDATED}
+        today="2026-11-06"
+        waiting={1}
+        debriefs={[
+          {
+            conversation,
+            person: {
+              id: person.id,
+              name: person.name,
+              role: null,
+              rank: null,
+            },
+          },
+        ]}
+      />,
+    );
+
+    const needsYou = view.getByRole("region", { name: "Needs you · 1" });
+    expect(
+      within(needsYou).getByRole("heading", { name: "Debrief · 1" }),
+    ).toBeTruthy();
+    expect(within(needsYou).getByRole("button", { name: "Held" })).toBeTruthy();
+    expect(view.getByText("1 decision waits for you below.")).toBeTruthy();
   });
 
   // R9 as revised 2026-11-07 (the UX plan's UX6).
   it("counts the steps with no date, each count a link to the list that dates them, and says nothing when there are none", () => {
     const view = render(
-      <DueList
+      <DueSections
         due={NOTHING_DUE}
         later={NOTHING_LATER}
         undated={{ jobs: 1, people: 3 }}
@@ -211,7 +332,7 @@ describe("what's due on This week", () => {
     ).toBe("/jobs?view=no-date");
 
     view.rerender(
-      <DueList
+      <DueSections
         due={NOTHING_DUE}
         later={NOTHING_LATER}
         undated={NONE_UNDATED}

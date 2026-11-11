@@ -105,7 +105,7 @@ export function JobList({
   );
 }
 
-// An open job's step with no date gets one-tap date chips, so it can join This week (the UX plan's
+// An open job's step with no date gets one-tap date chips, so it can join Today (the UX plan's
 // UX6).
 function JobDateChips({ job }: { job: JobSummary }) {
   return !isClosed(job.status) && job.nextStep && !job.nextDate ? (

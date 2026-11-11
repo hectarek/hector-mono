@@ -128,7 +128,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   {
     name: "get_today",
     description:
-      "Today's view, in Eastern time: the top three jobs of the ranked list to apply to, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
+      "The home page's view, in Eastern time: the ranked list's top three to apply to, conversations to debrief, jobs and people due by today and later this week, applications gone stale, practice reviews due, how many open jobs and people have a next step with no date, today's Focus blocks and how each went, the week's blocks done of those planned, Claude's sessions of the last 7 days, and the week's counts beside Hector's targets. Takes nothing.",
     inputSchema: inputSchemaOf(getTodaySchema),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     action: getToday,

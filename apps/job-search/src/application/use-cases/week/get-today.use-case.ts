@@ -16,6 +16,7 @@ import {
   ACTIVITY_PAGE_MAX,
   type ActivityEntry,
 } from "@/src/entities/models/activity.model";
+import { blocksDone } from "@/src/entities/models/block.model";
 import { type JobSummary, jobSummary } from "@/src/entities/models/job.model";
 import { personSummary } from "@/src/entities/models/person.model";
 import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
@@ -38,10 +39,10 @@ const CLAUDE_CHANGES_MAX = 4 * ACTIVITY_PAGE_MAX;
 // How many of the ranked list's jobs it shows (R27).
 const APPLY_NEXT = 3;
 
-// This week and get_today (docs/build-plan.md U9, R9, R10): the top of the ranked list (R27), the
-// conversations to debrief, what's due by today in Eastern time and later this week, how many next
-// steps have no date, today's Focus blocks (U17), Claude's recent sessions, and the week's counts
-// against his targets.
+// Today and get_today (docs/build-plan.md U9 and U20, R9, R10): the top of the ranked list (R27),
+// the conversations to debrief, what's due by today in Eastern time and later this week, how many
+// next steps have no date, today's Focus blocks and the week's done against those planned (U17),
+// Claude's recent sessions, and the week's counts against his targets.
 export const getTodayUseCase = (
   jobsRepository: IJobsRepository,
   peopleRepository: IPeopleRepository,
@@ -150,7 +151,7 @@ export const getTodayUseCase = (
       counts,
       undatedJobs,
       undatedPeople,
-      blocks,
+      weekBlocks,
     ] = await Promise.all([
       applyNext(ownerId, today),
       debriefs(ownerId, now),
@@ -171,7 +172,7 @@ export const getTodayUseCase = (
       ),
       jobsRepository.countUndated(ownerId),
       peopleRepository.countUndated(ownerId),
-      blocksRepository.listBetween(ownerId, today, today),
+      blocksRepository.listBetween(ownerId, monday, sunday),
     ]);
     const staleIds = new Set(staleJobs.map(({ id }) => id));
     // Each job with its contacts, so its follow-up can be logged to one (the UX plan's UX3).
@@ -201,7 +202,8 @@ export const getTodayUseCase = (
         people: weekPeople.filter((person) => !byToday(person)),
       },
       undated: { jobs: undatedJobs, people: undatedPeople },
-      blocks,
+      blocks: weekBlocks.filter(({ day }) => day === today),
+      weekBlocks: blocksDone(weekBlocks),
       claude: claudeSessions(changes),
       counts,
       targets: (settings ?? DEFAULT_SETTINGS).targets,

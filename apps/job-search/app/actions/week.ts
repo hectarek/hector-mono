@@ -9,13 +9,13 @@ import type {
   WeekView,
 } from "@/src/entities/models/weekly-review.model";
 
-// This week and the weekly review (docs/build-plan.md U9, R9, R10): get_today, get_week and
+// Today and the weekly review (docs/build-plan.md U9, R9, R10): get_today, get_week and
 // save_weekly_review call these.
 
 export async function getToday(
   input: unknown,
 ): Promise<ActionResult<TodayView>> {
-  return answer("getToday", "Couldn't read this week. Try again.", async () =>
+  return answer("getToday", "Couldn't read Today. Try again.", async () =>
     getInjection("IGetTodayController")(input, await getActionActor()),
   );
 }

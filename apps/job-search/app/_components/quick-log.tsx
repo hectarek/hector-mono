@@ -74,7 +74,7 @@ const KINDS = INTERACTION_KINDS.map((kind) => ({
 }));
 
 // A conversation is held, or still to come and logged ahead with its start and end, so it reaches
-// This week's debriefs once it ends (R9).
+// Today's debriefs once it ends (R9).
 const WHEN = [
   { value: "held", label: "Held" },
   { value: "ahead", label: "Coming up" },
@@ -239,7 +239,7 @@ export function QuickLog({
             <SheetTitle>Log outreach</SheetTitle>
             <SheetDescription>
               {ahead
-                ? "A conversation coming up, dated by its start. Once it ends, This week asks how it went."
+                ? "A conversation coming up, dated by its start. Once it ends, Today asks how it went."
                 : "A message sent, a reply or a conversation. It's dated today unless you change the date under More."}
             </SheetDescription>
           </SheetHeader>

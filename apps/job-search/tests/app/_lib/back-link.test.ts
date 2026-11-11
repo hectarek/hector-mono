@@ -5,7 +5,7 @@ const JOBS = { href: "/jobs", label: "Jobs" };
 
 describe("a record's back link (the UX plan's UX8)", () => {
   it("returns to the page it was opened from, named for it", () => {
-    expect(backTo("/", JOBS)).toEqual({ href: "/", label: "This week" });
+    expect(backTo("/", JOBS)).toEqual({ href: "/", label: "Today" });
     expect(backTo("/people?view=no-date", JOBS)).toEqual({
       href: "/people?view=no-date",
       label: "People",

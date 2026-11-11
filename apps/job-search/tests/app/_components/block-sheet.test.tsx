@@ -167,7 +167,7 @@ describe("a block's row and its sheet (U17)", () => {
   });
 });
 
-describe("today's blocks on This week (U17)", () => {
+describe("today's schedule on Today (U17)", () => {
   it("counts the blocks done of those planned, leaving a moved one out, and says which is happening now", async () => {
     const done = await aBlock({ state: "done" });
     const moved = await aBlock({
@@ -187,7 +187,7 @@ describe("today's blocks on This week (U17)", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Today's blocks · 1 of 2 done" }),
+      screen.getByRole("heading", { name: "Schedule · 1 of 2 done" }),
     ).toBeTruthy();
     expect(rowOf(now).textContent).toContain("Now");
     expect(rowOf(moved).textContent).toContain("Moved");
