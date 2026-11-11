@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PageTitle, SectionTitle } from "@/app/_components/display";
 import { WeekBlocks } from "@/app/_components/week-blocks";
 import { WeekCounts } from "@/app/_components/week-counts";
+import { WeekMilestoneForm } from "@/app/_components/week-milestone-form";
 import { WeeklyReviewForm } from "@/app/_components/weekly-review-form";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { formatMoment } from "@/app/_lib/format-day";
@@ -14,11 +15,11 @@ import { formatWeekRange } from "@/src/entities/week";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-// The weekly review (R10, U9): a week's counts beside its targets, a way to the weeks before and
-// after, its Focus blocks (U17), and its review. With no review saved, the counts are live and the form is empty. Once
-// saved, the counts and targets are the review's snapshot, any live count that no longer matches
-// shows beside it, and the form edits only the milestone and the change. This week unless
-// `?week=` names another week's Monday.
+// The weekly review (R10, U9): a week's milestone, which Monday's planning sets (U20), its counts
+// beside its targets, a way to the weeks before and after, its Focus blocks (U17), and its review.
+// With no review saved, the counts are live and the form is empty. Once saved, the counts and
+// targets are the review's snapshot, any live count that no longer matches shows beside it, and
+// the form edits only the change. This week unless `?week=` names another week's Monday.
 export default async function WeekPage({
   searchParams,
 }: {
@@ -71,6 +72,11 @@ export default async function WeekPage({
           ) : null}
         </nav>
       </div>
+
+      <section aria-labelledby="week-plan" className="flex flex-col gap-3">
+        <SectionTitle id="week-plan">Plan</SectionTitle>
+        <WeekMilestoneForm week={view.week} plan={view.plan} />
+      </section>
 
       <section aria-labelledby="week-counts" className="flex flex-col gap-3">
         <SectionTitle id="week-counts">

@@ -44,7 +44,7 @@ export class MockWeeklyReviewsRepository implements IWeeklyReviewsRepository {
   async update(
     ownerId: string,
     id: string,
-    changes: Partial<Pick<WeeklyReview, "milestone" | "change">>,
+    changes: Pick<WeeklyReview, "change">,
   ): Promise<WeeklyReview> {
     const row = this.rows.find(
       (row) => row.ownerId === ownerId && row.review.id === id,

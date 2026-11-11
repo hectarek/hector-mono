@@ -63,6 +63,18 @@ describe("the tables [postgres]", () => {
     await season("2026-11-02", "2027-02-01", `[${checkpoint}]`);
   });
 
+  // R10 as revised 2026-11-10 (U20).
+  it("keep a week's plan to its Monday, one per owner and week", async () => {
+    const plan = (week: string) =>
+      sql(
+        "insert into week_plans (owner_id, week, milestone) values ($1, $2, 'A milestone')",
+        [OWNER, week],
+      );
+    await expect(plan("2026-11-11")).rejects.toThrow();
+    await plan("2026-11-09");
+    await expect(plan("2026-11-09")).rejects.toThrow();
+  });
+
   it("keep when a row last changed to the millisecond, a JS Date's precision", async () => {
     await company(null, null);
     const [row] = await sql<{ fraction: string }>(

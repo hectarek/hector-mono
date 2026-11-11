@@ -28,11 +28,11 @@ export interface IWeeklyReviewsRepository {
     review: NewWeeklyReview,
     tx: ITransaction,
   ): Promise<WeeklyReview>;
-  // A later save: the milestone and the change given, and updatedAt moved on.
+  // A later save: the change given, and updatedAt moved on.
   update(
     ownerId: string,
     id: string,
-    changes: Partial<Pick<WeeklyReview, "milestone" | "change">>,
+    changes: Pick<WeeklyReview, "change">,
     tx: ITransaction,
   ): Promise<WeeklyReview>;
 }

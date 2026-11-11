@@ -37,6 +37,7 @@ const recordKindSchema = z.enum([
   "interaction",
   "practice-entry",
   "weekly-review",
+  "week-plan",
   "block",
   "agent-session",
 ]);

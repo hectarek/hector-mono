@@ -10,13 +10,12 @@ import { useRecordForm } from "@/app/_lib/use-record-form";
 import { saveWeeklyReview } from "@/app/actions/week";
 import type { WeeklyReview } from "@/src/entities/models/weekly-review.model";
 
-type ReviewField = "milestone" | "change";
-const REVIEW_FIELDS: readonly ReviewField[] = ["milestone", "change"];
+type ReviewField = "change";
+const REVIEW_FIELDS: readonly ReviewField[] = ["change"];
 
 const fieldsOf = (
   review: WeeklyReview | undefined,
 ): Record<ReviewField, string> => ({
-  milestone: review?.milestone ?? "",
   change: review?.change ?? "",
 });
 
@@ -31,10 +30,10 @@ function isReview(value: unknown): value is WeeklyReview {
   );
 }
 
-// A week's review (R10): its build milestone and its one change. The first save fixes the week's
-// counts and targets as they are then; a later one, made against the updatedAt read with the
-// review (R22), changes only what was edited, and on a conflict the form stays open on the review
-// as it is now, with what was typed kept (docs/build-plan.md KTD15).
+// A week's review (R10): its one change, beside the milestone its plan set (WeekMilestoneForm).
+// The first save fixes the week's counts and targets as they are then; a later one, made against
+// the updatedAt read with the review (R22), changes only the change, and on a conflict the form
+// stays open on the review as it is now, with what was typed kept (docs/build-plan.md KTD15).
 export function WeeklyReviewForm({
   week,
   review,
@@ -68,15 +67,6 @@ export function WeeklyReviewForm({
         <ConflictNotice what="the review" changes={form.changes} />
       ) : null}
       <FieldGroup>
-        <FormField
-          id="review-milestone"
-          label={FIELD_LABELS.milestone ?? "Build milestone"}
-          kind="text"
-          value={form.fields.milestone}
-          onChange={(text) => form.setField("milestone", text)}
-          error={failure?.fields?.milestone}
-          maxLength={200}
-        />
         <FormField
           id="review-change"
           label={FIELD_LABELS.change ?? "The one change"}

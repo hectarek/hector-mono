@@ -3,6 +3,7 @@ import { within } from "@testing-library/dom";
 import TodayPage from "@/app/(main)/page";
 import { closeJob, pinJob } from "@/app/actions/jobs";
 import { getSettings, updateSettings } from "@/app/actions/settings";
+import { getWeek, setWeekMilestone } from "@/app/actions/week";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { aClaudeJob, aCompany, aJob, dataOf } from "@/tests/_support/screens";
 import { renderOnServer } from "@/tests/_support/server-render";
@@ -95,6 +96,26 @@ describe("Today", () => {
     expect(
       follows(track, page.getByRole("region", { name: "This week" })),
     ).toBe(true);
+  });
+
+  // R10 as revised 2026-11-10: the milestone Monday's planning set joins the week's line.
+  it("shows this week's milestone in the week's line once planning sets it", async () => {
+    signInAs("agent");
+    const week = dataOf(await getWeek({}));
+    dataOf(
+      await setWeekMilestone({
+        week: week.week,
+        milestone: "Ship the fictional widget",
+        updatedAt: week.plan?.updatedAt.toISOString() ?? null,
+      }),
+    );
+    signInAs("owner");
+
+    const page = await today();
+
+    const line = within(page.getByRole("region", { name: "This week" }));
+    expect(line.getByText("Milestone")).toBeTruthy();
+    expect(line.getByText("Ship the fictional widget")).toBeTruthy();
   });
 
   // R27: Hector pins, and Claude on his word, so its session has both.

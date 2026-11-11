@@ -65,6 +65,7 @@ export const ACTION_REACH: Record<string, Reach> = {
   "sources.addSource": { tool: "add_source" },
   "week.getToday": { tool: "get_today" },
   "week.getWeek": { tool: "get_week" },
+  "week.setWeekMilestone": { tool: "set_week_milestone" },
   "week.saveWeeklyReview": { tool: "save_weekly_review" },
 };
 
