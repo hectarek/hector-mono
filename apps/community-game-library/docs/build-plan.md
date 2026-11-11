@@ -15,11 +15,11 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 | | |
 |---|---|
-| Phase | Design: the look is chosen (D13), and every screen is being drawn in it before any code |
-| Next | Hector's review of the screens, then the design system the build uses |
-| Then | The technical half, once the recipes performance review is done |
-| Waiting on Hector | H1 (BoardGameGeek registration), and his review of the screens |
-| Updated | 2026-11-10 |
+| Phase | Design: the look is chosen (D13), every screen is drawn, and Hector's first review is in |
+| Next | Settle where each action lives and what the two library views are called, then redraw the screens that changed and draw the ones still missing |
+| Then | The design system the build uses, and the technical half once the recipes performance review is done |
+| Waiting on Hector | H1 (BoardGameGeek registration), H2 (sign-in providers), and his call on the two open questions |
+| Updated | 2026-11-11 |
 
 ---
 
@@ -82,8 +82,8 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 **Catalog**
 
 - R1. The catalog holds, for each game: its title and other names, year, cover image (full size and thumbnail), description, player count range and the counts it plays best at, play time, minimum age, complexity (BGG's 1 to 5 weight), categories (the genre, such as party or card game), mechanics (such as deck building or worker placement), designers, publishers, and its expansions or base game. *asked*
-- R2. Search finds a game by title as it's typed, ignoring case, punctuation and leading articles, and tolerates a typo or a missing word ("ticket ride" finds Ticket to Ride). Each result shows its cover, year and publisher, so editions and same-named games can be told apart. Search covers every game in the catalog, not only the ones members own. *asked*
-- R3. A member adds a game to their shelf with one tap on a search result, and can add several in a row without leaving search. *asked (one tap); gap (several in a row)*
+- R2. Search finds a game by title as it's typed, ignoring case, punctuation and leading articles, and tolerates a typo or a missing word ("ticket ride" finds Ticket to Ride). Each result shows its cover, year and publisher, so editions and same-named games can be told apart. Search covers every game in the catalog, not only the ones members own, and shows its results in two groups: first the games on the member's own and their friends' shelves, then the rest of the catalog. *asked* (Revised 2026-11-11, Hector on the screens: the two groups.)
+- R3. A member adds a game to their shelf with one tap on a search result, and can add several in a row without leaving search. Adding starts from the member's own shelf or from a catalog result in search. The view of everyone's games has no add button of its own, since it shows what people already have. *asked (one tap); gap (several in a row)* (Revised 2026-11-11, Hector on the screens: where adding starts.)
 - R4. When search can't find a game, the member suggests it: its title, and optionally its year, publisher, a link and a photo of the box. The admin adds it or declines it with a reason, and the member is told either way. An added game lands on the suggester's shelf. With the catalog a copy of BGG's (D7), a miss is rare: a game newer than the last weekly update, which the admin can pull from BGG at once, or one BGG doesn't list, which the admin adds by hand (R5). *asked; gap (the outcome and the notice)* (Revised 2026-11-10, Hector on Q11: the admin handles suggestions, with no catalog agent.)
 - R5. The admin can correct a game's details, set its how-to-play video, and add a game BGG doesn't list, with the same fields a BGG game has (D11). Every change records who made it. *asked*
 - R6. Dropped 2026-11-10 (Hector, Q3): no tags of our own for now. Filters use BGG's own attributes (D8), and tags come back only for something that data turns out to lack. *asked*
@@ -91,7 +91,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 
 **Shelves and friends**
 
-- R8. A copy records its game, its owner, the expansions in the box, its condition and any missing parts, whether its owner lends it, whether friends can pass it along (R48), and when it was added. Its owner can edit or remove it, except while it's on loan. *asked; gap (expansions, condition, whether it's lent)*
+- R8. A copy records its game, its owner, the expansions in the box, its condition and any missing parts, whether its owner lends it, whether friends can pass it along (R48), and when it was added. Its owner can edit or remove it, except while it's on loan. A copy its owner doesn't lend, such as a special edition, still shows to friends, marked not lent, and can't be requested. A copy's page links to its game's page (R14). *asked; gap (expansions, condition, whether it's lent)* (Clarified 2026-11-11, Hector on the screens: a copy that isn't lent, and the link.)
 - R9. A member can own more than one copy of a game, and each copy lends on its own. *gap*
 - R10. A member can open their own shelf to manage it and any friend's shelf to browse and borrow from. Someone who isn't a friend sees neither. *asked* (Revised 2026-11-10, Hector on Q1: friends, not one group.)
 - R49. Each member has a friend link to share, say in the group chat. Opening it, signed in or after signing up, makes the two people friends at once. A link lasts a week, and making a new one ends the old one. The app also offers one-tap friend requests, which the other person accepts, to a friend's friends and to people from a game night you went to. There's no search of everyone who uses the app. *asked (friends, Q1); gap (how people become friends)*
@@ -108,18 +108,20 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
   - owner
   - available now
 
-  *asked (filters, friends' games); gap (one library view across shelves, availability)*
-- R12. Library and shelf lists sort by title, recently added, complexity, play time, year or most borrowed. *gap*
+  The filters people reach for most come first: available now, owner, player count and play time. Complexity, category, mechanic and minimum age are folded away until opened.
+
+  *asked (filters, friends' games); gap (one library view across shelves, availability)* (Revised 2026-11-11, Hector on the screens: the order, and folding the rest away.)
+- R12. Library and shelf lists sort by title, recently added, complexity, play time, year or most borrowed. Sorting is its own control, apart from the filters. *gap* (Revised 2026-11-11, Hector on the screens: apart from the filters.)
 - R13. Filters and sort live in the page's address, so going back keeps them and a filtered view can be shared in the group chat. *gap*
-- R14. A game's page leads with its cover at full quality, then its facts (players with the best counts, time, age, complexity), description, categories and mechanics, expansions, the how-to-play video, and which of your friends own it, with each copy's state and a Borrow button. *asked*
+- R14. A game's page leads with its cover at full quality, then its facts (players with the best counts, time, age, complexity), description, categories and mechanics, expansions, the how-to-play video, and which of your friends own it, with each copy's state and a Borrow button. A member who owns a copy sees it there too, with a link to the copy's own page, where they manage it (R8). *asked* (Revised 2026-11-11, Hector on the screens: the game's page and the copy's page stay separate and link to each other.)
 - R15. A copy shows its state wherever it appears: available, requested, out (with its due date and how many are in line), or not lent. *gap*
 
 **Lending**
 
 - R16. A member requests a friend's copy that its owner lends, with an optional note ("Can I grab it Friday?"). The owner accepts and sets the loan period (1 week, 2 weeks, a month, or a date), or declines with an optional note. *asked (the owner sets the period); gap (the request and the decline)*
 - R17. An owner can record a loan made in person, picking the friend and the period, with no request first. *gap*
-- R18. A loan's due date counts from the handoff, which the person receiving the game confirms; a direct lend is handed off at once (D5). *gap*
-- R19. The borrower marks a game returned and the owner confirms it, noting any missing parts or damage on the copy. The owner can also mark it returned without waiting. *gap*
+- R18. A loan's due date counts from the day of the handoff. The person receiving the game confirms it and gives the day they picked it up, which starts as today and can be set to an earlier day, so confirming late doesn't move the due date. A direct lend is handed off at once (D5). *gap* (Revised 2026-11-11, Hector on the screens: the pick-up day, since most people confirm late.)
+- R19. The borrower marks a game returned and the owner confirms it, noting any missing parts or damage on the copy. The owner can also mark it returned without waiting. Whoever marks it gives the day it came back, which starts as today, so a late confirmation doesn't make the loan look overdue. *gap* (The return day was added 2026-11-11 by Claude to match R18's pick-up day; Hector hasn't confirmed it.)
 - R20. The borrower can ask for more time, which the owner grants with a new due date or declines. The owner can change the due date at any time, and can call a game back, which ends any pass-along. *gap*
 - R21. The borrower can withdraw a request or leave a line, and the owner can cancel an accepted loan before the handoff or decline anyone in a line. *gap*
 - R22. My loans shows, in one place, games I've lent that are out, games I've borrowed, the lines I'm in, and requests waiting in either direction, overdue ones first. *asked; gap (both directions, requests, lines)*
@@ -165,8 +167,9 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 
 **Accounts and access**
 
-- R39. Anyone can sign up, and a new account sees the catalog and nothing else until it has friends. Signed-out visitors see only the welcome page, which carries the app's name and no member's. *gap* (Revised 2026-11-10, Hector on Q1: it had been invite-only, which friends make unnecessary.)
-- R40. A member's profile has their name, a photo, and an optional phone number for arranging handoffs, shown only to their friends and to the other person in a loan or a pass-along. *gap*
+- R39. Anyone can sign up, with Google, Apple or an email address, and a new account sees the catalog and nothing else until it has friends. Signed-out visitors see only the welcome page, which carries the app's name and no member's. *gap* (Revised 2026-11-10, Hector on Q1: it had been invite-only, which friends make unnecessary. Revised 2026-11-11, Hector on the screens: Google and Apple sign-in.)
+- R40. A member's profile has their name, a photo, and an optional phone number for arranging handoffs, shown only to their friends and to the other person in a loan or a pass-along. *gap* (Hector, 2026-11-11: keep the photo, with a simple file bucket to hold it.)
+- R51. Each member picks a playing piece, a shape and a color, which stands for them wherever they appear: in a seat at a game night, in a line, and next to a loan or a copy (D13). There are enough shapes and colors for every friend in a circle to have their own. *asked (Hector, 2026-11-11, on the screens: more variety than one pawn in twelve colors)*
 - R41. A member can delete their account once their loans are settled; their copies leave their friends' libraries with them. The admin can remove an account that misuses the app. *gap* (Revised 2026-11-10, Hector on Q1: the admin runs the catalog, not the membership.)
 - R42. Dropped 2026-11-10 (Hector, Q11): the catalog agent's tools. *asked*
 
@@ -185,7 +188,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 - D2. **Rules, not AI, in the app.** Game suggestions for a night (R37) and table splits (R46) come from readable rules over the catalog's data, with their reasons shown. Why: answers members can check, and no model costs or keys in the app, as in the job search app.
 - D3. **No money, deposits or penalties.** Overdue means reminders, not fees. Why: these are friends.
 - D4. **The owner decides.** Only a copy's owner accepts or declines a request on it, sets its period, extends it, turns on pass-along or confirms its return. The admin can't lend someone else's copy.
-- D5. **The period counts from the handoff.** The owner picks a period when accepting, and the due date is set when the person receiving the game confirms they have it. Why: a request accepted on Monday and picked up on Saturday shouldn't lose five days. A direct lend (R17) skips the confirmation.
+- D5. **The period counts from the handoff.** The owner picks a period when accepting, and the due date counts from the pick-up day the person receiving the game gives when they confirm they have it (R18). Why: a request accepted on Monday and picked up on Saturday shouldn't lose five days, and someone who confirms a few days late shouldn't gain them. A direct lend (R17) skips the confirmation. (Revised 2026-11-11, Hector on the screens: the pick-up day.)
 - D6. **Architecture from recipes.** The app copies hectors-recipes' code and system architecture once its performance review is done, and the technical half starts from that review's lessons. *asked*
 - D7. **The catalog is our own copy of BoardGameGeek's.** It's filled from BGG before anyone is invited, so the library is full on day one, and a script refreshes it about once a week. The script spaces its calls generously, so it never strains BGG's service, however long the first copy takes. Search runs on our copy, so members never wait on BGG. Why: BGG is the most complete source there is, and there's no reason to rebuild it. (Hector, 2026-11-10, on Q2 and Q10)
 - D8. **The catalog's attributes are BGG's.** Players, best player counts, time, age, weight, categories and mechanics come as BGG records them, and the app adds no tags of its own until that data turns out to lack something. BGG's categories include Card Game, which may already separate a card game from a big board game. (Hector, 2026-11-10, on Q3)
@@ -290,6 +293,7 @@ Every question from the first draft has Hector's answer (2026-11-10):
 ### Needs from Hector
 
 - H1. Register the app for BGG's XML API (boardgamegeek.com/applications) and keep its token for the build. BGG warns that approval can take a week or more, so this is worth starting now.
+- H2. Set up the two sign-in providers for Neon Auth before launch (R39): a Google OAuth client with its consent screen verified, and Sign in with Apple, which needs an Apple Developer account. The steps are in the notes for the technical half.
 
 ---
 
@@ -308,7 +312,12 @@ For the session that writes the technical half, once the recipes performance rev
 - Visibility (D10): friendships are mutual rows; a night's audience is stored as where it's shared, so a group can be added as another audience. Recipes' spaces, invite links and roles are worth reading as the later groups' model, and its invite links as the friend link's.
 - Loans form a chain under pass-along (R48): each loan is its own row, linked to the one it followed, so history and reminders stay per borrower.
 - Reminders and notices need a scheduled job (a daily run), which neither recipes nor the job search app has, or in-app due reminders worked out when the app opens. Push (D9, later) needs the scheduled job and a service worker, which recipes doesn't have; the performance review's cold-open findings point at a service worker too.
-- The sign-in methods members get (Google, email codes, Apple), checked against what Neon Auth supports. Sign-up is open (R39).
+- Sign-in (R39). Neon Auth's docs, read 2026-11-11 (`neon.com/docs/auth/guides/setup-oauth`), list Google and Apple among its social sign-in providers, beside email and password, email codes and magic links:
+  - Google works in development on credentials Neon shares, which show Neon's name on the consent screen. Production needs our own Google OAuth client, and Google's verification before anyone outside a test list can use it.
+  - Apple has no shared credentials. It needs four values from an Apple Developer account (a Services ID, a `.p8` key, the Team ID and the Key ID), and an HTTPS return address, so it can't be tried on localhost.
+  - Each Neon branch has its own auth address, so each provider's return address is registered per branch.
+  - Recipes renders Neon's own sign-in view (`AuthView`), so the screen's layout is mostly Neon's, restyled.
+- Uploaded images: the box photo on a suggestion (R4), the cover of a game added by hand (R5) and the profile photo (R40). Recipes stores no files, so this is new ground. Hector's pick is a bucket in Neon. Neon Object Storage (`neon.com/docs/storage/overview`, read 2026-11-11) is S3-style, branches with the database, includes 5 GB on the free plan, and runs only in some regions (US East Ohio and N. Virginia, Frankfurt, Singapore), so the project's region decides whether it can be used.
 
 ---
 
@@ -320,3 +329,4 @@ For the session that writes the technical half, once the recipes performance rev
 - **2026-11-10:** Hector agreed the product half as it stands, the proposed details included (D2 to D5, D10, D11, R48, R49). **Next:** the design system's style tiles.
 - **2026-11-10:** Hector's take on the first style tiles: Box lid and Punchboard, leaning Punchboard, and light mode only (D12, R43 revised). **Next:** round two of the style tiles, around those two.
 - **2026-11-10:** the look is chosen: Punchboard, with game pieces that each do one job (D13). It came out of eight style tiles, then a draft with its controls, its pieces and four phone screens, which Hector approved with no changes. He asked for every screen to be drawn before any code, so the layout can be judged first: 51 screens across getting in, the library, loans, game nights, friends, the inbox and admin, each tied to the requirements it covers. **Next:** Hector's review of the screens; what he changes there comes back into the requirements.
+- **2026-11-11:** Hector's review of the 51 screens, checked against the requirements. Taken: Google and Apple sign-in (R39, H2); the profile photo stays, in a file bucket (R40); a playing piece with more shapes to pick from (R51); search results in two groups, the library's games and then the catalog (R2); no add button on the view of everyone's games (R3); the commonest filters first, the rest folded away, and sorting apart from filtering (R11, R12); the game's page and the copy's page stay separate and link to each other (R8, R14); a pick-up day when confirming a handoff (R18, D5). Claude added a return day to match (R19), which Hector hasn't confirmed. Neon Auth's providers and Neon Object Storage were read in Neon's docs. Still open: what the two library views are called, and where each action lives, since the inbox, the loans tab and the shelf show the same things. **Next:** Hector's call on those two, then the redraw.
