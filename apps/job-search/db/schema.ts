@@ -418,8 +418,7 @@ export const jobPeople = pgTable(
 
 // Weekly reviews (R10, U9): a week's counts and targets as they stood at its first save, fixed from
 // then on, and its one change. One per owner and week, keyed by its Monday. The week's milestone
-// moved to its plan (week_plans, U20): 0015 copied it there, and the milestone column, out of this
-// schema and unread, waits for the migration that drops it.
+// moved to its plan (week_plans, U20): 0015 copied it there, and 0016 dropped the review's column.
 export const weeklyReviews = pgTable(
   "weekly_reviews",
   {

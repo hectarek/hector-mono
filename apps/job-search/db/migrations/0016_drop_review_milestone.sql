@@ -1,0 +1,1 @@
+ALTER TABLE "weekly_reviews" DROP COLUMN "milestone";
