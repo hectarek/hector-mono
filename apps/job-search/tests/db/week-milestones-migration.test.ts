@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ANOTHER_OWNER, OWNER } from "@/tests/_support/app";
 import { resetDatabase, sql } from "@/tests/_support/database";
 
 // 0015 (U20): each week's milestone moves from its review to the week's plan. The test database
 // ran it while empty, so the test runs its SQL again over reviews as the code before it wrote them.
+// 0016 dropped the column it reads, so the test puts it back for its own run and drops it after.
 const MIGRATION = await Bun.file(
   `${import.meta.dir}/../../db/migrations/0015_week_milestones.sql`,
 ).text();
@@ -15,7 +16,11 @@ const aReview = (ownerId: string, week: string, milestone: string | null) =>
   );
 
 describe("0015, a review's milestone as its week's plan [postgres]", () => {
-  beforeEach(resetDatabase);
+  beforeEach(async () => {
+    await resetDatabase();
+    await sql("alter table weekly_reviews add column milestone text");
+  });
+  afterEach(() => sql("alter table weekly_reviews drop column milestone"));
 
   it("copies each week's milestone to its plan with the review's times, and leaves a blank one behind", async () => {
     await aReview(OWNER, "2026-10-26", "Ship the fictional widget");
