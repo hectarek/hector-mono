@@ -15,10 +15,10 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 | | |
 |---|---|
-| Phase | Design: the look is chosen (D13), every screen is drawn, and Hector's first review is in |
-| Next | Settle where each action lives and what the two library views are called, then redraw the screens that changed and draw the ones still missing |
+| Phase | Design: the look is chosen (D13) and where things live is settled (D14); the screens are being redrawn to match |
+| Next | Hector's review of the redrawn screens, and his pick of piece shapes (R51) |
 | Then | The design system the build uses, and the technical half once the recipes performance review is done |
-| Waiting on Hector | H1 (BoardGameGeek registration), H2 (sign-in providers), and his call on the two open questions |
+| Waiting on Hector | H1 (BoardGameGeek registration), H2 (sign-in providers), and his review of the redraw |
 | Updated | 2026-11-11 |
 
 ---
@@ -76,6 +76,8 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 - **Pass-along:** a borrower handing a copy straight to the next friend in line, rather than back to its owner.
 - **Game night:** an event with a host, a time, a place, a capacity and a list of games.
 - **Suggestion:** a member's request to add a game the catalog doesn't have.
+
+On screen the app says it differently, in Hector's words of 2026-11-11: a member's shelf is their library ("My library", "Sam's library"), and the library across friends is the view called "All friends", which includes the member's own games. The screens never say "shelf". This spec keeps its own words above, so its requirements read the same as when they were agreed.
 
 ### Requirements
 
@@ -139,7 +141,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 
 - R25. The borrower is reminded two days before a loan is due and on the morning it's due. The owner is told on the day it's due back. Once it's overdue, both are told, and again every three days until it's returned. *asked*
 - R26. Members are also told about: a request on their copy, the answer to their request, a friend request, someone joining the line for a game they have, their turn coming up in a line, a pass-along to confirm, a request for more time and its answer, a return waiting for them to confirm, a game-night invite, a change to or cancellation of a night they're going to, a place opening for them on a waitlist, the morning of a night they're going to, and the outcome of their suggestion. *gap*
-- R27. Every notice lands in an inbox in the app, with an unread count. *gap* (Revised 2026-11-10, Hector on Q7: in the app only for the first release; push comes in a later phase, D9.)
+- R27. Every notice lands in an inbox in the app, with an unread count. The inbox lists what happened and links to it; what waits on a member is also counted on the tab it lives in (D14). *gap* (Revised 2026-11-10, Hector on Q7: in the app only for the first release; push comes in a later phase, D9. Revised 2026-11-11, Hector on the screens: the inbox links and doesn't act.)
 - R28. Each member picks which kinds of notice they get. Loan reminders are on by default. *gap*
 
 **Game nights**
@@ -197,6 +199,7 @@ The app makes friends' shelves visible, makes a loan a record with a due date an
 - D11. **Games added by hand match BGG's.** A game BGG doesn't list, such as a card game it lacks, has the same fields as a BGG game, with no exceptions, and is marked as ours, so the weekly refresh leaves it alone. If BGG lists it later, the admin merges ours into BGG's and its copies move over. (Hector, 2026-11-10, on Q11)
 - D12. **Light mode only.** The app has one theme, a light one, and ignores the phone's dark setting. Why: none of the first round's dark versions worked for Hector, and the game box look is printed cardboard, which reads as light. (Hector, 2026-11-10, on the first style tiles)
 - D13. **The look is Punchboard.** The inside of a game box: kraft and chipboard, navy ink, stencilled labels, rubber stamps and dashed die-cut edges. A stamp is a status, and a dashed edge marks something die-cut, a thing you can pick up. Color comes from game pieces, and each kind has one job on every screen: a pawn is a person, dice are a player count or a suggestion, a punch token is a copy, and a track with the borrower's pawn on it is the days on a loan. Why: of the eight style tiles it read most like a real board game, and the stamps and dashed edges were what people pointed to. One job per piece keeps the theme carrying information, not sitting on top of it. (Hector, 2026-11-10, on the style tiles)
+- D14. **Each thing has one home, and it's changed only there.** A game, a copy, a loan, a game night and a friend each have a page, and that page is the only place its buttons live. Lists, cards and the inbox show a thing's state and open its page. The app has four tabs (Library, Nights, Loans, Friends), each showing a count of what waits on the member there. The inbox opens from a bell beside the member's piece, lists what happened and links to it, and has no buttons of its own. Why: in the first screens one borrow request showed in four places with a button in two, and Hector couldn't tell where he was meant to act. The other choices were to make the inbox the one to-do list, which leaves requests visible on the loans tab that can't be answered there, or to add a home tab, which repeats things on purpose. A later push notification can open the same page. (Hector, 2026-11-11, on the screens)
 
 ### Key flows
 
@@ -330,3 +333,4 @@ For the session that writes the technical half, once the recipes performance rev
 - **2026-11-10:** Hector's take on the first style tiles: Box lid and Punchboard, leaning Punchboard, and light mode only (D12, R43 revised). **Next:** round two of the style tiles, around those two.
 - **2026-11-10:** the look is chosen: Punchboard, with game pieces that each do one job (D13). It came out of eight style tiles, then a draft with its controls, its pieces and four phone screens, which Hector approved with no changes. He asked for every screen to be drawn before any code, so the layout can be judged first: 51 screens across getting in, the library, loans, game nights, friends, the inbox and admin, each tied to the requirements it covers. **Next:** Hector's review of the screens; what he changes there comes back into the requirements.
 - **2026-11-11:** Hector's review of the 51 screens, checked against the requirements. Taken: Google and Apple sign-in (R39, H2); the profile photo stays, in a file bucket (R40); a playing piece with more shapes to pick from (R51); search results in two groups, the library's games and then the catalog (R2); no add button on the view of everyone's games (R3); the commonest filters first, the rest folded away, and sorting apart from filtering (R11, R12); the game's page and the copy's page stay separate and link to each other (R8, R14); a pick-up day when confirming a handoff (R18, D5). Claude added a return day to match (R19), which Hector hasn't confirmed. Neon Auth's providers and Neon Object Storage were read in Neon's docs. Still open: what the two library views are called, and where each action lives, since the inbox, the loans tab and the shelf show the same things. **Next:** Hector's call on those two, then the redraw.
+- **2026-11-11:** Hector's call: each thing has one home (D14), so four tabs with counts and the inbox behind a bell. The two library views take his names, "All friends" and "My library", with the member's own games in the first; the spec keeps its own words and notes the screen's under Words. The screens are being redrawn to match, with the 14 that were missing: search in two groups, a game the member owns, sort, the owner's side of a more-time request, changing a due date, calling a game back, inviting to a night, cancelling one, past nights, a date picker and four admin pages. Five piece shapes are drawn for his pick (R51). **Next:** his review of the redraw, and his pick of piece shapes.
