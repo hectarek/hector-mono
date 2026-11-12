@@ -59,6 +59,7 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | C7 | A game I lent | R19, R20, R21 |
 | C14 | Change the due date | R20 |
 | C15 | Call it back | R20 |
+| C18 | After calling it back | R20, R52 |
 | C8 | Confirm it's back, and when | R19 |
 | C9 | Record a loan | R17 |
 | C10 | Join the line | R24 |
@@ -81,6 +82,7 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | D10 | Invite people | R30 |
 | D14 | A night's link, signed out | R30, R36 |
 | D11 | Cancel a night | R34 |
+| D15 | After cancelling | R34, R52 |
 | D8 | What should we play? | R37 |
 | D9 | Split into tables | R46 |
 | D12 | Past game nights | R33 |
@@ -125,11 +127,13 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 |---|---|---|
 | X1 | Pick a date (the sheet every date choice opens) | R16, R20, R29 |
 | X2 | What happens next, and when it goes wrong: the patterns in the tables below | |
+| Y1 | Covers: with box art and without, while loading and when it fails, and where the source's credit goes | R1 |
+| Y2 | The home-screen icon, the name and the link preview, as options to pick from | R43 |
 | W0 to W4 | Wider screens: the rules, the library on a laptop and a tablet, a game's page, a sheet as a dialog | R43 |
 
 ## Rules every screen follows
 
-These came from Hector's reviews (D13, D14) and from a usability audit of all 65 first screens on 2026-11-11.
+These came from Hector's reviews (D13, D14) and from a usability audit of all 65 first screens on 2026-11-11. The look itself, with its tokens and components, is a design system kept beside the canvas.
 
 1. **Each thing has one home (D14).** A game, a copy, a loan, a game night and a friend each have a page, and that page is the only place its buttons live. Lists, cards and the inbox show a thing's state and open its page.
 2. **One main action per screen.** It is the one filled navy button. Red is only for an action that loses something. Saying no to a request is an ordinary button.
@@ -167,7 +171,7 @@ Proposed on 2026-11-11 from the audit. Hector agreed the rules behind them on 20
 | Ask for more time | The borrower's page reads "You asked for 1 more week · Sam hasn't answered". The owner's page leads with the request and counts on their tab |
 | Answer a request for more time | The due date changes or stays, and the borrower is told either way |
 | Change the due date | The track and the due line change, and the borrower is told |
-| Call a game back | The owner's page reads "Called back today", and the message offers "Text Jo too", which opens the phone's share sheet with a ready message (R52). The borrower's page leads with "Sam wants it back now". Any pass-along ends (R20) |
+| Call a game back | The owner's page reads "Called back today", and the message offers "Text Jo too", which opens the phone's share sheet with a ready message (R52). The borrower's page leads with "Sam wants it back now". Any pass-along ends, and a waiting request for more time is closed (R20) |
 | "I gave it to Jo", passing a game along | The giver's page reads "Waiting for Jo to confirm", with "I still have it" to take it back. The loan stays the giver's until Jo confirms |
 | The next person confirms a pass-along | The giver's loan ends, the new one starts for the same period (R48), and the owner is told who has the game |
 | Join a line | On the game's page that copy reads "2nd in line", with "Leave the line". Loans lists it under "In line" |
