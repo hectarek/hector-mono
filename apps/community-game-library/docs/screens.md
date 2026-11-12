@@ -253,8 +253,8 @@ Proposed on 2026-11-11 from the audit. Hector agreed the rules behind them on 20
 |---|---|---|
 | The owner to answer a request | You asked | The borrower can withdraw |
 | The borrower to confirm the pick-up | Priya hasn't picked it up yet | The owner can tap "Priya has it" and give the day, or cancel the loan |
-| The owner to confirm a return | Waiting for Sam to confirm | The owner is reminded. The loan can't run overdue once the borrower has given the day (R19) |
-| The next person to confirm a pass-along | Waiting for Jo to confirm | The giver can tap "I still have it". The owner can call the game back |
+| The owner to confirm a return | Waiting for Sam to confirm | The owner is reminded. The loan can't run overdue once the borrower has given the day, and a week later it closes as returned on that day, as if the owner had said yes (R19, D15) |
+| The next person to confirm a pass-along | Waiting for Jo to confirm | The giver can tap "I still have it". The owner can call the game back. The giver's loan can't run overdue meanwhile (D15) |
 | The owner to answer a request for more time | You asked for 1 more week | The due date stays as it was |
 | An invited person to answer | Invited | The host sees them under "No answer yet" |
 | The admin to answer a suggestion | Waiting on the admin | Nothing |
