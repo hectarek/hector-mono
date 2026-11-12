@@ -117,7 +117,6 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | G3 | Add a game by hand | R1, R5 |
 | G4 | A game's record, and its video | R5, R7 |
 | G5 | Find a game to edit | R5 |
-| G6 | Merge a hand-added game into BGG's | R5 |
 | G7 | Answered suggestions | R4 |
 | G8 | Remove an account | R41 |
 
@@ -148,6 +147,7 @@ These came from Hector's reviews (D13, D14) and from a usability audit of all 65
 11. **Back goes where the person came from.**
 12. **What looks tappable is.** A row with an arrow opens a page. Facts are plain text. A chip is only ever a filter.
 13. **A title is never cut short.** It wraps to two lines, and a stamp that no longer fits drops under it.
+14. **Show only what a game has.** Every catalog value but the title may be missing. A line, a fact, an inked die or a filter appears only when there's a value for it; the drawings show games that have every value.
 
 ## States that weren't drawn
 
@@ -204,7 +204,6 @@ Proposed on 2026-11-11 from the audit. Hector agreed the rules behind them on 20
 | Take someone out of a line | Take Ben out of the line? | He's told. A note is optional. | Remove Ben · Keep him |
 | Take someone off a waitlist | Take Dev off the waitlist? | Dev is told. | Remove Dev · Keep Dev |
 | Make a new friend link, or a new link for a night | Make a new link? | The link you already shared stops working. | Make a new link · Keep this one |
-| Merge a hand-added game into BoardGameGeek's | Merge Lantern Tag into BoardGameGeek's? | Our details are replaced by BoardGameGeek's, and its copies move over. This can't be undone. | Merge and remove ours · Keep both |
 | The admin removes an account | Remove Dev's account? | Dev can't sign in again. Their games disappear from everyone's library. This can't be undone. | Remove Dev's account · Keep it |
 | Leave a form with text typed | Leave without saving? | | Leave · Keep editing |
 

@@ -100,7 +100,7 @@ Written before Hector's direction above, and kept as an option only. No sourcing
 
 ## What it would change in the spec
 
-Proposed on the assumption of that direction, so still undecided. Nothing in build-plan.md has been changed for these.
+Proposed on the assumption of that direction. R1, R5 and R11 have since been settled by the data model ([data-model.md](data-model.md), 2026-11-12), which records no source; the rest stays open with the source.
 
 - **D7** (the catalog is our own copy of BGG's): names from the CSV plus details on demand, not a full copy filled before launch. The first release must work with no BGG access at all.
 - **R1** (what a game holds): only the title and the player range are required.

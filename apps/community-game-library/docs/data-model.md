@@ -1,26 +1,26 @@
 # Community Game Library: data model
 
-Updated 2026-11-12. Proposed by Claude and revised after Hector's review of the first draft; he hasn't confirmed this version.
+Updated 2026-11-12. Hector confirmed it on 2026-11-12.
 
 The catalog's tables: games, the games users own, and suggestions for games the catalog lacks. They hold only the values the drawn screens use. Where each value comes from is not decided; the findings are in [catalog-data.md](catalog-data.md). Users' settings, friends, loans, game nights and notices come later, under the same naming rules. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s, and screen codes such as B5 are the design canvas's ([screens.md](screens.md)).
 
 ## Naming rules
 
-These follow the recipes app's schema (`apps/hectors-recipes/db/schema.ts`), which this app copies. Its spec writes down only rule 7; the rest are read from its tables. Every table here, and every table added later, keeps them.
+These are the conventions a professional Postgres schema commonly follows; the recipes app's schema follows them too. Every table here, and every table added later, keeps them.
 
-1. A table's name is plural and snake_case. A table of things that belong to another is named for the owner, singular, then the things, plural, as recipes' `recipe_ingredients` and `space_members` are: `user_games`, `user_game_expansions`, `game_suggestions`.
+1. A table's name is plural and snake_case. A table of things that belong to another is named for the owner, singular, then the things, plural: `user_games`, `user_game_expansions`, `game_suggestions`.
 2. A table that holds things has an `id` (uuid), `created_at` and `updated_at` (timestamptz, set by the database). A table that only pairs two things is keyed by the pair.
-3. A foreign key is the table's name, singular, plus `_id`: `game_id`, `user_game_id`. When a table points at its own rows, the role goes first, as recipes' `copied_from_recipe_id` does: `base_game_id`.
-4. A member is a user, as in recipes. Whose row it is goes in `user_id`, and who made it in `created_by`; both hold the user's id from Neon Auth.
-5. A column's name is singular unless it holds a list, and a list is a text array, as recipes' `tags` is: `designers`, `publishers`, `categories`. A unit keeps its plural, as recipes' `time_minutes` does: `min_players`.
-6. A link ends in `_url` and is named for what it points at, as recipes' `image_url`, `video_url` and `source_url` are.
-7. A value from a fixed set is text, typed as a union and held to it by a check. Its values are lowercase, hyphenated and readable on their own (`'base-game'`, `'like-new'`, `'already-here'`), as recipes' spec asks. The column that says what sort of row it is is `type`, as on recipes' `spaces`.
-8. A yes-or-no is a plain word with no `is_`, as recipes' `cooked`, `checked` and `optional` are: `lendable`, `pass_along`.
+3. A foreign key is the table's name, singular, plus `_id`: `game_id`, `user_game_id`. When a table points at its own rows, the role goes first: `base_game_id`.
+4. A member is a user. Whose row it is goes in `user_id`, and who made it in `created_by`; both hold the user's id from Neon Auth.
+5. A column's name is singular unless it holds a list, and a list is an array: `designers`, `publishers`, `categories`, `best_players`. A unit keeps its plural: `min_players`, `max_minutes`.
+6. A link ends in `_url` and is named for what it points at: `image_url`, `video_url`, `source_url`.
+7. A value from a fixed set is text, typed as a union and held to it by a check. Its values are lowercase, hyphenated and readable on their own (`'base-game'`, `'like-new'`, `'already-here'`). The column that says what sort of row it is is `type`.
+8. A yes-or-no is a plain word with no `is_`: `lendable`, `pass_along`.
 9. When something happened is `<verb>_at`, and who did it `<verb>_by`: `answered_at`, `created_by`.
 10. A free-text note is named for what it's about and ends in `_note`: `condition_note`, `decline_note`.
-11. A range is `min_` and `max_` before its unit: `min_players`, `max_minutes`.
-12. Each value lives in one place. A history table is kept only when something reads the history, as the job search app's `job_status_changes` feeds its counts.
-13. No column belongs to an outside data source until a source is chosen. Its id comes with it.
+11. A lower or upper bound is `min_` or `max_` before what it measures: `min_players`, `max_minutes`, `min_age`.
+12. Each value lives in one place. A history table is kept only when something reads the history.
+13. No column holds an outside source's own id until a source is chosen; the id comes with the source. A value any source could fill, such as `popularity`, is fine.
 
 ## games
 
@@ -36,17 +36,20 @@ One row per game or expansion.
 | `publishers` | text[] | no | Search rows (the first), the game's page | R1, R2 |
 | `designers` | text[] | no | The game's page ("designed by …") | R1 |
 | `min_players`, `max_players` | integer | no | Rows, the game's page, the Players filter, What should we play? | R1, R11, R37 |
+| `best_players` | integer[] | no | The game's page ("best at 4"), the Best at side of the Players filter, What should we play? | R1, R11, R37 |
 | `min_minutes`, `max_minutes` | integer | no | Rows, the game's page, the Play time filter, What should we play? | R1, R11, R37 |
+| `min_age` | integer | no | The game's page ("Age 10+"), the folded Minimum age filter | R1, R11 |
 | `complexity` | text: `'light' \| 'medium' \| 'heavy'` | no | The game's page, the folded Complexity filter, What should we play? | R1, R11, R37 |
 | `categories` | text[] | no | The game's page, the folded Category filter | R1, R11 |
 | `description` | text | no | The game's page (About) | R1, R14 |
 | `image_url` | text | no | Everywhere a cover shows; the drawn token when it's empty | R1 |
 | `video_url` | text | no | The game's page (How to play); the admin's record (G4) | R7 |
+| `popularity` | integer | no | Not shown. Among close matches in search, more popular games come first | R2 |
 | `created_at`, `updated_at` | timestamptz | yes | | |
 
 A check keeps `base_game_id` set exactly when `type` is `'expansion'`.
 
-Players and play time aren't required, since a game can be known by its title before its details are. Rows, filters and suggestions all use them, so a game in someone's library should have them.
+Only `type` and `title` are required, since a game can be known by its title before its details are. A screen shows a value only when the game has it: no line, fact, inked die or filter appears for a value that's missing (Hector, 2026-11-12). Rows, filters and suggestions lean on players and play time, so a game in someone's library should have those.
 
 Credits for outside data are shown once per source, at the foot of a game's page and of search results, and on About the catalog (Y1). Which credit shows is settled with the source.
 
@@ -102,44 +105,18 @@ A user's suggestion of a game that search didn't find (R4, B9, G2).
 
 `'already-here'` is G2's answer "It's already here": the user is pointed to the game in the catalog and it lands in their library, as with `'added'`. It's its own value because the admin added nothing, so Answered suggestions (G7) shows it as "Already here", not as declined.
 
-## Changed after Hector's review
+## Not in the model
 
-Hector reviewed the first draft on 2026-11-12. His main point was that its names followed no pattern; the rules above are the answer, and every name below follows them.
+Hector reviewed the first draft on 2026-11-12, asked for names that follow one pattern, and confirmed this version.
 
-**Removed**
-
-| What | Why | What it changes on the screens and in the spec |
+| What | Why | On the screens |
 |---|---|---|
-| `best_players` | Hector: not needed | "Best at 4" leaves the game's page (B5, B11) and the Players filter (B2); the dice stop inking a best count; What should we play? (D8) ranks by players and time alone. R11, R14 and R37 lose best counts |
-| `min_age` | Hector: not needed | "Age 10+" leaves B5 and B11, the Minimum age filter leaves B2, and the field leaves the admin's screens (G3, G4). R1 and R11 lose it |
-| `bgg_id` | Hector: not needed while the source is open (rule 13) | The "Ours" stamp (G5), merging a game into BoardGameGeek's (G6), the record's Source group (G4) and "Search BoardGameGeek now" (G2) wait for a source |
-| `popularity` | Rule 13: it came from BoardGameGeek's list | Catalog results in search are ordered by how well the title matches (R2) |
-| `game_changes` | Rule 12: the game's row is the one source of truth, nothing reads the history, and there is one admin | The admin's record (G4) loses its Changes list and "Corrected · was 45 min" with "Put it back". R5 drops "every change records who made it" |
-| `answered_by` | One admin answers every suggestion | None |
-| `description_credit`, `cover_credit` | Credits are per source (above) | None |
-
-**Added**: `video_url`, the how-to-play video, which Hector asked for as an easy optional field. R7 had deferred the video to a later phase; it comes into the first release.
-
-**Renamed**
-
-| Was | Now | Rule |
-|---|---|---|
-| `kind` | `type` | 7 |
-| `cover_url` | `image_url` | 6 |
-| `copies`, `copy_expansions` | `user_games`, `user_game_expansions` | 1 |
-| `owner_id` | `user_id` | 4 |
-| `publisher`, `designers` (text) | `publishers`, `designers` (text[]) | 5 |
-| `missing_parts` | `condition_note` | 10 |
-| `lends_it`, `friends_can_pass_along` | `lendable`, `pass_along` | 8 |
-| `added_at` | `created_at` | 2 |
-| `suggested_by` | `created_by` | 4, 9 |
-| `photo_url`, `link` | `image_url`, `source_url` | 6 |
-| `answer` | `decline_note` | 10 |
-| `expansion_id` | `game_id` | 3 |
-
-**Still left out of the first release**, as the first draft proposed: mechanics, other names, complexity as a number (the word instead), a second image size, and ratings.
-
-**Waiting on Hector**
-
-- `base_game_id` or `game_id`. Hector asked for `game_id`. This draft keeps `base_game_id` under rule 3: on `games`, a column called `game_id` reads as the row's own id, and it would mean something other than `game_id` on `user_games` and `user_game_expansions`. Recipes names its own self-reference `copied_from_recipe_id` for the same reason.
-- Dropping `popularity`, which this draft does under rule 13.
+| An outside source's id (`bgg_id`) | No source is chosen yet (rule 13) | No "Ours" stamp (G5), no merging a game into a source's record (G6, out of the first release), no Source group on the record (G4), and no searching a source from a suggestion (G2), until a source is chosen |
+| A history of changes (`game_changes`) | The game's row is the one source of truth (rule 12), and there is one admin | The admin's record (G4) shows the current details only |
+| Who answered a suggestion | One admin answers every suggestion | None |
+| A credit per game | Credits are per source (above) | None |
+| Mechanics | Left out of the first release | No mechanics on the game's page or in the filter |
+| Other names | Left out of the first release | Search matches the title |
+| Complexity as a number | Kept as a word, light, medium or heavy | "Complexity: medium" on the game's page |
+| A second image size | One address, sized by the app | None |
+| Ratings and ranks | Not used; `popularity` orders search | None |
