@@ -67,7 +67,10 @@ describeEachBackend("the weekly review", () => {
       HECTOR,
       updateSettingsSchema.parse({
         targets,
-        pendingCap: current.pendingCap,
+        payFloor: current.payFloor,
+        seasonStart: null,
+        seasonFinish: null,
+        checkpoints: [],
         updatedAt: current.updatedAt?.toISOString() ?? null,
       }),
     );
@@ -92,6 +95,7 @@ describeEachBackend("the weekly review", () => {
         practiceSessions: null,
         screensReached: null,
       },
+      plan: null,
       review: null,
       previous: LAST_WEEK,
       next: null,
@@ -108,7 +112,6 @@ describeEachBackend("the weekly review", () => {
 
     const saved = await save({
       week: LAST_WEEK,
-      milestone: "Shipped the fictional widget",
       change: "Send messages earlier in the week",
     });
     await sent("2026-10-21");
@@ -117,7 +120,6 @@ describeEachBackend("the weekly review", () => {
       week: LAST_WEEK,
       counts: { messagesSent: 1 },
       targets: TARGETS,
-      milestone: "Shipped the fictional widget",
       change: "Send messages earlier in the week",
       author: "owner",
     });
@@ -139,8 +141,8 @@ describeEachBackend("the weekly review", () => {
     ).toBe(3);
   });
 
-  it("changes only the milestone and the change later, against the updatedAt read, and refuses a stale one", async () => {
-    const first = await save({ week: THIS_WEEK, milestone: "Draft" });
+  it("changes only the change later, against the updatedAt read, and refuses a stale one", async () => {
+    const first = await save({ week: THIS_WEEK, change: "Draft" });
     await sent("2026-10-28");
 
     const second = await save({
@@ -152,12 +154,11 @@ describeEachBackend("the weekly review", () => {
     expect(second).toMatchObject({
       id: first.id,
       counts: first.counts,
-      milestone: "Draft",
       change: "Fewer tabs open",
     });
     const refused = await save({
       week: THIS_WEEK,
-      milestone: "Late",
+      change: "Late",
       updatedAt: first.updatedAt.toISOString(),
     }).catch((error: unknown) => error);
     expect(refused).toBeInstanceOf(ConflictError);
@@ -170,7 +171,7 @@ describeEachBackend("the weekly review", () => {
 
   it("saves Claude's review as Claude's, and logs it", async () => {
     const saved = await save(
-      { week: LAST_WEEK, milestone: "Claude's summary" },
+      { week: LAST_WEEK, change: "Claude's summary" },
       CLAUDE,
     );
 

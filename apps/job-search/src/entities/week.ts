@@ -37,6 +37,11 @@ export function addDays(date: string, days: number): string {
   return toIso(result);
 }
 
+// How many days from one date to another: negative when the second comes first.
+export function daysBetween(from: string, to: string): number {
+  return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / 86_400_000);
+}
+
 // Weeks start on Monday.
 export function mondayOf(date: string): string {
   const day = toUtc(date).getUTCDay();

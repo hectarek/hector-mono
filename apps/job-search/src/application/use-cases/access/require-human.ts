@@ -8,12 +8,13 @@ import type {
 } from "@/src/entities/models/activity.model";
 
 // What only Hector may do (R21): Claude's notes only append, so editing one is his too, and taking
-// a contact off a job is a removal, as a delete is. The account endpoints, also his alone, are kept
-// to his session by the auth route.
+// a contact off a job is a removal, as a delete is. Moving an archived job back to an open status
+// (reopen) and changing an archived job's posting link (relink) would bring back a posting he
+// passed on (R21 as revised 2026-11-10). The account endpoints, also his alone, are kept to his
+// session by the auth route.
 type HumanOnlyOperation =
-  | "accept"
-  | "dismiss"
   | "reopen"
+  | "relink"
   | "delete"
   | "remove-contact"
   | "edit-note"

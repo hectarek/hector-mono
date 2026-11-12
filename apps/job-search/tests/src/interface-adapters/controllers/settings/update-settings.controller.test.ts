@@ -24,20 +24,38 @@ const setup = () => {
   };
 };
 
+// The form's three checkpoint rows, the second left blank.
+const CHECKPOINT_ROWS = [
+  { on: "2026-12-18", name: "Five screens" },
+  { on: "", name: "" },
+  { on: "2026-11-13", name: "Portfolio live" },
+];
+
 describe("updateSettingsController", () => {
-  it("hands the use case who's saving and the settings as read, the time read as a date", async () => {
+  it("hands the use case who's saving and the settings as read, the time read as a date and the season as one", async () => {
     const { useCase, controller } = setup();
     await controller(
       {
         targets: TARGETS,
-        pendingCap: 8,
+        payFloor: 123_456,
+        seasonStart: "2026-11-02",
+        seasonFinish: "2027-02-01",
+        checkpoints: CHECKPOINT_ROWS,
         updatedAt: "2026-10-26T15:00:00.123Z",
       },
       HECTOR,
     );
     expect(useCase).toHaveBeenCalledWith(HECTOR, {
       targets: TARGETS,
-      pendingCap: 8,
+      payFloor: 123_456,
+      season: {
+        start: "2026-11-02",
+        finish: "2027-02-01",
+        checkpoints: [
+          { on: "2026-11-13", name: "Portfolio live" },
+          { on: "2026-12-18", name: "Five screens" },
+        ],
+      },
       updatedAt: new Date("2026-10-26T15:00:00.123Z"),
     });
   });
@@ -45,17 +63,34 @@ describe("updateSettingsController", () => {
   it.each([
     {
       label: "a target below 0",
-      input: { targets: { ...TARGETS, applications: -1 }, pendingCap: 8 },
+      input: { targets: { ...TARGETS, applications: -1 }, payFloor: 123_456 },
     },
-    { label: "a queue cap of 0", input: { targets: TARGETS, pendingCap: 0 } },
+    { label: "a pay floor below 0", input: { targets: TARGETS, payFloor: -1 } },
     {
       label: "a target missing",
-      input: { targets: { messagesSent: 1 }, pendingCap: 8 },
+      input: { targets: { messagesSent: 1 }, payFloor: 123_456 },
+    },
+    {
+      label: "a season's start with no finish",
+      input: {
+        targets: TARGETS,
+        payFloor: 123_456,
+        seasonStart: "2026-11-02",
+      },
     },
   ])("rejects $label before the use case runs", async ({ input }) => {
     const { useCase, controller } = setup();
     await expect(
-      controller({ ...input, updatedAt: null }, HECTOR),
+      controller(
+        {
+          seasonStart: null,
+          seasonFinish: null,
+          checkpoints: [],
+          ...input,
+          updatedAt: null,
+        },
+        HECTOR,
+      ),
     ).rejects.toBeInstanceOf(InputParseError);
     expect(useCase).not.toHaveBeenCalled();
   });

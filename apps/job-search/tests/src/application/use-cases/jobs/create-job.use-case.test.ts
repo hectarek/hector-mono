@@ -3,9 +3,7 @@ import {
   DuplicateError,
   InputParseError,
   NotFoundError,
-  QueueFullError,
 } from "@/src/entities/errors/common";
-import { DEFAULT_SETTINGS } from "@/src/entities/models/settings.model";
 import { addDays, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import {
   ANOTHER_OWNER,
@@ -19,7 +17,7 @@ import {
   HECTOR,
   jobFixtures,
   newPosting,
-  watchQueueReads,
+  watchPostingReads,
 } from "@/tests/_support/jobs";
 
 describeEachBackend("createJob", () => {
@@ -33,47 +31,34 @@ describeEachBackend("createJob", () => {
     acme = await jobs.company("Acme Inc");
   });
 
-  const queue = async () =>
+  // The ranked list's jobs, by id (R27).
+  const toApply = async () =>
     (
-      await app.findJobs(OWNER, {
-        reviewState: "pending",
-        limit: 20,
-        offset: 0,
-      })
-    ).jobs.map((job) => job.id);
-  const pipeline = async () =>
-    (
-      await app.findJobs(OWNER, {
-        reviewState: "accepted",
-        limit: 20,
-        offset: 0,
-      })
+      await app.findJobs(OWNER, { status: "to-apply", limit: 50, offset: 0 })
     ).jobs.map((job) => job.id);
 
-  // Sets Hector's cap on pending proposals.
-  const capAt = (pendingCap: number) =>
-    app.updateSettings(HECTOR, {
-      targets: DEFAULT_SETTINGS.targets,
-      pendingCap,
-      updatedAt: null,
-    });
-
-  it("leaves Claude's proposal pending in the queue, out of the pipeline, with its reason and the source it names", async () => {
-    const proposed = await jobs.propose(acme, {
+  it("puts Claude's job straight on the ranked list, in verify with no next step, with its reason, score, posting date and the source it names", async () => {
+    const added = await jobs.byClaude(acme, {
       level: "senior",
       workMode: "remote",
       payMin: 12_345,
       payMax: 67_890,
+      postedOn: "2026-01-02",
+      score: 8,
       summary: "A fictional posting for a widget engineer.",
     });
 
-    expect(proposed).toMatchObject({
+    expect(added).toMatchObject({
       role: "Widget engineer",
       company: { id: acme, name: "Acme Inc" },
       source: { name: "Widget Jobs" },
       status: "verify",
-      reviewState: "pending",
-      proposalReason: "Matches the target role",
+      reason: "Matches the target role",
+      score: 8,
+      postedOn: "2026-01-02",
+      pinnedAt: null,
+      nextStep: null,
+      nextDate: null,
       level: "senior",
       workMode: "remote",
       payMin: 12_345,
@@ -81,82 +66,69 @@ describeEachBackend("createJob", () => {
       foundOn: todayIn(PLAN_TIME_ZONE),
       appliedOn: null,
     });
-    expect(await queue()).toEqual([proposed.id]);
-    expect(await pipeline()).toEqual([]);
     expect((await app.listSources(OWNER)).map((source) => source.name)).toEqual(
       ["Widget Jobs"],
     );
     const { entries } = await app.listActivity(OWNER, {
-      record: { kind: "job", id: proposed.id },
+      record: { kind: "job", id: added.id },
       limit: 20,
       offset: 0,
     });
     expect(entries).toEqual([
       expect.objectContaining({
         actor: "agent",
-        tool: "propose_job",
+        tool: "add_job",
         action: "created",
       }),
     ]);
   });
 
-  it("accepts a job Hector adds at once, in verify, its posting link optional", async () => {
+  it("puts a job Hector adds on the list the same way, its posting link and reason optional", async () => {
     const added = await jobs.add(acme);
 
     expect(added).toMatchObject({
-      reviewState: "accepted",
       status: "verify",
       postingUrl: null,
-      proposalReason: null,
+      reason: null,
+      score: null,
+      nextStep: null,
+      nextDate: null,
     });
-    expect(await pipeline()).toEqual([added.id]);
+    expect(await toApply()).toEqual([added.id]);
   });
 
-  // R1 as revised 2026-11-07 (the UX plan's UX6): a job never drops out of the loop.
-  it("starts a job Hector adds with no step on checking it's hiring, due that day, so it lands on This week", async () => {
-    const added = await jobs.add(acme);
+  it("dates a step given with no date a week out, for Hector's job and Claude's alike", async () => {
     const today = todayIn(PLAN_TIME_ZONE);
-
-    expect(added).toMatchObject({
-      nextStep: "Verify it's hiring",
-      nextDate: today,
-    });
-    const { due } = await app.getToday(OWNER);
-    expect(due.jobs.map(({ id }) => id)).toContain(added.id);
-  });
-
-  it("dates a step given with no date a week out, for Hector's job and Claude's proposal alike", async () => {
-    const today = todayIn(PLAN_TIME_ZONE);
-    const weekOut = (await jobs.add(acme, { nextStep: "Ask for a referral" }))
-      .nextDate;
-    const proposed = await jobs.propose(acme, {
+    const hectors = await jobs.add(acme, { nextStep: "Ask for a referral" });
+    const claudes = await jobs.byClaude(acme, {
       nextStep: "Read the team page",
     });
 
-    expect(weekOut).toBe(addDays(today, 7));
-    expect(proposed.nextDate).toBe(addDays(today, 7));
+    expect(hectors.nextDate).toBe(addDays(today, 7));
+    expect(claudes.nextDate).toBe(addDays(today, 7));
   });
 
-  it("leaves a proposal with no step without one, since accepting it sets its stage", async () => {
-    const proposed = await jobs.propose(acme);
+  // R20 as revised 2026-11-10: no cap, since the rank orders the list.
+  it("takes as many of Claude's jobs as it finds", async () => {
+    for (let found = 0; found < 11; found++) {
+      await jobs.byClaude(acme);
+    }
 
-    expect(proposed).toMatchObject({ nextStep: null, nextDate: null });
+    expect(await toApply()).toHaveLength(11);
   });
 
-  // AE1.
-  it("refuses a posting a dismissed job holds, tracking aside, with the dismissal's reason, and adds nothing", async () => {
+  // AE1 as revised 2026-11-10.
+  it("refuses a posting a job archived as Not for me holds, tracking aside, naming the archived job, and adds nothing", async () => {
     const posting = "https://www.linkedin.com/jobs/view/4242";
-    const first = await jobs.propose(acme, { postingUrl: posting });
-    await app.reviewProposal(HECTOR, {
+    const first = await jobs.byClaude(acme, { postingUrl: posting });
+    await app.moveJob(HECTOR, {
       id: first.id,
-      updatedAt: first.updatedAt,
-      decision: "dismiss",
-      reason: "not-hiring",
-      note: null,
+      status: "skipped",
+      reason: "Not a fit",
     });
 
     const refusal = await jobs
-      .propose(acme, {
+      .byClaude(acme, {
         postingUrl: `${posting}?refId=abc&trk=public_jobs&utm_source=feed`,
       })
       .catch((err: unknown) => err);
@@ -166,60 +138,38 @@ describeEachBackend("createJob", () => {
       id: first.id,
       role: "Widget engineer",
       company: "Acme Inc",
-      reviewState: "dismissed",
-      dismissReason: "not-hiring",
+      status: "skipped",
     });
     expect((refusal as DuplicateError).message).toBe(
-      "This posting was dismissed (not hiring): Widget engineer at Acme Inc.",
+      "This posting is on an archived job: Widget engineer at Acme Inc.",
     );
-    expect(await queue()).toEqual([]);
+    expect(await toApply()).toEqual([]);
   });
 
-  it("refuses Hector's add of a posting a pending or dismissed proposal holds, naming the job and its review", async () => {
-    const pending = await jobs.propose(acme);
-    const dismissed = await jobs.propose(acme);
-    await app.reviewProposal(HECTOR, {
-      id: dismissed.id,
-      updatedAt: dismissed.updatedAt,
-      decision: "dismiss",
-      reason: "wrong-level",
-      note: null,
+  it("refuses Hector's add of a posting an open job holds, naming it", async () => {
+    const held = await jobs.byClaude(acme);
+
+    const refusal = await jobs
+      .add(acme, { postingUrl: held.postingUrl })
+      .catch((err: unknown) => err);
+
+    expect(refusal).toBeInstanceOf(DuplicateError);
+    expect((refusal as DuplicateError).existing).toMatchObject({
+      id: held.id,
+      status: "verify",
     });
-
-    for (const [held, reviewState] of [
-      [pending, "pending"],
-      [dismissed, "dismissed"],
-    ] as const) {
-      const refusal = await jobs
-        .add(acme, { postingUrl: held.postingUrl })
-        .catch((err: unknown) => err);
-      expect(refusal).toBeInstanceOf(DuplicateError);
-      expect((refusal as DuplicateError).existing).toMatchObject({
-        id: held.id,
-        reviewState,
-      });
-    }
-    expect(await pipeline()).toEqual([]);
+    expect((refusal as DuplicateError).message).toBe(
+      "This posting is already a job: Widget engineer at Acme Inc.",
+    );
+    expect(await toApply()).toEqual([held.id]);
   });
 
-  it("refuses a proposal once the queue holds as many as Hector's cap, and still takes his own adds", async () => {
-    await capAt(1);
-    await jobs.propose(acme);
-
-    const refusal = await jobs.propose(acme).catch((err: unknown) => err);
-    expect(refusal).toBeInstanceOf(QueueFullError);
-    // The answer names the cap, so Claude knows how many wait (U6's review).
-    expect((refusal as QueueFullError).message).toContain("cap of 1:");
-    expect(await queue()).toHaveLength(1);
-    await jobs.add(acme);
-  });
-
-  it("lands one of two proposals of the same posting made at once, and refuses the other as a duplicate", async () => {
+  it("lands one of two adds of the same posting made at once, and refuses the other as a duplicate", async () => {
     const posting = newPosting();
 
     const outcomes = await Promise.allSettled([
-      jobs.propose(acme, { postingUrl: posting }),
-      jobs.propose(acme, { postingUrl: posting }),
+      jobs.byClaude(acme, { postingUrl: posting }),
+      jobs.byClaude(acme, { postingUrl: posting }),
     ]);
 
     expect(outcomes.map((outcome) => outcome.status).sort()).toEqual([
@@ -229,51 +179,36 @@ describeEachBackend("createJob", () => {
     expect(
       outcomes.find((outcome) => outcome.status === "rejected")?.reason,
     ).toBeInstanceOf(DuplicateError);
-    expect(await queue()).toHaveLength(1);
-  });
-
-  it("lands one of two proposals made at once with one slot left, and refuses the other as queue-full", async () => {
-    await capAt(2);
-    await jobs.propose(acme);
-
-    const outcomes = await Promise.allSettled([
-      jobs.propose(acme),
-      jobs.propose(acme),
-    ]);
-
-    expect(
-      outcomes.find((outcome) => outcome.status === "rejected")?.reason,
-    ).toBeInstanceOf(QueueFullError);
-    expect(await queue()).toHaveLength(2);
+    expect(await toApply()).toHaveLength(1);
   });
 
   it("finds the source by name in any case, and can't name another owner's company", async () => {
-    await jobs.propose(acme, { source: "widget jobs" });
+    await jobs.byClaude(acme, { source: "widget jobs" });
     expect(await app.listSources(OWNER)).toHaveLength(1);
 
     const theirs = await jobs.company("Acme Inc", ANOTHER_OWNER);
-    await expect(jobs.propose(theirs)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(jobs.byClaude(theirs)).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  // R20, KTD3: a proposal carries its posting's link, for the duplicate rule, and Claude's reason,
-  // for Hector's review, whatever the entry point (the add-job form included).
+  // R20, KTD3: Claude's job carries its posting's link, for the duplicate rule, and its reason, for
+  // Hector, whatever the entry point (the add-job form included).
   it("refuses Claude's job without a posting link or a reason, and adds nothing", async () => {
     for (const input of [{}, { postingUrl: newPosting() }]) {
       await expect(jobs.add(acme, input, CLAUDE)).rejects.toThrow(
         new InputParseError(
-          "A proposal needs the posting's link and a reason: use propose_job.",
+          "A job Claude adds needs the posting's link and a reason.",
         ),
       );
     }
-    expect(await queue()).toEqual([]);
+    expect(await toApply()).toEqual([]);
   });
 
-  // KTD8: on the database's own connections only the queue's lock keeps two writes apart.
-  it("takes the queue's lock before it looks for a duplicate or counts the queue", async () => {
-    const calls = watchQueueReads(app);
+  // KTD8: on the database's own connections only the posting lock keeps two writes apart.
+  it("takes the posting lock before it looks for a duplicate", async () => {
+    const calls = watchPostingReads(app);
 
-    await jobs.propose(acme);
+    await jobs.byClaude(acme);
 
-    expect(calls).toEqual(["lockQueue", "findByPostingKey", "countPending"]);
+    expect(calls).toEqual(["lockPostings", "findByPostingKey"]);
   });
 });

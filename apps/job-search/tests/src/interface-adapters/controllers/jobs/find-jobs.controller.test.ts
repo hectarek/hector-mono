@@ -19,21 +19,20 @@ const setup = () => {
 };
 
 describe("findJobsController", () => {
-  it("hands the use case the owner's id and the query as read, accepted jobs by default", async () => {
+  it("hands the use case the owner's id and the query as read, a page of 20 by default", async () => {
     const { useCase, controller } = setup();
-    await controller({ status: "open" }, CLAUDE_READING).catch(() => {});
+    await controller({ status: "to-apply" }, CLAUDE_READING).catch(() => {});
     expect(useCase).toHaveBeenCalledWith(OWNER, {
-      status: "open",
-      reviewState: "accepted",
+      status: "to-apply",
       limit: 20,
       offset: 0,
     });
   });
 
-  it("rejects a review state that isn't one before the use case runs", async () => {
+  it("rejects a status that isn't one before the use case runs", async () => {
     const { useCase, controller } = setup();
     await expect(
-      controller({ reviewState: "maybe" }, CLAUDE_READING),
+      controller({ status: "maybe" }, CLAUDE_READING),
     ).rejects.toBeInstanceOf(InputParseError);
     expect(useCase).not.toHaveBeenCalled();
   });

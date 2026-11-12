@@ -1,13 +1,15 @@
 import type { ICompaniesRepository } from "@/src/application/repositories/companies.repository.interface";
 import type { IJobsRepository } from "@/src/application/repositories/jobs.repository.interface";
 import { DuplicateError, NotFoundError } from "@/src/entities/errors/common";
+import { isClosed } from "@/src/entities/job-lifecycle";
 import type { DuplicateJob } from "@/src/entities/models/job.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 // Checks a job's write makes inside its transaction (docs/build-plan.md U6).
 
-// Refuses a posting already on another job, whatever its review (R20, KTD8), naming that job and,
-// when dismissed, why. Take the queue's lock first, so a write started meanwhile waits.
+// Refuses a posting already on another job, archived ones included, so a job Hector passed on
+// stays passed on (R20, KTD8), naming that job and saying when it's archived. Take the posting lock
+// first, so a write started meanwhile waits.
 export async function refuseDuplicate(
   jobsRepository: IJobsRepository,
   ownerId: string,
@@ -25,19 +27,10 @@ export async function refuseDuplicate(
   }
 }
 
-function duplicateMessage({
-  role,
-  company,
-  reviewState,
-  dismissReason,
-}: DuplicateJob): string {
+function duplicateMessage({ role, company, status }: DuplicateJob): string {
   const job = `${role} at ${company}`;
-  if (reviewState === "dismissed") {
-    const why = (dismissReason ?? "other").replaceAll("-", " ");
-    return `This posting was dismissed (${why}): ${job}.`;
-  }
-  return reviewState === "pending"
-    ? `This posting is already proposed: ${job}.`
+  return isClosed(status)
+    ? `This posting is on an archived job: ${job}.`
     : `This posting is already a job: ${job}.`;
 }
 

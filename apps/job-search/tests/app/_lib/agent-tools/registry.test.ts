@@ -19,11 +19,11 @@ import {
 } from "@/src/entities/models/company.model";
 import { logInteractionSchema } from "@/src/entities/models/interaction.model";
 import {
+  addJobSchema,
   closeJobSchema,
   findJobsSchema,
   jobIdSchema,
-  listProposalsSchema,
-  proposeJobSchema,
+  pinJobSchema,
   setJobStatusSchema,
   updateJobSchema,
 } from "@/src/entities/models/job.model";
@@ -48,18 +48,18 @@ import { getTodaySchema } from "@/src/entities/models/today.model";
 import {
   getWeekSchema,
   saveWeeklyReviewSchema,
+  setWeekMilestoneSchema,
 } from "@/src/entities/models/weekly-review.model";
 
-// The entity schema each tool's controller parses its input with. list_proposals declares
-// find_jobs' filters but the review state, which its action sets itself.
+// The entity schema each tool's controller parses its input with.
 const PARSED_WITH: Record<string, z.ZodType> = {
   whoami: whoamiSchema,
   start_session: startSessionSchema,
   get_today: getTodaySchema,
   get_week: getWeekSchema,
+  set_week_milestone: setWeekMilestoneSchema,
   save_weekly_review: saveWeeklyReviewSchema,
   get_settings: getSettingsSchema,
-  list_proposals: listProposalsSchema,
   find_companies: findCompaniesSchema,
   get_company: companyIdSchema,
   save_company: saveCompanySchema,
@@ -68,8 +68,9 @@ const PARSED_WITH: Record<string, z.ZodType> = {
   list_activity: listActivitySchema,
   find_jobs: findJobsSchema,
   get_job: jobIdSchema,
-  propose_job: proposeJobSchema,
+  add_job: addJobSchema,
   update_job: updateJobSchema,
+  pin_job: pinJobSchema,
   set_job_status: setJobStatusSchema,
   close_job: closeJobSchema,
   add_note: addNoteSchema,

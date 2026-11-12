@@ -120,7 +120,7 @@ describeEachBackend("getToday", () => {
   });
 
   // R9 as revised 2026-11-07 (the UX plan's UX6): the steps with no date never show as due.
-  it("counts the open jobs and the people whose next step has no date, and not closed jobs or proposals", async () => {
+  it("counts the open jobs and the people whose next step has no date, and not closed jobs", async () => {
     const open = await jobs.add(companyId, { role: "Open" });
     const closed = await jobs.add(companyId, { role: "Closed" });
     await app.moveJob(HECTOR, {
@@ -128,12 +128,11 @@ describeEachBackend("getToday", () => {
       status: "withdrawn",
       reason: "Took another path",
     });
-    const proposed = await jobs.propose(companyId, { role: "Proposed" });
     const ada = await person({ name: "Ada Example" });
     await person({ name: "Grace Example" });
     // Steps with no date, as an import left some, before the rule.
     await app.repos.transactions.startTransaction(async (tx) => {
-      for (const id of [open.id, closed.id, proposed.id]) {
+      for (const id of [open.id, closed.id]) {
         await app.repos.jobs.update(
           OWNER,
           id,
@@ -178,6 +177,38 @@ describeEachBackend("getToday", () => {
     ]);
   });
 
+  // R9 as revised 2026-11-10 (U20): the week's line counts the whole week's blocks.
+  it("counts the week's Focus blocks done against those planned, a moved one in neither, and no other week's", async () => {
+    const block = (
+      startsAt: string,
+      state: "planned" | "done" | "partial" | "moved",
+    ) => ({
+      startsAt,
+      endsAt: "2026-10-29T03:59:00Z",
+      effort: "practice",
+      title: `${state} ${startsAt}`,
+      state,
+    });
+    await app.addBlocks(
+      HECTOR,
+      addBlocksSchema.parse({
+        blocks: [
+          block("2026-10-26T09:30:00-04:00", "done"),
+          block("2026-10-27T09:30:00-04:00", "partial"),
+          block("2026-10-28T09:30:00-04:00", "moved"),
+          block("2026-10-28T11:00:00-04:00", "planned"),
+          // The Sunday before is last week's.
+          block("2026-10-25T09:30:00-04:00", "done"),
+        ],
+      }),
+    );
+
+    const view = await app.getToday(OWNER);
+
+    expect(view.weekBlocks).toEqual({ done: 1, planned: 3 });
+    expect(view.blocks).toHaveLength(2);
+  });
+
   it("gives each due job its contacts, so its follow-up can name one (the UX plan's UX3)", async () => {
     const job = await jobs.add(companyId, {
       role: "With contacts",
@@ -218,8 +249,27 @@ describeEachBackend("getToday", () => {
     expect(due.jobs.map(({ id }) => id)).toEqual([replied]);
   });
 
-  it("puts Claude's proposals and the conversations that have ended under decisions", async () => {
-    const proposal = await jobs.propose(companyId);
+  // R27: Today shows the top three.
+  it("answers the top three of the ranked list as apply next", async () => {
+    for (const [role, score] of [
+      ["Fourth", 6],
+      ["First", 9],
+      ["Third", 7],
+      ["Second", 8],
+    ] as const) {
+      await jobs.byClaude(companyId, { role, score });
+    }
+
+    const { applyNext } = await app.getToday(OWNER);
+
+    expect(applyNext.map(({ role }) => role)).toEqual([
+      "First",
+      "Second",
+      "Third",
+    ]);
+  });
+
+  it("puts the conversations that have ended under decisions", async () => {
     const contact = await person({ name: "Grace Example" });
     const ended = await log({
       personIds: [contact],
@@ -240,7 +290,6 @@ describeEachBackend("getToday", () => {
 
     const { decisions } = await app.getToday(OWNER);
 
-    expect(decisions.proposals.map(({ id }) => id)).toEqual([proposal.id]);
     expect(decisions.debriefs).toEqual(
       ended.interactions.map((conversation) => ({
         conversation,
@@ -345,15 +394,17 @@ describeEachBackend("getToday", () => {
 
   it("groups Claude's changes into its sessions, newest first, with refused attempts listed", async () => {
     const first = await app.startSession(CLAUDE, { limit: 20 });
-    await jobs.propose(companyId);
+    await jobs.byClaude(companyId);
     const second = await app.startSession(CLAUDE, { limit: 20 });
-    const proposal = await jobs.propose(companyId);
+    const found = await jobs.byClaude(companyId);
+    await app.moveJob(HECTOR, {
+      id: found.id,
+      status: "skipped",
+      reason: "Not a fit",
+    });
+    // Moving it back is Hector's (R21 as revised 2026-11-10).
     await app
-      .reviewProposal(CLAUDE, {
-        id: proposal.id,
-        updatedAt: proposal.updatedAt,
-        decision: "accept",
-      })
+      .moveJob(CLAUDE, { id: found.id, status: "verify" })
       .catch(() => {});
 
     const { claude } = await app.getToday(OWNER);
@@ -364,7 +415,7 @@ describeEachBackend("getToday", () => {
     ]);
     expect(claude[0]?.counts).toEqual([{ kind: "job", changes: 2 }]);
     expect(claude[0]?.listed).toMatchObject([
-      { action: "refused", reason: "accept", record: { kind: "job" } },
+      { action: "refused", reason: "reopen", record: { kind: "job" } },
     ]);
     expect(claude[1]?.counts).toEqual([
       { kind: "lead-source", changes: 1 },
@@ -386,7 +437,7 @@ describeEachBackend("getToday", () => {
       status: "screen",
       on: "2026-10-27",
     });
-    await jobs.propose(theirCompany, {}, { ...theirs, actor: "agent" });
+    await jobs.byClaude(theirCompany, {}, { ...theirs, actor: "agent" });
     const them = (
       await app.addPerson(
         theirs,
@@ -411,7 +462,8 @@ describeEachBackend("getToday", () => {
 
     const view = await app.getToday(OWNER);
 
-    expect(view.decisions).toEqual({ proposals: [], debriefs: [] });
+    expect(view.applyNext).toEqual([]);
+    expect(view.decisions).toEqual({ debriefs: [] });
     expect(view.due).toEqual({ jobs: [], people: [], stale: [], practice: [] });
     expect(view.claude).toEqual([]);
     expect(view.counts).toEqual({
@@ -436,7 +488,10 @@ describeEachBackend("getToday", () => {
           practiceSessions: 6,
           screensReached: 1,
         },
-        pendingCap: 10,
+        payFloor: null,
+        seasonStart: null,
+        seasonFinish: null,
+        checkpoints: [],
         updatedAt: null,
       }),
     );
@@ -447,6 +502,35 @@ describeEachBackend("getToday", () => {
       applications: 3,
       practiceSessions: 6,
       screensReached: 1,
+    });
+  });
+
+  // R9 and R12 as revised 2026-11-10 (U20): the season Today tracks toward.
+  it("answers the search season from Settings, none until Hector sets it", async () => {
+    expect((await app.getToday(OWNER)).season).toBeNull();
+
+    await app.updateSettings(
+      HECTOR,
+      updateSettingsSchema.parse({
+        targets: {
+          messagesSent: null,
+          conversationsHeld: null,
+          applications: null,
+          practiceSessions: null,
+          screensReached: null,
+        },
+        payFloor: null,
+        seasonStart: "2026-10-05",
+        seasonFinish: "2027-01-04",
+        checkpoints: [{ on: "2026-11-16", name: "Five screens" }],
+        updatedAt: null,
+      }),
+    );
+
+    expect((await app.getToday(OWNER)).season).toEqual({
+      start: "2026-10-05",
+      finish: "2027-01-04",
+      checkpoints: [{ on: "2026-11-16", name: "Five screens" }],
     });
   });
 });

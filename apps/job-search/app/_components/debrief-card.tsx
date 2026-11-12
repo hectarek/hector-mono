@@ -29,7 +29,7 @@ const OUTCOMES = {
   ],
 };
 
-// A conversation to debrief on This week (R8, R9): how it ended (held, cancelled or no-show),
+// A conversation to debrief on Today (R8, R9): how it ended (held, cancelled or no-show),
 // with a note, and the person's next step and date if Hector adds them. Saved, the page refreshes
 // without it.
 export function DebriefCard({ debrief }: { debrief: ConversationToDebrief }) {

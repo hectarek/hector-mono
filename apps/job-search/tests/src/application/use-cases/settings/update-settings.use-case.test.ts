@@ -26,13 +26,24 @@ const TARGETS = {
   screensReached: null,
 };
 
+// A fictional season, its checkpoints in date order.
+const SEASON = {
+  start: "2026-11-02",
+  finish: "2027-02-01",
+  checkpoints: [
+    { on: "2026-11-13", name: "Portfolio live" },
+    { on: "2026-12-18", name: "Five screens" },
+  ],
+};
+
 // The settings form's save, against what it read.
 const save = (
   read: Settings,
   values: Partial<UpdateSettingsInput> = {},
 ): UpdateSettingsInput => ({
   targets: TARGETS,
-  pendingCap: 8,
+  payFloor: 123_456,
+  season: null,
   updatedAt: read.updatedAt,
   ...values,
 });
@@ -53,11 +64,11 @@ describeEachBackend("updateSettings", () => {
       })
     ).entries;
 
-  it("reads the defaults before the first save: no targets, and a queue of 10", async () => {
+  it("reads the defaults before the first save: no targets, pay floor or season", async () => {
     expect(await app.getSettings(OWNER)).toEqual(DEFAULT_SETTINGS);
   });
 
-  it("stores the targets and cap Hector saves, reads them back, and logs each value that changed", async () => {
+  it("stores the targets and pay floor Hector saves, reads them back, and logs each value that changed", async () => {
     const saved = await app.updateSettings(
       HECTOR,
       save(await app.getSettings(OWNER)),
@@ -65,7 +76,8 @@ describeEachBackend("updateSettings", () => {
 
     expect(saved).toEqual({
       targets: TARGETS,
-      pendingCap: 8,
+      payFloor: 123_456,
+      season: null,
       updatedAt: expect.any(Date),
     });
     expect(await app.getSettings(OWNER)).toEqual(saved);
@@ -79,7 +91,7 @@ describeEachBackend("updateSettings", () => {
           { field: "conversationsHeld", before: null, after: 2 },
           { field: "applications", before: null, after: 5 },
           { field: "practiceSessions", before: null, after: 4 },
-          { field: "pendingCap", before: 10, after: 8 },
+          { field: "payFloor", before: null, after: 123_456 },
         ],
       }),
     ]);
@@ -106,6 +118,50 @@ describeEachBackend("updateSettings", () => {
     ]);
   });
 
+  // R12 as revised 2026-11-10: the season Today tracks toward.
+  it("stores the season Hector saves, reads it back, and logs its start, finish and checkpoints", async () => {
+    const saved = await app.updateSettings(
+      HECTOR,
+      save(await app.getSettings(OWNER), { season: SEASON }),
+    );
+
+    expect(saved.season).toEqual(SEASON);
+    expect((await app.getSettings(OWNER)).season).toEqual(SEASON);
+    const [latest] = await settingsHistory();
+    expect(latest?.changes).toEqual(
+      expect.arrayContaining([
+        { field: "seasonStart", before: null, after: "2026-11-02" },
+        { field: "seasonFinish", before: null, after: "2027-02-01" },
+        {
+          field: "checkpoints",
+          before: null,
+          after: "2026-11-13 Portfolio live; 2026-12-18 Five screens",
+        },
+      ]),
+    );
+  });
+
+  it("clears the season, and logs what it was", async () => {
+    const first = await app.updateSettings(
+      HECTOR,
+      save(await app.getSettings(OWNER), { season: SEASON }),
+    );
+
+    const cleared = await app.updateSettings(HECTOR, save(first));
+
+    expect(cleared.season).toBeNull();
+    const [latest] = await settingsHistory();
+    expect(latest?.changes).toEqual([
+      { field: "seasonStart", before: "2026-11-02", after: null },
+      { field: "seasonFinish", before: "2027-02-01", after: null },
+      {
+        field: "checkpoints",
+        before: "2026-11-13 Portfolio live; 2026-12-18 Five screens",
+        after: null,
+      },
+    ]);
+  });
+
   // R21: settings are Hector's alone.
   it("refuses Claude with HumanOnlyError, logs the refusal, and stores nothing", async () => {
     await expect(
@@ -128,21 +184,23 @@ describeEachBackend("updateSettings", () => {
     const other = await app.updateSettings(HECTOR, save(read));
 
     const refusal = await app
-      .updateSettings(HECTOR, save(read, { pendingCap: 20 }))
+      .updateSettings(HECTOR, save(read, { payFloor: 654_321 }))
       .catch((err: unknown) => err);
 
     expect(refusal).toBeInstanceOf(ConflictError);
     expect((refusal as ConflictError).current).toEqual(other);
-    expect((await app.getSettings(OWNER)).pendingCap).toBe(8);
+    expect((await app.getSettings(OWNER)).payFloor).toBe(123_456);
   });
 
-  it("writes and logs nothing when nothing changed", async () => {
+  it("writes and logs nothing when nothing changed, the season included", async () => {
     const saved = await app.updateSettings(
       HECTOR,
-      save(await app.getSettings(OWNER)),
+      save(await app.getSettings(OWNER), { season: SEASON }),
     );
 
-    expect(await app.updateSettings(HECTOR, save(saved))).toEqual(saved);
+    expect(
+      await app.updateSettings(HECTOR, save(saved, { season: SEASON })),
+    ).toEqual(saved);
     expect(await settingsHistory()).toHaveLength(1);
   });
 

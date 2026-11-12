@@ -50,3 +50,6 @@ certificates
 /test-results/
 /playwright-report/
 /blob-report/
+
+# the service worker, built by scripts/build-service-worker.ts before next build
+/public/sw.js

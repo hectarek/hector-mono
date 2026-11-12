@@ -37,7 +37,7 @@ describe("the job form", () => {
     const id = nextState.pushed[0]?.replace("/jobs/", "") ?? "";
     expect(dataOf(await getJob({ id })).job).toMatchObject({
       role: "Anvil tester",
-      reviewState: "accepted",
+      status: "verify",
       level: "senior",
       payMin: 12_345,
       source: { name: "widget jobs" },

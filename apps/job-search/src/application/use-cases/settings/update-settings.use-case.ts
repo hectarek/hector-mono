@@ -18,10 +18,10 @@ import {
 
 export type IUpdateSettingsUseCase = ReturnType<typeof updateSettingsUseCase>;
 
-// Saves Hector's settings (R12), which only he may change (R21): Claude's try is refused, and
-// logged, before anything is read. A save is made only against the updatedAt the form read
-// (R22). The settings are one record whose id is the owner's, and their history logs each
-// value that changed.
+// Saves Hector's settings (R12 as revised 2026-11-10), which only he may change (R21): Claude's
+// try is refused, and logged, before anything is read. A save is made only against the updatedAt
+// the form read (R22). The settings are one record whose id is the owner's, and their history
+// logs each value that changed.
 export const updateSettingsUseCase = (
   settingsRepository: ISettingsRepository,
   activityRepository: IActivityRepository,
@@ -74,10 +74,20 @@ export const updateSettingsUseCase = (
   };
 };
 
-// Settings as their history names them: each target by its count, then the cap.
+// Settings as their history names them: each target by its count, the pay floor, and the season's
+// start, finish and checkpoints, each checkpoint as its day and name on one line.
 function asLogged({
   targets,
-  pendingCap,
-}: SettingsValues): Record<string, number | null> {
-  return { ...targets, pendingCap };
+  payFloor,
+  season,
+}: SettingsValues): Record<string, number | string | null> {
+  return {
+    ...targets,
+    payFloor,
+    seasonStart: season?.start ?? null,
+    seasonFinish: season?.finish ?? null,
+    checkpoints: season?.checkpoints.length
+      ? season.checkpoints.map(({ on, name }) => `${on} ${name}`).join("; ")
+      : null,
+  };
 }

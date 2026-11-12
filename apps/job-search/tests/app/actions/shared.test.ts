@@ -16,7 +16,6 @@ import {
   InputParseError,
   NotAllowedError,
   NotFoundError,
-  QueueFullError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
 import { listActivitySchema } from "@/src/entities/models/activity.model";
@@ -107,20 +106,19 @@ describe("toActionError", () => {
   });
 
   // R20, KTD8.
-  it("answers a posting already on a job with `duplicate` and that job, and a full queue with `queue-full`", () => {
+  it("answers a posting already on a job with `duplicate` and that job", () => {
     const existing = {
       id: "00000000-0000-4000-8000-0000000000b1",
       role: "Widget engineer",
       company: "Acme Inc",
-      reviewState: "dismissed",
-      dismissReason: "not-hiring",
+      status: "skipped",
     };
     const logger = new RecordingLogger();
     expect(
       toActionError(
         new DuplicateError(
           existing,
-          "This posting was dismissed (not hiring).",
+          "This posting is on an archived job: Widget engineer at Acme Inc.",
         ),
         logger,
         FALLBACK,
@@ -128,14 +126,9 @@ describe("toActionError", () => {
     ).toEqual({
       ok: false,
       code: "duplicate",
-      message: "This posting was dismissed (not hiring).",
-      current: existing,
-    });
-    expect(toActionError(new QueueFullError(10), logger, FALLBACK)).toEqual({
-      ok: false,
-      code: "queue-full",
       message:
-        "The review queue is full at Hector's cap of 10: he reviews what's waiting first.",
+        "This posting is on an archived job: Widget engineer at Acme Inc.",
+      current: existing,
     });
     expect(logger.text).not.toContain("Acme Inc");
   });

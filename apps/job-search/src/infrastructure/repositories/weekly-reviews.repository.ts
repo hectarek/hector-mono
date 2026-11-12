@@ -78,7 +78,7 @@ export class WeeklyReviewsRepository
   async update(
     ownerId: string,
     id: string,
-    changes: Partial<Pick<WeeklyReview, "milestone" | "change">>,
+    changes: Pick<WeeklyReview, "change">,
     tx: ITransaction,
   ): Promise<WeeklyReview> {
     try {

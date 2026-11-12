@@ -17,17 +17,15 @@ import { getPageActor } from "@/app/_lib/current-actor";
 import { FIELD_LABELS } from "@/app/_lib/field-labels";
 import { loadCompany } from "@/app/_lib/load-company";
 import { deleteCompany } from "@/app/actions/companies";
-import { getInjection } from "@/di/container";
 import type { Company } from "@/src/entities/models/company.model";
-import { JOB_PAGE_MAX } from "@/src/entities/models/job.model";
 
 const HEADCOUNT = new Intl.NumberFormat("en-US");
 
 // A company (R4), in the order every record's page takes (the UX plan's UX8): its header (who
 // added it, where it is and what it does, its tier, and actions), a warning when another
-// company's name matches its own, its jobs and people, the proposals that name it, waiting or
-// dismissed (each keeps it from its delete, as its people do), its facts, the filled ones first,
-// its research, and its history (R19).
+// company's name matches its own, its jobs (archived ones too, which keep it from its delete, as
+// its people do) and people, its facts, the filled ones first, its research, and its history
+// (R19).
 export default async function CompanyPage({
   params,
   searchParams,
@@ -47,17 +45,6 @@ export default async function CompanyPage({
     id,
     actor,
   );
-  const find = getInjection("IFindJobsController");
-  const [waiting, dismissed] = await Promise.all([
-    find(
-      { companyId: company.id, reviewState: "pending", limit: JOB_PAGE_MAX },
-      actor,
-    ),
-    find(
-      { companyId: company.id, reviewState: "dismissed", limit: JOB_PAGE_MAX },
-      actor,
-    ),
-  ]);
   const facts = FACTS.map((fact): [string, ReactNode | null] => [
     FIELD_LABELS[fact] ?? fact,
     factOf(company, fact),
@@ -176,26 +163,6 @@ export default async function CompanyPage({
           <p className="text-muted-foreground text-sm">No one here yet.</p>
         )}
       </section>
-
-      {waiting.jobs.length ? (
-        <section
-          aria-labelledby="company-waiting"
-          className="flex flex-col gap-2"
-        >
-          <SectionTitle id="company-waiting">To review</SectionTitle>
-          <JobList jobs={waiting.jobs} atCompany from={here} />
-        </section>
-      ) : null}
-
-      {dismissed.jobs.length ? (
-        <section
-          aria-labelledby="company-dismissed"
-          className="flex flex-col gap-2"
-        >
-          <SectionTitle id="company-dismissed">Dismissed</SectionTitle>
-          <JobList jobs={dismissed.jobs} atCompany from={here} />
-        </section>
-      ) : null}
 
       <section aria-labelledby="company-facts" className="flex flex-col gap-2">
         <SectionTitle id="company-facts">Facts</SectionTitle>

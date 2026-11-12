@@ -8,7 +8,7 @@ import {
 } from "@/src/entities/weekly-counts";
 
 // A week's counts (R10, docs/build-plan.md KTD9), each from its repository's query over the days
-// things happened, Monday to Sunday: This week's and the week page's live counts, and a review's
+// things happened, Monday to Sunday: Today's and the week page's live counts, and a review's
 // snapshot.
 export async function weekCounts(
   repositories: {

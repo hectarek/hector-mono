@@ -1,7 +1,7 @@
 import { CLOSED_STATUSES, type JobStatus } from "./job-lifecycle";
 import type { ActivityEntry, RecordRef } from "./models/activity.model";
 
-// One of Claude's working sessions as This week lists it (R9, U9): when it started, how many
+// One of Claude's working sessions as Today lists it (R9, U9): when it started, how many
 // changes it made to each kind of record, and the changes worth seeing one by one (a job's closing
 // move, a refused attempt). `id` is its start's record, or null for changes made before the first
 // start in the window, as part of a session that started earlier.
@@ -55,7 +55,7 @@ function addTo(session: ClaudeSession, entry: ActivityEntry): void {
   }
 }
 
-// A job's move to a closed status, which This week lists one by one.
+// A job's move to a closed status, which Today lists one by one.
 function closesAJob(entry: ActivityEntry): boolean {
   return (
     entry.record.kind === "job" &&

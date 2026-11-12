@@ -1,6 +1,8 @@
-import { UserButton } from "@neondatabase/auth/react";
+import { Button } from "@repo/ui/components/button";
+import { CircleUserRound } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/app/_components/logo";
+import { ACCOUNT_HREF } from "@/app/_lib/auth-paths";
 
 export function Header() {
   return (
@@ -13,7 +15,17 @@ export function Header() {
         <Link href="/" transitionTypes={["switch-tab"]}>
           <Logo className="h-5 w-auto" />
         </Link>
-        <UserButton size="icon" />
+        {/* A plain link, not Neon's menu, so Neon's sign-in kit stays off every other page
+            (D102). Not prefetched: the account page is rare, and it's where the kit loads. */}
+        <Button
+          variant="secondary"
+          size="icon-lg"
+          aria-label="Account"
+          nativeButton={false}
+          render={<Link href={ACCOUNT_HREF} prefetch={false} />}
+        >
+          <CircleUserRound />
+        </Button>
       </div>
     </header>
   );

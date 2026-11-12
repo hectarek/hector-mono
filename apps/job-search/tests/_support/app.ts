@@ -13,6 +13,7 @@ import type { INotesRepository } from "@/src/application/repositories/notes.repo
 import type { IPeopleRepository } from "@/src/application/repositories/people.repository.interface";
 import type { IPracticeRepository } from "@/src/application/repositories/practice.repository.interface";
 import type { ISettingsRepository } from "@/src/application/repositories/settings.repository.interface";
+import type { IWeekPlansRepository } from "@/src/application/repositories/week-plans.repository.interface";
 import type { IWeeklyReviewsRepository } from "@/src/application/repositories/weekly-reviews.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { listActivityUseCase } from "@/src/application/use-cases/activity/list-activity.use-case";
@@ -28,12 +29,13 @@ import { saveCompanyUseCase } from "@/src/application/use-cases/companies/save-c
 import { importSnapshotUseCase } from "@/src/application/use-cases/import/import-snapshot.use-case";
 import { deleteInteractionUseCase } from "@/src/application/use-cases/interactions/delete-interaction.use-case";
 import { logInteractionUseCase } from "@/src/application/use-cases/interactions/log-interaction.use-case";
+import { archiveExpiredUseCase } from "@/src/application/use-cases/jobs/archive-expired.use-case";
 import { createJobUseCase } from "@/src/application/use-cases/jobs/create-job.use-case";
 import { deleteJobUseCase } from "@/src/application/use-cases/jobs/delete-job.use-case";
 import { findJobsUseCase } from "@/src/application/use-cases/jobs/find-jobs.use-case";
 import { getJobUseCase } from "@/src/application/use-cases/jobs/get-job.use-case";
 import { moveJobUseCase } from "@/src/application/use-cases/jobs/move-job.use-case";
-import { reviewProposalUseCase } from "@/src/application/use-cases/jobs/review-proposal.use-case";
+import { pinJobUseCase } from "@/src/application/use-cases/jobs/pin-job.use-case";
 import { updateJobUseCase } from "@/src/application/use-cases/jobs/update-job.use-case";
 import { addNoteUseCase } from "@/src/application/use-cases/notes/add-note.use-case";
 import { deleteNoteUseCase } from "@/src/application/use-cases/notes/delete-note.use-case";
@@ -56,6 +58,7 @@ import { listSourcesUseCase } from "@/src/application/use-cases/sources/list-sou
 import { getTodayUseCase } from "@/src/application/use-cases/week/get-today.use-case";
 import { getWeekUseCase } from "@/src/application/use-cases/week/get-week.use-case";
 import { saveWeeklyReviewUseCase } from "@/src/application/use-cases/week/save-weekly-review.use-case";
+import { setWeekMilestoneUseCase } from "@/src/application/use-cases/week/set-week-milestone.use-case";
 import { ActivityRepository } from "@/src/infrastructure/repositories/activity.repository";
 import { MockActivityRepository } from "@/src/infrastructure/repositories/activity.repository.mock";
 import { BlocksRepository } from "@/src/infrastructure/repositories/blocks.repository";
@@ -78,6 +81,8 @@ import { PracticeRepository } from "@/src/infrastructure/repositories/practice.r
 import { MockPracticeRepository } from "@/src/infrastructure/repositories/practice.repository.mock";
 import { SettingsRepository } from "@/src/infrastructure/repositories/settings.repository";
 import { MockSettingsRepository } from "@/src/infrastructure/repositories/settings.repository.mock";
+import { WeekPlansRepository } from "@/src/infrastructure/repositories/week-plans.repository";
+import { MockWeekPlansRepository } from "@/src/infrastructure/repositories/week-plans.repository.mock";
 import { WeeklyReviewsRepository } from "@/src/infrastructure/repositories/weekly-reviews.repository";
 import { MockWeeklyReviewsRepository } from "@/src/infrastructure/repositories/weekly-reviews.repository.mock";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
@@ -100,6 +105,7 @@ type Repositories = {
   interactions: IInteractionsRepository;
   practice: IPracticeRepository;
   weeklyReviews: IWeeklyReviewsRepository;
+  weekPlans: IWeekPlansRepository;
   blocks: IBlocksRepository;
   importRefs: IImportRefsRepository;
   transactions: ITransactionManagerService;
@@ -119,6 +125,7 @@ function mockRepositories(): Repositories {
     interactions: new MockInteractionsRepository(),
     practice: new MockPracticeRepository(),
     weeklyReviews: new MockWeeklyReviewsRepository(),
+    weekPlans: new MockWeekPlansRepository(),
     blocks: new MockBlocksRepository(),
     importRefs: new MockImportRefsRepository(),
     transactions: new MockTransactionManagerService(),
@@ -139,6 +146,7 @@ export function postgresRepositories(): Repositories {
     interactions: new InteractionsRepository(log),
     practice: new PracticeRepository(log),
     weeklyReviews: new WeeklyReviewsRepository(log),
+    weekPlans: new WeekPlansRepository(log),
     blocks: new BlocksRepository(log),
     importRefs: new ImportRefsRepository(log),
     transactions: new TransactionManagerService(log),
@@ -191,10 +199,12 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     interactions,
     practice,
     weeklyReviews,
+    weekPlans,
     blocks,
     importRefs,
     transactions,
   } = repos;
+  const moveJob = moveJobUseCase(jobs, activity, transactions, log);
   return {
     repos,
     listActivity: listActivityUseCase(activity, log),
@@ -219,13 +229,12 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    findJobs: findJobsUseCase(jobs, log),
+    findJobs: findJobsUseCase(jobs, settings, log),
     getJob: getJobUseCase(jobs, notes, activity, people, interactions, log),
     createJob: createJobUseCase(
       jobs,
       companies,
       sources,
-      settings,
       activity,
       transactions,
       log,
@@ -238,8 +247,9 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    moveJob: moveJobUseCase(jobs, activity, transactions, log),
-    reviewProposal: reviewProposalUseCase(jobs, activity, transactions, log),
+    moveJob,
+    pinJob: pinJobUseCase(jobs, activity, transactions, log),
+    archiveExpired: archiveExpiredUseCase(jobs, moveJob, log),
     deleteJob: deleteJobUseCase(
       jobs,
       notes,
@@ -324,6 +334,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       blocks,
       activity,
       settings,
+      weekPlans,
       log,
     ),
     addBlocks: addBlocksUseCase(blocks, activity, transactions, log),
@@ -336,7 +347,14 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       interactions,
       practice,
       settings,
+      weekPlans,
       weeklyReviews,
+    ),
+    setWeekMilestone: setWeekMilestoneUseCase(
+      weekPlans,
+      activity,
+      transactions,
+      log,
     ),
     saveWeeklyReview: saveWeeklyReviewUseCase(
       weeklyReviews,

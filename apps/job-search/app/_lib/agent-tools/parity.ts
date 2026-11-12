@@ -7,14 +7,14 @@
 // - `{ tool, via }`: reached through another tool's action, and why.
 // - `{ humanOnly }`: no tool calls it, and why.
 // - `{ agentEndpoint }`: it serves the tools themselves, and how (KTD22).
+// - `{ scheduled }`: Vercel calls it on a schedule, as the system, and what it does (KTD24).
 export type Reach =
   | { tool: string; via?: string }
   | { humanOnly: string }
-  | { agentEndpoint: string };
+  | { agentEndpoint: string }
+  | { scheduled: string };
 
 const DELETING = "Deleting anything is Hector's (R21).";
-const REVIEWING =
-  "Accepting, dismissing and reopening a proposal is Hector's review (R20, R21).";
 
 // The exported actions in app/actions/, as "<file>.<export>".
 export const ACTION_REACH: Record<string, Reach> = {
@@ -32,17 +32,11 @@ export const ACTION_REACH: Record<string, Reach> = {
   "interactions.deleteInteraction": { humanOnly: DELETING },
   "jobs.findJobs": { tool: "find_jobs" },
   "jobs.getJob": { tool: "get_job" },
-  "jobs.proposeJob": { tool: "propose_job" },
-  "jobs.addJob": {
-    tool: "propose_job",
-    via: "Hector's form adds a job, accepted at once; Claude's finds wait in his review queue as proposals (KTD3, R20).",
-  },
+  "jobs.addJob": { tool: "add_job" },
   "jobs.updateJob": { tool: "update_job" },
+  "jobs.pinJob": { tool: "pin_job" },
   "jobs.setJobStatus": { tool: "set_job_status" },
   "jobs.closeJob": { tool: "close_job" },
-  "jobs.acceptProposal": { humanOnly: REVIEWING },
-  "jobs.dismissProposal": { humanOnly: REVIEWING },
-  "jobs.reopenProposal": { humanOnly: REVIEWING },
   "jobs.deleteJob": { humanOnly: DELETING },
   "notes.addNote": { tool: "add_note" },
   "notes.editNote": {
@@ -65,15 +59,14 @@ export const ACTION_REACH: Record<string, Reach> = {
   "session.startSession": { tool: "start_session" },
   "settings.getSettings": { tool: "get_settings" },
   "settings.updateSettings": {
-    humanOnly:
-      "Changing the targets and the queue's cap is Hector's (R12, R21).",
+    humanOnly: "Changing the targets and the pay floor is Hector's (R12, R21).",
   },
   "sources.listSources": { tool: "list_sources" },
   "sources.addSource": { tool: "add_source" },
   "week.getToday": { tool: "get_today" },
   "week.getWeek": { tool: "get_week" },
+  "week.setWeekMilestone": { tool: "set_week_milestone" },
   "week.saveWeeklyReview": { tool: "save_weekly_review" },
-  "week.listProposals": { tool: "list_proposals" },
 };
 
 // The route handlers under app/(api)/, as "<path> <method>".
@@ -84,6 +77,10 @@ const MCP =
 export const ROUTE_REACH: Record<string, Reach> = {
   "api/auth/[...path] GET": { humanOnly: AUTH },
   "api/auth/[...path] POST": { humanOnly: AUTH },
+  "api/cron/archive-expired POST": {
+    scheduled:
+      "The daily run: archives the jobs that left the ranked list untouched, as the system (KTD24).",
+  },
   "mcp POST": { agentEndpoint: MCP },
 };
 

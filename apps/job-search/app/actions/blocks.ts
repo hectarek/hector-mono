@@ -68,7 +68,7 @@ export async function deleteBlock(
   );
 }
 
-// The pages a block shows on: This week, the week page, its own page, and Claude's page, which
+// The pages a block shows on: Today, the week page, its own page, and Claude's page, which
 // lists its changes.
 function pagesOf({ id }: { id: string }): string[] {
   return ["/", "/week", `/blocks/${id}`, "/agent"];

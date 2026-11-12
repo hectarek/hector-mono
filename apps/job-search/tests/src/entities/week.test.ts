@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   addDays,
+  daysBetween,
   formatWeekRange,
   isIsoDate,
   mondayOf,
@@ -19,6 +20,14 @@ describe("week helpers", () => {
     expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
     expect(mondayOf("2027-01-03")).toBe("2026-12-28");
     expect(weekDates("2026-09-28").at(-1)).toBe("2026-10-04");
+  });
+
+  it("counts the days between two dates, across a clock change and a year's end", () => {
+    // Clocks went back in New York on Nov 1; dates have no clock.
+    expect(daysBetween("2026-10-31", "2026-11-02")).toBe(2);
+    expect(daysBetween("2026-11-02", "2027-02-01")).toBe(91);
+    expect(daysBetween("2026-11-13", "2026-11-02")).toBe(-11);
+    expect(daysBetween("2026-11-02", "2026-11-02")).toBe(0);
   });
 
   it("uses the plan's time zone for today, not the server's", () => {

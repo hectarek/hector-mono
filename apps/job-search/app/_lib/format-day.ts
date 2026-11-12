@@ -13,6 +13,17 @@ export function formatDay(day: string): string {
   return DAY.format(new Date(`${day}T00:00:00Z`));
 }
 
+const MONTH_DAY = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+// A date with no year, "Nov 13", where the year goes without saying: the season's track.
+export function formatMonthDay(day: string): string {
+  return MONTH_DAY.format(new Date(`${day}T00:00:00Z`));
+}
+
 const WEEKDAY = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   timeZone: "UTC",

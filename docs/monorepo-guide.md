@@ -159,6 +159,8 @@ The `^` prefix means "run this task in all dependencies first." So if `hectors-r
 
 Turbo caches task outputs. If inputs haven't changed, it replays the cached output instantly. The `.turbo/` directories store this cache locally. Each checkout keeps its own: `turbo.json` sets `cacheDir` to `.turbo/cache`, which turns off Turborepo's sharing of the main checkout's cache with worktrees (2.11.10). Shared artifacts are restored without rewriting the absolute paths in them, such as a `.next` build's, and Claude Code's sandbox can't write the main checkout's cache from a worktree, which failed every check there. The `clean:install` script clears these caches along with every `node_modules` and `bun.lock` (see [Troubleshooting](#troubleshooting)).
 
+Turborepo's strict env mode also withholds `TMPDIR` from a task that doesn't list it, so a test's `os.tmpdir()` falls back to `/tmp`, which Claude Code's sandbox can't write. Run through `bun run test`, a test that made a temporary folder failed there, while a plain `bun test` passed (2026-11-10). So `turbo.json` passes `TMPDIR` to every `test` task (`passThroughEnv`, which keeps it out of the cache's hash).
+
 ---
 
 ## Dependency Management

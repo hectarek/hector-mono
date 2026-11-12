@@ -44,7 +44,8 @@ app/
                        # use-wake-lock, use-swipe (a sideways swipe, for the week and cook mode), space-href, app-icon (drawing for all generated icons)
   manifest.ts, apple-icon.tsx, pwa-icon/[size]/  # install to home screen; paths bypass auth in proxy.ts
   error.tsx, not-found.tsx; loading.tsx per page shape: (main)/ is the general one, (library)/, plan/, groceries/, recipes/[id]/ have their own; (form)/ and cook mode have theirs
-  _providers/          # Providers: @repo/ui ThemeProvider around AuthProvider
+  _providers/          # Providers: @repo/ui ThemeProvider. AuthProvider (Neon's sign-in kit) wraps only the
+                       # sign-in and account pages, in their own layouts (docs/ux-plan.md D102)
   actions/             # Server actions per domain: grocery, import, plan, recipes, spaces; shared.ts holds their helpers (not "use server")
 
 src/
@@ -90,7 +91,10 @@ db/
 lib/
   auth/server.ts, logger.ts
 
+service-worker/        # rules.ts, handlers.ts, worker.ts: the phone's saved copies (see Saved copies below)
+
 scripts/
+  build-service-worker.ts       # builds public/sw.js before next build
   seed-from-obsidian.ts         # one-off vault import; dry run by default, --commit --email=<account>
   lib/parse-obsidian-note.ts    # note -> recipe (frontmatter, sections, NYT clippings)
 
@@ -136,7 +140,7 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
 - A component in a layout that reads the address (`usePathname`) sits inside `<Suspense>`, as pages with `[id]` or `[token]` don't know it while prerendering: `BottomNav` starts with no tab lit.
 - The clock (`new Date()`, `Date.now()`) and `crypto.randomUUID()` fail the build if they run while a page prerenders. Each page reads the session first, which ends its prerender, so `todayIn` and the editor's row keys run at request time; keep that order. Reading the address first isn't enough: a prefetch knows the address and runs on to the clock (Meal plan did).
 - `experimental.hideLogsAfterAbort` keeps `NeonAuthService`'s `catch` (and Neon's own) from logging the end of a prerender as a failed sign-in during `next build`. Request-time logs are unchanged.
-- `next build` needs the auth env vars present (`lib/auth/server.ts` throws at import without them), but nothing at build time reaches Neon or the database, so placeholder values build.
+- `next build` needs the auth env vars present (`lib/auth/server.ts` throws at import without them), but nothing at build time reaches Neon or the database, so placeholder values build. From a Claude Code session, the build can't fetch the two Google fonts inside the sandbox, even with `fonts.googleapis.com` and `fonts.gstatic.com` allowed (2026-11-10), so the PR's Vercel preview is the build check. Building outside the sandbox wasn't tried: it would read the real `.env`.
 - Next.js keeps the last three pages you left alive but hidden (React's `<Activity>`), so Back finds them as you left them (docs/ux-plan.md D88). Scroll, the library's search and the grouping stay; anything you open goes:
   - A sheet, dialog or ⋯ holds its open state in `useState` (not Base UI's) and calls `useClosesOnLeave` (`app/_lib/use-closes-on-leave.ts`) to close it, putting the key it returns on its `Drawer` or `Dialog`. A sheet whose parent holds the state closes with `onOpenChange(false)`. A new one does the same, with a screen test inside `<Activity>`.
   - It closes as you leave (a tap on a link, Back or Forward), not as the page hides: React holds a hidden page's updates until it shows the page again, so a sheet closed then is still on screen for a moment after you're back. The key unmounts the sheet at once, because the next page can hide it before its closing animation runs. Next.js's "Preserving UI state" guide closes in a `useLayoutEffect` cleanup, which here lands only after you're back (checked in the browser, 2026-10-08); the hook keeps that cleanup as the fallback for leaving another way, such as a save that redirects.
@@ -147,6 +151,16 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
   - A Server Action that changes what they show calls `revalidatePath`, which empties the browser's cache, so your own change shows at once. Someone else's can take 5 minutes.
   - No plain `'use cache'` (stored on the server) around anything that depends on who's signed in. Only the Recipes tab's link has `prefetch={true}`: one request per link on screen.
   - In tests, the preload's `cacheLife` does nothing, so every call reads afresh. `tests/flows/instant.flow.ts` checks the Recipes tab with `@next/playwright`'s `instant()`. A page opened again within 5 minutes shows at once only in a production build (`next dev`, which the flows run on, fetches it again), so check that by hand on `next start`.
+
+## Saved copies (the service worker)
+
+The phone keeps a copy of each page you read, and the next open shows it at once while the page brings itself up to date, with no sign (docs/ux-plan.md P31.2, D103). Written by hand, not Serwist: its Turbopack route is for apps without Cache Components.
+- `service-worker/rules.ts` decides each request: a saved page (the library, Meal plan, Groceries, Books, a recipe, cook mode), a build file under `/_next/static`, a way out (`/welcome`, `/auth/sign-out`, which deletes the saved pages), or the network for everything else: every RSC request, server action and API call, the forms (they read fresh, D87), sign-in and Account. A new page you read goes in `SAVED_PAGES`; a new form stays out.
+- `service-worker/handlers.ts` answers: a saved page at once, with `data-saved-copy` on `<html>` (the root layout's `suppressHydrationWarning` covers it), while the network's answer is saved for next time in the background, so a page with no saved copy still streams. Only a 200 HTML page that wasn't redirected is saved.
+- `scripts/build-service-worker.ts` builds `public/sw.js` (gitignored) before `next build`, stamped with `VERCEL_GIT_COMMIT_SHA` (listed in `turbo.json`, as is the file in the build's outputs). Each deploy's worker differs, so the browser installs it, and it deletes every other deploy's caches: a saved page never outlives the build files it needs. `proxy.ts` lets `/sw.js` through signed out, and `next.config.ts` serves it uncached.
+- `SavedCopy` (`app/_components/saved-copy.tsx`, in the `(main)` and `(cook)` layouts) registers the worker in production only, asks it to look for a new deploy when the app comes back to the front, and calls `router.refresh()` on a page marked as saved (`refreshIfSaved`, `app/_lib/saved-copy.ts`): not offline, and once per page in 30 seconds, because a failed refresh loads the whole page, which the worker answers with the saved copy again.
+- The switch: `SAVED_COPIES = false` in `rules.ts` makes the worker delete everything it saved and unregister itself, and the page stop registering it. One change and a deploy.
+- `next dev` never registers it. Its behaviour is tested through `tests/service-worker/` (the rules, and the handlers against an in-memory cache); a real phone checks the rest (H5).
 
 ## Feature Rules
 
@@ -178,6 +192,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - Server-action helpers (`actionLogger`, `text`, `toActionError`, `ActionState`) live in `app/actions/shared.ts`; the signed-in user comes from `getCurrentUserId` (`app/_lib/current-user.ts`) in pages and actions alike.
 - One-time data work (a re-read, a cleanup) is done by Claude in a Claude Code session, never through the app's AI (docs/ux-plan.md D31). The app's AI is for its features, and the local `AI_GATEWAY_API_KEY` only for testing them. Export the records, answer them in session, and put the answers through the same checks and a dry-run/commit guard, as the P9.3 re-read did (`scripts/reread-recipes.ts`, removed once it had run).
 - Naming (docs/ux-plan.md D28): a vendor's name appears only on the adapter that wraps it, meaning its class and file (`AblyRealtimeService`, `NeonAuthService`). Interfaces, DI symbols, use cases, controllers and pages stay neutral (`IRealtimeService`). Browser code has no DI container, so its one adapter module keeps a neutral file name and export (`app/_lib/live-updates.ts`, `listenToPlan`), and it's the only browser file that imports `ably`.
+- An adapter whose vendor SDK only some requests use imports it on first use (`await import()` in the method, `type` imports at the top), as `AiGatewayRecipeReaderService` and `AblyRealtimeService` do: the DI container loads every adapter when a server function starts (docs/ux-plan.md P30.2, ../../docs/clean-architecture.md §3.4). `tests/di/container.test.ts` lists the packages kept out of start-up; a new one goes there too.
 - Never import infrastructure directly in `app/`; always use DI symbols.
 - `.env`'s `DATABASE_URL` is the production database (one database for local and deployed). Reading it is fine; `db:migrate`, the seed's `--commit` and any other write need Hector's explicit OK at that moment. Apply an additive migration before the deploy that uses it, and a drop after (next rule).
 - Browser tests (docs/ux-plan.md P15.7) use a separate Neon project, `hectors-recipes-test`: no real data, its own Neon Auth and accounts, through the gitignored `.env.test` (`.worktreeinclude` copies it into new worktrees). A new migration goes there too, or the tests run against the old schema. From the app, outside Claude Code's sandbox: `bun --no-env-file --env-file=.env.test scripts/check-test-database.ts && bun --no-env-file --env-file=.env.test node_modules/.bin/drizzle-kit migrate`. `--no-env-file` keeps Bun from loading `.env` (production) as well, and the guard stops the run on any database but the test project's (used for 0020, 2026-10-31).
@@ -251,7 +266,8 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 
 - Route all auth access through `IAuthenticationService` in app/actions/pages.
 - `lib/auth/server.ts` is only for the auth route (`app/(api)/api/auth/[...path]/route.ts`), the auth pages (`app/(auth)/auth/[path]/page.tsx`) and the auth service implementation (`src/infrastructure/services/neon-auth.service.ts`).
-- Pages can't write cookies, and Neon's `getSession()` writes one when its 5-minute session cache has expired and Neon hands back a refreshed cookie; in a page that throws and the page fails as signed out. `proxy.ts` therefore refreshes the cache (through our own `/api/auth/get-session` route) whenever the cache cookie is missing, passing the new cookies to the browser and to that request's render; an ended session goes to `/welcome` (with `redirectTo`). See [../../docs/proxy-auth-research.md](../../docs/proxy-auth-research.md) (2026-09 addendum).
+- Pages can't write cookies, and Neon's `getSession()` writes one when its cached copy of the session has expired and Neon hands back a refreshed cookie; in a page that throws and the page fails as signed out. `proxy.ts` therefore refreshes the copy (through our own `/api/auth/get-session` route) whenever its cookie is missing, passing the new cookies to the browser and to that request's render; an ended session goes to `/welcome` (with `redirectTo`). See [../../docs/proxy-auth-research.md](../../docs/proxy-auth-research.md) (2026-09 and 2026-11 addenda).
+- The copy lasts a day (`sessionDataTtl` in `lib/auth/server.ts`, docs/ux-plan.md D101), not the SDK's 5 minutes, because the refresh runs before the page's first byte and often waits on the database waking up. Don't shorten it below the usual gap between opens. A session ended from elsewhere keeps working on a device for up to a day; signing out on the device clears its copy at once.
 - `/auth/*` pages send someone already signed in back into the app, except `sign-out` (`skipsWhenSignedIn` in `app/_lib/auth-paths.ts`): sign-out needs the session it ends.
 - `/welcome` is where signed-out visitors start. The proxy handles it by cookie alone: signed in goes on to `redirectTo` (through `safeRedirect`), signed out sees it. It isn't in the matcher's skip list, so keep that check in the proxy.
 - Sign-in keeps the return path: `proxy.ts` sends signed-out visitors to `/welcome?redirectTo=<path>`, the welcome screen passes it on to the sign-up and sign-in links, and `app/(auth)/auth/[path]/page.tsx` only honors same-app paths (`app/_lib/safe-redirect.ts`, which resolves the path the way a browser would, so `/\evil.com` is caught) and passes them to `AuthView` as a prop (the prop overrides the raw query param, which AuthView would otherwise trust).
@@ -259,6 +275,7 @@ How each feature works, and what to keep true when changing it, is in [docs/feat
 - `proxy.ts` sends every signed-out request to `/welcome` except `/shared/<token>` (`SHARED_RECIPE`, one path segment, nothing under it). A new signed-out page needs its own line there and a proxy test.
 - Safari (including the iOS Simulator) can't sign in on `http://localhost`: Neon Auth always marks its cookies `Secure`, and WebKit drops Secure cookies over plain http (Chrome treats localhost as secure, so the browser pane works). Check iPhone Safari against the deployed HTTPS site instead (`https://recipes.hectorfgonzalez.com`, one database for both).
 - Neon's auth screens are styled through `AuthView`'s `classNames` (the card frame is removed) and `localization` (the app's wording), set in `app/(auth)/auth/[path]/page.tsx`.
+- Neon's sign-in kit (the components from `@neondatabase/auth/react` and the browser's auth client, `@neondatabase/auth/next`) is 870 KB of JavaScript, so it loads only on the pages that draw its views: `AuthProvider` sits in `app/(auth)/auth/layout.tsx` and `app/(main)/account/layout.tsx`, not the root (docs/ux-plan.md D102). The header's account button is a plain link to Account, where Sign out is a button. `tests/app/layout.test.ts` fails if the root or signed-in layout reaches the kit again; its path constants (`@neondatabase/auth/react/ui/server`) are plain strings and fine anywhere.
 
 ## Logging Rules
 

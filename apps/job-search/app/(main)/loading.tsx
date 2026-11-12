@@ -1,6 +1,6 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
 
-// This week's shape while it loads: its title and the week under it. The shell stays put.
+// Today's shape while it loads: its title and the week under it. The shell stays put.
 export default function Loading() {
   return (
     <div role="status" aria-busy="true" className="flex flex-col gap-2">

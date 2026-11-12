@@ -70,7 +70,7 @@ Full-screen tasks: no header or tab bar, their own way out
 Error, Not found                   any route
 ```
 
-The header has the logo (to the library) and the account button. Meal plan and Groceries open the default plan (D14); a tab doesn't carry the plan you were looking at.
+The header has the logo (to the library) and the account button, a link to Account (D102). Meal plan and Groceries open the default plan (D14); a tab doesn't carry the plan you were looking at.
 
 ## Screens
 
@@ -187,10 +187,11 @@ Each screen lists its main action (the one filled button, D32), what its ⋯ hol
 
 ### Account — `/account/[path]`
 
-- **Job:** the account itself (Neon's own views) and Appearance: light, dark or match the device.
+- **Job:** the account itself (Neon's own views), Appearance (light, dark or match the device), and Sign out (D102).
 - **Surface:** Market. Back link "Recipes".
-- **Reached from:** the header's account button (Neon's menu).
-- **Motion:** none. Neon's links load the whole page.
+- **On it:** Neon's account views; on Settings, the Appearance card and then Sign out, a `secondary` button that loads Neon's sign-out page.
+- **Reached from:** the header's account button, a link straight here (D102; before, Neon's menu).
+- **Motion:** none. Neon's links, and Sign out, load the whole page.
 
 ### Add a recipe — `/recipes/new`
 

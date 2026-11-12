@@ -10,46 +10,38 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { EmptySectors, PageTitle } from "@/app/_components/display";
 import { JobList } from "@/app/_components/job-list";
+import { ToApplyList } from "@/app/_components/to-apply-list";
 import { getPageActor } from "@/app/_lib/current-actor";
 import { getInjection } from "@/di/container";
 import { JOB_PAGE_MAX, type JobQuery } from "@/src/entities/models/job.model";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-// The pipeline's views: open jobs, those of them whose step has no date (the UX plan's UX6),
-// archived jobs (every ended status; Closed is one, the posting's, Q6), the review queue (R20) and
-// dismissed proposals.
+// The pipeline's views: open jobs, the ranked list of those not yet applied to (R27), the open
+// ones whose step has no date (the UX plan's UX6), and archived jobs (every ended status; Closed
+// is one, the posting's, Q6).
 const VIEWS = {
-  open: { label: "Open", query: { status: "open", reviewState: "accepted" } },
-  "no-date": {
-    label: "No date",
-    query: { status: "open", reviewState: "accepted", undated: true },
-  },
-  archived: {
-    label: "Archived",
-    query: { status: "archived", reviewState: "accepted" },
-  },
-  review: { label: "To review", query: { reviewState: "pending" } },
-  dismissed: { label: "Dismissed", query: { reviewState: "dismissed" } },
+  open: { label: "Open", query: { status: "open" } },
+  "to-apply": { label: "To apply", query: { status: "to-apply" } },
+  "no-date": { label: "No date", query: { status: "open", undated: true } },
+  archived: { label: "Archived", query: { status: "archived" } },
 } satisfies Record<
   string,
-  {
-    label: string;
-    query: Pick<JobQuery, "status" | "reviewState" | "undated">;
-  }
+  { label: string; query: Pick<JobQuery, "status" | "undated"> }
 >;
 type View = keyof typeof VIEWS;
 
 const EMPTY: Record<View, string> = {
-  open: "No open jobs. Add one, or accept one of Claude's proposals.",
+  open: "No open jobs. Add one, or wait for Claude's next finds.",
+  "to-apply":
+    "Nothing to apply to. Claude's finds land here, ranked, and so do the jobs you add.",
   "no-date": "Every open job's next step has a date.",
   archived: "No archived jobs yet.",
-  review: "Nothing to review: Claude's proposals wait here.",
-  dismissed: "No dismissed proposals.",
 };
 
-// The pipeline (R1): one view at a time, by next date, a page at a time, with the number of
-// proposals waiting for review. A step with no date can be dated from its row.
+// The pipeline (R1): one view at a time, a page at a time. To apply is in the rank's order, with
+// Pin and Not for me on each job (R27); the others go by next date, and a step with no date can
+// be dated from its row.
 export default async function JobsPage({
   searchParams,
 }: {
@@ -62,12 +54,11 @@ export default async function JobsPage({
       ? (params.view as View)
       : "open";
   const offset = Math.max(0, Number.parseInt(String(params.offset), 10) || 0);
-  const find = getInjection("IFindJobsController");
-  const [{ jobs, nextOffset }, waiting] = await Promise.all([
-    find({ ...VIEWS[view].query, limit: JOB_PAGE_MAX, offset }, actor),
-    // The cap holds the queue to 50 at most (settings), so one page counts it.
-    find({ reviewState: "pending", limit: JOB_PAGE_MAX }, actor),
-  ]);
+  const { jobs, nextOffset } = await getInjection("IFindJobsController")(
+    { ...VIEWS[view].query, limit: JOB_PAGE_MAX, offset },
+    actor,
+  );
+  const from = view === "open" ? "/jobs" : `/jobs?view=${view}`;
 
   const pageHref = (from: number) =>
     `/jobs?${new URLSearchParams({ view, offset: String(from) })}`;
@@ -103,18 +94,19 @@ export default async function JobsPage({
             className="min-h-11"
           >
             {VIEWS[each].label}
-            {each === "review" && waiting.jobs.length
-              ? ` (${waiting.jobs.length})`
-              : null}
           </Button>
         ))}
       </nav>
 
-      {jobs.length ? (
-        <JobList
+      {jobs.length && view === "to-apply" ? (
+        <ToApplyList
           jobs={jobs}
-          from={view === "open" ? "/jobs" : `/jobs?view=${view}`}
+          from={from}
+          human={actor.actor === "owner"}
+          start={offset + 1}
         />
+      ) : jobs.length ? (
+        <JobList jobs={jobs} from={from} />
       ) : (
         <Empty>
           <EmptyHeader>

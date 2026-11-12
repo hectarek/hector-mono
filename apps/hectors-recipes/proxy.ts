@@ -9,13 +9,13 @@ const WELCOME_PATH = "/welcome";
 const SHARED_RECIPE = /^\/shared\/[^/]+$/;
 
 // Primary session cookie set by @neondatabase/auth (Better Auth under the hood), and its
-// signed 5-minute cache. See: node_modules/@neondatabase/auth/dist/server-*.mjs
+// signed copy, kept a day (lib/auth/server.ts). See: node_modules/@neondatabase/auth/dist/server-*.mjs
 const SESSION_COOKIE = "__Secure-neon-auth.session_token";
 const SESSION_DATA_COOKIE = "__Secure-neon-auth.local.session_data";
 
 /**
  * Optimistic auth check — reads the cookie, and only calls the auth server when the
- * session's 5-minute cache has expired (see refreshSessionCache).
+ * session's cached copy has expired (see refreshSessionCache).
  *
  * Next.js 16 guidance: proxy.ts should only perform fast, optimistic checks
  * (cookie presence). Full session validation belongs in Server Components,
@@ -71,7 +71,8 @@ function pastWelcome(request: NextRequest): NextResponse {
  * signed out, on every load. Refresh it here instead, through our own auth route (a
  * route handler, which may set cookies): the browser gets the new cookies, and so does
  * this request's render, which then reads the fresh cache without going to Neon.
- * Runs about once per cache lifetime (5 minutes), not on every request.
+ * Runs once per copy lifetime (a day, lib/auth/server.ts), not on every request: it waits on
+ * Neon Auth and often on the database waking up, before the page's first byte.
  */
 async function refreshSessionCache(
   request: NextRequest,
@@ -133,7 +134,8 @@ function withCookies(headers: Headers, cookies: Map<string, string>): Headers {
 export const config = {
   matcher: [
     // The manifest and icons must load signed out: browsers fetch them without cookies
-    // when installing to the home screen.
-    "/((?!api|_next/static|_next/image|favicon.ico|icon.svg|sitemap.xml|robots.txt|auth|manifest.webmanifest|apple-icon|pwa-icon).*)",
+    // when installing to the home screen. So must the service worker (docs/ux-plan.md
+    // P31.2): the browser looks for a new one signed out too, after Sign out.
+    "/((?!api|_next/static|_next/image|favicon.ico|icon.svg|sitemap.xml|robots.txt|auth|manifest.webmanifest|apple-icon|pwa-icon|sw.js).*)",
   ],
 };

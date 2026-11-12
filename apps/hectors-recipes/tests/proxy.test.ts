@@ -5,7 +5,7 @@ import proxy, { config } from "@/proxy";
 const SESSION_COOKIE = "__Secure-neon-auth.session_token";
 const SESSION_DATA_COOKIE = "__Secure-neon-auth.local.session_data";
 
-// Signed in, with the 5-minute cached copy of the session still present.
+// Signed in, with the cached copy of the session (kept a day) still present.
 const request = (path: string, signedIn = false) =>
   new NextRequest(`https://recipes.example${path}`, {
     headers: signedIn
@@ -140,6 +140,8 @@ describe("proxy", () => {
       "/pwa-icon/192",
       "/auth/sign-in",
       "/api/auth/session",
+      // The service worker: the browser looks for a new one signed out too (P31.2).
+      "/sw.js",
     ]) {
       expect(guarded(path)).toBe(false);
     }

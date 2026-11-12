@@ -332,6 +332,22 @@ The cookie-only proxy left one gap. `auth.getSession()` in a Server Component fi
 
 `apps/hectors-recipes/proxy.ts` now refreshes the cache itself, only when the cache cookie is missing: it calls the app's own `/api/auth/get-session` route (a route handler, which may set cookies), forwards the `Set-Cookie` headers to the browser, and rewrites this request's `cookie` header so the render reads the fresh cache without going to Neon. If the refresh clears the session token it redirects to the welcome screen (`/welcome`, with `redirectTo`); if the call fails it lets the request through as before. That is one extra call per cache lifetime, not per request, and it never redirects RSC requests that have a valid session. `apps/stash/proxy.ts` has the same fix. Tests: `apps/hectors-recipes/tests/proxy.test.ts`, `apps/stash/tests/proxy.test.ts`.
 
+## 2026-11 addendum: what "one call per cache lifetime" cost (hectors-recipes, `@neondatabase/auth@0.7.0-beta`)
+
+The 2026-09 fix counted its cost as one call per cache lifetime. It was never timed, and on a phone app that's opened now and then, nearly every open starts a new cache lifetime: the cache lasts 5 minutes (`cookies.sessionDataTtl`, default 300 seconds), while the free Neon database had slept a median 30 minutes before each wake (Neon's operations log, 11 October to 10 November 2026). So the refresh ran on almost every cold open, before the page's first byte, and it often had to wait for the database to wake, since Neon Auth keeps its sessions in the app's own database:
+
+- The refresh is the proxy calling the app's `/api/auth/get-session` route, which calls Neon Auth twice: with no cache cookie, the SDK fetches the session once to mint the cookie and again for the reply (`trySessionCache` in its server code).
+- Timed from a Mac with the database awake (2026-11-10): 0.19–0.48 s for the whole refresh. A wake adds a median 0.46 s, and 1.6–4.6 s once Neon has archived the storage after a day asleep.
+
+The fix in hectors-recipes (docs/ux-plan.md D101, P30.1) is the SDK's own setting: `sessionDataTtl: 86400`, a day. One day is where it costs nothing in how long people stay signed in:
+
+- Neon Auth's sessions run 7 days from their last update, and Better Auth updates a session at most once a day (`updateAge`). Both checked on the production database on 2026-11-10: `expiresAt - updatedAt` was 7 days for every session, and no session was extended less than a day after it began.
+- So a check within a day of the last one couldn't extend the session anyway. Longer than a day would delay extensions, and a copy close to 7 days could let a session lapse while it was in use.
+- The SDK caps the copy at the session's own expiry (`signSessionDataCookie`: the earlier of the session's `expiresAt` and now plus the TTL), and signing out deletes the copy with the token.
+- The cost is revocation: a session ended from elsewhere (revoked, or its account deleted) keeps working on a device until its copy expires, up to a day. For a personal app that's accepted (Hector, 2026-11-10). It's the trade-off Better Auth names for its own cookie cache ([session management, cookie cache](https://www.better-auth.com/docs/concepts/session-management#cookie-cache)).
+
+For the next app: a cache in front of a sleeping service saves nothing if it expires before the usual gap between visits. Set its lifetime from how the app is used and from the session's own refresh interval, not from the library's default. `apps/stash` keeps the 5-minute default until it's measured the same way.
+
 ## When to Revisit
 
 - **When `@neondatabase/auth` exits beta** — check if they've updated `auth.middleware()` to handle RSC requests or if they provide a public `getSessionCookie` utility

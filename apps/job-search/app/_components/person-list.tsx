@@ -44,7 +44,7 @@ function nextOf({ nextStep, nextDate }: PersonSummary): string | null {
     .join(" · ");
 }
 
-// A step with no date gets one-tap date chips, so it can join This week (the UX plan's UX6).
+// A step with no date gets one-tap date chips, so it can join Today (the UX plan's UX6).
 function PersonDateChips({ person }: { person: PersonSummary }) {
   return person.nextStep && !person.nextDate ? (
     <DateChips kind="person" record={person} name={person.name} />

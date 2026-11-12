@@ -10,8 +10,8 @@ import { JOB_PAGE_MAX } from "@/src/entities/models/job.model";
 export type IGetCompanyUseCase = ReturnType<typeof getCompanyUseCase>;
 
 // A company as its page and get_company show it (docs/build-plan.md U5, U6, U7): with any other
-// company whose name matches its own ignoring case and punctuation, its accepted jobs, its people,
-// in a compact shape, and who added it (the UX plan's UX8).
+// company whose name matches its own ignoring case and punctuation, its jobs, its people, in a
+// compact shape, and who added it (the UX plan's UX8).
 export const getCompanyUseCase = (
   companiesRepository: ICompaniesRepository,
   jobsRepository: IJobsRepository,
@@ -33,7 +33,6 @@ export const getCompanyUseCase = (
       companiesRepository.findSimilar(ownerId, company.name, id),
       jobsRepository.find(ownerId, {
         companyId: id,
-        reviewState: "accepted",
         limit: JOB_PAGE_MAX,
         offset: 0,
       }),

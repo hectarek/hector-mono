@@ -11,29 +11,26 @@ import { CLAUDE, HECTOR, jobFixtures } from "@/tests/_support/jobs";
 
 describeEachBackend("getJob", () => {
   // get_job's answer (U6). Contacts come with U7, interview rounds with U12, fit with U15.
-  it("answers with the job, whatever its review, its notes, status moves and latest changes", async () => {
+  it("answers with the job, its notes, status moves and latest changes", async () => {
     const app = makeApp();
     const jobs = jobFixtures(app);
-    const proposal = await jobs.propose(await jobs.company());
-    const accepted = await app.reviewProposal(HECTOR, {
-      id: proposal.id,
-      updatedAt: proposal.updatedAt,
-      decision: "accept",
-    });
-    await app.moveJob(HECTOR, { id: proposal.id, status: "target" });
+    const found = await jobs.byClaude(await jobs.company());
+    await app.pinJob(HECTOR, { id: found.id, pinned: true });
+    await app.moveJob(HECTOR, { id: found.id, status: "target" });
     const note = await app.addNote(CLAUDE, {
-      record: { kind: "job", id: proposal.id },
+      record: { kind: "job", id: found.id },
       body: "A fictional note.",
     });
 
-    const detail = await app.getJob(OWNER, { id: proposal.id });
+    const detail = await app.getJob(OWNER, { id: found.id });
 
     expect(detail.job).toMatchObject({
-      id: proposal.id,
-      reviewState: "accepted",
+      id: found.id,
       status: "target",
-      company: accepted.company,
+      reason: "Matches the target role",
+      company: found.company,
     });
+    expect(detail.job.pinnedAt).toBeInstanceOf(Date);
     expect(detail.notes).toEqual([note]);
     expect(detail.moves).toEqual([
       expect.objectContaining({ from: "verify", to: "target" }),
@@ -43,7 +40,7 @@ describeEachBackend("getJob", () => {
       "updated",
       "created",
     ]);
-    // Claude proposed it (the UX plan's UX8).
+    // Claude added it (the UX plan's UX8).
     expect(detail.added).toEqual({ by: "agent", at: expect.any(Date) });
   });
 

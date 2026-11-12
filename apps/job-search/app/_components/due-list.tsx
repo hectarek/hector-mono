@@ -2,7 +2,8 @@ import { cn } from "@repo/ui/lib/utils";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactElement, ReactNode } from "react";
-import { DisplayLabel } from "@/app/_components/display";
+import { DebriefCard } from "@/app/_components/debrief-card";
+import { DisplayLabel, SectionTitle } from "@/app/_components/display";
 import { MarkStaleButton } from "@/app/_components/mark-stale-button";
 import { NextStepSheet } from "@/app/_components/next-step-sheet";
 import {
@@ -17,7 +18,11 @@ import { dueLabel, formatDay, formatWeekday } from "@/app/_lib/format-day";
 import type { JobSummary } from "@/src/entities/models/job.model";
 import type { PersonSummary } from "@/src/entities/models/person.model";
 import type { DueSession } from "@/src/entities/models/practice-entry.model";
-import type { DueJob, TodayView } from "@/src/entities/models/today.model";
+import type {
+  ConversationToDebrief,
+  DueJob,
+  TodayView,
+} from "@/src/entities/models/today.model";
 import { LADDER_STEPS } from "@/src/entities/practice-ladder";
 
 // How many late tasks show before the rest fold under Show more.
@@ -50,59 +55,61 @@ const byDue = (a: StepTask, b: StepTask) => a.due.localeCompare(b.due);
 const byPriority = (a: StepTask, b: StepTask) =>
   a.priority - b.priority || byDue(a, b);
 
-// What's due on This week (R9, the design system's PitBoard and TaskRow): the next task on the pit
-// board, then the rest in groups (late, today, stale candidates and practice reviews), each row one
-// tap that opens its sheet or its record, what's due later this week, folded by weekday, and how
-// many steps have no date. With nothing due, the board says so and points at what's waiting
-// instead.
-export function DueList({
-  due,
-  later,
-  undated,
-  today,
-  waiting,
-}: {
-  due: TodayView["due"];
-  later: TodayView["later"];
-  undated: TodayView["undated"];
-  today: string;
-  // How many decisions wait above, for the clear board's pointer.
-  waiting: number;
-}) {
+// What's due on Today (R9 as revised 2026-11-10, the design system's PitBoard and TaskRow), worked
+// out once for three of its sections: the next task for the pit board, the other steps late and
+// due today, the practice reviews the board doesn't hold, and the steps due after today through
+// Sunday. The board's task isn't repeated in a group.
+type DueTasks = {
+  board: StepTask | undefined;
+  // With no step due, the earliest practice review takes the board.
+  reviewOnBoard: DueSession | undefined;
+  late: StepTask[];
+  onToday: StepTask[];
+  reviews: DueSession[];
+  coming: StepTask[];
+};
+
+export function dueTasks(
+  due: TodayView["due"],
+  later: TodayView["later"],
+  today: string,
+): DueTasks {
   const steps = [
     ...due.jobs.map((job) => jobTask(job, today)),
     ...due.people.map((person) => personTask(person, today)),
   ].sort(byDue);
   const board = [...steps].sort(byPriority)[0];
   const rest = steps.filter((task) => task !== board);
-  // With no step due, the earliest practice review takes the board.
   const reviewOnBoard = board ? undefined : due.practice[0];
-  const reviews = reviewOnBoard ? due.practice.slice(1) : due.practice;
-  const coming = [
-    ...later.jobs.map((job) => jobTask(job, today)),
-    ...later.people.map((person) => personTask(person, today)),
-  ].sort(byDue);
+  return {
+    board,
+    reviewOnBoard,
+    late: rest.filter(({ due: day }) => day < today),
+    onToday: rest.filter(({ due: day }) => day >= today),
+    reviews: reviewOnBoard ? due.practice.slice(1) : due.practice,
+    coming: [
+      ...later.jobs.map((job) => jobTask(job, today)),
+      ...later.people.map((person) => personTask(person, today)),
+    ].sort(byDue),
+  };
+}
 
-  if (!board && !reviewOnBoard && !due.stale.length) {
-    return (
-      <div className="flex flex-col gap-4">
-        <ClearBoard
-          instead={
-            waiting
-              ? `${waiting} ${waiting === 1 ? "decision waits" : "decisions wait"} for you above.`
-              : "Nothing needs a decision either."
-          }
-        />
-        <LaterThisWeek tasks={coming} today={today} />
-        <NoDateLine undated={undated} />
-      </div>
-    );
-  }
-
-  const late = rest.filter(({ due: day }) => day < today);
-  const onToday = rest.filter(({ due: day }) => day >= today);
+// Today's next task (R9's second section, the UX plan's UX4): the step on the pit board, or with
+// no step due the earliest practice review. With neither, the clear board says so and points at
+// the decisions waiting below.
+export function NextTask({
+  tasks: { board, reviewOnBoard },
+  today,
+  waiting,
+}: {
+  tasks: DueTasks;
+  today: string;
+  // How many decisions wait below (conversations to debrief, stale candidates), for the clear
+  // board's pointer.
+  waiting: number;
+}) {
   return (
-    <div className="flex flex-col gap-4">
+    <section aria-label="Next task">
       {/* Keyed by its task: when the next task takes the board, its sheet starts afresh rather
           than keeping the one before's record. */}
       {board ? (
@@ -116,8 +123,7 @@ export function DueList({
             />,
           )}
         </div>
-      ) : null}
-      {reviewOnBoard ? (
+      ) : reviewOnBoard ? (
         <div key={reviewOnBoard.id} className="flex flex-col gap-2">
           <PitBoard
             href={`/practice/${reviewOnBoard.id}`}
@@ -129,7 +135,48 @@ export function DueList({
             <PracticeReview session={reviewSession(reviewOnBoard)} />
           </div>
         </div>
-      ) : null}
+      ) : (
+        <ClearBoard
+          instead={
+            waiting
+              ? `${waiting} ${waiting === 1 ? "decision waits" : "decisions wait"} for you below.`
+              : "Nothing needs a decision either."
+          }
+        />
+      )}
+    </section>
+  );
+}
+
+// What needs Hector on Today (R9's fourth section, the UX plan's UX4): the steps late and due
+// today that the board doesn't hold, applications gone quiet, conversations to debrief and
+// practice reviews, each group under its count, then how many next steps have no date. Each row
+// is one tap that opens its sheet or its record. With none of it, the section isn't shown.
+export function NeedsYou({
+  tasks: { late, onToday, reviews },
+  stale,
+  debriefs,
+  undated,
+  today,
+}: {
+  tasks: DueTasks;
+  stale: JobSummary[];
+  debriefs: ConversationToDebrief[];
+  undated: TodayView["undated"];
+  today: string;
+}) {
+  const count =
+    late.length +
+    onToday.length +
+    stale.length +
+    debriefs.length +
+    reviews.length;
+  if (!count && !undated.jobs && !undated.people) return null;
+  return (
+    <section aria-labelledby="today-needs" className="flex flex-col gap-4">
+      <SectionTitle id="today-needs">
+        Needs you{count ? ` · ${count}` : ""}
+      </SectionTitle>
       <Group label="Late" count={late.length}>
         <StepRows tasks={late.slice(0, LATE_SHOWN)} today={today} />
         {late.length > LATE_SHOWN ? (
@@ -144,10 +191,19 @@ export function DueList({
       <Group label="Today" count={onToday.length}>
         <StepRows tasks={onToday} today={today} />
       </Group>
-      <Group label="Stale?" count={due.stale.length}>
+      <Group label="Stale?" count={stale.length}>
         <ul className="bg-card divide-y overflow-hidden rounded-xl border">
-          {due.stale.map((job) => (
+          {stale.map((job) => (
             <StaleRow key={job.id} job={job} />
+          ))}
+        </ul>
+      </Group>
+      <Group label="Debrief" count={debriefs.length}>
+        <ul className="flex flex-col gap-4">
+          {debriefs.map((debrief) => (
+            <li key={debrief.conversation.id}>
+              <DebriefCard debrief={debrief} />
+            </li>
           ))}
         </ul>
       </Group>
@@ -158,9 +214,8 @@ export function DueList({
           ))}
         </ul>
       </Group>
-      <LaterThisWeek tasks={coming} today={today} />
       <NoDateLine undated={undated} />
-    </div>
+    </section>
   );
 }
 
@@ -340,34 +395,43 @@ function ReviewRow({ session, today }: { session: DueSession; today: string }) {
   );
 }
 
-// What's due after today, through Sunday, folded until it's opened, by weekday (R9 as revised
-// 2026-11-07).
-function LaterThisWeek({ tasks, today }: { tasks: StepTask[]; today: string }) {
-  if (!tasks.length) return null;
-  const days = [...new Set(tasks.map(({ due }) => due))];
+// The rest of the week on Today (R9's sixth section, as revised 2026-11-07 and 2026-11-10): what's
+// due after today through Sunday, folded until it's opened, by weekday. Tomorrow's events join it
+// with the calendar (U14).
+export function LaterThisWeek({
+  tasks: { coming },
+  today,
+}: {
+  tasks: DueTasks;
+  today: string;
+}) {
+  if (!coming.length) return null;
+  const days = [...new Set(coming.map(({ due }) => due))];
   return (
-    <details className="flex flex-col gap-2">
-      <summary className="flex min-h-11 cursor-pointer items-center">
-        <DisplayLabel className="text-muted-foreground">
-          Later this week · {tasks.length}
-        </DisplayLabel>
-      </summary>
-      <div className="flex flex-col gap-3">
-        {days.map((day) => (
-          <section key={day} className="flex flex-col gap-2">
-            <h3>
-              <DisplayLabel className="text-muted-foreground">
-                {formatWeekday(day)}
-              </DisplayLabel>
-            </h3>
-            <StepRows
-              tasks={tasks.filter(({ due }) => due === day)}
-              today={today}
-            />
-          </section>
-        ))}
-      </div>
-    </details>
+    <section aria-labelledby="today-later">
+      <details className="flex flex-col gap-2">
+        <summary className="flex min-h-11 cursor-pointer items-center">
+          <SectionTitle id="today-later">
+            Later this week · {coming.length}
+          </SectionTitle>
+        </summary>
+        <div className="flex flex-col gap-3">
+          {days.map((day) => (
+            <section key={day} className="flex flex-col gap-2">
+              <h3>
+                <DisplayLabel className="text-muted-foreground">
+                  {formatWeekday(day)}
+                </DisplayLabel>
+              </h3>
+              <StepRows
+                tasks={coming.filter(({ due }) => due === day)}
+                today={today}
+              />
+            </section>
+          ))}
+        </div>
+      </details>
+    </section>
   );
 }
 

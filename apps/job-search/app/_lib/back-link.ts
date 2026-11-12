@@ -30,7 +30,7 @@ export function backTo(
   if (raw === undefined) return fallback;
   const href = safeRedirect(raw);
   if (href === "/") {
-    return raw === "/" ? { href, label: "This week" } : fallback;
+    return raw === "/" ? { href, label: "Today" } : fallback;
   }
   const path = href.split(/[?#]/)[0] ?? "";
   const place = PLACES.find(

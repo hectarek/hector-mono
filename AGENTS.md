@@ -157,6 +157,7 @@ Choose the simplest pattern that solves the problem.
 
 ## React & Next.js Patterns
 - Next.js 16+, React 19
+- An app on Vercel Hobby, Neon Free and Neon Auth that people open from a phone follows [docs/fast-first-open.md](docs/fast-first-open.md): a day-long session copy, SDKs loaded on first use, the sign-in kit only where it's used, and saved copies of pages in a service worker. Its checklist is for a new app.
 - Server Components by default
 - Colocate components near their routes (`app/_components/`)
 - Providers live in `app/_providers/`

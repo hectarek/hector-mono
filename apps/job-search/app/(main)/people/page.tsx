@@ -138,7 +138,7 @@ export default async function PeoplePage({
               {query
                 ? "Try part of the name, or add the person."
                 : view === "no-date"
-                  ? "Every next step has a date, so each reaches This week when it's due."
+                  ? "Every next step has a date, so each reaches Today when it's due."
                   : "Add someone you know, or log a message to someone new."}
             </EmptyDescription>
           </EmptyHeader>

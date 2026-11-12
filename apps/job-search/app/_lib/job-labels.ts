@@ -5,12 +5,9 @@ import type {
   ConversationState,
   InteractionKind,
 } from "@/src/entities/models/interaction.model";
-import type {
-  DismissReason,
-  JobFacts,
-  ReviewState,
-} from "@/src/entities/models/job.model";
+import type { JobFacts } from "@/src/entities/models/job.model";
 import type { PracticeResult } from "@/src/entities/practice-ladder";
+import { EXPIRED_REASON } from "@/src/entities/rank";
 
 // A job's values as the screens name them.
 
@@ -28,21 +25,6 @@ export const STATUS_LABELS: Record<JobStatus, string> = {
   withdrawn: "Withdrawn",
   "offer-accepted": "Offer accepted",
   "offer-declined": "Offer declined",
-};
-
-export const REVIEW_LABELS: Record<ReviewState, string> = {
-  pending: "To review",
-  accepted: "Accepted",
-  dismissed: "Dismissed",
-};
-
-export const DISMISS_LABELS: Record<DismissReason, string> = {
-  "not-hiring": "Not hiring",
-  "wrong-level": "Wrong level",
-  "wrong-location-or-mode": "Wrong location or mode",
-  "pay-too-low": "Pay too low",
-  "company-too-small": "Company too small",
-  other: "Other",
 };
 
 export const LEVEL_LABELS: Record<NonNullable<JobFacts["level"]>, string> = {
@@ -102,12 +84,22 @@ export const PRACTICE_RESULT_LABELS: Record<PracticeResult, string> = {
 };
 
 // The reasons a close offers as one tap, by the status it closes as (the UX plan's UX9). Any
-// other is typed.
+// other is typed. Skipped's are Not for me's too, with the old review queue's dismiss reasons and
+// the daily run's (R20 as revised 2026-11-10, KTD24).
 export const CLOSE_REASONS: Record<ClosedStatus, readonly string[]> = {
   rejected: ["After applying", "After the screen", "After the onsite"],
   closed: ["Posting closed", "Role filled"],
   stale: ["No reply after 21 days"],
-  skipped: ["Not a fit", "Applied there already"],
+  skipped: [
+    "Not a fit",
+    "Not hiring",
+    "Wrong level",
+    "Wrong location or mode",
+    "Pay too low",
+    "Company too small",
+    "Applied there already",
+    EXPIRED_REASON,
+  ],
   withdrawn: ["Lost interest", "Chose another role"],
   "offer-accepted": ["Accepted the offer"],
   "offer-declined": ["Declined the offer"],

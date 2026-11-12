@@ -6,7 +6,11 @@ import {
   it,
   setSystemTime,
 } from "bun:test";
-import { InputParseError } from "@/src/entities/errors/common";
+import {
+  ConflictError,
+  HumanOnlyError,
+  InputParseError,
+} from "@/src/entities/errors/common";
 import type { ChangeContext } from "@/src/entities/models/activity.model";
 import type { Job } from "@/src/entities/models/job.model";
 import {
@@ -196,31 +200,83 @@ describeEachBackend("moveJob", () => {
     expect(latest?.reason).toBe("A form rejection");
   });
 
-  it("from stale to screen: allowed, and logged", async () => {
+  it("from stale to screen, by Hector: allowed, and logged", async () => {
     await move("applied", "2026-10-01");
     await move("stale", TODAY, "No reply in 21 days");
-    const reopened = await move("screen");
+    const reopened = await app.moveJob(HECTOR, {
+      id: job.id,
+      status: "screen",
+    });
 
     expect(reopened.status).toBe("screen");
     const [latest] = await app.repos.jobs.listStatusChanges(OWNER, job.id);
     expect(latest).toMatchObject({ from: "stale", to: "screen" });
   });
 
-  it("refuses a date after today", async () => {
-    await expect(move("target", "2026-10-27")).rejects.toBeInstanceOf(
-      InputParseError,
+  // AE2 as revised 2026-11-10 (R21): a job Hector passed on stays passed on.
+  it("refuses Claude's move of an archived job back to an open status as Hector's, logs the refusal, and changes nothing", async () => {
+    const archived = await app.moveJob(HECTOR, {
+      id: job.id,
+      status: "skipped",
+      reason: "Not a fit",
+    });
+
+    await expect(move("verify")).rejects.toBeInstanceOf(HumanOnlyError);
+
+    expect(await app.getJob(OWNER, { id: job.id })).toMatchObject({
+      job: { status: "skipped", updatedAt: archived.updatedAt },
+    });
+    expect(await app.repos.jobs.listStatusChanges(OWNER, job.id)).toHaveLength(
+      1,
+    );
+    const [refused] = (
+      await app.listActivity(OWNER, {
+        record: { kind: "job", id: job.id },
+        limit: 20,
+        offset: 0,
+      })
+    ).entries;
+    expect(refused).toMatchObject({
+      actor: "agent",
+      action: "refused",
+      reason: "reopen",
+    });
+  });
+
+  it("lets Claude archive a job, or move one archived to another archived status", async () => {
+    await move("skipped", TODAY, "Not a fit");
+
+    expect((await move("closed", TODAY, "Posting closed")).status).toBe(
+      "closed",
     );
   });
 
-  it("refuses to move a proposal Hector hasn't accepted", async () => {
-    const jobs = jobFixtures(app);
-    const proposal = await jobs.propose(job.company.id);
+  // The daily run moves against the updatedAt it read (KTD24).
+  it("given the updatedAt read, refuses a move once the job has changed since, and writes nothing", async () => {
+    const read = job.updatedAt;
+    await move("target");
 
-    await expect(
-      app.moveJob(CLAUDE, { id: proposal.id, status: "applied" }),
-    ).rejects.toThrow("A proposal's status moves once Hector accepts it.");
-    expect(await app.repos.jobs.listStatusChanges(OWNER, proposal.id)).toEqual(
-      [],
+    const refusal = await app
+      .moveJob(CLAUDE, {
+        id: job.id,
+        status: "skipped",
+        reason: "Not picked in time",
+        updatedAt: read,
+      })
+      .catch((err: unknown) => err);
+
+    expect(refusal).toBeInstanceOf(ConflictError);
+    expect((refusal as ConflictError).current).toMatchObject({
+      status: "target",
+    });
+    expect(await app.repos.jobs.listStatusChanges(OWNER, job.id)).toHaveLength(
+      1,
+    );
+  });
+
+  it("refuses a date after today", async () => {
+    await expect(move("target", "2026-10-27")).rejects.toBeInstanceOf(
+      InputParseError,
     );
   });
 

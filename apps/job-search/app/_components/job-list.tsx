@@ -18,13 +18,11 @@ import { DateChips } from "@/app/_components/date-chips";
 import { StatusChip } from "@/app/_components/status-chip";
 import { withFrom } from "@/app/_lib/back-link";
 import { formatDay } from "@/app/_lib/format-day";
-import { DISMISS_LABELS } from "@/app/_lib/job-labels";
 import { isClosed } from "@/src/entities/job-lifecycle";
 import type { JobSummary } from "@/src/entities/models/job.model";
 
 // A page of jobs: a table on desktop, cards on phones (docs/build-plan.md KTD19), each job's status
-// as the design system's status chip. A dismissed proposal shows why in place of its next step.
-// On a company's own page the company goes unsaid, and `from`, the page the list is on, is where
+// as the design system's status chip. On a company's own page the company goes unsaid, and `from`, the page the list is on, is where
 // a job's back link returns (the UX plan's UX8).
 export function JobList({
   jobs,
@@ -107,22 +105,16 @@ export function JobList({
   );
 }
 
-// An open job's step with no date gets one-tap date chips, so it can join This week (the UX plan's
-// UX6). A proposal waits on Hector's review, which sets its step.
+// An open job's step with no date gets one-tap date chips, so it can join Today (the UX plan's
+// UX6).
 function JobDateChips({ job }: { job: JobSummary }) {
-  return job.reviewState === "accepted" &&
-    !isClosed(job.status) &&
-    job.nextStep &&
-    !job.nextDate ? (
+  return !isClosed(job.status) && job.nextStep && !job.nextDate ? (
     <DateChips kind="job" record={job} name={job.role} />
   ) : null;
 }
 
-// What's next for a job: its next step and when, or why it was dismissed.
+// What's next for a job: its next step and when.
 function next(job: JobSummary): string | null {
-  if (job.reviewState === "dismissed") {
-    return job.dismissReason ? DISMISS_LABELS[job.dismissReason] : null;
-  }
   const due = job.nextDate ? formatDay(job.nextDate) : null;
   return [job.nextStep, due].filter(Boolean).join(", due ") || null;
 }

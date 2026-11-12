@@ -21,7 +21,7 @@ export function useRecordForm<R, K extends string>(
   const [changedSince, setChangedSince] = useState<K[]>([]);
   const [isPending, startTransition] = useTransition();
 
-  // Given another record in the same place (the next task on This week's board, say), the form
+  // Given another record in the same place (the next task on Today's board, say), the form
   // starts over on it, so it can't save to the one it held before. A new record's form (none yet)
   // and settings (no id) never do, and a save that lands after the swap is set right here too.
   const id = idOf(record);
