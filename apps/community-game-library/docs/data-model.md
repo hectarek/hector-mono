@@ -84,6 +84,8 @@ The expansions in a copy's box.
 
 Its key is the pair. The expansion's `base_game_id` is the copy's game.
 
+`base_game_id` can't stand in for this table: it says which expansions a game has, not which ones a user owns. Storing an owned expansion as its own `user_games` row would make every list, count and loan of copies skip those rows, give them a condition and switches that mean nothing, and lose which of two copies holds it. Hector agreed to keep the table on 2026-11-12.
+
 ## game_suggestions
 
 A user's suggestion of a game that search didn't find (R4, B9, G2).
