@@ -1,6 +1,6 @@
 # Community Game Library: screens
 
-Updated 2026-11-11
+Updated 2026-11-12
 
 Every screen of the app was drawn before any code, on a private design canvas. This file is the record the build works from: which screens exist, the rules they follow, and what happens in the states that weren't drawn. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
 
@@ -147,7 +147,7 @@ These came from Hector's reviews (D13, D14) and from a usability audit of all 65
 
 ## States that weren't drawn
 
-Proposed on 2026-11-11 from the audit. Hector hasn't gone through these line by line, so any of them can change.
+Proposed on 2026-11-11 from the audit. Hector agreed the rules behind them on 2026-11-12; the wording of any line can still change.
 
 ### After each action
 
@@ -167,7 +167,7 @@ Proposed on 2026-11-11 from the audit. Hector hasn't gone through these line by 
 | Ask for more time | The borrower's page reads "You asked for 1 more week · Sam hasn't answered". The owner's page leads with the request and counts on their tab |
 | Answer a request for more time | The due date changes or stays, and the borrower is told either way |
 | Change the due date | The track and the due line change, and the borrower is told |
-| Call a game back | The owner's page reads "Called back today". The borrower's page leads with "Sam wants it back now". Any pass-along ends (R20) |
+| Call a game back | The owner's page reads "Called back today", and the message offers "Text Jo too", which opens the phone's share sheet with a ready message (R52). The borrower's page leads with "Sam wants it back now". Any pass-along ends (R20) |
 | "I gave it to Jo", passing a game along | The giver's page reads "Waiting for Jo to confirm", with "I still have it" to take it back. The loan stays the giver's until Jo confirms |
 | The next person confirms a pass-along | The giver's loan ends, the new one starts for the same period (R48), and the owner is told who has the game |
 | Join a line | On the game's page that copy reads "2nd in line", with "Leave the line". Loans lists it under "In line" |
@@ -176,7 +176,7 @@ Proposed on 2026-11-11 from the audit. Hector hasn't gone through these line by 
 | Join a waitlist | The page reads "Waitlist · you're 2nd", with "Leave the waitlist" |
 | Create a game night | The host's page (D7). For a night only invited people see, the invite page comes first (D10) |
 | Send invitations | Back on the host's page. Each person shows as "Invited" until they answer |
-| Cancel a night | It leaves Nights for everyone and shows under past nights as "Cancelled". Everyone going, invited or waiting gets a notice |
+| Cancel a night | It leaves Nights for everyone and shows under past nights as "Cancelled". Everyone going, invited or waiting gets a notice, and the message offers "Text them too", which opens the phone's share sheet with a ready message (R52) |
 | Accept a friend request | They join "Your friends", with "You and Mei are friends." The Friends count drops |
 | Decline a friend request | The row goes. The other person isn't told |
 | "Add friend" | The row reads "You asked", with "Cancel request" |
