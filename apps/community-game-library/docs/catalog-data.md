@@ -2,7 +2,7 @@
 
 Updated 2026-11-12
 
-What was found when the catalog's source was checked before the data model was written. These are findings only: how the catalog gets filled is not decided. Hector's direction on 2026-11-12 is a simple data model first, holding only the values the spec and the drawn screens use. Every page named here was read on 2026-11-12, by one of two sessions. A line marked "our reading" is a judgment, not something the source states. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
+What was found when the catalog's source was checked before the data model was written. These are findings only: how the catalog gets filled is not decided. Hector's direction on 2026-11-12 is a simple data model first, holding only the values the spec and the drawn screens use. The proposed model is in [data-model.md](data-model.md). Every page named here was read on 2026-11-12, by one of two sessions. A line marked "our reading" is a judgment, not something the source states. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
 
 ## The short answer
 
