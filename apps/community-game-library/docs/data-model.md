@@ -47,7 +47,7 @@ One row per game or expansion.
 | `popularity` | integer | no | Not shown. Among close matches in search, more popular games come first | R2 |
 | `created_at`, `updated_at` | timestamptz | yes | | |
 
-A check keeps `base_game_id` set exactly when `type` is `'expansion'`.
+A check keeps `base_game_id` set exactly when `type` is `'expansion'`. What should we play?'s fourth choice, "New players", isn't stored: it picks light games (R37).
 
 Only `type` and `title` are required, since a game can be known by its title before its details are. A screen shows a value only when the game has it: no line, fact, inked die or filter appears for a value that's missing (Hector, 2026-11-12). Rows, filters and suggestions lean on players and play time, so a game in someone's library should have those.
 
