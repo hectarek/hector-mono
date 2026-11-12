@@ -19,7 +19,7 @@ Besides step 2 of [How to build a unit](../build-plan.md#how-to-build-a-unit):
 
 ## The rules
 
-These are Claude's, written to match D8 and D9. Where the boards don't say, the choice is marked.
+These are Claude's, written to match D8 and D9. Where the boards don't say, the choice is marked, and Hector agreed each one on 2026-11-12.
 
 **What should we play?** (`src/entities/what-to-play.ts`)
 
@@ -56,5 +56,4 @@ These are Claude's, written to match D8 and D9. Where the boards don't say, the 
 
 - [ ] The checks, dead code and tests pass
 - [ ] D8 and D9 match their boards at 390 px, and work at 768 and 1280 px
-- [ ] The task notes the choices marked above, for Hector's review
 - [ ] Committed as `feat(community-game-library): U20 what should we play, and tables`

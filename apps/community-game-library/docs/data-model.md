@@ -1,12 +1,12 @@
 # Community Game Library: data model
 
-Updated 2026-11-12. Hector confirmed the catalog's tables on 2026-11-12. The rest (members, friends, loans, game nights and notices) were added the same day for his review, under the same rules.
+Updated 2026-11-12. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules.
 
 Every table the first release needs, holding only the values the drawn screens and the spec use. Where the catalog's values come from is not decided; the findings are in [catalog-data.md](catalog-data.md). U3 creates all of them in one migration ([build-plan.md](build-plan.md), KTD5). The requirement and decision numbers (R, D, KTD) are build-plan.md's, and screen codes such as B5 are the design canvas's ([screens.md](screens.md)).
 
 ## Naming rules
 
-These are the conventions a professional Postgres schema commonly follows; the recipes app's schema follows them too. Every table here, and every table added later, keeps them. Rules 14 and 15, and the second sentences of rules 2, 4, 7, 9 and 10, were added with the rest of the model on 2026-11-12, for Hector's review.
+These are the conventions a professional Postgres schema commonly follows; the recipes app's schema follows them too. Every table here, and every table added later, keeps them. Rules 14 and 15, and the second sentences of rules 2, 4, 7, 9 and 10, were added with the rest of the model on 2026-11-12, and Hector agreed them the same day.
 
 1. A table's name is plural and snake_case. A table of things that belong to another is named for the owner, singular, then the things, plural: `user_games`, `user_game_expansions`, `game_suggestions`, `game_night_votes`.
 2. A table that holds things has an `id` (uuid), `created_at` and `updated_at` (timestamptz, set by the database). A table that pairs two things is keyed by the pair, with timestamps only where a screen or a rule reads them, and a table of one row per user is keyed by `user_id`.

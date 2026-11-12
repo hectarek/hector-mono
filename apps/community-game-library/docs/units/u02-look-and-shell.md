@@ -4,7 +4,7 @@
 |---|---|
 | Batch | 1, Foundation (`feat/community-game-library-b1-foundation`) |
 | Model | Strong: every screen uses what this builds |
-| After | U1. Needs H5 before the theme's restyles |
+| After | U1. H5, the OK on the theme's approach, was given on 2026-11-12 |
 | Serves | D12, D13, R43; KTD12, KTD14, KTD16, KTD17, KTD18 |
 
 The Punchboard theme in `@repo/ui`, the app's own pieces, the patterns every screen shares, and the shell: the header with the bell and the piece, the four tabs, and the wider-screen rules.
@@ -22,7 +22,7 @@ Besides step 2 of [How to build a unit](../build-plan.md#how-to-build-a-unit):
 ## Build
 
 1. **First, a spike.** Check that the design lint accepts a piece color set by `data-color` on an app element and styled from the theme file. If it doesn't, stop and put the options in the task. Never loosen a rule.
-2. **The theme (KTD12):** `packages/ui/src/styles/themes/community-game-library.css`, with building.md's token table, and the dark blocks repeating the light values for the theme test. Restyled by `data-slot` inside it, once H5's OK is in the task:
+2. **The theme (KTD12):** `packages/ui/src/styles/themes/community-game-library.css`, with building.md's token table, and the dark blocks repeating the light values for the theme test. Restyled by `data-slot` inside it, as Hector agreed (H5):
    - 2px edges and 44 px heights on buttons, fields and toggles
    - the solid red button, with white text and a navy edge
    - the dashed navy focus ring
@@ -65,7 +65,6 @@ The pages that use these (each later unit). The counts' numbers (U11). The membe
 
 ## Done when
 
-- [ ] H5's OK is in the task before the restyles
 - [ ] `packages/ui`'s checks and the theme test pass, and no other app's screens change
 - [ ] The app's checks, dead code and tests pass
 - [ ] Each component matches its design-system preview, and the shell matches B1's header and tab bar at 390 px; the wide frames match Wide0 to Wide4 at 768 and 1280 px

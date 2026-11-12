@@ -15,10 +15,10 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 | | |
 |---|---|
-| Phase | The plan is written: the whole data model ([data-model.md](data-model.md)), the technical half's decisions and code map (below), and 26 unit briefs in 8 batches ([units/](units/)), for Hector's review. The design is finished ([screens.md](screens.md)) |
-| Next | Hector's review; then the build's tasks in his tracker, and Batch 1 |
-| Then | Batches 2 to 8, with motion last (D13). The catalog's source decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md)) |
-| Waiting on Hector | His review of the new tables, the decisions and the briefs; H3, H5 and H7 before Batch 1; H2, H4, H6 and H9 before launch; H1 if the catalog uses BoardGameGeek |
+| Phase | The plan is agreed (2026-11-12): the whole data model ([data-model.md](data-model.md)), the technical half's decisions and code map (below), and 26 unit briefs in 8 batches ([units/](units/)). The design is finished ([screens.md](screens.md)) |
+| Next | This spec's PR merging; then the build's tasks in Hector's tracker, and Batch 1 |
+| Then | Batches 2 to 8, with motion last (D13). The catalog's source is its own effort beside the build, and decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md)) |
+| Waiting on Hector | The spec PR's merge; H3 and H7 before Batch 1; H2, H4 and H9 before launch; H6, the catalog's source, beside the build, with H1 if it's BoardGameGeek |
 | Updated | 2026-11-12 |
 
 ---
@@ -29,7 +29,7 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 - Decisions (D) are product choices with their reasons. Hector agreed every one on 2026-11-10, including the details Claude proposed.
 - A requirement or decision that changed after Hector saw it says so, with the date and the question it came from.
 - Needs from Hector (H) are steps only he can take.
-- Key technical decisions (KTD) are the technical half's choices of mechanism, with their reasons. Claude proposed them on 2026-11-12, for Hector's review.
+- Key technical decisions (KTD) are the technical half's choices of mechanism, with their reasons. Claude proposed them on 2026-11-12, and Hector agreed them the same day.
 - Units (U) are the build's steps, each with a brief of its own in [units/](units/). A batch is the units one PR holds.
 - A line marked "Audit, 2026-11-11" is a rule Claude added from the usability audit of the screens, where a screen couldn't be drawn without one. Hector agreed them on 2026-11-12.
 - The screens drawn for these requirements, the rules they follow and the states between them are in [screens.md](screens.md).
@@ -168,7 +168,7 @@ On screen the app says it differently, in Hector's words of 2026-11-11: a member
   - the time available
   - the complexity the host wants: light, medium, heavy, or light enough for new players
 
-  Each suggestion says why it fits ("Best at 5 · 60 to 90 min · medium"). *asked* (Revised 2026-11-12 by Claude, to match the approved screen D8: the games come from the night's games on the table, or from all the member's friends' games, their own included, not only the host's library. For Hector to confirm.)
+  Each suggestion says why it fits ("Best at 5 · 60 to 90 min · medium"). *asked* (Revised 2026-11-12 by Claude, to match the approved screen D8: the games come from the night's games on the table, or from all the member's friends' games, their own included, not only the host's library. Hector agreed the same day.)
 - R38. Before a night, members going can vote on the games on its list, and the host sees the ranking. *gap (Hector took it on Q9)*
 - R46. When more people are going than one game seats, the app proposes tables: a split of the people going, with a game for each table that plays well at its size and fits the time. *gap (Hector took it on Q9)*
 
@@ -306,8 +306,8 @@ Every question from the first draft has Hector's answer (2026-11-10):
 - H2. Set up Google sign-in for Neon Auth before launch (R39): a Google OAuth client with its consent screen verified. The steps are in the notes for the technical half.
 - H3. Neon, before U1's database steps. An OK for Claude to create the test project, `community-game-library-test`, in AWS US East (N. Virginia), with Neon Auth and object storage. Then create the production project yourself in the same region, since object storage runs only in some regions (KTD11), and put its values in Vercel's Production environment, so no production secret passes through a Claude session (KTD1).
 - H4. Neon Auth on production, before launch: your own email sender (SMTP), the application name "Community Game Library", the production domain as its trusted domain, and localhost access off (KTD3).
-- H5. An OK, before U2, on how the theme reaches what tokens can't: restyling the shared components by `data-slot` inside the theme file (KTD12, the design system's building.md).
-- H6. The catalog's source, before U24 ([catalog-data.md](catalog-data.md), KTD21). The build doesn't wait on it; the first friends' invitations do.
+- H5. An OK, before U2, on how the theme reaches what tokens can't: restyling the shared components by `data-slot` inside the theme file (KTD12, the design system's building.md). Given 2026-11-12.
+- H6. The catalog's source, before U24 ([catalog-data.md](catalog-data.md), KTD21). The build doesn't wait on it; the first friends' invitations do. Hector's call (2026-11-12): settle it as a separate effort while the app is built.
 - H7. Vercel, before Batch 1's first push: the project rooted at `apps/community-game-library`, with Skip deployment on and no Ignored Build Step (KTD20); communitygamelibrary.com pointed at it; Production's variables from H3; `CRON_SECRET` before U17 merges (KTD8).
 - H8. The gates: the shell and getting in on Batch 1's preview, and the first full slice after U6 (Batches and units).
 - H9. Launch: share your friend link with the circle, and open the app on your phone after a day away (KTD2).
@@ -347,7 +347,7 @@ For the session that writes the technical half, once the recipes performance rev
 
 ## The technical half
 
-Written 2026-11-12, after the recipes performance review (`docs/fast-first-open.md`), with job-search's build as the precedent. Hector asked for every decision, the code map and every unit's brief up front, so building is following the briefs, and for PRs that hold several units, so the free plans' daily build limit isn't spent in a day. Claude proposed everything here on 2026-11-12, for his review. A decision that changes later is marked revised with its date, not rewritten.
+Written 2026-11-12, after the recipes performance review (`docs/fast-first-open.md`), with job-search's build as the precedent. Hector asked for every decision, the code map and every unit's brief up front, so building is following the briefs, and for PRs that hold several units, so the free plans' daily build limit isn't spent in a day. Claude proposed everything here on 2026-11-12, and Hector agreed it the same day, taking Claude's recommendation on each open choice. A decision that changes later is marked revised with its date, not rewritten.
 
 ### How to build a unit
 
@@ -424,7 +424,7 @@ For the agent building one:
 - KTD12. **The look: Punchboard, as a theme in `@repo/ui` (D12, D13).** The design system's `building.md` maps it, and this decides what it left open.
   - `packages/ui/src/styles/themes/community-game-library.css`, with `data-theme="community-game-library"` on `<html>`, named for the app as `recipes.css` and `job-search.css` are (building.md suggested `punchboard.css`). The dark blocks the theme test requires repeat the light values. There's no `ThemeProvider`, since the app is light only.
   - Fonts through `next/font/google`: IBM Plex Sans (`--font-sans`), Stardos Stencil 700 (`--font-heading`, always uppercase) and IBM Plex Mono 500 (`--font-mono`).
-  - What tokens can't reach (2px edges, 44 px targets, the dashed focus ring, the solid red button, the navy toast) comes from restyling the shared components by `data-slot` inside the theme file, as `neobrutalist.css` does: building.md's first way, which asked for the owner's OK first (H5).
+  - What tokens can't reach (2px edges, 44 px targets, the dashed focus ring, the solid red button, the navy toast) comes from restyling the shared components by `data-slot` inside the theme file, as `neobrutalist.css` does: building.md's first way, which asked for the owner's OK first. Hector gave it on 2026-11-12 (H5).
   - The kit's type sizes (10, 13, 15, 22 and 26 px) become named sizes in the shared stylesheet, as `text-2xs` was. The arbitrary-values rule stays on.
   - Piece colors are the theme's own custom properties (`--piece-brick` and so on, as `neobrutalist.css` has `--neo-*`), set through a `data-color` attribute that the theme file styles, so no raw color or arbitrary value reaches the app. U2 checks that the design lint accepts this before building on it.
   - The app's own components come from the design system's `components/bundle.css`: Stamp, TabCount, Piece, Seats, CoverThumb and Cover, Dice, Track, ListRow, Header, TabBar and Group. The shared ones are restyled: Button, the fields (Input, Textarea, NativeSelect), Checkbox, RadioGroup, Switch, ToggleGroup (SegmentedControl and FilterChip), Drawer (Sheet), AlertDialog (Dialog), the Toaster (Toast) and Empty.
@@ -440,11 +440,11 @@ For the agent building one:
 
 - KTD20. **Batches, pushes and the free plans (Hector, 2026-11-12).**
   - Vercel's Hobby plan allows 100 deployments a day for the whole account, and counts a build its Ignored Build Step cancels as a full deployment. Its own skipping of projects a push doesn't affect isn't counted, works with Bun workspaces, and is on by default for a new project (Vercel's limits, project settings and monorepo docs, read 2026-11-12). So this app's `vercel.json` has no `ignoreCommand`, unlike the new-app checklist's, and U1 checks the project's Skip deployment setting is on.
-  - Units go in batches: one branch and PR per batch, one commit per unit. An agent commits locally and pushes when the batch is ready for review, or once for a gate's preview, so a batch costs one to three preview builds rather than one per unit.
+  - Units go in batches: one branch and PR per batch, one commit per unit. An agent commits locally and pushes when the batch is ready for review, or once for a gate's preview, so a batch costs one to three preview builds rather than one per unit. Hector made batching the default for all work in the repo on 2026-11-12 (root `AGENTS.md`): the detail lives in each commit, not in a PR of its own.
   - CI runs on GitHub's runners, which are free for a public repo. Tests use PGlite and previews the test project, so no Neon branch is made per preview (Neon's Free plan: 10 branches and 100 compute hours a project a month).
   - Hobby is for non-commercial personal use, which this app is (D3).
   - The repo's other apps still use `ignoreCommand`, so each push still costs one deployment per app; moving them to Vercel's skipping is separate work.
-- KTD21. **The catalog during the build (D7, on hold).** Until the source is chosen, the catalog is the canvas's fictional games, put into the local and test databases by `scripts/seed.ts` (U4). Real games reach production only through the admin's Add a game by hand (G3) or U24's import. Launch needs the source decided (H6), with H1 if it's BoardGameGeek, and so do the source's credits (Y1).
+- KTD21. **The catalog during the build (D7, on hold).** Until the source is chosen, the catalog is the canvas's fictional games, put into the local and test databases by `scripts/seed.ts` (U4). Real games reach production only through the admin's Add a game by hand (G3) or U24's import. Launch needs the source decided (H6), with H1 if it's BoardGameGeek, and so do the source's credits (Y1). The decision is its own effort, run while the app is built (Hector, 2026-11-12).
 - KTD22. **Tests as recipes'.** Use cases run on both backends (`describeEachBackend`), constraints are tested on PGlite alone, controllers through `controllerBasics`, and screens with happy-dom against the real actions. Every acceptance example (AE1 to AE10) is a named test in the unit that builds it. Browser flows (Playwright) come in U25 only, on the test project, behind recipes' test-database guard with the comment `community-game-library-test`: making an account, then borrowing and giving back a game.
 - KTD23. **What should we play? and tables are rules (R37, R46, D2).** Pure functions in `src/entities/what-to-play.ts` and `src/entities/tables.ts`, each answer with its reason. U20's brief holds the rules.
 - KTD24. **A night's calendar file (R35).** `/nights/[id]/calendar` answers `text/calendar`, made on request for someone who can see the night (KTD4), with its title, times, place and address. Nothing keeps a calendar in sync.
@@ -557,7 +557,7 @@ Each unit is one task in Hector's tracker, under the same U number, with its bri
 
 | Batch | Branch | Units | Starts after | Gate |
 |---|---|---|---|---|
-| 1 Foundation | `feat/community-game-library-b1-foundation` | U1 to U5 | H3, H5, H7 | The shell and getting in, on the batch's preview (H8) |
+| 1 Foundation | `feat/community-game-library-b1-foundation` | U1 to U5 | The spec's PR merged; H3, H7 | The shell and getting in, on the batch's preview (H8) |
 | 2 Catalog and libraries | `feat/community-game-library-b2-catalog` | U6 to U9 | Batch 1 merged | After U6, from screenshots, before U7 (H8) |
 | 3 Friends and the inbox | `feat/community-game-library-b3-friends` | U10, U11 | Batch 2 merged | |
 | 4 Loans | `feat/community-game-library-b4-loans` | U12 to U17 | Batch 3 merged | |
@@ -570,7 +570,7 @@ Batches 4 and 5 run side by side, each in its own worktree, so at most two agent
 
 **Batch 1: Foundation**
 - **U1** Scaffold from recipes · strong · KTD1, KTD2, KTD11, KTD20 · needs H3, H7 · [brief](units/u01-scaffold.md)
-- **U2** The look and the shell · strong · KTD12, KTD14, KTD16 to KTD18 · needs H5 · after U1 · [brief](units/u02-look-and-shell.md)
+- **U2** The look and the shell · strong · KTD12, KTD14, KTD16 to KTD18 · after U1 · [brief](units/u02-look-and-shell.md)
 - **U3** Every table and the shared rules · strong · KTD5, KTD6, KTD10 · after U1 · [brief](units/u03-tables-and-rules.md)
 - **U4** Shared reads, the cast and the seed · strong · KTD4, KTD7, KTD13, KTD21 · after U3 · [brief](units/u04-shared-reads-and-seed.md)
 - **U5** Getting in, and You · standard · KTD3, KTD11 · after U2, U4 · [brief](units/u05-getting-in.md)
@@ -670,3 +670,4 @@ Batches 4 and 5 run side by side, each in its own worktree, so at most two agent
 - **2026-11-12:** Hector confirmed the catalog's data model ([data-model.md](data-model.md)) after asking for names that follow one pattern. Best counts, minimum age and popularity stay as optional values, a screen shows a value only when the game has it, the source's id and the change history are out, and the how-to-play video is in (R1, R2, R5, R7, R11, R14). The admin screens lose what needed a source, G6 leaves the first release, and the game's page shows complexity as a word. **Next:** the return day, then breaking the build into tasks.
 - **2026-11-12:** Hector confirmed the return day (R19) and set a generous default that assumes good intent (D15): once a borrower says they've handed a game over, the loan can't run overdue, and a return the owner hasn't answered closes by itself a week later. The second session's remaining findings are in [catalog-data.md](catalog-data.md): what BGG offers without an application, what its application weighs, and the options for covers. Hector asked whether owned expansions need their own table, given `base_game_id`; Claude recommended keeping it, since `base_game_id` says which expansions a game has, not which ones a member owns. **Next:** his answer, then breaking the build into tasks.
 - **2026-11-12:** the technical half. Hector kept `user_game_expansions` and D15 as written, and asked for every decision, the code map and every unit's brief now, with PRs holding several units so the free plans' daily build limit isn't spent in one day. Written: the rest of the data model (members, friends, loans, nights and notices, with five naming rules added), KTD1 to KTD25, the code map, 26 units in 8 batches, a brief for each in [units/](units/), and H3 to H9. Checked in the providers' docs that day: Vercel's Hobby limits (100 deployments a day for the account, with a build cancelled by the Ignored Build Step counted and Vercel's own skipping not), Schedules on Hobby, Neon's Free plan and Object Storage, and Neon Auth's production checklist (codes work with the shared sender, links don't). **Next:** Hector's review of the new tables, the decisions and the briefs; then H3, H5 and H7, the build's tasks in his tracker, and Batch 1.
+- **2026-11-12:** Hector agreed the rest of the data model, and took Claude's recommendation on each open choice: the theme's approach (H5), R37 as revised to match D8, U20's defaults and its reading of D9's sharing, and the 8-character link codes. The catalog's source is a separate effort run while the app is built (H6), and batching units into one PR, with a commit each, is the default for all work in the repo (root `AGENTS.md`). He'd taken the repo's skipping of unchanged apps (2026-10-08) to be the fix for the daily deployment limit; Vercel's docs say a build its Ignored Build Step cancels still counts as a deployment, and 32 of the account's last 50 deployments were such cancels. **Next:** the spec's PR; once it merges, the build's tasks, H3 and H7, and Batch 1.
