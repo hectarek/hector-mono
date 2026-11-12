@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "bunx turbo@2 query affected --packages job-search --base \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD~1}\" --exit-code",
   "schedules": {
     "archive-expired": {
       "schedule": "0 5 * * *",
