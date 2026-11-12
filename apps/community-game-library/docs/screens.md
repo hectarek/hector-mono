@@ -186,7 +186,7 @@ Proposed on 2026-11-11 from the audit. Hector agreed the rules behind them on 20
 | "Add friend" | The row reads "You asked", with "Cancel request" |
 | Unfriend | Back on Friends without them. They aren't told (R50) |
 | Flip a switch | It takes effect at once, with "Saved." |
-| The admin answers a suggestion | It moves to the answered list. The member is told, and an added game lands in their library (R4) |
+| The admin answers a suggestion | It moves to the answered list. The member is told, and the game lands in their library, whether the admin added it or it was already in the catalog (R4) |
 
 ### Actions that ask first
 

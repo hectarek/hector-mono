@@ -24,14 +24,14 @@ One row per game or expansion.
 | `complexity` | `'light' \| 'medium' \| 'heavy'` | | The game's page, the folded Complexity filter, What should we play? | R1, R11, R37 |
 | `categories` | text[] | | The game's page, the folded Category filter | R1, R11 |
 | `description` | text | | The game's page (About) | R1, R14 |
-| `description_credit` | text | | Under the description, when the text is someone else's | |
 | `cover_url` | text | | Everywhere a cover shows; the drawn token when it's empty | R1 |
-| `cover_credit` | text | | The game's page, when the cover is someone else's | |
 | `bgg_id` | integer, unique | | Not shown. Ties a game to BGG's list of games. Empty on a game added by hand, which the admin screens stamp "Ours" (G3, G5) | D7, D11 |
 | `popularity` | integer | | Not shown. Orders search results | R2 |
 | `created_at`, `updated_at` | timestamptz | yes | | |
 
 Players and play time aren't required, since a game can be known by its title before its details are. Rows, filters and suggestions all use them, so a game in someone's library should have them.
+
+Credits are shown once per source, at the foot of a game's page and of search results, and on About the catalog (Y1), not per game. Which credit a game shows is settled with the sourcing. A per-game credit column comes back only if a chosen source needs one, such as text taken under an attribution license.
 
 ## copies
 
@@ -50,6 +50,8 @@ One row per physical copy a member owns.
 
 **copy_expansions**: `copy_id` → copies and `expansion_id` → games, one row per expansion in the box (R8). The expansion's `base_game_id` is the copy's game.
 
+My library's switch, "Friends can pass my games along" (B6), sets `friends_can_pass_along` on every copy the member owns, and is also the member's default for copies added later. That default is a member setting, `pass_along_by_default`, for when the members table is written.
+
 ## game_suggestions
 
 A member's suggestion for a game search didn't find (R4, B9, G2).
@@ -60,11 +62,13 @@ A member's suggestion for a game search didn't find (R4, B9, G2).
 | `suggested_by` | → members | yes |
 | `title` | text | yes |
 | `year`, `publisher`, `link`, `photo_url` | text or integer | |
-| `status` | `'waiting' \| 'added' \| 'declined'` | yes |
+| `status` | `'waiting' \| 'added' \| 'already-here' \| 'declined'` | yes |
 | `answer` | text | when declined |
-| `game_id` | uuid → games | when added, or when the game turned out to be in the catalog |
+| `game_id` | uuid → games | when added, or already here |
 | `created_at`, `answered_at` | timestamptz | `created_at` |
 | `answered_by` | → members | when answered |
+
+`'already-here'` is G2's answer "It's already here": the member is pointed to the game in the catalog and it lands in their library, as with `'added'`. It's its own value because the admin added nothing, so Answered suggestions (G7) shows it as "Already here", not as declined.
 
 ## game_changes
 
@@ -76,7 +80,10 @@ What the admin changed on a game, and who changed it (R5, G4's Changes list).
 | `game_id` | uuid → games | yes |
 | `changed_by` | → members | yes |
 | `changed_at` | timestamptz | yes |
-| `summary` | text | yes, for example "Play time: 45 min to 45–60 min" |
+| `field` | text | yes, the column changed, for example `max_minutes` |
+| `old_value`, `new_value` | text | `old_value` is empty when the field was empty |
+
+The old value is what lets the game's record show what a corrected field was before, and put it back (G4). With sources undecided, the old value isn't always BoardGameGeek's, so G4 reads "Corrected · was 45 min" and "Put it back". Whether a game from BoardGameGeek can be corrected at all is open in catalog-data.md, since BGG's terms forbid modifying its data.
 
 ## Left out of the MVP
 
