@@ -15,10 +15,10 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 | | |
 |---|---|
-| Phase | Design is finished: every screen is drawn and audited ([screens.md](screens.md)), the last picks are made, the look is a design system kept beside the canvas, and the catalog's data model is confirmed ([data-model.md](data-model.md)) |
-| Next | Breaking the build into tasks |
-| Then | The technical half and the build, with motion added last (D13). Where the catalog's data comes from stays open ([catalog-data.md](catalog-data.md)) |
-| Waiting on Hector | H2 (Google sign-in), and H1 (BoardGameGeek registration) if the catalog uses its data |
+| Phase | The plan is written: the whole data model ([data-model.md](data-model.md)), the technical half's decisions and code map (below), and 26 unit briefs in 8 batches ([units/](units/)), for Hector's review. The design is finished ([screens.md](screens.md)) |
+| Next | Hector's review; then the build's tasks in his tracker, and Batch 1 |
+| Then | Batches 2 to 8, with motion last (D13). The catalog's source decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md)) |
+| Waiting on Hector | His review of the new tables, the decisions and the briefs; H3, H5 and H7 before Batch 1; H2, H4, H6 and H9 before launch; H1 if the catalog uses BoardGameGeek |
 | Updated | 2026-11-12 |
 
 ---
@@ -29,6 +29,8 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 - Decisions (D) are product choices with their reasons. Hector agreed every one on 2026-11-10, including the details Claude proposed.
 - A requirement or decision that changed after Hector saw it says so, with the date and the question it came from.
 - Needs from Hector (H) are steps only he can take.
+- Key technical decisions (KTD) are the technical half's choices of mechanism, with their reasons. Claude proposed them on 2026-11-12, for Hector's review.
+- Units (U) are the build's steps, each with a brief of its own in [units/](units/). A batch is the units one PR holds.
 - A line marked "Audit, 2026-11-11" is a rule Claude added from the usability audit of the screens, where a screen couldn't be drawn without one. Hector agreed them on 2026-11-12.
 - The screens drawn for these requirements, the rules they follow and the states between them are in [screens.md](screens.md).
 
@@ -42,7 +44,7 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 - **Stop conditions:**
   - BoardGameGeek's terms don't allow keeping a copy of its catalog, or showing its images: stop catalog work and bring it back to Hector (D7).
   - Any task would put a member's name, contact or address into the repo: stop, and keep it in the database.
-- **Execution profile:** Claude builds. Hector reviews and merges one PR per phase. Account and production-data steps are his (Needs from Hector).
+- **Execution profile:** agents build, one batch of units per PR (KTD20). Hector reviews and merges each PR, looks at two gates, and takes the account and production steps (Needs from Hector).
 
 ---
 
@@ -166,7 +168,7 @@ On screen the app says it differently, in Hector's words of 2026-11-11: a member
   - the time available
   - the complexity the host wants: light, medium, heavy, or light enough for new players
 
-  Each suggestion says why it fits ("Best at 5 · 60 to 90 min · medium"). *asked*
+  Each suggestion says why it fits ("Best at 5 · 60 to 90 min · medium"). *asked* (Revised 2026-11-12 by Claude, to match the approved screen D8: the games come from the night's games on the table, or from all the member's friends' games, their own included, not only the host's library. For Hector to confirm.)
 - R38. Before a night, members going can vote on the games on its list, and the host sees the ranking. *gap (Hector took it on Q9)*
 - R46. When more people are going than one game seats, the app proposes tables: a split of the people going, with a game for each table that plays well at its size and fits the time. *gap (Hector took it on Q9)*
 
@@ -302,12 +304,19 @@ Every question from the first draft has Hector's answer (2026-11-10):
 
 - H1. Register the app for BGG's XML API (boardgamegeek.com/applications) and keep its token for the build. BGG warns that approval can take a week or more, so this is worth starting now.
 - H2. Set up Google sign-in for Neon Auth before launch (R39): a Google OAuth client with its consent screen verified. The steps are in the notes for the technical half.
+- H3. Neon, before U1's database steps. An OK for Claude to create the test project, `community-game-library-test`, in AWS US East (N. Virginia), with Neon Auth and object storage. Then create the production project yourself in the same region, since object storage runs only in some regions (KTD11), and put its values in Vercel's Production environment, so no production secret passes through a Claude session (KTD1).
+- H4. Neon Auth on production, before launch: your own email sender (SMTP), the application name "Community Game Library", the production domain as its trusted domain, and localhost access off (KTD3).
+- H5. An OK, before U2, on how the theme reaches what tokens can't: restyling the shared components by `data-slot` inside the theme file (KTD12, the design system's building.md).
+- H6. The catalog's source, before U24 ([catalog-data.md](catalog-data.md), KTD21). The build doesn't wait on it; the first friends' invitations do.
+- H7. Vercel, before Batch 1's first push: the project rooted at `apps/community-game-library`, with Skip deployment on and no Ignored Build Step (KTD20); communitygamelibrary.com pointed at it; Production's variables from H3; `CRON_SECRET` before U17 merges (KTD8).
+- H8. The gates: the shell and getting in on Batch 1's preview, and the first full slice after U6 (Batches and units).
+- H9. Launch: share your friend link with the circle, and open the app on your phone after a day away (KTD2).
 
 ---
 
 ## Notes for the technical half
 
-For the session that writes the technical half, once the recipes performance review is done. Leads to check, not decisions:
+For the session that writes the technical half, once the recipes performance review is done. Leads to check, not decisions. The technical half below settled them on 2026-11-12, and they stay as the research behind its decisions:
 
 - The catalog copy (D7). Facts gathered 2026-11-10 from search results and third-party clients, since BGG's own pages refuse automated reads; confirm each in a browser:
   - BGG holds more than 100,000 games, ranked and unranked, of which about 20,000 or more are ranked.
@@ -336,6 +345,312 @@ For the session that writes the technical half, once the recipes performance rev
 
 ---
 
+## The technical half
+
+Written 2026-11-12, after the recipes performance review (`docs/fast-first-open.md`), with job-search's build as the precedent. Hector asked for every decision, the code map and every unit's brief up front, so building is following the briefs, and for PRs that hold several units, so the free plans' daily build limit isn't spent in a day. Claude proposed everything here on 2026-11-12, for his review. A decision that changes later is marked revised with its date, not rewritten.
+
+### How to build a unit
+
+For the agent building one:
+
+1. Start from the unit's task in Hector's tracker. It names the unit, its batch and branch, what it waits on and what earlier sessions did. It also holds the links to the design canvas and the design system, which are private while this repo is public. The unit's brief is `docs/units/u<nn>-<name>.md`.
+2. Read the root `AGENTS.md`, this app's `AGENTS.md` (from U1 on), `packages/ui/AGENTS.md` for any screen, and `docs/clean-architecture.md`. Then read the brief in full, and only the parts of this spec, [data-model.md](data-model.md) and [screens.md](screens.md) that it names.
+3. Read each board the brief names from the canvas with the Artifact tool (`read`, with `path` set to `project/<board>.dc.html`), and the design system pages it names (`project/components/<Name>/README.md`). A board's words, order and states are its screen's spec, and the design system's rules hold on every screen.
+4. Build inward-out (`docs/clean-architecture.md` §9): the entity and its tests, the repository and its mock, the use case with tests on both backends, the controller, the action, then the page and its screen tests. Copy the files the brief names as exemplars rather than starting a pattern of your own.
+5. Work down the brief's Done when list. Commit once per unit on the batch's branch, as `feat(community-game-library): U<n> <summary>`. Don't push until the batch is ready for review, or a gate asks for a preview (KTD20).
+6. Before stopping, record progress in the unit's task: its criteria, notes and status. Change this spec only for a decision that changes it, marked revised with its date. Where a brief and a board disagree, the board wins on words and layout and the brief on behavior; say so in the task.
+
+### Key technical decisions
+
+**Setup**
+
+- KTD1. **Copied from recipes, with job-search's privacy rules.** The app copies `apps/hectors-recipes`' infrastructure rather than sharing it (D6), as job-search did. Next.js 16 with Cache Components and partial prefetching, React 19 with the compiler, Tailwind through `@repo/ui`, Neon Postgres through `@neondatabase/serverless`, Drizzle with generated migrations, Neon Auth, DI with `@evyweb/ioctopus`, and `bun:test` with PGlite. U1's brief lists the files. Not copied: the AI reader, live updates (Ably), the page and PDF fetchers, and spaces with their roles. Three things differ from recipes, as in job-search:
+  - Local development and previews use a Neon test project. Production's values live only in Vercel's Production environment and never pass through a Claude session, and production migrations run with Hector's OK at that moment, through the Neon MCP or his terminal (job-search KTD17). Recipes uses its production database locally, and `.worktreeinclude` copies `.env` into every worktree.
+  - Logs carry error classes, codes and record ids, never a field's value (job-search KTD20, `loggable`), since the database holds friends' names, phone numbers and addresses.
+  - The admin is the account whose id is `ADMIN_USER_ID`.
+- KTD2. **A fast first open from the first deploy (R44).** The target: opened from the home screen after a day away, the page last read shows at once from the phone's saved copy, and the fresh page arrives within about three seconds of a cold start (recipes measured 33 ms and 3.0 s, `docs/fast-first-open.md`). Every pattern in that doc's checklist applies:
+  - the session copy lasts a day
+  - the object-storage client loads on first use, with recipes' container import test
+  - a request's first reads run in a row
+  - Neon's sign-in kit sits only in the sign-in and account layouts, with recipes' layout test
+  - the service worker keeps saved copies (U23)
+  
+  U25 measures a cold open on production and records the numbers here.
+- KTD3. **Accounts: Neon Auth, with Google and email (R39).**
+  - Email and password, with sign-up checked by a code. Neon's shared sender can send codes and password resets, but not verification links (Neon's Auth production checklist, read 2026-11-12). Google signs in on Neon's shared credentials in development, and on our own OAuth client in production (H2).
+  - Before launch, on the production project: our own email sender (SMTP), the application name "Community Game Library", the production domain as the only trusted domain, and localhost access off (H4). The test project trusts localhost and each preview branch's alias, as job-search's does.
+  - The sign-in pages render Neon's `AuthView`, restyled through `classNames` and `localization`, as recipes does.
+  - After sign-in, a member with no `user_profiles` row goes to set up their profile (A4). One with a `removed_users` row sees only that the account was removed. Everyone else gets the app.
+  - A link opened inside a chat app's own browser (A9). The welcome page and both link pages check the user agent against a short list of known in-app browsers (`src/entities/in-app-browser.ts`, each with a test) and show A9 in place of sign-in. U5 checks the list against each app's published user agent.
+  - The proxy (recipes' `proxy.ts`) sends signed-out requests to `/welcome`, except `/welcome`, `/auth/*`, `/f/<token>`, `/n/<token>`, `/sw.js`, the manifest, the icons, the link-preview images and `/api/cron/daily`, which checks its own secret. Each exception has a proxy test.
+
+**Data and rules**
+
+- KTD4. **Who sees what is checked in every use case (D10, R10, R30, R36).**
+  - Another member's copies, profile, phone, photo or nights are read only after `requireFriend` (`src/application/use-cases/friends/require-friend.ts`), and repository reads take the viewer's id and join `friendships`, so a stranger's rows never load (AE8). The other person in an open loan or a pass-along sees the name, piece and phone, friends or not (R40, R48).
+  - A night is read only after `canSeeNight`: the host, anyone with an attendee row, or the host's friends when its audience is `'friends'`. The place, address and list load only after it (AE5). People at one night see each other's names and pieces, never each other's libraries (R30).
+  - A link, a friend's or a night's, opens only what it's for. Its token is the 8-character code the boards draw (`K7Q2-HARB`, data-model.md), checked for its form before any read, as recipes checks its share tokens.
+  - Every repository and use case that reads another member's rows has a test with a stranger, on both backends.
+- KTD5. **Every table in one migration.** U3 creates the whole of [data-model.md](data-model.md) in the app's first migration, with its checks and indexes. A later unit changes the schema only when its brief says so, with one migration per batch at most, additive before the deploy that uses it and drops after (recipes' Backend Rules). Two batches in progress never both touch `db/schema.ts`.
+- KTD6. **Loans are one state machine.** `src/entities/loan.ts` (U3) holds data-model.md's statuses and moves as pure functions:
+  - which moves each person may make: the owner, the borrower, or the next friend in line
+  - the dates, with a month as 30 days
+  - when a loan is overdue
+  - the copy's line
+  - a copy's state for whoever is looking (R15, B13): available, requested, you asked, 2nd in line, out until Nov 20, not lent, yours
+  
+  Every loan write takes the copy's row lock first (`select … for update` on `user_games`), so two answers can't both land. A change that no longer applies throws `ChangedError` with a reason, which the screen turns into its line and next action (KTD16). Only a copy's owner answers, sets the period, extends, changes the due date, calls back or confirms a return, and anyone else, the admin included, is refused (D4, AE7).
+- KTD7. **Notices are written with their change and read with their words.**
+  - The use case that makes a change writes one `notices` row for each person told, in the change's own transaction, through `INoticesRepository.add` (U4), with a type from data-model.md's list.
+  - `app/_lib/notice-text.ts` (U11) turns a type and its rows into the inbox line and its link, for every type, so each type's words live in one place.
+  - The inbox (F1) lists the member's notices newest first, leaves out the groups they switched off, and marks them read when it opens. The bell counts the unread ones it shows.
+  - The tabs' counts (D14) are read from the rows, not from notices, by one use case the shell calls (`get-tab-counts`, U11). Loans counts requests to answer, pick-ups to confirm, returns to confirm and more-time requests to answer; Nights counts invites by name with no answer (R33); Friends counts friend requests waiting.
+- KTD8. **The daily run.** As job-search's (its KTD24): a Vercel schedule with a path target posts to `/api/cron/daily` at 7:00 America/New_York, and the route accepts only `Authorization: Bearer <CRON_SECRET>`, a secret Hector sets in Vercel (H7). On Hobby a schedule runs at most every 15 minutes, within a 15-minute window, up to 5,000 runs a billing period, and a run is a function invocation, not a deployment (Vercel's Schedules docs, read 2026-11-12). The run:
+  - writes R25's reminders due today: `due-soon` two days before, `due-today`, `due-back-today`, and `overdue` the day after and every three days after, plus `night-today`
+  - closes each return its owner hasn't answered for 7 days (D15), with `return-closed`
+  - writes nothing twice: a reminder carries `reminded_on` under a unique index, so a second run the same day adds nothing
+  
+  No screen waits on it: whether a loan is overdue or due today is worked out when a page reads it.
+- KTD9. **One time zone, America/New_York**, as recipes' `PLAN_TIME_ZONE` and job-search's KTD18. Dates are `YYYY-MM-DD` strings end to end, and "today" comes from `todayIn` on the server, never the phone. A night's start and end are timestamps shown in Eastern time. A date shows its weekday, and its year once that isn't this year (screens.md). Revisit when a circle elsewhere joins.
+- KTD10. **Search runs on our copy, with trigrams (R2).** `games.search_title` holds the normalized title (`src/entities/search-title.ts`, U3) under a `pg_trgm` index. Neon has the extension, and so does the PGlite the tests use (0.5.11 ships `pg_trgm`). The input is normalized the same way and matched by word similarity above a threshold. Results come in R2's two groups, games on the member's and their friends' copies first and then the rest, each ordered by closeness and then popularity. "ticket ride" finding Ticket to Ride is a test. U24 sizes it on the real catalog.
+- KTD11. **Photos in Neon Object Storage (R4, R5, R40).**
+  - Two buckets in the Neon project. `profile-photos` is private: a page that shows a photo gets a signed address that lasts an hour, made only for someone who may see the person (KTD4). `catalog-images` is public-read, for covers of games added by hand and box photos on suggestions, kept as their address in `image_url` (data-model rule 14).
+  - The browser shrinks a picture to at most 800 px on its long side and under 300 KB (`app/_lib/shrink-image.ts`) before a server action stores it. Server Actions take 1 MB by default and Vercel's functions 4.5 MB (Vercel's limits, read 2026-11-12). The action checks the type and size again.
+  - `IFileStorage` (application) with an S3 adapter over `@aws-sdk/client-s3`, imported on first use (KTD2), and a mock for tests, all in U1. Neon's storage is S3-style: an S3 SDK points at the branch's endpoint with a Neon credential (Neon's docs, read 2026-11-12).
+  - The Neon project has to be in a region with object storage, here AWS US East (H3). The Free plan includes 5 GB a project.
+
+**Screens**
+
+- KTD12. **The look: Punchboard, as a theme in `@repo/ui` (D12, D13).** The design system's `building.md` maps it, and this decides what it left open.
+  - `packages/ui/src/styles/themes/community-game-library.css`, with `data-theme="community-game-library"` on `<html>`, named for the app as `recipes.css` and `job-search.css` are (building.md suggested `punchboard.css`). The dark blocks the theme test requires repeat the light values. There's no `ThemeProvider`, since the app is light only.
+  - Fonts through `next/font/google`: IBM Plex Sans (`--font-sans`), Stardos Stencil 700 (`--font-heading`, always uppercase) and IBM Plex Mono 500 (`--font-mono`).
+  - What tokens can't reach (2px edges, 44 px targets, the dashed focus ring, the solid red button, the navy toast) comes from restyling the shared components by `data-slot` inside the theme file, as `neobrutalist.css` does: building.md's first way, which asked for the owner's OK first (H5).
+  - The kit's type sizes (10, 13, 15, 22 and 26 px) become named sizes in the shared stylesheet, as `text-2xs` was. The arbitrary-values rule stays on.
+  - Piece colors are the theme's own custom properties (`--piece-brick` and so on, as `neobrutalist.css` has `--neo-*`), set through a `data-color` attribute that the theme file styles, so no raw color or arbitrary value reaches the app. U2 checks that the design lint accepts this before building on it.
+  - The app's own components come from the design system's `components/bundle.css`: Stamp, TabCount, Piece, Seats, CoverThumb and Cover, Dice, Track, ListRow, Header, TabBar and Group. The shared ones are restyled: Button, the fields (Input, Textarea, NativeSelect), Checkbox, RadioGroup, Switch, ToggleGroup (SegmentedControl and FilterChip), Drawer (Sheet), AlertDialog (Dialog), the Toaster (Toast) and Empty.
+- KTD13. **Screens are built from the canvas, with its cast as the fixtures.** Each brief names its boards, and a board's HTML is the spec for its words, order, states and sizes, under screens.md's Rules every screen follows. The canvas's fictional people (You, Alice, Sam, Priya, Jo, Ben, Mei, Dev and Noor) and its games are `tests/_support/cast.ts` and the local seed (U4), so a screen can be checked against its board at 390 px with the same data. The words come from the design system's Words table.
+- KTD14. **Wider screens come from the shell and the shared components (R43).** U2 builds the notes' rules into them: one breakpoint at 768 px, where the tabs move into the header; pages are one centered column, 640 px for one you read or fill in and 1080 px for one you browse; list rows run in two columns from 768 px and three from 1100 px; and a sheet becomes a centered dialog 480 px wide. A unit gets them by using those components, and checks its screens at 768 and 1280 px.
+- KTD15. **Names in code.** Below the screens, names follow the schema in camelCase: `userGame`, `loan`, `gameNight`, `gameNightAttendee`, `friendship`, `friendRequest`, `friendLink`, `notice`, `userProfile`. Routes and components use the screens' words: `/copies/[id]`, `CopyPage`, `copy-state.tsx`. The code map pairs them. Values are data-model.md's readable ones everywhere, with no second name for any of them in code.
+- KTD16. **Actions and errors as recipes'.** Typed domain errors are caught in the action with `toActionError`, and `ActionState` carries each field's error. Taps go through `callAction`, forms submit with `onSubmit` and `startTransition`, and each action revalidates every page its change shows on, found from the code map's routes. One error is new: `ChangedError` with a reason (`'copy-lent'`, `'request-withdrawn'`, `'request-answered'`, `'seats-taken'`, `'night-cancelled'`, `'not-friends'`). The screen turns it into screens.md's one line and next best action, such as "Join the line", and sends nothing.
+- KTD17. **Ask first, say what happened, offer Undo** (screens.md's rules 3 and 5). `ConfirmDialog` (`app/_components/confirm-dialog.tsx`, U2) asks before every action in screens.md's Actions that ask first: its red button names the thing, the other says what's kept, and it names who's told. `notify` (`app/_lib/notify.ts`, U2, job-search's pattern with the app's own toaster id) says what happened, with Undo where the action can be undone. Each row of screens.md's After each action is a screen test in the unit that builds its action.
+- KTD18. **Links people share.** A friend link is `/f/<token>` (R49) and a night's link `/n/<token>` (R30), as E2, D7 and D10 draw them, with an 8-character code a person can read aloud. Signed out, they show A3 or D14, and a night's shows only its title, date and seats. Signed in, the friend link makes the two people friends at once and opens the friend's page, and the night's link gives the member an attendee row as `'invited'` and opens the night. An expired or replaced link says "This link no longer works." (screens.md). Sharing (E2, D10, C18, D15, R52) opens the phone's share sheet (`navigator.share`) with a ready message, and falls back to copying it, with a toast (`app/_components/share-button.tsx`, U2). The welcome page and both links have link-preview images (Y2, U23).
+- KTD19. **The home screen and saved copies (R43, R44).** `app/manifest.ts` with the name, "Game Library" as the short name, and kraft and navy as its colors; icons drawn from the design system's Three pieces SVG, in recipes' `app-icon.tsx` pattern. The service worker is recipes', with this app's saved pages (the Library and My library, a game, a copy, Loans and a loan, Nights and a night, Friends and a friend, the inbox and You) and every form left to the network. A6 shows iPhone's Share then Add to Home Screen, and on Android the browser's own install prompt when it offers one. Offline, a saved page shows with screens.md's no-connection line, and nothing else works offline, since reading the library offline is deferred.
+
+**Building**
+
+- KTD20. **Batches, pushes and the free plans (Hector, 2026-11-12).**
+  - Vercel's Hobby plan allows 100 deployments a day for the whole account, and counts a build its Ignored Build Step cancels as a full deployment. Its own skipping of projects a push doesn't affect isn't counted, works with Bun workspaces, and is on by default for a new project (Vercel's limits, project settings and monorepo docs, read 2026-11-12). So this app's `vercel.json` has no `ignoreCommand`, unlike the new-app checklist's, and U1 checks the project's Skip deployment setting is on.
+  - Units go in batches: one branch and PR per batch, one commit per unit. An agent commits locally and pushes when the batch is ready for review, or once for a gate's preview, so a batch costs one to three preview builds rather than one per unit.
+  - CI runs on GitHub's runners, which are free for a public repo. Tests use PGlite and previews the test project, so no Neon branch is made per preview (Neon's Free plan: 10 branches and 100 compute hours a project a month).
+  - Hobby is for non-commercial personal use, which this app is (D3).
+  - The repo's other apps still use `ignoreCommand`, so each push still costs one deployment per app; moving them to Vercel's skipping is separate work.
+- KTD21. **The catalog during the build (D7, on hold).** Until the source is chosen, the catalog is the canvas's fictional games, put into the local and test databases by `scripts/seed.ts` (U4). Real games reach production only through the admin's Add a game by hand (G3) or U24's import. Launch needs the source decided (H6), with H1 if it's BoardGameGeek, and so do the source's credits (Y1).
+- KTD22. **Tests as recipes'.** Use cases run on both backends (`describeEachBackend`), constraints are tested on PGlite alone, controllers through `controllerBasics`, and screens with happy-dom against the real actions. Every acceptance example (AE1 to AE10) is a named test in the unit that builds it. Browser flows (Playwright) come in U25 only, on the test project, behind recipes' test-database guard with the comment `community-game-library-test`: making an account, then borrowing and giving back a game.
+- KTD23. **What should we play? and tables are rules (R37, R46, D2).** Pure functions in `src/entities/what-to-play.ts` and `src/entities/tables.ts`, each answer with its reason. U20's brief holds the rules.
+- KTD24. **A night's calendar file (R35).** `/nights/[id]/calendar` answers `text/calendar`, made on request for someone who can see the night (KTD4), with its title, times, place and address. Nothing keeps a calendar in sync.
+- KTD25. **Motion last (D13).** Nothing moves between screens until U26, which takes the design system's Motion proposals to Hector first.
+
+### Code map
+
+Every route, folder and name the units build, fixed now so agents don't make names up. A unit that needs a name not here adds it here in the same change.
+
+```
+apps/community-game-library/
+  app/
+    (api)/api/auth/[...path]/       # Neon Auth's endpoints (recipes)
+    (api)/api/cron/daily/           # the daily run (KTD8, U17)
+    (auth)/welcome/                 # A1, and A9 inside a chat app's browser (U5)
+    (auth)/auth/[path]/             # Neon's forms: make an account (A2), sign in (A8); the sign-in kit's layout
+    (start)/start/profile/          # A4, step 1 of 3 (U5)
+    (start)/start/friends/          # A5, step 2 (U10)
+    (start)/start/home-screen/      # A6, step 3 (U5)
+    f/[token]/                      # a friend link: A3 signed out, friends at once signed in (KTD18, U10)
+    n/[token]/                      # a night's link: D14 signed out (KTD18, U19)
+    removed/                        # a removed account's only page (U5)
+    (main)/                         # header, tab bar, bell and piece (U2)
+      page.tsx                      # Library, All friends: B1 to B4, B10, B12; ?q, filters and sort in the address (R13)
+      my-library/                   # B6; add/ (B8), suggest/ (B9)
+      games/[id]/                   # a game's page: B5, B11, B13; the Ask to borrow (C1) and Join the line (C10) sheets
+      copies/[id]/                  # a copy's page: B7, B14
+      loans/                        # Loans: C4; record/ (C9), past/ (C12)
+      loans/[id]/                   # a loan's page: C2, C3, C5, C7, C16, C17, C18, with C6, C8, C11 and C13 to C15
+      nights/                       # Nights: D1; new/ (D5, D6), past/ (D12)
+      nights/[id]/                  # a night's page: D2, D7, D13, with D3, D4 and D11; edit/, invite/ (D10),
+                                    # what-to-play/ (D8), tables/ (D9), calendar/ (KTD24)
+      friends/                      # Friends: E1; link/ (E2)
+      friends/[userId]/             # a friend's page and library: E3, E4
+      inbox/                        # F1, F2
+      you/                          # E5; edit/ (E6), notices/ (E7), delete/ (E8, E9), catalog/ (About the catalog, Y1)
+      admin/                        # G1; suggestions/[id]/ (G2), suggestions/answered/ (G7), games/ (G5),
+                                    # games/new/ (G3), games/[id]/ (G4), accounts/[userId]/ (G8)
+    account/[path]/                 # Neon's account views (email, password), with the sign-in kit's layout
+    _components/                    # app-header, tab-bar, tab-count, bell, piece, seats, stamp, cover-thumb, cover,
+                                    # dice, track, list-row, group, confirm-dialog, share-button, date-sheet (X1),
+                                    # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy;
+                                    # by area: game-row, copy-row, copy-state, library-list, filter-sheet, sort-sheet,
+                                    # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
+                                    # piece-picker, profile-form
+    _lib/                           # current-user, auth-paths, safe-redirect, call-action, notify, notice-text,
+                                    # notice-text/ (one file per area), changed-lines, library-params (R13), share,
+                                    # shrink-image, use-closes-on-leave, leave-guard, app-icon
+    actions/                        # shared.ts, profile.ts, copies.ts, catalog.ts, suggestions.ts, friends.ts,
+                                    # loans.ts, nights.ts, notices.ts, account.ts, admin.ts
+    manifest.ts, apple-icon.tsx, pwa-icon/[size]/, opengraph-image.tsx, error.tsx, not-found.tsx
+  src/
+    entities/
+      errors/common.ts, errors/loggable.ts   # recipes' errors with ChangedError (KTD16); job-search's loggable
+      models/                       # game, user-game, user-game-expansion, game-suggestion, user-profile,
+                                    # user-settings, friendship, friend-request, friend-link, loan, game-night,
+                                    # game-night-attendee, game-night-game, game-night-vote, notice, user, session,
+                                    # transaction, logger
+      week.ts                       # recipes' dates and todayIn, with PLAN_TIME_ZONE (KTD9)
+      search-title.ts               # KTD10 (U3)
+      loan.ts                       # the state machine, dates, the line and a copy's state (KTD6, U3)
+      notice-types.ts               # each type's group (U3)
+      piece.ts                      # shapes and colors (R51, U3)
+      reminders.ts                  # which reminders are due on a day (KTD8, U17)
+      night.ts                      # seats, guests and the waitlist (R31, R47, U19)
+      what-to-play.ts, tables.ts    # KTD23 (U20)
+      library-filters.ts            # R11 to R13: parse, apply, and which filters to show (U8)
+      in-app-browser.ts             # A9 (KTD3, U5)
+      share-message.ts              # the ready messages (R52)
+      calendar-file.ts              # KTD24 (U21)
+    application/
+      repositories/                 # games, user-games, game-suggestions, user-profiles, user-settings,
+                                    # friendships, friend-requests, friend-links, loans, game-nights, notices,
+                                    # removed-users
+      services/                     # authentication, logger, transaction-manager, file-storage
+      use-cases/                    # catalog/, copies/, suggestions/, profile/, friends/, loans/, nights/,
+                                    # notices/, account/, admin/, daily/
+    interface-adapters/controllers/ # the same areas as use-cases/
+    infrastructure/
+      repositories/                 # base, then one per interface, with a mock each
+      services/                     # neon-auth, transaction-manager, console-logger, s3-file-storage, with mocks
+  di/                               # container.ts, types.ts, modules/ (one per area)
+  db/                               # schema.ts, index.ts, migrations/
+  lib/                              # auth/server.ts, logger.ts
+  service-worker/                   # rules.ts, handlers.ts, worker.ts (U23)
+  scripts/                          # seed.ts, build-service-worker.ts, check-test-database.ts
+  tests/                            # mirrors the tree; _support/ with cast.ts
+  proxy.ts
+```
+
+Use cases by area, each a file named for what it does (`request-loan.use-case.ts`), with a controller of the same name:
+
+- **catalog:** search-games, get-game, list-expansions
+- **copies:** add-user-game, update-user-game, set-user-game-expansions, set-lending, remove-user-game, set-pass-along-for-all, list-my-library, list-library, get-user-game
+- **suggestions:** suggest-game, list-suggestions, list-answered-suggestions, answer-suggestion, add-game, update-game, find-games-to-edit
+- **profile:** create-profile, update-profile, set-photo, remove-photo, get-profile, update-notice-settings
+- **friends:** require-friend, get-friend-link, make-friend-link, use-friend-link, list-friends, get-friend, send-friend-request, answer-friend-request, cancel-friend-request, unfriend, list-people-you-may-know
+- **loans:** request-loan, withdraw-request, answer-request, remove-from-line, cancel-loan, confirm-pick-up, give-back, confirm-return, ask-more-time, answer-more-time, change-due-date, call-back, pass-along, confirm-pass-along, take-back-pass-along, record-loan, list-loans, get-loan, list-past-loans, get-copy-history
+- **nights:** can-see-night, create-night, update-night, cancel-night, invite-to-night, make-night-link, use-night-link, answer-night, remove-from-waitlist, add-game-to-night, remove-game-from-night, vote, list-nights, list-past-nights, get-night, what-to-play, split-tables
+- **notices:** list-inbox, mark-read, get-tab-counts
+- **account:** list-what-ends, delete-account
+- **admin:** require-admin, remove-account
+- **daily:** run-daily
+
+Two batches can be open at once (Batches and units), so the files both touch take one rule: in `di/container.ts`, `di/types.ts`, the code map and the app's `AGENTS.md`, add lines in alphabetical place within their list, and resolve a merge conflict there by keeping both sides.
+
+### Batches and units
+
+Each unit is one task in Hector's tracker, under the same U number, with its brief in `docs/units/`. A batch is one branch and one PR (KTD20). A gate is Hector's look before the next units copy what came before.
+
+| Batch | Branch | Units | Starts after | Gate |
+|---|---|---|---|---|
+| 1 Foundation | `feat/community-game-library-b1-foundation` | U1 to U5 | H3, H5, H7 | The shell and getting in, on the batch's preview (H8) |
+| 2 Catalog and libraries | `feat/community-game-library-b2-catalog` | U6 to U9 | Batch 1 merged | After U6, from screenshots, before U7 (H8) |
+| 3 Friends and the inbox | `feat/community-game-library-b3-friends` | U10, U11 | Batch 2 merged | |
+| 4 Loans | `feat/community-game-library-b4-loans` | U12 to U17 | Batch 3 merged | |
+| 5 Nights | `feat/community-game-library-b5-nights` | U18 to U21 | Batch 3 merged | |
+| 6 Accounts and the phone | `feat/community-game-library-b6-accounts` | U22, U23 | Batches 4 and 5 merged | |
+| 7 Launch | `feat/community-game-library-b7-launch` | U24, U25 | Batch 6 merged; H6 for U24, then H2, H4 and H9 | The phone check after a day away (H9) |
+| 8 Motion | `feat/community-game-library-b8-motion` | U26 | Batch 7 merged | Hector's pick of the motion |
+
+Batches 4 and 5 run side by side, each in its own worktree, so at most two agents build at once. "Strong" means the strongest model available, for a unit that sets a pattern or holds the hardest logic. Every other unit is written to be built by a smaller model.
+
+**Batch 1: Foundation**
+- **U1** Scaffold from recipes · strong · KTD1, KTD2, KTD11, KTD20 · needs H3, H7 · [brief](units/u01-scaffold.md)
+- **U2** The look and the shell · strong · KTD12, KTD14, KTD16 to KTD18 · needs H5 · after U1 · [brief](units/u02-look-and-shell.md)
+- **U3** Every table and the shared rules · strong · KTD5, KTD6, KTD10 · after U1 · [brief](units/u03-tables-and-rules.md)
+- **U4** Shared reads, the cast and the seed · strong · KTD4, KTD7, KTD13, KTD21 · after U3 · [brief](units/u04-shared-reads-and-seed.md)
+- **U5** Getting in, and You · standard · KTD3, KTD11 · after U2, U4 · [brief](units/u05-getting-in.md)
+
+**Batch 2: Catalog and libraries**
+- **U6** Search and a game's page · strong · KTD10, KTD13 · after Batch 1 · [brief](units/u06-search-and-game-page.md)
+- **U7** Copies and My library · standard · KTD6, KTD15 · after U6 · [brief](units/u07-copies.md)
+- **U8** All friends: filters and sort · standard · KTD4 · after U7 · [brief](units/u08-library-filters.md)
+- **U9** Suggestions and the admin's catalog · standard · KTD11 · after U6 · [brief](units/u09-suggestions-and-admin.md)
+
+**Batch 3: Friends and the inbox**
+- **U10** Friends · standard · KTD4, KTD18 · after Batch 2 · [brief](units/u10-friends.md)
+- **U11** The inbox, the counts and notice settings · standard · KTD7 · after U10 · [brief](units/u11-inbox-and-counts.md)
+
+**Batch 4: Loans**
+- **U12** Ask and answer · strong · KTD6, KTD7, KTD16 · after Batch 3 · [brief](units/u12-ask-and-answer.md)
+- **U13** Pick-up and return · strong · KTD6, D15 · after U12 · [brief](units/u13-pick-up-and-return.md)
+- **U14** More time, due dates and calling back · standard · KTD6, KTD18 · after U13 · [brief](units/u14-more-time-and-call-back.md)
+- **U15** Lines and passing it along · strong · KTD6 · after U13 · [brief](units/u15-lines-and-pass-along.md)
+- **U16** Recording a loan, and past loans · standard · KTD6 · after U13 · [brief](units/u16-record-and-past-loans.md)
+- **U17** The daily run · strong · KTD8 · needs H7's secret before the merge · after U14, U15 · [brief](units/u17-daily-run.md)
+
+**Batch 5: Nights**
+- **U18** Nights and a new night · standard · KTD4, KTD9 · after Batch 3 · [brief](units/u18-nights-and-new-night.md)
+- **U19** Invites, answers, the waitlist and guests · standard · KTD4, KTD18 · after U18 · [brief](units/u19-invites-and-answers.md)
+- **U20** What should we play? and tables · standard · KTD23 · after U19 · [brief](units/u20-what-to-play-and-tables.md)
+- **U21** Cancelling, past nights and the calendar file · standard · KTD18, KTD24 · after U19 · [brief](units/u21-cancel-and-past-nights.md)
+
+**Batch 6: Accounts and the phone**
+- **U22** Deleting an account, and the admin's removal · standard · KTD4 · after Batches 4 and 5 · [brief](units/u22-delete-and-remove.md)
+- **U23** The home screen, saved copies and link previews · strong · KTD2, KTD19 · after Batches 4 and 5 · [brief](units/u23-home-screen.md)
+
+**Batch 7: Launch**
+- **U24** The catalog's data · strong · KTD10, KTD21 · needs H6, and H1 if it's BoardGameGeek · [brief](units/u24-catalog-data.md)
+- **U25** Production and the first friends · standard · KTD1 to KTD3, KTD22 · needs H2, H4, H9 · after U24 · [brief](units/u25-launch.md)
+
+**Batch 8: Motion**
+- **U26** Motion · standard · KTD25 · needs Hector's pick · [brief](units/u26-motion.md)
+
+### Verification
+
+| When | Check |
+|---|---|
+| Every change | `bun check --filter=community-game-library && bun ts --filter=community-game-library` |
+| Every change | `bun run dead-code` |
+| A unit with tests | its test files from the app folder, then `bun run test --filter=community-game-library` |
+| A unit with screens | each screen at 390 px with the cast's data, beside its board; again at 768 and 1280 px (KTD14); new touch targets at least 44 px |
+| A schema change (U3, or a brief that says so) | `db:generate`, the SQL read, applied to the test project with Hector's OK; on production with his OK at that moment, before the merge (KTD1) |
+| U1, U2, U23, and any config change | the build: the batch's preview build, since a Claude session can't fetch the Google fonts inside the sandbox (recipes' Cache Components notes) |
+| Every PR | the diff, screenshots and PR text hold only fictional people (R45) |
+| A PR with new tables, use cases or access rules | a Whiteboard board, per the root `AGENTS.md` |
+
+### Definition of done
+
+**The whole build**
+- Every requirement holds as revised, apart from the dropped and deferred ones.
+- AE1 to AE10 pass as tests.
+- KTD2's cold open is measured on production and meets the target.
+- The app's `AGENTS.md` describes what shipped.
+- The repo holds no member's name, contact or address.
+- Every task for the build in Hector's tracker is done.
+
+**Each unit**
+- Its brief's Done when list is checked off in its task.
+- Its screens match their boards at 390 px, and work at 768 and 1280 px.
+- Every notice its changes cause is written, and every page they change is revalidated.
+- Its forms, asks, messages and errors use U2's shared patterns: the leave guard, the confirm dialog, `notify`, the changed notice and the error lines (KTD16, KTD17).
+- What it learned that's durable is in the app's `AGENTS.md`.
+- Its task holds the evidence: what changed, the checks run and the screenshots taken.
+
+### Conventions
+
+- **Unit lines:** `- **U<n>** Title · model · KTDs · needs H<n> · after U<m> · [brief]`, with no state. State lives in each unit's task.
+- **Owners:** an agent builds. Hector's steps are the Needs from Hector. A migration, production data, or an account or service setup waits for his OK at that moment.
+- **Branches and commits:** one branch and PR per batch (`feat/community-game-library-b<n>-<topic>`), one commit per unit (`feat(community-game-library): U<n> <summary>`), and fixes after review as `fix(community-game-library): …`. Push when the batch is ready, or once for a gate (KTD20). A batch's PR opens with the migration its merge needs, if any. Refer to PRs as `hectarek/hector-mono#n`.
+- **Lessons:** written with the batch's PR, per the root `AGENTS.md`.
+- **Privacy:** R45 holds for every file, commit and PR.
+
+---
+
 ## Session log
 
 - **2026-11-10:** first draft of the product half, from Hector's list of requirements, with gaps marked and open questions. The repo's planning format, the new-app checklist and the job search and recipes apps were read for patterns. BGG's API pages refused automated reads, so its terms here come from search results. **Next:** Hector's answers to Q1 to Q13, then the design system's style tiles.
@@ -354,3 +669,4 @@ For the session that writes the technical half, once the recipes performance rev
 - **2026-11-12:** Hector's last design picks: the ship joins as a fourth piece shape (R51), the home-screen icon is Three pieces, and motion waits until everything else is built (D13). The design is finished. **Next:** his review of the data model and the return day, then breaking the build into tasks.
 - **2026-11-12:** Hector confirmed the catalog's data model ([data-model.md](data-model.md)) after asking for names that follow one pattern. Best counts, minimum age and popularity stay as optional values, a screen shows a value only when the game has it, the source's id and the change history are out, and the how-to-play video is in (R1, R2, R5, R7, R11, R14). The admin screens lose what needed a source, G6 leaves the first release, and the game's page shows complexity as a word. **Next:** the return day, then breaking the build into tasks.
 - **2026-11-12:** Hector confirmed the return day (R19) and set a generous default that assumes good intent (D15): once a borrower says they've handed a game over, the loan can't run overdue, and a return the owner hasn't answered closes by itself a week later. The second session's remaining findings are in [catalog-data.md](catalog-data.md): what BGG offers without an application, what its application weighs, and the options for covers. Hector asked whether owned expansions need their own table, given `base_game_id`; Claude recommended keeping it, since `base_game_id` says which expansions a game has, not which ones a member owns. **Next:** his answer, then breaking the build into tasks.
+- **2026-11-12:** the technical half. Hector kept `user_game_expansions` and D15 as written, and asked for every decision, the code map and every unit's brief now, with PRs holding several units so the free plans' daily build limit isn't spent in one day. Written: the rest of the data model (members, friends, loans, nights and notices, with five naming rules added), KTD1 to KTD25, the code map, 26 units in 8 batches, a brief for each in [units/](units/), and H3 to H9. Checked in the providers' docs that day: Vercel's Hobby limits (100 deployments a day for the account, with a build cancelled by the Ignored Build Step counted and Vercel's own skipping not), Schedules on Hobby, Neon's Free plan and Object Storage, and Neon Auth's production checklist (codes work with the shared sender, links don't). **Next:** Hector's review of the new tables, the decisions and the briefs; then H3, H5 and H7, the build's tasks in his tracker, and Batch 1.
