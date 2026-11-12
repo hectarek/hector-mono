@@ -128,7 +128,7 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | X1 | Pick a date (the sheet every date choice opens) | R16, R20, R29 |
 | X2 | What happens next, and when it goes wrong: the patterns in the tables below | |
 | Y1 | Covers: with box art and without, while loading and when it fails, and where the source's credit goes | R1 |
-| Y2 | The home-screen icon, the name and the link preview, as options to pick from | R43 |
+| Y2 | The home-screen icon (Three pieces, chosen 2026-11-12), the name and the link preview | R43 |
 | W0 to W4 | Wider screens: the rules, the library on a laptop and a tablet, a game's page, a sheet as a dialog | R43 |
 
 ## Rules every screen follows
