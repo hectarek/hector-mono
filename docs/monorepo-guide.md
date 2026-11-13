@@ -221,7 +221,7 @@ Follow the `new-app` skill ([.claude/skills/new-app/SKILL.md](../.claude/skills/
 
 ### How Vercel builds an app
 
-Each deployed app is its own Vercel project whose **root directory is the app's folder** (`apps/hector-portfolio`, `apps/hectors-recipes`, `apps/relationship-meter`), with the Next.js framework preset. For each deploy, Vercel:
+Each deployed app is its own Vercel project whose **root directory is the app's folder** (`apps/hector-portfolio`, whose project is `main-portfolio`, `apps/hectors-recipes`, `apps/job-search` and `apps/relationship-meter`), with the Next.js framework preset. `stash` and `hectors-tools` have no Vercel project. For each deploy, Vercel:
 
 1. Clones the whole monorepo and runs `bun install` (it detects Bun from the root `bun.lock`)
 2. Detects Turborepo and runs `turbo run build` from the app's folder, which Turborepo scopes to that app and its dependencies
@@ -233,22 +233,22 @@ Because the build runs through Turborepo, its strict env mode applies: an env va
 
 ### Building only the apps that changed
 
-Every push to a pull request, and every merge, starts a deploy in each Vercel project. On 2026-10-08 that hit the Hobby plan's daily deployment limit ("Deployment rate limited — retry in 24 hours"), and merges to `main` didn't reach production. So each deployed app's `vercel.json` has an `ignoreCommand` that skips the build when nothing the app uses changed:
+Every push to a pull request, and every merge, starts a deploy in each Vercel project unless the project skips it. Hobby allows 100 deployments a day for the whole account, 100 an hour and 60 in five minutes ([Vercel: limits](https://vercel.com/docs/limits)). On 2026-10-08 the daily limit stopped every deploy ("Deployment rate limited — retry in 24 hours"), and merges to `main` didn't reach production.
 
-```json
-"ignoreCommand": "bunx turbo@2 query affected --packages hectors-recipes --base \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD~1}\" --exit-code"
-```
+So each project has **Skip deployment** on, under Settings → Build and Deployment → Root Directory. Vercel then skips a push that doesn't affect the app, before a build starts. A skipped push takes no build slot and, since 2026-10-21, doesn't count toward the limits ([Vercel: skipping unaffected projects](https://vercel.com/docs/monorepos#skipping-unaffected-projects); [changelog](https://vercel.com/changelog/skipped-monorepo-deployments-no-longer-count-against-limits)). A new project has it on by default.
 
-- `turbo query affected` compares the commit with the app's last successful deploy (`VERCEL_GIT_PREVIOUS_SHA`), or with the commit before when Vercel gives none. It counts a change in the app's folder, in a workspace package it uses (`@repo/ui`), in its dependencies in `bun.lock`, or in `turbo.json`.
-- Vercel skips the build on exit 0 and builds on anything else. `--exit-code` exits 1 when the app is affected, and 1 too when the earlier commit isn't in Vercel's clone (`GitRefNotFound`), so a doubtful case builds.
-- It runs before `bun install`, so `bunx` fetches `turbo` (the 2.x line, as the root's). Vercel's build image has Bun before the install (its install step runs `bun install` without fetching Bun). If `bunx` were ever missing, the command would fail, and a failed command builds.
-- Checked on 2026-10-08 against commits that changed only `@repo/ui` (every app builds), only one app's code or Markdown (that app builds), and only the repo's own `docs/` and `AGENTS.md` (none builds).
-- A redeploy of an app's last successful deploy is skipped too: `VERCEL_GIT_PREVIOUS_SHA` is then the commit being redeployed, so nothing is affected, and Vercel marks the deploy Canceled with a link to the ignored build step (seen 2026-10-26). A changed environment variable reaches an app only with the next commit that builds it.
-- A Markdown-only change inside an app still builds that app. Excluding `*.md` from the `build` task's `inputs` doesn't help: in Turborepo 2.11.7, `--tasks build` reports a task "package is affected" for any file in its package.
+- A push affects an app when it changes anything in the app's folder (Markdown included), a workspace package the app depends on (`@repo/ui`, `@repo/biome-config`, `@repo/typescript-config`), or the app's own dependencies in `bun.lock`.
+- A change to any file outside a workspace package is global and deploys every app: root `docs/`, `AGENTS.md`, `.claude/`, `.github/`, the root configs, and an app folder with no `package.json` yet. Vercel's [requirements](https://vercel.com/docs/monorepos#requirements) say so, and Vercel staff confirmed in June 2026 that a root README change counts ([Vercel community](https://community.vercel.com/t/skip-unaffected-projects-treats-all-non-workspace-changes-as-global-make-it-configurable/44061)). So a PR that touches a root file deploys every app when it merges: 39 of the 113 merges to `main` from 2026-10-01 to 2026-11-12 did.
+- A forum report says Vercel looks only at a push's last commit ([Vercel community](https://community.vercel.com/t/skipping-unaffected-projects-misses-changes-hidden-behind-merge-commits-and-multi-commit-pushes/43259)). A new branch's first push on 2026-11-12 didn't work that way: its last commit changed only job-search, an earlier one changed all four apps, and all four built. A later push that changes an app before a last commit that leaves it alone hasn't been tried, so check a batch push's previews.
+- No app's `vercel.json` has an `ignoreCommand` (the Ignored Build Step), and a new app's shouldn't either. A build that step cancels still counts as a full deployment and takes a build slot ([Vercel: Ignored Build Step](https://vercel.com/docs/project-configuration/project-settings#ignored-build-step)). Vercel decides to skip before a build starts, so the step would run only on pushes it didn't skip, and each cancel would add to the count. From 2026-10-08 to 2026-11-12 each app had one (`turbo query affected`). hectors-recipes and job-search also had Skip deployment on, so Vercel skipped them first; relationship-meter and main-portfolio didn't, so every push cost a canceled deployment in each.
+- Vercel lists a skipped project's deployment as Canceled, with no build time and a link to `#skipping-unaffected-projects`, and its GitHub comment files it under Skipped. A cancel by the Ignored Build Step linked to `#ignored-build-step` after about 15 s of build, and the comment called it Ignored.
+- With the step gone, nothing cancels a redeploy from the dashboard. Vercel's docs describe skipping for pushes only; a redeploy hasn't been tried since.
+- The Vercel connector's project responses leave the setting (`enableAffectedProjectsDeployments`) out. Read it in the dashboard, or from a push that touches one app: each project with the setting on lists that push as skipped.
 
 ### Vercel project settings
 
 - **Root directory**: the app's folder (e.g. `apps/hectors-recipes`)
+- **Skip deployment** (in the Root Directory section): on (see [Building only the apps that changed](#building-only-the-apps-that-changed))
 - **Framework preset**: Next.js. Build, install and output settings stay at the preset's defaults unless the app's `vercel.json` overrides them
 
 ### Important considerations
