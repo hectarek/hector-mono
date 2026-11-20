@@ -1,5 +1,6 @@
 // Runs before every test file (bunfig.toml [test].preload).
 import { mock } from "bun:test";
+import * as nextServer from "next/server";
 import { testDb } from "@/tests/_support/database";
 import { NotFoundPage, nextState, Redirected } from "@/tests/_support/next";
 
@@ -22,6 +23,13 @@ mock.module("@/db", () => ({ db: testDb }));
 
 // The real module throws at import without those variables; tests use MockAuthService.
 mock.module("@/lib/auth/server", () => ({ auth: {} }));
+
+// Outside Next.js there's no request to wait for: a page's connection() goes on at once. The
+// rest of the module is the real one, which the proxy uses.
+mock.module("next/server", () => ({
+  ...nextServer,
+  connection: async () => {},
+}));
 
 mock.module("next/cache", () => ({
   revalidatePath: (path: string) => {

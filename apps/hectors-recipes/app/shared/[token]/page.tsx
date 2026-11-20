@@ -3,6 +3,7 @@ import { Button } from "@repo/ui/components/button";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Logo } from "@/app/_components/logo";
 import { RecipeCover } from "@/app/_components/recipe-cover";
 import { RecipeFacts } from "@/app/_components/recipe-facts";
@@ -27,7 +28,10 @@ export default async function SharedRecipePage({
   params: Promise<{ token: string }>;
   searchParams: SearchParams;
 }) {
-  // The session first: it ends the prerender, as on every page (AGENTS.md, Cache Components).
+  // A prefetch or a prerender stops at connection(), before the session read, which would
+  // otherwise fail and log once that render ends (AGENTS.md, Cache Components). The session
+  // comes next, as on every page.
+  await connection();
   const userId = await getCurrentUserId();
   const { token } = await params;
   const recipe = await loadSharedRecipe(token);
