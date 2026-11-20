@@ -18,10 +18,12 @@ In Hector's private task tracker, not here: one task per unit, under the same UX
 Each unit is one task in Hector's task tracker. Owner C is Claude; C+H is Claude after Hector's OK at that moment.
 
 **Phase 1: Fixes first**
+
 - **UX1** Stop the two ways the daily loop writes wrong data — C
 - **UX2** See where you are and what's picked — C · needs Q9
 
 **Phase 2: The daily loop**
+
 - **UX3** Done and push on every due row — C · needs Q2, Q3, Q5
 - **UX4** This week you can scan — C · needs Q10 · revises R9
 - **UX5** Log outreach from anywhere — C
@@ -29,23 +31,28 @@ Each unit is one task in Hector's task tracker. Owner C is Claude; C+H is Claude
 - **UX7** One pass over the imported next steps — C+H
 
 **Phase 3: Records**
+
 - **UX8** Record pages that lead with what's next — C · needs Q7
 - **UX9** Moving a job, and what comes next — C
 - **UX10** Values in words, said one way — C
 
 **Phase 4: Claude's work and decisions**
+
 - **UX11** Proposals decided from the card — C
 - **UX12** Claude's changes you can check — C
 - **UX13** Stale candidates and debriefs — C · needs Q4
 
 **Phase 5: The Friday review**
+
 - **UX14** A weekly review you can do from the app — C
 
 **Phase 6: Lists and capture**
+
 - **UX15** Lists that show what needs attention — C
 - **UX16** Add a job from its link — C
 
 **Phase 7: Practice and accessibility**
+
 - **UX17** Practice that fits the loop — C
 - **UX18** What's left for screen readers and keyboards — C
 

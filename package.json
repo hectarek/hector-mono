@@ -19,12 +19,12 @@
     "safari:recipes": "bun run dev --filter=hectors-recipes -- --experimental-https"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.3",
-    "@shadcn/lint": "^0.2.3",
+    "@biomejs/biome": "2.6.8",
+    "@shadcn/lint": "^0.2.5",
     "drizzle-kit": "^0.31.11",
-    "fallow": "3.36.0",
-    "oxlint": "^1.89.0",
-    "turbo": "^2.11.10",
+    "fallow": "3.45.0",
+    "oxlint": "^1.94.0",
+    "turbo": "^2.11.13",
     "typescript": "7.0.2"
   },
   "engines": {

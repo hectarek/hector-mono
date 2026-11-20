@@ -133,6 +133,7 @@ Stored enum-like values are readable on their own (`recipe-book`, not `book`); k
 ## Cache Components
 
 Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `next.config.ts`; docs/ux-plan.md Phase 28).
+
 - `export const dynamic`, `revalidate` and `dynamicParams` fail the build. A page that reads the session, its address or the database in its body has a `loading.tsx` in its own folder, so the prerendered shell is the layout and the skeleton, and the page streams in after. One at `(main)` or `(form)` isn't enough: a tap between two pages re-renders only below the layout they share, so it covers a page load but not that tap. The general shapes are `PageSkeleton` and `FormSkeleton` (`app/_components/page-skeletons.tsx`). Books needs none: it reads only through a private cache (below).
 - `next dev` checks every page as it loads (Next.js's instant-navigation validation) and logs what would hold up a tap into it: a read outside `<Suspense>`, or the clock while prerendering. A new page loads clean in dev, on a page load and on a tap from another page.
 - A page without a `loading.tsx` puts what it reads at request time (the session, `searchParams`, the database) inside `<Suspense>`: Welcome's invite note and buttons, the auth pages' form.
@@ -155,6 +156,7 @@ Next.js Cache Components is on (`cacheComponents` and `partialPrefetching` in `n
 ## Saved copies (the service worker)
 
 The phone keeps a copy of each page you read, and the next open shows it at once while the page brings itself up to date, with no sign (docs/ux-plan.md P31.2, D103). Written by hand, not Serwist: its Turbopack route is for apps without Cache Components.
+
 - `service-worker/rules.ts` decides each request: a saved page (the library, Meal plan, Groceries, Books, a recipe, cook mode), a build file under `/_next/static`, a way out (`/welcome`, `/auth/sign-out`, which deletes the saved pages), or the network for everything else: every RSC request, server action and API call, the forms (they read fresh, D87), sign-in and Account. A new page you read goes in `SAVED_PAGES`; a new form stays out.
 - `service-worker/handlers.ts` answers: a saved page at once, with `data-saved-copy` on `<html>` (the root layout's `suppressHydrationWarning` covers it), while the network's answer is saved for next time in the background, so a page with no saved copy still streams. Only a 200 HTML page that wasn't redirected is saved.
 - `scripts/build-service-worker.ts` builds `public/sw.js` (gitignored) before `next build`, stamped with `VERCEL_GIT_COMMIT_SHA` (listed in `turbo.json`, as is the file in the build's outputs). Each deploy's worker differs, so the browser installs it, and it deletes every other deploy's caches: a saved page never outlives the build files it needs. `proxy.ts` lets `/sw.js` through signed out, and `next.config.ts` serves it uncached.
@@ -165,6 +167,7 @@ The phone keeps a copy of each page you read, and the next open shows it at once
 ## Feature Rules
 
 How each feature works, and what to keep true when changing it, is in [docs/features.md](docs/features.md). When a feature's behaviour or rules change, update its section there in the same change; only rules every change follows go here. Before changing a feature, read its section:
+
 - [Recipes: ingredient lines, steps and scaling](docs/features.md#recipes-ingredient-lines-steps-and-scaling)
 - [Library and tags](docs/features.md#library-and-tags)
 - [The recipe form](docs/features.md#the-recipe-form)

@@ -186,6 +186,7 @@ Eight tables total. The only link across space types is the optional `plan_entri
 ## Ingredient parsing (best effort)
 
 A pure function in the domain layer, unit-tested with real vault lines as fixtures:
+
 - Leading quantity: integers, decimals, `1/2`, `1 1/2`, unicode fractions (`½ ⅓ ¾`), ranges (`1-2` → upper value)
 - Unit: normalize spellings (`tablespoon(s)`/`tbsp`/`T` → `tbsp`, `ounces` → `oz`, and so on), including clove, can, bunch, slice, pinch
 - Name: the rest, minus trailing prep notes after a comma or `-`, singularized
@@ -199,6 +200,7 @@ If the recipe has `yield_servings`, the detail and cook views show a servings st
 ## Quick-add to a grocery list
 
 Available from recipe detail, cook mode, and the plan ("add this week to list" covers every entry this week that isn't eaten and has a recipe).
+
 1. Take the recipe's lines at the current servings, or the default.
 2. If an **unchecked** item already has the same `ingredient_id` and `unit`, add the quantities together and rewrite its text. Otherwise insert a new item.
 3. Lines with nothing parsed are inserted as-is.
@@ -241,6 +243,7 @@ Designed at 375px first, with a bottom tab bar: **Recipes · Plan · Groceries**
 Source: the vault's recipes folder. The script only reads the vault.
 
 What's there:
+
 - **Frontmatter:** `created` (75), `meal` (74), `recipe_tags` (65), `source` (55), `cover` (42), `time` as text like "20 min" (12), `servings` (2)
 - **Body:** 59 notes use `## Ingredients` with `- [ ]` lines and `## Instructions` with a numbered list. Some NYT clippings use `## **INGREDIENTS**` / `## **PREPARATION**`. Some have sub-headings inside ingredients or state servings inline ("Makes 4 serving/s").
 - **Stubs that won't import as-is:** a PDF-only note, one-line notes, and a photo-plus-pasted-text note
@@ -351,6 +354,7 @@ Everything in the build order shipped. Where the build differs from the spec abo
 **Still to verify on real phones:** that cook mode keeps the screen on (the Claude browser pane refuses the Wake Lock permission, so it couldn't be confirmed there), in the browser and installed to the home screen, on both phones.
 
 **Worth knowing:**
+
 - Joining is always an explicit "Join" tap, never on opening the link (link previews fetch URLs).
 - Deleting a book or a plan (with its grocery list) deletes its contents for everyone in it.
 - The app icon is the design system's leaf on a herb-green tile; the drawing is in `app/_lib/app-icon.tsx`.

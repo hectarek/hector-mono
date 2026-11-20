@@ -22,6 +22,7 @@ tests/          # mirrors src/ (bun test): tests/src/styles/themes.test.ts guard
 
 Setting up a new app (components.json, globals.css, fonts, ThemeProvider) is a step-by-step in [docs/ui-package.md](../../docs/ui-package.md).
 Import via the package export paths (no barrel files):
+
 ```ts
 import { Button } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
@@ -30,6 +31,7 @@ import { cn } from "@repo/ui/lib/utils";
 ## Adding components
 
 Use the shadcn CLI, don't hand-write primitives. This follows shadcn's official monorepo setup: every app has a `components.json` whose `ui` alias is `@repo/ui/components`, so running the CLI **from an app** installs base components here (and blocks into that app):
+
 ```bash
 cd apps/<app> && bunx --bun shadcn@latest add <component>     # → packages/ui/src/components
 cd packages/ui && bun run ui:add <component>                  # same, from this package
@@ -59,6 +61,7 @@ bunx --bun shadcn@latest add <component> --diff src/components/<component>.tsx  
 ## Theming
 
 Same model as shadcn (tokens in `:root` / `.dark`, exposed through `@theme inline`), extended to several brand themes. shadcn only documents one theme per stylesheet.
+
 - **The contract** is the token list at the top of `themes/default.css`: shadcn's set, plus `success`, `warning`, `info` (each with `-foreground`), `signal` (now and next: a marker or a call-out) and `best` (a best-ever result), each with `-foreground`, `ghost` (a reference mark drawn behind a value), `chart-foreground` (text on a chart colour used as a fill), plus `radius`. `globals.css` maps every one to a Tailwind utility, identically for every theme. Components and apps use only these (`bg-primary`, `text-warning-foreground`, `rounded-lg`). A new colour role is a contract change: add it to `default.css` (light and dark), the `@theme inline` list, and the test's `CONTRACT`.
 - **Default theme** (`themes/default.css`) is shadcn preset `b1YmpVjjs` exactly, as `shadcn init` writes it, plus the status colours (foreground on its colour ≥ 7.6:1 in both modes). It always loads.
 - **Other themes** are `themes/<name>.css`: `[data-theme="<name>"]` for light and `[data-theme="<name>"].dark, .dark [data-theme="<name>"]` for dark. They may set only some tokens (the rest come from the default), but every token set for light must also be set for dark, or the light value leaks into dark mode; the test enforces it. An app opts in with `@import "@repo/ui/styles/themes/<name>.css"` after the base import, plus `data-theme="<name>"` on `<html>`. Prefer token-only themes. `neobrutalist.css` also restyles components by `data-slot`, which is more fragile across shadcn updates. It colours every Card with `--primary`; `<Card data-card="plain">` asks for a plain (secondary) card instead, a theme-level option that leaves the component untouched. `recipes.css` is generated from the "Hector's Recipes" Claude Design system (its README links it); change the system, then regenerate, rather than hand-editing values. `job-search.css` is generated the same way from the "Job Search" design system (its header links it). `portfolio.css` is the portfolio's neutral paper and ink with a honey accent, token-only; its in-between shades are tokens at an opacity (faint text `text-muted-foreground/70`, a strong rule `border-foreground/25`) rather than contract roles.
@@ -83,6 +86,7 @@ Same model as shadcn (tokens in `:root` / `.dark`, exposed through `@theme inlin
 ## Before Finishing Any Change
 
 Every app consumes this package, so check them too: Turbo's leading `...` adds the packages that depend on `@repo/ui`.
+
 ```bash
 bun check --filter=...@repo/ui && bun ts --filter=...@repo/ui && bun run test --filter=...@repo/ui
 ```
