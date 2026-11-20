@@ -1,0 +1,280 @@
+/* The Punchboard tokens from the design system (tokens.json), for the spike's two screens. */
+:root {
+  --kraft: #d9bc8c;
+  --chipboard: #ebddc2;
+  --bone: #f7f0e1;
+  --navy: #1e2a44;
+  --stamp-red: #a3301f;
+  --smudge: #5a4632;
+  --text-brown: #3b2e20;
+  --sheet-backdrop: #a99168;
+  --stencil: "Stardos Stencil", Rockwell, Georgia, serif;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --edge: 2px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--kraft);
+  color: var(--navy);
+  font: 400 14px / 1.45 var(--sans);
+}
+
+:focus-visible {
+  outline: var(--edge) dashed var(--navy);
+  outline-offset: 3px;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.app-name {
+  font: 700 20px / 1 var(--stencil);
+  text-transform: uppercase;
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+  display: grid;
+  gap: 12px;
+}
+
+.screen-title {
+  font: 700 30px / 1 var(--stencil);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.page-title {
+  font: 700 24px / 1.15 var(--sans);
+  margin: 0;
+}
+
+.section-label {
+  font: 700 15px / 1.2 var(--stencil);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--stamp-red);
+  margin: 0;
+}
+
+.panel {
+  background: var(--chipboard);
+  border: var(--edge) solid var(--navy);
+  border-radius: 4px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 8px;
+  align-items: end;
+}
+
+.field-label {
+  grid-column: 1 / -1;
+  font: 600 13px / 1.2 var(--sans);
+}
+
+.field {
+  min-height: 44px;
+  padding: 0 12px;
+  border: var(--edge) solid var(--navy);
+  border-radius: 4px;
+  background: var(--bone);
+  color: var(--navy);
+  font: 400 15px var(--sans);
+  width: 100%;
+}
+
+.button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: var(--edge) solid var(--navy);
+  border-radius: 4px;
+  background: var(--navy);
+  color: var(--bone);
+  font: 700 15px var(--sans);
+  cursor: pointer;
+}
+
+.button.quiet {
+  background: var(--bone);
+  color: var(--navy);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row + .row {
+  border-top: var(--edge) dashed var(--navy);
+}
+
+.row-link {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cover-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 3px;
+  border: var(--edge) solid var(--navy);
+  background: var(--bone);
+  display: grid;
+  place-items: center;
+  font: 700 18px var(--stencil);
+}
+
+.name {
+  display: block;
+  font: 700 15px var(--sans);
+}
+
+.fact {
+  display: block;
+  font: 500 11px var(--mono);
+  color: var(--text-brown);
+}
+
+.stamp {
+  font: 700 12px var(--stencil);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: var(--edge) solid currentColor;
+  border-radius: 3px;
+  color: var(--smudge);
+  white-space: nowrap;
+}
+
+.empty,
+.body {
+  color: var(--text-brown);
+  margin: 0;
+}
+
+.back {
+  font: 700 18px var(--stencil);
+  text-transform: uppercase;
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.cover {
+  aspect-ratio: 16 / 10;
+  border: var(--edge) solid var(--navy);
+  border-radius: 4px;
+  background: var(--bone);
+  display: grid;
+  place-items: center;
+}
+
+.cover-title {
+  font: 700 26px / 1 var(--stencil);
+  text-transform: uppercase;
+  text-align: center;
+  padding: 16px;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font: 500 12px var(--mono);
+  color: var(--text-brown);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dice {
+  display: flex;
+  gap: 5px;
+}
+
+.die {
+  width: 26px;
+  height: 26px;
+  border: var(--edge) solid var(--navy);
+  border-radius: 4px;
+  background: var(--bone);
+  display: grid;
+  place-items: center;
+  font: 500 12px var(--mono);
+}
+
+.die.best {
+  background: var(--navy);
+  color: var(--bone);
+}
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--sheet-backdrop) 85%, transparent);
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--chipboard);
+  border-top: var(--edge) dashed var(--navy);
+  border-radius: 6px 6px 0 0;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.sheet-title {
+  font: 700 22px / 1.1 var(--stencil);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.auth-form {
+  display: grid;
+  gap: 8px;
+}
+
+.error-line {
+  font: 600 12px var(--sans);
+  color: var(--stamp-red);
+  margin: 0;
+}

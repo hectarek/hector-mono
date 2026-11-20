@@ -91,6 +91,12 @@
         "3205"
       ],
       "port": 3205
+    },
+    {
+      "name": "community-game-library-spike",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "apps/community-game-library-spike", "dev"],
+      "port": 3109
     }
   ]
 }
