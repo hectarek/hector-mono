@@ -73,6 +73,7 @@ Lighthouse 12 (the version `@lhci/cli` 0.15 runs) has no PWA category, so there'
 **Error**: `Port 3000 is in use`
 
 **Solution**:
+
 1. Stop the server that's using the port (the dev server, or an earlier `next start`).
 
 2. Or update `.lighthouserc.js` to use a different port:
@@ -87,6 +88,7 @@ Lighthouse 12 (the version `@lhci/cli` 0.15 runs) has no PWA category, so there'
 **Error**: Server doesn't start in time
 
 **Solution**: Increase timeout in `.lighthouserc.js` (it covers the build too):
+
 ```javascript
 startServerReadyTimeout: 180000, // 3 minutes instead of 2
 ```

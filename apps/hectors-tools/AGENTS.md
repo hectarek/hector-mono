@@ -130,6 +130,7 @@ bun check --filter=hectors-tools && bun ts --filter=hectors-tools
 ## Before Finishing Any Change
 
 Scope checks to this app:
+
 ```bash
 bun check --filter=hectors-tools && bun ts --filter=hectors-tools && bun run test --filter=hectors-tools
 ```

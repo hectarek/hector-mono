@@ -68,6 +68,7 @@ Static site — keep it simple. No auth, no database, no API routes, no TanStack
 ## Brand Voice
 
 Personal portfolio for Hector Gonzalez, a full-stack engineer, strongest on the front end, with applied AI as the specialty. The hero line (`src/data/profile.json`'s tagline) says how he works: figure out what's needed, build it with AI, and work with others. The full voice and style guide is `docs/spec.md` §5, and every copy change follows its Copy Rules; this is the short version.
+
 - **Short and plain** — write the way Hector talks; the hero is one line, and the home page reads as one story (`docs/spec.md` §4)
 - **Show, don't name** — specific facts carry the copy; never name a trait ("passionate", "authentic", "product-minded") or hint at one with adjectives
 - **No clichés or slogans** — no "ships AI features", "passionate", "excited" or "synergy", and no setup-and-reversal lines like "Ambiguity in. Useful systems out."
@@ -97,6 +98,7 @@ From a Claude Code session, run the build outside the sandbox (2026-11-20): insi
 ## Before Finishing Any Change
 
 Scope checks to this app:
+
 ```bash
 bun check --filter=hector-portfolio && bun ts --filter=hector-portfolio && bun run test --filter=hector-portfolio
 ```

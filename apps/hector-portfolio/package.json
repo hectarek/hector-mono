@@ -27,23 +27,23 @@
   "dependencies": {
     "@repo/ui": "workspace:*",
     "@vercel/analytics": "^2.0.1",
-    "framer-motion": "^14.6.0",
-    "lucide-react": "^1.61.0",
-    "next": "16.4.3",
+    "framer-motion": "^14.14.0",
+    "lucide-react": "^1.77.0",
+    "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "recharts": "3.10.1"
+    "recharts": "3.11.0"
   },
   "devDependencies": {
-    "@lhci/cli": "^0.15.1",
+    "@lhci/cli": "^0.16.1",
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/bun": "1.4.4",
-    "@types/node": "^26.6.5",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/bun": "1.4.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2"
   }
 }

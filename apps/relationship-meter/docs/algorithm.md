@@ -66,6 +66,7 @@ newStrength = currentStrength × (0.5 ^ (daysSinceContact / adjustedHalfLife))
 ```
 
 Where `adjustedHalfLife` accounts for:
+
 1. **Category** - Kin relationships decay slower
 2. **Relationship Duration** - Long-term friendships (5+ years) decay slower
 3. **Inertia** - Strong relationships resist decay more than weak ones
@@ -150,6 +151,7 @@ Strong relationships have "inertia" - they resist decay:
 ### Decay Examples
 
 **Example 1: Close Friend (Non-Kin)**
+
 - Current strength: 80
 - Days since contact: 30
 - Half-life: 30 days (non-kin)
@@ -159,6 +161,7 @@ Strong relationships have "inertia" - they resist decay:
 - New strength: 80 × 0.595 = **47.6** (strength is kept to one decimal)
 
 **Example 2: Family Member (Kin)**
+
 - Current strength: 80
 - Days since contact: 30
 - Half-life: 180 days (kin)
@@ -296,6 +299,7 @@ newStrength = min(100, max(0, currentStrength + finalBoost))
 ### Interaction Examples
 
 **Example 1: Positive Deep Conversation**
+
 - Type: Deep Conversation (+25)
 - Tone: Positive (×1.0)
 - Reciprocity: Mutual (×1.0)
@@ -303,6 +307,7 @@ newStrength = min(100, max(0, currentStrength + finalBoost))
 - Final boost: 25 × 1.0 × 1.0 × 1.25 = **+31.25**
 
 **Example 2: Neutral Quick Check-in**
+
 - Type: Asynchronous Contact (+8)
 - Tone: Neutral (×0.5)
 - Reciprocity: One-Way Initiator (×0.7)
@@ -310,6 +315,7 @@ newStrength = min(100, max(0, currentStrength + finalBoost))
 - Final boost: 8 × 0.5 × 0.7 × 0.5 = **+1.4**
 
 **Example 3: Negative Interaction**
+
 - Type: Synchronous Contact (+15)
 - Tone: Negative (×-0.5)
 - Reciprocity: Mutual (×1.0)
@@ -370,6 +376,7 @@ When adding a relationship, users rate closeness on a 1-7 scale:
 ## Implementation Reference
 
 All constants and functions are defined in:
+
 - [`app/_lib/model.ts`](../app/_lib/model.ts) - Constants, types, and algorithms
 - [`app/_lib/types.ts`](../app/_lib/types.ts) - TypeScript interfaces
 

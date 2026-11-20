@@ -1606,6 +1606,7 @@ Branch `feat/recipes-p17-photo-or-file`, in its own worktree. Hector, 2026-10-04
 Branch `feat/recipes-p18-finding-recipes`, in its own worktree. Hector, 2026-10-04: "the quality of the search needs to be better… not just look up by name, but by relevant info like tags"; "a pass in this session of better tagging"; "group by… meals (dinner, lunch, etc) types (asian, indian, etc), and dietary (gluten free, protien, etc)… categorize our tags… cleanly account for in our schema". Decided: a tag catalog (D55), search (D56), grouping (D57), the tags and the pass (D58).
 
 Starting point, 2026-10-04, read-only on production:
+
 - 81 recipes in one book; 4 have no tags, and the rest about 2 each.
 - The 19 tags are already lowercase:
   - meal: dinner (33), lunch, dessert, breakfast, side dish, drink, snack;
@@ -1693,6 +1694,7 @@ One commit per task; the PR when the phase is done.
 Branch `feat/recipes-p19-groceries-by-recipe`. Hector, 2026-10-04: "in our grocery list, we should also have a group by recipe… the ability to see the groceries of each recipe separately"; "group like ingredients so they stack so that we dont have to keep going back and forth"; "a pass data wise on the units… more options (not too many)". Decided 2026-10-05: items link to their recipes (D59), By recipe (D60), like items together (D61), the units (D62).
 
 Starting point, 2026-10-05, read-only on production:
+
 - The grocery list is empty, so items need no backfill.
 - A recipe is found on the list by the titles in its items' "for …" notes, split at ", " (`noteSources`). One of the 81 titles has a comma, so that recipe is never seen as on the list, and adding it again doubles every amount (L7).
 - Of 1,007 lines, 175 have an amount and no unit. Most are counts, 49 of them by size ("1 medium onion"). The parser misses:
@@ -1797,6 +1799,7 @@ One commit per task; the PR when the phase is done.
 ## Phase 20 (planned): Measuring AI reads, links first
 
 Hector wants this phase to start with a long discussion, so he can learn the best practices for measuring an AI feature (2026-10-04: "when we get to 20… i want to make sure we spend a lot of time discussing that so that I can learn best practices"). Hector, 2026-10-04: "every time we are using ai, we should capture the data so that we can measure the accuracy… independently verify and tweak our prompts / service"; "We should do this with web sites first not photos". Planned in detail when it starts; one PR.
+
 - **Every AI read recorded:**
   - what was sent (the link and the page's text), the instructions' version, the model, tokens and time;
   - the draft;
@@ -1810,6 +1813,7 @@ Hector wants this phase to start with a long discussion, so he can learn the bes
 Branch `feat/recipes-p21-cook-step-by-step`, in its own worktree. Hector, 2026-10-07: "make the cook mode much more useful and good ux experience on mobile. We need to make it so that we can do step by step and make better use of the space"; then "go with your recommendations, do 21 first", so it comes before Phase 20. Decided: one screen at a time (D63), Gather first (D64), a step's own ingredients (D65), timers that follow you (D66), and what waits (D67).
 
 Starting point, 2026-10-07:
+
 - Cook mode is one long page: the wake-lock notice, every ingredient, every step, then Add to list. "Current step" is a highlight you tap, and nothing moves you on. A timer sits in its own step, so it scrolls away once you move on.
 - Read-only on production's 81 recipes:
   - Steps: a median of 6 (the most is 18). A median step is 140 characters and 9 in 10 are under 360, so almost every step fits one phone screen at a large size; the longest, 845, scrolls.
@@ -1901,6 +1905,7 @@ One commit per task; the PR when the phase is done.
 Branch `docs/recipes-p22-ux-map`, in its own worktree. Testers sent a lot of feedback (2026-10-07). Hector asked how to grow the app from it without cluttering it, with every change weighed against the rest of the app and the design system. Decided: a map first, then the feedback placed on it, before anything is built (D70).
 
 Starting point, 2026-10-07:
+
 - How screens look is settled and enforced: the Claude Design system, `recipes.css` and the design lint.
 - Patterns are in three places. The design system's README has four (bottom sheet, method steps, empty states, lists you check off), the app's AGENTS.md UI Rules has the later ones (the title's ⋯, D32's buttons, `BackLink`, full-screen tasks, row sheets), and this plan's decisions hold the history.
 - The screen canvas has Library, Recipe, Cook, Plan and Groceries in light and dark, drawn on 2026-09-24. The app has 17 routes; the later phases' screens (the title's ⋯, the add-recipe choice, cook and eat days, the week swipe, groceries by recipe, cook mode one step at a time) aren't on it.
@@ -2173,6 +2178,7 @@ Decided 2026-10-08: Hector took the recommendations (H36), as D87–D90. Merged 
 Why now: Next.js 16.4 recommends Cache Components for every app, and Next.js 17 turns it on for every app, so the app moves either way. With it on, `export const dynamic` fails the build. The portfolio moved in hectarek/hector-mono#39. React 19.3's view transitions are stable, and Next.js 16.4 needs no setting for them. Both are in one phase because the best transition here, a recipe card growing into its page, only plays when the page is ready at the tap. Cache Components' caching is what makes it ready.
 
 Starting point, 2026-10-08, read from the code:
+
 - **Pages.** 15 of the 17 pages export `dynamic = "force-dynamic"`, Welcome and Sign in among them, and the signed-in ones read the session in their body. `account/[path]`, `auth/[path]` and `pwa-icon/[size]` set `dynamicParams = false`, which Cache Components refuses at build.
 - **Loading states.** No page uses `<Suspense>`: the six `loading.tsx` files are the only loading states. They cover every page under `(main)` and `(form)`, but not cook mode, Welcome or Sign in.
 - **Layouts.** No layout reads the session, cookies or the clock. The header, the tab bar (`usePathname`) and the install hint can be prerendered as they are.
@@ -2184,6 +2190,7 @@ Starting point, 2026-10-08, read from the code:
 **Stash first.** Stash moves before P28.1, in its own small PR. It has the same Neon Auth and proxy, 2 `force-dynamic` exports and 2 `dynamicParams`, so it's a cheap rehearsal of P28.1 and P28.2 (D90). Hector's tracker has the task.
 
 **What stash's move found** (hectarek/hector-mono#45, 2026-10-08), for P28.1 and P28.2:
+
 - **Auth and account pages.** They prerender Neon's view paths through `generateStaticParams` (`Object.values(authViewPaths)`, `accountViewPaths`), and any other path is `notFound()`, a real 404. That replaces `dynamicParams = false`. The "already signed in" check goes inside `<Suspense>` with the form after it, so the form never flashes before the redirect.
 - **Build logs.** A page that reads the session stops prerendering at the read. `NeonAuthService`'s `catch` and Neon's own library then log that stop as a failed sign-in during `next build`. `experimental.hideLogsAfterAbort` hides those logs; request-time logs are unchanged.
 - **Neon's UI does full page loads.** Its default `navigate` sets `window.location.href`, and its links are plain `<a>`. So sign-out already clears every page Next.js keeps alive (D88), with no code. The account button's links reload the app too.
@@ -2195,6 +2202,7 @@ Starting point, 2026-10-08, read from the code:
 Each is placed on [ux-map.md](./ux-map.md) by its four questions. Hector took the recommended option of each (A as D87, B as D88, C as D89), and the map and AGENTS.md change with the tasks.
 
 **A. What's ready the moment you tap.**
+
 - **Placed.** Jobs: all six, most of all Find something to cook. Screens: the three tabs and a recipe's page. Pattern: none on screen; it changes how soon a screen appears. Cost: a change someone else makes can show up late on a screen kept in the phone's memory. Your own changes always show at once, because any save clears that memory.
 - **Option 1: nothing kept.** Each tap still shows the skeleton, then the page, as today.
 - **Option 2, recommended.** The library, Books and the recipe pages you open are kept in the phone's memory for 5 minutes (`'use cache: private'`, never stored on the server):
@@ -2206,6 +2214,7 @@ Each is placed on [ux-map.md](./ux-map.md) by its four questions. Hector took th
 - **Not recommended: getting every recipe card ready before it's tapped** (`<Link prefetch>` on each card). It would make a card's first tap instant, at one server request per card on screen.
 
 **B. Coming back to a page.** With Cache Components, Next.js keeps the last three pages you left alive but hidden, so Back returns to them as you left them. Proposed:
+
 - **Placed.** Jobs: Find something to cook, Add a recipe, Cook. Screens: the library, the recipe form and the two ways to add a recipe by reading one, a recipe's page, every screen with a sheet. Pattern: none on screen. Cost: none in taps. A few screens need a reset, or they'd show something stale.
 - **Kept:** where you scrolled, and the library's search, chips and Sort and group.
 - **Reset:**
@@ -2217,6 +2226,7 @@ Each is placed on [ux-map.md](./ux-map.md) by its four questions. Hector took th
 - **Groceries** reconnects to live updates when you come back, as it does after the phone sleeps today.
 
 **C. Moving between screens.** Proposed for Hector's "room to play" (D75):
+
 - **Placed.** Jobs: Find something to cook (card to recipe), Cook (recipe to cook mode), every tab switch. Screens: no screen gets busier and there's nothing new to tap. Pattern: new, Motion between screens, written into AGENTS.md's UI Rules and the map's patterns table before a screen uses it. Cost: none in taps. Safari may play some transitions differently (Next.js's guide), so they're checked on an iPhone. Motion isn't a bold moment (D75). With reduced motion, nothing moves; at most a fade.
 - **Recommended, five moves:**
   1. **A card grows into its recipe.** The photo or produce tile moves and resizes into the page's, the same colour (`produceFor`). It plays when the page is ready at the tap (one you opened in the last 5 minutes, under A2). Otherwise the page fades up.
@@ -2358,6 +2368,7 @@ Today every screen is behind sign-in, and any signed-in person can open a recipe
 Hector, 2026-11-10: "lets do all the free changes" (D100), after a review of why the app is slow to open on his phone after time away. Its own branch, `feat/recipes-p30-first-open`, in its own worktree. Phase 31 does the phone's side.
 
 What a cold open waited on, in order, read from the code and measured where it says so (2026-11-10):
+
 - **The proxy's session refresh.** The session's signed copy lasted 5 minutes (the SDK's default), and once it had run out, the proxy refreshed it before the page's first byte: our `/api/auth/get-session` route, which calls Neon Auth twice. Timed from a Mac with the database awake: 0.19–0.48 s.
 - **The database waking.** Neon Free sleeps after 5 idle minutes, and Neon Auth keeps its sessions in the same database. Neon's operations log, 11 October to 10 November: 128 wakes, median 0.46 s, and 1.6–4.6 s after a day asleep, once Neon has archived the storage. The database had slept a median 30 minutes before each wake, so the 5-minute copy had nearly always run out too, and the refresh landed on almost every open.
 - **A function starting.** Vercel Hobby keeps none warm. A new one loads the DI container, which imported every adapter, the AI SDK and Ably among them, though few requests use either: about 110 ms with Bun on a Mac.

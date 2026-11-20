@@ -134,6 +134,7 @@ How to run it, and the score thresholds `.lighthouserc.js` asserts, are in [ligh
 There's no environment variable for it. The canonical origin is set once, as `SITE_URL` in `src/shared/config/site.ts` (`https://www.hectorfgonzalez.com`). The apex `hectorfgonzalez.com` redirects to www, so every URL uses www.
 
 This is used for:
+
 - Canonical URLs, Open Graph URLs and relative image URLs in `generateSEOMetadata()`
 - Sitemap URLs
 - Robots.txt sitemap reference

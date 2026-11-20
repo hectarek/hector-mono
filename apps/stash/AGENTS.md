@@ -145,6 +145,7 @@ bun run test --filter=stash           # or: cd apps/stash && bun test tests/path
 ## Before Finishing Any Change
 
 Scope checks to this app:
+
 ```bash
 bun check --filter=stash && bun ts --filter=stash && bun run test --filter=stash
 ```
@@ -222,6 +223,7 @@ bun check --filter=stash && bun ts --filter=stash && bun run test --filter=stash
 ### Entry Points
 
 The app has three types of entry points. Not every entry point goes through the full clean architecture stack. **All entry points must have error logging** -- use DI logger for server-side code, `lib/logger.ts` for edge/root code:
+
 - **Server Actions** (`app/actions/`): Internal UI mutations. Go through DI -> Controller -> Use Case -> Repository. Always contain business logic. Wrap in try/catch with a scoped logger (`actionLogger`); the catch goes through `toActionError` (see Server Actions).
 - **Route Handlers** (`app/(api)/api/`): External/SDK endpoints. If they contain business logic, go through DI -> Controller. If they are pure framework plumbing (e.g. auth handler), they delegate directly to the SDK. Wrap with error logging using `lib/logger.ts`.
 - **Proxy** (`proxy.ts`): Route protection. Checks the session cookie and refreshes the session cache when it has expired (see Proxy above). No SDK middleware, no logging.

@@ -198,7 +198,9 @@ bun run deps:interactive  # bun update --interactive --recursive: pick what to u
 
 `deps:update` is not "latest compatible": `--latest` ignores the current ranges, jumps major versions, and rewrites the ranges in every `package.json`. Read the changelogs of anything that crossed a major, and check that `recharts` is still the identical version in `packages/ui` and every app that imports it.
 
-After updating, always run `bun ts && bun check && bun run test` to verify nothing broke.
+After updating, always run `bun ts && bun check && bun run test && bun run dead-code` to verify nothing broke. A new Biome can reformat files during `bun check`, and a new Fallow can find what an older one missed or stop needing an exception ([lint-and-dead-code.md](./lint-and-dead-code.md)).
+
+From a Claude Code session, run `deps:check` outside the sandbox (2026-11-20). Inside it, `bun outdated` fails with "unable to write files to tempdir: EPERM", even with `TMPDIR` set to a writable folder.
 
 ### Experimental Next.js options
 

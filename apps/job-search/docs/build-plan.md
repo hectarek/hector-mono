@@ -36,40 +36,49 @@ In Hector's private task tracker, not here (since 2026-10-27). The Session log's
 Each unit is one task in Hector's task tracker, where its state lives (see Conventions).
 
 **Phase 1: Foundation and the agent path**
+
 - **U1** Scaffold the app — C · KTD1, KTD17, KTD19 · needs H1
 - **U2** Identity, access and the private screen — C · KTD2, KTD3 · needs H2
 - **U3** Action envelope and activity log — C · KTD4, KTD7
 - **U4** WebMCP adapter and the agent-path spike (gate) — C+H · KTD5, KTD6 · needs H3
 
 **Phase 2: Pipeline**
+
 - **U5** Companies, lead sources and settings — C · KTD3
 - **U6** Jobs, status lifecycle and the review queue — C · KTD7, KTD8
 
 **Phase 3: People, practice and the week**
+
 - **U7** People, interactions and outreach logging — C · KTD9
 - **U8** Practice log — C
 - **U9** This week, the weekly review and fresh views — C · KTD9, KTD15
 - **U10** Tool parity check and agent docs — C · KTD5, KTD16
 
 **Phase 4: Cutover**
+
 - **U11** Import and cutover — C+H · KTD14 · needs H5, H6
 - **U17** Focus blocks and how each went — C · KTD3, KTD7, KTD15, KTD18 (added 2026-11-07)
 - **U18** Claude's MCP endpoint and its OAuth sign-in — C+H · KTD22, KTD5, KTD6 · needs H7 (added 2026-11-09)
 
 **Phase 5: Interviews and lead-source yield**
+
 - **U12** Interview rounds and lead-source yield — C · KTD7
 
 **Phase 6: Calendar** (revised 2026-11-10: U13 and U14, read-only now, are built in Phase 9's order)
+
 - **U13** Google Calendar connection — C+H · KTD10 · needs H4
 - **U14** Calendar view, scheduling and linking — C · KTD11, KTD12
 
 **Phase 7: Profile and fit**
+
 - **U15** Profile, fit checklist and fit notes — C · KTD13
 
 **Phase 8: Public write-up**
+
 - **U16** Public README and demo — C · KTD16
 
 **Phase 9: Today as home** (added 2026-11-10; built next, before Phases 5 to 8, in the order U19, U20, U13, U14, U21)
+
 - **U19** The ranked list, in place of the review queue — C+H · KTD8, KTD23, KTD24
 - **U20** Today as home — C · KTD9, KTD15 · needs H8
 - **U21** Focus blocks from the calendar — C+H · KTD11, KTD25 · needs H4

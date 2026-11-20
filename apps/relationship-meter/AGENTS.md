@@ -73,6 +73,7 @@ bun run test --filter=relationship-meter     # or: cd apps/relationship-meter &&
 ## Before Finishing Any Change
 
 Scope checks to this app:
+
 ```bash
 bun check --filter=relationship-meter && bun ts --filter=relationship-meter && bun run test --filter=relationship-meter
 ```

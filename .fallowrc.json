@@ -6,7 +6,6 @@
     "apps/hectors-recipes/service-worker/worker.ts",
     "apps/job-search/scripts/*.ts"
   ],
-  "ignoreDependencies": ["@repo/biome-config"],
   "ignoreExports": [
     {
       "file": "apps/*/app/**/route.{ts,tsx}",
@@ -14,7 +13,7 @@
     },
     {
       "file": "apps/*/app/**/{layout,page}.tsx",
-      "exports": ["ensureStatic", "instant"]
+      "exports": ["ensureStatic"]
     }
   ],
   "rules": {
