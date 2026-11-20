@@ -126,10 +126,9 @@ export function AboutContent({ profile, experience }: AboutContentProps) {
               Then my old program director asked me to help write the curriculum
               for a new cohort. That turned into co-founding Stiegler EdTech,
               where I ran the same program I&apos;d gone through, writing the
-              curriculum and teaching it every day. Of the 130 or so career
-              changers I taught, more than 100 were hired into full-time roles
-              at Charlotte employers like Bank of America, Wells Fargo,
-              Lowe&apos;s and Truist.
+              curriculum and teaching it every day. Of the 75 career changers
+              who finished the two cohorts I taught, 68 were hired, most at
+              Ally, U.S. Bank, Lowe&apos;s and Bank of America.
             </p>
             <p>
               As the company grew, I became CTO. I co-architected The Notwork,

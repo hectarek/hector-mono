@@ -32,9 +32,9 @@ const PROOF_ITEMS: ProofItem[] = [
     hint: "2D and 3D games I designed and built in Pixi.js and Three.js.",
   },
   {
-    value: "100+",
+    value: "68 of 75",
     label: "Students hired",
-    hint: "Of about 130 adults I taught to code, hired at places like Bank of America and Lowe's.",
+    hint: "Adults who finished the two coding cohorts I taught, hired at places like Ally, U.S. Bank and Lowe's.",
   },
 ];
 
@@ -70,8 +70,8 @@ export function ProofStrip() {
                 {item.label}
                 <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
               </dt>
-              {/* Sized to the cell, so the widest value, "10,000+", stays on one line on phones and tablets */}
-              <dd className="font-mono text-[min(2.25rem,23cqi)] font-medium leading-[1.1] tracking-tight text-foreground">
+              {/* Sized to the cell, so the widest value, "68 of 75", stays on one line on phones and tablets */}
+              <dd className="font-mono text-[min(2.25rem,21cqi)] font-medium leading-[1.1] tracking-tight text-foreground">
                 {item.value}
               </dd>
               <dd className="text-sm leading-relaxed text-muted-foreground">

@@ -49,8 +49,8 @@
       "location": "Charlotte, NC",
       "description": "Co-founded the company and ran CTAC, its coding program for adults changing careers: the curriculum, the daily teaching, the cohorts and the sponsoring employers.",
       "bullets": [
-        "Wrote the curriculum and taught it every day as the only instructor for two years, then supervised a third: about 130 adults, more than half of the program's graduates.",
-        "More than 100 of them were hired into full-time roles at Charlotte employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated and Truist.",
+        "Wrote the curriculum and taught it every day as the only instructor for two cohorts, then supervised a third.",
+        "68 of the 75 adults who finished those two cohorts were hired, most at Ally, U.S. Bank, Lowe's and Bank of America.",
         "Led a four-person curriculum team on a cohort build for an outside client.",
         "Worked with the sponsoring employers so each cohort learned what their hiring teams needed.",
         "Set up hiring, onboarding and program operations from the company's founding."
@@ -58,11 +58,7 @@
       "metrics": [
         {
           "label": "My students hired",
-          "value": "100+"
-        },
-        {
-          "label": "Adults I taught",
-          "value": "About 130"
+          "value": "68 of 75"
         }
       ],
       "technologies": [

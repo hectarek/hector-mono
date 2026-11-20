@@ -457,7 +457,7 @@
       "id": "ctac-program",
       "slug": "ctac-program",
       "title": "CTAC — Careers in Technology Cohort",
-      "description": "A coding program for adults changing careers. I wrote the curriculum and taught about 130 people, and more than 100 were hired into full-time roles.",
+      "description": "A coding program for adults changing careers. I wrote the curriculum and taught two cohorts, and 68 of the 75 people who finished were hired.",
       "longDescription": "CTAC trained adults to move into software jobs. I went through it as a student, then came back to run it: I wrote the curriculum, taught it every day as the only instructor for two years, and supervised a third. I also worked with the sponsoring employers so each cohort learned what their hiring teams needed.",
       "technologies": [
         "Curriculum design",
@@ -475,11 +475,7 @@
       "metrics": [
         {
           "label": "My students hired",
-          "value": "100+"
-        },
-        {
-          "label": "Adults I taught",
-          "value": "About 130"
+          "value": "68 of 75"
         },
         {
           "label": "Years I ran it",
@@ -487,8 +483,7 @@
         }
       ],
       "highlights": [
-        "More than 100 of the 130 or so career changers I taught were hired into full-time roles at Charlotte employers, including Bank of America, Wells Fargo, Lowe's, Ally, Coca-Cola Consolidated and Truist.",
-        "Those 130 were over half of the program's 200 or so graduates, across three years of cohorts.",
+        "Of the 75 career changers who finished my two cohorts, 68 were hired, most at Ally, U.S. Bank, Lowe's and Bank of America.",
         "I led a four-person curriculum team on a cohort build for an outside client."
       ],
       "screenshots": [
