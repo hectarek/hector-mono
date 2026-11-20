@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import solid from "@solidjs/vite-plugin";
 import { fileRoutes } from "filesystem-routing/vite";
+import { nitro } from "nitro/vite";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -33,6 +34,8 @@ export default defineConfig({
     // `httpMethods` also scans route modules for GET/POST/... exports (API
     // routes); handler modules never enter the client bundle.
     fileRoutes({ httpMethods: true, types: true }),
+    // Nitro wraps the ssr build for a host: its Vercel preset when VERCEL is set at build time.
+    nitro({ serverEntry: false }),
   ],
   resolve: {
     alias: { "@": fileURLToPath(new URL(".", import.meta.url)) },
