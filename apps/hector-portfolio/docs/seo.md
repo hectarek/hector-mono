@@ -46,6 +46,8 @@ The card's source is [`og-image.html`](./og-image.html). It shows the hero line 
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --user-data-dir="$(mktemp -d)" --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=5000 --screenshot="$PWD/public/og-image.png" "file://$PWD/docs/og-image.html"
 ```
 
+From a Claude Code session, run it outside the sandbox (2026-11-20). Inside it, `mktemp -d` can't write to the system temp folder, and Chrome can't create its profile lock or socket directory, even with a writable `--user-data-dir`.
+
 ### Page-Level SEO
 
 ```typescript
