@@ -1,5 +1,6 @@
 import { AuthView } from "@neondatabase/auth/react";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { BackLink } from "@/app/_components/back-link";
 import { Logo } from "@/app/_components/logo";
@@ -60,7 +61,8 @@ export default async function AuthPage({
 
 // Where to go afterwards (?redirectTo=) and whether someone's already signed in are only
 // known at request time, so the screen waits for them: someone signed in goes on without
-// the form showing first.
+// the form showing first. A prefetch or a prerender stops at connection(), before Neon's
+// session fetch, which would otherwise fail and log once that render ends.
 async function AuthForm({
   path,
   searchParams,
@@ -68,6 +70,7 @@ async function AuthForm({
   path: string;
   searchParams: SearchParams;
 }) {
+  await connection();
   const redirectTo = safeRedirect((await searchParams).redirectTo);
   if (skipsWhenSignedIn(path)) {
     const { data: session } = await auth.getSession();
