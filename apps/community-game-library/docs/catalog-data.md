@@ -1,8 +1,10 @@
 # Community Game Library: where the game data comes from
 
-Updated 2026-11-12
+Updated 2026-11-20
 
-What was found when the catalog's source was checked before the data model was written. These are findings only: how the catalog gets filled is not decided. Hector's direction on 2026-11-12 is a simple data model first, holding only the values the spec and the drawn screens use. The proposed model is in [data-model.md](data-model.md). Every page named here was read on 2026-11-12, by one of two sessions. A line marked "our reading" is a judgment, not something the source states. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
+**Decided 2026-11-20 (Hector):** we source and shape the catalog ourselves, with his help, as an effort beside the build, and U24 loads it ([build-plan.md](build-plan.md) D7 and H6, revised that day). The findings below stay as background. One of them binds the new plan: BGG's terms bar using its data "as data for an AI", so agents don't read or shape BGG's data, the list of every game included (the conditions, below).
+
+What was found when the catalog's source was checked before the data model was written. These were findings only: how the catalog got filled wasn't decided until 2026-11-20. Hector's direction on 2026-11-12 is a simple data model first, holding only the values the spec and the drawn screens use. The proposed model is in [data-model.md](data-model.md). Every page named here was read on 2026-11-12, by one of two sessions. A line marked "our reading" is a judgment, not something the source states. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
 
 ## The short answer
 
@@ -137,7 +139,7 @@ Proposed on the assumption of that direction. R1, R5 and R11 have since been set
 - **R11** (filters): complexity, category, mechanic and age only have data for games that came from BGG. Players, play time, owner and availability work for every game.
 - **A credit**: BGG's name and "Powered by BGG" logo wherever its data shows. The placement is drawn on the canvas (Y1).
 - **No AI on BGG's data**: the admin's AI helper stays dropped, test fixtures stay fictional, and an agent building the app doesn't read BGG's records.
-- **H1** (register with BGG) decides how rich the catalog is at launch, so it should go in now.
+- **H1** (register with BGG) would have decided how rich the catalog is at launch. It isn't needed since the 2026-11-20 decision.
 
 ## Not checked
 
