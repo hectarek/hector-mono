@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { PGlite } from "@electric-sql/pglite";
+import type { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import journal from "@/db/migrations/meta/_journal.json";
@@ -8,6 +8,7 @@ import {
   checksMigrations,
   missingMigrations,
 } from "@/scripts/require-migrations";
+import { newPGlite } from "@/tests/_support/database";
 
 const JOURNAL_TAGS = journal.entries.map(({ tag }) => tag);
 
@@ -33,7 +34,7 @@ describe("missingMigrations", () => {
   });
 
   async function migrated() {
-    client = new PGlite();
+    client = newPGlite();
     const db = drizzle({ client });
     await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
     return db;
@@ -54,7 +55,7 @@ describe("missingMigrations", () => {
   });
 
   it("names every migration on a database that has run none", async () => {
-    client = new PGlite();
+    client = newPGlite();
 
     expect(await missingMigrations(drizzle({ client }))).toEqual(JOURNAL_TAGS);
   });

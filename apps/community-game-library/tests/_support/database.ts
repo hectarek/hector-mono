@@ -2,11 +2,18 @@
 // real repositories and transaction manager run against real SQL, with the app's own
 // migrations, and never against a real database. Recipes' harness.
 import { PGlite } from "@electric-sql/pglite";
+import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import * as schema from "@/db/schema";
 
-const client = new PGlite();
+// An empty in-memory Postgres with the extension the migrations load: pg_trgm, from PGlite's
+// contrib, for search (KTD10). The migration scripts' tests make their own.
+export function newPGlite(): PGlite {
+  return new PGlite({ extensions: { pg_trgm } });
+}
+
+const client = newPGlite();
 export const testDb = drizzle({ client, schema });
 
 let migrated: Promise<void> | undefined;

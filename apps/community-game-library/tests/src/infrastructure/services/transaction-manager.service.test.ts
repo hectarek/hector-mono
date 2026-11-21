@@ -14,8 +14,8 @@ import {
 import { describeEachBackend, makeApp } from "@/tests/_support/app";
 import { resetDatabase, sql } from "@/tests/_support/database";
 
-// Whether a table exists, by name: the app has no tables yet (U3), so these tests write
-// temporary ones, which roll back with their transaction as any write does.
+// Whether a table exists, by name: these tests write temporary tables of their own, which roll
+// back with their transaction as any write does.
 const tableExists = async (name: string) =>
   (
     await sql<{ found: boolean }>(

@@ -58,12 +58,22 @@ const MONTH_YEAR = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
+// A date's weekday, "Fri", and its month and day, "Nov 20": the parts formatDate joins, and a
+// stamp's short words ("Due Fri", "Out to Nov 20").
+export function formatWeekday(date: string): string {
+  return WEEKDAY.format(toUtc(date));
+}
+
+export function formatMonthDay(date: string): string {
+  return MONTH_DAY.format(toUtc(date));
+}
+
 // A date as every screen writes it (KTD9; screens.md, Limits to build for): its weekday, month
 // and day, "Fri, Nov 20", and the year once it isn't this year, "Fri, Jan 7, 2028". The parts
 // are formatted apart and joined here, since ICU builds join them differently (job-search's
 // format-day.ts found Bun on macOS and on Linux disagreeing).
 export function formatDate(date: string, today: string): string {
-  const day = `${WEEKDAY.format(toUtc(date))}, ${MONTH_DAY.format(toUtc(date))}`;
+  const day = `${formatWeekday(date)}, ${formatMonthDay(date)}`;
   const year = date.slice(0, 4);
   return year === today.slice(0, 4) ? day : `${day}, ${year}`;
 }

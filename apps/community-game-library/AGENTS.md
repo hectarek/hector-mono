@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1, U2):
+The spec's code map, as far as it's built (U1 to U3):
 
 ```
 app/
@@ -43,10 +43,17 @@ src/
   entities/
     errors/                  # common.ts (recipes' errors, each naming itself, and ChangedError with its
                              # CHANGED_REASONS), loggable.ts (job-search's)
-    models/                  # user, session, transaction, logger
-    piece.ts                 # PIECE_SHAPES, PIECE_COLORS (R51)
+    models/                  # a Zod model per table (see Data Model), with its own fixed lists;
+                             # user, session, transaction, logger
+    loan.ts                  # the statuses, LOAN_MOVES and canMove, PASS_ALONG_FOLLOW_ONS, the
+                             # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6)
+    notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
+                             # DEFAULT_NOTICES_OFF
+    piece.ts                 # PIECE_SHAPES, PIECE_COLORS, PEOPLE_ONLY_COLORS (R51)
+    search-title.ts          # toSearchTitle (KTD10)
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
-                             # formatDate ("Fri, Nov 20", with the year once it isn't this year)
+                             # formatDate ("Fri, Nov 20", with the year once it isn't this year),
+                             # formatWeekday and formatMonthDay, its parts
   application/
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
@@ -56,11 +63,11 @@ src/
     services/                # neon-auth, transaction-manager, console-logger, s3-file-storage, with mocks
 di/                          # container.ts, types.ts, modules: access, authentication, file-storage,
                              # logger, transaction
-db/                          # schema.ts (no tables until U3), index.ts, migrations/ (an empty journal)
+db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
 lib/                         # auth/server.ts, logger.ts
 scripts/                     # check-test-database.ts, require-migrations.ts, migrate-production.ts;
                              # lib/ (migrations.ts, terminal.ts)
-tests/                       # bun:test, mirroring the tree; _support/ (see Testing)
+tests/                       # bun:test, mirroring the tree; db/schema.test.ts; _support/ (see Testing)
 proxy.ts
 ```
 
@@ -93,6 +100,23 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **One breakpoint for the shell, 768px** (`md:`): the tabs move into the AppBar, a sheet becomes a 480px dialog. Browsed lists add a third column from 1100px, written `min-[68.75rem]:`: Tailwind sorts a px breakpoint before `md`'s rem one, so `min-[1100px]:` loses to `md:` (2026-11-21).
 - **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; U5 gives the bell and the piece the member's own (the piece is a bone pawn until then) and U11 the tabs their counts.
 - **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
+
+## Data Model
+
+[docs/data-model.md](docs/data-model.md) is the source for every table, column, check and index, and says why each exists. `db/schema.ts` holds all sixteen, made by U3's one migration (KTD5), and each table has a Zod model in `src/entities/models/` named for it (`loans` → `loan.model.ts`). A later unit changes the schema only when its task says so: one migration per batch at most, additive before the deploy that uses it and drops after (recipes' Backend Rules), and never in two open batches at once.
+
+The database refuses on its own: a value outside its fixed list, an expansion without a base game or a base game with one, a friendship with oneself, a night with no seats or one that ends before it starts, negative guests, a loan from `'out'` on without its pick-up day and due date, a second loan holding a copy (`'out'`, `'returning'` or `'passing'`), a second yes waiting for its pick-up, a second open loan by one borrower on one copy, a second reminder of a type on one day for one loan or night, a second friend request between two people either way round, and a token already in use. `tests/db/schema.test.ts` shows each. Every writer keeps the rest true:
+
+- **The fixed lists live in the entities**, and the checks are built from them: the statuses in `loan.ts`, the notice types and groups in `notice-types.ts`, the pieces in `piece.ts`, and each table's other lists in its model (`GAME_TYPES` in `game.model.ts`). A value added to a list needs a migration that rebuilds its check.
+- **`games.search_title`** is `toSearchTitle(title)`, written in the same write as the title (KTD10).
+- **A loan moves only as `canMove` allows**, after the copy's row lock (`select … for update` on `user_games`, KTD6). A pass-along writes both loans in one transaction (`PASS_ALONG_FOLLOW_ONS`). A yes sets `period_days` or, for a picked date, `due_on`, and the pick-up sets the other (`datesAtPickUp`). Overdue and the line are worked out when read (`isOverdue`, `lineOf`), never stored.
+- **A request for more time** sets the three `more_time_` columns together, and either answer clears all three.
+- **A friendship is two rows**, made and deleted together. Accepting a friend request deletes it, and its notice goes with it.
+- **A notice** is written in its change's own transaction (KTD7) and points at one thing. A reminder has no `created_by` and carries `reminded_on`; the daily run inserts it with `on conflict do nothing`.
+- **User ids are Neon Auth's, with no foreign key.** The database deletes only what hangs off a copy, a loan, a night, a suggestion or a friend request (data-model.md, What goes with a copy or an account); deleting a member (U22) deletes the rest of their rows itself.
+- **An expansion in a copy's box** has the copy's game as its `base_game_id`. No key checks it.
+- **`updated_at`** moves on every update drizzle writes (`$onUpdate` in the schema). Raw SQL that updates a row sets it itself.
+- **The first migration starts with `create extension if not exists pg_trgm`**, added by hand: drizzle-kit writes no extensions. A migration is never edited once it's applied anywhere, since its hash is recorded there and the migration scripts would then take that database for another app's.
 
 ## Backend Rules
 
@@ -141,14 +165,15 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 
 - `tests/` mirrors the source tree (`proxy.ts` → `tests/proxy.test.ts`); run tests from this folder so `bunfig.toml`'s preload applies.
 - `tests/_support/preload.ts` runs before every test. It deletes the variables `.env` holds (all but `LOG_LEVEL`), so no test reaches the test project, points `@/db` at PGlite, swaps `@/lib/auth/server` for `tests/_support/neon-auth.ts` (its route handler records what reached Neon, and a test sets `neonAuth.answer` or `neonAuth.getSession` to make Neon fail, then calls `neonAuth.reset()`), makes `redirect()` throw `Redirected` and `notFound()` throw `NotFoundPage` (`tests/_support/next.ts`), lets `connection()` go on at once, and stubs `next/cache`, the router and `getCurrentUserId` (`nextState.userId`; `signInAsNewUser()` in `beforeEach`).
-- Database: PGlite with the real migrations (`tests/_support/database.ts`). `resetDatabase()` in `beforeEach` migrates once, then empties every table in `public`, which it finds itself, so a new table needs no line there. `sql()` runs raw checks, never inside an open transaction. Until U3's first migration there are no tables, and the transaction manager's tests write temporary ones.
+- Database: PGlite with the real migrations (`tests/_support/database.ts`), loading `pg_trgm` from PGlite's contrib, which the first migration needs. A test that makes a database of its own, as the migration scripts' tests do, makes it with `newPGlite()`; a bare `new PGlite()` fails on that first line. `resetDatabase()` in `beforeEach` migrates once, then empties every table in `public`, which it finds itself, so a new table needs no line there. `sql()` runs raw checks, never inside an open transaction. The transaction manager's tests write temporary tables of their own.
+- Constraints are tested on PGlite alone (KTD22), in `tests/db/schema.test.ts`: each refusal by its Postgres code and constraint name (`{ code: "23514", constraint: "games_type_check" }`), so a test can't pass on another error. It also holds each model to its table: every table has one, its type is drizzle's row type (a difference fails `bun ts`), and it parses every row drizzle reads back. A new column goes in the table, its model and that test's filled rows together.
 - Use-case tests use `describeEachBackend` and `makeApp()` (`tests/_support/app.ts`, recipes' harness): each runs on the mocks and on the real repositories over PGlite, and one that fails only on `[postgres]` means a mock has drifted from the SQL. Each unit adds its repositories and use cases there. U1 has only the transaction manager.
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged, so a test can show a value never reached the logs.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
 - Not copied yet, since Fallow fails a file nothing uses: recipes' `tests/_support/controller.ts` (`controllerBasics`) comes with the first controller. `tests/_support/cast.ts` and the seed come with U4. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests.
 - Base UI's dialogs and sheets in happy-dom (U2): a dialog closes after its exit transition, so wait for it with `waitFor`, and poll absence as a boolean (`expect(view.queryByRole("dialog") === null).toBe(true)`): Bun prints a whole element when an expectation on one fails, which takes seconds and starves `waitFor`'s retries. `fireEvent.click` doesn't focus a button as a tap does, so focus the opener first to test where the cursor goes back. A sheet takes the phone's Drawer when `happyDOM.setInnerWidth(390)` (the window's `happyDOM`, cast). Sonner's toasts are global to a test file, so a toast from one test still shows in the next. next/image calls `onLoad` after the picture decodes, a moment after the load event.
 - Fallow (`bun run dead-code`) counts test files as entry points, so a helper copied with its test is in use before any page needs it. The scripts are entry points in the root `.fallowrc.json` (`apps/community-game-library/scripts/*.ts`).
-- The migration scripts' tests hold whatever the journal holds. Job-search's tests of a run that applies a migration (typing `migrate`, another answer stopping it, a migration still unapplied afterwards) come back with U3's first migration.
+- The migration scripts' tests run on the real journal, with job-search's tests of a run that applies it: typing `migrate`, another answer stopping it, and a migration still unapplied afterwards.
 - Browser flows (Playwright, on the test project, behind `scripts/check-test-database.ts`) come with U25.
 
 ## Commands

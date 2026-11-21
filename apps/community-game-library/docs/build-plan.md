@@ -519,14 +519,14 @@ apps/community-game-library/
     entities/
       errors/common.ts, errors/loggable.ts   # recipes' errors with ChangedError (KTD16); job-search's loggable
       models/                       # game, user-game, user-game-expansion, game-suggestion, user-profile,
-                                    # user-settings, friendship, friend-request, friend-link, loan, game-night,
-                                    # game-night-attendee, game-night-game, game-night-vote, notice, user, session,
-                                    # transaction, logger
+                                    # user-settings, removed-user, friendship, friend-request, friend-link, loan,
+                                    # game-night, game-night-attendee, game-night-game, game-night-vote, notice,
+                                    # user, session, transaction, logger
       week.ts                       # recipes' dates and todayIn, with PLAN_TIME_ZONE (KTD9); formatDate, formatMonth (U2)
       search-title.ts               # KTD10 (U3)
       loan.ts                       # the state machine, dates, the line and a copy's state (KTD6, U3)
       notice-types.ts               # each type's group (U3)
-      piece.ts                      # shapes and colors (R51, U2)
+      piece.ts                      # shapes and colors, and the colors for people only (R51, U2)
       reminders.ts                  # which reminders are due on a day (KTD8, U17)
       night.ts                      # seats, guests and the waitlist (R31, R47, U19)
       what-to-play.ts, tables.ts    # KTD23 (U20)

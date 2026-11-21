@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { PGlite } from "@electric-sql/pglite";
+import type { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import journal from "@/db/migrations/meta/_journal.json";
@@ -11,10 +11,9 @@ import {
   migrateTarget,
   urlRefusal,
 } from "@/scripts/migrate-production";
+import { newPGlite } from "@/tests/_support/database";
 
-// Job-search's tests, for the ones that hold whatever the journal holds. It's empty until U3's
-// first migration, which brings back job-search's tests of a run that applies one: typing
-// `migrate`, any other answer stopping it, and a migration still unapplied afterwards.
+// Job-search's tests, on this app's journal.
 
 // Fictional Neon addresses: .env's stands in for the test project's, the other for production's.
 const ENV_URL =
@@ -83,7 +82,7 @@ describe("migrateTarget", () => {
   });
 
   function freshTarget() {
-    client = new PGlite();
+    client = newPGlite();
     const db = drizzle({ client });
     let runs = 0;
     return {
@@ -143,6 +142,41 @@ describe("migrateTarget", () => {
     expect(await migrationsTableExists()).toBe(false);
   });
 
+  it("applies the journal once `migrate` is typed, and shows the result", async () => {
+    const target = freshTarget();
+    const { terminal, printed, refused, asked } = scriptedTerminal(["migrate"]);
+
+    expect(
+      await migrateTarget(target.db, HOST, terminal, target.applyMigrations),
+    ).toBe(0);
+    expect(refused).toEqual([]);
+    expect(asked).toHaveLength(1);
+    expect(target.runs()).toBe(1);
+    expect(printed.slice(0, 5)).toEqual([
+      `Target: ${HOST}, database postgres`,
+      `Migrations in the journal: ${JOURNAL_TAGS.join(", ")}`,
+      "Applied on the target: 0",
+      `To apply: ${JOURNAL_TAGS.join(", ")}`,
+      `Applied on the target: ${JOURNAL_TAGS.length} of ${JOURNAL_TAGS.length}`,
+    ]);
+    expect(printed[5]).toMatch(/^Tables in public: .*\bgames\b/);
+  });
+
+  it.each(["yes", "Migrate", ""])(
+    "stops on %p, with nothing changed",
+    async (answer) => {
+      const target = freshTarget();
+      const { terminal, refused } = scriptedTerminal([answer]);
+
+      expect(
+        await migrateTarget(target.db, HOST, terminal, target.applyMigrations),
+      ).toBe(1);
+      expect(refused).toEqual(["Stopped. Nothing changed."]);
+      expect(target.runs()).toBe(0);
+      expect(await migrationsTableExists()).toBe(false);
+    },
+  );
+
   it("has nothing to apply on a target that's up to date, and asks nothing", async () => {
     const target = freshTarget();
     await migrate(target.db, { migrationsFolder: MIGRATIONS_FOLDER });
@@ -176,6 +210,17 @@ describe("migrateTarget", () => {
     );
     expect(asked).toEqual([]);
     expect(target.runs()).toBe(0);
+  });
+
+  it("fails when a migration it listed is still unapplied afterwards", async () => {
+    const target = freshTarget();
+    const { terminal, refused } = scriptedTerminal(["migrate"]);
+
+    // As if drizzle had skipped every migration without an error.
+    expect(
+      await migrateTarget(target.db, HOST, terminal, async () => undefined),
+    ).toBe(1);
+    expect(refused).toEqual([`Still not applied: ${JOURNAL_TAGS.join(", ")}.`]);
   });
 });
 

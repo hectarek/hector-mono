@@ -2,10 +2,14 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import type { PEOPLE_ONLY_COLORS, PieceColor } from "@/src/entities/piece";
 
-// A game's cover token is one of five piece colors; pumpkin, teal, rose and charcoal are for
-// people's pieces only (the design system's CoverThumb).
-export type CoverColor = "brick" | "mustard" | "moss" | "ocean" | "plum";
+// A game's cover token is one of five piece colors (the design system's CoverThumb): never one
+// for people only, and never bone, the square it sits on.
+export type CoverColor = Exclude<
+  PieceColor,
+  (typeof PEOPLE_ONLY_COLORS)[number] | "bone"
+>;
 
 // What a cover shows (Y1): the game's token until its art loads, the art once it does, and
 // the token again if the art fails, so a cover never shows a broken picture or an empty box.
