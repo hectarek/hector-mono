@@ -12,8 +12,7 @@ import Image from "next/image";
 import { type ChangeEvent, useEffect, useId, useRef, useState } from "react";
 import { CameraIcon } from "@/app/_components/icons";
 import { shrinkImage } from "@/app/_lib/shrink-image";
-
-const FAILED = "That photo didn’t upload. Try a smaller one.";
+import { PHOTO_FAILED_LINE } from "@/src/entities/profile-photo";
 
 // A photo in a form (KTD11; E6, B9, G3): choose one, see it, and the form sends it shrunk to a
 // JPEG within 800px and 300 KB (shrink-image.ts), under the field's `name`. Round for a member's
@@ -74,7 +73,7 @@ export function PhotoField({
   }
 
   const shown = preview ?? photoUrl ?? undefined;
-  const line = failed ? FAILED : error;
+  const line = failed ? PHOTO_FAILED_LINE : error;
   const picture = shown ? (
     <Image
       src={shown}

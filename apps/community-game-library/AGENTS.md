@@ -22,22 +22,34 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U4):
+The spec's code map, as far as it's built (U1 to U5):
 
 ```
 app/
   (api)/api/auth/[...path]/  # Neon Auth's endpoints, passed through; logged by status, path and class
-  (auth)/welcome/            # where signed-out visitors start: the app's name until U5 draws A1
-  (main)/                    # the signed-in app: layout.tsx (the shell, below), page.tsx (the Library,
-                             # its header until U6), loading.tsx (its header and skeleton)
+  (auth)/welcome/            # where signed-out visitors start: A1, or A9 inside a chat app's browser
+                             # (page.tsx, welcome-screen.tsx)
+  (auth)/auth/[path]/        # Neon's forms: make an account (A2), sign in (A8); layout.tsx loads the kit
+  (start)/start/             # the steps before the app: profile/ (A4), home-screen/ (A6); A5 comes with U10
+  (main)/                    # the signed-in app: layout.tsx (the shell, below; account-gate.tsx), page.tsx
+                             # (the Library, its header until U6), loading.tsx (its header and skeleton);
+                             # you/ (E5) and you/edit/ (E6)
+  account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
+  removed/                   # a removed account's only page
   _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader), back-link,
                              # bell, changed-notice, confirm-dialog (and LeaveGuardDialog), cover,
                              # cover-thumb, date-sheet, dice, group, icons, list-row, no-connection,
                              # page-column, people-picker, photo-field, piece, seats, share-button,
-                             # sheet, stamp, tab-bar, tab-count, track; action-form
+                             # sheet, stamp, tab-bar, tab-count, track; action-form. U5's: auth-notice,
+                             # home-screen-steps, open-in-browser (A9's Copy the link), piece-picker,
+                             # profile-form (A4 and E6), steps
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
-                             # notify, leave-guard, changed-lines, share, shrink-image
-  actions/                   # shared.ts: ActionState, actionLogger, text, toActionError (not "use server")
+                             # notify, leave-guard, changed-lines, share, shrink-image. U5's: account
+                             # (getAccount and the gate), auth (the browser's auth client), auth-localization,
+                             # auth-notice
+  _providers/                # auth-provider: Neon's kit, for the sign-in and account layouts only
+  actions/                   # shared.ts: ActionState, actionLogger, text, toActionError (not "use server");
+                             # profile.ts: createProfile, updateProfile, removePhoto
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
@@ -47,9 +59,13 @@ src/
                              # user, session, transaction, logger
     loan.ts                  # the statuses, LOAN_MOVES and canMove, PASS_ALONG_FOLLOW_ONS, the
                              # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6)
+    account-state.ts         # AccountState: removed, needs-profile, or ready (KTD3)
+    in-app-browser.ts        # IN_APP_BROWSERS and inAppBrowserOf: A9's list, each pattern with its source
     notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
                              # DEFAULT_NOTICES_OFF
     piece.ts                 # PIECE_SHAPES, PIECE_COLORS, PEOPLE_ONLY_COLORS (R51)
+    profile-photo.ts         # what a photo may be (types, 300 KB), its signed address's hour, the
+                             # "didn't upload" line
     search-title.ts          # toSearchTitle (KTD10)
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
                              # formatDate ("Fri, Nov 20", with the year once it isn't this year),
@@ -60,6 +76,10 @@ src/
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/friends/       # require-friend (KTD4)
+    use-cases/profile/       # create-profile, get-account-state, get-profile, list-taken-pieces,
+                             # remove-photo, set-photo, update-profile
+  interface-adapters/
+    controllers/profile/     # one per use case of profile/ (they check the user and the input)
   infrastructure/
     drizzle-errors.ts        # names drizzle's query error for the logs
     repositories/            # base.repository.ts, then one per interface, each with its .mock.ts
@@ -102,7 +122,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **The shared components' look is the theme's.** It restyles Button, the fields, the choices, the toggles, Drawer, Dialog, AlertDialog, the Toaster and Empty by `data-slot`, unlayered, so their utilities can't change it; `no-restyle` forbids trying, and layout classes still work. A Button's kind is its variant (`default` the one primary, `secondary`, `destructive` the solid red, `link` the quiet dashed link) and its size its size (`lg` a screen's 48px main action, `sm` a button in a row or the header). The app's own components (stamp, piece, list-row and the rest) are utilities over the tokens.
 - **Type sizes** are Tailwind's and the shared stylesheet's: `text-10`, `text-13`, `text-15`, `text-22` and `text-26` are the kit's own, with the font's own line height. `cn` from `@repo/ui/lib/utils` knows them; `cn` straight from the `cn` package takes `text-13` for a color and drops it beside one (2026-11-21).
 - **One breakpoint for the shell, 768px** (`md:`): the tabs move into the AppBar, a sheet becomes a 480px dialog. Browsed lists add a third column from 1100px, written `min-[68.75rem]:`: Tailwind sorts a px breakpoint before `md`'s rem one, so `min-[1100px]:` loses to `md:` (2026-11-21).
-- **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; U5 gives the bell and the piece the member's own (the piece is a bone pawn until then) and U11 the tabs their counts.
+- **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; the piece is the member's own since U5 (a bone pawn while it loads), and U11 gives the bell and the tabs their counts.
 - **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
 
 ## Data Model
@@ -126,7 +146,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 
 - Reads go page → controller (through `getInjection`) → use case → repository. Writes go through a server action in `app/actions/<domain>.ts`, then `revalidatePath` for every page its change shows on (KTD16). Build a feature inward-out (`docs/clean-architecture.md` §9).
 - Errors are typed classes from `src/entities/errors/common.ts`, thrown below the action and caught in it with `toActionError` (`app/actions/shared.ts`), never returned. A new error class sets `override name = "<ClassName>"`, as the others do, and goes in the transaction manager's `DOMAIN_ERRORS` if it can be thrown inside a transaction, or the action sees "Transaction failed" instead.
-- `toActionError` gives each field its message through `FIELD_LABELS`, the form's labels in its board's words. It's empty until the first form (U5): each form adds its fields, and a test that names one.
+- `toActionError` gives each field its message through `FIELD_LABELS`, the form's labels in its board's words (A4 and E6's `name`, `phone` and `photo` so far): each form adds its fields, and a test that names one.
 - Writes check access and mutate inside one `startTransaction`, so the check and the write see the same state, and every read inside a transaction passes `tx`: a read without it hangs on PGlite's one connection. Timeouts are Postgres-side (`set local statement_timeout`).
 - Another member's copies, profile, phone, photo or nights are read only after `requireFriend(friendships, viewerId, otherUserId, tx)` (`src/application/use-cases/friends/require-friend.ts`, KTD4), a plain function a use case calls, as recipes' `requireSpaceRole`. A stranger gets the `NotFoundError` an id with no account gets, so they can't tell an account exists (AE8). Nobody is their own friend: a use case that shows members their own things checks for that first.
 - A list of people reads `IUserProfilesRepository.getManyByUserIds`, which gives names and pieces only (`NameAndPiece`): the people in a loan's line or at a night needn't be the viewer's friends. The whole profile, with the phone and photo, comes from `getByUserId`, after `requireFriend` or for the other person in a loan (KTD4).
@@ -145,7 +165,11 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - `proxy.ts` is recipes': a cookie check, and a refresh of the session's copy through `/api/auth/get-session` when it's missing. It sends every signed-out request to `/welcome?redirectTo=<path>`, server actions included, as recipes' does, except `/welcome` and Neon's forms under `/auth` (the matcher). A page that opens signed out (KTD3: `/f/<token>`, `/n/<token>`, `/sw.js`, the manifest, the icons, the link-preview images) adds its own line there, with a proxy test. Route handlers under `/api` check their own access (`/api/cron/daily` its secret, KTD8).
 - Redirect targets go through `safeRedirect` (`app/_lib/safe-redirect.ts`), which keeps only same-app paths.
 - The admin is the account whose id is `ADMIN_USER_ID` (KTD1), never an email. `di/modules/access.module.ts` reads it, and anything only the admin does starts with `IRequireAdmin` (`src/application/use-cases/admin/require-admin.ts`), which refuses anyone else with `UnauthorizedError`. A missing or malformed id makes nobody the admin, and the first refusal it causes is logged once, as a warning. Production's id is set after Hector's first sign-in there, then a redeploy (H3). Tests have no admin: the preload drops `ADMIN_USER_ID`.
-- Neon's sign-in kit (`@neondatabase/auth/react` and the browser's auth client) is 870 KB of JavaScript, so it loads only in the sign-in and account layouts, never the root or `(main)` layout (KTD2). `tests/app/layout.test.ts` fails if they reach it.
+- Neon's sign-in kit (`@neondatabase/auth/react` and the browser's auth client) is 870 KB of JavaScript, so it loads only in the sign-in and account layouts, never the root or `(main)` layout (KTD2). `tests/app/layout.test.ts` fails if they reach it, or if the steps, welcome, removed, You or Edit profile pages do. Sign out and the account pages are plain links (`SIGN_OUT_HREF`, `ACCOUNT_HREF`), so the kit stays out of the pages that link to them.
+- **The gate after sign-in** is `gate(landing)` in `app/_lib/account.ts`, over `getAccount()` (read once a request, `IGetAccountStateController`): no `user_profiles` row goes to `/start/profile`, a `removed_users` row to `/removed`, everyone else gets the app; signed out goes to `/welcome`. The `(main)` layout runs it beside the page (`account-gate.tsx` in `<Suspense>`, so the shell still prerenders and a redirect arrives as the stream does), and each step page and `/removed` calls it for its own landing. A page that calls it waits on `connection()` first. The header's piece reads the same `getAccount()` (`MyPiece`, a bone pawn until it resolves): an async component never resolves in a screen test, so the tests see the bone pawn and call `MyPiece()` directly.
+- **The sign-in views** (`app/_providers/auth-provider.tsx`): Google on (`social`), the email code on sign-up (`emailVerification: { otp: true }`), the board's words (`app/_lib/auth-localization.ts`), light only (`defaultTheme="light"`, and `suppressHydrationWarning` on `<html>`, since the kit's theme provider sets a class and `color-scheme` on it). Neon's own toast isn't shown: the provider's `toast` hands each message to `AuthNotice`, a line under the form. Neon's sign-up error for a taken email carries only a message ("User already exists. Use another email.", code `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL`), not the `error.code` the kit's `localization` is looked up by, so `toAuthMessage` words it by the message (checked on the test project, 2026-11-21). `globals.css` imports Neon's Tailwind sources and declares the layer order first, as recipes does; without them the kit's classes (`gap-6`) generate no CSS. The kit's fields are its own components, so the theme's restyle of the shared fields doesn't reach them: `CLASS_NAMES` in the auth page gives them the 44px field and 2px edge. A class like `text-15` merges away the text color there (Neon's `cn` takes it for one): use `text-base`.
+- **The test project's sign-up code check is off** (KTD3), so an email account is made without a code there. The code step is Neon's own (`EMAIL_VERIFICATION`, `/auth/email-verification?email=`), and Hector checks it on production before friends join (H4). Google signs in on Neon's shared credentials on the test project: the button reaches Google's sign-in page, and a real Google sign-in is Hector's on a preview.
+- **A9** (`src/entities/in-app-browser.ts`): each in-app browser's pattern is from UAParser.js's published list, with its link beside it, and a test per app. WhatsApp's, Telegram's, Slack's and iMessage's own web views that carry no marker can't be told apart, and aren't listed. The welcome page (and U10's and U19's link pages) show A9 in place of the ways in.
 - Safari can't sign in on `http://localhost` (Neon Auth's cookies are always `Secure`), as in recipes: check iPhone Safari on a preview.
 
 ## Logging Rules
@@ -182,7 +206,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - **The seed** (`scripts/seed.ts`, KTD21) writes the cast to `.env`'s database and stops unless it carries the test project's comment. A dry run by default; `--commit` writes, in one transaction; `--as <name>=<user id>` maps a member to their account (`.cast-accounts.json`), and the rest keep the cast's ids. It writes what's missing and skips what's there, so it's safe to run again, and a unit that extends the cast runs it again (Commands). Its test runs it on PGlite with the comment and without. U4 ran it on the test project on 2026-11-21, every member mapped.
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged, so a test can show a value never reached the logs.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
-- Not copied yet, since Fallow fails a file nothing uses: recipes' `tests/_support/controller.ts` (`controllerBasics`) comes with the first controller, which U4 didn't write. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests.
+- `tests/_support/controller.ts` (`controllerBasics`, recipes') came with U5's first controllers: a controller test names its valid input, what the use case should receive and the inputs to reject. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests. `tests/_support/members.ts` signs a test in as a member with a profile (`signInAsMember`) through the container's own controllers, for page, action and gate tests: the container's mock repositories live for the whole run, so each test signs in as a new user.
 - Base UI's dialogs and sheets in happy-dom (U2): a dialog closes after its exit transition, so wait for it with `waitFor`, and poll absence as a boolean (`expect(view.queryByRole("dialog") === null).toBe(true)`): Bun prints a whole element when an expectation on one fails, which takes seconds and starves `waitFor`'s retries. `fireEvent.click` doesn't focus a button as a tap does, so focus the opener first to test where the cursor goes back. A sheet takes the phone's Drawer when `happyDOM.setInnerWidth(390)` (the window's `happyDOM`, cast). Sonner's toasts are global to a test file, so a toast from one test still shows in the next. next/image calls `onLoad` after the picture decodes, a moment after the load event.
 - Fallow (`bun run dead-code`) counts test files as entry points, so a helper copied with its test is in use before any page needs it. The scripts are entry points in the root `.fallowrc.json` (`apps/community-game-library/scripts/*.ts`).
 - The migration scripts' tests run on the real journal, with job-search's tests of a run that applies it: typing `migrate`, another answer stopping it, and a migration still unapplied afterwards.

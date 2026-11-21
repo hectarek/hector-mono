@@ -531,7 +531,9 @@ apps/community-game-library/
       night.ts                      # seats, guests and the waitlist (R31, R47, U19)
       what-to-play.ts, tables.ts    # KTD23 (U20)
       library-filters.ts            # R11 to R13: parse, apply, and which filters to show (U8)
+      account-state.ts              # removed, needs a profile, or ready (KTD3, U5)
       in-app-browser.ts             # A9 (KTD3, U5)
+      profile-photo.ts              # what a photo may be, and its signed address's hour (KTD11, U5)
       share-message.ts              # the ready messages (R52)
       calendar-file.ts              # KTD24 (U21)
     application/
@@ -561,7 +563,7 @@ Use cases by area, each a file named for what it does (`request-loan.use-case.ts
 - **catalog:** search-games, get-game, list-expansions
 - **copies:** add-user-game, update-user-game, set-user-game-expansions, set-lending, remove-user-game, set-pass-along-for-all, list-my-library, list-library, get-user-game
 - **suggestions:** suggest-game, list-suggestions, list-answered-suggestions, answer-suggestion, add-game, update-game, find-games-to-edit
-- **profile:** create-profile, update-profile, set-photo, remove-photo, get-profile, update-notice-settings
+- **profile:** create-profile, get-account-state, get-profile, list-taken-pieces, remove-photo, set-photo, update-notice-settings, update-profile
 - **friends:** require-friend, get-friend-link, make-friend-link, use-friend-link, list-friends, get-friend, send-friend-request, answer-friend-request, cancel-friend-request, unfriend, list-people-you-may-know
 - **loans:** request-loan, withdraw-request, answer-request, remove-from-line, cancel-loan, confirm-pick-up, give-back, confirm-return, ask-more-time, answer-more-time, change-due-date, call-back, pass-along, confirm-pass-along, take-back-pass-along, record-loan, list-loans, get-loan, list-past-loans, get-copy-history
 - **nights:** can-see-night, create-night, update-night, cancel-night, invite-to-night, make-night-link, use-night-link, answer-night, remove-from-waitlist, add-game-to-night, remove-game-from-night, vote, list-nights, list-past-nights, get-night, what-to-play, split-tables

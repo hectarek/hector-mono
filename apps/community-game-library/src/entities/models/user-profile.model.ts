@@ -31,3 +31,22 @@ export type NewUserProfile = NameAndPiece & { phone?: string | null };
 export type UserProfileChanges = Partial<
   Pick<UserProfile, "name" | "pieceShape" | "pieceColor" | "phone" | "photoKey">
 >;
+
+// What A4 and E6 send: the name is required, the photo goes by its own step, and the phone, when
+// it's left empty, is cleared.
+export const profileFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(60, "Name is too long"),
+  pieceShape: z.enum(PIECE_SHAPES),
+  pieceColor: z.enum(PIECE_COLORS),
+  phone: z
+    .string()
+    .trim()
+    .max(40, "Phone is too long")
+    .nullish()
+    .transform((phone) => phone || null),
+});
+export type ProfileForm = z.infer<typeof profileFormSchema>;

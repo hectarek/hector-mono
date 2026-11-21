@@ -1,21 +1,52 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { connection } from "next/server";
+import { type ReactNode, Suspense } from "react";
 import { BackLink } from "@/app/_components/back-link";
 import { Bell } from "@/app/_components/bell";
 import { Piece } from "@/app/_components/piece";
 import { TabBar } from "@/app/_components/tab-bar";
+import { getAccount } from "@/app/_lib/account";
+import type { PieceColor, PieceShape } from "@/src/entities/piece";
 
-// The member's own piece, which opens You (profile, notices, admin). U5 reads the member's
-// piece; until then it's a bone pawn.
-function YouButton() {
+// The member's own piece, which opens You (profile, notices, admin). Until the profile is read, or
+// when there's none to show, it's a bone pawn.
+function YouLink({
+  piece = { shape: "pawn", color: "bone" },
+}: {
+  piece?: { shape: PieceShape; color: PieceColor };
+}) {
   return (
     <Link
       href="/you"
       aria-label="You"
       className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-foreground bg-secondary"
     >
-      <Piece shape="pawn" color="bone" size={16} />
+      <Piece shape={piece.shape} color={piece.color} size={16} />
     </Link>
+  );
+}
+
+// The member's own piece, read once a request (getAccount) after the page has waited on
+// connection(), so a prerender or a prefetch stops here with the bone pawn showing.
+export async function MyPiece() {
+  await connection();
+  const account = await getAccount();
+  return (
+    <YouLink
+      piece={
+        account?.state === "ready"
+          ? { shape: account.me.pieceShape, color: account.me.pieceColor }
+          : undefined
+      }
+    />
+  );
+}
+
+function YouButton() {
+  return (
+    <Suspense fallback={<YouLink />}>
+      <MyPiece />
+    </Suspense>
   );
 }
 

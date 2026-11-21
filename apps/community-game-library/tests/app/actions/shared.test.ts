@@ -49,16 +49,42 @@ describe("toActionError", () => {
   const logger = new MockLoggerService();
 
   it("says what's wrong with the input, by its first issue", () => {
-    const schema = z.object({
-      phone: z.string().min(7, "Enter the whole number"),
-    });
+    const schema = z.object({ count: z.number("Enter the whole number") });
     expect(
-      toActionError(parseError(schema, { phone: "1" }), logger, FALLBACK),
+      toActionError(parseError(schema, { count: "x" }), logger, FALLBACK),
     ).toEqual({ error: "Enter the whole number" });
   });
 
-  // FIELD_LABELS is empty until the first form (U5), so no field is named yet, and hidden ones
-  // never are.
+  // A4 and E6's fields are named in the form's words, each under its own field: a message that
+  // doesn't name its field gets the label, and one that does keeps it.
+  it("names a form's field, and shows its message under it", () => {
+    const schema = z.object({
+      phone: z.string().min(7, "Enter the whole number"),
+      name: z.string().min(1, "Name is required"),
+    });
+    expect(
+      toActionError(
+        parseError(schema, { phone: "1", name: "" }),
+        logger,
+        FALLBACK,
+      ),
+    ).toEqual({
+      error: "Phone: Enter the whole number",
+      fields: { phone: "Enter the whole number", name: "Name is required" },
+    });
+    expect(
+      toActionError(
+        parseError(schema, { phone: "5550123", name: "" }),
+        logger,
+        FALLBACK,
+      ),
+    ).toEqual({
+      error: "Name is required",
+      fields: { name: "Name is required" },
+    });
+  });
+
+  // Hidden fields are never named.
   it("never names a field the form doesn't show", () => {
     const schema = z.object({ userGameId: z.uuid("Pick a game") });
     const answer = toActionError(

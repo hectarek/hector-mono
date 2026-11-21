@@ -49,6 +49,9 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="community-game-library"
+      // Neon's sign-in kit (the sign-in and account layouts) sets next-themes' class and
+      // color-scheme on <html> when it loads, which the server's html doesn't carry.
+      suppressHydrationWarning
       className={`${plexSans.variable} ${stardosStencil.variable} ${plexMono.variable} font-sans antialiased`}
     >
       <body>

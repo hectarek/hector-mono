@@ -1,6 +1,21 @@
+/* Layer order first. Neon Auth puts its defaults (including `* { border-color }`) in
+   @layer neon-auth; left undeclared, that layer would rank above Tailwind's utilities and beat
+   classes like border-foreground. Rank it with the base styles instead (recipes' globals.css). */
+@layer theme, base, neon-auth, components, utilities;
+
 @import "@repo/ui/styles/globals.css";
 /* The Punchboard theme; data-theme="community-game-library" on <html> turns it on. */
 @import "@repo/ui/styles/themes/community-game-library.css";
+/* After Tailwind (inside the first line), as Neon Auth requires: its classes for the sign-in
+   views (A2, A8) and the account views. */
+@import "@neondatabase/auth/ui/tailwind";
+
+/* Neon Auth re-points Tailwind's colours and radius at its own --neon-* variables. The colours
+   fall back to the theme's tokens; the radius is fixed, so point it at the theme's --radius
+   (unlayered, so it beats Neon's @layer neon-auth). */
+:root {
+  --neon-radius: var(--radius);
+}
 
 /* Where a toast sits (the design system's Toast): 10px above the tab bar on a phone (its 68px
    and the home bar's inset), and near the bottom from 768px, where the tabs are in the header.

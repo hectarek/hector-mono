@@ -11,6 +11,13 @@ import type { IUserProfilesRepository } from "@/src/application/repositories/use
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
+import { createProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
+import { getAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
+import { getProfileUseCase } from "@/src/application/use-cases/profile/get-profile.use-case";
+import { listTakenPiecesUseCase } from "@/src/application/use-cases/profile/list-taken-pieces.use-case";
+import { removePhotoUseCase } from "@/src/application/use-cases/profile/remove-photo.use-case";
+import { setPhotoUseCase } from "@/src/application/use-cases/profile/set-photo.use-case";
+import { updateProfileUseCase } from "@/src/application/use-cases/profile/update-profile.use-case";
 import { FriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository";
 import { MockFriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository.mock";
 import { LoansRepository } from "@/src/infrastructure/repositories/loans.repository";
@@ -23,6 +30,7 @@ import { UserProfilesRepository } from "@/src/infrastructure/repositories/user-p
 import { MockUserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository.mock";
 import { UserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository";
 import { MockUserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository.mock";
+import { MockFileStorageService } from "@/src/infrastructure/services/mock-file-storage.service";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { MockTransactionManagerService } from "@/src/infrastructure/services/mock-transaction-manager.service";
 import { TransactionManagerService } from "@/src/infrastructure/services/transaction-manager.service";
@@ -103,10 +111,35 @@ export function describeEachBackend(name: string, fn: () => void): void {
 }
 
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
-  const { friendships, loans, removedUsers, transactions } = repos;
+  const {
+    friendships,
+    loans,
+    removedUsers,
+    transactions,
+    userProfiles,
+    userSettings,
+  } = repos;
+  const storage = new MockFileStorageService();
+  const log = new MockLoggerService();
 
   return {
     repos,
+    // What the photo steps stored, by bucket and key.
+    files: storage.files,
+
+    // Profile
+    createProfile: createProfileUseCase(
+      userProfiles,
+      userSettings,
+      transactions,
+      log,
+    ),
+    updateProfile: updateProfileUseCase(userProfiles, transactions, log),
+    getProfile: getProfileUseCase(userProfiles, friendships, storage),
+    getAccountState: getAccountStateUseCase(removedUsers, userProfiles),
+    listTakenPieces: listTakenPiecesUseCase(friendships, userProfiles),
+    setPhoto: setPhotoUseCase(userProfiles, storage, transactions, log),
+    removePhoto: removePhotoUseCase(userProfiles, storage, transactions, log),
 
     requireFriend: (viewerId: string, otherUserId: string) =>
       requireFriend(friendships, viewerId, otherUserId),

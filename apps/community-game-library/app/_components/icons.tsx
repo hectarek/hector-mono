@@ -119,6 +119,22 @@ export function CameraIcon(props: IconProps) {
   );
 }
 
+export function PhoneIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <path d="M6 3.5h4l1.5 4.5-2.2 1.6a12 12 0 0 0 5.1 5.1l1.6-2.2 4.5 1.5v4a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4 5.7 2 2 0 0 1 6 3.5z" />
+    </LineIcon>
+  );
+}
+
+export function SignOutIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <path d="M14 5H6v14h8M11 12h9M17 9l3 3-3 3" />
+    </LineIcon>
+  );
+}
+
 export function ShareIcon(props: IconProps) {
   return (
     <LineIcon {...props}>

@@ -37,8 +37,12 @@ export function text(formData: FormData, key: string): string | undefined {
 
 // Fields as the forms label them, in the words of each form's board. Anything not listed (hidden
 // ids) is never named: the person can't see those fields, so a code name would only confuse.
-// Empty until the first form (U5): each form's fields join it.
-const FIELD_LABELS: Record<string, string> = {};
+// Each form's fields join it (A4 and E6's: name, phone, photo).
+const FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  phone: "Phone",
+  photo: "Photo",
+};
 
 type Issue = { path: PropertyKey[]; message: string };
 

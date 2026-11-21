@@ -16,6 +16,18 @@ const layouts = () =>
     Bun.resolveSync("@/app/(main)/layout", import.meta.dir),
   );
 
+// The pages and layouts that open before the app, or that never draw the kit's views.
+const outsideKit = () =>
+  packagesLoadedBy(
+    Bun.resolveSync("@/app/(start)/layout", import.meta.dir),
+    Bun.resolveSync("@/app/(start)/start/profile/page", import.meta.dir),
+    Bun.resolveSync("@/app/(start)/start/home-screen/page", import.meta.dir),
+    Bun.resolveSync("@/app/(auth)/welcome/page", import.meta.dir),
+    Bun.resolveSync("@/app/removed/page", import.meta.dir),
+    Bun.resolveSync("@/app/(main)/you/page", import.meta.dir),
+    Bun.resolveSync("@/app/(main)/you/edit/page", import.meta.dir),
+  );
+
 describe("the root and signed-in layouts", () => {
   test("don't load Neon's sign-in kit", () => {
     expect([...layouts()].filter(KIT)).toEqual([]);
@@ -30,5 +42,21 @@ describe("the root and signed-in layouts", () => {
       Bun.resolveSync("@/app/(main)/page", import.meta.dir),
     );
     expect(page.has("@evyweb/ioctopus")).toBe(true);
+  });
+});
+
+describe("the setup steps, the welcome page, the removed page and You", () => {
+  test("don't load Neon's sign-in kit either: their links to sign out and the account are plain links", () => {
+    expect([...outsideKit()].filter(KIT)).toEqual([]);
+  });
+});
+
+describe("the sign-in and account layouts", () => {
+  // The other half of the guard: the kit is loaded where its views are drawn.
+  test("are where the kit loads", () => {
+    for (const layout of ["@/app/(auth)/auth/layout", "@/app/account/layout"]) {
+      const loaded = packagesLoadedBy(Bun.resolveSync(layout, import.meta.dir));
+      expect([...loaded].filter(KIT).length).toBeGreaterThan(0);
+    }
   });
 });

@@ -16,13 +16,15 @@ const PATHS: Record<PieceShape, string> = {
 
 // Width by height, and the outline in the box's units, thicker as the piece shrinks: 11 beside
 // 12px text, 16 in a line of text, on a track and in the You button, 20 in a list row, 24 in a
-// row of seats, and 14 only for a guest beside a 20.
+// row of seats, 14 only for a guest beside a 20, and 36 for the member's own piece beside the words
+// that say what it's for (A4, E5, E6).
 const SIZES = {
   11: { box: "h-4 w-2.75", outline: 2.2 },
   14: { box: "h-5 w-3.5", outline: 2 },
   16: { box: "h-5.75 w-4", outline: 1.8 },
   20: { box: "h-7.25 w-5", outline: 1.6 },
   24: { box: "h-8.75 w-6", outline: 1.5 },
+  36: { box: "h-13 w-9", outline: 1.5 },
 } as const;
 
 export type PieceSize = keyof typeof SIZES;

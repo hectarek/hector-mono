@@ -128,6 +128,22 @@ describe("proxy", () => {
     expect(location.pathname).toBe("/");
   });
 
+  // The steps before the app, You and the removed page need a session like any page; their gate
+  // after sign-in is the pages' own (app/_lib/account.ts).
+  it("guards the setup steps and the removed page like any page", async () => {
+    for (const path of [
+      "/start/profile",
+      "/start/home-screen",
+      "/removed",
+      "/you",
+    ]) {
+      expect(
+        (await proxy(request(path, true))).headers.get("location"),
+      ).toBeNull();
+      expect(locationOf(await proxy(request(path))).pathname).toBe("/welcome");
+    }
+  });
+
   // Neon's forms open signed out, and the route handlers check their own access.
   it("guards the app's pages and the welcome screen, and skips Neon's forms and the routes", () => {
     const [matcher] = config.matcher;
