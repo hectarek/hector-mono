@@ -42,3 +42,33 @@ export function addDays(date: string, days: number): string {
 export function daysBetween(from: string, to: string): number {
   return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / 86_400_000);
 }
+
+const WEEKDAY = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  timeZone: "UTC",
+});
+const MONTH_DAY = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+const MONTH_YEAR = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+// A date as every screen writes it (KTD9; screens.md, Limits to build for): its weekday, month
+// and day, "Fri, Nov 20", and the year once it isn't this year, "Fri, Jan 7, 2028". The parts
+// are formatted apart and joined here, since ICU builds join them differently (job-search's
+// format-day.ts found Bun on macOS and on Linux disagreeing).
+export function formatDate(date: string, today: string): string {
+  const day = `${WEEKDAY.format(toUtc(date))}, ${MONTH_DAY.format(toUtc(date))}`;
+  const year = date.slice(0, 4);
+  return year === today.slice(0, 4) ? day : `${day}, ${year}`;
+}
+
+// A month, given as "YYYY-MM", by its name and year: "November 2026".
+export function formatMonth(month: string): string {
+  return MONTH_YEAR.format(toUtc(`${month}-01`));
+}

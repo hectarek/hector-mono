@@ -6,6 +6,7 @@ import type * as schema from "@/db/schema";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import {
+  ChangedError,
   DatabaseOperationError,
   InputParseError,
   NotFoundError,
@@ -17,6 +18,7 @@ import type { ITransaction } from "@/src/entities/models/transaction.model";
 import "@/src/infrastructure/drizzle-errors";
 
 const DOMAIN_ERRORS = [
+  ChangedError,
   DatabaseOperationError,
   InputParseError,
   NotFoundError,

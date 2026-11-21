@@ -23,8 +23,9 @@ describe("the root and signed-in layouts", () => {
 
   test("the walk follows the app's own imports into the packages they load", () => {
     // Guards the walk itself: if it stopped following imports, the test above would pass. The
-    // layouts import nothing yet (U2 builds the shell), so the Library page stands in: it
-    // reaches the DI container through the app's own files.
+    // root layout reaches sonner through @repo/ui's Toaster, and the Library page the DI
+    // container through the app's own files.
+    expect(layouts().has("sonner")).toBe(true);
     const page = packagesLoadedBy(
       Bun.resolveSync("@/app/(main)/page", import.meta.dir),
     );

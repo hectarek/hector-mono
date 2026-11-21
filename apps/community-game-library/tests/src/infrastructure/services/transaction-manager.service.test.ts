@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { sql as drizzleSql } from "drizzle-orm";
 import {
+  ChangedError,
   DatabaseOperationError,
   NotFoundError,
   UnauthorizedError,
@@ -73,6 +74,17 @@ describeEachBackend("a transaction", () => {
   it("answers with what the callback returns", async () => {
     const { repos } = makeApp();
     expect(await repos.transactions.startTransaction(async () => 42)).toBe(42);
+  });
+
+  it("passes a change underneath through unchanged, with its reason", async () => {
+    const { repos } = makeApp();
+    const thrown = new ChangedError("seats-taken");
+    const run = repos.transactions.startTransaction(async () => {
+      throw thrown;
+    });
+    const caught = await run.catch((err: unknown) => err);
+    expect(caught).toBe(thrown);
+    expect((caught as ChangedError).reason).toBe("seats-taken");
   });
 
   it("passes a domain error through unchanged", async () => {

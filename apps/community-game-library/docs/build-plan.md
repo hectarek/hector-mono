@@ -504,7 +504,8 @@ apps/community-game-library/
     account/[path]/                 # Neon's account views (email, password), with the sign-in kit's layout
     _components/                    # app-header, tab-bar, tab-count, bell, piece, seats, stamp, cover-thumb, cover,
                                     # dice, track, list-row, group, confirm-dialog, share-button, date-sheet (X1),
-                                    # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy;
+                                    # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy,
+                                    # icons, no-connection, page-column, sheet (U2);
                                     # by area: game-row, copy-row, copy-state, library-list, filter-sheet, sort-sheet,
                                     # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
                                     # piece-picker, profile-form
@@ -521,11 +522,11 @@ apps/community-game-library/
                                     # user-settings, friendship, friend-request, friend-link, loan, game-night,
                                     # game-night-attendee, game-night-game, game-night-vote, notice, user, session,
                                     # transaction, logger
-      week.ts                       # recipes' dates and todayIn, with PLAN_TIME_ZONE (KTD9)
+      week.ts                       # recipes' dates and todayIn, with PLAN_TIME_ZONE (KTD9); formatDate, formatMonth (U2)
       search-title.ts               # KTD10 (U3)
       loan.ts                       # the state machine, dates, the line and a copy's state (KTD6, U3)
       notice-types.ts               # each type's group (U3)
-      piece.ts                      # shapes and colors (R51, U3)
+      piece.ts                      # shapes and colors (R51, U2)
       reminders.ts                  # which reminders are due on a day (KTD8, U17)
       night.ts                      # seats, guests and the waitlist (R31, R47, U19)
       what-to-play.ts, tables.ts    # KTD23 (U20)
@@ -551,7 +552,7 @@ apps/community-game-library/
   service-worker/                   # rules.ts, handlers.ts, worker.ts (U23)
   scripts/                          # seed.ts, build-service-worker.ts, check-test-database.ts, require-migrations.ts, migrate-production.ts;
                                     # lib/ (migrations.ts, terminal.ts), which the last two share
-  tests/                            # mirrors the tree; _support/ with cast.ts
+  tests/                            # mirrors the tree; _support/ with cast.ts and focus.ts
   proxy.ts
 ```
 

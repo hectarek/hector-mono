@@ -1,6 +1,9 @@
+import { CHANGED_LINES } from "@/app/_lib/changed-lines";
 import { getInjection } from "@/di/container";
 import type { DI_RETURN_TYPES } from "@/di/types";
 import {
+  ChangedError,
+  type ChangedReason,
   InputParseError,
   NotFoundError,
   UnauthenticatedError,
@@ -15,6 +18,8 @@ export type ActionState = {
   message?: string;
   // Validation messages by form field name, for forms that show them under each field.
   fields?: Partial<Record<string, string>>;
+  // What changed underneath, for a sheet's ChangedNotice; `error` carries its line as well.
+  changed?: ChangedReason;
 } | null;
 
 export function actionLogger(op: string): DI_RETURN_TYPES["ILoggerService"] {
@@ -101,6 +106,10 @@ export function toActionError(
   if (err instanceof UnauthenticatedError) {
     logger.warn("Unauthenticated attempt", loggable(err));
     return { error: "Your session expired. Sign in again." };
+  }
+  if (err instanceof ChangedError) {
+    logger.info("Changed underneath", { ...loggable(err), reason: err.reason });
+    return { error: CHANGED_LINES[err.reason].line, changed: err.reason };
   }
   if (err instanceof UnauthorizedError || err instanceof NotFoundError) {
     logger.warn("Denied", loggable(err));

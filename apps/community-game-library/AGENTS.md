@@ -22,23 +22,31 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1):
+The spec's code map, as far as it's built (U1, U2):
 
 ```
 app/
   (api)/api/auth/[...path]/  # Neon Auth's endpoints, passed through; logged by status, path and class
   (auth)/welcome/            # where signed-out visitors start: the app's name until U5 draws A1
-  (main)/                    # the signed-in app: layout.tsx (U2 builds the shell), page.tsx (the Library,
-                             # a heading until U6), loading.tsx (its skeleton)
-  _components/               # back-link, action-form
-  _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave
+  (main)/                    # the signed-in app: layout.tsx (the shell, below), page.tsx (the Library,
+                             # its header until U6), loading.tsx (its header and skeleton)
+  _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader), back-link,
+                             # bell, changed-notice, confirm-dialog (and LeaveGuardDialog), cover,
+                             # cover-thumb, date-sheet, dice, group, icons, list-row, no-connection,
+                             # page-column, people-picker, photo-field, piece, seats, share-button,
+                             # sheet, stamp, tab-bar, tab-count, track; action-form
+  _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
+                             # notify, leave-guard, changed-lines, share, shrink-image
   actions/                   # shared.ts: ActionState, actionLogger, text, toActionError (not "use server")
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
-    errors/                  # common.ts (recipes' errors, each naming itself), loggable.ts (job-search's)
+    errors/                  # common.ts (recipes' errors, each naming itself, and ChangedError with its
+                             # CHANGED_REASONS), loggable.ts (job-search's)
     models/                  # user, session, transaction, logger
-    week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9)
+    piece.ts                 # PIECE_SHAPES, PIECE_COLORS (R51)
+    week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
+                             # formatDate ("Fri, Nov 20", with the year once it isn't this year)
   application/
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
@@ -74,6 +82,17 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - A page waits on `connection()` (`next/server`) before it reads the session, as the Library page does. Without it, the build's prerender, and on Vercel a partial prefetch, start Neon's session read, which fails and logs ("Cookie validation error", then "Failed to get session") when their render ends ([the lesson](../../docs/solutions/runtime-errors/partial-prefetching-runs-page-reads-that-fail-in-production.md)). The U1 Library page logged both in `next build` until it waited (2026-11-21): it has no params or `searchParams` to stop the prerender first, as recipes' pages do. `connection()` also blocks prefetches, so a tab whose data should arrive with its prefetch reads it through a private cache instead (recipes' D87), when a unit chooses that.
 - A component above a page's `loading.tsx` that reads the address (`usePathname`) sits inside its own `<Suspense>`, or prerendering a route with params hangs and `next build` fails. CI doesn't build, so run `next build` after changing the shell.
 - `next build` needs the auth variables present (`lib/auth/server.ts` throws at import without them), but nothing at build time reaches Neon, the database or storage, so placeholders build. A production build on Vercel is the one exception: its migration check reads production's migrations first (Environments). `next build` prints no errors (2026-11-21); an error in its output is a new problem.
+
+## Screens
+
+The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-library.css` (KTD12), and the design system (its link is in Hector's tracker) is the spec for every component; a board's words, order and states are its screen's. U2 built the theme, the components and the shell; each later unit builds its pages from them.
+
+- **Colors are tokens only.** Navy is `foreground`/`primary`/`border`, kraft `background`, chipboard `card`/`popover`, bone `secondary`/`muted`, text-brown `muted-foreground`, stamp-red `destructive`, and `text-white` is the kit's white. The theme's own colors come through data attributes it styles, never a class: `data-color="<piece color>"` paints a piece or a token (the fill of an SVG or a shape in one, the background of anything else), and `data-ink="smudge"` sets the brown of an on-hold stamp or a small caps label. A switched-off control is any disabled button: the theme draws it dashed in switched-off.
+- **The shared components' look is the theme's.** It restyles Button, the fields, the choices, the toggles, Drawer, Dialog, AlertDialog, the Toaster and Empty by `data-slot`, unlayered, so their utilities can't change it; `no-restyle` forbids trying, and layout classes still work. A Button's kind is its variant (`default` the one primary, `secondary`, `destructive` the solid red, `link` the quiet dashed link) and its size its size (`lg` a screen's 48px main action, `sm` a button in a row or the header). The app's own components (stamp, piece, list-row and the rest) are utilities over the tokens.
+- **Type sizes** are Tailwind's and the shared stylesheet's: `text-10`, `text-13`, `text-15`, `text-22` and `text-26` are the kit's own, with the font's own line height. `cn` from `@repo/ui/lib/utils` knows them; `cn` straight from the `cn` package takes `text-13` for a color and drops it beside one (2026-11-21).
+- **One breakpoint for the shell, 768px** (`md:`): the tabs move into the AppBar, a sheet becomes a 480px dialog. Browsed lists add a third column from 1100px, written `min-[68.75rem]:`: Tailwind sorts a px breakpoint before `md`'s rem one, so `min-[1100px]:` loses to `md:` (2026-11-21).
+- **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; U5 gives the bell and the piece the member's own (the piece is a bone pawn until then) and U11 the tabs their counts.
+- **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
 
 ## Backend Rules
 
@@ -126,7 +145,8 @@ Recipes' rules carry over ([its AGENTS.md](../hectors-recipes/AGENTS.md#cache-co
 - Use-case tests use `describeEachBackend` and `makeApp()` (`tests/_support/app.ts`, recipes' harness): each runs on the mocks and on the real repositories over PGlite, and one that fails only on `[postgres]` means a mock has drifted from the SQL. Each unit adds its repositories and use cases there. U1 has only the transaction manager.
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged, so a test can show a value never reached the logs.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
-- Not copied yet, since Fallow fails a file nothing uses: recipes' `tests/_support/controller.ts` (`controllerBasics`) comes with the first controller, and `tests/_support/focus.ts` (`focused()`) with the first screen test that checks where the cursor is. `tests/_support/cast.ts` and the seed come with U4.
+- Not copied yet, since Fallow fails a file nothing uses: recipes' `tests/_support/controller.ts` (`controllerBasics`) comes with the first controller. `tests/_support/cast.ts` and the seed come with U4. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests.
+- Base UI's dialogs and sheets in happy-dom (U2): a dialog closes after its exit transition, so wait for it with `waitFor`, and poll absence as a boolean (`expect(view.queryByRole("dialog") === null).toBe(true)`): Bun prints a whole element when an expectation on one fails, which takes seconds and starves `waitFor`'s retries. `fireEvent.click` doesn't focus a button as a tap does, so focus the opener first to test where the cursor goes back. A sheet takes the phone's Drawer when `happyDOM.setInnerWidth(390)` (the window's `happyDOM`, cast). Sonner's toasts are global to a test file, so a toast from one test still shows in the next. next/image calls `onLoad` after the picture decodes, a moment after the load event.
 - Fallow (`bun run dead-code`) counts test files as entry points, so a helper copied with its test is in use before any page needs it. The scripts are entry points in the root `.fallowrc.json` (`apps/community-game-library/scripts/*.ts`).
 - The migration scripts' tests hold whatever the journal holds. Job-search's tests of a run that applies a migration (typing `migrate`, another answer stopping it, a migration still unapplied afterwards) come back with U3's first migration.
 - Browser flows (Playwright, on the test project, behind `scripts/check-test-database.ts`) come with U25.
@@ -154,7 +174,7 @@ bun run dead-code
 cd apps/community-game-library && bun run test
 ```
 
-A unit with screens checks each one at 390 px beside its board, and again at 768 and 1280 px (the spec's Verification). A config change also runs the local build.
+A unit with screens checks each one at 390 px beside its board, and again at 768 and 1280 px (the spec's Verification). A config change also runs the local build. To compare with a board, U2 copied the board's markup (its `<helmet>` and the `<x-dc>` body) into a page under `public/` and measured both with the browser's `getBoundingClientRect`, then deleted the copies.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

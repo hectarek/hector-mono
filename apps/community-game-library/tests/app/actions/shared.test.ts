@@ -2,6 +2,7 @@ import { describe, expect, it, spyOn } from "bun:test";
 import { z } from "zod";
 import { actionLogger, text, toActionError } from "@/app/actions/shared";
 import {
+  ChangedError,
   DatabaseOperationError,
   InputParseError,
   NotFoundError,
@@ -87,6 +88,16 @@ describe("toActionError", () => {
     ).toEqual({ error: "Only the admin can do this" });
     expect(toActionError(new NotFoundError("Gone"), logger, FALLBACK)).toEqual({
       error: "Gone",
+    });
+  });
+
+  // KTD16: something changed underneath; the sheet says what in one line and sends nothing.
+  it("says in one line what changed underneath, and which change it was", () => {
+    expect(
+      toActionError(new ChangedError("copy-lent"), logger, FALLBACK),
+    ).toEqual({
+      error: "It was just lent to someone else.",
+      changed: "copy-lent",
     });
   });
 

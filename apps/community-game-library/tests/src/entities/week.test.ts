@@ -2,6 +2,8 @@ import { describe, expect, it } from "bun:test";
 import {
   addDays,
   daysBetween,
+  formatDate,
+  formatMonth,
   isIsoDate,
   PLAN_TIME_ZONE,
   todayIn,
@@ -36,5 +38,23 @@ describe("date helpers", () => {
     expect(isIsoDate("2026-02-30")).toBe(false);
     expect(isIsoDate("2026-9-1")).toBe(false);
     expect(isIsoDate("garbage")).toBe(false);
+  });
+});
+
+// KTD9 and screens.md's limits: a date shows its weekday, and its year once that isn't this year.
+describe("formatDate", () => {
+  it("writes a date with its weekday, as the screens do", () => {
+    expect(formatDate("2026-11-20", "2026-11-10")).toBe("Fri, Nov 20");
+    expect(formatDate("2026-11-06", "2026-11-21")).toBe("Fri, Nov 6");
+  });
+
+  it("adds the year once it isn't this year", () => {
+    expect(formatDate("2027-01-07", "2026-12-28")).toBe("Thu, Jan 7, 2027");
+    expect(formatDate("2025-12-30", "2026-01-02")).toBe("Tue, Dec 30, 2025");
+  });
+
+  it("names a month by its name and year", () => {
+    expect(formatMonth("2026-11")).toBe("November 2026");
+    expect(formatMonth("2027-01")).toBe("January 2027");
   });
 });

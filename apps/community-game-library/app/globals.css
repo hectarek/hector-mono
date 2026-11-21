@@ -1,1 +1,15 @@
 @import "@repo/ui/styles/globals.css";
+/* The Punchboard theme; data-theme="community-game-library" on <html> turns it on. */
+@import "@repo/ui/styles/themes/community-game-library.css";
+
+/* Where a toast sits (the design system's Toast): 10px above the tab bar on a phone (its 68px
+   and the home bar's inset), and near the bottom from 768px, where the tabs are in the header.
+   The toaster in app/layout.tsx reads it. */
+:root {
+  --toast-bottom: calc(env(safe-area-inset-bottom) + 4.875rem);
+}
+@media (width >= 48rem) {
+  :root {
+    --toast-bottom: 1.5rem;
+  }
+}

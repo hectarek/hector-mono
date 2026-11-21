@@ -1,0 +1,710 @@
+/* ==========================================================================
+   COMMUNITY GAME LIBRARY THEME (community-game-library): Punchboard
+   From the "Community Game Library" design system (Punchboard; private, so its link is in
+   Hector's tracker). The inside of a board game box: a kraft ground, chipboard panels, navy
+   ink and edges, stamp-red only for what waits on you now and for loss, and color only from
+   the game pieces. Hex values are the kit's own (its tokens.json), kept exact.
+
+   Opt in: @import "@repo/ui/styles/themes/community-game-library.css" and
+   data-theme="community-game-library" on <html>. Fonts: IBM Plex Sans as --font-sans, Stardos
+   Stencil 700 as --font-heading (always uppercase), IBM Plex Mono 500 as --font-mono. The app
+   is light only and renders no ThemeProvider, so the dark blocks repeat the light values for
+   the theme test and never apply. Its type sizes (10, 13, 15, 22, 26 px) are in globals.css.
+
+   Like neobrutalist.css, it also restyles the shared components by data-slot, for what tokens
+   can't reach (Hector's OK, 2026-11-12): 2px edges, 44px controls, the solid red button, the
+   dashed focus ring, 24px ticks and radios, the 48 by 28 switch, the sheet and dialog panels,
+   the navy toast and the punched-out empty box. Those rules are unlayered, so they beat the
+   components' own utilities; set no property there that an app sets for layout (width,
+   margin, flex). Button variants and sizes carry no data attribute, so they're matched by one
+   of their own classes ([class~="bg-secondary"], [class~="h-9"]); re-check those after a
+   shadcn update of button.tsx.
+
+   Its own colors, outside the contract (as neobrutalist.css has --neo-*):
+   - --piece-<color>: the ten piece colors. data-color="<color>" paints an element with one: the
+     fill of an SVG (or a shape inside one), the background of anything else.
+   - --smudge: the brown of an on-hold stamp and a small caps label. data-ink="smudge" sets it
+     as an element's text color (border-current then draws its edge in it).
+   - --switched-off: a switched-off control's text and dashed edge, on every disabled button.
+   - --sheet-backdrop: the dim kraft behind a sheet or a dialog.
+   ========================================================================== */
+
+[data-theme="community-game-library"] {
+  --smudge: #5a4632;
+  --switched-off: #6e5a40;
+  --sheet-backdrop: #a99168;
+  --piece-brick: #b83e28;
+  --piece-pumpkin: #dd7225;
+  --piece-mustard: #e2a72b;
+  --piece-moss: #5c8b3c;
+  --piece-teal: #2e8c87;
+  --piece-ocean: #2a62a0;
+  --piece-plum: #7b4b86;
+  --piece-rose: #d9799b;
+  --piece-charcoal: #35373b;
+  --piece-bone: #f7f0e1;
+  /* A bottom sheet is as wide as the phone; from 768px a sheet is a dialog instead. */
+  --drawer-max-width: none;
+
+  /* The contract, as the design system's building.md maps it. */
+  --background: #d9bc8c; /* kraft */
+  --foreground: #1e2a44; /* navy */
+  --card: #ebddc2; /* chipboard */
+  --card-foreground: #1e2a44;
+  --popover: #ebddc2;
+  --popover-foreground: #1e2a44;
+  --primary: #1e2a44;
+  --primary-foreground: #f7f0e1; /* bone */
+  --secondary: #f7f0e1;
+  --secondary-foreground: #1e2a44;
+  --muted: #f7f0e1;
+  --muted-foreground: #3b2e20; /* text-brown */
+  --accent: #1e2a44;
+  --accent-foreground: #f7f0e1;
+  --destructive: #a3301f; /* stamp-red */
+  --border: #1e2a44;
+  --input: #1e2a44;
+  --ring: #1e2a44;
+  --radius: 0.25rem;
+}
+
+[data-theme="community-game-library"].dark,
+.dark [data-theme="community-game-library"] {
+  --background: #d9bc8c;
+  --foreground: #1e2a44;
+  --card: #ebddc2;
+  --card-foreground: #1e2a44;
+  --popover: #ebddc2;
+  --popover-foreground: #1e2a44;
+  --primary: #1e2a44;
+  --primary-foreground: #f7f0e1;
+  --secondary: #f7f0e1;
+  --secondary-foreground: #1e2a44;
+  --muted: #f7f0e1;
+  --muted-foreground: #3b2e20;
+  --accent: #1e2a44;
+  --accent-foreground: #f7f0e1;
+  --destructive: #a3301f;
+  --border: #1e2a44;
+  --input: #1e2a44;
+  --ring: #1e2a44;
+  --radius: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Piece colors and inks: data-color and data-ink
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"] [data-color="brick"] {
+  --piece: var(--piece-brick);
+}
+[data-theme="community-game-library"] [data-color="pumpkin"] {
+  --piece: var(--piece-pumpkin);
+}
+[data-theme="community-game-library"] [data-color="mustard"] {
+  --piece: var(--piece-mustard);
+}
+[data-theme="community-game-library"] [data-color="moss"] {
+  --piece: var(--piece-moss);
+}
+[data-theme="community-game-library"] [data-color="teal"] {
+  --piece: var(--piece-teal);
+}
+[data-theme="community-game-library"] [data-color="ocean"] {
+  --piece: var(--piece-ocean);
+}
+[data-theme="community-game-library"] [data-color="plum"] {
+  --piece: var(--piece-plum);
+}
+[data-theme="community-game-library"] [data-color="rose"] {
+  --piece: var(--piece-rose);
+}
+[data-theme="community-game-library"] [data-color="charcoal"] {
+  --piece: var(--piece-charcoal);
+}
+[data-theme="community-game-library"] [data-color="bone"] {
+  --piece: var(--piece-bone);
+}
+
+[data-theme="community-game-library"] [data-color] {
+  background-color: var(--piece);
+}
+[data-theme="community-game-library"] svg[data-color],
+[data-theme="community-game-library"] svg [data-color] {
+  fill: var(--piece);
+  background-color: transparent;
+}
+
+[data-theme="community-game-library"] [data-ink="smudge"] {
+  color: var(--smudge);
+}
+
+/* --------------------------------------------------------------------------
+   Focus: die-cut, a dashed navy ring 3px out
+   -------------------------------------------------------------------------- */
+
+/* Everything the app draws itself; in the base layer, so a utility can move the ring (a list
+   row draws it inside its edge). */
+@layer base {
+  [data-theme="community-game-library"] :focus-visible {
+    outline: 2px dashed var(--ring);
+    outline-offset: 3px;
+  }
+}
+
+/* The shared controls draw a soft ring of their own and hide the outline. */
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="button"],
+    .group\/button,
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="native-select"],
+    [data-slot="checkbox"],
+    [data-slot="radio-group-item"],
+    [data-slot="switch"],
+    [data-slot="toggle"],
+    [data-slot="toggle-group-item"]
+  ):focus-visible {
+  outline: 2px dashed var(--ring);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Button
+   -------------------------------------------------------------------------- */
+
+/* Matched by data-slot or the group/button class, as neobrutalist.css does: a Button rendered
+   as a trigger takes the trigger's data-slot. The kit's secondary is the base: a 44px printed
+   button with a 2px navy edge and a 15px label. */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button) {
+  min-height: 2.75rem;
+  padding-inline: 1.125rem;
+  gap: 0.5rem;
+  border: 2px solid var(--foreground);
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+  line-height: normal;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)
+  svg:not([class*="size-"]) {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* An icon before the label. */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button):has(> [data-icon="inline-start"]) {
+  padding-inline-start: 0.875rem;
+}
+
+/* outline looks like secondary: bone with a navy edge. */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)[class~="bg-background"] {
+  background-color: var(--secondary);
+}
+
+/* The needs-care button is solid: stamp-red, white label, navy edge. Only for loss. */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)[class~="bg-destructive/10"] {
+  border-color: var(--foreground);
+  background-color: var(--destructive);
+  color: #fff;
+}
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)[class~="bg-destructive/10"]:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--destructive),
+    var(--foreground) 15%
+  );
+}
+
+/* Ghost: no edge, no fill. */
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="button"],
+    .group\/button
+  )[class~="dark:hover:bg-muted/50"]:not([class~="text-muted-foreground"]) {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+/* Quiet (link and quiet): text with a dashed underline, no box. */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button):is(
+    [class~="underline-offset-4"],
+    [class~="text-muted-foreground"]
+  ) {
+  padding-inline: 0.25rem;
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3125rem;
+}
+
+/* Sizes: lg is a screen's main action (48px); sm and xs sit in a list row or the header
+   (14px label); the icon sizes are 44px squares. */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)[class~="h-9"] {
+  min-height: 3rem;
+}
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button):is([class~="h-7"], [class~="h-6"]) {
+  padding-inline: 0.875rem;
+  font-size: 0.875rem;
+}
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button):is(
+    [class~="size-6"],
+    [class~="size-7"],
+    [class~="size-8"],
+    [class~="size-9"]
+  ) {
+  min-width: 2.75rem;
+  padding: 0;
+}
+
+/* Switched off: a dashed switched-off edge and no fill, not a faded button. Every disabled
+   button in the app, its own included; one with no edge keeps none. */
+[data-theme="community-game-library"]
+  :is(
+    button:disabled,
+    [data-slot="button"][data-disabled],
+    .group\/button[data-disabled]
+  ) {
+  border-style: dashed;
+  border-color: var(--switched-off);
+  background-color: transparent;
+  color: var(--switched-off);
+  opacity: 1;
+  cursor: default;
+}
+
+/* --------------------------------------------------------------------------
+   Fields: bone, a 2px navy edge, 44px, 15px text
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="native-select"]
+  ) {
+  border: 2px solid var(--input);
+  border-radius: var(--radius);
+  background-color: var(--secondary);
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  box-shadow: none;
+}
+[data-theme="community-game-library"]
+  :is([data-slot="input"], [data-slot="native-select"]) {
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+}
+[data-theme="community-game-library"] [data-slot="native-select"] {
+  padding-inline-end: 2.25rem;
+}
+[data-theme="community-game-library"] [data-slot="native-select-icon"] {
+  color: var(--foreground);
+}
+[data-theme="community-game-library"] [data-slot="textarea"] {
+  padding: 0.625rem 0.75rem;
+  line-height: 1.4;
+  resize: none;
+}
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="native-select"]
+  )[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="native-select"]
+  ):disabled {
+  border-style: dashed;
+  border-color: var(--switched-off);
+  background-color: transparent;
+  color: var(--switched-off);
+  opacity: 1;
+}
+
+/* A field: its label, 6px, the control, then a help or error line. Only the edge and the
+   error line turn red. */
+[data-theme="community-game-library"] [data-slot="field"] {
+  gap: 0.375rem;
+}
+[data-theme="community-game-library"] [data-slot="field"][data-invalid="true"] {
+  color: inherit;
+}
+[data-theme="community-game-library"]
+  :is([data-slot="label"], [data-slot="field-label"]) {
+  font-size: 0.8125rem;
+  line-height: normal;
+  font-weight: 600;
+}
+/* A tick box's, a radio's or a switch's label reads as typed text: 15px, 10px from it. */
+[data-theme="community-game-library"]
+  [data-slot="label"]:has(
+    :is(
+        [data-slot="checkbox"],
+        [data-slot="radio-group-item"],
+        [data-slot="switch"]
+      )
+  ) {
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+}
+[data-theme="community-game-library"] [data-slot="field-description"] {
+  font-size: 0.75rem;
+  line-height: normal;
+  color: var(--muted-foreground);
+}
+/* stamp-red sits on chipboard or bone only: a field lives in a panel or a sheet. */
+[data-theme="community-game-library"] [data-slot="field-error"] {
+  font-size: 0.75rem;
+  line-height: normal;
+  font-weight: 600;
+  color: var(--destructive);
+}
+
+/* --------------------------------------------------------------------------
+   Choice: a 24px tick box, a 24px radio, a 48 by 28 switch
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"] [data-slot="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--foreground);
+  border-radius: calc(var(--radius) * 0.75);
+  background-color: var(--secondary);
+}
+[data-theme="community-game-library"] [data-slot="checkbox"][data-checked] {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-theme="community-game-library"] [data-slot="checkbox-indicator"] > svg {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 3.6;
+}
+
+[data-theme="community-game-library"] [data-slot="radio-group-item"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--foreground);
+  background-color: var(--secondary);
+}
+[data-theme="community-game-library"]
+  [data-slot="radio-group-item"][data-checked] {
+  border-color: var(--foreground);
+  background-color: var(--secondary);
+}
+[data-theme="community-game-library"] [data-slot="radio-group-indicator"] {
+  width: 100%;
+  height: 100%;
+}
+[data-theme="community-game-library"]
+  [data-slot="radio-group-indicator"]
+  > span {
+  width: 0.625rem;
+  height: 0.625rem;
+  background-color: var(--foreground);
+}
+
+[data-theme="community-game-library"] [data-slot="switch"] {
+  width: 3rem;
+  height: 1.75rem;
+  padding-inline: 0.25rem;
+  border: 2px solid var(--foreground);
+}
+[data-theme="community-game-library"] [data-slot="switch"][data-unchecked] {
+  background-color: var(--secondary);
+}
+[data-theme="community-game-library"] [data-slot="switch"][data-checked] {
+  background-color: var(--primary);
+}
+[data-theme="community-game-library"] [data-slot="switch-thumb"] {
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--foreground);
+  translate: 0 0;
+}
+[data-theme="community-game-library"]
+  [data-slot="switch"][data-checked]
+  [data-slot="switch-thumb"] {
+  background-color: var(--primary-foreground);
+  translate: 1.25rem 0;
+}
+[data-theme="community-game-library"] [data-slot="switch"][data-disabled] {
+  border-style: dashed;
+  border-color: var(--switched-off);
+  background-color: transparent;
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Toggle: a filter chip on its own or in a spaced group; the segmented control is a group
+   with spacing 0
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="toggle"],
+    [data-slot="toggle-group"]:not([data-spacing="0"])
+      > [data-slot="toggle-group-item"]
+  ) {
+  min-height: 2.75rem;
+  padding-inline: 0.875rem;
+  gap: 0.375rem;
+  border: 2px solid var(--foreground);
+  border-radius: 9999px;
+  background-color: var(--secondary);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="toggle"],
+    [data-slot="toggle-group"]:not([data-spacing="0"])
+      > [data-slot="toggle-group-item"]
+  )[aria-pressed="true"] {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+[data-theme="community-game-library"]
+  [data-slot="toggle-group"][data-spacing="0"]
+  > [data-slot="toggle-group-item"] {
+  flex: 1 1 0;
+  min-height: 2.75rem;
+  padding-inline: 0.625rem;
+  border: 2px solid var(--foreground);
+  border-radius: 0;
+  background-color: var(--secondary);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+[data-theme="community-game-library"]
+  [data-slot="toggle-group"][data-spacing="0"]
+  > [data-slot="toggle-group-item"]
+  + [data-slot="toggle-group-item"] {
+  border-left-width: 0;
+}
+[data-theme="community-game-library"]
+  [data-slot="toggle-group"][data-spacing="0"]
+  > [data-slot="toggle-group-item"]:first-child {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+[data-theme="community-game-library"]
+  [data-slot="toggle-group"][data-spacing="0"]
+  > [data-slot="toggle-group-item"]:last-child {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+[data-theme="community-game-library"]
+  [data-slot="toggle-group"][data-spacing="0"]
+  > [data-slot="toggle-group-item"][aria-pressed="true"] {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Sheet (Drawer) and Dialog (AlertDialog, and Dialog for a sheet from 768px): chipboard with
+   a printed edge, a die-cut ring 4px out and a 6px radius, on dim kraft
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="drawer-overlay"],
+    [data-slot="dialog-overlay"],
+    [data-slot="alert-dialog-overlay"]
+  ) {
+  background-color: color-mix(in srgb, var(--sheet-backdrop) 85%, transparent);
+  backdrop-filter: none;
+}
+
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="drawer-popup"],
+    [data-slot="dialog-content"],
+    [data-slot="alert-dialog-content"]
+  ) {
+  border: 2px solid var(--foreground);
+  border-radius: calc(var(--radius) * 1.5);
+  outline: 2px dashed var(--foreground);
+  outline-offset: 4px;
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: none;
+}
+
+/* A bottom sheet floats 10px from the sides and 12px from the bottom. Its closing slide counts
+   --drawer-inset, so it clears the ring; the bleed under it, for an overscroll, would show in
+   the gap. */
+[data-theme="community-game-library"] [data-slot="drawer-popup"] {
+  --drawer-inset: 1.5rem;
+  margin: 0 0.625rem calc(0.75rem + env(safe-area-inset-bottom));
+}
+[data-theme="community-game-library"] [data-slot="drawer-popup"]::after {
+  content: none;
+}
+
+[data-theme="community-game-library"] [data-slot="dialog-content"] {
+  max-width: min(30rem, calc(100% - 2rem));
+  gap: 0.875rem;
+  padding: 1rem;
+}
+
+/* A dialog asks before anything is lost: 24px from the sides, at most 480 wide. */
+[data-theme="community-game-library"] [data-slot="alert-dialog-content"] {
+  width: calc(100% - 3rem);
+  max-width: 30rem;
+  gap: 0.875rem;
+  padding: 1rem;
+}
+[data-theme="community-game-library"] [data-slot="alert-dialog-header"] {
+  place-items: start;
+  gap: 0.875rem;
+  text-align: left;
+}
+[data-theme="community-game-library"] [data-slot="alert-dialog-footer"] {
+  display: flex;
+  flex-direction: row;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+}
+
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="drawer-title"],
+    [data-slot="dialog-title"],
+    [data-slot="alert-dialog-title"]
+  ) {
+  font-family: var(--font-heading);
+  font-size: 1.375rem;
+  line-height: 1.1;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+[data-theme="community-game-library"]
+  :is(
+    [data-slot="dialog-description"],
+    [data-slot="alert-dialog-description"]
+  ) {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+  text-wrap: pretty;
+}
+
+/* --------------------------------------------------------------------------
+   Toast: a navy bar with bone text, its links 44px tall with a dashed underline
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"] [data-sonner-toaster] {
+  font-family: var(--font-sans);
+}
+[data-theme="community-game-library"] [data-sonner-toast][data-styled="true"] {
+  min-height: 3rem;
+  gap: 0.75rem;
+  padding: 0.125rem 0.625rem 0.125rem 0.875rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+[data-theme="community-game-library"]
+  [data-sonner-toast][data-styled="true"]
+  [data-title] {
+  font-weight: 600;
+  line-height: normal;
+}
+[data-theme="community-game-library"]
+  [data-sonner-toast][data-styled="true"]
+  [data-button] {
+  height: auto;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
+  border-radius: 0;
+  background: transparent;
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25rem;
+}
+[data-theme="community-game-library"]
+  [data-sonner-toast][data-styled="true"]
+  [data-button]:focus-visible {
+  outline: 2px dashed var(--primary-foreground);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Empty: the punched-out box, left-aligned, a dashed navy edge
+   -------------------------------------------------------------------------- */
+
+[data-theme="community-game-library"] [data-slot="empty"] {
+  flex: none;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: 2px dashed var(--foreground);
+  border-radius: var(--radius);
+  text-align: left;
+  text-wrap: pretty;
+}
+[data-theme="community-game-library"] [data-slot="empty-header"] {
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: none;
+}
+[data-theme="community-game-library"] [data-slot="empty-title"] {
+  font-size: 0.9375rem;
+  line-height: normal;
+  font-weight: 700;
+  letter-spacing: normal;
+}
+[data-theme="community-game-library"] [data-slot="empty-description"] {
+  font-size: 0.8125rem;
+  line-height: normal;
+  color: var(--muted-foreground);
+}
+[data-theme="community-game-library"] [data-slot="empty-content"] {
+  align-items: flex-start;
+  max-width: none;
+}
