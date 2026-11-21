@@ -51,9 +51,10 @@ jobs:
       - name: Typecheck (affected)
         run: bun turbo check-types --filter='...[origin/main]'
 
-      # Two apps' tests at a time (2026-11-21). An app with a database boots PGlite
-      # (Postgres in WebAssembly) in its first test. A change to a shared package runs
-      # every app's tests, and run all at once, four boots on one runner took over the
-      # 5 seconds bun allows a test; on their own they take about a second.
+      # One app's tests at a time (2026-11-21). An app with a database boots PGlite
+      # (Postgres in WebAssembly) in its tests' setup, and a change to a shared package
+      # runs every app's tests. All at once, four boots on one runner took over the
+      # 5 seconds bun allows a test or a hook; two at a time, recipes' migration test
+      # still did. On their own the slowest of those files take about a second.
       - name: Test (affected)
-        run: bun turbo test --filter='...[origin/main]' --concurrency=2
+        run: bun turbo test --filter='...[origin/main]' --concurrency=1
