@@ -1,6 +1,8 @@
 import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
 import { requireAdmin } from "@/src/application/use-cases/admin/require-admin";
+import { RemovedUsersRepository } from "@/src/infrastructure/repositories/removed-users.repository";
+import { MockRemovedUsersRepository } from "@/src/infrastructure/repositories/removed-users.repository.mock";
 
 export function createAccessModule() {
   const accessModule = createModule();
@@ -17,6 +19,17 @@ export function createAccessModule() {
       DI_SYMBOLS.AdminAccount,
       DI_SYMBOLS.ILoggerService,
     ]);
+
+  // The accounts the admin removed, which see only that (KTD3).
+  if (process.env.NODE_ENV === "test") {
+    accessModule
+      .bind(DI_SYMBOLS.IRemovedUsersRepository)
+      .toClass(MockRemovedUsersRepository);
+  } else {
+    accessModule
+      .bind(DI_SYMBOLS.IRemovedUsersRepository)
+      .toClass(RemovedUsersRepository, [DI_SYMBOLS.ILoggerService]);
+  }
 
   return accessModule;
 }

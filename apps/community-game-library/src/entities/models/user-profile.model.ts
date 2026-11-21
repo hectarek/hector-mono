@@ -16,3 +16,18 @@ export const userProfileSchema = z.object({
   updatedAt: z.date(),
 });
 export type UserProfile = z.infer<typeof userProfileSchema>;
+
+// What anyone who sees a member is shown: their name and piece, wherever they appear (R51). A
+// list of people reads only this, so a stranger's phone and photo never load with it (KTD4).
+export type NameAndPiece = Pick<
+  UserProfile,
+  "userId" | "name" | "pieceShape" | "pieceColor"
+>;
+
+// A new member's profile (A4). A photo comes after, through its own step.
+export type NewUserProfile = NameAndPiece & { phone?: string | null };
+
+// What an edit (E6) or a photo's step changes.
+export type UserProfileChanges = Partial<
+  Pick<UserProfile, "name" | "pieceShape" | "pieceColor" | "phone" | "photoKey">
+>;

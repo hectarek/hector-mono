@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# the cast's test accounts on the test project, with their one password (U4); agents may read it
+.cast-accounts.json
+
 # vercel
 .vercel
 

@@ -22,3 +22,19 @@ export const noticeSchema = z.object({
   updatedAt: z.date(),
 });
 export type Notice = z.infer<typeof noticeSchema>;
+
+// What a change writes for each person it tells, in its own transaction (KTD7): whom, what
+// happened, who did it (no one, for the daily run), the one thing it's about, and a note they
+// typed.
+export type NewNotice = Pick<Notice, "userId" | "type"> &
+  Partial<
+    Pick<
+      Notice,
+      | "createdBy"
+      | "loanId"
+      | "gameNightId"
+      | "gameSuggestionId"
+      | "friendRequestId"
+      | "answerNote"
+    >
+  >;

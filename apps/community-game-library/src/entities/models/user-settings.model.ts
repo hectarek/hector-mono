@@ -11,3 +11,13 @@ export const userSettingsSchema = z.object({
   updatedAt: z.date(),
 });
 export type UserSettings = z.infer<typeof userSettingsSchema>;
+
+// What My library's switch (B6) and Notices I get (E7) change.
+export type UserSettingsChanges = Partial<
+  Pick<UserSettings, "defaultPassAlong" | "noticesOff">
+>;
+
+// A new member's settings, made with their profile: the database's defaults (pass-along off, and
+// only the morning-of-a-night reminder off) for what isn't given.
+export type NewUserSettings = Pick<UserSettings, "userId"> &
+  UserSettingsChanges;
