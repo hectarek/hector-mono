@@ -1,0 +1,29 @@
+import { Button } from "@repo/ui/components/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@repo/ui/components/empty";
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <main className="mx-auto flex min-h-dvh max-w-md items-center px-4">
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>Not found</EmptyTitle>
+          <EmptyDescription>
+            This page doesn&apos;t exist, or it isn&apos;t shared with you.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button size="lg" nativeButton={false} render={<Link href="/" />}>
+            Go to the library
+          </Button>
+        </EmptyContent>
+      </Empty>
+    </main>
+  );
+}

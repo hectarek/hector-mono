@@ -1,4 +1,5 @@
 ---
+
 title: Community Game Library - Spec
 type: feat
 date: 2026-11-10
@@ -13,19 +14,19 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 ## Status
 
-| | |
-|---|---|
-| Phase | The plan is agreed (2026-11-12): the whole data model ([data-model.md](data-model.md)), the technical half's decisions and code map (below), and 26 units in 8 batches, each a task in Hector's tracker. The design is finished ([screens.md](screens.md)). Hector's calls of 2026-11-20 for an unattended build are in (Session log) |
-| Next | Batch 1, with H3's production project and H7's Vercel project before its push |
-| Then | Batches 2 to 8, one after another, with motion last (D13). The catalog's own dataset is planned with Hector beside the build, and decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md)) |
-| Waiting on Hector | H3 before Batch 1's push, and the domain (H7) after its merge; H2, H4 and H9 before launch; H6, the catalog's dataset, beside the build |
-| Updated | 2026-11-20 |
+|                   |                                                                                                                                                                                                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase             | The plan is agreed (2026-11-12): the whole data model ([data-model.md](data-model.md)), the technical half's decisions and code map (below), and 26 units in 8 batches, each a task in Hector's tracker. The design is finished ([screens.md](screens.md)). Hector's calls of 2026-11-20 for an unattended build are in (Session log) |
+| Next              | Batch 1, with H3's production project and H7's Vercel project before its push                                                                                                                                                                                                                                                         |
+| Then              | Batches 2 to 8, one after another, with motion last (D13). The catalog's own dataset is planned with Hector beside the build, and decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md))                                                                                                              |
+| Waiting on Hector | H3 before Batch 1's push, and the domain (H7) after its merge; H2, H4 and H9 before launch; H6, the catalog's dataset, beside the build                                                                                                                                                                                               |
+| Updated           | 2026-11-20                                                                                                                                                                                                                                                                                                                            |
 
 ---
 
 ## How to read this spec
 
-- Requirements (R) say what the app does. Each ends with where it came from: *asked* is from Hector's list or his answers of 2026-11-10, and *gap* is something Claude added because a good library or events app is expected to do it. Any gap can be cut.
+- Requirements (R) say what the app does. Each ends with where it came from: _asked_ is from Hector's list or his answers of 2026-11-10, and _gap_ is something Claude added because a good library or events app is expected to do it. Any gap can be cut.
 - Decisions (D) are product choices with their reasons. Hector agreed every one on 2026-11-10, including the details Claude proposed.
 - A requirement or decision that changed after Hector saw it says so, with the date and the question it came from.
 - Needs from Hector (H) are steps only he can take.
@@ -87,21 +88,21 @@ On screen the app says it differently, in Hector's words of 2026-11-11: a member
 
 **Catalog**
 
-- R1. The catalog holds, for each game or expansion: its title, year, one image, description, player count range and the counts it plays best at, play time, minimum age, complexity (light, medium or heavy), categories (the genre, such as party or card game), designers, publishers, its expansions or base game, a how-to-play video, and a popularity that orders search. Only the title is required, and a screen shows a value only when the game has it. The tables are in [data-model.md](data-model.md). *asked* (Revised 2026-11-12, Hector on the data model: other names, mechanics, ratings and a second image size are left out of the first release, complexity is a word rather than BGG's 1 to 5 weight, and the video is in.)
-- R2. Search finds a game by title as it's typed, ignoring case, punctuation and leading articles, and tolerates a typo or a missing word ("ticket ride" finds Ticket to Ride). Each result shows its cover, year and publisher, so editions and same-named games can be told apart. Search covers every game in the catalog, not only the ones members own, and shows its results in two groups: first the games on the member's own and their friends' shelves, then the rest of the catalog. Among close matches, more popular games come first. *asked* (Revised 2026-11-11, Hector on the screens: the two groups. Revised 2026-11-12, Hector on the data model: popularity orders close matches.)
-- R3. A member adds a game to their shelf with one tap on a search result, and can add several in a row without leaving search. Adding starts from the member's own shelf or from a catalog result in search. The view of everyone's games has no add button of its own, since it shows what people already have. *asked (one tap); gap (several in a row)* (Revised 2026-11-11, Hector on the screens: where adding starts.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* An expansion isn't added as a game of its own. It's ticked on the member's copy of the base game (R8).
-- R4. When search can't find a game, the member suggests it: its title, and optionally its year, publisher, a link and a photo of the box. The admin adds it or declines it with a reason, and the member is told either way. An added game lands on the suggester's shelf. The catalog is our own dataset (D7), so the admin adds a game it lacks by hand (R5). (Revised 2026-11-20, Hector on the catalog: it had been a copy of BGG's, which the admin could pull a new game from at once.) *asked; gap (the outcome and the notice)* (Revised 2026-11-10, Hector on Q11: the admin handles suggestions, with no catalog agent.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* The admin can also answer that the game is already in the catalog, which points the member to it and adds it to their shelf. A decline needs its reason.
-- R5. The admin can correct a game's details, set its how-to-play video, and add a game the catalog lacks, with the same fields as any other game. The game's row holds its current details, and no history of changes is kept. *asked* (Revised 2026-11-12, Hector on the data model: no history, since the row is the one source of truth and there is one admin. This replaces "every change records who made it" and the audit's rule that the admin can go back to BGG's value. Whether a correction survives a refresh is settled with the source.) (Revised 2026-11-20 with D7: the catalog is our own dataset, so no refresh overwrites a correction.)
-- R6. Dropped 2026-11-10 (Hector, Q3): no tags of our own for now. Filters use the catalog's own attributes (D8), and tags come back only for something that data turns out to lack. *asked*
-- R7. A game can carry one how-to-play video, which plays on its page. *asked* (Revised 2026-11-12, Hector on the data model: in the first release, as an optional link; it had been a later phase.)
+- R1. The catalog holds, for each game or expansion: its title, year, one image, description, player count range and the counts it plays best at, play time, minimum age, complexity (light, medium or heavy), categories (the genre, such as party or card game), designers, publishers, its expansions or base game, a how-to-play video, and a popularity that orders search. Only the title is required, and a screen shows a value only when the game has it. The tables are in [data-model.md](data-model.md). _asked_ (Revised 2026-11-12, Hector on the data model: other names, mechanics, ratings and a second image size are left out of the first release, complexity is a word rather than BGG's 1 to 5 weight, and the video is in.)
+- R2. Search finds a game by title as it's typed, ignoring case, punctuation and leading articles, and tolerates a typo or a missing word ("ticket ride" finds Ticket to Ride). Each result shows its cover, year and publisher, so editions and same-named games can be told apart. Search covers every game in the catalog, not only the ones members own, and shows its results in two groups: first the games on the member's own and their friends' shelves, then the rest of the catalog. Among close matches, more popular games come first. _asked_ (Revised 2026-11-11, Hector on the screens: the two groups. Revised 2026-11-12, Hector on the data model: popularity orders close matches.)
+- R3. A member adds a game to their shelf with one tap on a search result, and can add several in a row without leaving search. Adding starts from the member's own shelf or from a catalog result in search. The view of everyone's games has no add button of its own, since it shows what people already have. _asked (one tap); gap (several in a row)_ (Revised 2026-11-11, Hector on the screens: where adding starts.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ An expansion isn't added as a game of its own. It's ticked on the member's copy of the base game (R8).
+- R4. When search can't find a game, the member suggests it: its title, and optionally its year, publisher, a link and a photo of the box. The admin adds it or declines it with a reason, and the member is told either way. An added game lands on the suggester's shelf. The catalog is our own dataset (D7), so the admin adds a game it lacks by hand (R5). (Revised 2026-11-20, Hector on the catalog: it had been a copy of BGG's, which the admin could pull a new game from at once.) _asked; gap (the outcome and the notice)_ (Revised 2026-11-10, Hector on Q11: the admin handles suggestions, with no catalog agent.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ The admin can also answer that the game is already in the catalog, which points the member to it and adds it to their shelf. A decline needs its reason.
+- R5. The admin can correct a game's details, set its how-to-play video, and add a game the catalog lacks, with the same fields as any other game. The game's row holds its current details, and no history of changes is kept. _asked_ (Revised 2026-11-12, Hector on the data model: no history, since the row is the one source of truth and there is one admin. This replaces "every change records who made it" and the audit's rule that the admin can go back to BGG's value. Whether a correction survives a refresh is settled with the source.) (Revised 2026-11-20 with D7: the catalog is our own dataset, so no refresh overwrites a correction.)
+- R6. Dropped 2026-11-10 (Hector, Q3): no tags of our own for now. Filters use the catalog's own attributes (D8), and tags come back only for something that data turns out to lack. _asked_
+- R7. A game can carry one how-to-play video, which plays on its page. _asked_ (Revised 2026-11-12, Hector on the data model: in the first release, as an optional link; it had been a later phase.)
 
 **Shelves and friends**
 
-- R8. A copy records its game, its owner, the expansions in the box, its condition and any missing parts, whether its owner lends it, whether friends can pass it along (R48), and when it was added. Its owner can edit or remove it, except while it's on loan. A copy its owner doesn't lend, such as a special edition, still shows to friends, marked not lent, and can't be requested. A copy's page links to its game's page (R14). *asked; gap (expansions, condition, whether it's lent)* (Clarified 2026-11-11, Hector on the screens: a copy that isn't lent, and the link.)
-- R9. A member can own more than one copy of a game, and each copy lends on its own. *gap*
-- R10. A member can open their own shelf to manage it and any friend's shelf to browse and borrow from. Someone who isn't a friend sees neither. *asked* (Revised 2026-11-10, Hector on Q1: friends, not one group.)
-- R49. Each member has a friend link to share, say in the group chat. Opening it, signed in or after signing up, makes the two people friends at once. A link lasts a week, and making a new one ends the old one. The app also offers one-tap friend requests, which the other person accepts, to a friend's friends and to people from a game night you went to. There's no search of everyone who uses the app. *asked (friends, Q1); gap (how people become friends)* *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* A member can decline a friend request, which the sender isn't told, and can cancel one they sent.
-- R50. Either friend can unfriend the other, and neither is told. From then on they don't see each other's shelves or game nights. A loan still open between them stays visible to both until the game is back, and each leaves the other's lines. *gap* *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* Each is also taken off the other's game nights, and a request between them is withdrawn.
+- R8. A copy records its game, its owner, the expansions in the box, its condition and any missing parts, whether its owner lends it, whether friends can pass it along (R48), and when it was added. Its owner can edit or remove it, except while it's on loan. A copy its owner doesn't lend, such as a special edition, still shows to friends, marked not lent, and can't be requested. A copy's page links to its game's page (R14). _asked; gap (expansions, condition, whether it's lent)_ (Clarified 2026-11-11, Hector on the screens: a copy that isn't lent, and the link.)
+- R9. A member can own more than one copy of a game, and each copy lends on its own. _gap_
+- R10. A member can open their own shelf to manage it and any friend's shelf to browse and borrow from. Someone who isn't a friend sees neither. _asked_ (Revised 2026-11-10, Hector on Q1: friends, not one group.)
+- R49. Each member has a friend link to share, say in the group chat. Opening it, signed in or after signing up, makes the two people friends at once. A link lasts a week, and making a new one ends the old one. The app also offers one-tap friend requests, which the other person accepts, to a friend's friends and to people from a game night you went to. There's no search of everyone who uses the app. _asked (friends, Q1); gap (how people become friends)_ _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ A member can decline a friend request, which the sender isn't told, and can cancel one they sent.
+- R50. Either friend can unfriend the other, and neither is told. From then on they don't see each other's shelves or game nights. A loan still open between them stays visible to both until the game is back, and each leaves the other's lines. _gap_ _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ Each is also taken off the other's game nights, and a request between them is withdrawn.
 
 **Browsing the library**
 
@@ -116,50 +117,50 @@ On screen the app says it differently, in Hector's words of 2026-11-11: a member
 
   The filters people reach for most come first: available now, owner, player count and play time. Complexity, category and minimum age are folded away until opened.
 
-  *asked (filters, friends' games); gap (one library view across shelves, availability)* (Revised 2026-11-11, Hector on the screens: the order, and folding the rest away.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* Play time filters as a cap (30 minutes or less, an hour or less, two hours or less), and the player count starts on "plays with". (Revised 2026-11-12, Hector on the data model: no mechanic filter in the first release, and, by his rule that what has no data isn't shown, a filter appears only when some game in view has its value.)
-- R12. Library and shelf lists sort by title, recently added, complexity, play time, year or most borrowed. Sorting is its own control, apart from the filters. *gap* (Revised 2026-11-11, Hector on the screens: apart from the filters.)
-- R13. Filters and sort live in the page's address, so going back keeps them and a filtered view can be shared in the group chat. *gap*
-- R14. A game's page leads with its cover at full quality, then its facts (players with the best counts, time, age, complexity), description, categories, expansions, the how-to-play video, and which of your friends own it, with each copy's state and a Borrow button. A member who owns a copy sees it there too, with a link to the copy's own page, where they manage it (R8). *asked* (Revised 2026-11-11, Hector on the screens: the game's page and the copy's page stay separate and link to each other. Revised 2026-11-12, Hector on the data model: no mechanics, and only what the game has is shown.)
-- R15. A copy shows its state wherever it appears: available, requested, out (with its due date and how many are in line), or not lent. *gap*
+  _asked (filters, friends' games); gap (one library view across shelves, availability)_ (Revised 2026-11-11, Hector on the screens: the order, and folding the rest away.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ Play time filters as a cap (30 minutes or less, an hour or less, two hours or less), and the player count starts on "plays with". (Revised 2026-11-12, Hector on the data model: no mechanic filter in the first release, and, by his rule that what has no data isn't shown, a filter appears only when some game in view has its value.)
+- R12. Library and shelf lists sort by title, recently added, complexity, play time, year or most borrowed. Sorting is its own control, apart from the filters. _gap_ (Revised 2026-11-11, Hector on the screens: apart from the filters.)
+- R13. Filters and sort live in the page's address, so going back keeps them and a filtered view can be shared in the group chat. _gap_
+- R14. A game's page leads with its cover at full quality, then its facts (players with the best counts, time, age, complexity), description, categories, expansions, the how-to-play video, and which of your friends own it, with each copy's state and a Borrow button. A member who owns a copy sees it there too, with a link to the copy's own page, where they manage it (R8). _asked_ (Revised 2026-11-11, Hector on the screens: the game's page and the copy's page stay separate and link to each other. Revised 2026-11-12, Hector on the data model: no mechanics, and only what the game has is shown.)
+- R15. A copy shows its state wherever it appears: available, requested, out (with its due date and how many are in line), or not lent. _gap_
 
 **Lending**
 
-- R16. A member requests a friend's copy that its owner lends, with an optional note ("Can I grab it Friday?"). The owner accepts and sets the loan period (1 week, 2 weeks, a month, or a date), or declines with an optional note. *asked (the owner sets the period); gap (the request and the decline)*
-- R17. An owner can record a loan made in person, picking the friend and the period, with no request first. *gap* *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* The owner also gives the day it was handed over, which starts as today, so a loan recorded late doesn't gain days.
-- R18. A loan's due date counts from the day of the handoff. The person receiving the game confirms it and gives the day they picked it up, which starts as today and can be set to an earlier day, so confirming late doesn't move the due date. A direct lend is handed off at once (D5). *gap* (Revised 2026-11-11, Hector on the screens: the pick-up day, since most people confirm late.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* The owner can confirm the pick-up too, giving the day, so a loan never waits on a borrower who forgets.
-- R19. The borrower marks a game returned and gives the day it came back, which starts as today. From then on the loan can't run overdue and its reminders stop (D15). The owner confirms it, noting any missing parts or damage on the copy, or says they don't have it yet, which starts the loan running again. A return the owner hasn't answered a week later closes by itself, on the borrower's day. The owner can also mark it returned without waiting, giving the day. *gap* (The return day was added 2026-11-11 by Claude to match R18's pick-up day. Confirmed 2026-11-12, Hector: a generous default that assumes good intent, so a loan doesn't show as overdue when the game is back, D15.)
-- R20. The borrower can ask for more time, which the owner grants with a new due date or declines. The owner can change the due date at any time, and can call a game back, which ends any pass-along. *gap*
-- R21. The borrower can withdraw a request or leave a line, and the owner can cancel an accepted loan before the handoff or decline anyone in a line. *gap*
-- R22. My loans shows, in one place, games I've lent that are out, games I've borrowed, the lines I'm in, and requests waiting in either direction, overdue ones first. *asked; gap (both directions, requests, lines)*
-- R23. A copy keeps its loan history (who had it and when, pass-alongs included), and each member can see their own past loans. *gap*
-- R24. A friend can ask for a copy that's out, and joins its line. The line goes in the order people asked. The borrower sees that someone's waiting, and their due date doesn't change. *asked* (Revised 2026-11-10, Hector on Q6: a line, with pass-along, replaces "tell me when it's back".)
+- R16. A member requests a friend's copy that its owner lends, with an optional note ("Can I grab it Friday?"). The owner accepts and sets the loan period (1 week, 2 weeks, a month, or a date), or declines with an optional note. _asked (the owner sets the period); gap (the request and the decline)_
+- R17. An owner can record a loan made in person, picking the friend and the period, with no request first. _gap_ _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ The owner also gives the day it was handed over, which starts as today, so a loan recorded late doesn't gain days.
+- R18. A loan's due date counts from the day of the handoff. The person receiving the game confirms it and gives the day they picked it up, which starts as today and can be set to an earlier day, so confirming late doesn't move the due date. A direct lend is handed off at once (D5). _gap_ (Revised 2026-11-11, Hector on the screens: the pick-up day, since most people confirm late.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ The owner can confirm the pick-up too, giving the day, so a loan never waits on a borrower who forgets.
+- R19. The borrower marks a game returned and gives the day it came back, which starts as today. From then on the loan can't run overdue and its reminders stop (D15). The owner confirms it, noting any missing parts or damage on the copy, or says they don't have it yet, which starts the loan running again. A return the owner hasn't answered a week later closes by itself, on the borrower's day. The owner can also mark it returned without waiting, giving the day. _gap_ (The return day was added 2026-11-11 by Claude to match R18's pick-up day. Confirmed 2026-11-12, Hector: a generous default that assumes good intent, so a loan doesn't show as overdue when the game is back, D15.)
+- R20. The borrower can ask for more time, which the owner grants with a new due date or declines. The owner can change the due date at any time, and can call a game back, which ends any pass-along. _gap_
+- R21. The borrower can withdraw a request or leave a line, and the owner can cancel an accepted loan before the handoff or decline anyone in a line. _gap_
+- R22. My loans shows, in one place, games I've lent that are out, games I've borrowed, the lines I'm in, and requests waiting in either direction, overdue ones first. _asked; gap (both directions, requests, lines)_
+- R23. A copy keeps its loan history (who had it and when, pass-alongs included), and each member can see their own past loans. _gap_
+- R24. A friend can ask for a copy that's out, and joins its line. The line goes in the order people asked. The borrower sees that someone's waiting, and their due date doesn't change. _asked_ (Revised 2026-11-10, Hector on Q6: a line, with pass-along, replaces "tell me when it's back".)
 - R48. An owner can let friends pass a copy along, for one copy or their whole shelf; it's off until they do. With it on, a borrower who's done hands the copy straight to the next friend in line, rather than back to the owner:
   - the owner's switch approves the next loan in advance, and the owner is told who has the game now
   - the next loan runs the same period the owner gave the one before, counted from its own handoff (D5), not what's left of the last one
   - the owner can still change the due date, decline someone in the line, or call the game back (R20, R21)
   - with no one left in line, the last borrower returns it to the owner
 
-  With it off, the borrower returns the copy, and the owner accepts the next request in line as usual. Only the owner's friends can join a line, since they're the ones who see the copy. The two borrowers needn't be friends: the app shows each the other's name, and phone if they've added one, for the handoff. *asked (Hector, Q6)* *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* A pass-along stays the giver's loan until the next friend confirms they have the game, and the giver can take it back until then. Meanwhile it can't run overdue (D15, 2026-11-12).
+  With it off, the borrower returns the copy, and the owner accepts the next request in line as usual. Only the owner's friends can join a line, since they're the ones who see the copy. The two borrowers needn't be friends: the app shows each the other's name, and phone if they've added one, for the handoff. _asked (Hector, Q6)_ _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ A pass-along stays the giver's loan until the next friend confirms they have the game, and the giver can take it back until then. Meanwhile it can't run overdue (D15, 2026-11-12).
 
 **Notifications**
 
-- R25. The borrower is reminded two days before a loan is due and on the morning it's due. The owner is told on the day it's due back. Once it's overdue, both are told, and again every three days until it's returned. *asked* (Revised 2026-11-12, Hector on the return day: the overdue reminders stop once the borrower says they've handed the game over, D15.)
-- R26. Members are also told about: a request on their copy, the answer to their request, a friend request, someone joining the line for a game they have, their turn coming up in a line, a pass-along to confirm, a request for more time and its answer, a return waiting for them to confirm, a game-night invite, a change to or cancellation of a night they're going to, a place opening for them on a waitlist, the morning of a night they're going to, and the outcome of their suggestion. *gap* *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* The admin is told when a suggestion arrives.
-- R27. Every notice lands in an inbox in the app, with an unread count. The inbox lists what happened and links to it; what waits on a member is also counted on the tab it lives in (D14). *gap* (Revised 2026-11-10, Hector on Q7: in the app only for the first release; push comes in a later phase, D9. Revised 2026-11-11, Hector on the screens: the inbox links and doesn't act.)
-- R28. Each member picks which kinds of notice they get. Loan reminders are on by default. *gap*
-- R52. Where timing matters, the app offers to pass the news on directly, since a notice reaches only the inbox and is seen when its reader next opens the app (D9). After cancelling a night or calling a game back, the member is offered a ready message through the phone's share sheet, to send by text or in the group chat. *gap (from the usability audit of 2026-11-11; Hector agreed 2026-11-12)*
+- R25. The borrower is reminded two days before a loan is due and on the morning it's due. The owner is told on the day it's due back. Once it's overdue, both are told, and again every three days until it's returned. _asked_ (Revised 2026-11-12, Hector on the return day: the overdue reminders stop once the borrower says they've handed the game over, D15.)
+- R26. Members are also told about: a request on their copy, the answer to their request, a friend request, someone joining the line for a game they have, their turn coming up in a line, a pass-along to confirm, a request for more time and its answer, a return waiting for them to confirm, a game-night invite, a change to or cancellation of a night they're going to, a place opening for them on a waitlist, the morning of a night they're going to, and the outcome of their suggestion. _gap_ _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ The admin is told when a suggestion arrives.
+- R27. Every notice lands in an inbox in the app, with an unread count. The inbox lists what happened and links to it; what waits on a member is also counted on the tab it lives in (D14). _gap_ (Revised 2026-11-10, Hector on Q7: in the app only for the first release; push comes in a later phase, D9. Revised 2026-11-11, Hector on the screens: the inbox links and doesn't act.)
+- R28. Each member picks which kinds of notice they get. Loan reminders are on by default. _gap_
+- R52. Where timing matters, the app offers to pass the news on directly, since a notice reaches only the inbox and is seen when its reader next opens the app (D9). After cancelling a night or calling a game back, the member is offered a ready message through the phone's share sheet, to send by text or in the group chat. _gap (from the usability audit of 2026-11-11; Hector agreed 2026-11-12)_
 
 **Game nights**
 
-- R29. A member creates a game night with a title, a date and start time, an optional end, a place, a capacity (the most people, host included), a note, and the games that will be there, picked from their own shelf; members going add theirs (R32). *asked*
-- R30. A game night shows to the host's friends by default, and anyone who sees it can join while there's room. A private one is seen and joined only by the people its host invites, directly or with the night's link. Only the host invites, unless they turn on "guests can invite others", as a calendar invite allows. People at the same night who aren't friends see each other's names and the night's games, not each other's shelves. *asked* (Revised 2026-11-10, Hector on Q1: shown to friends, not the whole group.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* The host can make a new link for a night, which ends the old one.
-- R31. Members answer going, maybe or can't go. Going counts against the capacity. Once a night is full, more members can join its waitlist; when a place opens, the first on the waitlist who fits takes it and is told. *gap*
-- R47. A host can let members bring guests who don't use the app. A member going then says how many guests they're bringing, and each guest takes a place against the capacity, with no account and no RSVP of their own. It's a separate switch from "guests can invite others". *asked (Hector, Q8)*
-- R32. A member who's going can add games from their own shelf to the night's list ("I'll bring it"). *gap*
-- R33. Upcoming game nights lists the ones a member can see, soonest first, with the places left. Past nights fold away. *asked* *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* A night waits on a member, and counts on the Nights tab, when they were invited by name and haven't answered.
-- R34. The host can edit or cancel a night, and members going are told. *gap*
-- R35. A game night can be added to the phone's calendar by downloading its calendar file (.ics). Keeping the calendar in sync as a night changes is later work. *gap; asked (Hector, Q4)*
-- R36. A game night's place is shown only to people who can see the night. *gap*
+- R29. A member creates a game night with a title, a date and start time, an optional end, a place, a capacity (the most people, host included), a note, and the games that will be there, picked from their own shelf; members going add theirs (R32). _asked_
+- R30. A game night shows to the host's friends by default, and anyone who sees it can join while there's room. A private one is seen and joined only by the people its host invites, directly or with the night's link. Only the host invites, unless they turn on "guests can invite others", as a calendar invite allows. People at the same night who aren't friends see each other's names and the night's games, not each other's shelves. _asked_ (Revised 2026-11-10, Hector on Q1: shown to friends, not the whole group.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ The host can make a new link for a night, which ends the old one.
+- R31. Members answer going, maybe or can't go. Going counts against the capacity. Once a night is full, more members can join its waitlist; when a place opens, the first on the waitlist who fits takes it and is told. _gap_
+- R47. A host can let members bring guests who don't use the app. A member going then says how many guests they're bringing, and each guest takes a place against the capacity, with no account and no RSVP of their own. It's a separate switch from "guests can invite others". _asked (Hector, Q8)_
+- R32. A member who's going can add games from their own shelf to the night's list ("I'll bring it"). _gap_
+- R33. Upcoming game nights lists the ones a member can see, soonest first, with the places left. Past nights fold away. _asked_ _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ A night waits on a member, and counts on the Nights tab, when they were invited by name and haven't answered.
+- R34. The host can edit or cancel a night, and members going are told. _gap_
+- R35. A game night can be added to the phone's calendar by downloading its calendar file (.ics). Keeping the calendar in sync as a night changes is later work. _gap; asked (Hector, Q4)_
+- R36. A game night's place is shown only to people who can see the night. _gap_
 
 **Game-night tools**
 
@@ -168,35 +169,35 @@ On screen the app says it differently, in Hector's words of 2026-11-11: a member
   - the time available
   - the complexity the host wants: light, medium, heavy, or light enough for new players
 
-  Each suggestion says why it fits ("Best at 5 · 60 to 90 min · medium"). *asked* (Revised 2026-11-12 by Claude, to match the approved screen D8: the games come from the night's games on the table, or from all the member's friends' games, their own included, not only the host's library. Hector agreed the same day.)
-- R38. Before a night, members going can vote on the games on its list, and the host sees the ranking. *gap (Hector took it on Q9)*
-- R46. When more people are going than one game seats, the app proposes tables: a split of the people going, with a game for each table that plays well at its size and fits the time. *gap (Hector took it on Q9)*
+  Each suggestion says why it fits ("Best at 5 · 60 to 90 min · medium"). _asked_ (Revised 2026-11-12 by Claude, to match the approved screen D8: the games come from the night's games on the table, or from all the member's friends' games, their own included, not only the host's library. Hector agreed the same day.)
+- R38. Before a night, members going can vote on the games on its list, and the host sees the ranking. _gap (Hector took it on Q9)_
+- R46. When more people are going than one game seats, the app proposes tables: a split of the people going, with a game for each table that plays well at its size and fits the time. _gap (Hector took it on Q9)_
 
 **Accounts and access**
 
-- R39. Anyone can sign up, with Google or an email address, and a new account sees the catalog and nothing else until it has friends. Signed-out visitors see only the welcome page, which carries the app's name and no member's. *gap* (Revised 2026-11-10, Hector on Q1: it had been invite-only, which friends make unnecessary. Revised 2026-11-11, Hector on the screens: Google and Apple sign-in. Revised again the same day: Apple is left out, since it isn't a quick setup; the reason is in the notes for the technical half.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* A link opened inside a chat app's own browser asks the person to open it in their phone's browser, since Google sign-in and the home-screen step don't work there.
-- R40. A member's profile has their name, a photo, and an optional phone number for arranging handoffs, shown only to their friends and to the other person in a loan or a pass-along. *gap* (Hector, 2026-11-11: keep the photo, with a simple file bucket to hold it.)
-- R51. Each member picks a playing piece, a shape and a color, which stands for them wherever they appear: in a seat at a game night, in a line, and next to a loan or a copy (D13). There are four shapes (a pawn, a cone, a house and a ship) and ten colors, so every friend in a circle can have their own. *asked (Hector, 2026-11-11, on the screens: more variety than one pawn in twelve colors. Later that day he kept three of the five shapes drawn and asked for more colors, and on 2026-11-12 he added the ship.)*
-- R41. A member can delete their account once their loans are settled; their copies leave their friends' libraries with them. The admin can remove an account that misuses the app. *gap* (Revised 2026-11-10, Hector on Q1: the admin runs the catalog, not the membership.) *Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):* Deleting an account also cancels the nights its member hosts and ends their requests and places in line, and the page says so first.
-- R42. Dropped 2026-11-10 (Hector, Q11): the catalog agent's tools. *asked*
+- R39. Anyone can sign up, with Google or an email address, and a new account sees the catalog and nothing else until it has friends. Signed-out visitors see only the welcome page, which carries the app's name and no member's. _gap_ (Revised 2026-11-10, Hector on Q1: it had been invite-only, which friends make unnecessary. Revised 2026-11-11, Hector on the screens: Google and Apple sign-in. Revised again the same day: Apple is left out, since it isn't a quick setup; the reason is in the notes for the technical half.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ A link opened inside a chat app's own browser asks the person to open it in their phone's browser, since Google sign-in and the home-screen step don't work there.
+- R40. A member's profile has their name, a photo, and an optional phone number for arranging handoffs, shown only to their friends and to the other person in a loan or a pass-along. _gap_ (Hector, 2026-11-11: keep the photo, with a simple file bucket to hold it.)
+- R51. Each member picks a playing piece, a shape and a color, which stands for them wherever they appear: in a seat at a game night, in a line, and next to a loan or a copy (D13). There are four shapes (a pawn, a cone, a house and a ship) and ten colors, so every friend in a circle can have their own. _asked (Hector, 2026-11-11, on the screens: more variety than one pawn in twelve colors. Later that day he kept three of the five shapes drawn and asked for more colors, and on 2026-11-12 he added the ship.)_
+- R41. A member can delete their account once their loans are settled; their copies leave their friends' libraries with them. The admin can remove an account that misuses the app. _gap_ (Revised 2026-11-10, Hector on Q1: the admin runs the catalog, not the membership.) _Audit, 2026-11-11 (added by Claude; Hector agreed 2026-11-12):_ Deleting an account also cancels the nights its member hosts and ends their requests and places in line, and the page says so first.
+- R42. Dropped 2026-11-10 (Hector, Q11): the catalog agent's tools. _asked_
 
 **The app**
 
-- R43. The app installs to the home screen on iPhone and Android, opens full screen, and is built for phones first. On a tablet or laptop it is the same app with more room: the same pages in the same order, with the tabs moved into the header, browsing lists in columns and sheets shown as dialogs. No page or feature exists at one size only. It has a light theme only (D12). *asked* (Revised 2026-11-10, Hector on the first style tiles: it had a dark mode too. Revised 2026-11-11, Hector: no separate laptop layout, so the experience doesn't differ by device.)
-- R44. Opening the installed app after a day away shows the member's content quickly. The technical half sets the target from the recipes performance review. *gap*
+- R43. The app installs to the home screen on iPhone and Android, opens full screen, and is built for phones first. On a tablet or laptop it is the same app with more room: the same pages in the same order, with the tabs moved into the header, browsing lists in columns and sheets shown as dialogs. No page or feature exists at one size only. It has a light theme only (D12). _asked_ (Revised 2026-11-10, Hector on the first style tiles: it had a dark mode too. Revised 2026-11-11, Hector: no separate laptop layout, so the experience doesn't differ by device.)
+- R44. Opening the installed app after a day away shows the member's content quickly. The technical half sets the target from the recipes performance review. _gap_
 
 **Privacy**
 
-- R45. The public repo holds no member's name, email, phone or address. Code, tests, fixtures, screenshots, commit messages and PR text use fictional people. *gap*
+- R45. The public repo holds no member's name, email, phone or address. Code, tests, fixtures, screenshots, commit messages and PR text use fictional people. _gap_
 
 ### Decisions
 
-- D1. **A library, not a list.** A game exists once in the catalog, and members add copies of it. Members don't type in games of their own: a missing game goes through a suggestion (R4). Why: one rich record per game for everyone, no near-duplicates ("Catan" and "Settlers of Catan"), and filters that work across every shelf. *asked*
+- D1. **A library, not a list.** A game exists once in the catalog, and members add copies of it. Members don't type in games of their own: a missing game goes through a suggestion (R4). Why: one rich record per game for everyone, no near-duplicates ("Catan" and "Settlers of Catan"), and filters that work across every shelf. _asked_
 - D2. **Rules, not AI, in the app.** Game suggestions for a night (R37) and table splits (R46) come from readable rules over the catalog's data, with their reasons shown. Why: answers members can check, and no model costs or keys in the app, as in the job search app.
 - D3. **No money, deposits or penalties.** Overdue means reminders, not fees. Why: these are friends.
 - D4. **The owner decides.** Only a copy's owner accepts or declines a request on it, sets its period, extends it, turns on pass-along or confirms its return. The admin can't lend someone else's copy.
 - D5. **The period counts from the handoff.** The owner picks a period when accepting, and the due date counts from the pick-up day the person receiving the game gives when they confirm they have it (R18). Why: a request accepted on Monday and picked up on Saturday shouldn't lose five days, and someone who confirms a few days late shouldn't gain them. A direct lend (R17) skips the confirmation. (Revised 2026-11-11, Hector on the screens: the pick-up day.)
-- D6. **Architecture from recipes.** The app copies hectors-recipes' code and system architecture once its performance review is done, and the technical half starts from that review's lessons. *asked*
+- D6. **Architecture from recipes.** The app copies hectors-recipes' code and system architecture once its performance review is done, and the technical half starts from that review's lessons. _asked_
 - D7. **The catalog is our own.** We source and shape its data ourselves, with Hector, as an effort beside the build (H6), and U24 loads it before anyone is invited, so the library is full on day one. Until then the build runs on the canvas's fictional games (KTD21). Search runs on our copy. BoardGameGeek's terms bar using its data "as data for an AI", so agents don't read or shape BGG's data, an export of its catalog included ([catalog-data.md](catalog-data.md)). (Hector, 2026-11-10, on Q2 and Q10; revised 2026-11-20, Hector: it had been our own copy of BGG's, filled from BGG and refreshed weekly.)
 - D8. **The catalog's attributes are the data model's.** Players, best player counts, time, minimum age, complexity and categories, as [data-model.md](data-model.md)'s games table holds them, and the app adds no tags of its own until that data turns out to lack something. A category such as Card Game can separate a card game from a big board game. (Hector, 2026-11-10, on Q3; revised 2026-11-20 with D7: they had been BGG's, mechanics included.)
 - D9. **Notices start in the app, and push follows.** The first release has the in-app inbox only, with no push and no email. Push is a later phase: about as much work again as the inbox (a service worker, storing each phone's subscription, a scheduled sender, the iPhone home-screen step, and testing on real phones), so not the same effort, which was Hector's test. The inbox is built so push is one more way to deliver the same notices, not a rewrite. (Hector, 2026-11-10, on Q7)
@@ -372,7 +373,7 @@ For the agent building one:
   - `di/container.ts`, `di/types.ts`, and the authentication, logger and transaction modules
   - `tests/_support/` (`preload`, `next`, `app`, `database`, `controller`, `dom`, `focus`, `form`, `static-imports`), `tests/di/container.test.ts` and `tests/app/layout.test.ts`
   - from job-search: `scripts/check-test-database.ts`, which expects the test project's values in `.env`, and `scripts/require-migrations.ts` with `scripts/migrate-production.ts`, so a production build fails while a migration hasn't run there; the app's `turbo.json` lists `VERCEL_ENV`, as job-search's does (added 2026-11-20)
-  
+
   Three things differ from recipes, as in job-search:
   - Local development and previews use a Neon test project. Production's values live only in Vercel's Production environment and never pass through a Claude session, and production migrations run with Hector's OK at that moment, through the Neon MCP or his terminal (job-search KTD17). Hector gave a standing OK on 2026-11-20 for agents to write to the test project without asking each time: migrations, the seed, its storage key, and each preview's address in Neon Auth's trusted domains. Recipes uses its production database locally, and `.worktreeinclude` copies `.env` into every worktree from the main checkout. This app's `.env` lives in the build's one worktree instead (KTD20), since agents can't read or copy a `.env`.
   - Logs carry error classes, codes and record ids, never a field's value (job-search KTD20, `loggable`), since the database holds friends' names, phone numbers and addresses.
@@ -383,7 +384,7 @@ For the agent building one:
   - a request's first reads run in a row
   - Neon's sign-in kit sits only in the sign-in and account layouts, with recipes' layout test
   - the service worker keeps saved copies (U23)
-  
+
   U25 measures a cold open on production and records the numbers here.
 - KTD3. **Accounts: Neon Auth, with Google and email (R39).**
   - Email and password, with sign-up checked by a code on production. The test project has the code check off (Hector, 2026-11-20), so agents make the cast's accounts and run the sign-in flows, and Hector checks the code step on production before friends join. Neon's shared sender can send codes and password resets, but not verification links (Neon's Auth production checklist, read 2026-11-12). Google signs in on Neon's shared credentials in development, and on our own OAuth client in production (H2).
@@ -407,7 +408,7 @@ For the agent building one:
   - when a loan is overdue
   - the copy's line
   - a copy's state for whoever is looking (R15, B13): available, requested, you asked, 2nd in line, out until Nov 20, not lent, yours
-  
+
   Every loan write takes the copy's row lock first (`select … for update` on `user_games`), so two answers can't both land. A change that no longer applies throws `ChangedError` with a reason, which the screen turns into its line and next action (KTD16). Only a copy's owner answers, sets the period, extends, changes the due date, calls back or confirms a return, and anyone else, the admin included, is refused (D4, AE7).
 - KTD7. **Notices are written with their change and read with their words.**
   - The use case that makes a change writes one `notices` row for each person told, in the change's own transaction, through `INoticesRepository.add` (U4), with a type from data-model.md's list.
@@ -418,7 +419,7 @@ For the agent building one:
   - writes R25's reminders due today: `due-soon` two days before, `due-today`, `due-back-today`, and `overdue` the day after and every three days after, plus `night-today`
   - closes each return its owner hasn't answered for 7 days (D15), with `return-closed`
   - writes nothing twice: a reminder carries `reminded_on` under a unique index, so a second run the same day adds nothing
-  
+
   No screen waits on it: whether a loan is overdue or due today is worked out when a page reads it.
 - KTD9. **One time zone, America/New_York**, as recipes' `PLAN_TIME_ZONE` and job-search's KTD18. Dates are `YYYY-MM-DD` strings end to end, and "today" comes from `todayIn` on the server, never the phone. A night's start and end are timestamps shown in Eastern time. A date shows its weekday, and its year once that isn't this year (screens.md). Revisit when a circle elsewhere joins.
 - KTD10. **Search runs on our copy, with trigrams (R2).** `games.search_title` holds the normalized title (`src/entities/search-title.ts`, U3) under a `pg_trgm` index. Neon has the extension, and so does the PGlite the tests use (0.5.17, the version installed, ships `pg_trgm`). The input is normalized the same way and matched by word similarity above a threshold. Results come in R2's two groups, games on the member's and their friends' copies first and then the rest, each ordered by closeness and then popularity. "ticket ride" finding Ticket to Ride is a test. U24 sizes it on the real catalog.
@@ -484,6 +485,7 @@ apps/community-game-library/
     n/[token]/                      # a night's link: D14 signed out (KTD18, U19)
     removed/                        # a removed account's only page (U5)
     (main)/                         # header, tab bar, bell and piece (U2)
+      loading.tsx                   # the Library's skeleton, under the shell (U1)
       page.tsx                      # Library, All friends: B1 to B4, B10, B12; ?q, filters and sort in the address (R13)
       my-library/                   # B6; add/ (B8), suggest/ (B9)
       games/[id]/                   # a game's page: B5, B11, B13; the Ask to borrow (C1) and Join the line (C10) sheets
@@ -540,13 +542,15 @@ apps/community-game-library/
                                     # notices/, account/, admin/, daily/
     interface-adapters/controllers/ # the same areas as use-cases/
     infrastructure/
+      drizzle-errors.ts             # names drizzle's query error for the logs (job-search's, KTD1)
       repositories/                 # base, then one per interface, with a mock each
       services/                     # neon-auth, transaction-manager, console-logger, s3-file-storage, with mocks
   di/                               # container.ts, types.ts, modules/ (one per area)
   db/                               # schema.ts, index.ts, migrations/
   lib/                              # auth/server.ts, logger.ts
   service-worker/                   # rules.ts, handlers.ts, worker.ts (U23)
-  scripts/                          # seed.ts, build-service-worker.ts, check-test-database.ts, require-migrations.ts, migrate-production.ts
+  scripts/                          # seed.ts, build-service-worker.ts, check-test-database.ts, require-migrations.ts, migrate-production.ts;
+                                    # lib/ (migrations.ts, terminal.ts), which the last two share
   tests/                            # mirrors the tree; _support/ with cast.ts
   proxy.ts
 ```
@@ -571,20 +575,21 @@ Two batches can be open at once (Batches and units), so the files both touch tak
 
 Each unit is one task in Hector's tracker, under the same U number. A batch is one branch and one PR (KTD20). A gate is Hector's look at what the next units will copy; the build asks for it and keeps going, and what he changes goes into the open batch or the next (2026-11-20).
 
-| Batch | Branch | Units | Starts after | Gate |
-|---|---|---|---|---|
-| 1 Foundation | `feat/community-game-library-b1-foundation` | U1 to U5 | The spec's PR merged; H3 and H7 before its push | The shell and getting in, on the batch's preview (H8) |
-| 2 Catalog and libraries | `feat/community-game-library-b2-catalog` | U6 to U9 | Batch 1 merged | After U6, from screenshots, before U7 (H8) |
-| 3 Friends and the inbox | `feat/community-game-library-b3-friends` | U10, U11 | Batch 2 merged | |
-| 4 Loans | `feat/community-game-library-b4-loans` | U12 to U17 | Batch 3 merged | |
-| 5 Nights | `feat/community-game-library-b5-nights` | U18 to U21 | Batch 4 merged | |
-| 6 Accounts and the phone | `feat/community-game-library-b6-accounts` | U22, U23 | Batches 4 and 5 merged | |
-| 7 Launch | `feat/community-game-library-b7-launch` | U24, U25 | Batch 6 merged; H6 for U24, H2 and H4 for U25 | The phone check after a day away (H9) |
-| 8 Motion | `feat/community-game-library-b8-motion` | U26 | Batch 7 merged | Hector's pick of the motion |
+| Batch                    | Branch                                      | Units      | Starts after                                    | Gate                                                  |
+| ------------------------ | ------------------------------------------- | ---------- | ----------------------------------------------- | ----------------------------------------------------- |
+| 1 Foundation             | `feat/community-game-library-b1-foundation` | U1 to U5   | The spec's PR merged; H3 and H7 before its push | The shell and getting in, on the batch's preview (H8) |
+| 2 Catalog and libraries  | `feat/community-game-library-b2-catalog`    | U6 to U9   | Batch 1 merged                                  | After U6, from screenshots, before U7 (H8)            |
+| 3 Friends and the inbox  | `feat/community-game-library-b3-friends`    | U10, U11   | Batch 2 merged                                  |                                                       |
+| 4 Loans                  | `feat/community-game-library-b4-loans`      | U12 to U17 | Batch 3 merged                                  |                                                       |
+| 5 Nights                 | `feat/community-game-library-b5-nights`     | U18 to U21 | Batch 4 merged                                  |                                                       |
+| 6 Accounts and the phone | `feat/community-game-library-b6-accounts`   | U22, U23   | Batches 4 and 5 merged                          |                                                       |
+| 7 Launch                 | `feat/community-game-library-b7-launch`     | U24, U25   | Batch 6 merged; H6 for U24, H2 and H4 for U25   | The phone check after a day away (H9)                 |
+| 8 Motion                 | `feat/community-game-library-b8-motion`     | U26        | Batch 7 merged                                  | Hector's pick of the motion                           |
 
 Batches run one after another in one worktree (KTD20; revised 2026-11-20, when Batches 4 and 5 had run side by side). "Strong" means the strongest model available, for a unit that sets a pattern or holds the hardest logic. Every other unit is written to be built by a smaller model.
 
 **Batch 1: Foundation**
+
 - **U1** Scaffold from recipes · strong · KTD1, KTD2, KTD11, KTD20
 - **U2** The look and the shell · strong · KTD12, KTD14, KTD16 to KTD18 · after U1
 - **U3** Every table and the shared rules · strong · KTD5, KTD6, KTD10 · after U1
@@ -592,16 +597,19 @@ Batches run one after another in one worktree (KTD20; revised 2026-11-20, when B
 - **U5** Getting in, and You · standard · KTD3, KTD11 · needs H7 · after U2, U4
 
 **Batch 2: Catalog and libraries**
+
 - **U6** Search and a game's page · strong · KTD10, KTD13 · needs H3 · after Batch 1
 - **U7** Copies and My library · standard · KTD6, KTD15 · after U6
 - **U8** All friends: filters and sort · standard · KTD4 · after U7
 - **U9** Suggestions and the admin's catalog · standard · KTD11 · after U6
 
 **Batch 3: Friends and the inbox**
+
 - **U10** Friends · standard · KTD4, KTD18 · after Batch 2
 - **U11** The inbox, the counts and notice settings · standard · KTD7 · after U10
 
 **Batch 4: Loans**
+
 - **U12** Ask and answer · strong · KTD6, KTD7, KTD16 · after Batch 3
 - **U13** Pick-up and return · strong · KTD6, D15 · after U12
 - **U14** More time, due dates and calling back · standard · KTD6, KTD18 · after U13
@@ -610,38 +618,43 @@ Batches run one after another in one worktree (KTD20; revised 2026-11-20, when B
 - **U17** The daily run · strong · KTD8 · needs H7's secret before the merge · after U14, U15
 
 **Batch 5: Nights**
+
 - **U18** Nights and a new night · standard · KTD4, KTD9 · after Batch 4
 - **U19** Invites, answers, the waitlist and guests · standard · KTD4, KTD18 · after U18
 - **U20** What should we play? and tables · standard · KTD23 · after U19
 - **U21** Cancelling, past nights and the calendar file · standard · KTD18, KTD24 · after U19
 
 **Batch 6: Accounts and the phone**
+
 - **U22** Deleting an account, and the admin's removal · standard · KTD4 · after Batches 4 and 5
 - **U23** The home screen, saved copies and link previews · strong · KTD2, KTD19 · after Batches 4 and 5
 
 **Batch 7: Launch**
+
 - **U24** The catalog's data · strong · KTD10, KTD21 · needs H6
 - **U25** Production and the first friends · standard · KTD1 to KTD3, KTD22 · needs H2, H4 · after U24
 
 **Batch 8: Motion**
+
 - **U26** Motion · standard · KTD25 · needs H9 and Hector's pick
 
 ### Verification
 
-| When | Check |
-|---|---|
-| Every change | `bun check --filter=community-game-library && bun ts --filter=community-game-library` |
-| Every change | `bun run dead-code` |
-| A unit with tests | its test files from the app folder, then `bun run test --filter=community-game-library` |
-| A unit with screens | each screen at 390 px with the cast's data, beside its board; again at 768 and 1280 px (KTD14); new touch targets at least 44 px |
-| A schema change (U3, or a unit whose task says so) | `db:generate`, the SQL read, applied to the test project (KTD1's standing OK); on production with his OK at that moment, before the merge, which `scripts/require-migrations.ts` enforces (KTD1) |
-| U1, U2, U23, and any config change | the build: `bun run build --filter=community-game-library` outside the sandbox, with placeholder auth values on the command, since inside it the Google fonts can't be fetched (recipes' `AGENTS.md`); then the batch's preview build |
-| Every PR | the diff, screenshots and PR text hold only fictional people (R45) |
-| A PR with new tables, use cases or access rules | a Whiteboard board, per the root `AGENTS.md` |
+| When                                               | Check                                                                                                                                                                                                                                 |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Every change                                       | `bun check --filter=community-game-library && bun ts --filter=community-game-library`                                                                                                                                                 |
+| Every change                                       | `bun run dead-code`                                                                                                                                                                                                                   |
+| A unit with tests                                  | its test files from the app folder, then `bun run test --filter=community-game-library`                                                                                                                                               |
+| A unit with screens                                | each screen at 390 px with the cast's data, beside its board; again at 768 and 1280 px (KTD14); new touch targets at least 44 px                                                                                                      |
+| A schema change (U3, or a unit whose task says so) | `db:generate`, the SQL read, applied to the test project (KTD1's standing OK); on production with his OK at that moment, before the merge, which `scripts/require-migrations.ts` enforces (KTD1)                                      |
+| U1, U2, U23, and any config change                 | the build: `bun run build --filter=community-game-library` outside the sandbox, with placeholder auth values on the command, since inside it the Google fonts can't be fetched (recipes' `AGENTS.md`); then the batch's preview build |
+| Every PR                                           | the diff, screenshots and PR text hold only fictional people (R45)                                                                                                                                                                    |
+| A PR with new tables, use cases or access rules    | a Whiteboard board, per the root `AGENTS.md`                                                                                                                                                                                          |
 
 ### Definition of done
 
 **The whole build**
+
 - Every requirement holds as revised, apart from the dropped and deferred ones.
 - AE1 to AE10 pass as tests.
 - KTD2's cold open is measured on production and meets the target.
@@ -650,6 +663,7 @@ Batches run one after another in one worktree (KTD20; revised 2026-11-20, when B
 - Every task for the build in Hector's tracker is done.
 
 **Each unit**
+
 - Its task's acceptance criteria are checked off.
 - Its screens match their boards at 390 px, and work at 768 and 1280 px.
 - Every notice its changes cause is written, and every page they change is revalidated.

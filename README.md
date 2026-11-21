@@ -14,6 +14,7 @@ Personal monorepo for Hector Gonzalez's apps and shared packages. Turborepo + Bu
 | [`stash`](./apps/stash) | Stash/bookmark app (auth + DB) | — | Next.js 16, Neon Postgres, Drizzle, Neon Auth, full clean architecture |
 | [`hectors-tools`](./apps/hectors-tools) | Catalog of small AI and web tools | — | Next.js 16, AI SDK via the Vercel AI Gateway, clean architecture + DI, no DB or auth yet |
 | [`job-search`](./apps/job-search) | Private job search workspace (auth + DB), kept current by its owner and an AI agent | — | Next.js 16, Neon Postgres, Drizzle, Neon Auth, clean architecture |
+| [`community-game-library`](./apps/community-game-library) | A circle of friends' board games: who owns what, loans with due dates, game nights (auth + DB) | — | Next.js 16, Neon Postgres, Drizzle, Neon Auth, Neon Object Storage, clean architecture |
 
 ## Packages
 

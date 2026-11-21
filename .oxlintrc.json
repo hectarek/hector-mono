@@ -46,6 +46,7 @@
     },
     {
       "files": [
+        "apps/community-game-library/**",
         "apps/hector-portfolio/**",
         "apps/hectors-recipes/**",
         "apps/hectors-tools/**",
@@ -82,7 +83,8 @@
         "apps/stash/src/entities/**",
         "apps/hectors-recipes/src/entities/**",
         "apps/hectors-tools/src/entities/**",
-        "apps/job-search/src/entities/**"
+        "apps/job-search/src/entities/**",
+        "apps/community-game-library/src/entities/**"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -112,7 +114,8 @@
         "apps/stash/src/application/**",
         "apps/hectors-recipes/src/application/**",
         "apps/hectors-tools/src/application/**",
-        "apps/job-search/src/application/**"
+        "apps/job-search/src/application/**",
+        "apps/community-game-library/src/application/**"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -142,7 +145,8 @@
         "apps/stash/src/interface-adapters/**",
         "apps/hectors-recipes/src/interface-adapters/**",
         "apps/hectors-tools/src/interface-adapters/**",
-        "apps/job-search/src/interface-adapters/**"
+        "apps/job-search/src/interface-adapters/**",
+        "apps/community-game-library/src/interface-adapters/**"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -172,7 +176,8 @@
         "apps/stash/src/infrastructure/**",
         "apps/hectors-recipes/src/infrastructure/**",
         "apps/hectors-tools/src/infrastructure/**",
-        "apps/job-search/src/infrastructure/**"
+        "apps/job-search/src/infrastructure/**",
+        "apps/community-game-library/src/infrastructure/**"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -209,7 +214,9 @@
         "apps/hectors-tools/app/**",
         "apps/hectors-tools/proxy.ts",
         "apps/job-search/app/**",
-        "apps/job-search/proxy.ts"
+        "apps/job-search/proxy.ts",
+        "apps/community-game-library/app/**",
+        "apps/community-game-library/proxy.ts"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -244,7 +251,9 @@
         "apps/hectors-tools/app/(auth)/auth/**",
         "apps/hectors-tools/app/(api)/api/auth/**",
         "apps/job-search/app/(auth)/auth/**",
-        "apps/job-search/app/(api)/api/auth/**"
+        "apps/job-search/app/(api)/api/auth/**",
+        "apps/community-game-library/app/(auth)/auth/**",
+        "apps/community-game-library/app/(api)/api/auth/**"
       ],
       "rules": {
         "no-restricted-imports": [

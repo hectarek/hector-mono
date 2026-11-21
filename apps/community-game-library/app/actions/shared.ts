@@ -1,0 +1,111 @@
+import { getInjection } from "@/di/container";
+import type { DI_RETURN_TYPES } from "@/di/types";
+import {
+  InputParseError,
+  NotFoundError,
+  UnauthenticatedError,
+  UnauthorizedError,
+} from "@/src/entities/errors/common";
+import { loggable } from "@/src/entities/errors/loggable";
+
+// Helpers for app/actions/*: not a "use server" module, so nothing here is callable from the client.
+
+export type ActionState = {
+  error?: string;
+  message?: string;
+  // Validation messages by form field name, for forms that show them under each field.
+  fields?: Partial<Record<string, string>>;
+} | null;
+
+export function actionLogger(op: string): DI_RETURN_TYPES["ILoggerService"] {
+  return getInjection("ILoggerService").child({ layer: "action", op });
+}
+
+export function text(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
+// Fields as the forms label them, in the words of each form's board. Anything not listed (hidden
+// ids) is never named: the person can't see those fields, so a code name would only confuse.
+// Empty until the first form (U5): each form's fields join it.
+const FIELD_LABELS: Record<string, string> = {};
+
+type Issue = { path: PropertyKey[]; message: string };
+
+// Controllers attach the Zod error as the cause (actions can attach the same shape).
+function issuesOf(err: InputParseError): Issue[] {
+  const cause = err.cause;
+  return cause && typeof cause === "object" && "issues" in cause
+    ? (cause as { issues: Issue[] }).issues
+    : [];
+}
+
+// The nearest field in an issue's path that the form shows the person.
+function fieldOf(issue: Issue): string | undefined {
+  return [...issue.path]
+    .reverse()
+    .find(
+      (part): part is string =>
+        typeof part === "string" && part in FIELD_LABELS,
+    );
+}
+
+// The first issue, prefixed with its field's label unless the message already names it
+// ("Name is required", not "Name: Name is required").
+function describeInputError(err: InputParseError): string {
+  const [issue] = issuesOf(err);
+  if (!issue) {
+    return err.message;
+  }
+  const field = fieldOf(issue);
+  const label = field ? FIELD_LABELS[field] : undefined;
+  const named =
+    label &&
+    issue.message.toLowerCase().includes(label.toLowerCase().replace(/s$/, ""));
+  return label && !named ? `${label}: ${issue.message}` : issue.message;
+}
+
+// Each field's first message, to show under it.
+function fieldErrors(
+  err: InputParseError,
+): Partial<Record<string, string>> | undefined {
+  const fields: Partial<Record<string, string>> = {};
+  for (const issue of issuesOf(err)) {
+    const field = fieldOf(issue);
+    if (field && !fields[field]) {
+      fields[field] = issue.message;
+    }
+  }
+  return Object.keys(fields).length ? fields : undefined;
+}
+
+// What the person is told, and what the logs keep: an error's class and code, never its message
+// or a field's value (docs/build-plan.md KTD1).
+export function toActionError(
+  err: unknown,
+  logger: DI_RETURN_TYPES["ILoggerService"],
+  fallback: string,
+): ActionState {
+  if (err instanceof InputParseError) {
+    logger.warn("Input validation failed", loggable(err));
+    const fields = fieldErrors(err);
+    return fields
+      ? { error: describeInputError(err), fields }
+      : { error: describeInputError(err) };
+  }
+  if (err instanceof UnauthenticatedError) {
+    logger.warn("Unauthenticated attempt", loggable(err));
+    return { error: "Your session expired. Sign in again." };
+  }
+  if (err instanceof UnauthorizedError || err instanceof NotFoundError) {
+    logger.warn("Denied", loggable(err));
+    return { error: err.message };
+  }
+  logger.error("Unexpected failure", loggable(err));
+  return { error: fallback };
+}
