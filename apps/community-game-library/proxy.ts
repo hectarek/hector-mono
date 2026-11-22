@@ -4,6 +4,10 @@ import { safeRedirect } from "@/app/_lib/safe-redirect";
 // Where signed-out visitors start: the welcome screen, which leads to sign-up or sign-in.
 const WELCOME_PATH = "/welcome";
 
+// Pages that open signed out too (KTD3, KTD18): a friend link shows A3, which names nobody, and
+// makes the two friends once its visitor is in.
+const OPEN_SIGNED_OUT = [/^\/f\/[^/]+\/?$/];
+
 // Primary session cookie set by @neondatabase/auth (Better Auth under the hood), and its
 // signed copy, kept a day (lib/auth/server.ts). See: node_modules/@neondatabase/auth/dist/server-*.mjs
 const SESSION_COOKIE = "__Secure-neon-auth.session_token";
@@ -34,7 +38,9 @@ export default async function proxy(
     return signedIn ? pastWelcome(request) : NextResponse.next();
   }
   if (!signedIn) {
-    return toWelcome(request);
+    return OPEN_SIGNED_OUT.some((path) => path.test(request.nextUrl.pathname))
+      ? NextResponse.next()
+      : toWelcome(request);
   }
   if (!request.cookies.has(SESSION_DATA_COOKIE)) {
     return refreshSessionCache(request);

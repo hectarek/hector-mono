@@ -1,4 +1,5 @@
-import { and, asc, eq, or } from "drizzle-orm";
+import { and, asc, eq, ne, notExists, or } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { friendships } from "@/db/schema";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -50,19 +51,76 @@ export class FriendshipsRepository
     }
   }
 
+  async getSince(
+    userId: string,
+    friendUserId: string,
+    tx?: ITransaction,
+  ): Promise<Date | undefined> {
+    try {
+      const [row] = await this.getDbContext(tx)
+        .select({ createdAt: friendships.createdAt })
+        .from(friendships)
+        .where(oneWay(userId, friendUserId));
+      return row?.createdAt;
+    } catch (err) {
+      this.handleError(err, "getSince", { userId, friendUserId });
+    }
+  }
+
+  async listFriendsOfFriends(
+    userId: string,
+    tx?: ITransaction,
+  ): Promise<{ userId: string; viaUserId: string }[]> {
+    const theirs = alias(friendships, "theirs");
+    const mine = alias(friendships, "mine");
+    try {
+      const db = this.getDbContext(tx);
+      return await db
+        .select({
+          userId: theirs.friendUserId,
+          viaUserId: friendships.friendUserId,
+        })
+        .from(friendships)
+        .innerJoin(theirs, eq(theirs.userId, friendships.friendUserId))
+        .where(
+          and(
+            eq(friendships.userId, userId),
+            ne(theirs.friendUserId, userId),
+            notExists(
+              db
+                .select({ userId: mine.userId })
+                .from(mine)
+                .where(
+                  and(
+                    eq(mine.userId, userId),
+                    eq(mine.friendUserId, theirs.friendUserId),
+                  ),
+                ),
+            ),
+          ),
+        )
+        .orderBy(asc(theirs.friendUserId), asc(friendships.friendUserId));
+    } catch (err) {
+      this.handleError(err, "listFriendsOfFriends", { userId });
+    }
+  }
+
   // Both rows in one statement, so they land together. The table's check refuses a friendship
   // with oneself.
   async add(
-    userId: string,
-    friendUserId: string,
+    {
+      userId,
+      friendUserId,
+      createdAt,
+    }: { userId: string; friendUserId: string; createdAt?: Date },
     tx?: ITransaction,
   ): Promise<void> {
     try {
       await this.getDbContext(tx)
         .insert(friendships)
         .values([
-          { userId, friendUserId },
-          { userId: friendUserId, friendUserId: userId },
+          { userId, friendUserId, createdAt },
+          { userId: friendUserId, friendUserId: userId, createdAt },
         ])
         .onConflictDoNothing();
     } catch (err) {

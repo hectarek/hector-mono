@@ -113,12 +113,19 @@ describe("seed", () => {
       "  Profiles: 9 to write, 0 already there",
       "  Settings: 9 to write, 0 already there",
       "  Friendships: 18 to write, 0 already there",
+      "  Friend requests: 2 to write, 0 already there",
       "  Games: 13 to write, 0 already there",
       "  Copies: 11 to write, 0 already there",
       "  Expansions in boxes: 2 to write, 0 already there",
       "  Loans: 15 to write, 0 already there",
     ]);
-    for (const table of ["user_profiles", "friendships", "games", "loans"]) {
+    for (const table of [
+      "user_profiles",
+      "friendships",
+      "friend_requests",
+      "games",
+      "loans",
+    ]) {
       expect(await count(table)).toBe(0);
     }
   });
@@ -138,6 +145,12 @@ describe("seed", () => {
     // Both rows of each.
     expect(await count("friendships")).toBe(36);
     expect(await count("friendships", `user_id = '${YOURS}'`)).toBe(5);
+    // The circle's 15 friendships since July, as E3 dates them, and the friends of friends' 3
+    // before.
+    expect(
+      await count("friendships", "created_at = '2026-07-11T23:00:00Z'"),
+    ).toBe(30);
+    expect(await count("friend_requests")).toBe(2);
     expect(await count("user_games", `user_id = '${YOURS}'`)).toBe(4);
     expect(await count("user_games", `user_id = '${ALICES}'`)).toBe(2);
     expect(await count("loans", `borrower_user_id = '${YOURS}'`)).toBe(6);
@@ -145,10 +158,11 @@ describe("seed", () => {
 
     const again = scriptedTerminal();
     expect(await seed(args, again)).toBe(0);
-    expect(again.lines.slice(-7)).toEqual([
+    expect(again.lines.slice(-8)).toEqual([
       "  Profiles: 0 written, 9 already there",
       "  Settings: 0 written, 9 already there",
       "  Friendships: 0 written, 18 already there",
+      "  Friend requests: 0 written, 2 already there",
       "  Games: 0 written, 13 already there",
       "  Copies: 0 written, 11 already there",
       "  Expansions in boxes: 0 written, 2 already there",

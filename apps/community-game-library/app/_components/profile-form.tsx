@@ -44,6 +44,7 @@ export function ProfileForm({
   photoUrl,
   removePhoto,
   taken,
+  next = mode === "edit" ? "/you" : "/start/home-screen",
 }: {
   mode: "start" | "edit";
   action: ProfileAction;
@@ -53,6 +54,8 @@ export function ProfileForm({
   removePhoto?: () => Promise<ActionState>;
   // The friends' pieces, "Taken by your friends"; nothing draws when there are none.
   taken: NameAndPiece[];
+  // Where the form goes once saved: You, or setting up's next step (A5 after a friend link).
+  next?: string;
 }) {
   const router = useRouter();
   const form = useRef<HTMLFormElement>(null);
@@ -82,9 +85,9 @@ export function ProfileForm({
   useEffect(() => {
     if (state?.message) {
       if (mode === "edit") notify(state.message);
-      router.push(mode === "edit" ? "/you" : "/start/home-screen");
+      router.push(next);
     }
-  }, [state, mode, router]);
+  }, [state, mode, router, next]);
 
   async function takePhotoAway() {
     const error = removePhoto ? await callAction(removePhoto) : undefined;

@@ -511,7 +511,7 @@ apps/community-game-library/
                                     # icons, no-connection, page-column, sheet (U2);
                                     # by area: game-row, copy-row, copy-state, game-video, i-own-it, in-my-box,
                                     # saved-switch, library-list, library-controls, filter-sheet, sort-sheet, game-form,
-                                    # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
+                                    # loan-row, loan-track, night-row, attendee-list, friend-row, what-its-for (U10), notice-row,
                                     # piece-picker, profile-form
     _lib/                           # current-user, auth-paths, safe-redirect, call-action, notify, notice-text,
                                     # notice-text/ (one file per area), changed-lines, share,
@@ -573,9 +573,9 @@ Use cases by area, each a file named for what it does (`request-loan.use-case.ts
 - **copies:** add-user-game, update-user-game, put-in-box, set-lending, remove-user-game, set-pass-along-for-all, list-my-library, list-library, get-user-game (U7 saves a copy's expansions in update-user-game, with its condition, since B7's one Save covers both; put-in-box is search's In my box, in place of set-user-game-expansions)
 - **suggestions:** suggest-game, list-suggestions, list-answered-suggestions, get-suggestion (G2's read, U9), answer-suggestion, add-game, update-game, find-games-to-edit, get-game-to-edit (G4's read, U9)
 - **profile:** create-profile, get-account-state, get-profile, list-taken-pieces, remove-photo, set-photo, update-notice-settings, update-profile
-- **friends:** require-friend, get-friend-link, make-friend-link, use-friend-link, list-friends, get-friend, send-friend-request, answer-friend-request, cancel-friend-request, unfriend, list-people-you-may-know
+- **friends:** require-friend, get-friend-link, make-friend-link, check-friend-link (A3's read, signed out), open-friend-link, list-friends, get-friend, send-friend-request, answer-friend-request, cancel-friend-request, unfriend, list-people-you-may-know; people-you-may-know.ts, the read E1 and A5 share (U10, which renamed use-friend-link to open-friend-link: Biome reads a name starting with `use` as a React hook, revised 2026-11-22)
 - **loans:** request-loan, withdraw-request, answer-request, remove-from-line, cancel-loan, confirm-pick-up, give-back, confirm-return, ask-more-time, answer-more-time, change-due-date, call-back, pass-along, confirm-pass-along, take-back-pass-along, record-loan, list-loans, get-loan, list-past-loans, get-copy-history
-- **nights:** can-see-night, create-night, update-night, cancel-night, invite-to-night, make-night-link, use-night-link, answer-night, remove-from-waitlist, add-game-to-night, remove-game-from-night, vote, list-nights, list-past-nights, get-night, what-to-play, split-tables
+- **nights:** can-see-night, create-night, update-night, cancel-night, invite-to-night, make-night-link, open-night-link (renamed from use-night-link with U10's open-friend-link), answer-night, remove-from-waitlist, add-game-to-night, remove-game-from-night, vote, list-nights, list-past-nights, get-night, what-to-play, split-tables
 - **notices:** list-inbox, mark-read, get-tab-counts
 - **account:** list-what-ends, delete-account
 - **admin:** require-admin, remove-account

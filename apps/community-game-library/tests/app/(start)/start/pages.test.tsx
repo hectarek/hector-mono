@@ -20,7 +20,9 @@ describe("A4, the profile step", () => {
   });
 
   it("is step 1 of 3, with the name Neon Auth has, and the piece to pick", async () => {
-    const view = render(await ProfileStepPage());
+    const view = render(
+      await ProfileStepPage({ searchParams: Promise.resolve({}) }),
+    );
     expect(view.getByText("Step 1 of 3")).toBeTruthy();
     expect(view.getByRole("heading", { level: 1 }).textContent).toBe(
       "Set up your profile",
@@ -36,12 +38,16 @@ describe("A4, the profile step", () => {
 
   it("sends a member who has a profile on to the app", async () => {
     await signInAsMember();
-    expect(await wentTo(ProfileStepPage())).toBe("/");
+    expect(
+      await wentTo(ProfileStepPage({ searchParams: Promise.resolve({}) })),
+    ).toBe("/");
   });
 
   it("sends a signed-out visit to the welcome page", async () => {
     nextState.userId = undefined;
-    expect(await wentTo(ProfileStepPage())).toBe("/welcome");
+    expect(
+      await wentTo(ProfileStepPage({ searchParams: Promise.resolve({}) })),
+    ).toBe("/welcome");
   });
 });
 

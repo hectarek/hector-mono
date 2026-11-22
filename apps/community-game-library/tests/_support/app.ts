@@ -8,6 +8,8 @@ import {
   notices as noticesTable,
   userGames as userGamesTable,
 } from "@/db/schema";
+import type { IFriendLinksRepository } from "@/src/application/repositories/friend-links.repository.interface";
+import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { IGameSuggestionsRepository } from "@/src/application/repositories/game-suggestions.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
@@ -30,7 +32,18 @@ import { removeUserGameUseCase } from "@/src/application/use-cases/copies/remove
 import { setLendingUseCase } from "@/src/application/use-cases/copies/set-lending.use-case";
 import { setPassAlongForAllUseCase } from "@/src/application/use-cases/copies/set-pass-along-for-all.use-case";
 import { updateUserGameUseCase } from "@/src/application/use-cases/copies/update-user-game.use-case";
+import { answerFriendRequestUseCase } from "@/src/application/use-cases/friends/answer-friend-request.use-case";
+import { cancelFriendRequestUseCase } from "@/src/application/use-cases/friends/cancel-friend-request.use-case";
+import { checkFriendLinkUseCase } from "@/src/application/use-cases/friends/check-friend-link.use-case";
+import { getFriendUseCase } from "@/src/application/use-cases/friends/get-friend.use-case";
+import { getFriendLinkUseCase } from "@/src/application/use-cases/friends/get-friend-link.use-case";
+import { listFriendsUseCase } from "@/src/application/use-cases/friends/list-friends.use-case";
+import { listPeopleYouMayKnowUseCase } from "@/src/application/use-cases/friends/list-people-you-may-know.use-case";
+import { makeFriendLinkUseCase } from "@/src/application/use-cases/friends/make-friend-link.use-case";
+import { openFriendLinkUseCase } from "@/src/application/use-cases/friends/open-friend-link.use-case";
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
+import { sendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
+import { unfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
 import { createProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
 import { getAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
 import { getProfileUseCase } from "@/src/application/use-cases/profile/get-profile.use-case";
@@ -49,6 +62,10 @@ import { suggestGameUseCase } from "@/src/application/use-cases/suggestions/sugg
 import { updateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
 import type { Game } from "@/src/entities/models/game.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
+import { FriendLinksRepository } from "@/src/infrastructure/repositories/friend-links.repository";
+import { MockFriendLinksRepository } from "@/src/infrastructure/repositories/friend-links.repository.mock";
+import { FriendRequestsRepository } from "@/src/infrastructure/repositories/friend-requests.repository";
+import { MockFriendRequestsRepository } from "@/src/infrastructure/repositories/friend-requests.repository.mock";
 import { FriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository";
 import { MockFriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository.mock";
 import { GameSuggestionsRepository } from "@/src/infrastructure/repositories/game-suggestions.repository";
@@ -80,6 +97,8 @@ import {
 import { resetDatabase, sql, testDb } from "@/tests/_support/database";
 
 type Repositories = {
+  friendLinks: IFriendLinksRepository;
+  friendRequests: IFriendRequestsRepository;
   friendships: IFriendshipsRepository;
   gameSuggestions: IGameSuggestionsRepository;
   games: IGamesRepository;
@@ -93,14 +112,18 @@ type Repositories = {
 };
 
 function mockRepositories(): Repositories {
-  // The copies' mock reads friendships as the real repository's join does.
+  // The copies' mock reads friendships as the real repository's join does, and the requests'
+  // mock takes a request's notice with it, as the table's cascade does.
   const friendships = new MockFriendshipsRepository();
+  const notices = new MockNoticesRepository();
   return {
+    friendLinks: new MockFriendLinksRepository(),
+    friendRequests: new MockFriendRequestsRepository(notices),
     friendships,
     gameSuggestions: new MockGameSuggestionsRepository(),
     games: new MockGamesRepository(),
     loans: new MockLoansRepository(),
-    notices: new MockNoticesRepository(),
+    notices,
     removedUsers: new MockRemovedUsersRepository(),
     transactions: new MockTransactionManagerService(),
     userGames: new MockUserGamesRepository(friendships),
@@ -113,6 +136,8 @@ function mockRepositories(): Repositories {
 export function postgresRepositories(): Repositories {
   const log = new MockLoggerService();
   return {
+    friendLinks: new FriendLinksRepository(log),
+    friendRequests: new FriendRequestsRepository(log),
     friendships: new FriendshipsRepository(log),
     gameSuggestions: new GameSuggestionsRepository(log),
     games: new GamesRepository(log),
@@ -161,6 +186,8 @@ export function describeEachBackend(name: string, fn: () => void): void {
 
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
   const {
+    friendLinks,
+    friendRequests,
     friendships,
     gameSuggestions,
     games,
@@ -303,6 +330,64 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
 
     requireFriend: (viewerId: string, otherUserId: string) =>
       requireFriend(friendships, viewerId, otherUserId),
+
+    // Friends (U10)
+    getFriendLink: getFriendLinkUseCase(friendLinks, transactions, log),
+    makeFriendLink: makeFriendLinkUseCase(friendLinks, transactions, log),
+    checkFriendLink: checkFriendLinkUseCase(friendLinks),
+    openFriendLink: openFriendLinkUseCase(
+      friendLinks,
+      friendships,
+      friendRequests,
+      userProfiles,
+      transactions,
+      log,
+    ),
+    listFriends: listFriendsUseCase(
+      friendships,
+      friendRequests,
+      userProfiles,
+      userGames,
+    ),
+    listPeopleYouMayKnow: listPeopleYouMayKnowUseCase(
+      friendships,
+      friendRequests,
+      userProfiles,
+    ),
+    getFriend: getFriendUseCase(
+      friendships,
+      userProfiles,
+      userGames,
+      games,
+      loans,
+      storage,
+    ),
+    sendFriendRequest: sendFriendRequestUseCase(
+      friendships,
+      friendRequests,
+      notices,
+      transactions,
+      log,
+    ),
+    answerFriendRequest: answerFriendRequestUseCase(
+      friendships,
+      friendRequests,
+      transactions,
+      log,
+    ),
+    cancelFriendRequest: cancelFriendRequestUseCase(
+      friendRequests,
+      transactions,
+      log,
+    ),
+    unfriend: unfriendUseCase(
+      friendships,
+      friendRequests,
+      userGames,
+      loans,
+      transactions,
+      log,
+    ),
 
     // Fixtures
 

@@ -4,10 +4,9 @@ import { Skeleton } from "@repo/ui/components/skeleton";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { connection } from "next/server";
-import { DicePair } from "@/app/_components/dice";
 import { CopyLinkButton } from "@/app/_components/open-in-browser";
-import { Piece } from "@/app/_components/piece";
 import { Steps } from "@/app/_components/steps";
+import { WhatItsFor } from "@/app/_components/what-its-for";
 import { safeRedirect } from "@/app/_lib/safe-redirect";
 import { inAppBrowserOf } from "@/src/entities/in-app-browser";
 
@@ -67,51 +66,7 @@ export function Welcome({ ways }: { ways: React.ReactNode }) {
         </p>
       </div>
 
-      <ul className="mt-4 flex flex-col rounded-lg border-2 border-foreground bg-card *:border-dashed *:border-foreground *:not-first:border-t-2">
-        <li className="flex items-center gap-3.5 p-3.5">
-          <span
-            aria-hidden="true"
-            className="flex h-11 w-21 shrink-0 items-end justify-center gap-1"
-          >
-            <Piece shape="house" color="brick" size={24} />
-            <Piece shape="house" color="ocean" size={24} />
-            <Piece shape="pawn" color="mustard" size={24} />
-          </span>
-          <span className="flex-1 text-15 leading-snug font-semibold">
-            See what your friends own.
-          </span>
-        </li>
-        <li className="flex items-center gap-3.5 p-3.5">
-          <span
-            aria-hidden="true"
-            className="flex w-21 shrink-0 flex-col gap-0.5"
-          >
-            <span className="flex">
-              <span className="flex flex-1 justify-center">
-                <Piece shape="pawn" color="mustard" size={16} />
-              </span>
-              <span className="flex-3" />
-            </span>
-            <span className="flex">
-              <span className="h-4 flex-1 border-2 border-foreground bg-secondary" />
-              <span className="h-4 flex-1 border-2 border-l-0 border-foreground bg-secondary" />
-              <span className="h-4 flex-1 border-2 border-l-0 border-foreground bg-secondary" />
-              <span className="h-4 flex-1 border-2 border-l-0 border-foreground bg-destructive" />
-            </span>
-          </span>
-          <span className="flex-1 text-15 leading-snug font-semibold">
-            Borrow a game and know when it’s due.
-          </span>
-        </li>
-        <li className="flex items-center gap-3.5 p-3.5">
-          <span className="flex w-21 shrink-0 justify-center">
-            <DicePair onBone />
-          </span>
-          <span className="flex-1 text-15 leading-snug font-semibold">
-            Plan a game night and pick what to play.
-          </span>
-        </li>
-      </ul>
+      <WhatItsFor />
 
       <div className="mt-3 flex flex-col gap-2.5">{ways}</div>
 
@@ -133,8 +88,8 @@ export function WaysInPlaceholder() {
 }
 
 // A9: Google refuses to sign in inside another app's browser, and the home-screen step is missing
-// there, so this asks for the phone's own browser.
-function OpenInBrowser() {
+// there, so this asks for the phone's own browser. A friend link shows it too.
+export function OpenInBrowser() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-4 pb-6">
       <p className="font-heading text-xl leading-none font-bold uppercase">

@@ -67,4 +67,11 @@ export class MockLoansRepository implements ILoansRepository {
       .map(([userGameId, count]) => ({ userGameId, count }))
       .sort((a, b) => compare(a.userGameId, b.userGameId));
   }
+
+  async setStatus(loanId: string, status: LoanStatus): Promise<void> {
+    const loan = this.rows.find((row) => row.id === loanId);
+    if (loan) {
+      Object.assign(loan, { status, updatedAt: new Date() });
+    }
+  }
 }

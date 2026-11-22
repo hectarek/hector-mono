@@ -1,8 +1,10 @@
+import type { LoanStatus } from "@/src/entities/loan";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 // Loans of copies (docs/data-model.md, loans), read by copy, for copies the caller may already
-// see. src/entities/loan.ts turns them into a copy's state and line. Batch 4 adds the writes.
+// see. src/entities/loan.ts turns them into a copy's state and line. U10 adds the first write,
+// for unfriending; Batch 4 adds the rest.
 export interface ILoansRepository {
   // Each copy's open loans, from the request until it ends ('requested' to 'passing'), oldest
   // first.
@@ -25,4 +27,11 @@ export interface ILoansRepository {
     userGameIds: readonly string[],
     tx?: ITransaction,
   ): Promise<{ userGameId: string; count: number }[]>;
+  // A move that changes only the status, such as a withdrawal or a cancellation, written after
+  // the use case has locked the copy and checked the move with canMove (KTD6).
+  setStatus(
+    loanId: string,
+    status: LoanStatus,
+    tx: ITransaction,
+  ): Promise<void>;
 }

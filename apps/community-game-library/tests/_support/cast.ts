@@ -7,6 +7,7 @@
 // (friend requests, nights, notices) adds it here with its writes, and the seed picks it up.
 import { inArray } from "drizzle-orm";
 import { games, loans, userGameExpansions, userGames } from "@/db/schema";
+import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
@@ -115,6 +116,15 @@ const FRIENDSHIPS: [CastName, CastName][] = [
   ["alice", "mei"],
   ["alice", "dev"],
   ["sam", "noor"],
+];
+// When they became friends: the circle in July, as E3's "Friends since Jul 2026" has it, and the
+// friends of friends in the spring.
+const CIRCLE_SINCE = "2026-07-11T19:00:00-04:00";
+const OTHERS_SINCE = "2026-03-14T15:00:00-04:00";
+// Mei asked to be your friend, and you asked Dev, Alice's friends both (E1).
+const FRIEND_REQUESTS: { from: CastName; to: CastName }[] = [
+  { from: "you", to: "dev" },
+  { from: "mei", to: "you" },
 ];
 
 type GameFacts = Pick<
@@ -655,10 +665,19 @@ export function castRows(accounts: Partial<Record<CastName, string>> = {}) {
         defaultPassAlong: PEOPLE[name].defaultPassAlong ?? false,
       }),
     ),
-    friendships: FRIENDSHIPS.map(([one, other]): [string, string] => [
-      userIds[one],
-      userIds[other],
-    ]),
+    friendships: FRIENDSHIPS.map(([one, other]) => ({
+      userId: userIds[one],
+      friendUserId: userIds[other],
+      createdAt: new Date(
+        CIRCLE.includes(one) && CIRCLE.includes(other)
+          ? CIRCLE_SINCE
+          : OTHERS_SINCE,
+      ),
+    })),
+    friendRequests: FRIEND_REQUESTS.map(({ from, to }) => ({
+      createdBy: userIds[from],
+      recipientUserId: userIds[to],
+    })),
     // Base games before their expansions.
     games: [
       ...Object.values<CastGame>(GAMES).map((game) => gameRow(game, null)),
@@ -733,10 +752,11 @@ type PeopleRepositories = {
   userProfiles: IUserProfilesRepository;
   userSettings: IUserSettingsRepository;
   friendships: IFriendshipsRepository;
+  friendRequests: IFriendRequestsRepository;
 };
 
 // The cast's people through the repositories that write them, on either backend: each member's
-// profile and settings, and each friendship. What's there already stays as it is. With
+// profile and settings, each friendship, and each friend request. What's there already stays as it is. With
 // `commit: false` it only counts.
 export async function writeCastPeople(
   rows: CastRows,
@@ -744,7 +764,8 @@ export async function writeCastPeople(
   tx: ITransaction,
   { commit }: { commit: boolean },
 ): Promise<CastTally[]> {
-  const { userProfiles, userSettings, friendships } = repositories;
+  const { userProfiles, userSettings, friendships, friendRequests } =
+    repositories;
   return [
     await tally(
       "Profiles",
@@ -765,9 +786,20 @@ export async function writeCastPeople(
     await tally(
       "Friendships",
       rows.friendships,
-      ([one, other]) => friendships.areFriends(one, other, tx),
+      ({ userId, friendUserId }) =>
+        friendships.areFriends(userId, friendUserId, tx),
       (missing) =>
-        eachInTurn(missing, ([one, other]) => friendships.add(one, other, tx)),
+        eachInTurn(missing, (friendship) => friendships.add(friendship, tx)),
+      commit,
+    ),
+    await tally(
+      "Friend requests",
+      rows.friendRequests,
+      async ({ createdBy, recipientUserId }) =>
+        (await friendRequests.getBetween(createdBy, recipientUserId, tx)) !==
+        undefined,
+      (missing) =>
+        eachInTurn(missing, (request) => friendRequests.add(request, tx)),
       commit,
     ),
   ];

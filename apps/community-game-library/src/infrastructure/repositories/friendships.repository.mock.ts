@@ -2,6 +2,9 @@ import type { IFriendshipsRepository } from "@/src/application/repositories/frie
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import type { Friendship } from "@/src/entities/models/friendship.model";
 
+// Ids in code-point order, as the table's uuid order.
+const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
 export class MockFriendshipsRepository implements IFriendshipsRepository {
   private rows: Friendship[] = [];
 
@@ -15,15 +18,50 @@ export class MockFriendshipsRepository implements IFriendshipsRepository {
     return this.rows
       .filter((row) => row.userId === userId)
       .map((row) => row.friendUserId)
-      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+      .sort(compare);
   }
 
-  async add(userId: string, friendUserId: string): Promise<void> {
+  async getSince(
+    userId: string,
+    friendUserId: string,
+  ): Promise<Date | undefined> {
+    return this.rows.find(
+      (row) => row.userId === userId && row.friendUserId === friendUserId,
+    )?.createdAt;
+  }
+
+  async listFriendsOfFriends(
+    userId: string,
+  ): Promise<{ userId: string; viaUserId: string }[]> {
+    const mine = new Set(await this.listFriendIds(userId));
+    return this.rows
+      .filter(
+        (row) =>
+          mine.has(row.userId) &&
+          row.friendUserId !== userId &&
+          !mine.has(row.friendUserId),
+      )
+      .map((row) => ({ userId: row.friendUserId, viaUserId: row.userId }))
+      .sort((a, b) =>
+        a.userId === b.userId
+          ? compare(a.viaUserId, b.viaUserId)
+          : compare(a.userId, b.userId),
+      );
+  }
+
+  async add({
+    userId,
+    friendUserId,
+    createdAt = new Date(),
+  }: {
+    userId: string;
+    friendUserId: string;
+    createdAt?: Date;
+  }): Promise<void> {
     // As the table's check: a friendship is between two people.
     if (userId === friendUserId) {
       throw new DatabaseOperationError("add failed");
     }
-    const createdAt = new Date();
     for (const [one, other] of [
       [userId, friendUserId],
       [friendUserId, userId],

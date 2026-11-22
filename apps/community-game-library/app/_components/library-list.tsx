@@ -17,6 +17,7 @@ import {
   type FilterableItem,
   filterWords,
   type LibraryView,
+  type LibraryWhose,
   libraryViewSearch,
   noMatchLine,
   type OfferedFilters,
@@ -59,13 +60,15 @@ export function LibraryList({
   // The owners the owner filter offers, the member first.
   owners: NameAndPiece[];
   viewerId: string;
-  // Whose library B4's line speaks of: everyone's on All friends, yours on My library.
-  whose: "everyone" | "yours";
+  // Whose library B4's line speaks of: everyone's on All friends, yours on My library, a
+  // friend's on their page.
+  whose: LibraryWhose;
   // Whether the count line says the sort while nothing filters it: B1's does, B6's doesn't.
   sortInCount?: boolean;
-  // The page's search field and its views (All friends | My library), before the controls.
-  search: ReactNode;
-  views: ReactNode;
+  // The page's search field and its views (All friends | My library), before the controls; a
+  // friend's library (E3) has neither.
+  search?: ReactNode;
+  views?: ReactNode;
   // What sits between the controls and the count line (B6's Add a game and Lending).
   between?: ReactNode;
   empty: ReactNode;
@@ -76,8 +79,10 @@ export function LibraryList({
   return (
     <>
       <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-start">
-        <div className="md:min-w-0 md:grow md:basis-70">{search}</div>
-        <div className="md:w-65">{views}</div>
+        {search && (
+          <div className="md:min-w-0 md:grow md:basis-70">{search}</div>
+        )}
+        {views && <div className="md:w-65">{views}</div>}
         {list.total > 0 && (
           <LibraryControls
             path={path}

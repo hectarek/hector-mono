@@ -52,6 +52,11 @@ const MONTH_DAY = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   timeZone: "UTC",
 });
+const MONTH_SHORT = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: PLAN_TIME_ZONE,
+});
 const MONTH_YEAR = new Intl.DateTimeFormat("en-US", {
   month: "long",
   year: "numeric",
@@ -110,6 +115,11 @@ export function formatWhen(at: Date, now: Date): string {
 // A month, given as "YYYY-MM", by its name and year: "November 2026".
 export function formatMonth(month: string): string {
   return MONTH_YEAR.format(toUtc(`${month}-01`));
+}
+
+// The month two people became friends, short (E3): "Friends since Jul 2026".
+export function formatSince(at: Date): string {
+  return MONTH_SHORT.format(at);
 }
 
 // A day on a list's line: "today", "yesterday", then "Nov 2" (G1, G7, My library's suggestions).

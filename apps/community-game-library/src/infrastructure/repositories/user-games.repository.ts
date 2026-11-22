@@ -86,6 +86,18 @@ export class UserGamesRepository
     }
   }
 
+  async lock(id: string, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .select({ id: userGames.id })
+        .from(userGames)
+        .where(eq(userGames.id, id))
+        .for("update");
+    } catch (err) {
+      this.handleError(err, "lock", { id });
+    }
+  }
+
   async getById(id: string, tx?: ITransaction): Promise<UserGame | undefined> {
     try {
       const [copy] = await this.getDbContext(tx)
