@@ -2,7 +2,8 @@ import type { INoticesRepository } from "@/src/application/repositories/notices.
 import type { NewNotice, Notice } from "@/src/entities/models/notice.model";
 
 export class MockNoticesRepository implements INoticesRepository {
-  private readonly notices: Notice[] = [];
+  // What it was given, which tests read until U11 adds the inbox's reads.
+  readonly rows: Notice[] = [];
 
   async add(notice: NewNotice): Promise<Notice> {
     const now = new Date();
@@ -21,7 +22,7 @@ export class MockNoticesRepository implements INoticesRepository {
       createdAt: now,
       updatedAt: now,
     };
-    this.notices.push(created);
+    this.rows.push(created);
     return { ...created };
   }
 }

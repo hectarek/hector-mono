@@ -36,7 +36,7 @@ export default async function AddGamesPage({
           user.id,
         );
   // U9's suggestion page, with what was typed.
-  const suggestHref = `/my-library/suggest?title=${encodeURIComponent(search.trim())}`;
+  const suggestHref = `/my-library/suggest?title=${encodeURIComponent(search.trim())}&from=add`;
   const suggest = (
     <Button
       variant="link"

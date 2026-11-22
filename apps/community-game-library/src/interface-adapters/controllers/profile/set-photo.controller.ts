@@ -5,24 +5,10 @@ import {
   InputParseError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
-import {
-  MAX_PHOTO_BYTES,
-  PHOTO_FAILED_LINE,
-  PHOTO_TYPES,
-} from "@/src/entities/profile-photo";
+import { photoSchema } from "@/src/entities/profile-photo";
 
-// The action checks the type and size again, after the phone shrank the picture (KTD11).
-const inputSchema = z.object({
-  photo: z.object({
-    contentType: z.enum(PHOTO_TYPES, PHOTO_FAILED_LINE),
-    bytes: z
-      .instanceof(Uint8Array)
-      .refine(
-        (bytes) => bytes.byteLength > 0 && bytes.byteLength <= MAX_PHOTO_BYTES,
-        PHOTO_FAILED_LINE,
-      ),
-  }),
-});
+// The type and size are checked again, after the phone shrank the picture (KTD11).
+const inputSchema = z.object({ photo: photoSchema });
 
 export type ISetPhotoController = ReturnType<typeof setPhotoController>;
 

@@ -13,7 +13,13 @@ import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
 import { PlusIcon } from "@/app/_components/icons";
 import { LibraryList } from "@/app/_components/library-list";
-import { ListRow, RowFacts, RowName } from "@/app/_components/list-row";
+import {
+  List,
+  ListItem,
+  ListRow,
+  RowFacts,
+  RowName,
+} from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { SavedSwitch } from "@/app/_components/saved-switch";
 import { Stamp } from "@/app/_components/stamp";
@@ -28,11 +34,12 @@ import {
   parseLibraryView,
 } from "@/src/entities/library-filters";
 import { coverColorOf } from "@/src/entities/piece";
+import { formatDay } from "@/src/entities/week";
 
 // My library (B6, and A7 while it's empty): Add a game, the Lending panel's switch for every
 // copy, then each copy in the Library's one list, with its filters and sort (U8), opening the
-// copy's own page. The field searches as All friends' does (B10), the results in the list's
-// place. U9 adds the suggestions waiting on the admin.
+// copy's own page, then the member's suggestions waiting on the admin (U9; screens.md, Send a
+// suggestion). The field searches as All friends' does (B10), the results in the list's place.
 export default async function MyLibraryPage({
   searchParams,
 }: {
@@ -73,6 +80,7 @@ export default async function MyLibraryPage({
     params,
     user.id,
   );
+  const now = new Date();
   const noFriends = !library.hasFriends && (
     <Empty>
       <EmptyHeader>
@@ -163,6 +171,23 @@ export default async function MyLibraryPage({
           </ListRow>
         ))}
       </LibraryList>
+      {library.suggestions.length > 0 && (
+        <Group label="Suggested" overList>
+          <List>
+            {library.suggestions.map((suggestion) => (
+              <ListItem key={suggestion.id}>
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <RowName>{suggestion.title}</RowName>
+                  <RowFacts>
+                    suggested {formatDay(suggestion.createdAt, now)} · waiting
+                    on the admin
+                  </RowFacts>
+                </span>
+              </ListItem>
+            ))}
+          </List>
+        </Group>
+      )}
     </PageColumn>
   );
 }

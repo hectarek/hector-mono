@@ -71,6 +71,7 @@ export function createCopiesModule() {
       DI_SYMBOLS.IUserProfilesRepository,
       DI_SYMBOLS.IUserSettingsRepository,
       DI_SYMBOLS.IFriendshipsRepository,
+      DI_SYMBOLS.IGameSuggestionsRepository,
     ]);
   copiesModule
     .bind(DI_SYMBOLS.IPutInBoxUseCase)

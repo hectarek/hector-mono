@@ -1,6 +1,8 @@
+import { z } from "zod";
+
 // A member's photo (R40, KTD11): what the action accepts, after the phone has shrunk it to at
 // most 800px and under 300 KB (app/_lib/shrink-image.ts), and how long its signed address lasts.
-export const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export type PhotoType = (typeof PHOTO_TYPES)[number];
 
 export const MAX_PHOTO_BYTES = 300_000;
@@ -18,3 +20,15 @@ export const PHOTO_EXTENSIONS: Record<PhotoType, string> = {
   "image/png": "png",
   "image/webp": "webp",
 };
+
+// A photo as the action hands it on, checked again after the phone shrank it (KTD11): a profile's,
+// a suggested game's box, a game's picture.
+export const photoSchema = z.object({
+  contentType: z.enum(PHOTO_TYPES, PHOTO_FAILED_LINE),
+  bytes: z
+    .instanceof(Uint8Array)
+    .refine(
+      (bytes) => bytes.byteLength > 0 && bytes.byteLength <= MAX_PHOTO_BYTES,
+      PHOTO_FAILED_LINE,
+    ),
+});

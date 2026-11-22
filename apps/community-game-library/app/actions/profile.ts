@@ -5,10 +5,10 @@ import { getCurrentUserId } from "@/app/_lib/current-user";
 import {
   type ActionState,
   actionLogger,
+  photoOf,
   toActionError,
 } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
-import type { Photo, PhotoType } from "@/src/entities/profile-photo";
 
 // What A4 and E6 send: their fields as text, which the controller checks.
 function fieldsOf(formData: FormData) {
@@ -21,19 +21,6 @@ function fieldsOf(formData: FormData) {
     pieceShape: field("pieceShape"),
     pieceColor: field("pieceColor"),
     phone: field("phone"),
-  };
-}
-
-// The photo the form carries, if one was chosen: the shrunk picture as bytes. What type it is
-// and how big, the controller checks again.
-async function photoOf(formData: FormData): Promise<Photo | undefined> {
-  const file = formData.get("photo");
-  if (!(file instanceof File) || file.size === 0) {
-    return undefined;
-  }
-  return {
-    bytes: new Uint8Array(await file.arrayBuffer()),
-    contentType: file.type as PhotoType,
   };
 }
 

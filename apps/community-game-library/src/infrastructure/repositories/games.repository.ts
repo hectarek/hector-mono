@@ -5,9 +5,10 @@ import type {
   IGamesRepository,
 } from "@/src/application/repositories/games.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
-import type { Game } from "@/src/entities/models/game.model";
+import { DatabaseOperationError } from "@/src/entities/errors/common";
+import type { Game, GameRecord } from "@/src/entities/models/game.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
-import { SEARCH_MATCH_ABOVE } from "@/src/entities/search-title";
+import { SEARCH_MATCH_ABOVE, toSearchTitle } from "@/src/entities/search-title";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
 
 // Titles in code-point order, so the mock's order is the database's whatever its collation.
@@ -95,6 +96,37 @@ export class GamesRepository
         .orderBy(byTitle, asc(games.id));
     } catch (err) {
       this.handleError(err, "listExpansions", { baseGameId });
+    }
+  }
+
+  async add(game: GameRecord, tx: ITransaction): Promise<Game> {
+    try {
+      const [added] = await this.getDbContext(tx)
+        .insert(games)
+        .values({ ...game, searchTitle: toSearchTitle(game.title) })
+        .returning();
+      if (!added) {
+        throw new DatabaseOperationError("add failed");
+      }
+      return added;
+    } catch (err) {
+      this.handleError(err, "add");
+    }
+  }
+
+  async update(id: string, game: GameRecord, tx: ITransaction): Promise<Game> {
+    try {
+      const [updated] = await this.getDbContext(tx)
+        .update(games)
+        .set({ ...game, searchTitle: toSearchTitle(game.title) })
+        .where(eq(games.id, id))
+        .returning();
+      if (!updated) {
+        throw new DatabaseOperationError("update failed");
+      }
+      return updated;
+    } catch (err) {
+      this.handleError(err, "update", { id });
     }
   }
 }

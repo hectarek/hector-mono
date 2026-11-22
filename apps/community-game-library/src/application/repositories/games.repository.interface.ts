@@ -1,4 +1,4 @@
-import type { Game } from "@/src/entities/models/game.model";
+import type { Game, GameRecord } from "@/src/entities/models/game.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 
 // Search's two groups (R2): the games on the member's and their friends' shelves, then the rest
@@ -6,7 +6,7 @@ import type { ITransaction } from "@/src/entities/models/transaction.model";
 export type GameSearchResults = { onShelves: Game[]; inCatalog: Game[] };
 
 // The catalog (docs/data-model.md, games): base games and expansions, which every member may
-// read. U9 adds the admin's writes.
+// read, and the admin writes (U9).
 export interface IGamesRepository {
   // The games whose search title matches `searchTitle` (already through toSearchTitle) by word
   // similarity above SEARCH_MATCH_ABOVE (KTD10). Those in `shelfGameIds` come first, then the
@@ -22,4 +22,8 @@ export interface IGamesRepository {
   listByIds(ids: readonly string[], tx?: ITransaction): Promise<Game[]>;
   // A base game's expansions, by title.
   listExpansions(baseGameId: string, tx?: ITransaction): Promise<Game[]>;
+
+  // The admin's writes (G3, G4), each writing the search title with the title (KTD10).
+  add(game: GameRecord, tx: ITransaction): Promise<Game>;
+  update(id: string, game: GameRecord, tx: ITransaction): Promise<Game>;
 }

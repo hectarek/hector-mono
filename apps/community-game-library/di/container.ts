@@ -9,6 +9,7 @@ import { createLoansModule } from "@/di/modules/loans.module";
 import { createLoggerModule } from "@/di/modules/logger.module";
 import { createNoticesModule } from "@/di/modules/notices.module";
 import { createProfileModule } from "@/di/modules/profile.module";
+import { createSuggestionsModule } from "@/di/modules/suggestions.module";
 import { createTransactionModule } from "@/di/modules/transaction.module";
 import { type DI_RETURN_TYPES, DI_SYMBOLS } from "@/di/types";
 
@@ -30,6 +31,10 @@ ApplicationContainer.load(Symbol("LoansModule"), createLoansModule());
 ApplicationContainer.load(Symbol("LoggerModule"), createLoggerModule());
 ApplicationContainer.load(Symbol("NoticesModule"), createNoticesModule());
 ApplicationContainer.load(Symbol("ProfileModule"), createProfileModule());
+ApplicationContainer.load(
+  Symbol("SuggestionsModule"),
+  createSuggestionsModule(),
+);
 ApplicationContainer.load(
   Symbol("TransactionModule"),
   createTransactionModule(),

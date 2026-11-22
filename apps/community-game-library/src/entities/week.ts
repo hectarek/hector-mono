@@ -111,3 +111,23 @@ export function formatWhen(at: Date, now: Date): string {
 export function formatMonth(month: string): string {
   return MONTH_YEAR.format(toUtc(`${month}-01`));
 }
+
+// A day on a list's line: "today", "yesterday", then "Nov 2" (G1, G7, My library's suggestions).
+export function formatDay(at: Date, now: Date): string {
+  const day = todayIn(PLAN_TIME_ZONE, at);
+  const daysAgo = daysBetween(day, todayIn(PLAN_TIME_ZONE, now));
+  return daysAgo <= 0
+    ? "today"
+    : daysAgo === 1
+      ? "yesterday"
+      : formatMonthDay(day);
+}
+
+const CLOCK = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: PLAN_TIME_ZONE,
+});
+
+// A time of day, as G2 gives when a suggestion came: "9:12 AM".
+export const formatTime = (at: Date): string => CLOCK.format(at);

@@ -32,3 +32,10 @@ export const gameSchema = z.object({
   updatedAt: z.date(),
 });
 export type Game = z.infer<typeof gameSchema>;
+
+// What the admin writes of a game (G3, G4; R5): every field but those the app keeps itself, the
+// search title written with the title (KTD10).
+export type GameRecord = Omit<
+  Game,
+  "id" | "searchTitle" | "popularity" | "createdAt" | "updatedAt"
+>;

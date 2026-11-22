@@ -3,8 +3,13 @@
 // and on the real repositories (PGlite). Recipes' harness: each unit adds its repositories and
 // use cases here.
 import { beforeEach, describe } from "bun:test";
-import { games as gamesTable, userGames as userGamesTable } from "@/db/schema";
+import {
+  games as gamesTable,
+  notices as noticesTable,
+  userGames as userGamesTable,
+} from "@/db/schema";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameSuggestionsRepository } from "@/src/application/repositories/game-suggestions.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
@@ -13,6 +18,7 @@ import type { IUserGamesRepository } from "@/src/application/repositories/user-g
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
+import { requireAdmin } from "@/src/application/use-cases/admin/require-admin";
 import { getGameUseCase } from "@/src/application/use-cases/catalog/get-game.use-case";
 import { searchGamesUseCase } from "@/src/application/use-cases/catalog/search-games.use-case";
 import { addUserGameUseCase } from "@/src/application/use-cases/copies/add-user-game.use-case";
@@ -32,10 +38,21 @@ import { listTakenPiecesUseCase } from "@/src/application/use-cases/profile/list
 import { removePhotoUseCase } from "@/src/application/use-cases/profile/remove-photo.use-case";
 import { setPhotoUseCase } from "@/src/application/use-cases/profile/set-photo.use-case";
 import { updateProfileUseCase } from "@/src/application/use-cases/profile/update-profile.use-case";
+import { addGameUseCase } from "@/src/application/use-cases/suggestions/add-game.use-case";
+import { answerSuggestionUseCase } from "@/src/application/use-cases/suggestions/answer-suggestion.use-case";
+import { findGamesToEditUseCase } from "@/src/application/use-cases/suggestions/find-games-to-edit.use-case";
+import { getGameToEditUseCase } from "@/src/application/use-cases/suggestions/get-game-to-edit.use-case";
+import { getSuggestionUseCase } from "@/src/application/use-cases/suggestions/get-suggestion.use-case";
+import { listAnsweredSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-answered-suggestions.use-case";
+import { listSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-suggestions.use-case";
+import { suggestGameUseCase } from "@/src/application/use-cases/suggestions/suggest-game.use-case";
+import { updateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
 import type { Game } from "@/src/entities/models/game.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
 import { FriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository";
 import { MockFriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository.mock";
+import { GameSuggestionsRepository } from "@/src/infrastructure/repositories/game-suggestions.repository";
+import { MockGameSuggestionsRepository } from "@/src/infrastructure/repositories/game-suggestions.repository.mock";
 import { GamesRepository } from "@/src/infrastructure/repositories/games.repository";
 import { MockGamesRepository } from "@/src/infrastructure/repositories/games.repository.mock";
 import { LoansRepository } from "@/src/infrastructure/repositories/loans.repository";
@@ -55,6 +72,7 @@ import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.ser
 import { MockTransactionManagerService } from "@/src/infrastructure/services/mock-transaction-manager.service";
 import { TransactionManagerService } from "@/src/infrastructure/services/transaction-manager.service";
 import {
+  CAST,
   castRows,
   insertCastRows,
   writeCastPeople,
@@ -63,6 +81,7 @@ import { resetDatabase, sql, testDb } from "@/tests/_support/database";
 
 type Repositories = {
   friendships: IFriendshipsRepository;
+  gameSuggestions: IGameSuggestionsRepository;
   games: IGamesRepository;
   loans: ILoansRepository;
   notices: INoticesRepository;
@@ -78,6 +97,7 @@ function mockRepositories(): Repositories {
   const friendships = new MockFriendshipsRepository();
   return {
     friendships,
+    gameSuggestions: new MockGameSuggestionsRepository(),
     games: new MockGamesRepository(),
     loans: new MockLoansRepository(),
     notices: new MockNoticesRepository(),
@@ -94,6 +114,7 @@ export function postgresRepositories(): Repositories {
   const log = new MockLoggerService();
   return {
     friendships: new FriendshipsRepository(log),
+    gameSuggestions: new GameSuggestionsRepository(log),
     games: new GamesRepository(log),
     loans: new LoansRepository(log),
     notices: new NoticesRepository(log),
@@ -141,8 +162,10 @@ export function describeEachBackend(name: string, fn: () => void): void {
 export function makeApp(repos: Repositories = currentBackend.repositories()) {
   const {
     friendships,
+    gameSuggestions,
     games,
     loans,
+    notices,
     removedUsers,
     transactions,
     userGames,
@@ -151,6 +174,9 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
   } = repos;
   const storage = new MockFileStorageService();
   const log = new MockLoggerService();
+  // You is the admin, as on the canvas's E5.
+  const adminAccount = { adminUserId: CAST.people.you.id };
+  const admin = requireAdmin(adminAccount, log);
 
   return {
     repos,
@@ -213,8 +239,67 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       userProfiles,
       userSettings,
       friendships,
+      gameSuggestions,
     ),
     getUserGame: getUserGameUseCase(games, userGames, loans, userProfiles),
+
+    // Suggestions and the admin's catalog (U9)
+    suggestGame: suggestGameUseCase(
+      gameSuggestions,
+      notices,
+      storage,
+      transactions,
+      adminAccount,
+      log,
+    ),
+    listSuggestions: listSuggestionsUseCase(
+      admin,
+      gameSuggestions,
+      userProfiles,
+    ),
+    listAnsweredSuggestions: listAnsweredSuggestionsUseCase(
+      admin,
+      gameSuggestions,
+      userProfiles,
+      games,
+    ),
+    getSuggestion: getSuggestionUseCase(
+      admin,
+      gameSuggestions,
+      userProfiles,
+      games,
+    ),
+    answerSuggestion: answerSuggestionUseCase(
+      admin,
+      gameSuggestions,
+      games,
+      userGames,
+      userSettings,
+      notices,
+      transactions,
+      log,
+    ),
+    addGame: addGameUseCase(
+      admin,
+      games,
+      gameSuggestions,
+      userGames,
+      userSettings,
+      notices,
+      storage,
+      transactions,
+      log,
+    ),
+    updateGame: updateGameUseCase(admin, games, storage, transactions, log),
+    findGamesToEdit: findGamesToEditUseCase(admin, games),
+    getGameToEdit: getGameToEditUseCase(admin, games),
+    // What a member was told: the notices mock's rows, or the table's on PGlite.
+    noticesOf: async (userId: string) =>
+      notices instanceof MockNoticesRepository
+        ? notices.rows.filter((notice) => notice.userId === userId)
+        : (await testDb.select().from(noticesTable)).filter(
+            (notice) => notice.userId === userId,
+          ),
 
     requireFriend: (viewerId: string, otherUserId: string) =>
       requireFriend(friendships, viewerId, otherUserId),

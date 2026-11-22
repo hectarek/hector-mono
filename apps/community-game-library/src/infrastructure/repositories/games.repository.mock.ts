@@ -2,8 +2,9 @@ import type {
   GameSearchResults,
   IGamesRepository,
 } from "@/src/application/repositories/games.repository.interface";
-import type { Game } from "@/src/entities/models/game.model";
-import { SEARCH_MATCH_ABOVE } from "@/src/entities/search-title";
+import { DatabaseOperationError } from "@/src/entities/errors/common";
+import type { Game, GameRecord } from "@/src/entities/models/game.model";
+import { SEARCH_MATCH_ABOVE, toSearchTitle } from "@/src/entities/search-title";
 
 // pg_trgm's trigrams of a text, in order: each word (a run of letters and digits) padded with two
 // spaces in front and one behind, then every three characters of it.
@@ -91,8 +92,7 @@ const byTitle = (a: Game, b: Game) =>
   compare(a.searchTitle, b.searchTitle) || compare(a.id, b.id);
 
 export class MockGamesRepository implements IGamesRepository {
-  // The catalog its reads see. Tests put games here (makeCast, tests/_support/app.ts) until U9
-  // gives the catalog its writes.
+  // The catalog: the cast's games (makeCast, tests/_support/app.ts), and what the admin adds.
   readonly rows: Game[] = [];
 
   async search(
@@ -151,5 +151,31 @@ export class MockGamesRepository implements IGamesRepository {
       .filter((game) => game.baseGameId === baseGameId)
       .sort(byTitle)
       .map((game) => ({ ...game }));
+  }
+
+  async add(game: GameRecord): Promise<Game> {
+    const now = new Date();
+    const added: Game = {
+      ...game,
+      id: crypto.randomUUID(),
+      searchTitle: toSearchTitle(game.title),
+      popularity: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.rows.push(added);
+    return { ...added };
+  }
+
+  async update(id: string, game: GameRecord): Promise<Game> {
+    const row = this.rows.find((one) => one.id === id);
+    if (!row) {
+      throw new DatabaseOperationError("update failed");
+    }
+    Object.assign(row, game, {
+      searchTitle: toSearchTitle(game.title),
+      updatedAt: new Date(),
+    });
+    return { ...row };
   }
 }

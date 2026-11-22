@@ -10,6 +10,7 @@ import {
   UnauthorizedError,
 } from "@/src/entities/errors/common";
 import { loggable } from "@/src/entities/errors/loggable";
+import type { Photo, PhotoType } from "@/src/entities/profile-photo";
 
 // Helpers for app/actions/*: not a "use server" module, so nothing here is callable from the client.
 
@@ -26,6 +27,28 @@ export function actionLogger(op: string): DI_RETURN_TYPES["ILoggerService"] {
   return getInjection("ILoggerService").child({ layer: "action", op });
 }
 
+// The photo the form carries, if one was chosen: the shrunk picture as bytes. What type it is
+// and how big, the controller checks again.
+export async function photoOf(
+  formData: FormData,
+  name = "photo",
+): Promise<Photo | undefined> {
+  const file = formData.get(name);
+  if (!(file instanceof File) || file.size === 0) {
+    return undefined;
+  }
+  return {
+    bytes: new Uint8Array(await file.arrayBuffer()),
+    contentType: file.type as PhotoType,
+  };
+}
+
+// A form field as it was typed ("" when it's missing), for a controller to trim and check.
+export function typed(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
+}
+
 export function text(formData: FormData, key: string): string | undefined {
   const value = formData.get(key);
   if (typeof value !== "string") {
@@ -37,13 +60,32 @@ export function text(formData: FormData, key: string): string | undefined {
 
 // Fields as the forms label them, in the words of each form's board. Anything not listed (hidden
 // ids) is never named: the person can't see those fields, so a code name would only confuse.
-// Each form's fields join it (A4 and E6's: name, phone, photo; B7's: condition, conditionNote).
+// Each form's fields join it (A4 and E6's: name, phone, photo; B7's: condition, conditionNote; B9's,
+// G2's, G3's and G4's).
 const FIELD_LABELS: Record<string, string> = {
+  bestPlayers: "Plays best at",
+  categories: "Categories",
+  complexity: "Complexity",
   condition: "Condition",
   conditionNote: "Missing or damaged parts",
+  declineNote: "Reason",
+  description: "Description",
+  designers: "Designers",
+  imageUrl: "Image address",
+  maxMinutes: "Play time",
+  maxPlayers: "Players",
+  minAge: "Minimum age",
+  minMinutes: "Play time",
+  minPlayers: "Players",
   name: "Name",
   phone: "Phone",
   photo: "Photo",
+  publisher: "Publisher",
+  publishers: "Publishers",
+  sourceUrl: "Link",
+  title: "Title",
+  videoUrl: "How-to-play video",
+  year: "Year",
 };
 
 type Issue = { path: PropertyKey[]; message: string };

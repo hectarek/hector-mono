@@ -510,7 +510,7 @@ apps/community-game-library/
                                     # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy,
                                     # icons, no-connection, page-column, sheet (U2);
                                     # by area: game-row, copy-row, copy-state, game-video, i-own-it, in-my-box,
-                                    # saved-switch, library-list, library-controls, filter-sheet, sort-sheet,
+                                    # saved-switch, library-list, library-controls, filter-sheet, sort-sheet, game-form,
                                     # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
                                     # piece-picker, profile-form
     _lib/                           # current-user, auth-paths, safe-redirect, call-action, notify, notice-text,
@@ -571,7 +571,7 @@ Use cases by area, each a file named for what it does (`request-loan.use-case.ts
 
 - **catalog:** search-games, get-game, list-expansions
 - **copies:** add-user-game, update-user-game, put-in-box, set-lending, remove-user-game, set-pass-along-for-all, list-my-library, list-library, get-user-game (U7 saves a copy's expansions in update-user-game, with its condition, since B7's one Save covers both; put-in-box is search's In my box, in place of set-user-game-expansions)
-- **suggestions:** suggest-game, list-suggestions, list-answered-suggestions, answer-suggestion, add-game, update-game, find-games-to-edit
+- **suggestions:** suggest-game, list-suggestions, list-answered-suggestions, get-suggestion (G2's read, U9), answer-suggestion, add-game, update-game, find-games-to-edit, get-game-to-edit (G4's read, U9)
 - **profile:** create-profile, get-account-state, get-profile, list-taken-pieces, remove-photo, set-photo, update-notice-settings, update-profile
 - **friends:** require-friend, get-friend-link, make-friend-link, use-friend-link, list-friends, get-friend, send-friend-request, answer-friend-request, cancel-friend-request, unfriend, list-people-you-may-know
 - **loans:** request-loan, withdraw-request, answer-request, remove-from-line, cancel-loan, confirm-pick-up, give-back, confirm-return, ask-more-time, answer-more-time, change-due-date, call-back, pass-along, confirm-pass-along, take-back-pass-along, record-loan, list-loans, get-loan, list-past-loans, get-copy-history

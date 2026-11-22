@@ -1,4 +1,5 @@
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameSuggestionsRepository } from "@/src/application/repositories/game-suggestions.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
@@ -12,6 +13,7 @@ import {
   listLibrary,
 } from "@/src/entities/library-filters";
 import { copyState } from "@/src/entities/loan";
+import type { GameSuggestion } from "@/src/entities/models/game-suggestion.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
 
 export type IListMyLibraryUseCase = ReturnType<typeof listMyLibraryUseCase>;
@@ -28,6 +30,8 @@ export type MyLibrary = LibraryList<
   defaultPassAlong: boolean;
   // Before any friends, A7 says so with your friend link.
   hasFriends: boolean;
+  // Your suggestions still waiting on the admin (U9): "suggested today · waiting on the admin".
+  suggestions: GameSuggestion[];
 };
 
 // Each read waits for the one before (KTD2).
@@ -38,6 +42,7 @@ export const listMyLibraryUseCase = (
   userProfilesRepository: IUserProfilesRepository,
   userSettingsRepository: IUserSettingsRepository,
   friendshipsRepository: IFriendshipsRepository,
+  gameSuggestionsRepository: IGameSuggestionsRepository,
 ) => {
   return async (
     userId: string,
@@ -65,6 +70,7 @@ export const listMyLibraryUseCase = (
     );
     const settings = await userSettingsRepository.getByUserId(userId);
     const friendIds = await friendshipsRepository.listFriendIds(userId);
+    const suggestions = await gameSuggestionsRepository.listWaitingBy(userId);
     // Most borrowed is the one sort that needs the pick-ups, so only it reads them.
     const pickUps =
       view.sort === "most-borrowed"
@@ -109,6 +115,7 @@ export const listMyLibraryUseCase = (
       copies: copies.length,
       defaultPassAlong: settings?.defaultPassAlong ?? false,
       hasFriends: friendIds.length > 0,
+      suggestions,
     };
   };
 };

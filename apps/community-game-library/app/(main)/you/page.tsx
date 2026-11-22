@@ -8,9 +8,11 @@ import { PhoneIcon, SignOutIcon } from "@/app/_components/icons";
 import { List, ListRow } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
+import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
 import { SIGN_OUT_HREF } from "@/app/_lib/auth-paths";
 import { getInjection } from "@/di/container";
+import { UnauthorizedError } from "@/src/entities/errors/common";
 
 // E5: the member's own page, reached from the piece at the top. Its profile first, then the rows
 // the app's other pages add as they're built: My library (U7), Notices I get (U11), Admin (U9),
@@ -22,6 +24,15 @@ export default async function YouPage() {
     { userId: user.id },
     user.id,
   );
+  // The admin's row (DE-25), with the suggestions waiting: anyone else is refused, and has none.
+  const waiting = await getInjection("IListSuggestionsController")(
+    user.id,
+  ).catch((err: unknown) => {
+    if (err instanceof UnauthorizedError) {
+      return null;
+    }
+    throw err;
+  });
 
   return (
     <PageColumn
@@ -85,6 +96,25 @@ export default async function YouPage() {
               Put the app on my home screen
             </span>
           </ListRow>
+          {waiting && (
+            <ListRow
+              href="/admin"
+              stamp={<Stamp tone="navy">Admin</Stamp>}
+              aside={
+                waiting.length > 0 && (
+                  <span
+                    role="img"
+                    aria-label={`${waiting.length} waiting`}
+                    className="text-13 font-bold text-destructive"
+                  >
+                    {waiting.length}
+                  </span>
+                )
+              }
+            >
+              <span className="text-15 font-bold">Admin</span>
+            </ListRow>
+          )}
         </List>
       </Group>
 
