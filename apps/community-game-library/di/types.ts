@@ -1,7 +1,9 @@
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { IRemovedUsersRepository } from "@/src/application/repositories/removed-users.repository.interface";
+import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
@@ -12,6 +14,8 @@ import type {
   AdminAccount,
   IRequireAdmin,
 } from "@/src/application/use-cases/admin/require-admin";
+import type { IGetGameUseCase } from "@/src/application/use-cases/catalog/get-game.use-case";
+import type { ISearchGamesUseCase } from "@/src/application/use-cases/catalog/search-games.use-case";
 import type { ICreateProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
 import type { IGetAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
 import type { IGetProfileUseCase } from "@/src/application/use-cases/profile/get-profile.use-case";
@@ -19,6 +23,8 @@ import type { IListTakenPiecesUseCase } from "@/src/application/use-cases/profil
 import type { IRemovePhotoUseCase } from "@/src/application/use-cases/profile/remove-photo.use-case";
 import type { ISetPhotoUseCase } from "@/src/application/use-cases/profile/set-photo.use-case";
 import type { IUpdateProfileUseCase } from "@/src/application/use-cases/profile/update-profile.use-case";
+import type { IGetGameController } from "@/src/interface-adapters/controllers/catalog/get-game.controller";
+import type { ISearchGamesController } from "@/src/interface-adapters/controllers/catalog/search-games.controller";
 import type { ICreateProfileController } from "@/src/interface-adapters/controllers/profile/create-profile.controller";
 import type { IGetAccountStateController } from "@/src/interface-adapters/controllers/profile/get-account-state.controller";
 import type { IGetProfileController } from "@/src/interface-adapters/controllers/profile/get-profile.controller";
@@ -36,8 +42,11 @@ export const DI_SYMBOLS = {
   ICreateProfileUseCase: Symbol.for("ICreateProfileUseCase"),
   IFileStorage: Symbol.for("IFileStorage"),
   IFriendshipsRepository: Symbol.for("IFriendshipsRepository"),
+  IGamesRepository: Symbol.for("IGamesRepository"),
   IGetAccountStateController: Symbol.for("IGetAccountStateController"),
   IGetAccountStateUseCase: Symbol.for("IGetAccountStateUseCase"),
+  IGetGameController: Symbol.for("IGetGameController"),
+  IGetGameUseCase: Symbol.for("IGetGameUseCase"),
   IGetProfileController: Symbol.for("IGetProfileController"),
   IGetProfileUseCase: Symbol.for("IGetProfileUseCase"),
   IListTakenPiecesController: Symbol.for("IListTakenPiecesController"),
@@ -49,11 +58,14 @@ export const DI_SYMBOLS = {
   IRemovePhotoUseCase: Symbol.for("IRemovePhotoUseCase"),
   IRemovedUsersRepository: Symbol.for("IRemovedUsersRepository"),
   IRequireAdmin: Symbol.for("IRequireAdmin"),
+  ISearchGamesController: Symbol.for("ISearchGamesController"),
+  ISearchGamesUseCase: Symbol.for("ISearchGamesUseCase"),
   ISetPhotoController: Symbol.for("ISetPhotoController"),
   ISetPhotoUseCase: Symbol.for("ISetPhotoUseCase"),
   ITransactionManagerService: Symbol.for("ITransactionManagerService"),
   IUpdateProfileController: Symbol.for("IUpdateProfileController"),
   IUpdateProfileUseCase: Symbol.for("IUpdateProfileUseCase"),
+  IUserGamesRepository: Symbol.for("IUserGamesRepository"),
   IUserProfilesRepository: Symbol.for("IUserProfilesRepository"),
   IUserSettingsRepository: Symbol.for("IUserSettingsRepository"),
 };
@@ -65,8 +77,11 @@ export interface DI_RETURN_TYPES {
   ICreateProfileUseCase: ICreateProfileUseCase;
   IFileStorage: IFileStorage;
   IFriendshipsRepository: IFriendshipsRepository;
+  IGamesRepository: IGamesRepository;
   IGetAccountStateController: IGetAccountStateController;
   IGetAccountStateUseCase: IGetAccountStateUseCase;
+  IGetGameController: IGetGameController;
+  IGetGameUseCase: IGetGameUseCase;
   IGetProfileController: IGetProfileController;
   IGetProfileUseCase: IGetProfileUseCase;
   IListTakenPiecesController: IListTakenPiecesController;
@@ -78,11 +93,14 @@ export interface DI_RETURN_TYPES {
   IRemovePhotoUseCase: IRemovePhotoUseCase;
   IRemovedUsersRepository: IRemovedUsersRepository;
   IRequireAdmin: IRequireAdmin;
+  ISearchGamesController: ISearchGamesController;
+  ISearchGamesUseCase: ISearchGamesUseCase;
   ISetPhotoController: ISetPhotoController;
   ISetPhotoUseCase: ISetPhotoUseCase;
   ITransactionManagerService: ITransactionManagerService;
   IUpdateProfileController: IUpdateProfileController;
   IUpdateProfileUseCase: IUpdateProfileUseCase;
+  IUserGamesRepository: IUserGamesRepository;
   IUserProfilesRepository: IUserProfilesRepository;
   IUserSettingsRepository: IUserSettingsRepository;
 }

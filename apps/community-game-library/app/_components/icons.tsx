@@ -143,6 +143,16 @@ export function ShareIcon(props: IconProps) {
   );
 }
 
+// The how-to-play video's mark (B5), drawn 44px with a 1.5 stroke where it's used.
+export function PlayIcon(props: IconProps) {
+  return (
+    <LineIcon strokeWidth={1.5} roundCaps={false} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M10 8.5v7l6-3.5z" fill="currentColor" />
+    </LineIcon>
+  );
+}
+
 // A search field's mark: 16px.
 export function SearchIcon({ className }: { className?: string }) {
   return (

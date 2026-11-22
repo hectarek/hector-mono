@@ -26,3 +26,30 @@ export const PEOPLE_ONLY_COLORS = [
   "rose",
   "charcoal",
 ] as const satisfies readonly PieceColor[];
+
+// The colors a cover's token takes: the rest, without bone, the square it sits on.
+const COVER_COLORS = [
+  "brick",
+  "mustard",
+  "moss",
+  "ocean",
+  "plum",
+] as const satisfies readonly Exclude<
+  PieceColor,
+  (typeof PEOPLE_ONLY_COLORS)[number] | "bone"
+>[];
+export type CoverColor = (typeof COVER_COLORS)[number];
+
+// A game's token color, the same on every screen and every visit, since the catalog keeps none:
+// picked from its id, and an expansion takes its base game's, as B10 draws Night Tide.
+export function coverColorOf(game: {
+  id: string;
+  baseGameId: string | null;
+}): CoverColor {
+  const id = game.baseGameId ?? game.id;
+  let sum = 0;
+  for (const char of id) {
+    sum += char.charCodeAt(0);
+  }
+  return COVER_COLORS[sum % COVER_COLORS.length] ?? "mustard";
+}

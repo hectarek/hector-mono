@@ -32,8 +32,9 @@ app/
   (auth)/auth/[path]/        # Neon's forms: make an account (A2), sign in (A8); layout.tsx loads the kit
   (start)/start/             # the steps before the app: profile/ (A4), home-screen/ (A6); A5 comes with U10
   (main)/                    # the signed-in app: layout.tsx (the shell, below; account-gate.tsx), page.tsx
-                             # (the Library, its header until U6), loading.tsx (its header and skeleton);
-                             # you/ (E5) and you/edit/ (E6)
+                             # (the Library: search at ?q= since U6, with library-search.tsx), loading.tsx
+                             # (its header and skeleton); games/[id]/ (B5, B11, B13); you/ (E5) and
+                             # you/edit/ (E6)
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
   removed/                   # a removed account's only page
   _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader), back-link,
@@ -42,7 +43,8 @@ app/
                              # page-column, people-picker, photo-field, piece, seats, share-button,
                              # sheet, stamp, tab-bar, tab-count, track; action-form. U5's: auth-notice,
                              # home-screen-steps, open-in-browser (A9's Copy the link), piece-picker,
-                             # profile-form (A4 and E6), steps
+                             # profile-form (A4 and E6), steps. U6's: copy-row and copy-state (a copy and
+                             # its words, B13), game-row (GameCardRow, CatalogRow), game-video
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
                              # notify, leave-guard, changed-lines, share, shrink-image. U5's: account
                              # (getAccount and the gate), auth (the browser's auth client), auth-localization,
@@ -63,30 +65,36 @@ src/
     in-app-browser.ts        # IN_APP_BROWSERS and inAppBrowserOf: A9's list, each pattern with its source
     notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
                              # DEFAULT_NOTICES_OFF
-    piece.ts                 # PIECE_SHAPES, PIECE_COLORS, PEOPLE_ONLY_COLORS (R51)
+    piece.ts                 # PIECE_SHAPES, PIECE_COLORS, PEOPLE_ONLY_COLORS (R51); CoverColor and
+                             # coverColorOf, a game's token color
     profile-photo.ts         # what a photo may be (types, 300 KB), its signed address's hour, the
                              # "didn't upload" line
-    search-title.ts          # toSearchTitle (KTD10)
+    search-title.ts          # toSearchTitle and SEARCH_MATCH_ABOVE (KTD10)
+    game-card.ts             # gameCard: a game's card in a list from its copies' states (B1, B10)
+    game-facts.ts            # a game's facts and lines in the boards' words, only what it has (rule 14)
+    video-link.ts            # videoEmbed, recipes'
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
                              # formatDate ("Fri, Nov 20", with the year once it isn't this year),
                              # formatWeekday and formatMonthDay, its parts
   application/
     repositories/            # interfaces (U4): friendships, loans (reads), notices (add), removed-users,
-                             # user-profiles, user-settings
+                             # user-profiles, user-settings; U6: games (reads), user-games (reads)
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
+    use-cases/catalog/       # get-game, search-games (U6)
     use-cases/friends/       # require-friend (KTD4)
     use-cases/profile/       # create-profile, get-account-state, get-profile, list-taken-pieces,
                              # remove-photo, set-photo, update-profile
   interface-adapters/
+    controllers/catalog/     # get-game, search-games
     controllers/profile/     # one per use case of profile/ (they check the user and the input)
   infrastructure/
     drizzle-errors.ts        # names drizzle's query error for the logs
     repositories/            # base.repository.ts, then one per interface, each with its .mock.ts
     services/                # neon-auth, transaction-manager, console-logger, s3-file-storage, with mocks
 di/                          # container.ts, types.ts, modules: access (with removed users),
-                             # authentication, file-storage, friends, loans, logger, notices, profile
-                             # (profiles and settings), transaction
+                             # authentication, catalog (games, U6), copies (user games, U6), file-storage,
+                             # friends, loans, logger, notices, profile (profiles and settings), transaction
 db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
 lib/                         # auth/server.ts, logger.ts
 scripts/                     # check-test-database.ts, require-migrations.ts, migrate-production.ts,
@@ -124,6 +132,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **One breakpoint for the shell, 768px** (`md:`): the tabs move into the AppBar, a sheet becomes a 480px dialog. Browsed lists add a third column from 1100px, written `min-[68.75rem]:`: Tailwind sorts a px breakpoint before `md`'s rem one, so `min-[1100px]:` loses to `md:` (2026-11-21).
 - **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; the piece is the member's own since U5 (a bone pawn while it loads), and U11 gives the bell and the tabs their counts.
 - **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
+- **U6's patterns, for every later list and page.** A game in a list is `GameCardRow` (`game-row.tsx`), its card from `gameCard` (`src/entities/game-card.ts`): one rule gives all nine of B1's cards (your own loan or request decides, then news of your own copy, then how many are free, "1 of 2 available"), and U8's library list uses it too. A catalog game is `CatalogRow`, its title underlined. A copy is `CopyRow` with `copyWords` (`copy-state.tsx`): each fact in mono on a line of its own, only the next in line beside a piece, and the stamp the member's own status. A page reads through one loader beside it (`loadGame` in `games/[id]/page.tsx`), which turns Not found or a bad id into `notFound()`; its return type is inferred, since `app/` can't import a use case's types. A game's facts and lines come from `game-facts.ts`, each only when the game has it (rule 14), and its token color from `coverColorOf`, since the catalog keeps none (an expansion takes its base game's). A link from search carries `?q=`, so the game's way back returns to the results.
 
 ## Data Model
 
@@ -151,6 +160,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - Another member's copies, profile, phone, photo or nights are read only after `requireFriend(friendships, viewerId, otherUserId, tx)` (`src/application/use-cases/friends/require-friend.ts`, KTD4), a plain function a use case calls, as recipes' `requireSpaceRole`. A stranger gets the `NotFoundError` an id with no account gets, so they can't tell an account exists (AE8). Nobody is their own friend: a use case that shows members their own things checks for that first.
 - A list of people reads `IUserProfilesRepository.getManyByUserIds`, which gives names and pieces only (`NameAndPiece`): the people in a loan's line or at a night needn't be the viewer's friends. The whole profile, with the phone and photo, comes from `getByUserId`, after `requireFriend` or for the other person in a loan (KTD4).
 - A notice is written through `INoticesRepository.add(notice, tx)`, whose transaction isn't optional: the change's own (KTD7).
+- **Search** (KTD10): `toSearchTitle` on what's typed, then pg_trgm's `word_similarity` above `SEARCH_MATCH_ABOVE` (0.5; measured 2026-11-22, a one-letter typo and two typed letters pass, one letter doesn't). The shelves' games, from `IUserGamesRepository.listVisible` (the read that joins friendships), come first, then closeness, popularity and the title in code-point order (`collate "C"`). Postgres refuses a constant in `ORDER BY`, so with no shelves the repository leaves that term out. `MockGamesRepository` ports pg_trgm's `iterate_word_similarity`, so both backends rank and cut off alike (it matched PGlite on 103,360 pairs). A two-word search whose one word is another title's still matches it ("safe harbor" scores Harbor Lights 0.58), and the shelves' group comes first: U24 sizes the threshold on the real catalog.
 - Dates are `YYYY-MM-DD` strings end to end, and "today" is `todayIn(PLAN_TIME_ZONE)` on the server, never the phone (KTD9).
 - Files (KTD11) go through `IFileStorage` (`src/application/services/file-storage.service.interface.ts`): `put(bucket, key, bytes, contentType)`, `remove(bucket, key)`, `signedUrl(bucket, key, seconds)` and `publicUrl(bucket, key)`, over the two buckets in `BUCKETS`. `profile-photos` is private: a row keeps the key (`photo_key`), and a page shows the photo through a signed address of an hour, made only for someone who may see the person. `catalog-images` is public-read: a row keeps the address `publicUrl` gives (`image_url`). Checked on the test project on 2026-11-21: a private file's public address answers 403 and its signed one 200, a public-read file answers 200 either way, and removing a file twice is no error.
 - An adapter whose vendor SDK only some requests use imports it on first use (`await import()` in the method, `type` imports at the top), as `S3FileStorageService` does: the DI container builds every adapter when a server function starts (KTD2). `tests/di/container.test.ts` lists the packages kept out of start-up; a new one goes there too.
@@ -207,6 +217,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - `makeApp().makeCast()` puts the cast in the current backend: its people (profiles, settings, friendships) through their repositories, `writeCastPeople`; on PGlite the games, copies, boxed expansions and loans through drizzle, `insertCastRows`; on the mocks the loans into `MockLoansRepository.rows`. A unit that gives a table its writes moves the cast's rows to them, and one that needs more of the boards' world (friend requests in U10, notices in U11, nights in U18) adds it to the cast with its writes. A row written through a repository is dated when it's written, so a friendship's "Friends since" (E3) reads the seed's month, not July.
 - **The seed** (`scripts/seed.ts`, KTD21) writes the cast to `.env`'s database and stops unless it carries the test project's comment. A dry run by default; `--commit` writes, in one transaction; `--as <name>=<user id>` maps a member to their account (`.cast-accounts.json`), and the rest keep the cast's ids. It writes what's missing and skips what's there, so it's safe to run again, and a unit that extends the cast runs it again (Commands). Its test runs it on PGlite with the comment and without. U4 ran it on the test project on 2026-11-21, every member mapped.
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged, so a test can show a value never reached the logs.
+- A page's test against its board signs in with `signInAsYouWithTheCast()` (`tests/_support/members.ts`), which puts the cast in the container's repositories once per file, and pins the clock to the kit's today with bun's `setSystemTime(new Date("2026-11-10T09:00:00-05:00"))`, reset after. Find a row within the render's own container (`within(view.container)`): `render`'s queries cover the whole document, earlier renders included. `makeApp().addGames()` and `addCopies()` add rows the cast doesn't have, such as a game with a popularity or a stranger's copy, until U7 and U9 give those tables their writes.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
 - `tests/_support/controller.ts` (`controllerBasics`, recipes') came with U5's first controllers: a controller test names its valid input, what the use case should receive and the inputs to reject. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests. `tests/_support/members.ts` signs a test in as a member with a profile (`signInAsMember`) through the container's own controllers, for page, action and gate tests: the container's mock repositories live for the whole run, so each test signs in as a new user.
 - Base UI's dialogs and sheets in happy-dom (U2): a dialog closes after its exit transition, so wait for it with `waitFor`, and poll absence as a boolean (`expect(view.queryByRole("dialog") === null).toBe(true)`): Bun prints a whole element when an expectation on one fails, which takes seconds and starves `waitFor`'s retries. `fireEvent.click` doesn't focus a button as a tap does, so focus the opener first to test where the cursor goes back. A sheet takes the phone's Drawer when `happyDOM.setInnerWidth(390)` (the window's `happyDOM`, cast). Sonner's toasts are global to a test file, so a toast from one test still shows in the next. next/image calls `onLoad` after the picture decodes, a moment after the load event.
@@ -238,7 +249,7 @@ bun run dead-code
 cd apps/community-game-library && bun run test
 ```
 
-A unit with screens checks each one at 390 px beside its board, and again at 768 and 1280 px (the spec's Verification). A config change also runs the local build. To compare with a board, U2 copied the board's markup (its `<helmet>` and the `<x-dc>` body) into a page under `public/` and measured both with the browser's `getBoundingClientRect`, then deleted the copies.
+A unit with screens checks each one at 390 px beside its board, and again at 768 and 1280 px (the spec's Verification). A config change also runs the local build. To compare with a board, U2 copied the board's markup (its `<helmet>` and the `<x-dc>` body) into a page under `public/` and measured both with the browser's `getBoundingClientRect`, then deleted the copies. With the browser pane hidden, check in Playwright's headless browser instead (the Playwright MCP): a hidden pane runs the page in the background, where React's first Suspense reveal waits for an animation frame, so a streamed page stays on its skeleton (2026-11-22). Playwright hides the caret with an inline style, which the dev overlay then reports as a hydration mismatch on a text field; that one isn't the app's.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -14,13 +14,13 @@ The spec for building `apps/community-game-library`, served at communitygamelibr
 
 ## Status
 
-|                   |                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Phase             | The plan is agreed (2026-11-12): the whole data model ([data-model.md](data-model.md)), the technical half's decisions and code map (below), and 26 units in 8 batches, each a task in Hector's tracker. The design is finished ([screens.md](screens.md)). Batch 1 (U1 to U5) is merged and on production (hectarek/hector-mono#127, 2026-11-22): the scaffold, the look and the shell, every table, the shared reads and the cast, and getting in |
-| Next              | Batch 2 (U6 to U9), on its branch from main                                                                                                                                                                                                                                                                                                                                                            |
-| Then              | Batches 3 to 8, one after another, with motion last (D13). The catalog's own dataset is planned with Hector beside the build, and decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md))                                                                                                                                                                               |
-| Waiting on Hector | The domain (H7), production's storage variables under their `STORAGE_` names (H3), and a look at Batch 1's shell and getting in (H8); H2, H4 and H9 before launch; H6, the catalog's dataset, beside the build                                                                                                                                                                                                                                           |
-| Updated           | 2026-11-22                                                                                                                                                                                                                                                                                                                                                                                             |
+| Next              | Batch 2 (U6 to U9), on its branch from main                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Then              | Batches 3 to 8, one after another, with motion last (D13). The catalog's own dataset is planned with Hector beside the build, and decides when the first friends are invited (KTD21, [catalog-data.md](catalog-data.md))                                                                                                                                                                                                                            |
+| Waiting on Hector | The domain (H7), production's storage variables under their `STORAGE_` names (H3), and a look at Batch 1's shell and getting in (H8); H2, H4 and H9 before launch; H6, the catalog's dataset, beside the build                                                                                                                                                                                                                                      |
+| Updated           | 2026-11-22                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ---
 
@@ -487,6 +487,7 @@ apps/community-game-library/
     (main)/                         # header, tab bar, bell and piece (U2)
       loading.tsx                   # the Library's skeleton, under the shell (U1)
       page.tsx                      # Library, All friends: B1 to B4, B10, B12; ?q, filters and sort in the address (R13)
+      library-search.tsx            # the search field, which puts ?q in the address as you type (U6)
       my-library/                   # B6; add/ (B8), suggest/ (B9)
       games/[id]/                   # a game's page: B5, B11, B13; the Ask to borrow (C1) and Join the line (C10) sheets
       copies/[id]/                  # a copy's page: B7, B14
@@ -506,7 +507,7 @@ apps/community-game-library/
                                     # dice, track, list-row, group, confirm-dialog, share-button, date-sheet (X1),
                                     # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy,
                                     # icons, no-connection, page-column, sheet (U2);
-                                    # by area: game-row, copy-row, copy-state, library-list, filter-sheet, sort-sheet,
+                                    # by area: game-row, copy-row, copy-state, game-video, library-list, filter-sheet, sort-sheet,
                                     # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
                                     # piece-picker, profile-form
     _lib/                           # current-user, auth-paths, safe-redirect, call-action, notify, notice-text,
@@ -523,7 +524,10 @@ apps/community-game-library/
                                     # game-night, game-night-attendee, game-night-game, game-night-vote, notice,
                                     # user, session, transaction, logger
       week.ts                       # recipes' dates and todayIn, with PLAN_TIME_ZONE (KTD9); formatDate, formatMonth (U2)
-      search-title.ts               # KTD10 (U3)
+      search-title.ts               # KTD10 (U3), with its match threshold (U6)
+      game-card.ts                  # a game's card in a list from its copies' states (B1, B10; U6)
+      game-facts.ts                 # a game's facts and lines in the boards' words (rule 14; U6)
+      video-link.ts                 # where a how-to-play video plays, recipes' (R7; U6)
       loan.ts                       # the state machine, dates, the line and a copy's state (KTD6, U3)
       notice-types.ts               # each type's group (U3)
       piece.ts                      # shapes and colors, and the colors for people only (R51, U2)

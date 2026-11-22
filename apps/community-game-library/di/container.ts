@@ -1,6 +1,8 @@
 import { createContainer } from "@evyweb/ioctopus";
 import { createAccessModule } from "@/di/modules/access.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
+import { createCatalogModule } from "@/di/modules/catalog.module";
+import { createCopiesModule } from "@/di/modules/copies.module";
 import { createFileStorageModule } from "@/di/modules/file-storage.module";
 import { createFriendsModule } from "@/di/modules/friends.module";
 import { createLoansModule } from "@/di/modules/loans.module";
@@ -17,6 +19,8 @@ ApplicationContainer.load(
   Symbol("AuthenticationModule"),
   createAuthenticationModule(),
 );
+ApplicationContainer.load(Symbol("CatalogModule"), createCatalogModule());
+ApplicationContainer.load(Symbol("CopiesModule"), createCopiesModule());
 ApplicationContainer.load(
   Symbol("FileStorageModule"),
   createFileStorageModule(),

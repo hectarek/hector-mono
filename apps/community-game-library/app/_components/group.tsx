@@ -8,6 +8,7 @@ export function Group({
   label,
   aside,
   overList = false,
+  id,
   children,
 }: {
   label: string;
@@ -15,12 +16,17 @@ export function Group({
   aside?: ReactNode;
   // A navy label on kraft, directly above a list, rather than a panel.
   overList?: boolean;
+  // The label's id, for a link that jumps to the group (B5's "See copies").
+  id?: string;
   children: ReactNode;
 }) {
   if (overList) {
     return (
       <section className="flex flex-col gap-3">
-        <h2 className="mt-1 font-heading text-15 font-bold tracking-wider uppercase">
+        <h2
+          id={id}
+          className="mt-1 scroll-mt-4 font-heading text-15 font-bold tracking-wider uppercase"
+        >
           {label}
         </h2>
         {children}
@@ -30,7 +36,10 @@ export function Group({
   return (
     <section className="flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-3.5 py-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-heading text-15 font-bold tracking-wider text-destructive uppercase">
+        <h2
+          id={id}
+          className="scroll-mt-4 font-heading text-15 font-bold tracking-wider text-destructive uppercase"
+        >
           {label}
         </h2>
         {aside}
