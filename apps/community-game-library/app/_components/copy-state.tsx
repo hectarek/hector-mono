@@ -1,12 +1,14 @@
 import { RowFacts } from "@/app/_components/list-row";
 import { Piece } from "@/app/_components/piece";
+import { expansionName } from "@/src/entities/game-facts";
 import type { CopyStamp, CopyState } from "@/src/entities/loan";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import { formatDate, formatMonthDay, formatWhen } from "@/src/entities/week";
 
-const CONDITIONS: Record<UserGame["condition"], string> = {
+// A copy's condition in the boards' words (B7's choices, B13's lines).
+export const CONDITIONS: Record<UserGame["condition"], string> = {
   "like-new": "Like new",
   good: "Good",
   worn: "Worn",
@@ -130,11 +132,7 @@ export function copyWords({
     .filter((part) => part)
     .join(" · ");
   const inTheBox = listed(
-    boxedExpansions.map((title) =>
-      title.startsWith(`${baseTitle}: `)
-        ? title.slice(baseTitle.length + 2)
-        : title,
-    ),
+    boxedExpansions.map((title) => expansionName(title, baseTitle)),
   );
   if (inTheBox && copy.conditionNote) {
     fact(condition);

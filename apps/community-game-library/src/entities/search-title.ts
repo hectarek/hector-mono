@@ -11,6 +11,11 @@ const LEADING_ARTICLE = /^(?:the|a|an) /;
 // Master) sit at 0.5. U24 checks it on the real catalog.
 export const SEARCH_MATCH_ABOVE = 0.5;
 
+// How a search lists what it finds: the Library's two groups, the games on the shelves first
+// (R2, B10), or Add games' one list of the whole catalog, the closest first (B8).
+export const SEARCH_ORDERS = ["shelves-first", "closest-first"] as const;
+export type SearchOrder = (typeof SEARCH_ORDERS)[number];
+
 export function toSearchTitle(title: string): string {
   return (
     title

@@ -1,4 +1,8 @@
-import { Empty, EmptyDescription } from "@repo/ui/components/empty";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+} from "@repo/ui/components/empty";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
@@ -8,6 +12,7 @@ import { Cover } from "@/app/_components/cover";
 import { Dice } from "@/app/_components/dice";
 import { GameVideo } from "@/app/_components/game-video";
 import { Group } from "@/app/_components/group";
+import { IOwnIt } from "@/app/_components/i-own-it";
 import { List, ListRow, RowFacts, RowName } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Stamp } from "@/app/_components/stamp";
@@ -218,8 +223,22 @@ export default async function GamePage({
             <EmptyDescription>
               None of your friends own this yet.
             </EmptyDescription>
+            {game.type === "base-game" && (
+              <EmptyContent>
+                <IOwnIt gameId={game.id} />
+              </EmptyContent>
+            )}
           </Empty>
         )}
+        {game.type === "base-game" &&
+          copies.length > 0 &&
+          !copies.some(({ state }) => state.yours) && (
+            <IOwnIt
+              gameId={game.id}
+              label="I own this too. Add it to my library"
+              quiet
+            />
+          )}
       </Group>
     </PageColumn>
   );

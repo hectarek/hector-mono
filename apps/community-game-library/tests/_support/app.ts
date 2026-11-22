@@ -15,6 +15,14 @@ import type { IUserSettingsRepository } from "@/src/application/repositories/use
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { getGameUseCase } from "@/src/application/use-cases/catalog/get-game.use-case";
 import { searchGamesUseCase } from "@/src/application/use-cases/catalog/search-games.use-case";
+import { addUserGameUseCase } from "@/src/application/use-cases/copies/add-user-game.use-case";
+import { getUserGameUseCase } from "@/src/application/use-cases/copies/get-user-game.use-case";
+import { listMyLibraryUseCase } from "@/src/application/use-cases/copies/list-my-library.use-case";
+import { putInBoxUseCase } from "@/src/application/use-cases/copies/put-in-box.use-case";
+import { removeUserGameUseCase } from "@/src/application/use-cases/copies/remove-user-game.use-case";
+import { setLendingUseCase } from "@/src/application/use-cases/copies/set-lending.use-case";
+import { setPassAlongForAllUseCase } from "@/src/application/use-cases/copies/set-pass-along-for-all.use-case";
+import { updateUserGameUseCase } from "@/src/application/use-cases/copies/update-user-game.use-case";
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
 import { createProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
 import { getAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
@@ -165,6 +173,39 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     // Catalog
     getGame: getGameUseCase(games, userGames, loans, userProfiles),
     searchGames: searchGamesUseCase(games, userGames, loans, userProfiles),
+
+    // Copies
+    addUserGame: addUserGameUseCase(
+      games,
+      userGames,
+      userSettings,
+      transactions,
+      log,
+    ),
+    updateUserGame: updateUserGameUseCase(games, userGames, transactions, log),
+    putInBox: putInBoxUseCase(games, userGames, transactions, log),
+    setLending: setLendingUseCase(userGames, transactions, log),
+    setPassAlongForAll: setPassAlongForAllUseCase(
+      userGames,
+      userSettings,
+      transactions,
+      log,
+    ),
+    removeUserGame: removeUserGameUseCase(
+      games,
+      userGames,
+      loans,
+      transactions,
+      log,
+    ),
+    listMyLibrary: listMyLibraryUseCase(
+      games,
+      userGames,
+      loans,
+      userProfiles,
+      userSettings,
+    ),
+    getUserGame: getUserGameUseCase(games, userGames, loans, userProfiles),
 
     requireFriend: (viewerId: string, otherUserId: string) =>
       requireFriend(friendships, viewerId, otherUserId),

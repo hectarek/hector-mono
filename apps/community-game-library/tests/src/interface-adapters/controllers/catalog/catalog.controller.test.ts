@@ -23,10 +23,11 @@ describe("searchGamesController", () => {
   controllerBasics({
     make: (useCase, logger) => searchGamesController(useCase, logger),
     valid: { q: "harbor" },
-    calledWith: ["harbor", you.id, todayIn(PLAN_TIME_ZONE)],
+    calledWith: ["harbor", you.id, todayIn(PLAN_TIME_ZONE), "shelves-first"],
     invalid: {
       "no words": {},
       "far more than a title": { q: "x".repeat(201) },
+      "an order that isn't one": { q: "harbor", order: "newest" },
     },
   });
 });

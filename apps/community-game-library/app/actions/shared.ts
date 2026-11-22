@@ -37,8 +37,10 @@ export function text(formData: FormData, key: string): string | undefined {
 
 // Fields as the forms label them, in the words of each form's board. Anything not listed (hidden
 // ids) is never named: the person can't see those fields, so a code name would only confuse.
-// Each form's fields join it (A4 and E6's: name, phone, photo).
+// Each form's fields join it (A4 and E6's: name, phone, photo; B7's: condition, conditionNote).
 const FIELD_LABELS: Record<string, string> = {
+  condition: "Condition",
+  conditionNote: "Missing or damaged parts",
   name: "Name",
   phone: "Phone",
   photo: "Photo",

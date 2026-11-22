@@ -5,7 +5,7 @@ import type { IUserProfilesRepository } from "@/src/application/repositories/use
 import { type GameCard, gameCard } from "@/src/entities/game-card";
 import { copyState } from "@/src/entities/loan";
 import type { Game } from "@/src/entities/models/game.model";
-import { toSearchTitle } from "@/src/entities/search-title";
+import { type SearchOrder, toSearchTitle } from "@/src/entities/search-title";
 
 export type ISearchGamesUseCase = ReturnType<typeof searchGamesUseCase>;
 
@@ -13,13 +13,16 @@ export type ISearchGamesUseCase = ReturnType<typeof searchGamesUseCase>;
 const SEARCH_LIMIT = 30;
 
 // Search's results in R2's two groups (B10): the games on the shelves you can see, each as its
-// library card, then the rest of the catalog, each with its base game when it's an expansion,
-// and whether you own that base game (B10's "Add Harbor Lights first").
+// library card, then the rest of the catalog, each with its base game when it's an expansion:
+// whether you own that base game (B10's "Add Harbor Lights first"), and whether the expansion is
+// in one of your boxes already. Listed closest first (B8), every game is in the second group,
+// and `yours` says which you own already.
 export type SearchResults = {
   onShelves: { game: Game; card: GameCard }[];
   inCatalog: {
     game: Game;
-    base: { title: string; yours: boolean } | null;
+    yours: boolean;
+    base: { title: string; yours: boolean; boxed: boolean } | null;
   }[];
 };
 
@@ -35,6 +38,7 @@ export const searchGamesUseCase = (
     typed: string,
     viewerId: string,
     today: string,
+    order: SearchOrder = "shelves-first",
   ): Promise<SearchResults> => {
     const searchTitle = toSearchTitle(typed);
     if (searchTitle === "") {
@@ -43,7 +47,9 @@ export const searchGamesUseCase = (
     const visible = await userGamesRepository.listVisible(viewerId);
     const found = await gamesRepository.search(
       searchTitle,
-      [...new Set(visible.map((copy) => copy.gameId))],
+      order === "shelves-first"
+        ? [...new Set(visible.map((copy) => copy.gameId))]
+        : [],
       SEARCH_LIMIT,
     );
 
@@ -69,10 +75,20 @@ export const searchGamesUseCase = (
         ])
       ).map((base) => [base.id, base]),
     );
-    const yours = new Set(
-      visible
-        .filter((copy) => copy.userId === viewerId)
-        .map((copy) => copy.gameId),
+    const yourCopies = visible.filter((copy) => copy.userId === viewerId);
+    const yours = new Set(yourCopies.map((copy) => copy.gameId));
+    // What's in your boxes, read only when an expansion found is one you could put in one.
+    const boxable = found.inCatalog.some(
+      (game) => game.baseGameId !== null && yours.has(game.baseGameId),
+    );
+    const boxed = new Set(
+      boxable
+        ? (
+            await userGamesRepository.listExpansionsInBoxes(
+              yourCopies.map((copy) => copy.id),
+            )
+          ).map((row) => row.gameId)
+        : [],
     );
 
     return {
@@ -98,7 +114,14 @@ export const searchGamesUseCase = (
         const base = game.baseGameId ? bases.get(game.baseGameId) : undefined;
         return {
           game,
-          base: base ? { title: base.title, yours: yours.has(base.id) } : null,
+          yours: yours.has(game.id),
+          base: base
+            ? {
+                title: base.title,
+                yours: yours.has(base.id),
+                boxed: boxed.has(game.id),
+              }
+            : null,
         };
       }),
     };

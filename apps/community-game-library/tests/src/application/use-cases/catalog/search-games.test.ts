@@ -52,11 +52,41 @@ describeEachBackend("search-games", () => {
     ).toEqual([
       {
         title: "Harbor Lights: Night Tide",
-        base: { title: "Harbor Lights", yours: false },
+        base: { title: "Harbor Lights", yours: false, boxed: false },
       },
       { title: "Harbor Master", base: null },
       { title: "Safe Harbor", base: null },
     ]);
+  });
+
+  // Add games lists the whole catalog closest first, Sam's and Alice's Harbor Lights too (B8).
+  it("gives B8's one list for harbor", async () => {
+    const found = await app.searchGames(
+      "harbor",
+      you.id,
+      CAST_TODAY,
+      "closest-first",
+    );
+
+    expect(found.onShelves).toEqual([]);
+    expect(found.inCatalog.map(({ game }) => game.title)).toEqual([
+      "Harbor Lights",
+      "Harbor Lights: Night Tide",
+      "Harbor Master",
+      "Safe Harbor",
+    ]);
+    expect(found.inCatalog.some(({ yours }) => yours)).toBe(false);
+
+    // Your own Salt & Signal is in the one list too, as yours.
+    const salt = await app.searchGames(
+      "salt",
+      you.id,
+      CAST_TODAY,
+      "closest-first",
+    );
+    expect(
+      salt.inCatalog.map(({ game, yours }) => [game.title, yours]),
+    ).toEqual([["Salt & Signal", true]]);
   });
 
   it("never counts a stranger's copy (KTD4)", async () => {
@@ -72,14 +102,20 @@ describeEachBackend("search-games", () => {
     expect(meis.onShelves.map(({ card }) => card.ownerLine)).toEqual(["Yours"]);
   });
 
-  it("says when you own an expansion's base game", async () => {
+  it("says when you own an expansion's base game, and when it's in your box", async () => {
     const found = await search("low tide");
 
     // Night Tide shares "tide", so it comes too, after the closer match.
     expect(found.inCatalog.map(({ game, base }) => [game.title, base])).toEqual(
       [
-        ["Gull & Anchor: Low Tide", { title: "Gull & Anchor", yours: true }],
-        ["Harbor Lights: Night Tide", { title: "Harbor Lights", yours: false }],
+        [
+          "Gull & Anchor: Low Tide",
+          { title: "Gull & Anchor", yours: true, boxed: true },
+        ],
+        [
+          "Harbor Lights: Night Tide",
+          { title: "Harbor Lights", yours: false, boxed: false },
+        ],
       ],
     );
   });

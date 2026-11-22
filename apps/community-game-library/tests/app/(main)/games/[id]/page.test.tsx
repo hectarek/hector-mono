@@ -162,12 +162,33 @@ describe("a game's page", () => {
     );
   });
 
-  it("says when none of your friends own a game", async () => {
+  it("says when none of your friends own a game, with I own it", async () => {
     const view = await renderGame(games.harborMaster.id);
 
     expect(view.getByText("None of your friends own this yet.")).toBeTruthy();
+    expect(view.getByRole("button", { name: "I own it" })).toBeTruthy();
     expect(view.queryByText("Available")).toBeNull();
     expect(view.getByRole("heading", { name: "Copies" })).toBeTruthy();
+  });
+
+  // B5: a game your friends own and you don't.
+  it("offers to add a game your friends own to your library", async () => {
+    const view = await renderGame(games.harborLights.id);
+    expect(
+      view.getByRole("button", {
+        name: "I own this too. Add it to my library",
+      }),
+    ).toBeTruthy();
+
+    // Not on a game you own (B11), nor on an expansion's page.
+    for (const gameId of [games.nightMarket.id, games.nightTide.id]) {
+      const other = await renderGame(gameId);
+      expect(
+        within(other.container).queryByRole("button", {
+          name: "I own this too. Add it to my library",
+        }) === null,
+      ).toBe(true);
+    }
   });
 
   it("shows an expansion's base game, and the copy whose box holds it", async () => {

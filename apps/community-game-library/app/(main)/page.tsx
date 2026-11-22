@@ -14,6 +14,7 @@ import { List } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { LibrarySearch } from "@/app/(main)/library-search";
+import { LibraryViews } from "@/app/(main)/library-views";
 import { getInjection } from "@/di/container";
 
 // The Library (B1), which U6 and U8 build. U6's half is search (R2, B10): ?q= holds what's
@@ -51,6 +52,7 @@ export default async function LibraryPage({
   return (
     <PageColumn width="browse" header={<AppHeader title="Library" />}>
       <LibrarySearch initial={search} />
+      {!results && <LibraryViews current="all-friends" />}
       {results &&
         (results.onShelves.length === 0 && results.inCatalog.length === 0 ? (
           <Empty>
@@ -93,10 +95,11 @@ export default async function LibraryPage({
                 overList
               >
                 <List browse>
-                  {results.inCatalog.map(({ game, base }) => (
+                  {results.inCatalog.map(({ game, yours, base }) => (
                     <CatalogRow
                       key={game.id}
                       game={game}
+                      yours={yours}
                       base={base}
                       href={gameHref(game.id)}
                     />

@@ -30,6 +30,14 @@ describe("the Library page", () => {
     const view = await renderLibrary();
     expect(view.getByRole("heading", { level: 1 }).textContent).toBe("Library");
     expect(view.getByRole("searchbox", { name: "Search games" })).toBeTruthy();
+    // B1's views, All friends pressed; My library is the other.
+    expect(
+      view
+        .getByRole("button", { name: "All friends" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    fireEvent.click(view.getByRole("button", { name: "My library" }));
+    expect(nextState.pushed).toContain("/my-library");
   });
 
   // The proxy sends a visitor with no session cookie to the welcome screen first. This is a
@@ -89,6 +97,18 @@ describe("the Library's search", () => {
       "Harbor Master1998 · Bellwether & Co.",
       "Safe Harbor2011 · Small Hours Press",
     ]);
+    // I own it on each base game, none on an expansion whose base game you don't own (R3).
+    expect(
+      within(catalog)
+        .getAllByRole("button", { name: "I own it" })
+        .map((button) => button.closest("li")?.textContent),
+    ).toEqual([
+      "Harbor Master1998 · Bellwether & Co.I own it",
+      "Safe Harbor2011 · Small Hours PressI own it",
+    ]);
+    expect(view.queryByRole("button", { name: "All friends" }) === null).toBe(
+      true,
+    );
     expect(
       view
         .getByRole("button", { name: "Can’t find it? Suggest a game" })

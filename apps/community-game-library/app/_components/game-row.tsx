@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { CoverThumb } from "@/app/_components/cover-thumb";
+import { IOwnIt } from "@/app/_components/i-own-it";
+import { InMyBox } from "@/app/_components/in-my-box";
 import {
   ListItem,
   ListRow,
@@ -53,17 +55,20 @@ export function GameCardRow({
   );
 }
 
-// A catalog game in search (B10's second group): its thumb, its title underlined, then the year
-// and the first publisher, or for an expansion whose base game you don't own, "Add Harbor
-// Lights first". It opens the game's page; its "I own it" (and an expansion's "In my box") come
-// with U7, beside the link.
+// A catalog game in search (B10's second group, B8): its thumb, its title underlined, then the
+// year and the first publisher, or for an expansion whose base game you don't own, "Add Harbor
+// Lights first". It opens the game's page. Its action sits beside the link: I own it on a base
+// game, In my box on an expansion of one you own. On Add games' one list a game you own already
+// is stamped Yours, so it isn't added twice by mistake; a second copy starts on its copy's page.
 export function CatalogRow({
   game,
+  yours,
   base,
   href,
 }: {
   game: Game;
-  base: { title: string; yours: boolean } | null;
+  yours: boolean;
+  base: { title: string; yours: boolean; boxed: boolean } | null;
   href: string;
 }) {
   const line = catalogLine(game);
@@ -88,6 +93,15 @@ export function CatalogRow({
           {base && !base.yours && <RowFacts>Add {base.title} first</RowFacts>}
         </span>
       </Link>
+      {game.type === "expansion" ? (
+        base?.yours && <InMyBox gameId={game.id} boxed={base.boxed} />
+      ) : yours ? (
+        <span className="shrink-0">
+          <Stamp tone="navy">Yours</Stamp>
+        </span>
+      ) : (
+        <IOwnIt gameId={game.id} />
+      )}
     </ListItem>
   );
 }

@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U5):
+The spec's code map, as far as it's built (U1 to U7):
 
 ```
 app/
@@ -33,7 +33,9 @@ app/
   (start)/start/             # the steps before the app: profile/ (A4), home-screen/ (A6); A5 comes with U10
   (main)/                    # the signed-in app: layout.tsx (the shell, below; account-gate.tsx), page.tsx
                              # (the Library: search at ?q= since U6, with library-search.tsx), loading.tsx
-                             # (its header and skeleton); games/[id]/ (B5, B11, B13); you/ (E5) and
+                             # (its header and skeleton); library-views.tsx (All friends | My library, U7);
+                             # games/[id]/ (B5, B11, B13); my-library/ (B6, A7) and my-library/add/ (B8);
+                             # copies/[id]/ (B7, B14: copy-form.tsx, remove-copy.tsx); you/ (E5) and
                              # you/edit/ (E6)
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
   removed/                   # a removed account's only page
@@ -44,14 +46,18 @@ app/
                              # sheet, stamp, tab-bar, tab-count, track; action-form. U5's: auth-notice,
                              # home-screen-steps, open-in-browser (A9's Copy the link), piece-picker,
                              # profile-form (A4 and E6), steps. U6's: copy-row and copy-state (a copy and
-                             # its words, B13), game-row (GameCardRow, CatalogRow), game-video
+                             # its words, B13), game-row (GameCardRow, CatalogRow), game-video. U7's:
+                             # i-own-it (IOwnIt, and AddedTally and AddedSoFar, B8's count), in-my-box,
+                             # saved-switch (a switch that saves as it flips)
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
                              # notify, leave-guard, changed-lines, share, shrink-image. U5's: account
                              # (getAccount and the gate), auth (the browser's auth client), auth-localization,
                              # auth-notice
   _providers/                # auth-provider: Neon's kit, for the sign-in and account layouts only
   actions/                   # shared.ts: ActionState, actionLogger, text, toActionError (not "use server");
-                             # profile.ts: createProfile, updateProfile, removePhoto
+                             # profile.ts: createProfile, updateProfile, removePhoto; copies.ts (U7):
+                             # addCopy, undoAddCopy, putInBox, saveCopy, setLending, setPassAlongForAll,
+                             # removeCopy
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
@@ -69,7 +75,8 @@ src/
                              # coverColorOf, a game's token color
     profile-photo.ts         # what a photo may be (types, 300 KB), its signed address's hour, the
                              # "didn't upload" line
-    search-title.ts          # toSearchTitle and SEARCH_MATCH_ABOVE (KTD10)
+    search-title.ts          # toSearchTitle and SEARCH_MATCH_ABOVE (KTD10); SEARCH_ORDERS, the Library's
+                             # shelves first or Add games' closest first
     game-card.ts             # gameCard: a game's card in a list from its copies' states (B1, B10)
     game-facts.ts            # a game's facts and lines in the boards' words, only what it has (rule 14)
     video-link.ts            # videoEmbed, recipes'
@@ -78,22 +85,28 @@ src/
                              # formatWeekday and formatMonthDay, its parts
   application/
     repositories/            # interfaces (U4): friendships, loans (reads), notices (add), removed-users,
-                             # user-profiles, user-settings; U6: games (reads), user-games (reads)
+                             # user-profiles, user-settings; U6: games (reads), user-games (reads, and
+                             # U7's writes)
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/catalog/       # get-game, search-games (U6)
+    use-cases/copies/        # add-user-game, get-user-game, list-my-library, put-in-box, remove-user-game,
+                             # require-own-copy (a plain function), set-lending, set-pass-along-for-all,
+                             # update-user-game (U7)
     use-cases/friends/       # require-friend (KTD4)
     use-cases/profile/       # create-profile, get-account-state, get-profile, list-taken-pieces,
                              # remove-photo, set-photo, update-profile
   interface-adapters/
     controllers/catalog/     # get-game, search-games
+    controllers/copies/      # one per use case of copies/, but require-own-copy
     controllers/profile/     # one per use case of profile/ (they check the user and the input)
   infrastructure/
     drizzle-errors.ts        # names drizzle's query error for the logs
     repositories/            # base.repository.ts, then one per interface, each with its .mock.ts
     services/                # neon-auth, transaction-manager, console-logger, s3-file-storage, with mocks
 di/                          # container.ts, types.ts, modules: access (with removed users),
-                             # authentication, catalog (games, U6), copies (user games, U6), file-storage,
+                             # authentication, catalog (games, U6), copies (user games, U6; U7's use cases),
+                             # file-storage,
                              # friends, loans, logger, notices, profile (profiles and settings), transaction
 db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
 lib/                         # auth/server.ts, logger.ts
@@ -133,6 +146,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; the piece is the member's own since U5 (a bone pawn while it loads), and U11 gives the bell and the tabs their counts.
 - **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
 - **U6's patterns, for every later list and page.** A game in a list is `GameCardRow` (`game-row.tsx`), its card from `gameCard` (`src/entities/game-card.ts`): one rule gives all nine of B1's cards (your own loan or request decides, then news of your own copy, then how many are free, "1 of 2 available"), and U8's library list uses it too. A catalog game is `CatalogRow`, its title underlined. A copy is `CopyRow` with `copyWords` (`copy-state.tsx`): each fact in mono on a line of its own, only the next in line beside a piece, and the stamp the member's own status. A page reads through one loader beside it (`loadGame` in `games/[id]/page.tsx`), which turns Not found or a bad id into `notFound()`; its return type is inferred, since `app/` can't import a use case's types. A game's facts and lines come from `game-facts.ts`, each only when the game has it (rule 14), and its token color from `coverColorOf`, since the catalog keeps none (an expansion takes its base game's). A link from search carries `?q=`, so the game's way back returns to the results.
+- **U7's patterns.** An action says what it did through `notify`, with Undo where it can be undone: `IOwnIt` stamps its row Added with Undo under it, and a page that counts what's added wraps its rows in `AddedTally` (B8's "1 added"). A switch that saves as it flips is `SavedSwitch` ("Saved.", or back as it was with the error), given its server action bound to the thing it changes (`setLending.bind(null, copyId, "lendable")`). A form with Save keeps its fields in state and compares them with the props its page renders, which the save's revalidation refreshes, so its leave guard needs no copy of what was saved (`copy-form.tsx`). A form that stays on its page after a save sends from `onSubmit`, in a transition, not through the form's `action`: React resets a form once its action ends, which put B7's controlled condition back to the one the page loaded with while the copy kept the new one (2026-11-22); a screen test checks the field after "Saved.". A catalog row shows its own action: I own it on a base game, In my box on an expansion of a game you own. Only a copy's owner opens its page (`requireOwnCopy`); anyone else gets Not found. An action whose dialog ends on another page returns its message, and the dialog pushes the route and shows it (`removeCopy`).
 
 ## Data Model
 
@@ -193,7 +207,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - Env names, in `.env.example` and `turbo.json`: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `ADMIN_USER_ID`, `STORAGE_AWS_ENDPOINT_URL_S3`, `STORAGE_AWS_REGION`, `STORAGE_AWS_ACCESS_KEY_ID`, `STORAGE_AWS_SECRET_ACCESS_KEY` (Neon's quickstart names with `STORAGE_` in front, so they never mix with the `AWS_` variables a function's platform sets), `CRON_SECRET` (the token Vercel's schedule sends the daily run, KTD8; production only, set by Hector before U17 merges) and `LOG_LEVEL`. `turbo.json` also lists `VERCEL_ENV` for the migration check. Turborepo withholds from `next build` any variable `turbo.json` doesn't list.
 - The local `.env` holds the Neon test project's values only: `community-game-library-test` (AWS US East, N. Virginia), whose database carries that name as its comment, with Neon Auth trusting localhost, its sign-up code check off, and both buckets. Its storage credential is "community-game-library local and previews" (U1, 2026-11-21). `ADMIN_USER_ID` is You's account (Robin Vale, the canvas's admin on E5), since U4 (2026-11-21).
 - Vercel's Preview environment holds the same test project's values, entered through the Vercel connector when H7's project was made (2026-11-21): the pooled database, Neon Auth's address, a cookie secret of its own, You as `ADMIN_USER_ID`, and a storage credential of its own, "community-game-library previews", so the previews' key can be revoked without touching local work. Secrets are Vercel's sensitive type, so they can't be read back or renamed: to change one, make a new value and replace it, and to fix a name, add the variable again under the right one and delete the old (the API refuses a sensitive variable's new name, 2026-11-22).
-- **The cast's accounts** (U4, 2026-11-21): each of the canvas's nine people has an account on the test project, `robin@example.com` for You and `<name>@example.com` for the rest, made through Neon Auth's sign-up behind the auth route, all with one generated password. `.cast-accounts.json` in this folder holds each member's email and user id and the password: gitignored, never committed, never copied into a doc, and readable by agents, who sign in with it on the dev server to check a screen against its board. The seed's `--as` takes its ids. The test project also has U2's shell account, `robin.u2-shell@example.com`, which isn't the cast's.
+- **The cast's accounts** (U4, 2026-11-21): each of the canvas's nine people has an account on the test project, `robin@example.com` for You and `<name>@example.com` for the rest, made through Neon Auth's sign-up behind the auth route, all with one generated password. `.cast-accounts.json` in this folder holds each member's email and user id and the password: gitignored, never committed, never copied into a doc, and meant for agents to sign in with on the dev server. Claude Code's auto-mode classifier refused reading the password into a session (2026-11-22), so a screen check signs in instead as a test account made through the app's sign-up and given friends on the test project, as U6 did with Kit Sample (`kit.u6@example.com`, Sam's and Alice's friend; its password isn't kept), while the screen tests cover what only You sees. The seed's `--as` takes its ids. The test project also has U2's shell account, `robin.u2-shell@example.com`, which isn't the cast's.
 - The `.env` lives in the build's one worktree, which every batch keeps using (KTD20): `.worktreeinclude` copies `apps/*/.env` only from the main checkout, and agents can't read or copy a `.env`. The repo's settings deny reading `.env` files, and that covers the Write and Edit tools too, so an agent writes one with a shell heredoc (`umask 077; cat > .env <<'EOF'`), which reads nothing. A command that needs `.env` (the dev server, `db:migrate`, `scripts/check-test-database.ts`) runs outside Claude Code's sandbox, and nothing prints its values.
 - `bun scripts/check-test-database.ts` (from this folder, outside the sandbox) stops unless `.env`'s database carries the test project's comment and its auth is on the same Neon endpoint. Run it before anything that writes to `.env`'s database from a terminal.
 - Hector's rules of 2026-11-20:
@@ -220,6 +234,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - A page's test against its board signs in with `signInAsYouWithTheCast()` (`tests/_support/members.ts`), which puts the cast in the container's repositories once per file, and pins the clock to the kit's today with bun's `setSystemTime(new Date("2026-11-10T09:00:00-05:00"))`, reset after. Find a row within the render's own container (`within(view.container)`): `render`'s queries cover the whole document, earlier renders included. `makeApp().addGames()` and `addCopies()` add rows the cast doesn't have, such as a game with a popularity or a stranger's copy, until U7 and U9 give those tables their writes.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
 - `tests/_support/controller.ts` (`controllerBasics`, recipes') came with U5's first controllers: a controller test names its valid input, what the use case should receive and the inputs to reject. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests. `tests/_support/members.ts` signs a test in as a member with a profile (`signInAsMember`) through the container's own controllers, for page, action and gate tests: the container's mock repositories live for the whole run, so each test signs in as a new user.
+- A Base UI switch or checkbox inside its own `<label>` flips twice on one click in happy-dom (U7, 2026-11-22), so its label sits beside it with `htmlFor`; Base UI gives the `id` to its hidden input, which the label then clicks (`SavedSwitch`, B7's expansions).
 - Base UI's dialogs and sheets in happy-dom (U2): a dialog closes after its exit transition, so wait for it with `waitFor`, and poll absence as a boolean (`expect(view.queryByRole("dialog") === null).toBe(true)`): Bun prints a whole element when an expectation on one fails, which takes seconds and starves `waitFor`'s retries. `fireEvent.click` doesn't focus a button as a tap does, so focus the opener first to test where the cursor goes back. A sheet takes the phone's Drawer when `happyDOM.setInnerWidth(390)` (the window's `happyDOM`, cast). Sonner's toasts are global to a test file, so a toast from one test still shows in the next. next/image calls `onLoad` after the picture decodes, a moment after the load event.
 - Fallow (`bun run dead-code`) counts test files as entry points, so a helper copied with its test is in use before any page needs it. The scripts are entry points in the root `.fallowrc.json` (`apps/community-game-library/scripts/*.ts`).
 - The migration scripts' tests run on the real journal, with job-search's tests of a run that applies it: typing `migrate`, another answer stopping it, and a migration still unapplied afterwards.

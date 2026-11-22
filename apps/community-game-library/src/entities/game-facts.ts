@@ -74,6 +74,14 @@ export function catalogLine(game: Game): string {
     .join(SEPARATOR);
 }
 
+// An expansion's own name, without its base game's in front: "Gull & Anchor: Low Tide" in a box
+// of Gull & Anchor is "Low Tide" (B13; screens.md, In my box).
+export function expansionName(title: string, baseTitle: string): string {
+  return title.startsWith(`${baseTitle}: `)
+    ? title.slice(baseTitle.length + 2)
+    : title;
+}
+
 // A library card's line (B10, Y1): the players and the play time, "2–5 · 45–60 min".
 export function cardLine(game: Game): string {
   const minutes = range(game.minMinutes, game.maxMinutes);

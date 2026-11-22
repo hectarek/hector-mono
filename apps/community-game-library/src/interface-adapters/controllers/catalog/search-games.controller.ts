@@ -8,10 +8,15 @@ import {
   InputParseError,
   UnauthenticatedError,
 } from "@/src/entities/errors/common";
+import { SEARCH_ORDERS } from "@/src/entities/search-title";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
-// What's typed: a title is never this long, so more is someone pasting something else.
-const inputSchema = z.object({ q: z.string().max(200) });
+// What's typed: a title is never this long, so more is someone pasting something else. The
+// Library lists the shelves first, and Add games the whole catalog in one list.
+const inputSchema = z.object({
+  q: z.string().max(200),
+  order: z.enum(SEARCH_ORDERS).default("shelves-first"),
+});
 
 export type ISearchGamesController = ReturnType<typeof searchGamesController>;
 
@@ -37,6 +42,6 @@ export const searchGamesController = (
     if (parseError) {
       throw new InputParseError("Invalid input", { cause: parseError });
     }
-    return useCase(data.q, userId, todayIn(PLAN_TIME_ZONE));
+    return useCase(data.q, userId, todayIn(PLAN_TIME_ZONE), data.order);
   };
 };

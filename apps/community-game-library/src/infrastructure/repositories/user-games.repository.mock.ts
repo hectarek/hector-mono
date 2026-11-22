@@ -1,6 +1,11 @@
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
-import type { UserGame } from "@/src/entities/models/user-game.model";
+import { DatabaseOperationError } from "@/src/entities/errors/common";
+import type {
+  NewUserGame,
+  UserGame,
+  UserGameChanges,
+} from "@/src/entities/models/user-game.model";
 import type { UserGameExpansion } from "@/src/entities/models/user-game-expansion.model";
 
 // The real repository's orders: a timestamp, then the id; ids by code point.
@@ -50,4 +55,72 @@ export class MockUserGamesRepository implements IUserGamesRepository {
       )
       .map((boxed) => ({ ...boxed }));
   }
+
+  async getById(id: string): Promise<UserGame | undefined> {
+    const copy = this.rows.find((row) => row.id === id);
+    return copy && { ...copy };
+  }
+
+  async listOwn(userId: string): Promise<UserGame[]> {
+    return this.rows
+      .filter((copy) => copy.userId === userId)
+      .sort(oldestFirst)
+      .map((copy) => ({ ...copy }));
+  }
+
+  // The table's defaults: in good condition, no note, lent.
+  async add(copy: NewUserGame): Promise<UserGame> {
+    const now = new Date();
+    const added: UserGame = {
+      id: crypto.randomUUID(),
+      condition: "good",
+      conditionNote: null,
+      lendable: true,
+      createdAt: now,
+      updatedAt: now,
+      ...copy,
+    };
+    this.rows.push(added);
+    return { ...added };
+  }
+
+  async update(id: string, changes: UserGameChanges): Promise<UserGame> {
+    const copy = this.rows.find((row) => row.id === id);
+    if (!copy) {
+      throw new DatabaseOperationError("update failed");
+    }
+    Object.assign(copy, changes, { updatedAt: new Date() });
+    return { ...copy };
+  }
+
+  // As the database's cascade does for the box; the loans live in their own mock.
+  async remove(id: string): Promise<void> {
+    keepOnly(this.rows, (copy) => copy.id !== id);
+    keepOnly(this.expansions, (boxed) => boxed.userGameId !== id);
+  }
+
+  async setExpansions(
+    userGameId: string,
+    gameIds: readonly string[],
+  ): Promise<void> {
+    keepOnly(this.expansions, (boxed) => boxed.userGameId !== userGameId);
+    this.expansions.push(...gameIds.map((gameId) => ({ userGameId, gameId })));
+  }
+
+  async setPassAlongForAll(userId: string, passAlong: boolean): Promise<void> {
+    const now = new Date();
+    for (const copy of this.rows) {
+      if (copy.userId === userId) {
+        copy.passAlong = passAlong;
+        copy.updatedAt = now;
+      }
+    }
+  }
+}
+
+// Keeps the rows that pass, in place, since tests hold the arrays.
+function keepOnly<T>(rows: T[], keep: (row: T) => boolean): void {
+  const kept = rows.filter(keep);
+  rows.length = 0;
+  rows.push(...kept);
 }

@@ -488,6 +488,7 @@ apps/community-game-library/
       loading.tsx                   # the Library's skeleton, under the shell (U1)
       page.tsx                      # Library, All friends: B1 to B4, B10, B12; ?q, filters and sort in the address (R13)
       library-search.tsx            # the search field, which puts ?q in the address as you type (U6)
+      library-views.tsx             # All friends | My library, the views under the field (U7)
       my-library/                   # B6; add/ (B8), suggest/ (B9)
       games/[id]/                   # a game's page: B5, B11, B13; the Ask to borrow (C1) and Join the line (C10) sheets
       copies/[id]/                  # a copy's page: B7, B14
@@ -507,7 +508,8 @@ apps/community-game-library/
                                     # dice, track, list-row, group, confirm-dialog, share-button, date-sheet (X1),
                                     # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy,
                                     # icons, no-connection, page-column, sheet (U2);
-                                    # by area: game-row, copy-row, copy-state, game-video, library-list, filter-sheet, sort-sheet,
+                                    # by area: game-row, copy-row, copy-state, game-video, i-own-it, in-my-box,
+                                    # saved-switch, library-list, filter-sheet, sort-sheet,
                                     # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
                                     # piece-picker, profile-form
     _lib/                           # current-user, auth-paths, safe-redirect, call-action, notify, notice-text,
@@ -565,7 +567,7 @@ apps/community-game-library/
 Use cases by area, each a file named for what it does (`request-loan.use-case.ts`), with a controller of the same name:
 
 - **catalog:** search-games, get-game, list-expansions
-- **copies:** add-user-game, update-user-game, set-user-game-expansions, set-lending, remove-user-game, set-pass-along-for-all, list-my-library, list-library, get-user-game
+- **copies:** add-user-game, update-user-game, put-in-box, set-lending, remove-user-game, set-pass-along-for-all, list-my-library, list-library, get-user-game (U7 saves a copy's expansions in update-user-game, with its condition, since B7's one Save covers both; put-in-box is search's In my box, in place of set-user-game-expansions)
 - **suggestions:** suggest-game, list-suggestions, list-answered-suggestions, answer-suggestion, add-game, update-game, find-games-to-edit
 - **profile:** create-profile, get-account-state, get-profile, list-taken-pieces, remove-photo, set-photo, update-notice-settings, update-profile
 - **friends:** require-friend, get-friend-link, make-friend-link, use-friend-link, list-friends, get-friend, send-friend-request, answer-friend-request, cancel-friend-request, unfriend, list-people-you-may-know

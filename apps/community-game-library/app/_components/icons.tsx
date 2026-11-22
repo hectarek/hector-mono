@@ -153,6 +153,20 @@ export function PlayIcon(props: IconProps) {
   );
 }
 
+// Add a game's mark (B6, A7): 16px, with a 2.4 stroke.
+export function PlusIcon(props: IconProps) {
+  return (
+    <LineIcon
+      viewBox="0 0 16 16"
+      strokeWidth={2.4}
+      className="size-4"
+      {...props}
+    >
+      <path d="M8 3v10M3 8h10" />
+    </LineIcon>
+  );
+}
+
 // A search field's mark: 16px.
 export function SearchIcon({ className }: { className?: string }) {
   return (
