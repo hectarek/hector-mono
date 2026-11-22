@@ -84,6 +84,21 @@ describe("toActionError", () => {
     });
   });
 
+  // B7's This copy names its parts field in the board's words.
+  it("names B7's missing parts field", () => {
+    const schema = z.object({ conditionNote: z.string().max(5, "Too long") });
+    expect(
+      toActionError(
+        parseError(schema, { conditionNote: "A torn lid" }),
+        logger,
+        FALLBACK,
+      ),
+    ).toEqual({
+      error: "Missing or damaged parts: Too long",
+      fields: { conditionNote: "Too long" },
+    });
+  });
+
   // Hidden fields are never named.
   it("never names a field the form doesn't show", () => {
     const schema = z.object({ userGameId: z.uuid("Pick a game") });

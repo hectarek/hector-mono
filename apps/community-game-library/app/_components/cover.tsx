@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { type CoverColor, useCoverArt } from "@/app/_components/cover-thumb";
+import { useCoverArt } from "@/app/_components/cover-thumb";
+import type { CoverColor } from "@/src/entities/piece";
 
 // The cover at the top of a game's page (the design system's Cover, Y1): a 148px bone block in a
 // die-cut tile. Without art, the game's 54px token and its title in stencil are the cover; with

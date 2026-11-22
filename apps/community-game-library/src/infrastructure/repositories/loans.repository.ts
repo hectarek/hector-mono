@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
 import { loans } from "@/db/schema";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -80,6 +80,30 @@ export class LoansRepository
         .orderBy(desc(loans.pickedUpOn), desc(loans.createdAt), desc(loans.id));
     } catch (err) {
       this.handleError(err, "listHistoryForCopy", { userGameId });
+    }
+  }
+
+  async countPickedUpForCopies(
+    userGameIds: readonly string[],
+    tx?: ITransaction,
+  ): Promise<{ userGameId: string; count: number }[]> {
+    if (userGameIds.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select({ userGameId: loans.userGameId, count: count() })
+        .from(loans)
+        .where(
+          and(
+            inArray(loans.userGameId, [...userGameIds]),
+            inArray(loans.status, [...PICKED_UP_STATUSES]),
+          ),
+        )
+        .groupBy(loans.userGameId)
+        .orderBy(asc(loans.userGameId));
+    } catch (err) {
+      this.handleError(err, "countPickedUpForCopies");
     }
   }
 }

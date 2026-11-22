@@ -78,7 +78,56 @@ export function formatDate(date: string, today: string): string {
   return year === today.slice(0, 4) ? day : `${day}, ${year}`;
 }
 
+const HOUR = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  hourCycle: "h23",
+  timeZone: PLAN_TIME_ZONE,
+});
+
+// When something happened, as a line after a verb says it ("You asked this morning", B13), in
+// the app's time zone: this morning, afternoon or evening, yesterday, a weekday within the week,
+// then its date.
+export function formatWhen(at: Date, now: Date): string {
+  const day = todayIn(PLAN_TIME_ZONE, at);
+  const today = todayIn(PLAN_TIME_ZONE, now);
+  const daysAgo = daysBetween(day, today);
+  if (daysAgo <= 0) {
+    const hour = Number(HOUR.format(at));
+    return hour < 12
+      ? "this morning"
+      : hour < 17
+        ? "this afternoon"
+        : "this evening";
+  }
+  if (daysAgo === 1) {
+    return "yesterday";
+  }
+  return daysAgo < 7
+    ? `on ${formatWeekday(day)}`
+    : `on ${formatDate(day, today)}`;
+}
+
 // A month, given as "YYYY-MM", by its name and year: "November 2026".
 export function formatMonth(month: string): string {
   return MONTH_YEAR.format(toUtc(`${month}-01`));
 }
+
+// A day on a list's line: "today", "yesterday", then "Nov 2" (G1, G7, My library's suggestions).
+export function formatDay(at: Date, now: Date): string {
+  const day = todayIn(PLAN_TIME_ZONE, at);
+  const daysAgo = daysBetween(day, todayIn(PLAN_TIME_ZONE, now));
+  return daysAgo <= 0
+    ? "today"
+    : daysAgo === 1
+      ? "yesterday"
+      : formatMonthDay(day);
+}
+
+const CLOCK = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: PLAN_TIME_ZONE,
+});
+
+// A time of day, as G2 gives when a suggestion came: "9:12 AM".
+export const formatTime = (at: Date): string => CLOCK.format(at);

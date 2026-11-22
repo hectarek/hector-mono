@@ -143,6 +143,41 @@ export function ShareIcon(props: IconProps) {
   );
 }
 
+// The how-to-play video's mark (B5), drawn 44px with a 1.5 stroke where it's used.
+export function PlayIcon(props: IconProps) {
+  return (
+    <LineIcon strokeWidth={1.5} roundCaps={false} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M10 8.5v7l6-3.5z" fill="currentColor" />
+    </LineIcon>
+  );
+}
+
+// The library's Filter button (B1): two sliders.
+export function FilterIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="8" cy="17" r="2" />
+    </LineIcon>
+  );
+}
+
+// Add a game's mark (B6, A7): 16px, with a 2.4 stroke.
+export function PlusIcon(props: IconProps) {
+  return (
+    <LineIcon
+      viewBox="0 0 16 16"
+      strokeWidth={2.4}
+      className="size-4"
+      {...props}
+    >
+      <path d="M8 3v10M3 8h10" />
+    </LineIcon>
+  );
+}
+
 // A search field's mark: 16px.
 export function SearchIcon({ className }: { className?: string }) {
   return (

@@ -24,16 +24,22 @@ const CloseSheet = createContext<() => void>(() => {});
 // answer a night, sort, pick a date. On a phone it rises from the bottom (the Drawer); from 768px
 // it's a centered dialog 480 wide with the same content (KTD14, Wide3). Its title is a stencil
 // heading with a close button beside it; its content sits 14px apart and ends in SheetActions.
-// Like recipes' sheets, it closes as the page is left (useClosesOnLeave, recipes' D88).
+// A long one (the library's Filter, B2) scrolls under a `footer` that stays put. Like recipes'
+// sheets, it closes as the page is left (useClosesOnLeave, recipes' D88).
 export function Sheet({
   open,
   onOpenChange,
   title,
+  closeLabel = "Close",
+  footer,
   children,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  // What closing does, when it's more than closing (B2's "Close without changing the filters").
+  closeLabel?: string;
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   const phone = useIsMobile();
@@ -44,7 +50,7 @@ export function Sheet({
   const closeButton = (
     <button
       type="button"
-      aria-label="Close"
+      aria-label={closeLabel}
       className="-mt-1.5 -mr-2 flex size-11 shrink-0 items-center justify-center text-foreground hover:text-destructive"
     />
   );
@@ -54,7 +60,7 @@ export function Sheet({
       <CloseSheet.Provider value={close}>
         <Drawer key={sheetKey} open={open} onOpenChange={onOpenChange}>
           <DrawerContent>
-            <div className="flex flex-col gap-3.5 overflow-y-auto p-4">
+            <div className="flex min-h-0 flex-col gap-3.5 overflow-y-auto p-4">
               <div className="flex items-start justify-between gap-2.5">
                 <DrawerTitle className="mt-2">{title}</DrawerTitle>
                 <DrawerClose render={closeButton}>
@@ -63,6 +69,11 @@ export function Sheet({
               </div>
               {children}
             </div>
+            {footer && (
+              <div className="shrink-0 border-t-2 border-foreground px-4 py-3">
+                {footer}
+              </div>
+            )}
           </DrawerContent>
         </Drawer>
       </CloseSheet.Provider>
@@ -71,14 +82,24 @@ export function Sheet({
   return (
     <CloseSheet.Provider value={close}>
       <Dialog key={sheetKey} open={open} onOpenChange={onOpenChange}>
-        <DialogContent showCloseButton={false}>
+        <DialogContent
+          showCloseButton={false}
+          className={footer ? "flex max-h-9/10 flex-col" : undefined}
+        >
           <div className="flex items-start justify-between gap-2.5">
             <DialogTitle className="mt-2">{title}</DialogTitle>
             <DialogClose render={closeButton}>
               <CloseIcon className="size-5.5" strokeWidth={2.4} />
             </DialogClose>
           </div>
-          {children}
+          {footer ? (
+            <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-4">
+              {children}
+            </div>
+          ) : (
+            children
+          )}
+          {footer}
         </DialogContent>
       </Dialog>
     </CloseSheet.Provider>

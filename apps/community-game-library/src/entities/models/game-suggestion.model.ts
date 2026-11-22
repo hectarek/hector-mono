@@ -26,3 +26,15 @@ export const gameSuggestionSchema = z.object({
   updatedAt: z.date(),
 });
 export type GameSuggestion = z.infer<typeof gameSuggestionSchema>;
+
+// What a member sends (B9): the title, and what else they know.
+export type NewGameSuggestion = Pick<
+  GameSuggestion,
+  "createdBy" | "title" | "year" | "publisher" | "sourceUrl" | "imageUrl"
+>;
+
+// The admin's answer (G2): added or already here points at the game, a decline carries its
+// reason (R4's audit line).
+export type SuggestionAnswer =
+  | { status: "added" | "already-here"; gameId: string }
+  | { status: "declined"; declineNote: string };
