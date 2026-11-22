@@ -7,7 +7,7 @@ import {
   setSystemTime,
 } from "bun:test";
 import { Toaster } from "@repo/ui/components/sonner";
-import { fireEvent, render, within } from "@testing-library/react";
+import { fireEvent, render, waitFor, within } from "@testing-library/react";
 import { APP_TOASTER } from "@/app/_lib/notify";
 import AddGamesPage from "@/app/(main)/my-library/add/page";
 import { getInjection } from "@/di/container";
@@ -127,10 +127,14 @@ describe("Add games", () => {
     expect(await view.findByText("2 added")).toBeTruthy();
     expect(await yourCopiesOf(games.safeHarbor.id)).toHaveLength(1);
 
-    // Undo on the row takes it off your shelf again.
-    fireEvent.click(
-      within(row(view, "Safe Harbor")).getByRole("button", { name: "Undo" }),
-    );
+    // Undo on the row takes it off your shelf again. It's switched off until the add's
+    // transition ends, which can come a moment after "2 added" shows (on CI's runner, 2026-11-22),
+    // and a click on it then does nothing, as a tap wouldn't.
+    const undo = within(row(view, "Safe Harbor")).getByRole("button", {
+      name: "Undo",
+    });
+    await waitFor(() => expect(undo.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(undo);
     expect(await view.findByText("1 added")).toBeTruthy();
     expect(await yourCopiesOf(games.safeHarbor.id)).toHaveLength(0);
 
