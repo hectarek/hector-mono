@@ -96,6 +96,9 @@ export default async function YouPage() {
               Put the app on my home screen
             </span>
           </ListRow>
+          <ListRow href="/you/notices">
+            <span className="text-15 font-bold">Notices I get</span>
+          </ListRow>
           {waiting && (
             <ListRow
               href="/admin"

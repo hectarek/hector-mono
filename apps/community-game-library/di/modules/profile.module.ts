@@ -2,10 +2,12 @@ import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
 import { createProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
 import { getAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
+import { getNoticeSettingsUseCase } from "@/src/application/use-cases/profile/get-notice-settings.use-case";
 import { getProfileUseCase } from "@/src/application/use-cases/profile/get-profile.use-case";
 import { listTakenPiecesUseCase } from "@/src/application/use-cases/profile/list-taken-pieces.use-case";
 import { removePhotoUseCase } from "@/src/application/use-cases/profile/remove-photo.use-case";
 import { setPhotoUseCase } from "@/src/application/use-cases/profile/set-photo.use-case";
+import { updateNoticeSettingsUseCase } from "@/src/application/use-cases/profile/update-notice-settings.use-case";
 import { updateProfileUseCase } from "@/src/application/use-cases/profile/update-profile.use-case";
 import { UserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository";
 import { MockUserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository.mock";
@@ -13,10 +15,12 @@ import { UserSettingsRepository } from "@/src/infrastructure/repositories/user-s
 import { MockUserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository.mock";
 import { createProfileController } from "@/src/interface-adapters/controllers/profile/create-profile.controller";
 import { getAccountStateController } from "@/src/interface-adapters/controllers/profile/get-account-state.controller";
+import { getNoticeSettingsController } from "@/src/interface-adapters/controllers/profile/get-notice-settings.controller";
 import { getProfileController } from "@/src/interface-adapters/controllers/profile/get-profile.controller";
 import { listTakenPiecesController } from "@/src/interface-adapters/controllers/profile/list-taken-pieces.controller";
 import { removePhotoController } from "@/src/interface-adapters/controllers/profile/remove-photo.controller";
 import { setPhotoController } from "@/src/interface-adapters/controllers/profile/set-photo.controller";
+import { updateNoticeSettingsController } from "@/src/interface-adapters/controllers/profile/update-notice-settings.controller";
 import { updateProfileController } from "@/src/interface-adapters/controllers/profile/update-profile.controller";
 
 export function createProfileModule() {
@@ -125,6 +129,30 @@ export function createProfileModule() {
     .toHigherOrderFunction(
       setPhotoController,
       withUseCase(DI_SYMBOLS.ISetPhotoUseCase),
+    );
+  profileModule
+    .bind(DI_SYMBOLS.IGetNoticeSettingsUseCase)
+    .toHigherOrderFunction(getNoticeSettingsUseCase, [
+      DI_SYMBOLS.IUserSettingsRepository,
+    ]);
+  profileModule
+    .bind(DI_SYMBOLS.IGetNoticeSettingsController)
+    .toHigherOrderFunction(
+      getNoticeSettingsController,
+      withUseCase(DI_SYMBOLS.IGetNoticeSettingsUseCase),
+    );
+  profileModule
+    .bind(DI_SYMBOLS.IUpdateNoticeSettingsUseCase)
+    .toHigherOrderFunction(updateNoticeSettingsUseCase, [
+      DI_SYMBOLS.IUserSettingsRepository,
+      DI_SYMBOLS.ITransactionManagerService,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  profileModule
+    .bind(DI_SYMBOLS.IUpdateNoticeSettingsController)
+    .toHigherOrderFunction(
+      updateNoticeSettingsController,
+      withUseCase(DI_SYMBOLS.IUpdateNoticeSettingsUseCase),
     );
   profileModule
     .bind(DI_SYMBOLS.IUpdateProfileController)

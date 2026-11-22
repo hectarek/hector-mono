@@ -43,6 +43,10 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / 86_400_000);
 }
 
+const DAY_NAME = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  timeZone: "UTC",
+});
 const WEEKDAY = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
   timeZone: "UTC",
@@ -71,6 +75,11 @@ export function formatWeekday(date: string): string {
 
 export function formatMonthDay(date: string): string {
   return MONTH_DAY.format(toUtc(date));
+}
+
+// A day by its whole name, as a line says it: "You have it until Friday" (F1).
+export function formatDayName(date: string): string {
+  return DAY_NAME.format(toUtc(date));
 }
 
 // A date as every screen writes it (KTD9; screens.md, Limits to build for): its weekday, month
@@ -141,3 +150,18 @@ const CLOCK = new Intl.DateTimeFormat("en-US", {
 
 // A time of day, as G2 gives when a suggestion came: "9:12 AM".
 export const formatTime = (at: Date): string => CLOCK.format(at);
+
+// When a notice arrived, as F1's right-hand column says it: minutes ago within the hour, the time
+// today, Yesterday, a weekday within the week, then its month and day.
+export function formatNoticeTime(at: Date, now: Date): string {
+  const minutes = Math.floor((now.getTime() - at.getTime()) / 60_000);
+  const day = todayIn(PLAN_TIME_ZONE, at);
+  const daysAgo = daysBetween(day, todayIn(PLAN_TIME_ZONE, now));
+  if (daysAgo <= 0) {
+    return minutes < 60 ? `${Math.max(minutes, 1)} min ago` : formatTime(at);
+  }
+  if (daysAgo === 1) {
+    return "Yesterday";
+  }
+  return daysAgo < 7 ? formatWeekday(day) : formatMonthDay(day);
+}

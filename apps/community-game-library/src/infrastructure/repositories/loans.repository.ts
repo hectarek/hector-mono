@@ -122,4 +122,39 @@ export class LoansRepository
       this.handleError(err, "setStatus", { loanId });
     }
   }
+
+  async listByIds(ids: readonly string[], tx?: ITransaction): Promise<Loan[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(inArray(loans.id, [...ids]))
+        .orderBy(asc(loans.createdAt), asc(loans.id));
+    } catch (err) {
+      this.handleError(err, "listByIds");
+    }
+  }
+
+  async listOpenForBorrower(
+    userId: string,
+    tx?: ITransaction,
+  ): Promise<Loan[]> {
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(
+          and(
+            eq(loans.borrowerUserId, userId),
+            inArray(loans.status, [...OPEN_STATUSES]),
+          ),
+        )
+        .orderBy(asc(loans.createdAt), asc(loans.id));
+    } catch (err) {
+      this.handleError(err, "listOpenForBorrower", { userId });
+    }
+  }
 }

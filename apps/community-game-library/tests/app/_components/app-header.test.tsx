@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
-import { AppBar, AppHeader, MyPiece } from "@/app/_components/app-header";
+import { AppBar, AppHeader, MemberTools } from "@/app/_components/app-header";
 import { NoConnection } from "@/app/_components/no-connection";
 import { signInAsMember } from "@/tests/_support/members";
 import { nextState, signInAsNewUser } from "@/tests/_support/next";
@@ -44,7 +44,7 @@ describe("the piece in the header", () => {
 
   it("is the member's own piece", async () => {
     await signInAsMember({ pieceShape: "ship", pieceColor: "plum" });
-    const view = render(await MyPiece());
+    const view = render(await MemberTools({ on: "kraft" }));
     expect(piece(view)?.getAttribute("data-color")).toBe("plum");
     expect(piece(view)?.getAttribute("d")).toStartWith("M2.2 21.8");
   });
@@ -55,12 +55,12 @@ describe("the piece in the header", () => {
     loading.unmount();
 
     signInAsNewUser();
-    const none = render(await MyPiece());
+    const none = render(await MemberTools({ on: "kraft" }));
     expect(piece(none)?.getAttribute("data-color")).toBe("bone");
     none.unmount();
 
     nextState.userId = undefined;
-    const signedOut = render(await MyPiece());
+    const signedOut = render(await MemberTools({ on: "kraft" }));
     expect(piece(signedOut)?.getAttribute("data-color")).toBe("bone");
   });
 });

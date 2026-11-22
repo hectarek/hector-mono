@@ -44,12 +44,17 @@ import { openFriendLinkUseCase } from "@/src/application/use-cases/friends/open-
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
 import { sendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import { unfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+import { getTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
+import { listInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
+import { markInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
 import { createProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
 import { getAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
+import { getNoticeSettingsUseCase } from "@/src/application/use-cases/profile/get-notice-settings.use-case";
 import { getProfileUseCase } from "@/src/application/use-cases/profile/get-profile.use-case";
 import { listTakenPiecesUseCase } from "@/src/application/use-cases/profile/list-taken-pieces.use-case";
 import { removePhotoUseCase } from "@/src/application/use-cases/profile/remove-photo.use-case";
 import { setPhotoUseCase } from "@/src/application/use-cases/profile/set-photo.use-case";
+import { updateNoticeSettingsUseCase } from "@/src/application/use-cases/profile/update-notice-settings.use-case";
 import { updateProfileUseCase } from "@/src/application/use-cases/profile/update-profile.use-case";
 import { addGameUseCase } from "@/src/application/use-cases/suggestions/add-game.use-case";
 import { answerSuggestionUseCase } from "@/src/application/use-cases/suggestions/answer-suggestion.use-case";
@@ -330,6 +335,31 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
 
     requireFriend: (viewerId: string, otherUserId: string) =>
       requireFriend(friendships, viewerId, otherUserId),
+
+    // The inbox, the counts and notice settings (U11)
+    listInbox: listInboxUseCase(
+      notices,
+      userSettings,
+      loans,
+      userGames,
+      games,
+      gameSuggestions,
+      userProfiles,
+    ),
+    markInboxRead: markInboxReadUseCase(notices, transactions),
+    getTabCounts: getTabCountsUseCase(
+      notices,
+      userSettings,
+      userGames,
+      loans,
+      friendRequests,
+    ),
+    getNoticeSettings: getNoticeSettingsUseCase(userSettings),
+    updateNoticeSettings: updateNoticeSettingsUseCase(
+      userSettings,
+      transactions,
+      log,
+    ),
 
     // Friends (U10)
     getFriendLink: getFriendLinkUseCase(friendLinks, transactions, log),

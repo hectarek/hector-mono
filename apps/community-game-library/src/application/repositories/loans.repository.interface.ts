@@ -27,6 +27,11 @@ export interface ILoansRepository {
     userGameIds: readonly string[],
     tx?: ITransaction,
   ): Promise<{ userGameId: string; count: number }[]>;
+  // Loans by id, whoever's they are: a notice's loan, or a pass-along's previous one. The caller
+  // has already checked the member may see them.
+  listByIds(ids: readonly string[], tx?: ITransaction): Promise<Loan[]>;
+  // A member's own open loans as the borrower, oldest first.
+  listOpenForBorrower(userId: string, tx?: ITransaction): Promise<Loan[]>;
   // A move that changes only the status, such as a withdrawal or a cancellation, written after
   // the use case has locked the copy and checked the move with canMove (KTD6).
   setStatus(

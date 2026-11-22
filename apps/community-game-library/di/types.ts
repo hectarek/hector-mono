@@ -39,12 +39,17 @@ import type { IMakeFriendLinkUseCase } from "@/src/application/use-cases/friends
 import type { IOpenFriendLinkUseCase } from "@/src/application/use-cases/friends/open-friend-link.use-case";
 import type { ISendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import type { IUnfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+import type { IGetTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
+import type { IListInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
+import type { IMarkInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
 import type { ICreateProfileUseCase } from "@/src/application/use-cases/profile/create-profile.use-case";
 import type { IGetAccountStateUseCase } from "@/src/application/use-cases/profile/get-account-state.use-case";
+import type { IGetNoticeSettingsUseCase } from "@/src/application/use-cases/profile/get-notice-settings.use-case";
 import type { IGetProfileUseCase } from "@/src/application/use-cases/profile/get-profile.use-case";
 import type { IListTakenPiecesUseCase } from "@/src/application/use-cases/profile/list-taken-pieces.use-case";
 import type { IRemovePhotoUseCase } from "@/src/application/use-cases/profile/remove-photo.use-case";
 import type { ISetPhotoUseCase } from "@/src/application/use-cases/profile/set-photo.use-case";
+import type { IUpdateNoticeSettingsUseCase } from "@/src/application/use-cases/profile/update-notice-settings.use-case";
 import type { IUpdateProfileUseCase } from "@/src/application/use-cases/profile/update-profile.use-case";
 import type { IAddGameUseCase } from "@/src/application/use-cases/suggestions/add-game.use-case";
 import type { IAnswerSuggestionUseCase } from "@/src/application/use-cases/suggestions/answer-suggestion.use-case";
@@ -77,12 +82,17 @@ import type { IMakeFriendLinkController } from "@/src/interface-adapters/control
 import type { IOpenFriendLinkController } from "@/src/interface-adapters/controllers/friends/open-friend-link.controller";
 import type { ISendFriendRequestController } from "@/src/interface-adapters/controllers/friends/send-friend-request.controller";
 import type { IUnfriendController } from "@/src/interface-adapters/controllers/friends/unfriend.controller";
+import type { IGetTabCountsController } from "@/src/interface-adapters/controllers/notices/get-tab-counts.controller";
+import type { IListInboxController } from "@/src/interface-adapters/controllers/notices/list-inbox.controller";
+import type { IMarkInboxReadController } from "@/src/interface-adapters/controllers/notices/mark-inbox-read.controller";
 import type { ICreateProfileController } from "@/src/interface-adapters/controllers/profile/create-profile.controller";
 import type { IGetAccountStateController } from "@/src/interface-adapters/controllers/profile/get-account-state.controller";
+import type { IGetNoticeSettingsController } from "@/src/interface-adapters/controllers/profile/get-notice-settings.controller";
 import type { IGetProfileController } from "@/src/interface-adapters/controllers/profile/get-profile.controller";
 import type { IListTakenPiecesController } from "@/src/interface-adapters/controllers/profile/list-taken-pieces.controller";
 import type { IRemovePhotoController } from "@/src/interface-adapters/controllers/profile/remove-photo.controller";
 import type { ISetPhotoController } from "@/src/interface-adapters/controllers/profile/set-photo.controller";
+import type { IUpdateNoticeSettingsController } from "@/src/interface-adapters/controllers/profile/update-notice-settings.controller";
 import type { IUpdateProfileController } from "@/src/interface-adapters/controllers/profile/update-profile.controller";
 import type { IAddGameController } from "@/src/interface-adapters/controllers/suggestions/add-game.controller";
 import type { IAnswerSuggestionController } from "@/src/interface-adapters/controllers/suggestions/answer-suggestion.controller";
@@ -131,10 +141,14 @@ export const DI_SYMBOLS = {
   IGetGameToEditController: Symbol.for("IGetGameToEditController"),
   IGetGameToEditUseCase: Symbol.for("IGetGameToEditUseCase"),
   IGetGameUseCase: Symbol.for("IGetGameUseCase"),
+  IGetNoticeSettingsController: Symbol.for("IGetNoticeSettingsController"),
+  IGetNoticeSettingsUseCase: Symbol.for("IGetNoticeSettingsUseCase"),
   IGetProfileController: Symbol.for("IGetProfileController"),
   IGetProfileUseCase: Symbol.for("IGetProfileUseCase"),
   IGetSuggestionController: Symbol.for("IGetSuggestionController"),
   IGetSuggestionUseCase: Symbol.for("IGetSuggestionUseCase"),
+  IGetTabCountsController: Symbol.for("IGetTabCountsController"),
+  IGetTabCountsUseCase: Symbol.for("IGetTabCountsUseCase"),
   IGetUserGameController: Symbol.for("IGetUserGameController"),
   IGetUserGameUseCase: Symbol.for("IGetUserGameUseCase"),
   IListAnsweredSuggestionsController: Symbol.for(
@@ -145,6 +159,8 @@ export const DI_SYMBOLS = {
   ),
   IListFriendsController: Symbol.for("IListFriendsController"),
   IListFriendsUseCase: Symbol.for("IListFriendsUseCase"),
+  IListInboxController: Symbol.for("IListInboxController"),
+  IListInboxUseCase: Symbol.for("IListInboxUseCase"),
   IListLibraryController: Symbol.for("IListLibraryController"),
   IListLibraryUseCase: Symbol.for("IListLibraryUseCase"),
   IListMyLibraryController: Symbol.for("IListMyLibraryController"),
@@ -161,6 +177,8 @@ export const DI_SYMBOLS = {
   ILoggerService: Symbol.for("ILoggerService"),
   IMakeFriendLinkController: Symbol.for("IMakeFriendLinkController"),
   IMakeFriendLinkUseCase: Symbol.for("IMakeFriendLinkUseCase"),
+  IMarkInboxReadController: Symbol.for("IMarkInboxReadController"),
+  IMarkInboxReadUseCase: Symbol.for("IMarkInboxReadUseCase"),
   INoticesRepository: Symbol.for("INoticesRepository"),
   IOpenFriendLinkController: Symbol.for("IOpenFriendLinkController"),
   IOpenFriendLinkUseCase: Symbol.for("IOpenFriendLinkUseCase"),
@@ -189,6 +207,10 @@ export const DI_SYMBOLS = {
   IUnfriendUseCase: Symbol.for("IUnfriendUseCase"),
   IUpdateGameController: Symbol.for("IUpdateGameController"),
   IUpdateGameUseCase: Symbol.for("IUpdateGameUseCase"),
+  IUpdateNoticeSettingsController: Symbol.for(
+    "IUpdateNoticeSettingsController",
+  ),
+  IUpdateNoticeSettingsUseCase: Symbol.for("IUpdateNoticeSettingsUseCase"),
   IUpdateProfileController: Symbol.for("IUpdateProfileController"),
   IUpdateProfileUseCase: Symbol.for("IUpdateProfileUseCase"),
   IUpdateUserGameController: Symbol.for("IUpdateUserGameController"),
@@ -233,16 +255,22 @@ export interface DI_RETURN_TYPES {
   IGetGameToEditController: IGetGameToEditController;
   IGetGameToEditUseCase: IGetGameToEditUseCase;
   IGetGameUseCase: IGetGameUseCase;
+  IGetNoticeSettingsController: IGetNoticeSettingsController;
+  IGetNoticeSettingsUseCase: IGetNoticeSettingsUseCase;
   IGetProfileController: IGetProfileController;
   IGetProfileUseCase: IGetProfileUseCase;
   IGetSuggestionController: IGetSuggestionController;
   IGetSuggestionUseCase: IGetSuggestionUseCase;
+  IGetTabCountsController: IGetTabCountsController;
+  IGetTabCountsUseCase: IGetTabCountsUseCase;
   IGetUserGameController: IGetUserGameController;
   IGetUserGameUseCase: IGetUserGameUseCase;
   IListAnsweredSuggestionsController: IListAnsweredSuggestionsController;
   IListAnsweredSuggestionsUseCase: IListAnsweredSuggestionsUseCase;
   IListFriendsController: IListFriendsController;
   IListFriendsUseCase: IListFriendsUseCase;
+  IListInboxController: IListInboxController;
+  IListInboxUseCase: IListInboxUseCase;
   IListLibraryController: IListLibraryController;
   IListLibraryUseCase: IListLibraryUseCase;
   IListMyLibraryController: IListMyLibraryController;
@@ -257,6 +285,8 @@ export interface DI_RETURN_TYPES {
   ILoggerService: ILoggerService;
   IMakeFriendLinkController: IMakeFriendLinkController;
   IMakeFriendLinkUseCase: IMakeFriendLinkUseCase;
+  IMarkInboxReadController: IMarkInboxReadController;
+  IMarkInboxReadUseCase: IMarkInboxReadUseCase;
   INoticesRepository: INoticesRepository;
   IOpenFriendLinkController: IOpenFriendLinkController;
   IOpenFriendLinkUseCase: IOpenFriendLinkUseCase;
@@ -285,6 +315,8 @@ export interface DI_RETURN_TYPES {
   IUnfriendUseCase: IUnfriendUseCase;
   IUpdateGameController: IUpdateGameController;
   IUpdateGameUseCase: IUpdateGameUseCase;
+  IUpdateNoticeSettingsController: IUpdateNoticeSettingsController;
+  IUpdateNoticeSettingsUseCase: IUpdateNoticeSettingsUseCase;
   IUpdateProfileController: IUpdateProfileController;
   IUpdateProfileUseCase: IUpdateProfileUseCase;
   IUpdateUserGameController: IUpdateUserGameController;

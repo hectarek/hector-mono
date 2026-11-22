@@ -74,4 +74,21 @@ export class MockLoansRepository implements ILoansRepository {
       Object.assign(loan, { status, updatedAt: new Date() });
     }
   }
+
+  async listByIds(ids: readonly string[]): Promise<Loan[]> {
+    const wanted = new Set(ids);
+    return this.rows
+      .filter((loan) => wanted.has(loan.id))
+      .sort(oldestFirst)
+      .map((loan) => ({ ...loan }));
+  }
+
+  async listOpenForBorrower(userId: string): Promise<Loan[]> {
+    return this.rows
+      .filter(
+        (loan) => loan.borrowerUserId === userId && open.includes(loan.status),
+      )
+      .sort(oldestFirst)
+      .map((loan) => ({ ...loan }));
+  }
 }

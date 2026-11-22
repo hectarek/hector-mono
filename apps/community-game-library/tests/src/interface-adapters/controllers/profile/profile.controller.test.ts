@@ -4,10 +4,12 @@ import { MAX_PHOTO_BYTES } from "@/src/entities/profile-photo";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { createProfileController } from "@/src/interface-adapters/controllers/profile/create-profile.controller";
 import { getAccountStateController } from "@/src/interface-adapters/controllers/profile/get-account-state.controller";
+import { getNoticeSettingsController } from "@/src/interface-adapters/controllers/profile/get-notice-settings.controller";
 import { getProfileController } from "@/src/interface-adapters/controllers/profile/get-profile.controller";
 import { listTakenPiecesController } from "@/src/interface-adapters/controllers/profile/list-taken-pieces.controller";
 import { removePhotoController } from "@/src/interface-adapters/controllers/profile/remove-photo.controller";
 import { setPhotoController } from "@/src/interface-adapters/controllers/profile/set-photo.controller";
+import { updateNoticeSettingsController } from "@/src/interface-adapters/controllers/profile/update-notice-settings.controller";
 import { updateProfileController } from "@/src/interface-adapters/controllers/profile/update-profile.controller";
 import { CAST } from "@/tests/_support/cast";
 import { controllerBasics, ID } from "@/tests/_support/controller";
@@ -63,9 +65,22 @@ describe("getProfileController", () => {
   });
 });
 
+describe("updateNoticeSettingsController", () => {
+  controllerBasics({
+    make: (useCase, logger) => updateNoticeSettingsController(useCase, logger),
+    valid: { group: "night-mornings", on: true },
+    calledWith: ["night-mornings", true, CAST.people.you.id],
+    invalid: {
+      "a group that isn't listed": { group: "push", on: true },
+      "a switch that isn't on or off": { group: "night-mornings", on: "yes" },
+    },
+  });
+});
+
 describe("the controllers that read for the signed-in member", () => {
   const controllers = {
     getAccountState: getAccountStateController,
+    getNoticeSettings: getNoticeSettingsController,
     listTakenPieces: listTakenPiecesController,
     removePhoto: removePhotoController,
   };

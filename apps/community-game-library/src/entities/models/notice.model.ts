@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { NOTICE_TYPES } from "../notice-types";
+import type { GameSuggestion } from "./game-suggestion.model";
+import type { NameAndPiece } from "./user-profile.model";
 
 // One person told (docs/data-model.md, notices; R25 to R27). It points at one thing and goes when
 // that thing goes; its words come from its type when it's read (KTD7).
@@ -38,3 +40,29 @@ export type NewNotice = Pick<Notice, "userId" | "type"> &
       | "answerNote"
     >
   >;
+
+// A notice as the inbox shows it (F1): the row, and what it points at, as its words need them.
+// Its night comes with nights' rows (U18).
+export type InboxNotice = {
+  notice: Notice;
+  // Who caused it, while they're a member: "Sam said yes".
+  actor: NameAndPiece | null;
+  loan: {
+    id: string;
+    gameId: string;
+    gameTitle: string;
+    ownerId: string;
+    borrowerId: string;
+    borrowerName: string | null;
+    requestNote: string | null;
+    dueOn: string | null;
+    moreTimeDueOn: string | null;
+  } | null;
+  night: { id: string; title: string; startsAt: Date } | null;
+  suggestion: {
+    id: string;
+    title: string;
+    status: GameSuggestion["status"];
+    gameId: string | null;
+  } | null;
+};

@@ -115,7 +115,10 @@ describe("Friends (E1)", () => {
     );
     expect(request?.createdBy).toBe(you.id);
 
-    const again = render(await FriendsPage());
+    // A fresh render, with its own toaster: the first one's pending work can keep a second
+    // render from committing in happy-dom.
+    view.unmount();
+    const again = withToaster(await FriendsPage());
     fireEvent.click(
       (await rowOf(again, "Noor")).getByRole("button", {
         name: "Cancel request",
