@@ -43,7 +43,10 @@ import type { IUnfriendUseCase } from "@/src/application/use-cases/friends/unfri
 // (docs/build-plan.md, Code map).
 import type { IAnswerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
 import type { ICancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import type { IConfirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
+import type { IConfirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import type { IGetLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import type { IGiveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import type { IListLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
 import type { IRequestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
@@ -92,7 +95,10 @@ import type { ISendFriendRequestController } from "@/src/interface-adapters/cont
 import type { IUnfriendController } from "@/src/interface-adapters/controllers/friends/unfriend.controller";
 import type { IAnswerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
 import type { ICancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import type { IConfirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
+import type { IConfirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import type { IGetLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import type { IGiveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import type { IListLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
 import type { IRequestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
 import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
@@ -137,6 +143,10 @@ export const DI_SYMBOLS = {
   ICancelLoanUseCase: Symbol.for("ICancelLoanUseCase"),
   ICheckFriendLinkController: Symbol.for("ICheckFriendLinkController"),
   ICheckFriendLinkUseCase: Symbol.for("ICheckFriendLinkUseCase"),
+  IConfirmPickUpController: Symbol.for("IConfirmPickUpController"),
+  IConfirmPickUpUseCase: Symbol.for("IConfirmPickUpUseCase"),
+  IConfirmReturnController: Symbol.for("IConfirmReturnController"),
+  IConfirmReturnUseCase: Symbol.for("IConfirmReturnUseCase"),
   ICreateProfileController: Symbol.for("ICreateProfileController"),
   ICreateProfileUseCase: Symbol.for("ICreateProfileUseCase"),
   IFileStorage: Symbol.for("IFileStorage"),
@@ -169,6 +179,8 @@ export const DI_SYMBOLS = {
   IGetTabCountsUseCase: Symbol.for("IGetTabCountsUseCase"),
   IGetUserGameController: Symbol.for("IGetUserGameController"),
   IGetUserGameUseCase: Symbol.for("IGetUserGameUseCase"),
+  IGiveBackController: Symbol.for("IGiveBackController"),
+  IGiveBackUseCase: Symbol.for("IGiveBackUseCase"),
   IListAnsweredSuggestionsController: Symbol.for(
     "IListAnsweredSuggestionsController",
   ),
@@ -263,6 +275,10 @@ export interface DI_RETURN_TYPES {
   ICancelLoanUseCase: ICancelLoanUseCase;
   ICheckFriendLinkController: ICheckFriendLinkController;
   ICheckFriendLinkUseCase: ICheckFriendLinkUseCase;
+  IConfirmPickUpController: IConfirmPickUpController;
+  IConfirmPickUpUseCase: IConfirmPickUpUseCase;
+  IConfirmReturnController: IConfirmReturnController;
+  IConfirmReturnUseCase: IConfirmReturnUseCase;
   ICreateProfileController: ICreateProfileController;
   ICreateProfileUseCase: ICreateProfileUseCase;
   IFileStorage: IFileStorage;
@@ -295,6 +311,8 @@ export interface DI_RETURN_TYPES {
   IGetTabCountsUseCase: IGetTabCountsUseCase;
   IGetUserGameController: IGetUserGameController;
   IGetUserGameUseCase: IGetUserGameUseCase;
+  IGiveBackController: IGiveBackController;
+  IGiveBackUseCase: IGiveBackUseCase;
   IListAnsweredSuggestionsController: IListAnsweredSuggestionsController;
   IListAnsweredSuggestionsUseCase: IListAnsweredSuggestionsUseCase;
   IListFriendsController: IListFriendsController;

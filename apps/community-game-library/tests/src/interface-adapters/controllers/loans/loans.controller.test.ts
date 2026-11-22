@@ -11,7 +11,10 @@ import { UnauthenticatedError } from "@/src/entities/errors/common";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { answerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
 import { cancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
+import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import { giveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import { listLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
 import { requestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
 import { withdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
@@ -148,6 +151,68 @@ describe("listLoansController", () => {
     expect(useCase).not.toHaveBeenCalled();
     await controller(you.id);
     expect(useCase).toHaveBeenCalledWith(
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    );
+  });
+});
+
+describe("confirmPickUpController", () => {
+  controllerBasics({
+    make: (useCase, logger) => confirmPickUpController(useCase, logger),
+    valid: { loanId: ID, pickedUpOn: "2026-11-09" },
+    calledWith: [
+      ID,
+      "2026-11-09",
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    ],
+    invalid: {
+      "a day that isn't one": { loanId: ID, pickedUpOn: "yesterday" },
+      "no day": { loanId: ID },
+    },
+  });
+});
+
+describe("giveBackController", () => {
+  controllerBasics({
+    make: (useCase, logger) => giveBackController(useCase, logger),
+    valid: { loanId: ID, returnedOn: "2026-11-09" },
+    calledWith: [
+      ID,
+      "2026-11-09",
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    ],
+    invalid: { "a day that isn't one": { loanId: ID, returnedOn: "Monday" } },
+  });
+});
+
+describe("confirmReturnController", () => {
+  controllerBasics({
+    make: (useCase, logger) => confirmReturnController(useCase, logger),
+    valid: { loanId: ID, answer: "back", returnedOn: "2026-11-09", note: " " },
+    calledWith: [
+      ID,
+      { answer: "back", returnedOn: "2026-11-09", note: null },
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    ],
+    invalid: {
+      "an answer it doesn't know": { loanId: ID, answer: "lost" },
+      "back with no day": { loanId: ID, answer: "back", note: "" },
+    },
+  });
+
+  it("passes I don't have it yet", async () => {
+    const useCase = mock(async () => ({ nextInLine: null }));
+    await confirmReturnController(useCase as never, new MockLoggerService())(
+      { loanId: ID, answer: "not-yet" },
+      you.id,
+    );
+    expect(useCase).toHaveBeenCalledWith(
+      ID,
+      { answer: "not-yet" },
       you.id,
       expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
     );

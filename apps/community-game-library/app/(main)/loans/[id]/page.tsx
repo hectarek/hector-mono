@@ -4,16 +4,13 @@ import type { ReactNode } from "react";
 import { AppHeader } from "@/app/_components/app-header";
 import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
-import { PhoneIcon } from "@/app/_components/icons";
 import { PageColumn } from "@/app/_components/page-column";
-import { Piece } from "@/app/_components/piece";
 import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import { ordinal } from "@/src/entities/loan";
 import type { Loan } from "@/src/entities/models/loan.model";
-import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import { coverColorOf } from "@/src/entities/piece";
 import {
   formatDate,
@@ -23,11 +20,25 @@ import {
 } from "@/src/entities/week";
 import { AnswerForm } from "./answer-form";
 import { LoanMoveButton } from "./loan-move-button";
+import {
+  Asker,
+  askedWhen,
+  capitalized,
+  datesLine,
+  Person,
+  periodWords,
+  Summary,
+  Title,
+} from "./loan-parts";
+import { BorrowedLoan, LentLoan } from "./out-views";
+import { OwnerPickUp } from "./owner-pick-up";
+import { PickUpForm } from "./pick-up-form";
 
-// A loan's page, for its copy's owner and its borrower only (D14: the one place its buttons live).
-// U12 draws the request and the yes: C16 to the borrower while it waits, C2 to the owner while
-// it's theirs to answer, C17 to the owner after a yes, and C3's top to the borrower, with I can't
-// pick it up after all; U13 adds the pick-up and the loan out.
+// A loan's page, for its copy's owner and its borrower only (D14: the one place its buttons live),
+// one board by the loan's status and the member's role: C16 to the borrower and C2 to the owner
+// while it's a request (U12); after a yes, C17 to the owner, with Priya has it, and C3 to the
+// borrower, with When you have it (U13); while it's out or coming back, C5 to the borrower and C7
+// to the owner, with Is it back? (C8) once the borrower says they gave it back (U13).
 export default async function LoanPage({
   params,
 }: {
@@ -36,7 +47,8 @@ export default async function LoanPage({
   await connection();
   const { user } = await gate("app");
   const { id } = await params;
-  const { loan, role, game, other, copyState } = await loadLoan(id, user.id);
+  const view = await loadLoan(id, user.id);
+  const { loan, role, game, other, copyState } = view;
   const now = new Date();
   const today = todayIn(PLAN_TIME_ZONE, now);
   const thumb = (
@@ -148,6 +160,19 @@ export default async function LoanPage({
           />
           <Person person={other} line="to arrange the pick-up" />
         </Group>
+        <Group label="What you can do">
+          <OwnerPickUp
+            loanId={loan.id}
+            loan={loan}
+            saidYesOn={saidYesOn(loan)}
+            borrower={other}
+            today={today}
+          />
+          <p className="text-xs text-muted-foreground">
+            Use this if {other.name} picked it up and hasn’t said so. You give
+            the day.
+          </p>
+        </Group>
         <Group label="Changed your mind?">
           <LoanMoveButton
             move="cancel"
@@ -179,6 +204,9 @@ export default async function LoanPage({
             ]}
           />
           <Person person={other} line="to arrange the pick-up" />
+          <p className="text-13 leading-snug text-muted-foreground">
+            When the game is in your hands, come back and tap I’ve picked it up.
+          </p>
           <LoanMoveButton
             move="cancel"
             loanId={loan.id}
@@ -189,8 +217,25 @@ export default async function LoanPage({
             body={`${other.name} is told, and the game is free for the next person.`}
           />
         </Group>
+        <Group label="When you have it">
+          <PickUpForm
+            loanId={loan.id}
+            loan={loan}
+            saidYesOn={saidYesOn(loan)}
+            borrower={view.you}
+            today={today}
+            submitLabel="I’ve picked it up"
+          />
+        </Group>
       </>
     );
+  } else if (
+    (loan.status === "out" || loan.status === "returning") &&
+    role === "borrower"
+  ) {
+    body = <BorrowedLoan view={view} today={today} now={now} />;
+  } else if (loan.status === "out" || loan.status === "returning") {
+    body = <LentLoan view={view} today={today} now={now} />;
   } else {
     body = (
       <>
@@ -200,8 +245,12 @@ export default async function LoanPage({
             thumb={thumb}
             lead={endedLine(loan, role, other.name)}
             facts={
-              loan.dueOn && loan.pickedUpOn
-                ? [`Due ${formatDate(loan.dueOn, today)}`]
+              loan.pickedUpOn
+                ? [
+                    loan.returnedOn
+                      ? `Picked up ${formatDate(loan.pickedUpOn, today)} · back ${formatDate(loan.returnedOn, today)}`
+                      : datesLine(loan, today),
+                  ]
                 : []
             }
           />
@@ -221,115 +270,10 @@ export default async function LoanPage({
   );
 }
 
-function Title({ children }: { children: string }) {
-  return (
-    <h1 className="text-2xl leading-7 font-bold wrap-break-word">{children}</h1>
-  );
+// The day of the owner's yes, the first a pick-up can be on.
+function saidYesOn(loan: Loan): string {
+  return todayIn(PLAN_TIME_ZONE, loan.answeredAt ?? loan.updatedAt);
 }
-
-// The game's token, a lead line in bold, and facts in mono under it.
-function Summary({
-  thumb,
-  lead,
-  facts,
-}: {
-  thumb: ReactNode;
-  lead: string;
-  facts: string[];
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      {thumb}
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-15 font-bold">{lead}</span>
-        {facts.map((fact) => (
-          <span
-            key={fact}
-            className="font-mono text-2xs font-medium text-muted-foreground"
-          >
-            {fact}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// The other person in the loan: their piece and name, why they're here, and their phone, which
-// the other person in an open loan sees, friends or not (R40).
-function Person({
-  person,
-  line,
-}: {
-  person: NameAndPiece & { phone: string | null };
-  line: string;
-}) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <Piece shape={person.pieceShape} color={person.pieceColor} size={20} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="text-15 font-bold">{person.name}</span>
-        {line && <span className="text-xs text-muted-foreground">{line}</span>}
-      </div>
-      {person.phone && (
-        <a
-          href={`tel:${person.phone.replace(/[^\d+]/g, "")}`}
-          aria-label={`Call ${person.name}, ${person.phone}`}
-          className="flex min-h-11 items-center gap-1.5 font-mono text-13 font-medium text-foreground hover:text-destructive"
-        >
-          <PhoneIcon />
-          <span className="border-b-2 border-dashed border-current pb-px">
-            {person.phone}
-          </span>
-        </a>
-      )}
-    </div>
-  );
-}
-
-// C2's asker: their piece and name, their note, and when they asked.
-function Asker({
-  person,
-  note,
-  asked,
-}: {
-  person: NameAndPiece;
-  note: string | null;
-  asked: string;
-}) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <Piece shape={person.pieceShape} color={person.pieceColor} size={20} />
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-15 font-bold">{person.name}</span>
-        {note && <span className="text-15">“{note}”</span>}
-        <span className="font-mono text-2xs font-medium text-muted-foreground">
-          Asked {asked}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// "20 min ago" within the hour, as C2 says it, then C16's "this morning".
-function askedWhen(at: Date, now: Date): string {
-  const minutes = Math.floor((now.getTime() - at.getTime()) / 60_000);
-  return minutes < 60 ? `${Math.max(minutes, 1)} min ago` : formatWhen(at, now);
-}
-
-// A yes's period in words (R16): 1 week, 2 weeks, a month.
-const PERIOD_WORDS: Partial<Record<number, string>> = {
-  7: "1 week",
-  14: "2 weeks",
-  30: "a month",
-};
-
-function periodWords(days: number | null): string {
-  return days === null ? "" : (PERIOD_WORDS[days] ?? `${days} days`);
-}
-
-const capitalized = (words: string) =>
-  `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
 
 // What happened to a loan that isn't a request or a yes any more. The loan out and its return
 // get their own pages with U13.

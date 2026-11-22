@@ -107,3 +107,82 @@ export async function cancelLoan(
   revalidateEverything();
   return { message: `Loan cancelled. ${otherName} is told.` };
 }
+
+// C3's I've picked it up, and C17's Priya has it, with the day. The page then reads as C5 or C7.
+export async function confirmPickUp(
+  loanId: string,
+  pickedUpOn: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IConfirmPickUpController")(
+      { loanId, pickedUpOn },
+      userId,
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("confirmPickUp"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: "The loan has started." };
+}
+
+// C5's I gave it back to Sam, with the day. The page then reads "Waiting for Sam to confirm".
+export async function giveBack(
+  loanId: string,
+  returnedOn: string,
+  ownerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IGiveBackController")({ loanId, returnedOn }, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("giveBack"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${ownerName} is asked to confirm it’s back.` };
+}
+
+// What Is it back? answers with: its message, and the next request in the copy's line, which the
+// owner is asked to answer.
+export type ConfirmReturnState =
+  | { message: string; nextInLine: string | null; error?: undefined }
+  | { error: string; message?: undefined; nextInLine?: undefined };
+
+// C8's Yes, it's back, with the day and anything new missing or damaged, or I don't have it yet.
+export async function confirmReturn(
+  loanId: string,
+  answer:
+    | { answer: "back"; returnedOn: string; note: string }
+    | { answer: "not-yet" },
+  words: { title: string; borrower: string },
+): Promise<ConfirmReturnState> {
+  try {
+    const userId = await getCurrentUserId();
+    const { nextInLine } = await getInjection("IConfirmReturnController")(
+      { loanId, ...answer },
+      userId,
+    );
+    revalidateEverything();
+    return answer.answer === "back"
+      ? { message: `${words.title} is back.`, nextInLine }
+      : {
+          message: `${words.borrower} is told it isn’t back yet.`,
+          nextInLine: null,
+        };
+  } catch (err) {
+    const state = toActionError(
+      err,
+      actionLogger("confirmReturn"),
+      "That didn’t send. Try again.",
+    );
+    return { error: state?.error ?? "That didn’t send. Try again." };
+  }
+}

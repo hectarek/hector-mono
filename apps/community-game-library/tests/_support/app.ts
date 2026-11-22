@@ -46,7 +46,10 @@ import { sendFriendRequestUseCase } from "@/src/application/use-cases/friends/se
 import { unfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
 import { answerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
 import { cancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
+import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import { giveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import { listLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
@@ -366,6 +369,17 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     cancelLoan: cancelLoanUseCase(userGames, loans, notices, transactions, log),
+
+    // The pick-up and the return (U13)
+    confirmPickUp: confirmPickUpUseCase(userGames, loans, transactions, log),
+    giveBack: giveBackUseCase(userGames, loans, notices, transactions, log),
+    confirmReturn: confirmReturnUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
     listLoans: listLoansUseCase(loans, userGames, games, userProfiles),
     getLoan: getLoanUseCase(loans, userGames, games, userProfiles),
 

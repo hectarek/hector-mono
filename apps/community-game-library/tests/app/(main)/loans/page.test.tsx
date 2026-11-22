@@ -55,6 +55,27 @@ describe("Loans (C4, U12's sections)", () => {
     }
   });
 
+  it("lists what you borrowed and lent in C4's order, each with its stamp and who's next (R22)", async () => {
+    await signInAsYouWithTheCast();
+    const view = render(await LoansPage());
+    const page = within(view.container);
+
+    expect(
+      page.getAllByRole("heading", { level: 2 }).map((h) => h.textContent),
+    ).toEqual(["Needs you · 1", "You borrowed", "You lent", "You asked"]);
+    const borrowed = page.getByRole("link", { name: /Moss & Mortar/ });
+    expect(borrowed.getAttribute("href")).toBe(
+      `/loans/${CAST.loans.youHaveMossAndMortar.id}`,
+    );
+    for (const words of ["Due Fri", "From Sam", "Jo is 1st in line"]) {
+      expect(within(borrowed).getByText(words)).toBeTruthy();
+    }
+    const lent = page.getByRole("link", { name: /Gull & Anchor/ });
+    for (const words of ["Overdue", "Jo has it", "Ben is 1st in line"]) {
+      expect(within(lent).getByText(words)).toBeTruthy();
+    }
+  });
+
   it("says No loans for a member with none (Empty lists)", async () => {
     await signInAsMember();
     const view = render(await LoansPage());

@@ -3,6 +3,9 @@ import { Piece } from "@/app/_components/piece";
 import type { PieceColor, PieceShape } from "@/src/entities/piece";
 
 export type TrackSpace = {
+  // What tells the space apart when a label repeats (a week-long loan starts and ends on a
+  // Tuesday): its day, by default its label.
+  id?: string;
   // "TUE", or "WK 2" for a loan longer than a week; "+1" for a late space.
   label: string;
   due?: boolean;
@@ -29,7 +32,10 @@ export function Track({
     <div aria-hidden="true" className="flex flex-col gap-0.5">
       <div className="flex">
         {spaces.map((space, index) => (
-          <span key={space.label} className="flex flex-1 justify-center">
+          <span
+            key={space.id ?? space.label}
+            className="flex flex-1 justify-center"
+          >
             {index === today && (
               <Piece shape={borrower.shape} color={borrower.color} size={16} />
             )}
@@ -39,7 +45,7 @@ export function Track({
       <div className="flex">
         {spaces.map((space) => (
           <span
-            key={space.label}
+            key={space.id ?? space.label}
             className={cn(
               "flex h-5.5 flex-1 items-center justify-center border-2 border-l-0 border-foreground font-mono text-10 font-medium first:border-l-2",
               space.late
@@ -56,7 +62,7 @@ export function Track({
       <div className="flex">
         {spaces.map((space, index) => (
           <span
-            key={space.label}
+            key={space.id ?? space.label}
             className="flex flex-1 justify-center font-mono text-10 font-medium text-muted-foreground"
           >
             {index === today && "today"}

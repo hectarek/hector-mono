@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U12):
+The spec's code map, as far as it's built (U1 to U13):
 
 ```
 app/
@@ -48,7 +48,10 @@ app/
                              # E2; [userId]/ E3, with E4's dialog in unfriend-button.tsx, U10); inbox/ (F1
                              # and F2, with mark-read.tsx, U11); loans/ (C4's Needs you and You asked, U12);
                              # loans/[id]/ (C16, C2 with answer-form.tsx, C17 and C3's top, U12;
-                             # loan-move-button.tsx, the moves that ask first); you/ (E5), you/edit/ (E6) and
+                             # loan-move-button.tsx, the moves that ask first; U13: C3's pick-up-form.tsx,
+                             # C17's owner-pick-up.tsx, C5 and C7 in out-views.tsx with give-back-form.tsx
+                             # and C8's is-it-back.tsx, day-field.tsx, and loan-parts.tsx, the parts the
+                             # boards share); you/ (E5), you/edit/ (E6) and
                              # you/notices/ (E7, U11)
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
   removed/                   # a removed account's only page
@@ -65,7 +68,8 @@ app/
                              # i-own-it (IOwnIt, and AddedTally and AddedSoFar, B8's count), in-my-box,
                              # saved-switch (a switch that saves as it flips). U8's: library-list (the one
                              # list), library-controls (Filter, Sort, chips), filter-sheet (B2), sort-sheet
-                             # (B12). U9's: game-form (G3 and G4). U10's: friend-row (a person with Accept and
+                             # (B12). U9's: game-form (G3 and G4). U13's: loan-track (a loan's spaces on
+                             # the track, trackSpaces); date-sheet's until. U10's: friend-row (a person with Accept and
                              # Decline, You asked and Cancel request, or Add friend), what-its-for (A1's and
                              # A3's three lines)
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
@@ -81,7 +85,8 @@ app/
                              # addGame, updateGame; friends.ts (U10): makeFriendLink, openFriendLink,
                              # sendFriendRequest, answerFriendRequest, cancelFriendRequest, unfriend;
                              # notices.ts (U11): markInboxRead, setNoticeGroup; loans.ts (U12): requestLoan,
-                             # withdrawRequest, answerRequest, cancelLoan
+                             # withdrawRequest, answerRequest, cancelLoan; U13: confirmPickUp, giveBack,
+                             # confirmReturn
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
@@ -135,7 +140,8 @@ src/
                              # send-friend-request, answer-friend-request, cancel-friend-request, unfriend;
                              # people-you-may-know.ts (friendsOfFriends), the read E1 and A5 share
     use-cases/loans/         # U12: request-loan, withdraw-request, answer-request, cancel-loan, list-loans,
-                             # get-loan; locked-loan.ts (lockedLoan), where every move of a loan starts
+                             # get-loan; locked-loan.ts (lockedLoan), where every move of a loan starts;
+                             # U13: confirm-pick-up, give-back, confirm-return
     use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
                              # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
@@ -207,6 +213,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **U10's patterns.** A friend link is opened by its page's client part (`open-link.tsx`), which sends `openFriendLink` once the page is open, never by the page's own load: link previews and prefetching load addresses on their own (recipes' join links). Signed in with no profile yet, the link makes the two friends first, then A4 carries `?friend=` on to A5. A use case named `use…` reads as a React hook to Biome's `useHookAtTopLevel`, so U10's is `open-friend-link`, and the nights' link will be `open-night-link` (the code map says so). Unfriending moves each open loan between the two after its copy's `lock` and `canMove` (KTD6), the app's first loan writes: requests are withdrawn, a yes not picked up yet is cancelled, and a loan that's out stays. Taking each off the other's game nights, and people from a past night in People you may know, come with nights' rows (U19's task says so). People you may know comes from `friendsOfFriends`, each with the friend they share, first by name ("Friend of Alice"). A client component imports nothing server-only, however deep: `open-link.tsx` showed `LinkGone` from a module that imported the welcome page, which reads `next/headers`, and only `next dev` and `next build` said so, while every test passed; `link-gone.tsx` and `what-its-for.tsx` hold the parts both sides use.
 - **U11's patterns.** The inbox (F1) lists a member's latest notices, newest first and at most `INBOX_LIMIT` (100), leaving out the groups they switched off on E7 (`shownTypes` in `notice-groups.ts`, which the bell's count shares). Each comes as an `InboxNotice`, with the loan, night or suggestion it points at, and its words come from `noticeText` (`app/_lib/notice-text.ts`): per type, the line, the detail under it, the page it opens and its stamp, one file per group under `notice-text/`, so a unit that adds a notice type adds its words there, with a case in its test. Opening the inbox marks the notices it listed read through its client part (`MarkInboxRead` in `mark-read.tsx`), once the page is open, as U10's friend link is opened, so a prefetch clears nothing; it sends their ids, so a notice that came after the page was drawn, or one a switched-off group hides, stays unread (`markRead`). A server action's `revalidatePath` re-renders the page being viewed ("Updates the UI immediately", in Next's `revalidatePath` reference), so the action brings the open inbox back with them read and the bell clears at once: `MarkInboxRead` keeps in state the ids that were unread when the page opened, and `IfNew` and `UnreadCount` mark from them until the member leaves. The tests stub `revalidatePath`, so the inbox's test rerenders the page itself to show the marks stay (found on the dev server, 2026-11-22, where they were gone 1.5 s after the inbox opened). F1's Mark all read isn't built, since opening does it. The tabs' counts come from the rows, not from notices (`get-tab-counts`, D14), so a group switched off changes only the bell's count, and Nights counts 0 until U19 gives nights their rows. `getShellCounts` (`app/_lib/shell-counts.ts`) reads them once a request with React's `cache`, for the bell, the bottom bar and the bar from 768px, and a failed read shows no counts rather than failing the page. E7 is a `SavedSwitch` per group, bound to `setNoticeGroup`.
 - **U12's patterns.** Every move of a loan starts with `lockedLoan` (`src/application/use-cases/loans/locked-loan.ts`): the loan, its copy's lock (`IUserGamesRepository.lock`, U10's, in place of the plan's `lockCopy`), the loan read again under the lock, and who the member is to it, its copy's owner or its borrower; anyone else, the admin included, gets Not found (D4, AE7, AE8). Then `canMove`, the write and the notices, in one transaction (KTD6, KTD7). A move that no longer applies throws `ChangedError` (`copy-lent`, `request-withdrawn`, `request-answered`), which the sheet or the form shows with `ChangedNotice` in place of its action. A loan's page shows one board by the loan's status and the member's role: C16 to the borrower and C2 to the owner while it's a request, C17 to the owner and C3's top to the borrower after a yes; a request further back in a line and the loan after the pick-up get theirs with U13 and U15. Its moves that ask first share `LoanMoveButton`, which goes on to Loans with the message, as unfriending does. Where a board says "his" or "she", the words use the name ("It’s Sam’s copy", "2 weeks from the day Priya picks it up"): profiles hold no pronouns. A copy's row takes an `action` (Borrow opens C1, `ask-to-borrow.tsx`), and a friend's copy you asked for, or one said yes to you, opens its loan's page. An owner's note goes on the borrower's notice with a yes as well as a no (`answer_note`), since C2 draws the note under both answers.
+- **U13's patterns.** A loan's dates count from the real pick-up (`datesAtPickUp`): a day from the yes to today, and not after a date the owner picked. A return takes a day from the pick-up to today, and from then the loan can't run overdue (D15). For a day that already happened, the date sheet takes `until` (`DayField` in `loans/[id]/day-field.tsx`). `trackSpaces` (`app/_components/loan-track.tsx`) works out a loan's track: a space a day from today to the due day within a week, a space a week after that, and once it's late the last days up to the due one with a "+n" space for the piece. Each space carries its day as `id`, since a week-long loan repeats a weekday and Biome refuses an index key. Yes, it's back answers with the next request in the copy's line, which the sheet opens for the owner to answer; with nobody in line it goes on to Loans. A copy's note reads as a sentence: the page adds a full stop only when the note lacks one, and a new missing or damaged part joins the old note. C8 lays out its own two answers, since `SheetActions` adds a Cancel C8 doesn't draw. The loan's page keeps its views beside it, `loan-parts.tsx` and `out-views.tsx` (C5, C7); their line is read-only until U15, and more time, calling it back and passing it along come with U14 and U15.
 
 ## Data Model
 

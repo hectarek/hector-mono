@@ -27,6 +27,11 @@ export type LoanPage = {
   // The copy as the owner sees it, for where the request stands: the owner answers the first in
   // line while the copy is home.
   copyState: CopyState<Loan>;
+  // The member looking, by name and piece: the borrower's piece stands on C5's track.
+  you: NameAndPiece;
+  // The people in the copy's line, in order, by name and piece, with their requests (C5's Who's
+  // involved, C7's The line): they needn't be the member's friends.
+  line: (NameAndPiece & { loanId: string; askedAt: Date })[];
 };
 
 const open: readonly LoanStatus[] = OPEN_STATUSES;
@@ -67,6 +72,19 @@ export const getLoanUseCase = (
       throw new NotFoundError();
     }
     const loans = await loansRepository.listOpenForCopies([copy.id]);
+    const state = copyState(copy, loans, copy.userId, today);
+    const people = new Map(
+      (
+        await userProfilesRepository.getManyByUserIds([
+          viewerId,
+          ...state.line.map((one) => one.borrowerUserId),
+        ])
+      ).map((person) => [person.userId, person]),
+    );
+    const you = people.get(viewerId);
+    if (!you) {
+      throw new NotFoundError();
+    }
     return {
       loan,
       role,
@@ -79,7 +97,14 @@ export const getLoanUseCase = (
         pieceColor: other.pieceColor,
         phone: open.includes(loan.status) ? other.phone : null,
       },
-      copyState: copyState(copy, loans, copy.userId, today),
+      copyState: state,
+      you,
+      line: state.line.flatMap((one) => {
+        const person = people.get(one.borrowerUserId);
+        return person
+          ? [{ ...person, loanId: one.id, askedAt: one.createdAt }]
+          : [];
+      }),
     };
   };
 };
