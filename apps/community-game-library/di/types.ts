@@ -39,6 +39,14 @@ import type { IMakeFriendLinkUseCase } from "@/src/application/use-cases/friends
 import type { IOpenFriendLinkUseCase } from "@/src/application/use-cases/friends/open-friend-link.use-case";
 import type { ISendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import type { IUnfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+// Each list keeps its lines in alphabetical order, so two batches adding to it merge cleanly
+// (docs/build-plan.md, Code map).
+import type { IAnswerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
+import type { ICancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import type { IGetLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import type { IListLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import type { IRequestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
+import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import type { IGetTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import type { IListInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import type { IMarkInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -82,6 +90,12 @@ import type { IMakeFriendLinkController } from "@/src/interface-adapters/control
 import type { IOpenFriendLinkController } from "@/src/interface-adapters/controllers/friends/open-friend-link.controller";
 import type { ISendFriendRequestController } from "@/src/interface-adapters/controllers/friends/send-friend-request.controller";
 import type { IUnfriendController } from "@/src/interface-adapters/controllers/friends/unfriend.controller";
+import type { IAnswerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
+import type { ICancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import type { IGetLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import type { IListLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import type { IRequestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
+import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
 import type { IGetTabCountsController } from "@/src/interface-adapters/controllers/notices/get-tab-counts.controller";
 import type { IListInboxController } from "@/src/interface-adapters/controllers/notices/list-inbox.controller";
 import type { IMarkInboxReadController } from "@/src/interface-adapters/controllers/notices/mark-inbox-read.controller";
@@ -104,8 +118,6 @@ import type { IListSuggestionsController } from "@/src/interface-adapters/contro
 import type { ISuggestGameController } from "@/src/interface-adapters/controllers/suggestions/suggest-game.controller";
 import type { IUpdateGameController } from "@/src/interface-adapters/controllers/suggestions/update-game.controller";
 
-// Each list keeps its lines in alphabetical order, so two batches adding to it merge cleanly
-// (docs/build-plan.md, Code map).
 export const DI_SYMBOLS = {
   AdminAccount: Symbol.for("AdminAccount"),
   IAddGameController: Symbol.for("IAddGameController"),
@@ -114,11 +126,15 @@ export const DI_SYMBOLS = {
   IAddUserGameUseCase: Symbol.for("IAddUserGameUseCase"),
   IAnswerFriendRequestController: Symbol.for("IAnswerFriendRequestController"),
   IAnswerFriendRequestUseCase: Symbol.for("IAnswerFriendRequestUseCase"),
+  IAnswerRequestController: Symbol.for("IAnswerRequestController"),
+  IAnswerRequestUseCase: Symbol.for("IAnswerRequestUseCase"),
   IAnswerSuggestionController: Symbol.for("IAnswerSuggestionController"),
   IAnswerSuggestionUseCase: Symbol.for("IAnswerSuggestionUseCase"),
   IAuthenticationService: Symbol.for("IAuthenticationService"),
   ICancelFriendRequestController: Symbol.for("ICancelFriendRequestController"),
   ICancelFriendRequestUseCase: Symbol.for("ICancelFriendRequestUseCase"),
+  ICancelLoanController: Symbol.for("ICancelLoanController"),
+  ICancelLoanUseCase: Symbol.for("ICancelLoanUseCase"),
   ICheckFriendLinkController: Symbol.for("ICheckFriendLinkController"),
   ICheckFriendLinkUseCase: Symbol.for("ICheckFriendLinkUseCase"),
   ICreateProfileController: Symbol.for("ICreateProfileController"),
@@ -141,6 +157,8 @@ export const DI_SYMBOLS = {
   IGetGameToEditController: Symbol.for("IGetGameToEditController"),
   IGetGameToEditUseCase: Symbol.for("IGetGameToEditUseCase"),
   IGetGameUseCase: Symbol.for("IGetGameUseCase"),
+  IGetLoanController: Symbol.for("IGetLoanController"),
+  IGetLoanUseCase: Symbol.for("IGetLoanUseCase"),
   IGetNoticeSettingsController: Symbol.for("IGetNoticeSettingsController"),
   IGetNoticeSettingsUseCase: Symbol.for("IGetNoticeSettingsUseCase"),
   IGetProfileController: Symbol.for("IGetProfileController"),
@@ -163,6 +181,8 @@ export const DI_SYMBOLS = {
   IListInboxUseCase: Symbol.for("IListInboxUseCase"),
   IListLibraryController: Symbol.for("IListLibraryController"),
   IListLibraryUseCase: Symbol.for("IListLibraryUseCase"),
+  IListLoansController: Symbol.for("IListLoansController"),
+  IListLoansUseCase: Symbol.for("IListLoansUseCase"),
   IListMyLibraryController: Symbol.for("IListMyLibraryController"),
   IListMyLibraryUseCase: Symbol.for("IListMyLibraryUseCase"),
   IListPeopleYouMayKnowController: Symbol.for(
@@ -189,6 +209,8 @@ export const DI_SYMBOLS = {
   IRemoveUserGameController: Symbol.for("IRemoveUserGameController"),
   IRemoveUserGameUseCase: Symbol.for("IRemoveUserGameUseCase"),
   IRemovedUsersRepository: Symbol.for("IRemovedUsersRepository"),
+  IRequestLoanController: Symbol.for("IRequestLoanController"),
+  IRequestLoanUseCase: Symbol.for("IRequestLoanUseCase"),
   IRequireAdmin: Symbol.for("IRequireAdmin"),
   ISearchGamesController: Symbol.for("ISearchGamesController"),
   ISearchGamesUseCase: Symbol.for("ISearchGamesUseCase"),
@@ -218,6 +240,8 @@ export const DI_SYMBOLS = {
   IUserGamesRepository: Symbol.for("IUserGamesRepository"),
   IUserProfilesRepository: Symbol.for("IUserProfilesRepository"),
   IUserSettingsRepository: Symbol.for("IUserSettingsRepository"),
+  IWithdrawRequestController: Symbol.for("IWithdrawRequestController"),
+  IWithdrawRequestUseCase: Symbol.for("IWithdrawRequestUseCase"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -228,11 +252,15 @@ export interface DI_RETURN_TYPES {
   IAddUserGameUseCase: IAddUserGameUseCase;
   IAnswerFriendRequestController: IAnswerFriendRequestController;
   IAnswerFriendRequestUseCase: IAnswerFriendRequestUseCase;
+  IAnswerRequestController: IAnswerRequestController;
+  IAnswerRequestUseCase: IAnswerRequestUseCase;
   IAnswerSuggestionController: IAnswerSuggestionController;
   IAnswerSuggestionUseCase: IAnswerSuggestionUseCase;
   IAuthenticationService: IAuthenticationService;
   ICancelFriendRequestController: ICancelFriendRequestController;
   ICancelFriendRequestUseCase: ICancelFriendRequestUseCase;
+  ICancelLoanController: ICancelLoanController;
+  ICancelLoanUseCase: ICancelLoanUseCase;
   ICheckFriendLinkController: ICheckFriendLinkController;
   ICheckFriendLinkUseCase: ICheckFriendLinkUseCase;
   ICreateProfileController: ICreateProfileController;
@@ -255,6 +283,8 @@ export interface DI_RETURN_TYPES {
   IGetGameToEditController: IGetGameToEditController;
   IGetGameToEditUseCase: IGetGameToEditUseCase;
   IGetGameUseCase: IGetGameUseCase;
+  IGetLoanController: IGetLoanController;
+  IGetLoanUseCase: IGetLoanUseCase;
   IGetNoticeSettingsController: IGetNoticeSettingsController;
   IGetNoticeSettingsUseCase: IGetNoticeSettingsUseCase;
   IGetProfileController: IGetProfileController;
@@ -273,6 +303,8 @@ export interface DI_RETURN_TYPES {
   IListInboxUseCase: IListInboxUseCase;
   IListLibraryController: IListLibraryController;
   IListLibraryUseCase: IListLibraryUseCase;
+  IListLoansController: IListLoansController;
+  IListLoansUseCase: IListLoansUseCase;
   IListMyLibraryController: IListMyLibraryController;
   IListMyLibraryUseCase: IListMyLibraryUseCase;
   IListPeopleYouMayKnowController: IListPeopleYouMayKnowController;
@@ -297,6 +329,8 @@ export interface DI_RETURN_TYPES {
   IRemoveUserGameController: IRemoveUserGameController;
   IRemoveUserGameUseCase: IRemoveUserGameUseCase;
   IRemovedUsersRepository: IRemovedUsersRepository;
+  IRequestLoanController: IRequestLoanController;
+  IRequestLoanUseCase: IRequestLoanUseCase;
   IRequireAdmin: IRequireAdmin;
   ISearchGamesController: ISearchGamesController;
   ISearchGamesUseCase: ISearchGamesUseCase;
@@ -324,4 +358,6 @@ export interface DI_RETURN_TYPES {
   IUserGamesRepository: IUserGamesRepository;
   IUserProfilesRepository: IUserProfilesRepository;
   IUserSettingsRepository: IUserSettingsRepository;
+  IWithdrawRequestController: IWithdrawRequestController;
+  IWithdrawRequestUseCase: IWithdrawRequestUseCase;
 }

@@ -285,7 +285,8 @@ export type CopyState<L> = {
   line: L[];
 };
 
-function ordinal(place: number): string {
+// "1st", "2nd", "11th": a place in a line.
+export function ordinal(place: number): string {
   const lastTwo = place % 100;
   if (lastTwo < 11 || lastTwo > 13) {
     const suffix = ["th", "st", "nd", "rd"][place % 10];

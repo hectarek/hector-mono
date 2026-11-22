@@ -66,7 +66,7 @@ export const LOAN_TEXTS: NoticeTexts<LoanType> = {
     ),
   "request-accepted": (item) =>
     words(`${actorOf(item)} said yes to ${gameOf(item)}`, hrefOf(item), {
-      detail: "Pick it up, then say you have it.",
+      detail: note(item) ?? "Pick it up, then say you have it.",
     }),
   "request-declined": (item) =>
     words(`${actorOf(item)} said no to ${gameOf(item)}`, hrefOf(item), {

@@ -40,6 +40,37 @@ export type CopyWordsInput = {
   now: Date;
 };
 
+// A copy's condition with its note, and the expansions in its box.
+function conditionAndBox(
+  copy: UserGame,
+  boxedExpansions: readonly string[],
+  baseTitle: string,
+): { condition: string; inTheBox: string } {
+  return {
+    condition: [CONDITIONS[copy.condition], copy.conditionNote]
+      .filter((part) => part)
+      .join(" · "),
+    inTheBox: listed(
+      boxedExpansions.map((title) => expansionName(title, baseTitle)),
+    ),
+  };
+}
+
+// The same as one line, as Ask to borrow's sheet gives it (C1): "Good · 1 part missing · with
+// Night Tide".
+export function copySummary(
+  copy: UserGame,
+  boxedExpansions: readonly string[],
+  baseTitle: string,
+): string {
+  const { condition, inTheBox } = conditionAndBox(
+    copy,
+    boxedExpansions,
+    baseTitle,
+  );
+  return inTheBox ? `${condition} · with ${inTheBox}` : condition;
+}
+
 // What a copy's row says under its name (B5, B11, B13): where the copy is, who has it or is in
 // line, then its condition and the expansions in its box. The stamp is the person looking's own
 // status, or "Not lent" (rule 7): a friend's copy that's simply home or out has none, since its
@@ -128,11 +159,10 @@ export function copyWords({
 
   // Its condition, then what's in the box: on a line of its own when there's a note, so the
   // condition line stays short (B13's Sam's copy against Jo's).
-  const condition = [CONDITIONS[copy.condition], copy.conditionNote]
-    .filter((part) => part)
-    .join(" · ");
-  const inTheBox = listed(
-    boxedExpansions.map((title) => expansionName(title, baseTitle)),
+  const { condition, inTheBox } = conditionAndBox(
+    copy,
+    boxedExpansions,
+    baseTitle,
   );
   if (inTheBox && copy.conditionNote) {
     fact(condition);

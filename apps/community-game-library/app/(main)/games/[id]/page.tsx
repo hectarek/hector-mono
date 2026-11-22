@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { CopyRow, copyName } from "@/app/_components/copy-row";
-import { copyWords } from "@/app/_components/copy-state";
+import { copySummary, copyWords } from "@/app/_components/copy-state";
 import { Cover } from "@/app/_components/cover";
 import { Dice } from "@/app/_components/dice";
 import { GameVideo } from "@/app/_components/game-video";
@@ -21,8 +21,11 @@ import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import { gameCard } from "@/src/entities/game-card";
 import { gameFacts, titleLine } from "@/src/entities/game-facts";
+import type { CopyState } from "@/src/entities/loan";
+import type { Loan } from "@/src/entities/models/loan.model";
 import { coverColorOf } from "@/src/entities/piece";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
+import { AskToBorrow } from "./ask-to-borrow";
 
 // A game's page (R14; B5, B11, B13; Wide2 in the 640 column): its cover with the member's own
 // stamp, its facts, About, its expansions or base game, the how-to-play video, then every copy
@@ -217,7 +220,23 @@ export default async function GamePage({
                   owner={owner}
                   lines={words.lines}
                   stamp={words.stamp}
-                  href={state.yours ? `/copies/${copy.id}` : undefined}
+                  href={copyHref(copy.id, state, user.id)}
+                  action={
+                    state.kind === "available" && !state.yours ? (
+                      <AskToBorrow
+                        userGameId={copy.id}
+                        title={game.title}
+                        color={coverColorOf(game)}
+                        imageUrl={game.imageUrl}
+                        owner={owner}
+                        summary={copySummary(
+                          copy,
+                          boxedExpansions,
+                          baseGame?.title ?? game.title,
+                        )}
+                      />
+                    ) : undefined
+                  }
                 />
               );
             })}
@@ -246,6 +265,25 @@ export default async function GamePage({
       </Group>
     </PageColumn>
   );
+}
+
+// Where a copy's row opens: the member's own copy's page, or the loan page of their request or of
+// the yes waiting for their pick-up (screens.md: the copy "opens the request").
+function copyHref(
+  copyId: string,
+  state: CopyState<Loan>,
+  userId: string,
+): string | undefined {
+  if (state.yours) {
+    return `/copies/${copyId}`;
+  }
+  const mine =
+    state.kind === "you-asked"
+      ? state.line.find((loan) => loan.borrowerUserId === userId)
+      : state.kind === "to-pick-up"
+        ? state.promised
+        : null;
+  return mine ? `/loans/${mine.id}` : undefined;
 }
 
 // Everything the page reads, through its controller: an id that isn't a game's is Not found.

@@ -25,3 +25,14 @@ export const loanSchema = z.object({
   updatedAt: z.date(),
 });
 export type Loan = z.infer<typeof loanSchema>;
+
+// A request for a copy (U12): its copy, who asks, and their note. The rest takes the table's
+// defaults.
+export type NewLoan = Pick<Loan, "userGameId" | "borrowerUserId"> &
+  Partial<Pick<Loan, "requestNote">>;
+
+// What a move writes besides the status (KTD6): a yes's period or date, and when it was answered.
+// Later units add the pick-up's, the return's and more time's columns.
+export type LoanChanges = Partial<
+  Pick<Loan, "status" | "periodDays" | "dueOn" | "answeredAt">
+>;

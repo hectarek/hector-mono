@@ -44,6 +44,12 @@ import { openFriendLinkUseCase } from "@/src/application/use-cases/friends/open-
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
 import { sendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import { unfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+import { answerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
+import { cancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import { listLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
+import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import { getTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import { listInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import { markInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -335,6 +341,33 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
 
     requireFriend: (viewerId: string, otherUserId: string) =>
       requireFriend(friendships, viewerId, otherUserId),
+
+    // Requests and their answers (U12)
+    requestLoan: requestLoanUseCase(
+      friendships,
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    withdrawRequest: withdrawRequestUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    answerRequest: answerRequestUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    cancelLoan: cancelLoanUseCase(userGames, loans, notices, transactions, log),
+    listLoans: listLoansUseCase(loans, userGames, games, userProfiles),
+    getLoan: getLoanUseCase(loans, userGames, games, userProfiles),
 
     // The inbox, the counts and notice settings (U11)
     listInbox: listInboxUseCase(
