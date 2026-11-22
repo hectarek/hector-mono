@@ -1,8 +1,16 @@
-import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
+import {
+  INBOX_LIMIT,
+  type INoticesRepository,
+} from "@/src/application/repositories/notices.repository.interface";
 import type { NewNotice, Notice } from "@/src/entities/models/notice.model";
+import type { NoticeType } from "@/src/entities/notice-types";
+
+const newestFirst = (a: Notice, b: Notice) =>
+  b.createdAt.getTime() - a.createdAt.getTime() ||
+  (b.id < a.id ? -1 : b.id > a.id ? 1 : 0);
 
 export class MockNoticesRepository implements INoticesRepository {
-  // What it was given, which tests read until U11 adds the inbox's reads.
+  // What it was given; tests and the cast put rows in here too.
   readonly rows: Notice[] = [];
 
   async add(notice: NewNotice): Promise<Notice> {
@@ -24,5 +32,38 @@ export class MockNoticesRepository implements INoticesRepository {
     };
     this.rows.push(created);
     return { ...created };
+  }
+
+  async listForUser(userId: string): Promise<Notice[]> {
+    return this.rows
+      .filter((row) => row.userId === userId)
+      .sort(newestFirst)
+      .slice(0, INBOX_LIMIT)
+      .map((row) => ({ ...row }));
+  }
+
+  async countUnread(
+    userId: string,
+    types: readonly NoticeType[],
+  ): Promise<number> {
+    return this.rows.filter(
+      (row) =>
+        row.userId === userId &&
+        row.readAt === null &&
+        types.includes(row.type),
+    ).length;
+  }
+
+  async markRead(userId: string, noticeIds: readonly string[]): Promise<void> {
+    const now = new Date();
+    for (const row of this.rows) {
+      if (
+        row.userId === userId &&
+        noticeIds.includes(row.id) &&
+        row.readAt === null
+      ) {
+        Object.assign(row, { readAt: now, updatedAt: now });
+      }
+    }
   }
 }

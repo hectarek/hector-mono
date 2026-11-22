@@ -4,6 +4,7 @@ import type { ILoansRepository } from "@/src/application/repositories/loans.repo
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import {
   HOLDING_STATUSES,
+  type LoanStatus,
   OPEN_STATUSES,
   PICKED_UP_STATUSES,
 } from "@/src/entities/loan";
@@ -104,6 +105,56 @@ export class LoansRepository
         .orderBy(asc(loans.userGameId));
     } catch (err) {
       this.handleError(err, "countPickedUpForCopies");
+    }
+  }
+
+  async setStatus(
+    loanId: string,
+    status: LoanStatus,
+    tx: ITransaction,
+  ): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .update(loans)
+        .set({ status })
+        .where(eq(loans.id, loanId));
+    } catch (err) {
+      this.handleError(err, "setStatus", { loanId });
+    }
+  }
+
+  async listByIds(ids: readonly string[], tx?: ITransaction): Promise<Loan[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(inArray(loans.id, [...ids]))
+        .orderBy(asc(loans.createdAt), asc(loans.id));
+    } catch (err) {
+      this.handleError(err, "listByIds");
+    }
+  }
+
+  async listOpenForBorrower(
+    userId: string,
+    tx?: ITransaction,
+  ): Promise<Loan[]> {
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(
+          and(
+            eq(loans.borrowerUserId, userId),
+            inArray(loans.status, [...OPEN_STATUSES]),
+          ),
+        )
+        .orderBy(asc(loans.createdAt), asc(loans.id));
+    } catch (err) {
+      this.handleError(err, "listOpenForBorrower", { userId });
     }
   }
 }

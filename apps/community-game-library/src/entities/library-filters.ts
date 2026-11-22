@@ -511,14 +511,16 @@ export const countLine = (shown: number, view: LibraryView, withSort = true) =>
 // B4's line, from the filters on: "No one’s library has a heavy game for four that plays in 30
 // minutes or less." A view filtered by owner, category or age, which that sentence can't say,
 // gets a plainer line. `whose` is "everyone" on All friends and "yours" on My library.
-export function noMatchLine(
-  view: LibraryView,
-  whose: "everyone" | "yours",
-): string {
+// Whose library a list is: All friends' (everyone's), My library (yours), or a friend's (E3).
+export type LibraryWhose = "everyone" | "yours" | { friend: string };
+
+export function noMatchLine(view: LibraryView, whose: LibraryWhose): string {
   if (view.owners.length || view.categories.length || view.age !== null) {
     return whose === "everyone"
       ? "No game in your library or your friends’ matches all of these."
-      : "No game in your library matches all of these.";
+      : whose === "yours"
+        ? "No game in your library matches all of these."
+        : `No game in ${whose.friend}’s library matches all of these.`;
   }
   const kinds = view.complexities.join(" or ");
   const players = view.players;
@@ -549,7 +551,9 @@ export function noMatchLine(
     .join(" ");
   return whose === "everyone"
     ? `No one’s library has a ${game}.`
-    : `Your library has no ${game}.`;
+    : whose === "yours"
+      ? `Your library has no ${game}.`
+      : `${whose.friend}’s library has no ${game}.`;
 }
 
 // B4's way out: "Without “30 min or less”: 1 game".

@@ -18,15 +18,18 @@ import { coverColorOf } from "@/src/entities/piece";
 
 // A game's card in a list (B1, and B10's first group): its thumb, title, players and time, whose
 // copies, its state, and the member's own stamp; the whole row opens the game's page. The same
-// row on every list it appears in (screens.md, Limits to build for).
+// row on every list it appears in (screens.md, Limits to build for). A friend's library (E3)
+// leaves out whose: they're all the friend's.
 export function GameCardRow({
   game,
   card,
   href,
+  owners = true,
 }: {
   game: Game;
   card: GameCard;
   href: string;
+  owners?: boolean;
 }) {
   const facts = cardLine(game);
   return (
@@ -37,19 +40,21 @@ export function GameCardRow({
     >
       <RowName>{game.title}</RowName>
       {facts && <RowFacts>{facts}</RowFacts>}
-      <RowLine>
-        <span className="flex shrink-0 items-end gap-0.75">
-          {card.owners.map((owner) => (
-            <Piece
-              key={owner.userId}
-              shape={owner.pieceShape}
-              color={owner.pieceColor}
-              size={11}
-            />
-          ))}
-        </span>
-        {card.ownerLine}
-      </RowLine>
+      {owners && (
+        <RowLine>
+          <span className="flex shrink-0 items-end gap-0.75">
+            {card.owners.map((owner) => (
+              <Piece
+                key={owner.userId}
+                shape={owner.pieceShape}
+                color={owner.pieceColor}
+                size={11}
+              />
+            ))}
+          </span>
+          {card.ownerLine}
+        </RowLine>
+      )}
       <RowLine>{card.stateLine}</RowLine>
     </ListRow>
   );

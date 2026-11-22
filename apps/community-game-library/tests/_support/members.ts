@@ -73,6 +73,7 @@ export async function signInAsYouWithTheCast(): Promise<string> {
           userProfiles: getInjection("IUserProfilesRepository"),
           userSettings: getInjection("IUserSettingsRepository"),
           friendships: getInjection("IFriendshipsRepository"),
+          friendRequests: getInjection("IFriendRequestsRepository"),
         },
         tx,
         { commit: true },

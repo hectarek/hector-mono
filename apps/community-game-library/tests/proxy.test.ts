@@ -92,6 +92,17 @@ describe("proxy", () => {
     );
   });
 
+  it("lets a signed-out visitor open a friend link, and nothing under it", async () => {
+    const response = await proxy(request("/f/K7Q2-HARB"));
+    expect(response.headers.get("location")).toBeNull();
+    expect(locationOf(await proxy(request("/f/K7Q2-HARB/more"))).pathname).toBe(
+      "/welcome",
+    );
+    expect(locationOf(await proxy(request("/friends"))).pathname).toBe(
+      "/welcome",
+    );
+  });
+
   it("doesn't add a return path for the home page", async () => {
     const location = locationOf(await proxy(request("/")));
     expect(location.pathname).toBe("/welcome");

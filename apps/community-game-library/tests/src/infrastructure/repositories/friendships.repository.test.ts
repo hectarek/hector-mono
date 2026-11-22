@@ -50,8 +50,8 @@ describeEachBackend("IFriendshipsRepository", () => {
   it("adds both sides at once, and adding again changes nothing", async () => {
     const { friendships } = app.repos;
 
-    await friendships.add(mei.id, you.id);
-    await friendships.add(you.id, mei.id);
+    await friendships.add({ userId: mei.id, friendUserId: you.id });
+    await friendships.add({ userId: you.id, friendUserId: mei.id });
 
     expect(await friendships.areFriends(you.id, mei.id)).toBe(true);
     expect(await friendships.listFriendIds(mei.id)).toEqual([you.id, alice.id]);
@@ -84,7 +84,7 @@ describeEachBackend("IFriendshipsRepository", () => {
 
   it("refuses a friendship with oneself", async () => {
     await expect(
-      app.repos.friendships.add(you.id, you.id),
+      app.repos.friendships.add({ userId: you.id, friendUserId: you.id }),
     ).rejects.toBeInstanceOf(DatabaseOperationError);
   });
 });
@@ -99,7 +99,7 @@ describe("FriendshipsRepository on Postgres", () => {
         "select user_id, friend_user_id from friendships order by user_id",
       );
 
-    await friendships.add(sam.id, you.id);
+    await friendships.add({ userId: sam.id, friendUserId: you.id });
     expect(await rows()).toEqual([
       { user_id: you.id, friend_user_id: sam.id },
       { user_id: sam.id, friend_user_id: you.id },

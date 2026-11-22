@@ -6,6 +6,7 @@ import { Bell } from "@/app/_components/bell";
 import { Piece } from "@/app/_components/piece";
 import { TabBar } from "@/app/_components/tab-bar";
 import { getAccount } from "@/app/_lib/account";
+import { getShellCounts } from "@/app/_lib/shell-counts";
 import type { PieceColor, PieceShape } from "@/src/entities/piece";
 
 // The member's own piece, which opens You (profile, notices, admin). Until the profile is read, or
@@ -26,26 +27,72 @@ function YouLink({
   );
 }
 
-// The member's own piece, read once a request (getAccount) after the page has waited on
-// connection(), so a prerender or a prefetch stops here with the bone pawn showing.
-export async function MyPiece() {
+// The bell with its count of unread lines (U11) and the member's own piece, read once a request
+// (getAccount, getShellCounts) after the page has waited on connection(), so a prerender or a
+// prefetch stops here with an uncounted bell and a bone pawn. One async part per header, as a
+// screen test's render waits on each.
+export async function MemberTools({ on }: { on: "kraft" | "chipboard" }) {
   await connection();
   const account = await getAccount();
+  const counts = account?.state === "ready" ? await getShellCounts() : null;
   return (
-    <YouLink
-      piece={
-        account?.state === "ready"
-          ? { shape: account.me.pieceShape, color: account.me.pieceColor }
-          : undefined
+    <>
+      <Bell on={on} unread={counts?.unread ?? 0} />
+      <YouLink
+        piece={
+          account?.state === "ready"
+            ? { shape: account.me.pieceShape, color: account.me.pieceColor }
+            : undefined
+        }
+      />
+    </>
+  );
+}
+
+function MemberToolsSlot({ on }: { on: "kraft" | "chipboard" }) {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Bell on={on} />
+          <YouLink />
+        </>
+      }
+    >
+      <MemberTools on={on} />
+    </Suspense>
+  );
+}
+
+// The tabs with their counts (U11), read once a request after the page has waited on
+// connection(); a prerender or a prefetch shows them uncounted.
+async function CountedTabBar({
+  placement,
+}: {
+  placement: "bottom" | "header";
+}) {
+  await connection();
+  const counts = await getShellCounts();
+  return (
+    <TabBar
+      placement={placement}
+      counts={
+        counts
+          ? {
+              loans: counts.loans,
+              nights: counts.nights,
+              friends: counts.friends,
+            }
+          : {}
       }
     />
   );
 }
 
-function YouButton() {
+export function ShellTabBar({ placement }: { placement: "bottom" | "header" }) {
   return (
-    <Suspense fallback={<YouLink />}>
-      <MyPiece />
+    <Suspense fallback={<TabBar placement={placement} />}>
+      <CountedTabBar placement={placement} />
     </Suspense>
   );
 }
@@ -61,9 +108,8 @@ export function AppBar() {
           <span className="hidden min-[68.75rem]:inline">Community </span>
           Game Library
         </p>
-        <TabBar placement="header" />
-        <Bell on="chipboard" />
-        <YouButton />
+        <ShellTabBar placement="header" />
+        <MemberToolsSlot on="chipboard" />
       </div>
     </header>
   );
@@ -93,8 +139,7 @@ export function AppHeader(
       </h1>
       {props.action}
       <div className="flex gap-2.5 md:hidden">
-        <Bell on="kraft" />
-        <YouButton />
+        <MemberToolsSlot on="kraft" />
       </div>
     </header>
   );

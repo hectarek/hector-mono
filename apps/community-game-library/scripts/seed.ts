@@ -16,6 +16,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { print, refuse, type Terminal } from "@/scripts/lib/terminal";
 import { loggable } from "@/src/entities/errors/loggable";
+import { FriendRequestsRepository } from "@/src/infrastructure/repositories/friend-requests.repository";
 import { FriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository";
 import { UserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository";
 import { UserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository";
@@ -99,6 +100,7 @@ export async function seed(
     userProfiles: new UserProfilesRepository(log),
     userSettings: new UserSettingsRepository(log),
     friendships: new FriendshipsRepository(log),
+    friendRequests: new FriendRequestsRepository(log),
   };
   const options = { commit: args.commit };
   const tallies = await new TransactionManagerService(log).startTransaction(

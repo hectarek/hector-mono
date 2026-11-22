@@ -56,6 +56,9 @@ export class MockUserGamesRepository implements IUserGamesRepository {
       .map((boxed) => ({ ...boxed }));
   }
 
+  // One process, one test at a time: nothing to wait for.
+  async lock(): Promise<void> {}
+
   async getById(id: string): Promise<UserGame | undefined> {
     const copy = this.rows.find((row) => row.id === id);
     return copy && { ...copy };

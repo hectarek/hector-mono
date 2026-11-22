@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U9):
+The spec's code map, as far as it's built (U1 to U11):
 
 ```
 app/
@@ -30,7 +30,10 @@ app/
   (auth)/welcome/            # where signed-out visitors start: A1, or A9 inside a chat app's browser
                              # (page.tsx, welcome-screen.tsx)
   (auth)/auth/[path]/        # Neon's forms: make an account (A2), sign in (A8); layout.tsx loads the kit
-  (start)/start/             # the steps before the app: profile/ (A4), home-screen/ (A6); A5 comes with U10
+  (start)/start/             # the steps before the app: profile/ (A4; ?friend= after a friend link), friends/
+                             # (A5, U10), home-screen/ (A6)
+  f/[token]/                 # a friend link (U10): A3 signed out, A9 in a chat app's browser, friends at once
+                             # signed in (link-screens.tsx, link-gone.tsx, open-link.tsx)
   (main)/                    # the signed-in app: layout.tsx (the shell, below; account-gate.tsx), page.tsx
                              # (the Library: All friends since U8, search at ?q= since U6, with
                              # library-search.tsx and library-search-results.tsx, shared with My library),
@@ -40,11 +43,14 @@ app/
                              # my-library/suggest/ (B9); admin/ (G1; suggestions/[id]/ G2, suggestions/answered/
                              # G7, games/ G5, games/new/ G3, games/[id]/ G4; admin-reads.ts, their Not found;
                              # admin-loading.tsx, the skeleton each route's loading.tsx renders);
-                             # copies/[id]/ (B7, B14: copy-form.tsx, remove-copy.tsx); you/ (E5) and
-                             # you/edit/ (E6)
+                             # copies/[id]/ (B7, B14: copy-form.tsx, remove-copy.tsx); friends/ (E1; link/
+                             # E2; [userId]/ E3, with E4's dialog in unfriend-button.tsx, U10); inbox/ (F1
+                             # and F2, with mark-read.tsx, U11); you/ (E5), you/edit/ (E6) and you/notices/
+                             # (E7, U11)
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
   removed/                   # a removed account's only page
-  _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader), back-link,
+  _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader; U11's
+                             # MemberTools, the bell and the piece, and ShellTabBar, the counted tabs), back-link,
                              # bell, changed-notice, confirm-dialog (and LeaveGuardDialog), cover,
                              # cover-thumb, date-sheet, dice, group, icons, list-row, no-connection,
                              # page-column, people-picker, photo-field, piece, seats, share-button,
@@ -55,24 +61,30 @@ app/
                              # i-own-it (IOwnIt, and AddedTally and AddedSoFar, B8's count), in-my-box,
                              # saved-switch (a switch that saves as it flips). U8's: library-list (the one
                              # list), library-controls (Filter, Sort, chips), filter-sheet (B2), sort-sheet
-                             # (B12). U9's: game-form (G3 and G4)
+                             # (B12). U9's: game-form (G3 and G4). U10's: friend-row (a person with Accept and
+                             # Decline, You asked and Cancel request, or Add friend), what-its-for (A1's and
+                             # A3's three lines)
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
                              # notify, leave-guard, changed-lines, share, shrink-image. U5's: account
                              # (getAccount and the gate), auth (the browser's auth client), auth-localization,
-                             # auth-notice
+                             # auth-notice. U11's: notice-text (noticeText: a notice's line, detail, link and
+                             # stamp, with notice-text/, one file per group), shell-counts (getShellCounts)
   _providers/                # auth-provider: Neon's kit, for the sign-in and account layouts only
   actions/                   # shared.ts: ActionState, actionLogger, text, toActionError (not "use server");
                              # profile.ts: createProfile, updateProfile, removePhoto; copies.ts (U7):
                              # addCopy, undoAddCopy, putInBox, saveCopy, setLending, setPassAlongForAll,
                              # removeCopy; suggestions.ts (U9): suggestGame; admin.ts (U9): answerSuggestion,
-                             # addGame, updateGame
+                             # addGame, updateGame; friends.ts (U10): makeFriendLink, openFriendLink,
+                             # sendFriendRequest, answerFriendRequest, cancelFriendRequest, unfriend;
+                             # notices.ts (U11): markInboxRead, setNoticeGroup
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
     errors/                  # common.ts (recipes' errors, each naming itself, and ChangedError with its
                              # CHANGED_REASONS), loggable.ts (job-search's)
     models/                  # a Zod model per table (see Data Model), with its own fixed lists;
-                             # user, session, transaction, logger
+                             # user, session, transaction, logger; notice.model.ts's InboxNotice, a notice
+                             # with what it points at (U11)
     loan.ts                  # the statuses, LOAN_MOVES and canMove, PASS_ALONG_FOLLOW_ONS, the
                              # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6)
     account-state.ts         # AccountState: removed, needs-profile, or ready (KTD3)
@@ -91,30 +103,46 @@ src/
                              # listLibrary (filter, sort, what to offer, B4's suggestion) over LibraryItems,
                              # countMatches (B2's live count), and the chips', count line's and B4's words
     video-link.ts            # videoEmbed, recipes'
+    link-token.ts            # a link's 8-character code in Crockford's base 32 (newLinkToken, linkTokenOf),
+                             # FRIEND_LINK_DAYS (U10; nights' links take the same form)
+    share-message.ts         # the ready messages for the share sheet (R52): the friend link's (U10)
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
                              # formatDate ("Fri, Nov 20", with the year once it isn't this year),
                              # formatWeekday and formatMonthDay, its parts; formatDay ("today", "yesterday",
-                             # "Nov 2") and formatTime ("9:12 AM", U9)
+                             # "Nov 2") and formatTime ("9:12 AM", U9); formatDayName ("Friday") and
+                             # formatNoticeTime ("25 min ago", "Yesterday", "Fri", U11)
   application/
     repositories/            # interfaces (U4): friendships, loans (reads; U8's pick-up counts), notices (add), removed-users,
                              # user-profiles, user-settings; U6: games (reads, and U9's writes), user-games
-                             # (reads, and U7's writes); U9: game-suggestions
+                             # (reads, and U7's writes); U9: game-suggestions; U10: friend-links,
+                             # friend-requests, and friendships' getSince and listFriendsOfFriends, loans'
+                             # setStatus and user-games' lock, the first loan write; U11: notices'
+                             # listForUser, countUnread and markRead, loans' listByIds and
+                             # listOpenForBorrower
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/catalog/       # get-game, search-games (U6)
     use-cases/copies/        # add-user-game, get-user-game, list-library (U8), list-my-library, put-in-box, remove-user-game,
                              # require-own-copy (a plain function), set-lending, set-pass-along-for-all,
                              # update-user-game (U7)
-    use-cases/friends/       # require-friend (KTD4)
+    use-cases/friends/       # require-friend (KTD4); U10: get-friend-link, make-friend-link, check-friend-link,
+                             # open-friend-link, list-friends, list-people-you-may-know, get-friend,
+                             # send-friend-request, answer-friend-request, cancel-friend-request, unfriend;
+                             # people-you-may-know.ts (friendsOfFriends), the read E1 and A5 share
+    use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
+                             # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
                              # answer-suggestion, add-game, update-game, find-games-to-edit, get-game-to-edit
                              # (U9); answer-step (answerSuggestion) and game-record (checkFamily,
                              # storeGameImage), plain functions they share
     use-cases/profile/       # create-profile, get-account-state, get-profile, list-taken-pieces,
-                             # remove-photo, set-photo, update-profile
+                             # remove-photo, set-photo, update-profile; get-notice-settings and
+                             # update-notice-settings (U11)
   interface-adapters/
     controllers/catalog/     # get-game, search-games
+    controllers/friends/     # one per use case of friends/, but require-friend (U10)
     controllers/copies/      # one per use case of copies/, but require-own-copy
+    controllers/notices/     # one per use case of notices/ (U11)
     controllers/suggestions/ # one per use case of suggestions/; form-fields.ts, the forms' field rules
     controllers/profile/     # one per use case of profile/ (they check the user and the input)
   infrastructure/
@@ -124,7 +152,8 @@ src/
 di/                          # container.ts, types.ts, modules: access (with removed users),
                              # authentication, catalog (games, U6), copies (user games, U6; U7's use cases),
                              # file-storage, suggestions (U9),
-                             # friends, loans, logger, notices, profile (profiles and settings), transaction
+                             # friends (friendships, U4; requests, links and their use cases, U10), loans,
+                             # logger, notices (U11's use cases), profile (profiles and settings), transaction
 db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
 lib/                         # auth/server.ts, logger.ts
 scripts/                     # check-test-database.ts, require-migrations.ts, migrate-production.ts,
@@ -160,12 +189,14 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **The shared components' look is the theme's.** It restyles Button, the fields, the choices, the toggles, Drawer, Dialog, AlertDialog, the Toaster and Empty by `data-slot`, unlayered, so their utilities can't change it; `no-restyle` forbids trying, and layout classes still work. A Button's kind is its variant (`default` the one primary, `secondary`, `destructive` the solid red, `link` the quiet dashed link) and its size its size (`lg` a screen's 48px main action, `sm` a button in a row or the header). The app's own components (stamp, piece, list-row and the rest) are utilities over the tokens.
 - **Type sizes** are Tailwind's and the shared stylesheet's: `text-10`, `text-13`, `text-15`, `text-22` and `text-26` are the kit's own, with the font's own line height. `cn` from `@repo/ui/lib/utils` knows them; `cn` straight from the `cn` package takes `text-13` for a color and drops it beside one (2026-11-21).
 - **One breakpoint for the shell, 768px** (`md:`): the tabs move into the AppBar, a sheet becomes a 480px dialog. Browsed lists add a third column from 1100px, written `min-[68.75rem]:`: Tailwind sorts a px breakpoint before `md`'s rem one, so `min-[1100px]:` loses to `md:` (2026-11-21).
-- **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; the piece is the member's own since U5 (a bone pawn while it loads), and U11 gives the bell and the tabs their counts.
+- **A page** is a `PageColumn` (`read`: 640 wide inside its sides; `browse`: 1080) whose `header` is an `AppHeader`: a tab's stencil title (with the bell and the piece on a phone) or a pushed page's `back` link named for where it goes. Its `loading.tsx` renders the same header. The `(main)` layout holds the AppBar, the bottom TabBar, the no-connection line and the leave guard's dialog; the piece is the member's own since U5 (a bone pawn while it loads), and the bell and the tabs carry their counts since U11.
 - **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
 - **U6's patterns, for every later list and page.** A game in a list is `GameCardRow` (`game-row.tsx`), its card from `gameCard` (`src/entities/game-card.ts`): one rule gives all nine of B1's cards (your own loan or request decides, then news of your own copy, then how many are free, "1 of 2 available"), and U8's library list uses it too. A catalog game is `CatalogRow`, its title underlined. A copy is `CopyRow` with `copyWords` (`copy-state.tsx`): each fact in mono on a line of its own, only the next in line beside a piece, and the stamp the member's own status. A page reads through one loader beside it (`loadGame` in `games/[id]/page.tsx`), which turns Not found or a bad id into `notFound()`; its return type is inferred, since `app/` can't import a use case's types. A game's facts and lines come from `game-facts.ts`, each only when the game has it (rule 14), and its token color from `coverColorOf`, since the catalog keeps none (an expansion takes its base game's). A link from search carries `?q=`, so the game's way back returns to the results.
 - **U7's patterns.** An action says what it did through `notify`, with Undo where it can be undone: `IOwnIt` stamps its row Added with Undo under it, and a page that counts what's added wraps its rows in `AddedTally` (B8's "1 added"). A switch that saves as it flips is `SavedSwitch` ("Saved.", or back as it was with the error), given its server action bound to the thing it changes (`setLending.bind(null, copyId, "lendable")`). A form with Save keeps its fields in state and compares them with the props its page renders, which the save's revalidation refreshes, so its leave guard needs no copy of what was saved (`copy-form.tsx`). A form that stays on its page after a save sends from `onSubmit`, in a transition, not through the form's `action`: React resets a form once its action ends, which put B7's controlled condition back to the one the page loaded with while the copy kept the new one (2026-11-22); a screen test checks the field after "Saved.". A catalog row shows its own action: I own it on a base game, In my box on an expansion of a game you own. Only a copy's owner opens its page (`requireOwnCopy`); anyone else gets Not found. An action whose dialog ends on another page returns its message, and the dialog pushes the route and shows it (`removeCopy`).
 - **U8's patterns.** A library is one list: `LibraryList` (`library-list.tsx`) over `listLibrary`'s result, with the page's own rows as its children, used by All friends and My library and, from U10, a friend's library. Its view lives in the address (R13): a page parses it with `parseLibraryView`, writes it with `libraryViewSearch`, and every control pushes a new address, so Back undoes a change; search keeps it (`LibrarySearch`'s `keep`), so clearing a search brings the filters back. B2's sheet stages its choices and applies them with Show N games, counting them with `countMatches` over `inView` (every game in view's facts, small enough for the client). Each of its changes goes through `onDraft(change)`, applied to the latest draft: a Base UI switch's or toggle group's change can render after the next tap's, so a handler that spread a draft it read earlier lost one of the two (found in a screen test, 2026-11-22). A filter shows only when some game in view has its value (R11's revision), or while it's on. A filter keeps a game when any of its copies matches, and the card stays whole (B3).
 - **U9's patterns.** Only the admin reads or writes a suggestion's answer or the catalog: each of those use cases starts with `requireAdmin`, and each admin page reads through `adminRead` (`app/(main)/admin/admin-reads.ts`), which turns a refusal into Not found, so a member can't tell the page exists. E5's Admin row is a read of the waiting suggestions that a refusal hides. The answering steps (`answerSuggestion` in `answer-step.ts`) are a plain function that `answer-suggestion` and `add-game` both call inside their transaction, so a game added from a suggestion answers it, puts it on the suggester's shelf (base games only, R3) and tells them in one write. A picture the admin or a member sends goes to the public `catalog-images` bucket (`storeGameImage`, `suggest-game`), and the file is removed when its row isn't written. G4 edits the whole record in G3's form (`game-form.tsx`), whose picture is an upload or an address, the upload winning when both are given.
+- **U10's patterns.** A friend link is opened by its page's client part (`open-link.tsx`), which sends `openFriendLink` once the page is open, never by the page's own load: link previews and prefetching load addresses on their own (recipes' join links). Signed in with no profile yet, the link makes the two friends first, then A4 carries `?friend=` on to A5. A use case named `use…` reads as a React hook to Biome's `useHookAtTopLevel`, so U10's is `open-friend-link`, and the nights' link will be `open-night-link` (the code map says so). Unfriending moves each open loan between the two after its copy's `lock` and `canMove` (KTD6), the app's first loan writes: requests are withdrawn, a yes not picked up yet is cancelled, and a loan that's out stays. Taking each off the other's game nights, and people from a past night in People you may know, come with nights' rows (U19's task says so). People you may know comes from `friendsOfFriends`, each with the friend they share, first by name ("Friend of Alice"). A client component imports nothing server-only, however deep: `open-link.tsx` showed `LinkGone` from a module that imported the welcome page, which reads `next/headers`, and only `next dev` and `next build` said so, while every test passed; `link-gone.tsx` and `what-its-for.tsx` hold the parts both sides use.
+- **U11's patterns.** The inbox (F1) lists a member's latest notices, newest first and at most `INBOX_LIMIT` (100), leaving out the groups they switched off on E7 (`shownTypes` in `notice-groups.ts`, which the bell's count shares). Each comes as an `InboxNotice`, with the loan, night or suggestion it points at, and its words come from `noticeText` (`app/_lib/notice-text.ts`): per type, the line, the detail under it, the page it opens and its stamp, one file per group under `notice-text/`, so a unit that adds a notice type adds its words there, with a case in its test. Opening the inbox marks the notices it listed read through its client part (`MarkInboxRead` in `mark-read.tsx`), once the page is open, as U10's friend link is opened, so a prefetch clears nothing; it sends their ids, so a notice that came after the page was drawn, or one a switched-off group hides, stays unread (`markRead`). A server action's `revalidatePath` re-renders the page being viewed ("Updates the UI immediately", in Next's `revalidatePath` reference), so the action brings the open inbox back with them read and the bell clears at once: `MarkInboxRead` keeps in state the ids that were unread when the page opened, and `IfNew` and `UnreadCount` mark from them until the member leaves. The tests stub `revalidatePath`, so the inbox's test rerenders the page itself to show the marks stay (found on the dev server, 2026-11-22, where they were gone 1.5 s after the inbox opened). F1's Mark all read isn't built, since opening does it. The tabs' counts come from the rows, not from notices (`get-tab-counts`, D14), so a group switched off changes only the bell's count, and Nights counts 0 until U19 gives nights their rows. `getShellCounts` (`app/_lib/shell-counts.ts`) reads them once a request with React's `cache`, for the bell, the bottom bar and the bar from 768px, and a failed read shows no counts rather than failing the page. E7 is a `SavedSwitch` per group, bound to `setNoticeGroup`.
 
 ## Data Model
 
@@ -209,7 +240,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - Redirect targets go through `safeRedirect` (`app/_lib/safe-redirect.ts`), which keeps only same-app paths.
 - The admin is the account whose id is `ADMIN_USER_ID` (KTD1), never an email. `di/modules/access.module.ts` reads it, and anything only the admin does starts with `IRequireAdmin` (`src/application/use-cases/admin/require-admin.ts`), which refuses anyone else with `UnauthorizedError`. A missing or malformed id makes nobody the admin, and the first refusal it causes is logged once, as a warning. Production's id is set after Hector's first sign-in there, then a redeploy (H3). Tests have no admin: the preload drops `ADMIN_USER_ID`.
 - Neon's sign-in kit (`@neondatabase/auth/react` and the browser's auth client) is 870 KB of JavaScript, so it loads only in the sign-in and account layouts, never the root or `(main)` layout (KTD2). `tests/app/layout.test.ts` fails if they reach it, or if the steps, welcome, removed, You or Edit profile pages do. Sign out and the account pages are plain links (`SIGN_OUT_HREF`, `ACCOUNT_HREF`), so the kit stays out of the pages that link to them.
-- **The gate after sign-in** is `gate(landing)` in `app/_lib/account.ts`, over `getAccount()` (read once a request, `IGetAccountStateController`): no `user_profiles` row goes to `/start/profile`, a `removed_users` row to `/removed`, everyone else gets the app; signed out goes to `/welcome`. The `(main)` layout runs it beside the page (`account-gate.tsx` in `<Suspense>`, so the shell still prerenders and a redirect arrives as the stream does), and each step page and `/removed` calls it for its own landing. A page that calls it waits on `connection()` first. The header's piece reads the same `getAccount()` (`MyPiece`, a bone pawn until it resolves): an async component never resolves in a screen test, so the tests see the bone pawn and call `MyPiece()` directly.
+- **The gate after sign-in** is `gate(landing)` in `app/_lib/account.ts`, over `getAccount()` (read once a request, `IGetAccountStateController`): no `user_profiles` row goes to `/start/profile`, a `removed_users` row to `/removed`, everyone else gets the app; signed out goes to `/welcome`. The `(main)` layout runs it beside the page (`account-gate.tsx` in `<Suspense>`, so the shell still prerenders and a redirect arrives as the stream does), and each step page and `/removed` calls it for its own landing. A page that calls it waits on `connection()` first. The header's bell and piece are one async part, `MemberTools`, which reads the same `getAccount()` and the bell's count from `getShellCounts()`, and shows an uncounted bell and a bone pawn until it resolves: an async component never resolves in a screen test, so the tests see the fallback and call `MemberTools()` directly.
 - **The sign-in views** (`app/_providers/auth-provider.tsx`): Google on (`social`), the email code on sign-up (`emailVerification: { otp: true }`), the board's words (`app/_lib/auth-localization.ts`), light only (`defaultTheme="light"`, and `suppressHydrationWarning` on `<html>`, since the kit's theme provider sets a class and `color-scheme` on it). Neon's own toast isn't shown: the provider's `toast` hands each message to `AuthNotice`, a line under the form. Neon's sign-up error for a taken email carries only a message ("User already exists. Use another email.", code `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL`), not the `error.code` the kit's `localization` is looked up by, so `toAuthMessage` words it by the message (checked on the test project, 2026-11-21). `globals.css` imports Neon's Tailwind sources and declares the layer order first, as recipes does; without them the kit's classes (`gap-6`) generate no CSS. The kit's fields are its own components, so the theme's restyle of the shared fields doesn't reach them: `CLASS_NAMES` in the auth page gives them the 44px field and 2px edge. A class like `text-15` merges away the text color there (Neon's `cn` takes it for one): use `text-base`.
 - **The test project's sign-up code check is off** (KTD3), so an email account is made without a code there. The code step is Neon's own (`EMAIL_VERIFICATION`, `/auth/email-verification?email=`), and Hector checks it on production before friends join (H4). Google signs in on Neon's shared credentials on the test project: the button reaches Google's sign-in page, and a real Google sign-in is Hector's on a preview.
 - **A9** (`src/entities/in-app-browser.ts`): each in-app browser's pattern is from UAParser.js's published list, with its link beside it, and a test per app. WhatsApp's, Telegram's, Slack's and iMessage's own web views that carry no marker can't be told apart, and aren't listed. The welcome page (and U10's and U19's link pages) show A9 in place of the ways in.
@@ -247,10 +278,10 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - Use-case tests use `describeEachBackend` and `makeApp()` (`tests/_support/app.ts`, recipes' harness): each runs on the mocks and on the real repositories over PGlite, and one that fails only on `[postgres]` means a mock has drifted from the SQL. Each unit adds its repositories and use cases there; `postgresRepositories()` is for a block that runs on PGlite alone. A repository no use case reads yet is tested the same way, through `makeApp().repos`, in `tests/src/infrastructure/repositories/`, with any check only the database can show (both rows of a friendship, a notice going with its failed change) in a block of its own (U4).
 - A mock mirrors its SQL: the same filters, the same order (a timestamp, then the id), the table's defaults, and its refusals as `DatabaseOperationError` (a second profile, a friendship with oneself). A mock whose table has no writes yet takes its rows from the tests: `MockLoansRepository.rows` until Batch 4, `MockRemovedUsersRepository.userIds` (through `addRemovedUser`) until U22.
 - **The cast** (`tests/_support/cast.ts`, KTD13) is the design kit's world on its today, Tue Nov 10, 2026 (`CAST_TODAY`): the nine people with their pieces and the boards' phones; the circle of six (You, Alice, Sam, Priya, Jo, Ben) all friends, with Mei and Dev Alice's friends and Noor Sam's; Sam's pass-along on; the 11 games and 2 expansions with the kit's facts (complexity from its weight: under 2 light, from 3 heavy); the 11 copies; and 15 loans, the open ones in the boards' states (Jo has your Gull & Anchor, a day overdue, and asked for more time; you have Sam's Moss & Mortar, due Fri) and the five that ended (B7's and C12's histories). Tests name rows by key (`CAST.people.you.id`, `CAST.copies.yourGullAndAnchor.id`, `CAST.loans.joHasGullAndAnchor.id`), whose ids are fixed (`00000000-…`) and no account's. `tests/src/infrastructure/repositories/loans.repository.test.ts` checks each copy reads back with its board's stamp.
-- `makeApp().makeCast()` puts the cast in the current backend: its people (profiles, settings, friendships) through their repositories, `writeCastPeople`; on PGlite the games, copies, boxed expansions and loans through drizzle, `insertCastRows`; on the mocks the loans into `MockLoansRepository.rows`. A unit that gives a table its writes moves the cast's rows to them, and one that needs more of the boards' world (friend requests in U10, notices in U11, nights in U18) adds it to the cast with its writes. A row written through a repository is dated when it's written, so a friendship's "Friends since" (E3) reads the seed's month, not July.
+- `makeApp().makeCast()` puts the cast in the current backend: its people (profiles, settings, friendships) through their repositories, `writeCastPeople`; on PGlite the games, copies, boxed expansions and loans through drizzle, `insertCastRows`; on the mocks the loans into `MockLoansRepository.rows`. A unit that gives a table its writes moves the cast's rows to them, and one that needs more of the boards' world (friend requests in U10, nights in U18, and the notices Batches 4 and 5 write) adds it to the cast with its writes. U11's tests add the notices they read themselves, through `INoticesRepository.add`. A row written through a repository is dated when it's written, so a friendship's "Friends since" (E3) reads the seed's month, not July.
 - **The seed** (`scripts/seed.ts`, KTD21) writes the cast to `.env`'s database and stops unless it carries the test project's comment. A dry run by default; `--commit` writes, in one transaction; `--as <name>=<user id>` maps a member to their account (`.cast-accounts.json`), and the rest keep the cast's ids. It writes what's missing and skips what's there, so it's safe to run again, and a unit that extends the cast runs it again (Commands). Its test runs it on PGlite with the comment and without. U4 ran it on the test project on 2026-11-21, every member mapped.
 - `RecordingLogger` (`tests/_support/logger.ts`) keeps every line logged, so a test can show a value never reached the logs.
-- A page's test against its board signs in with `signInAsYouWithTheCast()` (`tests/_support/members.ts`), which puts the cast in the container's repositories once per file, and pins the clock to the kit's today with bun's `setSystemTime(new Date("2026-11-10T09:00:00-05:00"))`, reset after. Find a row within the render's own container (`within(view.container)`): `render`'s queries cover the whole document, earlier renders included. `makeApp().addGames()` and `addCopies()` add rows the cast doesn't have, such as a game with a popularity or a stranger's copy, until U7 and U9 give those tables their writes.
+- A page's test against its board signs in with `signInAsYouWithTheCast()` (`tests/_support/members.ts`), which puts the cast in the container's repositories once per file, and pins the clock to the kit's today with bun's `setSystemTime(new Date("2026-11-10T09:00:00-05:00"))`, reset after. Find a row within the render's own container (`within(view.container)`): `render`'s queries cover the whole document, earlier renders included. A test that renders a page again after an action unmounts the first view (`view.unmount()`) and gives the second its own toaster: left mounted, the first view's pending work kept the second render from committing in happy-dom, and it stayed empty past every wait (U11's E1 test, 2026-11-22). `makeApp().addGames()` and `addCopies()` add rows the cast doesn't have, such as a game with a popularity or a stranger's copy, until U7 and U9 give those tables their writes.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. `dom.ts` gives Testing Library's waits (`findBy…`, `waitFor`) 3 seconds rather than 1, as job-search's does: on CI's runners a server action's round trip outran the default (2026-11-22). Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
 - The preload drops `ADMIN_USER_ID`, so a screen test of the admin's pages imports `tests/_support/as-admin.ts` first, which makes You the admin before the container reads it (U9). The use-case harness makes You the admin itself, as on the canvas's E5, and `app.noticesOf(userId)` reads what a member was told on either backend.
 - `tests/_support/controller.ts` (`controllerBasics`, recipes') came with U5's first controllers: a controller test names its valid input, what the use case should receive and the inputs to reject. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests. `tests/_support/members.ts` signs a test in as a member with a profile (`signInAsMember`) through the container's own controllers, for page, action and gate tests: the container's mock repositories live for the whole run, so each test signs in as a new user.
