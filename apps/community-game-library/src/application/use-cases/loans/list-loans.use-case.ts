@@ -20,14 +20,14 @@ export type LoanItem = {
   next: NameAndPiece | null;
 };
 
-// Loans (C4, R22), as far as U13 builds it: Needs you, the requests for the member's copies that
-// are theirs to answer and the returns they confirm; what they borrowed and what they lent, overdue
+// Loans (C4, R22), as far as U14 builds it: Needs you, the requests for the member's copies that
+// are theirs to answer, the returns they confirm and the requests for more time (U14); what they borrowed and what they lent, overdue
 // first, with a yes waiting for its pick-up; and their requests waiting on an owner (You asked).
 // Lines and more time join with U14 and U15.
 export type LoansList = {
   // The member, whose piece stands on what they borrowed.
   you: NameAndPiece | null;
-  needsYou: (LoanItem & { why: "request" | "return" })[];
+  needsYou: (LoanItem & { why: "request" | "return" | "more-time" })[];
   borrowed: LoanItem[];
   lent: LoanItem[];
   youAsked: LoanItem[];
@@ -75,6 +75,7 @@ export const listLoansUseCase = (
 
     const toAnswer: Row[] = [];
     const toConfirm: Row[] = [];
+    const moreTime: Row[] = [];
     const lent: Row[] = [];
     for (const copy of ownCopies) {
       const state = stateOf(copy);
@@ -86,6 +87,13 @@ export const listLoansUseCase = (
       const holder = state.holder ?? state.promised;
       if (holder?.status === "returning") {
         toConfirm.push({
+          loan: holder,
+          copy,
+          other: holder.borrowerUserId,
+          next,
+        });
+      } else if (holder?.moreTimeAskedAt) {
+        moreTime.push({
           loan: holder,
           copy,
           other: holder.borrowerUserId,
@@ -113,7 +121,14 @@ export const listLoansUseCase = (
       }
     }
 
-    const rows = [...toAnswer, ...toConfirm, ...lent, ...borrowed, ...waiting];
+    const rows = [
+      ...toAnswer,
+      ...toConfirm,
+      ...moreTime,
+      ...lent,
+      ...borrowed,
+      ...waiting,
+    ];
     const games = new Map(
       (
         await gamesRepository.listByIds([
@@ -156,6 +171,9 @@ export const listLoansUseCase = (
     return {
       you: people.get(userId) ?? null,
       needsYou: [
+        ...items(moreTime)
+          .sort(byDue(today))
+          .map((item) => ({ ...item, why: "more-time" as const })),
         ...items(toConfirm)
           .sort(bySince)
           .map((item) => ({ ...item, why: "return" as const })),

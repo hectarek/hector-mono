@@ -16,7 +16,7 @@ import {
 
 const { priyaAskedForNightMarket, youAskedForQuarryLane } = CAST.loans;
 
-describe("Loans (C4, U12's sections)", () => {
+describe("Loans (C4)", () => {
   beforeEach(() => {
     // The kit's today, Tue Nov 10, 2026, in the morning.
     setSystemTime(new Date("2026-11-10T09:40:00-05:00"));
@@ -31,7 +31,7 @@ describe("Loans (C4, U12's sections)", () => {
     const page = within(view.container);
 
     expect(page.getByRole("heading", { level: 1 }).textContent).toBe("Loans");
-    expect(page.getByRole("heading", { name: "Needs you · 1" })).toBeTruthy();
+    expect(page.getByRole("heading", { name: "Needs you · 2" })).toBeTruthy();
     const request = page.getByRole("link", {
       name: /Priya asked for Night Market/,
     });
@@ -55,24 +55,31 @@ describe("Loans (C4, U12's sections)", () => {
     }
   });
 
-  it("lists what you borrowed and lent in C4's order, each with its stamp and who's next (R22)", async () => {
+  it("lists C4's sections in order: Jo's request for more time and Priya's request, then what you borrowed (R22)", async () => {
     await signInAsYouWithTheCast();
     const view = render(await LoansPage());
     const page = within(view.container);
 
     expect(
       page.getAllByRole("heading", { level: 2 }).map((h) => h.textContent),
-    ).toEqual(["Needs you · 1", "You borrowed", "You lent", "You asked"]);
+    ).toEqual(["Needs you · 2", "You borrowed", "You asked"]);
+    const moreTime = page.getByRole("link", { name: /Gull & Anchor/ });
+    expect(moreTime.getAttribute("href")).toBe(
+      `/loans/${CAST.loans.joHasGullAndAnchor.id}`,
+    );
+    for (const words of [
+      "Jo asked for more time",
+      "Ben is 1st in line",
+      "Overdue",
+    ]) {
+      expect(within(moreTime).getByText(words)).toBeTruthy();
+    }
     const borrowed = page.getByRole("link", { name: /Moss & Mortar/ });
     expect(borrowed.getAttribute("href")).toBe(
       `/loans/${CAST.loans.youHaveMossAndMortar.id}`,
     );
     for (const words of ["Due Fri", "From Sam", "Jo is 1st in line"]) {
       expect(within(borrowed).getByText(words)).toBeTruthy();
-    }
-    const lent = page.getByRole("link", { name: /Gull & Anchor/ });
-    for (const words of ["Overdue", "Jo has it", "Ben is 1st in line"]) {
-      expect(within(lent).getByText(words)).toBeTruthy();
     }
   });
 

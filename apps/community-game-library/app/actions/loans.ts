@@ -186,3 +186,92 @@ export async function confirmReturn(
     return { error: state?.error ?? "That didn’t send. Try again." };
   }
 }
+
+// C6's Ask Sam: the date asked for, with a note. The page then reads "You asked for 1 more week".
+export async function askMoreTime(
+  loanId: string,
+  request: { dueOn: string; note: string },
+  ownerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IAskMoreTimeController")(
+      { loanId, ...request },
+      userId,
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("askMoreTime"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${ownerName} is asked for more time.` };
+}
+
+// C13's Send answer: yes until the date asked or one of the owner's own, or no, with a note.
+export async function answerMoreTime(
+  loanId: string,
+  answer: { note: string } & (
+    | { answer: "yes" }
+    | { answer: "yes"; dueOn: string }
+    | { answer: "no" }
+  ),
+  borrowerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IAnswerMoreTimeController")(
+      { loanId, ...answer },
+      userId,
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("answerMoreTime"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${borrowerName} is told.` };
+}
+
+// C14's Change the due date.
+export async function changeDueDate(
+  loanId: string,
+  dueOn: string,
+  borrowerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IChangeDueDateController")({ loanId, dueOn }, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("changeDueDate"),
+      "That didn’t save. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${borrowerName} is told the new date.` };
+}
+
+// C15's Call it back, after "Call Gull & Anchor back?". C18's message then offers Text Jo too.
+export async function callBack(
+  loanId: string,
+  borrowerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("ICallBackController")({ loanId }, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("callBack"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${borrowerName} is asked to bring it back.` };
+}

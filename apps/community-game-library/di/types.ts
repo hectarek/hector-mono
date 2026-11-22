@@ -39,10 +39,14 @@ import type { IMakeFriendLinkUseCase } from "@/src/application/use-cases/friends
 import type { IOpenFriendLinkUseCase } from "@/src/application/use-cases/friends/open-friend-link.use-case";
 import type { ISendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import type { IUnfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+import type { IAnswerMoreTimeUseCase } from "@/src/application/use-cases/loans/answer-more-time.use-case";
 // Each list keeps its lines in alphabetical order, so two batches adding to it merge cleanly
 // (docs/build-plan.md, Code map).
 import type { IAnswerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
+import type { IAskMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-more-time.use-case";
+import type { ICallBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
 import type { ICancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import type { IChangeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
 import type { IConfirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import type { IConfirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import type { IGetLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
@@ -93,8 +97,12 @@ import type { IMakeFriendLinkController } from "@/src/interface-adapters/control
 import type { IOpenFriendLinkController } from "@/src/interface-adapters/controllers/friends/open-friend-link.controller";
 import type { ISendFriendRequestController } from "@/src/interface-adapters/controllers/friends/send-friend-request.controller";
 import type { IUnfriendController } from "@/src/interface-adapters/controllers/friends/unfriend.controller";
+import type { IAnswerMoreTimeController } from "@/src/interface-adapters/controllers/loans/answer-more-time.controller";
 import type { IAnswerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
+import type { IAskMoreTimeController } from "@/src/interface-adapters/controllers/loans/ask-more-time.controller";
+import type { ICallBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
 import type { ICancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import type { IChangeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
 import type { IConfirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import type { IConfirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import type { IGetLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
@@ -132,15 +140,23 @@ export const DI_SYMBOLS = {
   IAddUserGameUseCase: Symbol.for("IAddUserGameUseCase"),
   IAnswerFriendRequestController: Symbol.for("IAnswerFriendRequestController"),
   IAnswerFriendRequestUseCase: Symbol.for("IAnswerFriendRequestUseCase"),
+  IAnswerMoreTimeController: Symbol.for("IAnswerMoreTimeController"),
+  IAnswerMoreTimeUseCase: Symbol.for("IAnswerMoreTimeUseCase"),
   IAnswerRequestController: Symbol.for("IAnswerRequestController"),
   IAnswerRequestUseCase: Symbol.for("IAnswerRequestUseCase"),
   IAnswerSuggestionController: Symbol.for("IAnswerSuggestionController"),
   IAnswerSuggestionUseCase: Symbol.for("IAnswerSuggestionUseCase"),
+  IAskMoreTimeController: Symbol.for("IAskMoreTimeController"),
+  IAskMoreTimeUseCase: Symbol.for("IAskMoreTimeUseCase"),
   IAuthenticationService: Symbol.for("IAuthenticationService"),
+  ICallBackController: Symbol.for("ICallBackController"),
+  ICallBackUseCase: Symbol.for("ICallBackUseCase"),
   ICancelFriendRequestController: Symbol.for("ICancelFriendRequestController"),
   ICancelFriendRequestUseCase: Symbol.for("ICancelFriendRequestUseCase"),
   ICancelLoanController: Symbol.for("ICancelLoanController"),
   ICancelLoanUseCase: Symbol.for("ICancelLoanUseCase"),
+  IChangeDueDateController: Symbol.for("IChangeDueDateController"),
+  IChangeDueDateUseCase: Symbol.for("IChangeDueDateUseCase"),
   ICheckFriendLinkController: Symbol.for("ICheckFriendLinkController"),
   ICheckFriendLinkUseCase: Symbol.for("ICheckFriendLinkUseCase"),
   IConfirmPickUpController: Symbol.for("IConfirmPickUpController"),
@@ -264,15 +280,23 @@ export interface DI_RETURN_TYPES {
   IAddUserGameUseCase: IAddUserGameUseCase;
   IAnswerFriendRequestController: IAnswerFriendRequestController;
   IAnswerFriendRequestUseCase: IAnswerFriendRequestUseCase;
+  IAnswerMoreTimeController: IAnswerMoreTimeController;
+  IAnswerMoreTimeUseCase: IAnswerMoreTimeUseCase;
   IAnswerRequestController: IAnswerRequestController;
   IAnswerRequestUseCase: IAnswerRequestUseCase;
   IAnswerSuggestionController: IAnswerSuggestionController;
   IAnswerSuggestionUseCase: IAnswerSuggestionUseCase;
+  IAskMoreTimeController: IAskMoreTimeController;
+  IAskMoreTimeUseCase: IAskMoreTimeUseCase;
   IAuthenticationService: IAuthenticationService;
+  ICallBackController: ICallBackController;
+  ICallBackUseCase: ICallBackUseCase;
   ICancelFriendRequestController: ICancelFriendRequestController;
   ICancelFriendRequestUseCase: ICancelFriendRequestUseCase;
   ICancelLoanController: ICancelLoanController;
   ICancelLoanUseCase: ICancelLoanUseCase;
+  IChangeDueDateController: IChangeDueDateController;
+  IChangeDueDateUseCase: IChangeDueDateUseCase;
   ICheckFriendLinkController: ICheckFriendLinkController;
   ICheckFriendLinkUseCase: ICheckFriendLinkUseCase;
   IConfirmPickUpController: IConfirmPickUpController;

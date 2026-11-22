@@ -96,8 +96,8 @@ function LoanItemRow({
   );
 }
 
-// Loans (C4, R22): Needs you, the requests for the member's copies that are theirs to answer and
-// the returns they confirm; You borrowed and You lent, overdue first; and You asked, their own
+// Loans (C4, R22): Needs you, the requests for the member's copies that are theirs to answer, the
+// requests for more time (U14) and the returns they confirm; You borrowed and You lent, overdue first; and You asked, their own
 // requests waiting on an owner. Each row opens the loan's page. The lines, more time, Record a loan
 // and Past loans come with U14 to U16.
 export default async function LoansPage() {
@@ -127,8 +127,35 @@ export default async function LoansPage() {
       {needsYou.length > 0 && (
         <Group label={`Needs you · ${needsYou.length}`} overList>
           <List>
-            {needsYou.map(({ loan, game, other, why }) =>
-              why === "return" ? (
+            {needsYou.map(({ loan, copy, game, other, next, why }) =>
+              why === "more-time" ? (
+                <ListRow
+                  key={loan.id}
+                  href={`/loans/${loan.id}`}
+                  thumb={
+                    <Piece
+                      shape={other.pieceShape}
+                      color={other.pieceColor}
+                      size={20}
+                    />
+                  }
+                  stamp={
+                    <Stamp
+                      tone={
+                        copyState(copy, [loan], copy.userId, today).stamp.tone
+                      }
+                    >
+                      {copyState(copy, [loan], copy.userId, today).stamp.word}
+                    </Stamp>
+                  }
+                >
+                  <RowName>{game.title}</RowName>
+                  <span className="text-13">
+                    {other.name} asked for more time
+                  </span>
+                  {next && <RowFacts>{`${next.name} is 1st in line`}</RowFacts>}
+                </ListRow>
+              ) : why === "return" ? (
                 <ListRow
                   key={loan.id}
                   href={`/loans/${loan.id}`}

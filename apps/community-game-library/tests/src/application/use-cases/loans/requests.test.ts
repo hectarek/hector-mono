@@ -198,7 +198,9 @@ describeEachBackend("requests and their answers (U12)", () => {
           answerNote: "It's on the porch.",
         },
       ]);
-      expect((await app.listLoans(you.id, TODAY)).needsYou).toEqual([]);
+      expect(
+        (await app.listLoans(you.id, TODAY)).needsYou.map((item) => item.why),
+      ).toEqual(["more-time"]);
     });
 
     it("says yes until a picked date after today, and refuses today", async () => {
@@ -378,9 +380,17 @@ describeEachBackend("requests and their answers (U12)", () => {
 
     it("lists the cast's requests as C4 does: Priya's to you, and yours to Sam", async () => {
       const mine = await app.listLoans(you.id, TODAY);
+      // C4's Needs you · 2: Jo's request for more time, then Priya's request.
       expect(
-        mine.needsYou.map((item) => [item.other.name, item.game.title]),
-      ).toEqual([["Priya", "Night Market"]]);
+        mine.needsYou.map((item) => [
+          item.why,
+          item.other.name,
+          item.game.title,
+        ]),
+      ).toEqual([
+        ["more-time", "Jo", "Gull & Anchor"],
+        ["request", "Priya", "Night Market"],
+      ]);
       expect(
         mine.youAsked.map((item) => [item.other.name, item.game.title]),
       ).toEqual([["Sam", "Quarry Lane"]]);

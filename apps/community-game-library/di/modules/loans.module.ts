@@ -1,7 +1,11 @@
 import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
+import { answerMoreTimeUseCase } from "@/src/application/use-cases/loans/answer-more-time.use-case";
 import { answerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
+import { askMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-more-time.use-case";
+import { callBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
 import { cancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import { changeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
 import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
@@ -11,8 +15,12 @@ import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-lo
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import { LoansRepository } from "@/src/infrastructure/repositories/loans.repository";
 import { MockLoansRepository } from "@/src/infrastructure/repositories/loans.repository.mock";
+import { answerMoreTimeController } from "@/src/interface-adapters/controllers/loans/answer-more-time.controller";
 import { answerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
+import { askMoreTimeController } from "@/src/interface-adapters/controllers/loans/ask-more-time.controller";
+import { callBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
 import { cancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import { changeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
 import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
@@ -44,6 +52,42 @@ export function createLoansModule() {
     IUserProfilesRepository: profiles,
   } = DI_SYMBOLS;
 
+  loansModule
+    .bind(DI_SYMBOLS.IAskMoreTimeUseCase)
+    .toHigherOrderFunction(askMoreTimeUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IAnswerMoreTimeUseCase)
+    .toHigherOrderFunction(answerMoreTimeUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IChangeDueDateUseCase)
+    .toHigherOrderFunction(changeDueDateUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.ICallBackUseCase)
+    .toHigherOrderFunction(callBackUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
   loansModule
     .bind(DI_SYMBOLS.IAnswerRequestUseCase)
     .toHigherOrderFunction(answerRequestUseCase, [
@@ -119,6 +163,30 @@ export function createLoansModule() {
       log,
     ]);
 
+  loansModule
+    .bind(DI_SYMBOLS.IAskMoreTimeController)
+    .toHigherOrderFunction(askMoreTimeController, [
+      DI_SYMBOLS.IAskMoreTimeUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IAnswerMoreTimeController)
+    .toHigherOrderFunction(answerMoreTimeController, [
+      DI_SYMBOLS.IAnswerMoreTimeUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IChangeDueDateController)
+    .toHigherOrderFunction(changeDueDateController, [
+      DI_SYMBOLS.IChangeDueDateUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.ICallBackController)
+    .toHigherOrderFunction(callBackController, [
+      DI_SYMBOLS.ICallBackUseCase,
+      log,
+    ]);
   loansModule
     .bind(DI_SYMBOLS.IAnswerRequestController)
     .toHigherOrderFunction(answerRequestController, [

@@ -227,18 +227,23 @@ describeEachBackend("the pick-up and the return (U13)", () => {
   });
 
   it("lists what you borrowed and lent on Loans, overdue first (R22)", async () => {
-    const { borrowed, lent } = await app.listLoans(you.id, TODAY);
+    const before = await app.listLoans(you.id, TODAY);
     expect(
-      borrowed.map((item) => [
+      before.borrowed.map((item) => [
         item.game.title,
         item.other.name,
         item.next?.name,
       ]),
     ).toEqual([["Moss & Mortar", "Sam", "Jo"]]);
-    expect(
-      lent.map((item) => [item.game.title, item.other.name, item.next?.name]),
-    ).toEqual([["Gull & Anchor", "Jo", "Ben"]]);
+    // Jo's Gull & Anchor waits on you for more time, so it's under Needs you, not You lent.
+    expect(before.lent).toEqual([]);
 
+    await app.answerMoreTime(
+      joHasGullAndAnchor.id,
+      { answer: "no", note: null },
+      you.id,
+      TODAY,
+    );
     await sayYes({ periodDays: 7 });
     await app.confirmPickUp(
       priyaAskedForNightMarket.id,
@@ -247,7 +252,14 @@ describeEachBackend("the pick-up and the return (U13)", () => {
       TODAY,
     );
     expect(
-      (await app.listLoans(you.id, TODAY)).lent.map((item) => item.game.title),
-    ).toEqual(["Gull & Anchor", "Night Market"]);
+      (await app.listLoans(you.id, TODAY)).lent.map((item) => [
+        item.game.title,
+        item.other.name,
+        item.next?.name ?? null,
+      ]),
+    ).toEqual([
+      ["Gull & Anchor", "Jo", "Ben"],
+      ["Night Market", "Priya", null],
+    ]);
   });
 });

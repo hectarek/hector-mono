@@ -195,6 +195,14 @@ export function dueOn(pickedUpOn: string, periodDays: number): string {
   return addDays(pickedUpOn, periodDays);
 }
 
+// More time (R20; C6, C14): 3 more days or 1 more week, counted from the due date, or from today
+// once it's overdue ("It's overdue, so these count from today."), or a date after that.
+export const MORE_TIME_DAYS = [3, 7] as const;
+
+export function moreTimeFrom(dueOn: string, today: string): string {
+  return dueOn > today ? dueOn : today;
+}
+
 // A loan's dates from its pick-up on (R18): the due date its period gives, or, when the owner
 // picked a date, the days from the pick-up to it, so a pass-along's next loan can copy them (R48).
 export function datesAtPickUp(
@@ -252,7 +260,13 @@ const brown = (word: string): CopyStamp => ({ word, tone: "brown" });
 
 type CopyLoan = Pick<
   LoanFields,
-  "id" | "borrowerUserId" | "status" | "previousLoanId" | "dueOn" | "createdAt"
+  | "id"
+  | "borrowerUserId"
+  | "status"
+  | "previousLoanId"
+  | "dueOn"
+  | "calledBackAt"
+  | "createdAt"
 >;
 
 // A copy's state for the person looking (R15, B13; KTD6's available, requested, you asked, 2nd in
@@ -323,10 +337,13 @@ function holderStamp(loan: CopyLoan, today: string): CopyStamp {
   );
 }
 
-// The owner's stamp while someone else has their copy.
+// The owner's stamp while someone else has their copy: a call-back outranks overdue (C18).
 function ownersOutStamp(loan: CopyLoan, today: string): CopyStamp {
   if (loan.status === "returning") {
     return red("Given back");
+  }
+  if (loan.calledBackAt !== null) {
+    return { word: "Called back", tone: "late" };
   }
   if (loan.status === "passing") {
     return brown("Handed on");

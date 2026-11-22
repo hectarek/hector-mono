@@ -44,8 +44,12 @@ import { openFriendLinkUseCase } from "@/src/application/use-cases/friends/open-
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
 import { sendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import { unfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+import { answerMoreTimeUseCase } from "@/src/application/use-cases/loans/answer-more-time.use-case";
 import { answerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
+import { askMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-more-time.use-case";
+import { callBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
 import { cancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import { changeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
 import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
@@ -369,6 +373,30 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     cancelLoan: cancelLoanUseCase(userGames, loans, notices, transactions, log),
+
+    // More time, due dates and calling back (U14)
+    askMoreTime: askMoreTimeUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    answerMoreTime: answerMoreTimeUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    changeDueDate: changeDueDateUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    callBack: callBackUseCase(userGames, loans, notices, transactions, log),
 
     // The pick-up and the return (U13)
     confirmPickUp: confirmPickUpUseCase(userGames, loans, transactions, log),

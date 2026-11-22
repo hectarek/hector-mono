@@ -5,12 +5,21 @@ import { LoanTrack } from "@/app/_components/loan-track";
 import { Piece } from "@/app/_components/piece";
 import { Stamp } from "@/app/_components/stamp";
 import type { DI_RETURN_TYPES } from "@/di/types";
-import { copyState, ordinal } from "@/src/entities/loan";
+import {
+  copyState,
+  isOverdue,
+  moreTimeFrom,
+  ordinal,
+} from "@/src/entities/loan";
 import { coverColorOf } from "@/src/entities/piece";
-import { formatDate, formatWhen } from "@/src/entities/week";
+import { daysBetween, formatDate, formatWhen } from "@/src/entities/week";
+import { CallBackButton } from "./call-back-button";
+import { ChangeDueSheet } from "./change-due-sheet";
 import { GiveBackForm } from "./give-back-form";
 import { IsItBack } from "./is-it-back";
 import { asSentence, datesLine, PhoneLink, Summary, Title } from "./loan-parts";
+import { MoreTimeAnswer } from "./more-time-answer";
+import { MoreTimeSheet } from "./more-time-sheet";
 
 type LoanView = Awaited<ReturnType<DI_RETURN_TYPES["IGetLoanController"]>>;
 
@@ -48,9 +57,22 @@ function LineList({
   );
 }
 
+// What a request for more time asks for, in C5's words: "1 more week", "3 more days", or "more
+// time, until Fri, Nov 20".
+function moreTimeWords(dueOn: string, askedFor: string, today: string): string {
+  const days = daysBetween(dueOn, askedFor);
+  return days === 7
+    ? "1 more week"
+    : days === 3
+      ? "3 more days"
+      : `more time, until ${formatDate(askedFor, today)}`;
+}
+
 // C5, the loan the member borrowed, while they have it or wait for the owner to confirm it's
 // back: the stamp, the track with their piece on today, the dates and the owner's note on the copy;
-// who's involved; and I gave it back. Passing it along and more time come with U14 and U15.
+// who's involved; and I gave it back, or Ask for more time (U14). It leads with "Sam wants it back
+// now" once it's called back, and with the request while one waits for an answer. Passing it
+// along comes with U15.
 export function BorrowedLoan({
   view,
   today,
@@ -66,6 +88,26 @@ export function BorrowedLoan({
   return (
     <>
       <Title>{game.title}</Title>
+      {!returning && loan.calledBackAt && (
+        <Group label={`${owner.name} wants it back now`}>
+          <p className="text-15">
+            {owner.name} called it back {formatWhen(loan.calledBackAt, now)}.
+            {loan.dueOn &&
+              (loan.dueOn === today
+                ? " It’s due today."
+                : ` It was due ${formatDate(loan.dueOn, today)}.`)}
+          </p>
+        </Group>
+      )}
+      {!returning && loan.moreTimeDueOn && loan.dueOn && (
+        <Group label="Your request">
+          <Summary
+            thumb={null}
+            lead={`You asked for ${moreTimeWords(loan.dueOn, loan.moreTimeDueOn, today)}`}
+            facts={[`${owner.name} hasn’t answered`]}
+          />
+        </Group>
+      )}
       <Group
         label="The loan"
         aside={<Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
@@ -138,6 +180,19 @@ export function BorrowedLoan({
             owner={owner.name}
             today={today}
           />
+          {loan.dueOn && !loan.calledBackAt && !loan.moreTimeAskedAt && (
+            <MoreTimeSheet
+              loanId={loan.id}
+              title={game.title}
+              color={coverColorOf(game)}
+              imageUrl={game.imageUrl}
+              dueOn={loan.dueOn}
+              from={moreTimeFrom(loan.dueOn, today)}
+              owner={owner.name}
+              nextName={line[0]?.name ?? null}
+              today={today}
+            />
+          )}
         </Group>
       )}
     </>
@@ -145,9 +200,9 @@ export function BorrowedLoan({
 }
 
 // C7, the member's copy someone has: who has it, the track with their piece, and the dates; It's
-// back with me; the line; and the copy's history. While they wait for the owner to confirm it's
-// back, the page leads with it (C8). More time, calling it back and passing along come with U14 and
-// U15.
+// back with me and Change the due date (C14); the line; the copy's history; and Call it back (C15),
+// which C18 then marks. It leads with the borrower's request for more time (C13) while one waits,
+// and with Is it back? (C8) while they say they gave it back. Passing along comes with U15.
 export function LentLoan({
   view,
   today,
@@ -177,6 +232,38 @@ export function LentLoan({
   return (
     <>
       <Title>{game.title}</Title>
+      {!returning && loan.moreTimeDueOn && loan.pickedUpOn && loan.dueOn && (
+        <Group label={`${borrower.name} asked for more time`}>
+          <div className="flex items-start gap-2.5">
+            <Piece
+              shape={borrower.pieceShape}
+              color={borrower.pieceColor}
+              size={20}
+            />
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-15 font-bold">
+                Until {formatDate(loan.moreTimeDueOn, today)}
+              </span>
+              {loan.moreTimeNote && (
+                <span className="text-sm">“{loan.moreTimeNote}”</span>
+              )}
+            </div>
+          </div>
+          <MoreTimeAnswer
+            loanId={loan.id}
+            title={game.title}
+            color={coverColorOf(game)}
+            imageUrl={game.imageUrl}
+            borrower={borrower}
+            pickedUpOn={loan.pickedUpOn}
+            dueOn={loan.dueOn}
+            askedFor={loan.moreTimeDueOn}
+            askedNote={loan.moreTimeNote}
+            nextName={line[0]?.name ?? null}
+            today={today}
+          />
+        </Group>
+      )}
       {returning && loan.returnedOn && (
         <Group label="Is it back?">
           <span className="flex items-center gap-2.5 text-15">
@@ -219,9 +306,28 @@ export function LentLoan({
         )}
         <p className="font-mono text-2xs font-medium text-muted-foreground">
           {datesLine(loan, today)}
+          {loan.calledBackAt &&
+            ` · Called back ${formatWhen(loan.calledBackAt, now)}`}
         </p>
       </Group>
-      {!returning && <Group label="What you can do">{isItBack(null)}</Group>}
+      {!returning && (
+        <Group label="What you can do">
+          {isItBack(null)}
+          {loan.dueOn && (
+            <ChangeDueSheet
+              loanId={loan.id}
+              title={game.title}
+              color={coverColorOf(game)}
+              imageUrl={game.imageUrl}
+              dueOn={loan.dueOn}
+              from={moreTimeFrom(loan.dueOn, today)}
+              borrower={borrower}
+              nextName={line[0]?.name ?? null}
+              today={today}
+            />
+          )}
+        </Group>
+      )}
       {line.length > 0 && (
         <Group label="The line" overList>
           <LineList line={line} now={now} />
@@ -234,6 +340,23 @@ export function LentLoan({
           </ListRow>
         </List>
       </Group>
+      {!returning &&
+        (loan.calledBackAt ? (
+          <p className="rounded-lg border-2 border-foreground bg-card px-3.5 py-3 text-sm">
+            You called it back {formatWhen(loan.calledBackAt, now)}.{" "}
+            {borrower.name} sees that when they next open the app.
+          </p>
+        ) : (
+          <Group label="Need it back now?">
+            <CallBackButton
+              loanId={loan.id}
+              title={game.title}
+              borrower={borrower.name}
+              overdue={isOverdue(loan, today)}
+              nextName={line[0]?.name ?? null}
+            />
+          </Group>
+        ))}
     </>
   );
 }

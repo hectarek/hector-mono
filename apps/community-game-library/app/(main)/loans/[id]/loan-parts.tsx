@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { PhoneIcon } from "@/app/_components/icons";
 import { Piece } from "@/app/_components/piece";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
-import { formatDate, formatWhen } from "@/src/entities/week";
+import { daysBetween, formatDate, formatWhen } from "@/src/entities/week";
 
 // The parts a loan's page builds its boards from (C2, C3, C5, C7, C16, C17).
 
@@ -129,7 +129,8 @@ export const capitalized = (words: string) =>
   `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
 
 // A loan's dates once it's picked up, in mono under the track (C5, C7): "Picked up Fri, Nov 6 ·
-// 1 week · due Fri, Nov 13".
+// 1 week · due Fri, Nov 13". The period shows only while the due date is still the one it gives:
+// more time, a new date or a call-back leave just the two dates.
 export function datesLine(
   loan: {
     pickedUpOn: string | null;
@@ -138,9 +139,15 @@ export function datesLine(
   },
   today: string,
 ): string {
+  const period =
+    loan.pickedUpOn &&
+    loan.dueOn &&
+    daysBetween(loan.pickedUpOn, loan.dueOn) === loan.periodDays
+      ? periodWords(loan.periodDays)
+      : null;
   return [
     loan.pickedUpOn && `Picked up ${formatDate(loan.pickedUpOn, today)}`,
-    periodWords(loan.periodDays),
+    period,
     loan.dueOn && `due ${formatDate(loan.dueOn, today)}`,
   ]
     .filter((part) => part)

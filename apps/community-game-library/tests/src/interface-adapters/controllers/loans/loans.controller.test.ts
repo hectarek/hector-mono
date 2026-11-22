@@ -9,8 +9,12 @@ import {
 } from "bun:test";
 import { UnauthenticatedError } from "@/src/entities/errors/common";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
+import { answerMoreTimeController } from "@/src/interface-adapters/controllers/loans/answer-more-time.controller";
 import { answerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
+import { askMoreTimeController } from "@/src/interface-adapters/controllers/loans/ask-more-time.controller";
+import { callBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
 import { cancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import { changeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
 import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
@@ -216,5 +220,81 @@ describe("confirmReturnController", () => {
       you.id,
       expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
     );
+  });
+});
+
+const aDay = expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/);
+
+describe("askMoreTimeController", () => {
+  controllerBasics({
+    make: (useCase, logger) => askMoreTimeController(useCase, logger),
+    valid: { loanId: ID, dueOn: "2026-11-20", note: " " },
+    calledWith: [ID, { dueOn: "2026-11-20", note: null }, you.id, aDay],
+    invalid: {
+      "a day that isn't one": { loanId: ID, dueOn: "soon", note: "" },
+    },
+  });
+});
+
+describe("answerMoreTimeController", () => {
+  controllerBasics({
+    make: (useCase, logger) => answerMoreTimeController(useCase, logger),
+    valid: { loanId: ID, answer: "yes", note: "" },
+    calledWith: [ID, { answer: "yes", note: null }, you.id, aDay],
+    invalid: {
+      "an answer it doesn't know": { loanId: ID, answer: "maybe", note: "" },
+      "a yes with a day that isn't one": {
+        loanId: ID,
+        answer: "yes",
+        dueOn: "Friday",
+        note: "",
+      },
+    },
+  });
+
+  it("passes a date of the owner's own, and a no", async () => {
+    const useCase = mock(async () => undefined);
+    const controller = answerMoreTimeController(
+      useCase as never,
+      new MockLoggerService(),
+    );
+    await controller(
+      { loanId: ID, answer: "yes", dueOn: "2026-11-15", note: "" },
+      you.id,
+    );
+    expect(useCase).toHaveBeenLastCalledWith(
+      ID,
+      { answer: "yes", dueOn: "2026-11-15", note: null },
+      you.id,
+      aDay,
+    );
+    await controller(
+      { loanId: ID, answer: "no", note: "Ben's waiting." },
+      you.id,
+    );
+    expect(useCase).toHaveBeenLastCalledWith(
+      ID,
+      { answer: "no", note: "Ben's waiting." },
+      you.id,
+      aDay,
+    );
+  });
+});
+
+describe("changeDueDateController", () => {
+  controllerBasics({
+    make: (useCase, logger) => changeDueDateController(useCase, logger),
+    valid: { loanId: ID, dueOn: "2026-11-17" },
+    calledWith: [ID, "2026-11-17", you.id, aDay],
+    invalid: { "no day": { loanId: ID } },
+  });
+});
+
+describe("callBackController", () => {
+  controllerBasics({
+    make: (useCase, logger) => callBackController(useCase, logger),
+    valid: { loanId: ID },
+    calledWith: [ID, you.id, aDay],
+    invalid: { "a loan that isn't an id": { loanId: "gull-and-anchor" } },
   });
 });
