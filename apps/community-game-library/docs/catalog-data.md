@@ -76,27 +76,27 @@ Nothing else is open. The [full XML snapshot](https://boardgamegeek.com/wiki/pag
 
 A survey on 2026-11-12, with a test list of 32 games from Catan to Bananagrams.
 
-| Source | Alive | Storing allowed, by its own page | Fields | Test list |
-|---|---|---|---|---|
-| [Wikidata](https://www.wikidata.org/wiki/Wikidata:Copyright) | Yes | Yes: "available under the Creative Commons CC0 License" | Title, year, players; play time, age and publisher for some; no complexity, no best counts, no description | 30 of 32 found |
-| Board Game Atlas | No: closed 2023-08-23 | | | |
-| Datasets on Kaggle, GitHub, Hugging Face | Mixed | Labels vary from CC0 to non-commercial; several pages say the data stays BGG's | The full list, as copies of BGG | |
-| recommend.games API | Yes | No terms found; BGG ids and BGG image addresses | The full list | |
-| BoardGamePrices.co.uk API | Yes | "as long as you link back to this site … and be sure to cache obtained information for at least one hour" | Name, image, thumbnail, by BGG id only | 32 of 32 |
-| UPCitemdb (barcodes) | Yes | A license "solely for Customer's operations"; 100 requests a day free | Title, brand, retailer images | 2 of 2 barcodes |
-| Ludopedia API (Brazil) | Yes, in alpha | Terms not read (its pages refused the reader) | Most of the list, with complexity and best counts | |
-| Luding (Germany) | Yes | No license, no API | Designer, publisher, year, players, length | |
+| Source                                                       | Alive                 | Storing allowed, by its own page                                                                          | Fields                                                                                                     | Test list       |
+| ------------------------------------------------------------ | --------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------- |
+| [Wikidata](https://www.wikidata.org/wiki/Wikidata:Copyright) | Yes                   | Yes: "available under the Creative Commons CC0 License"                                                   | Title, year, players; play time, age and publisher for some; no complexity, no best counts, no description | 30 of 32 found  |
+| Board Game Atlas                                             | No: closed 2023-08-23 |                                                                                                           |                                                                                                            |                 |
+| Datasets on Kaggle, GitHub, Hugging Face                     | Mixed                 | Labels vary from CC0 to non-commercial; several pages say the data stays BGG's                            | The full list, as copies of BGG                                                                            |                 |
+| recommend.games API                                          | Yes                   | No terms found; BGG ids and BGG image addresses                                                           | The full list                                                                                              |                 |
+| BoardGamePrices.co.uk API                                    | Yes                   | "as long as you link back to this site … and be sure to cache obtained information for at least one hour" | Name, image, thumbnail, by BGG id only                                                                     | 32 of 32        |
+| UPCitemdb (barcodes)                                         | Yes                   | A license "solely for Customer's operations"; 100 requests a day free                                     | Title, brand, retailer images                                                                              | 2 of 2 barcodes |
+| Ludopedia API (Brazil)                                       | Yes, in alpha         | Terms not read (its pages refused the reader)                                                             | Most of the list, with complexity and best counts                                                          |                 |
+| Luding (Germany)                                             | Yes                   | No license, no API                                                                                        | Designer, publisher, year, players, length                                                                 |                 |
 
 Wikidata in numbers, from queries run that day: about 5,100 games carry a BGG id. Of those, 44% have a player range, 35% a year, 16% a play time and 13% an image. On the test list of well-known games the player range was there for all 30.
 
 **Measured against the CSV.** The data session looked up the most-rated base games in Wikidata and then in each game's English Wikipedia infobox. Share with the field filled:
 
-| Field | Top 100 | Top 500 | Top 1,000 | Top 2,000 |
-|---|---|---|---|---|
-| Players | 99% | 77% | 63% | 47% |
-| Play time | 88% | 56% | 45% | 32% |
-| Minimum age | 75% | 52% | 42% | 31% |
-| A freely licensed image | 75% | 40% | 29% | 18% |
+| Field                   | Top 100 | Top 500 | Top 1,000 | Top 2,000 |
+| ----------------------- | ------- | ------- | --------- | --------- |
+| Players                 | 99%     | 77%     | 63%       | 47%       |
+| Play time               | 88%     | 56%     | 45%       | 32%       |
+| Minimum age             | 75%     | 52%     | 42%       | 31%       |
+| A freely licensed image | 75%     | 40%     | 29%       | 18%       |
 
 Neither has complexity or "best at" counts, and the images are mostly photos of play.
 
@@ -112,13 +112,13 @@ The same lookup, for the 1,000 most-rated games: about 39% have an English Wikip
 
 **Covers: the options.** Hector would rather the app not store covers, for cost, and would take links to images hosted elsewhere (2026-11-12). Storing them costs little at this size: about 80 MB for 2,000 covers at 30 to 60 KB each (an estimate), and Neon's free plan includes 5 GB of object storage per project ([Neon's docs](https://neon.com/docs/storage/overview)). The harder questions are the right to show a cover and whether a link keeps working.
 
-| Option | Coverage | Stored by the app | The catch |
-|---|---|---|---|
-| The drawn token (Y1) | Every game | No | Not a picture of the box |
-| [BoardGamePrices' API](https://boardgameprices.co.uk/api/plugin) image links, by BGG id | 32 of 32, and 9 of 10, in two tests | No | A link back wherever it's shown, and caching (above). One small site, and the box art is the publisher's |
-| BGG's image links, from the API | Every BGG game | A link, or a copy | Needs an approved application. A BGG developer reportedly asked apps in 2018 to serve copies rather than link BGG's host (secondhand), and the larger apps keep copies |
-| Wikimedia Commons, through Wikidata | 29% of the 1,000 most-rated games | No | Free licenses with credit, but mostly photos of play. Wikipedia's own covers are non-free (8 of 10 checked) |
-| A member's photo of their box | What members add | Yes, about 50 KB each | Depends on members taking one |
+| Option                                                                                  | Coverage                            | Stored by the app     | The catch                                                                                                                                                              |
+| --------------------------------------------------------------------------------------- | ----------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The drawn token (Y1)                                                                    | Every game                          | No                    | Not a picture of the box                                                                                                                                               |
+| [BoardGamePrices' API](https://boardgameprices.co.uk/api/plugin) image links, by BGG id | 32 of 32, and 9 of 10, in two tests | No                    | A link back wherever it's shown, and caching (above). One small site, and the box art is the publisher's                                                               |
+| BGG's image links, from the API                                                         | Every BGG game                      | A link, or a copy     | Needs an approved application. A BGG developer reportedly asked apps in 2018 to serve copies rather than link BGG's host (secondhand), and the larger apps keep copies |
+| Wikimedia Commons, through Wikidata                                                     | 29% of the 1,000 most-rated games   | No                    | Free licenses with credit, but mostly photos of play. Wikipedia's own covers are non-free (8 of 10 checked)                                                            |
+| A member's photo of their box                                                           | What members add                    | Yes, about 50 KB each | Depends on members taking one                                                                                                                                          |
 
 ## One possible direction, not decided
 

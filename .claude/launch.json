@@ -28,6 +28,19 @@
       "port": 3101
     },
     {
+      "name": "community-game-library",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/community-game-library",
+        "dev",
+        "--port",
+        "3102"
+      ],
+      "port": 3102
+    },
+    {
       "name": "hector-portfolio-prod",
       "runtimeExecutable": "bun",
       "runtimeArgs": [

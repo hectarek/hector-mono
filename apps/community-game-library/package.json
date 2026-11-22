@@ -1,0 +1,59 @@
+{
+  "name": "community-game-library",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "bun scripts/require-migrations.ts && next build",
+    "start": "next start",
+    "ts": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
+    "lint": "biome check --write --error-on-warnings && oxlint --deny-warnings .",
+    "format": "biome format --write",
+    "test": "bun test && bun run test:screens",
+    "test:screens": "bun test --isolate --preload ./tests/_support/dom.ts --path-ignore-patterns='**/*.test.ts'",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:production": "bun scripts/migrate-production.ts",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1169.0",
+    "@aws-sdk/s3-request-presigner": "3.1169.0",
+    "@evyweb/ioctopus": "^1.4.1",
+    "@neondatabase/auth": "^0.7.0-beta",
+    "@neondatabase/serverless": "^1.2.1",
+    "@repo/ui": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "lucide-react": "^1.77.0",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sonner": "^2.0.8",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.17",
+    "@happy-dom/global-registrator": "^21.0.4",
+    "@repo/biome-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/bun": "1.4.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "drizzle-kit": "^0.31.11",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7.0.2"
+  },
+  "ignoreScripts": [
+    "sharp",
+    "unrs-resolver"
+  ],
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
+}
