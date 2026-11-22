@@ -52,4 +52,19 @@ export class MockLoansRepository implements ILoansRepository {
       .sort(newestPickUpFirst)
       .map((loan) => ({ ...loan }));
   }
+
+  async countPickedUpForCopies(
+    userGameIds: readonly string[],
+  ): Promise<{ userGameId: string; count: number }[]> {
+    const copies = new Set(userGameIds);
+    const counts = new Map<string, number>();
+    for (const loan of this.rows) {
+      if (copies.has(loan.userGameId) && pickedUp.includes(loan.status)) {
+        counts.set(loan.userGameId, (counts.get(loan.userGameId) ?? 0) + 1);
+      }
+    }
+    return [...counts]
+      .map(([userGameId, count]) => ({ userGameId, count }))
+      .sort((a, b) => compare(a.userGameId, b.userGameId));
+  }
 }

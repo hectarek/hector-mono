@@ -17,6 +17,7 @@ import { getGameUseCase } from "@/src/application/use-cases/catalog/get-game.use
 import { searchGamesUseCase } from "@/src/application/use-cases/catalog/search-games.use-case";
 import { addUserGameUseCase } from "@/src/application/use-cases/copies/add-user-game.use-case";
 import { getUserGameUseCase } from "@/src/application/use-cases/copies/get-user-game.use-case";
+import { listLibraryUseCase } from "@/src/application/use-cases/copies/list-library.use-case";
 import { listMyLibraryUseCase } from "@/src/application/use-cases/copies/list-my-library.use-case";
 import { putInBoxUseCase } from "@/src/application/use-cases/copies/put-in-box.use-case";
 import { removeUserGameUseCase } from "@/src/application/use-cases/copies/remove-user-game.use-case";
@@ -198,12 +199,20 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
+    listLibrary: listLibraryUseCase(
+      games,
+      userGames,
+      loans,
+      userProfiles,
+      friendships,
+    ),
     listMyLibrary: listMyLibraryUseCase(
       games,
       userGames,
       loans,
       userProfiles,
       userSettings,
+      friendships,
     ),
     getUserGame: getUserGameUseCase(games, userGames, loans, userProfiles),
 

@@ -86,6 +86,23 @@ describeEachBackend("ILoansRepository", () => {
     ).toEqual([]);
   });
 
+  // B12's Most borrowed counts pick-ups, the loan out now included, never a request.
+  it("counts each copy's pick-ups", async () => {
+    const counts = await app.repos.loans.countPickedUpForCopies([
+      copies.yourGullAndAnchor.id,
+      copies.priyasFenwickFair.id,
+      copies.yourNightMarket.id,
+    ]);
+
+    expect(counts).toEqual(
+      [
+        { userGameId: copies.yourGullAndAnchor.id, count: 3 },
+        { userGameId: copies.priyasFenwickFair.id, count: 2 },
+      ].sort((a, b) => (a.userGameId < b.userGameId ? -1 : 1)),
+    );
+    expect(await app.repos.loans.countPickedUpForCopies([])).toEqual([]);
+  });
+
   // The cast is the boards' world: each copy, read back, is in the state its board stamps it
   // with for you, on the canvas's today (B1, B5, B6, C4).
   it("reads the cast's copies back in the states the boards show", async () => {

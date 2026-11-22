@@ -18,6 +18,7 @@ import type { IGetGameUseCase } from "@/src/application/use-cases/catalog/get-ga
 import type { ISearchGamesUseCase } from "@/src/application/use-cases/catalog/search-games.use-case";
 import type { IAddUserGameUseCase } from "@/src/application/use-cases/copies/add-user-game.use-case";
 import type { IGetUserGameUseCase } from "@/src/application/use-cases/copies/get-user-game.use-case";
+import type { IListLibraryUseCase } from "@/src/application/use-cases/copies/list-library.use-case";
 import type { IListMyLibraryUseCase } from "@/src/application/use-cases/copies/list-my-library.use-case";
 import type { IPutInBoxUseCase } from "@/src/application/use-cases/copies/put-in-box.use-case";
 import type { IRemoveUserGameUseCase } from "@/src/application/use-cases/copies/remove-user-game.use-case";
@@ -35,6 +36,7 @@ import type { IGetGameController } from "@/src/interface-adapters/controllers/ca
 import type { ISearchGamesController } from "@/src/interface-adapters/controllers/catalog/search-games.controller";
 import type { IAddUserGameController } from "@/src/interface-adapters/controllers/copies/add-user-game.controller";
 import type { IGetUserGameController } from "@/src/interface-adapters/controllers/copies/get-user-game.controller";
+import type { IListLibraryController } from "@/src/interface-adapters/controllers/copies/list-library.controller";
 import type { IListMyLibraryController } from "@/src/interface-adapters/controllers/copies/list-my-library.controller";
 import type { IPutInBoxController } from "@/src/interface-adapters/controllers/copies/put-in-box.controller";
 import type { IRemoveUserGameController } from "@/src/interface-adapters/controllers/copies/remove-user-game.controller";
@@ -69,6 +71,8 @@ export const DI_SYMBOLS = {
   IGetProfileUseCase: Symbol.for("IGetProfileUseCase"),
   IGetUserGameController: Symbol.for("IGetUserGameController"),
   IGetUserGameUseCase: Symbol.for("IGetUserGameUseCase"),
+  IListLibraryController: Symbol.for("IListLibraryController"),
+  IListLibraryUseCase: Symbol.for("IListLibraryUseCase"),
   IListMyLibraryController: Symbol.for("IListMyLibraryController"),
   IListMyLibraryUseCase: Symbol.for("IListMyLibraryUseCase"),
   IListTakenPiecesController: Symbol.for("IListTakenPiecesController"),
@@ -120,6 +124,8 @@ export interface DI_RETURN_TYPES {
   IGetProfileUseCase: IGetProfileUseCase;
   IGetUserGameController: IGetUserGameController;
   IGetUserGameUseCase: IGetUserGameUseCase;
+  IListLibraryController: IListLibraryController;
+  IListLibraryUseCase: IListLibraryUseCase;
   IListMyLibraryController: IListMyLibraryController;
   IListMyLibraryUseCase: IListMyLibraryUseCase;
   IListTakenPiecesController: IListTakenPiecesController;

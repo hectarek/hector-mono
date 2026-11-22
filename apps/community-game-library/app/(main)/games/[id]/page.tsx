@@ -38,8 +38,10 @@ export default async function GamePage({
   await connection();
   const { user } = await gate("app");
   const { id } = await params;
-  const { q } = await searchParams;
+  const { q, from } = await searchParams;
   const search = typeof q === "string" && q.trim() !== "" ? q : null;
+  // Opened from a search on My library, the way back returns there (rule 11).
+  const back = from === "/my-library" ? "/my-library" : "/";
   const view = await loadGame(id, user.id);
   const now = new Date();
   const today = todayIn(PLAN_TIME_ZONE, now);
@@ -65,7 +67,9 @@ export default async function GamePage({
   return (
     <PageColumn
       width="read"
-      header={<AppHeader back={{ href: `/${keepSearch}`, label: "Library" }} />}
+      header={
+        <AppHeader back={{ href: `${back}${keepSearch}`, label: "Library" }} />
+      }
     >
       <Cover
         title={game.title}

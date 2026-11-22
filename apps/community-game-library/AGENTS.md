@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U7):
+The spec's code map, as far as it's built (U1 to U8):
 
 ```
 app/
@@ -32,8 +32,10 @@ app/
   (auth)/auth/[path]/        # Neon's forms: make an account (A2), sign in (A8); layout.tsx loads the kit
   (start)/start/             # the steps before the app: profile/ (A4), home-screen/ (A6); A5 comes with U10
   (main)/                    # the signed-in app: layout.tsx (the shell, below; account-gate.tsx), page.tsx
-                             # (the Library: search at ?q= since U6, with library-search.tsx), loading.tsx
-                             # (its header and skeleton); library-views.tsx (All friends | My library, U7);
+                             # (the Library: All friends since U8, search at ?q= since U6, with
+                             # library-search.tsx and library-search-results.tsx, shared with My library),
+                             # loading.tsx (its header and skeleton); library-views.tsx (All friends | My
+                             # library, U7);
                              # games/[id]/ (B5, B11, B13); my-library/ (B6, A7) and my-library/add/ (B8);
                              # copies/[id]/ (B7, B14: copy-form.tsx, remove-copy.tsx); you/ (E5) and
                              # you/edit/ (E6)
@@ -48,7 +50,9 @@ app/
                              # profile-form (A4 and E6), steps. U6's: copy-row and copy-state (a copy and
                              # its words, B13), game-row (GameCardRow, CatalogRow), game-video. U7's:
                              # i-own-it (IOwnIt, and AddedTally and AddedSoFar, B8's count), in-my-box,
-                             # saved-switch (a switch that saves as it flips)
+                             # saved-switch (a switch that saves as it flips). U8's: library-list (the one
+                             # list), library-controls (Filter, Sort, chips), filter-sheet (B2), sort-sheet
+                             # (B12)
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
                              # notify, leave-guard, changed-lines, share, shrink-image. U5's: account
                              # (getAccount and the gate), auth (the browser's auth client), auth-localization,
@@ -79,18 +83,21 @@ src/
                              # shelves first or Add games' closest first
     game-card.ts             # gameCard: a game's card in a list from its copies' states (B1, B10)
     game-facts.ts            # a game's facts and lines in the boards' words, only what it has (rule 14)
+    library-filters.ts       # R11 to R13 (U8): the address's view (parseLibraryView, libraryViewSearch),
+                             # listLibrary (filter, sort, what to offer, B4's suggestion) over LibraryItems,
+                             # countMatches (B2's live count), and the chips', count line's and B4's words
     video-link.ts            # videoEmbed, recipes'
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
                              # formatDate ("Fri, Nov 20", with the year once it isn't this year),
                              # formatWeekday and formatMonthDay, its parts
   application/
-    repositories/            # interfaces (U4): friendships, loans (reads), notices (add), removed-users,
+    repositories/            # interfaces (U4): friendships, loans (reads; U8's pick-up counts), notices (add), removed-users,
                              # user-profiles, user-settings; U6: games (reads), user-games (reads, and
                              # U7's writes)
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/catalog/       # get-game, search-games (U6)
-    use-cases/copies/        # add-user-game, get-user-game, list-my-library, put-in-box, remove-user-game,
+    use-cases/copies/        # add-user-game, get-user-game, list-library (U8), list-my-library, put-in-box, remove-user-game,
                              # require-own-copy (a plain function), set-lending, set-pass-along-for-all,
                              # update-user-game (U7)
     use-cases/friends/       # require-friend (KTD4)
@@ -147,6 +154,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **The shared patterns** (KTD16 to KTD18; screens.md): `ConfirmDialog` (controlled; `onConfirm` answers with its error, if any, and the dialog stays open to show it), `Sheet` and `SheetActions` (the Drawer on a phone, a dialog from 768px; both close on leave), `DateSheet` (X1), `notify` and `notifyNotSent` ("That didn't send." with Try again), `ShareButton`, `PhotoField`, `ChangedNotice` (an action state's `changed`, from `ChangedError`), `PeoplePicker` (buttons up to six, searched past six), the leave guard (a form calls `useLeaveGuard(hasTypedText)`; a link that leaves calls `confirmLeave`), `NoConnection`, @repo/ui's `Empty` (the punched-out box) and `FieldError` (the field's error line). Dates on screen go through `formatDate`.
 - **U6's patterns, for every later list and page.** A game in a list is `GameCardRow` (`game-row.tsx`), its card from `gameCard` (`src/entities/game-card.ts`): one rule gives all nine of B1's cards (your own loan or request decides, then news of your own copy, then how many are free, "1 of 2 available"), and U8's library list uses it too. A catalog game is `CatalogRow`, its title underlined. A copy is `CopyRow` with `copyWords` (`copy-state.tsx`): each fact in mono on a line of its own, only the next in line beside a piece, and the stamp the member's own status. A page reads through one loader beside it (`loadGame` in `games/[id]/page.tsx`), which turns Not found or a bad id into `notFound()`; its return type is inferred, since `app/` can't import a use case's types. A game's facts and lines come from `game-facts.ts`, each only when the game has it (rule 14), and its token color from `coverColorOf`, since the catalog keeps none (an expansion takes its base game's). A link from search carries `?q=`, so the game's way back returns to the results.
 - **U7's patterns.** An action says what it did through `notify`, with Undo where it can be undone: `IOwnIt` stamps its row Added with Undo under it, and a page that counts what's added wraps its rows in `AddedTally` (B8's "1 added"). A switch that saves as it flips is `SavedSwitch` ("Saved.", or back as it was with the error), given its server action bound to the thing it changes (`setLending.bind(null, copyId, "lendable")`). A form with Save keeps its fields in state and compares them with the props its page renders, which the save's revalidation refreshes, so its leave guard needs no copy of what was saved (`copy-form.tsx`). A form that stays on its page after a save sends from `onSubmit`, in a transition, not through the form's `action`: React resets a form once its action ends, which put B7's controlled condition back to the one the page loaded with while the copy kept the new one (2026-11-22); a screen test checks the field after "Saved.". A catalog row shows its own action: I own it on a base game, In my box on an expansion of a game you own. Only a copy's owner opens its page (`requireOwnCopy`); anyone else gets Not found. An action whose dialog ends on another page returns its message, and the dialog pushes the route and shows it (`removeCopy`).
+- **U8's patterns.** A library is one list: `LibraryList` (`library-list.tsx`) over `listLibrary`'s result, with the page's own rows as its children, used by All friends and My library and, from U10, a friend's library. Its view lives in the address (R13): a page parses it with `parseLibraryView`, writes it with `libraryViewSearch`, and every control pushes a new address, so Back undoes a change; search keeps it (`LibrarySearch`'s `keep`), so clearing a search brings the filters back. B2's sheet stages its choices and applies them with Show N games, counting them with `countMatches` over `inView` (every game in view's facts, small enough for the client). Each of its changes goes through `onDraft(change)`, applied to the latest draft: a Base UI switch's or toggle group's change can render after the next tap's, so a handler that spread a draft it read earlier lost one of the two (found in a screen test, 2026-11-22). A filter shows only when some game in view has its value (R11's revision), or while it's on. A filter keeps a game when any of its copies matches, and the card stays whole (B3).
 
 ## Data Model
 
@@ -234,7 +242,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - A page's test against its board signs in with `signInAsYouWithTheCast()` (`tests/_support/members.ts`), which puts the cast in the container's repositories once per file, and pins the clock to the kit's today with bun's `setSystemTime(new Date("2026-11-10T09:00:00-05:00"))`, reset after. Find a row within the render's own container (`within(view.container)`): `render`'s queries cover the whole document, earlier renders included. `makeApp().addGames()` and `addCopies()` add rows the cast doesn't have, such as a game with a popularity or a stranger's copy, until U7 and U9 give those tables their writes.
 - Screen tests are `*.test.tsx`: `bunfig.toml` leaves them out of a plain `bun test`, `bun run test:screens` runs them in happy-dom (`tests/_support/dom.ts`), each file isolated, and `bun run test` runs both. Fire `submit` at a form, never a button: React builds the form's data from the event's target, which happy-dom can't do for a button. A link-styled `Button` (`nativeButton={false}`) has the button role: check its `href` through `closest("a")`. A link with `target="_blank"` opens a tab that happy-dom loads, so give it `about:blank`, not an outside address: recipes' `use-closes-on-leave` test fetched example.com on every run.
 - `tests/_support/controller.ts` (`controllerBasics`, recipes') came with U5's first controllers: a controller test names its valid input, what the use case should receive and the inputs to reject. `tests/_support/focus.ts` (`focused()`) came with U2's dialog and sheet tests. `tests/_support/members.ts` signs a test in as a member with a profile (`signInAsMember`) through the container's own controllers, for page, action and gate tests: the container's mock repositories live for the whole run, so each test signs in as a new user.
-- A Base UI switch or checkbox inside its own `<label>` flips twice on one click in happy-dom (U7, 2026-11-22), so its label sits beside it with `htmlFor`; Base UI gives the `id` to its hidden input, which the label then clicks (`SavedSwitch`, B7's expansions).
+- A Base UI switch or checkbox inside its own `<label>` flips twice on one click in happy-dom (U7, 2026-11-22), so its label sits beside it with `htmlFor`; Base UI gives the `id` to its hidden input, which the label then clicks (`SavedSwitch`, B7's expansions). The visible control's own id is another, so a test names it through its `aria-labelledby` (U8's `nameOf` in the Library's page test). A Base UI toggle group's change inside a dialog renders a moment later: wait for what it changes (`findByRole`).
 - Base UI's dialogs and sheets in happy-dom (U2): a dialog closes after its exit transition, so wait for it with `waitFor`, and poll absence as a boolean (`expect(view.queryByRole("dialog") === null).toBe(true)`): Bun prints a whole element when an expectation on one fails, which takes seconds and starves `waitFor`'s retries. `fireEvent.click` doesn't focus a button as a tap does, so focus the opener first to test where the cursor goes back. A sheet takes the phone's Drawer when `happyDOM.setInnerWidth(390)` (the window's `happyDOM`, cast). Sonner's toasts are global to a test file, so a toast from one test still shows in the next. next/image calls `onLoad` after the picture decodes, a moment after the load event.
 - Fallow (`bun run dead-code`) counts test files as entry points, so a helper copied with its test is in use before any page needs it. The scripts are entry points in the root `.fallowrc.json` (`apps/community-game-library/scripts/*.ts`).
 - The migration scripts' tests run on the real journal, with job-search's tests of a run that applies it: typing `migrate`, another answer stopping it, and a migration still unapplied afterwards.

@@ -74,7 +74,13 @@ function Die({
 }
 
 // Past six, a numbered round token.
-function CountToken({ count, best }: { count: number; best: boolean }) {
+function CountToken({
+  count,
+  best,
+}: {
+  count: number | string;
+  best: boolean;
+}) {
   return (
     <span
       className={cn(
@@ -117,6 +123,16 @@ export function Dice({
         ),
       )}
     </span>
+  );
+}
+
+// One count of the library's player filter (B2): a die up to six, then a "7+" token, inked
+// while it's chosen.
+export function CountFace({ count, inked }: { count: number; inked: boolean }) {
+  return count <= 6 ? (
+    <Die count={count} best={inked} />
+  ) : (
+    <CountToken count={`${count}+`} best={inked} />
   );
 }
 

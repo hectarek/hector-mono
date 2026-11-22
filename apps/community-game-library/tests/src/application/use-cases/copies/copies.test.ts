@@ -3,6 +3,7 @@ import {
   InputParseError,
   UnauthorizedError,
 } from "@/src/entities/errors/common";
+import { EMPTY_VIEW } from "@/src/entities/library-filters";
 import { describeEachBackend, makeApp } from "@/tests/_support/app";
 import { CAST, CAST_TODAY } from "@/tests/_support/cast";
 
@@ -185,9 +186,10 @@ describeEachBackend("copies", () => {
     expect(
       (await app.addUserGame(games.harborMaster.id, you.id)).copy.passAlong,
     ).toBe(true);
-    expect((await app.listMyLibrary(you.id, CAST_TODAY)).defaultPassAlong).toBe(
-      true,
-    );
+    expect(
+      (await app.listMyLibrary(you.id, CAST_TODAY, EMPTY_VIEW))
+        .defaultPassAlong,
+    ).toBe(true);
   });
 
   it("AE2: refuses to remove a copy while someone has it", async () => {
@@ -227,10 +229,10 @@ describeEachBackend("copies", () => {
   });
 
   it("lists My library by title, with B6's lines", async () => {
-    const library = await app.listMyLibrary(you.id, CAST_TODAY);
+    const library = await app.listMyLibrary(you.id, CAST_TODAY, EMPTY_VIEW);
 
     expect(
-      library.copies.map(({ game, card }) => [game.title, card.stateLine]),
+      library.items.map(({ game, card }) => [game.title, card.stateLine]),
     ).toEqual([
       ["Gull & Anchor", "Jo has it · 1 in line"],
       ["Night Market", "Priya asked for it"],

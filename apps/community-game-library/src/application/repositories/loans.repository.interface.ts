@@ -19,4 +19,10 @@ export interface ILoansRepository {
   // The copy's history (B7): its loans that were picked up, the one out now included, newest
   // pick-up first.
   listHistoryForCopy(userGameId: string, tx?: ITransaction): Promise<Loan[]>;
+  // How many times each copy was picked up, the loan out now included (B12's Most borrowed),
+  // by copy id; a copy never picked up isn't listed.
+  countPickedUpForCopies(
+    userGameIds: readonly string[],
+    tx?: ITransaction,
+  ): Promise<{ userGameId: string; count: number }[]>;
 }

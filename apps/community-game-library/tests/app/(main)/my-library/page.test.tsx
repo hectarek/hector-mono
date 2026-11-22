@@ -19,10 +19,12 @@ import {
 
 const { copies, people } = CAST;
 
-const renderMyLibrary = async () =>
+const renderMyLibrary = async (
+  params: Record<string, string | string[]> = {},
+) =>
   render(
     <>
-      {await MyLibraryPage()}
+      {await MyLibraryPage({ searchParams: Promise.resolve(params) })}
       <Toaster id={APP_TOASTER} theme="light" />
     </>,
   );
@@ -62,6 +64,13 @@ describe("My library", () => {
       ),
     ).toBeTruthy();
     expect(view.getByText("4 games")).toBeTruthy();
+    // ABF-18: the same Filter and Sort as All friends.
+    expect(
+      within(view.container).getByRole("button", { name: "Filter" }),
+    ).toBeTruthy();
+    expect(
+      within(view.container).getByRole("button", { name: "Sort: Title" }),
+    ).toBeTruthy();
 
     const rows = within(view.container).getAllByRole("link", {
       name: /^(Gull|Night|Paper|Salt)/,
@@ -124,5 +133,14 @@ describe("My library", () => {
       view.getByText("Search for a game you own and tap I own it."),
     ).toBeTruthy();
     expect(view.queryByRole("switch") === null).toBe(true);
+    // A7's second box, until a friend joins.
+    expect(view.getByText("No friends yet")).toBeTruthy();
+    expect(
+      view
+        .getByRole("button", { name: "Share my friend link" })
+        .closest("a")
+        ?.getAttribute("href"),
+    ).toBe("/friends/link");
+    expect(view.queryByRole("button", { name: "Filter" }) === null).toBe(true);
   });
 });

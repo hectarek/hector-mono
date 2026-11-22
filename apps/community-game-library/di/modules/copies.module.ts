@@ -2,6 +2,7 @@ import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
 import { addUserGameUseCase } from "@/src/application/use-cases/copies/add-user-game.use-case";
 import { getUserGameUseCase } from "@/src/application/use-cases/copies/get-user-game.use-case";
+import { listLibraryUseCase } from "@/src/application/use-cases/copies/list-library.use-case";
 import { listMyLibraryUseCase } from "@/src/application/use-cases/copies/list-my-library.use-case";
 import { putInBoxUseCase } from "@/src/application/use-cases/copies/put-in-box.use-case";
 import { removeUserGameUseCase } from "@/src/application/use-cases/copies/remove-user-game.use-case";
@@ -12,6 +13,7 @@ import { UserGamesRepository } from "@/src/infrastructure/repositories/user-game
 import { MockUserGamesRepository } from "@/src/infrastructure/repositories/user-games.repository.mock";
 import { addUserGameController } from "@/src/interface-adapters/controllers/copies/add-user-game.controller";
 import { getUserGameController } from "@/src/interface-adapters/controllers/copies/get-user-game.controller";
+import { listLibraryController } from "@/src/interface-adapters/controllers/copies/list-library.controller";
 import { listMyLibraryController } from "@/src/interface-adapters/controllers/copies/list-my-library.controller";
 import { putInBoxController } from "@/src/interface-adapters/controllers/copies/put-in-box.controller";
 import { removeUserGameController } from "@/src/interface-adapters/controllers/copies/remove-user-game.controller";
@@ -52,6 +54,15 @@ export function createCopiesModule() {
       DI_SYMBOLS.IUserProfilesRepository,
     ]);
   copiesModule
+    .bind(DI_SYMBOLS.IListLibraryUseCase)
+    .toHigherOrderFunction(listLibraryUseCase, [
+      DI_SYMBOLS.IGamesRepository,
+      DI_SYMBOLS.IUserGamesRepository,
+      DI_SYMBOLS.ILoansRepository,
+      DI_SYMBOLS.IUserProfilesRepository,
+      DI_SYMBOLS.IFriendshipsRepository,
+    ]);
+  copiesModule
     .bind(DI_SYMBOLS.IListMyLibraryUseCase)
     .toHigherOrderFunction(listMyLibraryUseCase, [
       DI_SYMBOLS.IGamesRepository,
@@ -59,6 +70,7 @@ export function createCopiesModule() {
       DI_SYMBOLS.ILoansRepository,
       DI_SYMBOLS.IUserProfilesRepository,
       DI_SYMBOLS.IUserSettingsRepository,
+      DI_SYMBOLS.IFriendshipsRepository,
     ]);
   copiesModule
     .bind(DI_SYMBOLS.IPutInBoxUseCase)
@@ -112,6 +124,11 @@ export function createCopiesModule() {
       DI_SYMBOLS.IGetUserGameController,
       getUserGameController,
       DI_SYMBOLS.IGetUserGameUseCase,
+    ],
+    [
+      DI_SYMBOLS.IListLibraryController,
+      listLibraryController,
+      DI_SYMBOLS.IListLibraryUseCase,
     ],
     [
       DI_SYMBOLS.IListMyLibraryController,

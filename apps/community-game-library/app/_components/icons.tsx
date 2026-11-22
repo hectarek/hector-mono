@@ -153,6 +153,17 @@ export function PlayIcon(props: IconProps) {
   );
 }
 
+// The library's Filter button (B1): two sliders.
+export function FilterIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="8" cy="17" r="2" />
+    </LineIcon>
+  );
+}
+
 // Add a game's mark (B6, A7): 16px, with a 2.4 stroke.
 export function PlusIcon(props: IconProps) {
   return (

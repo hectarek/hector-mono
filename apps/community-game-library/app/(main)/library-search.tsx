@@ -14,11 +14,15 @@ const SETTLE_MS = 250;
 export function LibrarySearch({
   initial,
   path = "/",
+  keep = "",
   label,
 }: {
   initial: string;
   // The page whose address holds what's typed.
   path?: string;
+  // The rest of the address, kept as it is ("?available=now"): the list's filters come back when
+  // the search is cleared.
+  keep?: string;
   // Add games' label above the field, "Search the catalog". Without one the field names itself
   // inside, and says what it searches once something's typed.
   label?: string;
@@ -35,8 +39,11 @@ export function LibrarySearch({
     clearTimeout(settle.current);
     settle.current = setTimeout(() => {
       startTransition(() => {
+        const rest = keep.replace(/^\?/, "");
         router.replace(
-          value.trim() === "" ? path : `${path}?q=${encodeURIComponent(value)}`,
+          value.trim() === ""
+            ? `${path}${rest ? `?${rest}` : ""}`
+            : `${path}?q=${encodeURIComponent(value)}${rest ? `&${rest}` : ""}`,
           { scroll: false },
         );
       });

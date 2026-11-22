@@ -3,24 +3,29 @@ import {
   Empty,
   EmptyContent,
   EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
 } from "@repo/ui/components/empty";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
-import { CatalogRow, GameCardRow } from "@/app/_components/game-row";
-import { Group } from "@/app/_components/group";
-import { List } from "@/app/_components/list-row";
+import { GameCardRow } from "@/app/_components/game-row";
+import { LibraryList } from "@/app/_components/library-list";
 import { PageColumn } from "@/app/_components/page-column";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { LibrarySearch } from "@/app/(main)/library-search";
+import { LibrarySearchResults } from "@/app/(main)/library-search-results";
 import { LibraryViews } from "@/app/(main)/library-views";
 import { getInjection } from "@/di/container";
+import {
+  libraryViewSearch,
+  parseLibraryView,
+} from "@/src/entities/library-filters";
 
-// The Library (B1), which U6 and U8 build. U6's half is search (R2, B10): ?q= holds what's
-// typed, and the results come in two groups, the games on your and your friends' shelves as their
-// cards, then the rest of the catalog. U8 adds the list of every game on those shelves, with its
-// filters and sort, under the same field.
+// The Library, All friends (B1 to B4, B10): every game on your and your friends' shelves as its
+// card (U8), filtered and sorted from the address (R13), and search over them and the catalog
+// (U6) at ?q=, which takes the list's place while something is typed.
 //
 // It waits on connection() before it reads the session, so neither the build's prerender nor a
 // partial prefetch starts Neon's session read, which fails and logs when their render ends
@@ -37,86 +42,81 @@ export default async function LibraryPage({
   if (!userId) {
     redirect("/welcome");
   }
-  const { q } = await searchParams;
+  const params = await searchParams;
+  const { q } = params;
   const search = typeof q === "string" ? q : "";
-  const results =
-    search.trim() === ""
-      ? null
-      : await getInjection("ISearchGamesController")({ q: search }, userId);
-  // A game opened from the results comes back to them (rule 11).
-  const gameHref = (id: string) =>
-    `/games/${id}?q=${encodeURIComponent(search)}`;
-  // U9's suggestion page, with what was typed.
-  const suggestHref = `/my-library/suggest?title=${encodeURIComponent(search.trim())}`;
+  const view = parseLibraryView(params);
+  const field = (
+    <LibrarySearch initial={search} keep={libraryViewSearch(view)} />
+  );
+
+  if (search.trim() !== "") {
+    const results = await getInjection("ISearchGamesController")(
+      { q: search },
+      userId,
+    );
+    return (
+      <PageColumn width="browse" header={<AppHeader title="Library" />}>
+        {field}
+        <LibrarySearchResults search={search} results={results} path="/" />
+      </PageColumn>
+    );
+  }
+
+  const library = await getInjection("IListLibraryController")(params, userId);
+  const noFriends = (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>No friends yet</EmptyTitle>
+        <EmptyDescription>
+          Share your friend link to see what your friends own.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button
+          variant="secondary"
+          nativeButton={false}
+          render={<Link href="/friends/link" />}
+        >
+          Share my friend link
+        </Button>
+      </EmptyContent>
+    </Empty>
+  );
+  const friendsOwnNothing = (
+    <Empty>
+      <EmptyDescription>Your friends haven’t added games yet.</EmptyDescription>
+    </Empty>
+  );
 
   return (
     <PageColumn width="browse" header={<AppHeader title="Library" />}>
-      <LibrarySearch initial={search} />
-      {!results && <LibraryViews current="all-friends" />}
-      {results &&
-        (results.onShelves.length === 0 && results.inCatalog.length === 0 ? (
-          <Empty>
-            <EmptyDescription>
-              Nothing called “{search.trim()}” yet.
-            </EmptyDescription>
-            <EmptyContent>
-              <Button
-                variant="secondary"
-                size="lg"
-                nativeButton={false}
-                render={<Link href={suggestHref} />}
-              >
-                Suggest a game
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          <>
-            {results.onShelves.length > 0 && (
-              <Group
-                label={`Owned by you or a friend · ${results.onShelves.length}`}
-                overList
-              >
-                <List browse>
-                  {results.onShelves.map(({ game, card }) => (
-                    <GameCardRow
-                      key={game.id}
-                      game={game}
-                      card={card}
-                      href={gameHref(game.id)}
-                    />
-                  ))}
-                </List>
-              </Group>
-            )}
-            {results.inCatalog.length > 0 && (
-              <Group
-                label={`In the catalog · ${results.inCatalog.length}`}
-                overList
-              >
-                <List browse>
-                  {results.inCatalog.map(({ game, yours, base }) => (
-                    <CatalogRow
-                      key={game.id}
-                      game={game}
-                      yours={yours}
-                      base={base}
-                      href={gameHref(game.id)}
-                    />
-                  ))}
-                </List>
-              </Group>
-            )}
-            <Button
-              variant="link"
-              nativeButton={false}
-              render={<Link href={suggestHref} />}
-              className="self-start"
-            >
-              Can’t find it? Suggest a game
-            </Button>
-          </>
+      <LibraryList
+        path="/"
+        search={field}
+        views={<LibraryViews current="all-friends" />}
+        view={view}
+        list={{ ...library, shown: library.items.length }}
+        owners={library.owners}
+        viewerId={userId}
+        whose="everyone"
+        between={
+          library.total > 0 &&
+          (!library.hasFriends
+            ? noFriends
+            : !library.friendsOwnGames && friendsOwnNothing)
+        }
+        empty={library.hasFriends ? friendsOwnNothing : noFriends}
+      >
+        {library.items.map(({ game, card }) => (
+          <GameCardRow
+            key={game.id}
+            game={game}
+            card={card}
+            href={`/games/${game.id}`}
+          />
         ))}
+      </LibraryList>
     </PageColumn>
   );
 }

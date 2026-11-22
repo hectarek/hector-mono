@@ -1,9 +1,11 @@
 import { describe, expect, it, mock } from "bun:test";
 import { UnauthenticatedError } from "@/src/entities/errors/common";
+import { EMPTY_VIEW } from "@/src/entities/library-filters";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { addUserGameController } from "@/src/interface-adapters/controllers/copies/add-user-game.controller";
 import { getUserGameController } from "@/src/interface-adapters/controllers/copies/get-user-game.controller";
+import { listLibraryController } from "@/src/interface-adapters/controllers/copies/list-library.controller";
 import { listMyLibraryController } from "@/src/interface-adapters/controllers/copies/list-my-library.controller";
 import { putInBoxController } from "@/src/interface-adapters/controllers/copies/put-in-box.controller";
 import { removeUserGameController } from "@/src/interface-adapters/controllers/copies/remove-user-game.controller";
@@ -113,10 +115,36 @@ describe("listMyLibraryController", () => {
       new MockLoggerService(),
     );
 
-    await expect(controller(undefined)).rejects.toBeInstanceOf(
+    await expect(controller({}, undefined)).rejects.toBeInstanceOf(
       UnauthenticatedError,
     );
-    await controller(you.id);
-    expect(useCase).toHaveBeenCalledWith(you.id, todayIn(PLAN_TIME_ZONE));
+    await controller({ sort: "recently-added" }, you.id);
+    expect(useCase).toHaveBeenCalledWith(you.id, todayIn(PLAN_TIME_ZONE), {
+      ...EMPTY_VIEW,
+      sort: "recently-added",
+    });
+  });
+});
+
+describe("listLibraryController", () => {
+  it("turns away a signed-out visitor, and reads the address's view (R13)", async () => {
+    const useCase = mock(async () => undefined);
+    const controller = listLibraryController(
+      useCase as never,
+      new MockLoggerService(),
+    );
+
+    await expect(controller({}, undefined)).rejects.toBeInstanceOf(
+      UnauthenticatedError,
+    );
+    await controller(
+      { available: "now", sort: "year", time: "forever" },
+      you.id,
+    );
+    expect(useCase).toHaveBeenCalledWith(you.id, todayIn(PLAN_TIME_ZONE), {
+      ...EMPTY_VIEW,
+      available: true,
+      sort: "year",
+    });
   });
 });

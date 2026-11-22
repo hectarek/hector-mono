@@ -489,6 +489,7 @@ apps/community-game-library/
       page.tsx                      # Library, All friends: B1 to B4, B10, B12; ?q, filters and sort in the address (R13)
       library-search.tsx            # the search field, which puts ?q in the address as you type (U6)
       library-views.tsx             # All friends | My library, the views under the field (U7)
+      library-search-results.tsx    # search's two groups, on All friends and on My library (U8)
       my-library/                   # B6; add/ (B8), suggest/ (B9)
       games/[id]/                   # a game's page: B5, B11, B13; the Ask to borrow (C1) and Join the line (C10) sheets
       copies/[id]/                  # a copy's page: B7, B14
@@ -509,11 +510,11 @@ apps/community-game-library/
                                     # photo-field, changed-notice, people-picker, back-link, action-form, saved-copy,
                                     # icons, no-connection, page-column, sheet (U2);
                                     # by area: game-row, copy-row, copy-state, game-video, i-own-it, in-my-box,
-                                    # saved-switch, library-list, filter-sheet, sort-sheet,
+                                    # saved-switch, library-list, library-controls, filter-sheet, sort-sheet,
                                     # loan-row, loan-track, night-row, attendee-list, friend-row, notice-row,
                                     # piece-picker, profile-form
     _lib/                           # current-user, auth-paths, safe-redirect, call-action, notify, notice-text,
-                                    # notice-text/ (one file per area), changed-lines, library-params (R13), share,
+                                    # notice-text/ (one file per area), changed-lines, share,
                                     # shrink-image, use-closes-on-leave, leave-guard, app-icon
     actions/                        # shared.ts, profile.ts, copies.ts, catalog.ts, suggestions.ts, friends.ts,
                                     # loans.ts, nights.ts, notices.ts, account.ts, admin.ts
@@ -536,7 +537,9 @@ apps/community-game-library/
       reminders.ts                  # which reminders are due on a day (KTD8, U17)
       night.ts                      # seats, guests and the waitlist (R31, R47, U19)
       what-to-play.ts, tables.ts    # KTD23 (U20)
-      library-filters.ts            # R11 to R13: parse, apply, and which filters to show (U8)
+      library-filters.ts            # R11 to R13: parse and write the address, apply, and which filters to show (U8;
+                                    # the address's half, first given to _lib/library-params, is here since the
+                                    # controllers parse it too)
       account-state.ts              # removed, needs a profile, or ready (KTD3, U5)
       in-app-browser.ts             # A9 (KTD3, U5)
       profile-photo.ts              # what a photo may be, and its signed address's hour (KTD11, U5)
