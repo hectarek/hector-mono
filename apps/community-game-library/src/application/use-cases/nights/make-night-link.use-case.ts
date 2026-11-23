@@ -2,7 +2,7 @@ import type { IFriendshipsRepository } from "@/src/application/repositories/frie
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
-import { nightToSee } from "@/src/application/use-cases/nights/can-see-night";
+import { nightToChange } from "@/src/application/use-cases/nights/can-see-night";
 import { UnauthorizedError } from "@/src/entities/errors/common";
 import { newLinkToken } from "@/src/entities/link-token";
 
@@ -28,7 +28,7 @@ export const makeNightLinkUseCase = (
   return async (gameNightId: string, userId: string): Promise<string> =>
     transactionManagerService.startTransaction(async (tx) => {
       await gameNightsRepository.lock(gameNightId, tx);
-      const night = await nightToSee(readers, gameNightId, userId, tx);
+      const night = await nightToChange(readers, gameNightId, userId, tx);
       if (night.createdBy !== userId) {
         throw new UnauthorizedError("Only the host makes a night’s link.");
       }

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { type ReactNode, useState, useTransition } from "react";
 import { ChangedNotice } from "@/app/_components/changed-notice";
 import { Group } from "@/app/_components/group";
-import { MinusIcon, PlusIcon } from "@/app/_components/icons";
+import { DownloadIcon, MinusIcon, PlusIcon } from "@/app/_components/icons";
 import { Sheet, SheetActions } from "@/app/_components/sheet";
 import { Stamp } from "@/app/_components/stamp";
 import { callResultAction } from "@/app/_lib/call-action";
@@ -33,6 +33,8 @@ export type AnswerContext = {
   // Their place on the waitlist, while they're on it.
   place: number | null;
   canInvite: boolean;
+  // The night's calendar file, for Add to my calendar once going (D13, KTD24).
+  calendarHref: string;
 };
 
 const MOST_GUESTS = 9;
@@ -82,8 +84,9 @@ function InviteLine({ context }: { context: AnswerContext }) {
 }
 
 // Your answer, for anyone but the host (D2, D4, D13; R31): the three answers while there's room,
-// the waitlist when it's full (D4), "You + 0 guests" with Change answer or guests once going
-// (D13, opening D3), and your place on the waitlist with Leave the waitlist while you wait.
+// the waitlist when it's full (D4), "You + 0 guests" with Change answer or guests and Add to my
+// calendar once going (D13, opening D3), and your place on the waitlist with Leave the waitlist
+// while you wait.
 export function YourAnswer({ context }: { context: AnswerContext }) {
   const { state, pending, send } = useAnswer(context.gameNightId);
   const [changing, setChanging] = useState(false);
@@ -98,6 +101,14 @@ export function YourAnswer({ context }: { context: AnswerContext }) {
         </p>
         <Button variant="secondary" onClick={() => setChanging(true)}>
           Change answer or guests
+        </Button>
+        <Button
+          variant="secondary"
+          nativeButton={false}
+          render={<a href={context.calendarHref} />}
+        >
+          <DownloadIcon data-icon="inline-start" />
+          Add to my calendar
         </Button>
         <InviteLine context={context} />
       </>

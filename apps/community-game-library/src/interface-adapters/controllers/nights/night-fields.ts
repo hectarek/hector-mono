@@ -44,7 +44,10 @@ const detailsSchema = z.object(nightDetails);
 export function detailsOf(
   details: z.infer<typeof detailsSchema>,
 ): Required<
-  Omit<GameNightChanges, "attendeesCanInvite" | "guestsAllowed" | "linkToken">
+  Omit<
+    GameNightChanges,
+    "attendeesCanInvite" | "guestsAllowed" | "linkToken" | "cancelledAt"
+  >
 > {
   const startsAt = atTimeIn(details.date, details.startsAt, PLAN_TIME_ZONE);
   const sameDayEnd =

@@ -3,7 +3,7 @@ import type { IGameNightsRepository } from "@/src/application/repositories/game-
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
-import { nightToSee } from "@/src/application/use-cases/nights/can-see-night";
+import { nightToChange } from "@/src/application/use-cases/nights/can-see-night";
 import { fillSeats } from "@/src/application/use-cases/nights/night-seats";
 import {
   InputParseError,
@@ -60,7 +60,7 @@ export const updateNightUseCase = (
   ): Promise<{ night: GameNight; told: string[] }> =>
     transactionManagerService.startTransaction(async (tx) => {
       await gameNightsRepository.lock(gameNightId, tx);
-      const night = await nightToSee(readers, gameNightId, userId, tx);
+      const night = await nightToChange(readers, gameNightId, userId, tx);
       if (night.createdBy !== userId) {
         throw new UnauthorizedError("Only the host changes a night.");
       }

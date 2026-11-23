@@ -2,6 +2,7 @@ import { createModule } from "@evyweb/ioctopus";
 import { DI_SYMBOLS } from "@/di/types";
 import { addGameToNightUseCase } from "@/src/application/use-cases/nights/add-game-to-night.use-case";
 import { answerNightUseCase } from "@/src/application/use-cases/nights/answer-night.use-case";
+import { cancelNightUseCase } from "@/src/application/use-cases/nights/cancel-night.use-case";
 import { checkNightLinkUseCase } from "@/src/application/use-cases/nights/check-night-link.use-case";
 import { createNightUseCase } from "@/src/application/use-cases/nights/create-night.use-case";
 import { getInviteChoicesUseCase } from "@/src/application/use-cases/nights/get-invite-choices.use-case";
@@ -9,6 +10,7 @@ import { getNightUseCase } from "@/src/application/use-cases/nights/get-night.us
 import { getNightGameChoicesUseCase } from "@/src/application/use-cases/nights/get-night-game-choices.use-case";
 import { inviteToNightUseCase } from "@/src/application/use-cases/nights/invite-to-night.use-case";
 import { listNightsUseCase } from "@/src/application/use-cases/nights/list-nights.use-case";
+import { listPastNightsUseCase } from "@/src/application/use-cases/nights/list-past-nights.use-case";
 import { makeNightLinkUseCase } from "@/src/application/use-cases/nights/make-night-link.use-case";
 import { openNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
 import { removeFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
@@ -21,6 +23,7 @@ import { GameNightsRepository } from "@/src/infrastructure/repositories/game-nig
 import { MockGameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository.mock";
 import { addGameToNightController } from "@/src/interface-adapters/controllers/nights/add-game-to-night.controller";
 import { answerNightController } from "@/src/interface-adapters/controllers/nights/answer-night.controller";
+import { cancelNightController } from "@/src/interface-adapters/controllers/nights/cancel-night.controller";
 import { checkNightLinkController } from "@/src/interface-adapters/controllers/nights/check-night-link.controller";
 import { createNightController } from "@/src/interface-adapters/controllers/nights/create-night.controller";
 import { getInviteChoicesController } from "@/src/interface-adapters/controllers/nights/get-invite-choices.controller";
@@ -28,6 +31,7 @@ import { getNightController } from "@/src/interface-adapters/controllers/nights/
 import { getNightGameChoicesController } from "@/src/interface-adapters/controllers/nights/get-night-game-choices.controller";
 import { inviteToNightController } from "@/src/interface-adapters/controllers/nights/invite-to-night.controller";
 import { listNightsController } from "@/src/interface-adapters/controllers/nights/list-nights.controller";
+import { listPastNightsController } from "@/src/interface-adapters/controllers/nights/list-past-nights.controller";
 import { makeNightLinkController } from "@/src/interface-adapters/controllers/nights/make-night-link.controller";
 import { openNightLinkController } from "@/src/interface-adapters/controllers/nights/open-night-link.controller";
 import { removeFromWaitlistController } from "@/src/interface-adapters/controllers/nights/remove-from-waitlist.controller";
@@ -38,7 +42,8 @@ import { voteController } from "@/src/interface-adapters/controllers/nights/vote
 import { whatToPlayController } from "@/src/interface-adapters/controllers/nights/what-to-play.controller";
 
 // Game nights (R29 to R39): U17's daily run reads who's going; U18 makes, edits and reads them;
-// U19 answers, invites, the night's link, the waitlist, and the games and votes.
+// U19 answers, invites, the night's link, the waitlist, and the games and votes; U21 cancels
+// them and lists the past ones.
 export function createNightsModule() {
   const nightsModule = createModule();
 
@@ -100,6 +105,30 @@ export function createNightsModule() {
     .bind(DI_SYMBOLS.IListNightsController)
     .toHigherOrderFunction(listNightsController, [
       DI_SYMBOLS.IListNightsUseCase,
+      log,
+    ]);
+  nightsModule
+    .bind(DI_SYMBOLS.ICancelNightUseCase)
+    .toHigherOrderFunction(cancelNightUseCase, [
+      friendships,
+      gameNights,
+      notices,
+      transactions,
+      log,
+    ]);
+  nightsModule
+    .bind(DI_SYMBOLS.ICancelNightController)
+    .toHigherOrderFunction(cancelNightController, [
+      DI_SYMBOLS.ICancelNightUseCase,
+      log,
+    ]);
+  nightsModule
+    .bind(DI_SYMBOLS.IListPastNightsUseCase)
+    .toHigherOrderFunction(listPastNightsUseCase, [gameNights, profiles]);
+  nightsModule
+    .bind(DI_SYMBOLS.IListPastNightsController)
+    .toHigherOrderFunction(listPastNightsController, [
+      DI_SYMBOLS.IListPastNightsUseCase,
       log,
     ]);
   nightsModule

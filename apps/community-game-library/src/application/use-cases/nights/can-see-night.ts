@@ -1,6 +1,6 @@
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
-import { NotFoundError } from "@/src/entities/errors/common";
+import { ChangedError, NotFoundError } from "@/src/entities/errors/common";
 import type { GameNight } from "@/src/entities/models/game-night.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 
@@ -41,6 +41,22 @@ export async function nightToSee(
   const night = await readers.gameNights.getById(gameNightId, tx);
   if (!night || !(await canSeeNight(readers, night, viewerId, tx))) {
     throw new NotFoundError();
+  }
+  return night;
+}
+
+// A night the member may see and change. A cancelled night refuses every change with the line
+// "This game night was cancelled." (KTD16), since a page opened before it was cancelled still
+// offers them.
+export async function nightToChange(
+  readers: NightReaders,
+  gameNightId: string,
+  viewerId: string,
+  tx?: ITransaction,
+): Promise<GameNight> {
+  const night = await nightToSee(readers, gameNightId, viewerId, tx);
+  if (night.cancelledAt !== null) {
+    throw new ChangedError("night-cancelled");
   }
   return night;
 }

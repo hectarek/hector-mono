@@ -11,7 +11,7 @@ import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { AttendeeList } from "@/app/_components/attendee-list";
 import { Group } from "@/app/_components/group";
-import { LockIcon, PlaceIcon } from "@/app/_components/icons";
+import { DownloadIcon, LockIcon, PlaceIcon } from "@/app/_components/icons";
 import {
   hostWords,
   NightStamp,
@@ -24,13 +24,16 @@ import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
 import { listed } from "@/src/entities/listed";
+import { isUpcoming } from "@/src/entities/night";
 import {
   formatClock,
   formatDate,
+  formatTime,
   formatTimes,
   PLAN_TIME_ZONE,
   todayIn,
 } from "@/src/entities/week";
+import { CancelNight } from "./cancel-night";
 import { loadNight } from "./load-night";
 import { YourAnswer } from "./night-answer";
 import { NightLink } from "./night-link";
@@ -83,13 +86,29 @@ function unanswered(page: NightPage): string {
   return `${listed(waiting)} ${waiting.length === 1 ? "hasn’t" : "haven’t"} answered yet.`;
 }
 
+// Who a cancelled night tells, in its dialog (D11): everyone going, invited or waiting.
+const TOLD: readonly NightPage["list"][number]["status"][] = [
+  "going",
+  "invited",
+  "waitlisted",
+];
+
+// A night that's over: "5 came", or "4 were going" when it was cancelled.
+function overWords(cancelled: boolean, taken: number): string {
+  if (!cancelled) {
+    return `${taken} came`;
+  }
+  return `${taken} ${taken === 1 ? "was" : "were"} going`;
+}
+
 // A game night's page (D2, D4, D7, D13; R30, R31, R36): its details, with the place and address
 // for whoever can see the night. The host gets D7: the night's link for a night only invited
 // people see, who's going and who hasn't answered, the waitlist with Remove, and Invite people and
 // Edit. Anyone else gets D2's details with the seats, and their answer: D2's three, D4's waitlist
 // when it's full, D13's once going. Both get the games on the table with I'd play and I'll bring a
-// game once going. U20 adds What should we play? and tables, and U21 the calendar file and
-// cancelling.
+// game once going, What should we play? and tables (U20), and Add to my calendar (U21); the host
+// gets Cancelling, with D11's dialog. A night whose day has gone, or that's cancelled, only says
+// what it was: who came or was going, and the games on its table (D12).
 export default async function NightPage({
   params,
 }: {
@@ -99,11 +118,14 @@ export default async function NightPage({
   const { user } = await gate("app");
   const { id } = await params;
   const page = await loadNight(id, user.id);
-  const choices = page.canBring
-    ? await getInjection("IGetNightGameChoicesController")(user.id)
-    : null;
   const today = todayIn(PLAN_TIME_ZONE);
   const { night } = page;
+  const cancelled = night.cancelledAt !== null;
+  const over = cancelled || !isUpcoming(night.startsAt, today);
+  const choices =
+    page.canBring && !over
+      ? await getInjection("IGetNightGameChoicesController")(user.id)
+      : null;
   const isHost = page.you === "host";
   const taken = night.capacity - page.seatsOpen;
   const day = formatDate(todayIn(PLAN_TIME_ZONE, night.startsAt), today);
@@ -112,6 +134,7 @@ export default async function NightPage({
   const mine = page.going.find((one) => one.userId === user.id);
   const place =
     page.waitlist.findIndex((one) => one.userId === user.id) + 1 || null;
+  const calendarHref = `/nights/${night.id}/calendar`;
 
   return (
     <PageColumn
@@ -120,7 +143,11 @@ export default async function NightPage({
     >
       <section className="flex flex-col gap-2.5 rounded-lg border-2 border-foreground bg-card p-3.5">
         <div className="flex flex-col items-start gap-1">
-          {page.you === null && page.seatsOpen === 0 ? (
+          {cancelled ? (
+            <Stamp tone="brown" tilt={-3}>
+              Cancelled
+            </Stamp>
+          ) : !over && page.you === null && page.seatsOpen === 0 ? (
             <Stamp tone="brown" tilt={-3}>
               Full
             </Stamp>
@@ -156,7 +183,7 @@ export default async function NightPage({
           </p>
         )}
         <Audience page={page} />
-        {isHost && night.linkToken && (
+        {isHost && night.linkToken && !over && (
           <NightLink
             gameNightId={night.id}
             title={night.title}
@@ -167,11 +194,18 @@ export default async function NightPage({
         )}
         {!isHost && (
           <div className="flex flex-col gap-1.5 border-t-2 border-dashed border-foreground pt-3">
-            <Seats people={seatedPeople(page.going)} open={page.seatsOpen} />
+            <Seats
+              people={seatedPeople(page.going)}
+              open={over ? 0 : page.seatsOpen}
+            />
             <span className="font-mono text-13 font-medium">
-              {taken} of {night.capacity} going
-              {page.seatsOpen > 0 &&
-                ` · ${page.seatsOpen} ${page.seatsOpen === 1 ? "seat" : "seats"} open`}
+              {over
+                ? overWords(cancelled, taken)
+                : `${taken} of ${night.capacity} going${
+                    page.seatsOpen > 0
+                      ? ` · ${page.seatsOpen} ${page.seatsOpen === 1 ? "seat" : "seats"} open`
+                      : ""
+                  }`}
             </span>
             <span className="text-13 text-muted-foreground">
               {goingNames(page.going, user.id)}
@@ -194,13 +228,20 @@ export default async function NightPage({
       </section>
 
       {isHost && (
-        <Group label={`Going · ${taken} of ${night.capacity}`} overList>
+        <Group
+          label={
+            over
+              ? overWords(cancelled, taken)
+              : `Going · ${taken} of ${night.capacity}`
+          }
+          overList
+        >
           <AttendeeList
             going={page.going}
             hostId={night.createdBy}
             viewerId={user.id}
           />
-          {page.list.length === 0 ? (
+          {over ? null : page.list.length === 0 ? (
             <Empty>
               <EmptyHeader>
                 <EmptyTitle>Nobody’s invited yet.</EmptyTitle>
@@ -221,13 +262,13 @@ export default async function NightPage({
         </Group>
       )}
 
-      {isHost && page.waitlist.length > 0 && (
+      {isHost && !over && page.waitlist.length > 0 && (
         <Group label={`Waitlist · ${page.waitlist.length}`} overList>
           <NightWaitlist gameNightId={night.id} waitlist={page.waitlist} />
         </Group>
       )}
 
-      {!isHost && (
+      {!isHost && !over && (
         <YourAnswer
           context={{
             gameNightId: night.id,
@@ -241,6 +282,7 @@ export default async function NightPage({
             waitlisted: page.waitlisted,
             place,
             canInvite: page.canInvite,
+            calendarHref,
           }}
         />
       )}
@@ -249,10 +291,11 @@ export default async function NightPage({
         page={page}
         userId={user.id}
         choices={choices}
-        whatToPlay={!isHost}
+        whatToPlay={!isHost && !over}
+        over={over}
       />
 
-      {isHost && (
+      {isHost && !over && (
         <Group label="What you can do">
           <Button
             size="lg"
@@ -281,14 +324,38 @@ export default async function NightPage({
               Split into tables
             </Button>
           </div>
-          <Button
-            variant="secondary"
-            nativeButton={false}
-            render={<Link href={`/nights/${night.id}/edit`} />}
-          >
-            Edit
-          </Button>
+          <div className="flex flex-wrap gap-2.5">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              nativeButton={false}
+              render={<a href={calendarHref} />}
+            >
+              <DownloadIcon data-icon="inline-start" />
+              Add to my calendar
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              nativeButton={false}
+              render={<Link href={`/nights/${night.id}/edit`} />}
+            >
+              Edit
+            </Button>
+          </div>
         </Group>
+      )}
+
+      {isHost && !over && (
+        <CancelNight
+          gameNightId={night.id}
+          title={night.title}
+          day={day}
+          when={`${day} · ${formatTime(night.startsAt)}`}
+          told={page.list
+            .filter((one) => TOLD.includes(one.status))
+            .map((one) => one.name)}
+        />
       )}
     </PageColumn>
   );

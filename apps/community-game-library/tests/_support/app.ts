@@ -69,6 +69,7 @@ import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import { addGameToNightUseCase } from "@/src/application/use-cases/nights/add-game-to-night.use-case";
 import { answerNightUseCase } from "@/src/application/use-cases/nights/answer-night.use-case";
+import { cancelNightUseCase } from "@/src/application/use-cases/nights/cancel-night.use-case";
 import { checkNightLinkUseCase } from "@/src/application/use-cases/nights/check-night-link.use-case";
 import { createNightUseCase } from "@/src/application/use-cases/nights/create-night.use-case";
 import { getInviteChoicesUseCase } from "@/src/application/use-cases/nights/get-invite-choices.use-case";
@@ -76,6 +77,7 @@ import { getNightUseCase } from "@/src/application/use-cases/nights/get-night.us
 import { getNightGameChoicesUseCase } from "@/src/application/use-cases/nights/get-night-game-choices.use-case";
 import { inviteToNightUseCase } from "@/src/application/use-cases/nights/invite-to-night.use-case";
 import { listNightsUseCase } from "@/src/application/use-cases/nights/list-nights.use-case";
+import { listPastNightsUseCase } from "@/src/application/use-cases/nights/list-past-nights.use-case";
 import { makeNightLinkUseCase } from "@/src/application/use-cases/nights/make-night-link.use-case";
 import { openNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
 import { removeFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
@@ -593,6 +595,16 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     vote: voteUseCase(friendships, gameNights, transactions, log),
+
+    // Cancelling and past nights (U21)
+    cancelNight: cancelNightUseCase(
+      friendships,
+      gameNights,
+      notices,
+      transactions,
+      log,
+    ),
+    listPastNights: listPastNightsUseCase(gameNights, userProfiles),
 
     // What should we play? and tables (U20)
     whatToPlay: whatToPlayUseCase(

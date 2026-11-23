@@ -15,7 +15,7 @@ import type { ITransaction } from "@/src/entities/models/transaction.model";
 // Game nights (docs/data-model.md, game_nights, game_night_attendees, game_night_games and
 // game_night_votes). U17's daily run reads who's going to a night that starts soon; U18 makes,
 // edits and reads the nights, their lists and the games on their tables; U19 answers, invites,
-// the night's link, the waitlist and the votes.
+// the night's link, the waitlist and the votes; U21 cancels them and lists the past ones.
 export interface IGameNightsRepository {
   getById(id: string, tx?: ITransaction): Promise<GameNight | undefined>;
   // The night a link's token opens (KTD18), whoever may see it: the link is what lets them.
@@ -30,6 +30,13 @@ export interface IGameNightsRepository {
   listVisibleFrom(
     viewerId: string,
     from: Date,
+    tx?: ITransaction,
+  ): Promise<GameNight[]>;
+  // The nights a member can see (KTD4) that started before `before`, or are cancelled, newest
+  // first: Past game nights (D12, U21).
+  listVisiblePast(
+    viewerId: string,
+    before: Date,
     tx?: ITransaction,
   ): Promise<GameNight[]>;
   create(night: NewGameNight, tx: ITransaction): Promise<GameNight>;

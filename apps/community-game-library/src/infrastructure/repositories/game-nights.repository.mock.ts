@@ -60,23 +60,42 @@ export class MockGameNightsRepository implements IGameNightsRepository {
 
   async lock(): Promise<void> {}
 
-  async listVisibleFrom(viewerId: string, from: Date): Promise<GameNight[]> {
+  // Who may see a night (KTD4), as the real repository's visibleTo reads it.
+  private async visibleTo(viewerId: string) {
     const friends = new Set(await this.friendships.listFriendIds(viewerId));
     const listed = new Set(
       this.attendees
         .filter((one) => one.userId === viewerId)
         .map((one) => one.gameNightId),
     );
+    return (night: GameNight) =>
+      night.createdBy === viewerId ||
+      listed.has(night.id) ||
+      (night.audience === "friends" && friends.has(night.createdBy));
+  }
+
+  async listVisibleFrom(viewerId: string, from: Date): Promise<GameNight[]> {
+    const visible = await this.visibleTo(viewerId);
     return this.nights
       .filter(
         (night) =>
           night.startsAt >= from &&
           night.cancelledAt === null &&
-          (night.createdBy === viewerId ||
-            listed.has(night.id) ||
-            (night.audience === "friends" && friends.has(night.createdBy))),
+          visible(night),
       )
       .sort(byStart)
+      .map((night) => ({ ...night }));
+  }
+
+  async listVisiblePast(viewerId: string, before: Date): Promise<GameNight[]> {
+    const visible = await this.visibleTo(viewerId);
+    return this.nights
+      .filter(
+        (night) =>
+          (night.startsAt < before || night.cancelledAt !== null) &&
+          visible(night),
+      )
+      .sort((a, b) => byStart(b, a))
       .map((night) => ({ ...night }));
   }
 

@@ -4,7 +4,7 @@ import type { INoticesRepository } from "@/src/application/repositories/notices.
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { requireFriend } from "@/src/application/use-cases/friends/require-friend";
-import { nightToSee } from "@/src/application/use-cases/nights/can-see-night";
+import { nightToChange } from "@/src/application/use-cases/nights/can-see-night";
 import { UnauthorizedError } from "@/src/entities/errors/common";
 import type { GameNight } from "@/src/entities/models/game-night.model";
 import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
@@ -51,7 +51,7 @@ export const inviteToNightUseCase = (
   ): Promise<string[]> =>
     transactionManagerService.startTransaction(async (tx) => {
       await gameNightsRepository.lock(gameNightId, tx);
-      const night = await nightToSee(readers, gameNightId, userId, tx);
+      const night = await nightToChange(readers, gameNightId, userId, tx);
       const list = await gameNightsRepository.listAttendees([night.id], tx);
       if (!mayInvite(night, list, userId)) {
         throw new UnauthorizedError("Only the host invites people.");

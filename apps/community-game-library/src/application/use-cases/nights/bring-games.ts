@@ -1,6 +1,6 @@
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
-import { nightToSee } from "@/src/application/use-cases/nights/can-see-night";
+import { nightToChange } from "@/src/application/use-cases/nights/can-see-night";
 import { UnauthorizedError } from "@/src/entities/errors/common";
 import type { GameNight } from "@/src/entities/models/game-night.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
@@ -17,7 +17,7 @@ export async function nightToBringTo(
   tx: ITransaction,
 ): Promise<GameNight> {
   await readers.gameNights.lock(gameNightId, tx);
-  const night = await nightToSee(readers, gameNightId, userId, tx);
+  const night = await nightToChange(readers, gameNightId, userId, tx);
   const mine = await readers.gameNights.getAttendee(night.id, userId, tx);
   if (night.createdBy !== userId && mine?.status !== "going") {
     throw new UnauthorizedError("Only people going bring games and vote.");

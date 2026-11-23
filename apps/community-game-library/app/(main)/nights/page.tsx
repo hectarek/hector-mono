@@ -9,6 +9,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { Group } from "@/app/_components/group";
+import { List, ListRow, RowName } from "@/app/_components/list-row";
 import { NightCard } from "@/app/_components/night-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { gate } from "@/app/_lib/account";
@@ -19,11 +20,13 @@ import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 const TILTS = [3, -3] as const;
 
 // Nights (D1, R33): the nights coming up that the member can see, soonest first, each a card
-// that opens its night, with New night beside the title. Past nights fold away (U21).
+// that opens its night, with New night beside the title. Past nights fold away under Past game
+// nights (D12), with how many there are.
 export default async function NightsPage() {
   await connection();
   const { user } = await gate("app");
   const cards = await getInjection("IListNightsController")(user.id);
+  const past = await getInjection("IListPastNightsController")(user.id);
   const today = todayIn(PLAN_TIME_ZONE);
 
   return (
@@ -75,6 +78,11 @@ export default async function NightsPage() {
           </ul>
         </Group>
       )}
+      <List>
+        <ListRow href="/nights/past" aside={past.length}>
+          <RowName>Past game nights</RowName>
+        </ListRow>
+      </List>
     </PageColumn>
   );
 }

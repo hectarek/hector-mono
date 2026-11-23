@@ -32,7 +32,11 @@ describe("Nights (U18: D1)", () => {
     expect(page.getByRole("heading", { level: 2 }).textContent).toBe(
       "Coming up",
     );
-    const cards = page.getAllByRole("listitem").map((item) => {
+    // The cards under Coming up; Past game nights has its own row below them (U21).
+    const comingUp = within(
+      page.getByText("Coming up").closest("section") as HTMLElement,
+    );
+    const cards = comingUp.getAllByRole("listitem").map((item) => {
       const link = within(item).getByRole("link");
       return { link, card: within(link) };
     });

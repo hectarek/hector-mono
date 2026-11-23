@@ -57,12 +57,13 @@ function IdPlay({
 // The games on the table (D2, D7, D13; R32, R38): each with who brings it and who'd play it, most
 // wanted first, I'd play for the host and people going, and I'll bring a game, which opens D6 with
 // the member's own games on the table ticked. Anyone not going reads "Answer to say what you'd
-// play."
+// play." A night that's over shows its table as it was, with none of these.
 export function TableGames({
   page,
   userId,
   choices,
   whatToPlay,
+  over,
 }: {
   page: Night;
   userId: string;
@@ -70,10 +71,13 @@ export function TableGames({
   choices: NightGameChoices | null;
   // What should we play? beside the games (D2, D13); the host has it under What you can do.
   whatToPlay: boolean;
+  // The night's day has gone, or it's cancelled.
+  over: boolean;
 }) {
   const [picking, setPicking] = useState(false);
   const [, startTransition] = useTransition();
-  const { night, games, canBring } = page;
+  const { night, games } = page;
+  const canBring = page.canBring && !over;
   const mine = games
     .filter((one) => one.owner.userId === userId)
     .map((one) => one.userGameId);
@@ -112,7 +116,7 @@ export function TableGames({
         ) : undefined
       }
     >
-      {!canBring && games.length > 0 && (
+      {!canBring && !over && games.length > 0 && (
         <p className="text-13 text-muted-foreground">
           Answer to say what you’d play.
         </p>
@@ -199,15 +203,13 @@ export function TableGames({
         </div>
       )}
       {canBring && choices && (
-        <>
-          <PickGamesSheet
-            open={picking}
-            onOpenChange={setPicking}
-            choices={choices}
-            picked={mine}
-            onDone={bring}
-          />
-        </>
+        <PickGamesSheet
+          open={picking}
+          onOpenChange={setPicking}
+          choices={choices}
+          picked={mine}
+          onDone={bring}
+        />
       )}
     </Group>
   );

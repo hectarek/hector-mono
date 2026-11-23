@@ -118,6 +118,31 @@ export class GameNightsRepository
     }
   }
 
+  async listVisiblePast(
+    viewerId: string,
+    before: Date,
+    tx?: ITransaction,
+  ): Promise<GameNight[]> {
+    try {
+      const db = this.getDbContext(tx);
+      return await db
+        .select()
+        .from(gameNights)
+        .where(
+          and(
+            or(
+              lt(gameNights.startsAt, before),
+              isNotNull(gameNights.cancelledAt),
+            ),
+            this.visibleTo(db, viewerId),
+          ),
+        )
+        .orderBy(desc(gameNights.startsAt), desc(gameNights.id));
+    } catch (err) {
+      this.handleError(err, "listVisiblePast");
+    }
+  }
+
   async create(night: NewGameNight, tx: ITransaction): Promise<GameNight> {
     try {
       const [row] = await this.getDbContext(tx)

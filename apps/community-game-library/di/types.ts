@@ -64,6 +64,7 @@ import type { ITakeBackPassAlongUseCase } from "@/src/application/use-cases/loan
 import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import type { IAddGameToNightUseCase } from "@/src/application/use-cases/nights/add-game-to-night.use-case";
 import type { IAnswerNightUseCase } from "@/src/application/use-cases/nights/answer-night.use-case";
+import type { ICancelNightUseCase } from "@/src/application/use-cases/nights/cancel-night.use-case";
 import type { ICheckNightLinkUseCase } from "@/src/application/use-cases/nights/check-night-link.use-case";
 import type { ICreateNightUseCase } from "@/src/application/use-cases/nights/create-night.use-case";
 import type { IGetInviteChoicesUseCase } from "@/src/application/use-cases/nights/get-invite-choices.use-case";
@@ -71,6 +72,7 @@ import type { IGetNightUseCase } from "@/src/application/use-cases/nights/get-ni
 import type { IGetNightGameChoicesUseCase } from "@/src/application/use-cases/nights/get-night-game-choices.use-case";
 import type { IInviteToNightUseCase } from "@/src/application/use-cases/nights/invite-to-night.use-case";
 import type { IListNightsUseCase } from "@/src/application/use-cases/nights/list-nights.use-case";
+import type { IListPastNightsUseCase } from "@/src/application/use-cases/nights/list-past-nights.use-case";
 import type { IMakeNightLinkUseCase } from "@/src/application/use-cases/nights/make-night-link.use-case";
 import type { IOpenNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
 import type { IRemoveFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
@@ -144,6 +146,7 @@ import type { ITakeBackPassAlongController } from "@/src/interface-adapters/cont
 import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
 import type { IAddGameToNightController } from "@/src/interface-adapters/controllers/nights/add-game-to-night.controller";
 import type { IAnswerNightController } from "@/src/interface-adapters/controllers/nights/answer-night.controller";
+import type { ICancelNightController } from "@/src/interface-adapters/controllers/nights/cancel-night.controller";
 import type { ICheckNightLinkController } from "@/src/interface-adapters/controllers/nights/check-night-link.controller";
 import type { ICreateNightController } from "@/src/interface-adapters/controllers/nights/create-night.controller";
 import type { IGetInviteChoicesController } from "@/src/interface-adapters/controllers/nights/get-invite-choices.controller";
@@ -151,6 +154,7 @@ import type { IGetNightController } from "@/src/interface-adapters/controllers/n
 import type { IGetNightGameChoicesController } from "@/src/interface-adapters/controllers/nights/get-night-game-choices.controller";
 import type { IInviteToNightController } from "@/src/interface-adapters/controllers/nights/invite-to-night.controller";
 import type { IListNightsController } from "@/src/interface-adapters/controllers/nights/list-nights.controller";
+import type { IListPastNightsController } from "@/src/interface-adapters/controllers/nights/list-past-nights.controller";
 import type { IMakeNightLinkController } from "@/src/interface-adapters/controllers/nights/make-night-link.controller";
 import type { IOpenNightLinkController } from "@/src/interface-adapters/controllers/nights/open-night-link.controller";
 import type { IRemoveFromWaitlistController } from "@/src/interface-adapters/controllers/nights/remove-from-waitlist.controller";
@@ -208,6 +212,8 @@ export const DI_SYMBOLS = {
   ICancelFriendRequestUseCase: Symbol.for("ICancelFriendRequestUseCase"),
   ICancelLoanController: Symbol.for("ICancelLoanController"),
   ICancelLoanUseCase: Symbol.for("ICancelLoanUseCase"),
+  ICancelNightController: Symbol.for("ICancelNightController"),
+  ICancelNightUseCase: Symbol.for("ICancelNightUseCase"),
   IChangeDueDateController: Symbol.for("IChangeDueDateController"),
   IChangeDueDateUseCase: Symbol.for("IChangeDueDateUseCase"),
   ICheckFriendLinkController: Symbol.for("ICheckFriendLinkController"),
@@ -289,6 +295,8 @@ export const DI_SYMBOLS = {
   IListNightsUseCase: Symbol.for("IListNightsUseCase"),
   IListPastLoansController: Symbol.for("IListPastLoansController"),
   IListPastLoansUseCase: Symbol.for("IListPastLoansUseCase"),
+  IListPastNightsController: Symbol.for("IListPastNightsController"),
+  IListPastNightsUseCase: Symbol.for("IListPastNightsUseCase"),
   IListPeopleYouMayKnowController: Symbol.for(
     "IListPeopleYouMayKnowController",
   ),
@@ -399,6 +407,8 @@ export interface DI_RETURN_TYPES {
   ICancelFriendRequestUseCase: ICancelFriendRequestUseCase;
   ICancelLoanController: ICancelLoanController;
   ICancelLoanUseCase: ICancelLoanUseCase;
+  ICancelNightController: ICancelNightController;
+  ICancelNightUseCase: ICancelNightUseCase;
   IChangeDueDateController: IChangeDueDateController;
   IChangeDueDateUseCase: IChangeDueDateUseCase;
   ICheckFriendLinkController: ICheckFriendLinkController;
@@ -474,6 +484,8 @@ export interface DI_RETURN_TYPES {
   IListNightsUseCase: IListNightsUseCase;
   IListPastLoansController: IListPastLoansController;
   IListPastLoansUseCase: IListPastLoansUseCase;
+  IListPastNightsController: IListPastNightsController;
+  IListPastNightsUseCase: IListPastNightsUseCase;
   IListPeopleYouMayKnowController: IListPeopleYouMayKnowController;
   IListPeopleYouMayKnowUseCase: IListPeopleYouMayKnowUseCase;
   IListSuggestionsController: IListSuggestionsController;

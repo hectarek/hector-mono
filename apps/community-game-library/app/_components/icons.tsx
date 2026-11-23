@@ -221,6 +221,15 @@ export function PlaceIcon(props: IconProps) {
   );
 }
 
+// Add to my calendar's arrow onto a line (D7, D13).
+export function DownloadIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <path d="M12 4v11M8 11l4 4 4-4M5 19h14" />
+    </LineIcon>
+  );
+}
+
 // A night only invited people see (D7).
 export function LockIcon(props: IconProps) {
   return (

@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U20):
+The spec's code map, as far as it's built (U1 to U21):
 
 ```
 app/
@@ -67,7 +67,8 @@ app/
                              # [id]/ (D2, D4, D7, D13, with load-night.ts; U19's night-answer.tsx, YourAnswer
                              # and D3's sheet, night-link.tsx, night-waitlist.tsx, table-games.tsx),
                              # [id]/edit/ and [id]/invite/ (D10, U19); [id]/what-to-play/ (D8) and
-                             # [id]/tables/ (D9), each with its view, U20;
+                             # [id]/tables/ (D9), each with its view, U20; [id]/cancel-night.tsx
+                             # (Cancelling and D11), [id]/calendar/ (KTD24's route) and past/ (D12), U21;
                              # you/ (E5), you/edit/ (E6) and
                              # you/notices/ (E7, U11)
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
@@ -131,6 +132,7 @@ src/
                              # left out with why; startingTime, the time a night gives; minutesWords
     tables.ts                # splitTables (U20): the fewest even tables, each with its best game, and
                              # one table for all when a game seats everyone
+    calendar-file.ts         # a night as one iCalendar event (calendarFile, calendarFileName; KTD24, U21)
     reminders.ts             # which reminders the daily run writes on a day, and which returns it closes
                              # (loanReminders, returnClosesToday; KTD8, U17)
     notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
@@ -152,7 +154,8 @@ src/
     link-token.ts            # a link's 8-character code in Crockford's base 32 (newLinkToken, linkTokenOf),
                              # FRIEND_LINK_DAYS (U10; nights' links take the same form)
     share-message.ts         # the ready messages for the share sheet (R52): the friend link's (U10),
-                             # callBackMessage (C18, U14)
+                             # callBackMessage (C18, U14), nightLinkMessage (D7, D10, U19) and
+                             # nightCancelledMessage (D15, U21)
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
                              # formatDate ("Fri, Nov 20", with the year once it isn't this year),
                              # formatWeekday and formatMonthDay, its parts; formatDay ("today", "yesterday",
@@ -200,7 +203,9 @@ src/
                              # open-night-link, remove-from-waitlist, add-game-to-night,
                              # remove-game-from-night, vote; night-seats.ts (fillSeats, leaveTable) and
                              # bring-games.ts (nightToBringTo), which the moves share; U20: what-to-play,
-                             # split-tables, and play-choices.ts (playChoices), the games they read
+                             # split-tables, and play-choices.ts (playChoices), the games they read;
+                             # U21: cancel-night, list-past-nights, and nightToChange (can-see-night.ts),
+                             # where every change to a night starts
     use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
                              # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
@@ -285,6 +290,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **U18's patterns.** A night is read only after `nightToSee` (`src/application/use-cases/nights/can-see-night.ts`, KTD4): its host, anyone on its list, or the host's friends when it's for friends; anyone else gets the Not found an id with no night gets (AE5). Nights' list read (`listVisibleFrom`) holds the same rule in its SQL and its mock. A night stays on Nights until its Eastern day is over (`isUpcoming`), read 36 hours back as the daily run reads. D5 sends a day and clock times in Eastern, and `detailsOf` (`controllers/nights/night-fields.ts`) makes them moments with `atTimeIn`, an end at or before the start being the next day's. A card writes the start as "7 PM" (`formatClock`) and a page its times as "7 to 10:30 PM" (`formatTimes`), as D1, D2 and D7 draw them; F1 and E3 keep `formatTime`'s "7:00 PM", as theirs do. `NightForm` (`nights/night-form.tsx`) is D5 and the host's Edit: the times are half-hour selects, as D5 draws them; the seats are a ButtonGroup stepper, whose joined corners the theme squares, since Button refuses `rounded-*`; on Edit each switch is a `SavedSwitch` (rule 4) and Save changes sends the rest, so the form keeps the details and the switches in separate state. Edit tells everyone going but the host (`night-changed`) when the time, the place or the words change; the seats, who sees it and the switches change quietly, and the seats never drop below those taken. A server page can't call a function a `"use client"` module exports ("Attempted to call newNightStart() from the server", on the dev server only, since the tests have no server and client boundary), so New game night's starting values live in `new-night-start.ts`. D6 is a sheet over `get-night-game-choices` (`PickGamesSheet`, which U19's I'll bring a game reuses): every copy of the member's, at home and lent first, then kept, then out with who has it. `addGames` gives each game a `created_at` a millisecond apart, so the table keeps the picked order: rows written in one transaction share its start time. The host's page shows D7's parts this unit owns (the details, Going, the games, Edit), and anyone else gets D2's details with the seats and who said maybe; Create for a night only invited people see goes on to `/nights/[id]/invite`, which U19 builds. The cast's nights are dated around the kit's Nov 10, so on the dev server none is coming up: make one through New night, or move a seeded one forward on the test project and back again.
 - **U19's patterns.** Every move that changes a night's seats takes its lock first (`lock`), then `nightToSee`, and ends with `fillSeats` (`night-seats.ts`): each waitlisted member who fits moves to going, in the waitlist's order, skipping one who doesn't, and is told (`waitlist-seat`, AE4); Edit's added seats do the same. `fits`, `waitlistOf` and `movingUp` are pure (`night.ts`). A member who stops going takes their games off the table with everyone's votes on them, and their own votes go (`leaveTable`); unfriending takes each off the other's nights coming up the same way. Going when the seat went meanwhile is `ChangedError('seats-taken')`, whose next step is Join the waitlist; joining the waitlist goes straight to going when the seats are there after all, and keeps a place already held. The host goes to their own night and doesn't answer. A night only invited people see gets its link when it's made or switched to them; the link reaches only someone who may invite (`get-night` blanks it otherwise), and `check-night-link` gives D14 the title, the start and the seats, never the place. `/n/<token>` copies `/f/<token>`: the proxy lets it through signed out, its client part (`open-night.tsx`) sends the link once the page is open, a link's invite has no `invited_by`, so the Nights tab, which counts invites by name with no answer, leaves it out, and a new member goes on to A4 already on the list. A link's address is built from the request's host, as E2's is, over http on localhost; a page that reads `headers()` needs `mock.module("next/headers")` in its screen test. D3's sheet (`night-answer.tsx`) offers Go alone or Join the waitlist when a member not going yet brings more guests than seats (AE4); someone going can't add more than the seats open. Invite people (D10) and Already invited list invites by name only; the full night's line is D10's. The screen tests share the container's mock rows within a file, so a file whose tests answer, invite or vote calls `resetCastNights()` (`tests/_support/members.ts`) in `beforeEach`. People you may know adds people who went to a past night with the member (`listWentWith`), "At Halloween one-shots" where no friend is shared; a shared friend wins. Kit Sample's answers and invite on the test project stay as test rows.
 - **U20's patterns.** What should we play? and tables are pure rules (`what-to-play.ts`, `tables.ts`; KTD23), and the use cases only gather what they choose from (`playChoices`: the night's table in the order it was laid, with votes summed per game, and every game on the shelves the member can see, one each, a game on the table keeping its place there), so the pages run the rules in the browser as the choices change, as B2's live count does. A game missing a value a rule needs is left out with why (rule 14), the people first, then the time, then the complexity. D9's split seats each party (a member and their guests) at the first table with room under an even share, or where most room is left, so a big party makes its table larger rather than failing; a split starts at two tables, and one table for all is offered beside it, not as the split; with two or three going there's no split, and the one table is the answer. D8's Time and Complexity are the shared ToggleGroup's filter chips and From its segmented control (`spacing={0}`), which the theme draws; tapping the picked complexity clears it. The tables' message for the share sheet names everyone, the member too, and nothing is stored.
+- **U21's patterns.** Every change to a night starts with `nightToChange` (`can-see-night.ts`) in place of `nightToSee`, which refuses a cancelled night with `ChangedError('night-cancelled')` (KTD16), so a page opened before the night was cancelled gets the changed line; a new change on a night starts with it too. A night is over once its Eastern day has gone or it's cancelled: its page then says only what it was (who came, or who was going, and its table), with no answer, invite, link, waitlist, table moves, What should we play?, calendar or Cancelling, and Past game nights (`listVisiblePast`, read 36 hours ahead and kept by the Eastern day) lists both kinds, newest first, a cancelled night stamped Cancelled. Cancelling keeps the night's list and table, and tells everyone going, invited or waiting (`night-cancelled`, the note in `answer_note`); the dialog then opens Nights and shows D15's message, with Text them too only when someone was told. The calendar file is a route handler at `/nights/[id]/calendar` that reads the night through get-night's controller, so only someone who can see the night gets it (404 for anyone else); Add to my calendar links it with a plain `<a>`, not `Link`, which would treat it as a page, and without `download`, so the browser hands the `text/calendar` response to the phone's calendar (still to check on a phone). D1's own tests count list items under Coming up only, since Past game nights is a row of its own below them.
 
 ## Data Model
 

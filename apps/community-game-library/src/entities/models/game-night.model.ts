@@ -43,5 +43,7 @@ export type NewGameNight = Pick<
 > &
   Partial<Pick<GameNight, "linkToken">>;
 
-// What the host's Edit changes (U18), and a new link (U19); cancelling (U21) adds its own.
-export type GameNightChanges = Partial<Omit<NewGameNight, "createdBy">>;
+// What the host's Edit changes (U18), a new link (U19), and cancelling (U21).
+export type GameNightChanges = Partial<
+  Omit<NewGameNight, "createdBy"> & Pick<GameNight, "cancelledAt">
+>;

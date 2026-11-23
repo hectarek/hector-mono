@@ -236,6 +236,30 @@ export async function openNightLink(
   }
 }
 
+// D11's Cancel the night, after "Cancel Heavy games at mine?", with its optional note. Nights
+// opens after (D15), with Text them too.
+export async function cancelNight(
+  gameNightId: string,
+  note: string,
+): Promise<ActionState> {
+  let title: string;
+  try {
+    const userId = await getCurrentUserId();
+    ({ title } = await getInjection("ICancelNightController")(
+      { gameNightId, note },
+      userId,
+    ));
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("cancelNight"),
+      "That didn’t save. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${title} is cancelled` };
+}
+
 // Take someone off the waitlist (D7), after its dialog.
 export async function removeFromWaitlist(
   gameNightId: string,
