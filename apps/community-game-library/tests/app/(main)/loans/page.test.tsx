@@ -31,6 +31,16 @@ describe("Loans (C4)", () => {
     const page = within(view.container);
 
     expect(page.getByRole("heading", { level: 1 }).textContent).toBe("Loans");
+    // C4's Record a loan beside the title, and Past loans at the end (U16).
+    expect(
+      page
+        .getByRole("button", { name: "Record a loan" })
+        .closest("a")
+        ?.getAttribute("href"),
+    ).toBe("/loans/record");
+    expect(
+      page.getByRole("link", { name: /Past loans/ }).getAttribute("href"),
+    ).toBe("/loans/past");
     expect(page.getByRole("heading", { name: "Needs you · 2" })).toBeTruthy();
     const request = page.getByRole("link", {
       name: /Priya asked for Night Market/,
@@ -101,5 +111,9 @@ describe("Loans (C4)", () => {
         "Borrow a game from the Library, or record one you lent in person.",
       ),
     ).toBeTruthy();
+    // The empty state offers Record a loan too, as screens.md's Empty lists has it.
+    expect(page.getAllByRole("button", { name: "Record a loan" })).toHaveLength(
+      2,
+    );
   });
 });

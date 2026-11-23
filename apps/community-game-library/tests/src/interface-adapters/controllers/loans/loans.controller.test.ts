@@ -19,9 +19,12 @@ import { confirmPassAlongController } from "@/src/interface-adapters/controllers
 import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import { getRecordLoanChoicesController } from "@/src/interface-adapters/controllers/loans/get-record-loan-choices.controller";
 import { giveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import { listLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import { listPastLoansController } from "@/src/interface-adapters/controllers/loans/list-past-loans.controller";
 import { passAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
+import { recordLoanController } from "@/src/interface-adapters/controllers/loans/record-loan.controller";
 import { requestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
 import { takeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import { withdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
@@ -165,6 +168,64 @@ describe("listLoansController", () => {
   it("turns away a signed-out user, and lists the member's loans as of today", async () => {
     const useCase = mock(async () => ({ needsYou: [], youAsked: [] }));
     const controller = listLoansController(
+      useCase as never,
+      new MockLoggerService(),
+    );
+    await expect(controller(undefined)).rejects.toBeInstanceOf(
+      UnauthenticatedError,
+    );
+    expect(useCase).not.toHaveBeenCalled();
+    await controller(you.id);
+    expect(useCase).toHaveBeenCalledWith(
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    );
+  });
+});
+
+describe("recordLoanController", () => {
+  const loan = { userGameId: ID, borrowerUserId: ID, pickedUpOn: "2026-11-08" };
+  controllerBasics({
+    make: (useCase, logger) => recordLoanController(useCase, logger),
+    valid: { ...loan, periodDays: 14 },
+    calledWith: [
+      { ...loan, periodDays: 14 },
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    ],
+    invalid: {
+      "a period C9 doesn't offer": { ...loan, periodDays: 10 },
+      "no friend": { userGameId: ID, pickedUpOn: "2026-11-08", periodDays: 7 },
+      "a period and a date both": {
+        ...loan,
+        periodDays: 7,
+        dueOn: "2026-11-20",
+      },
+      "a day that isn't one": { ...loan, pickedUpOn: "Sunday", periodDays: 7 },
+    },
+  });
+});
+
+describe("listPastLoansController", () => {
+  it("turns away a signed-out user, and lists the member's past loans", async () => {
+    const useCase = mock(async () => ({ borrowed: [], lent: [] }));
+    const controller = listPastLoansController(
+      useCase as never,
+      new MockLoggerService(),
+    );
+    await expect(controller(undefined)).rejects.toBeInstanceOf(
+      UnauthenticatedError,
+    );
+    expect(useCase).not.toHaveBeenCalled();
+    await controller(you.id);
+    expect(useCase).toHaveBeenCalledWith(you.id);
+  });
+});
+
+describe("getRecordLoanChoicesController", () => {
+  it("turns away a signed-out user, and reads C9's choices as of today", async () => {
+    const useCase = mock(async () => ({ copies: [], friends: [] }));
+    const controller = getRecordLoanChoicesController(
       useCase as never,
       new MockLoggerService(),
     );

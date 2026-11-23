@@ -1,9 +1,12 @@
+import { Button } from "@repo/ui/components/button";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "@repo/ui/components/empty";
+import Link from "next/link";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { CoverThumb } from "@/app/_components/cover-thumb";
@@ -101,7 +104,8 @@ function LoanItemRow({
 // requests for more time and the returns they confirm; You borrowed and You lent, overdue first;
 // In line, the copies the member waits for, each opening its game's page, where Leave the line is;
 // and You asked, their own requests waiting on an owner. The other rows open the loan's page.
-// Record a loan and Past loans come with U16.
+// Record a loan (C9) sits beside the title and in the empty state, and Past loans (C12) at the
+// end.
 export default async function LoansPage() {
   await connection();
   const { user } = await gate("app");
@@ -118,7 +122,24 @@ export default async function LoansPage() {
     0;
 
   return (
-    <PageColumn width="read" header={<AppHeader title="Loans" />}>
+    <PageColumn
+      width="read"
+      header={
+        <AppHeader
+          title="Loans"
+          action={
+            <Button
+              size="sm"
+              variant="secondary"
+              nativeButton={false}
+              render={<Link href="/loans/record" />}
+            >
+              Record a loan
+            </Button>
+          }
+        />
+      }
+    >
       {empty && (
         <Empty>
           <EmptyHeader>
@@ -127,6 +148,15 @@ export default async function LoansPage() {
               Borrow a game from the Library, or record one you lent in person.
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button
+              variant="secondary"
+              nativeButton={false}
+              render={<Link href="/loans/record" />}
+            >
+              Record a loan
+            </Button>
+          </EmptyContent>
         </Empty>
       )}
 
@@ -294,6 +324,11 @@ export default async function LoansPage() {
           </List>
         </Group>
       )}
+      <List>
+        <ListRow href="/loans/past">
+          <RowName>Past loans</RowName>
+        </ListRow>
+      </List>
     </PageColumn>
   );
 }

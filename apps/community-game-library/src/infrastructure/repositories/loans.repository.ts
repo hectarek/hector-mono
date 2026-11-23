@@ -3,6 +3,7 @@ import { loans } from "@/db/schema";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import {
+  ENDED_STATUSES,
   HOLDING_STATUSES,
   type LoanStatus,
   OPEN_STATUSES,
@@ -15,6 +16,13 @@ import type {
 } from "@/src/entities/models/loan.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
+
+// Past loans' order: the newest return first, then the newest pick-up, then the id.
+const newestReturnFirst = [
+  desc(loans.returnedOn),
+  desc(loans.pickedUpOn),
+  desc(loans.id),
+] as const;
 
 export class LoansRepository
   extends BaseRepository
@@ -136,6 +144,51 @@ export class LoansRepository
         .orderBy(desc(loans.pickedUpOn), desc(loans.createdAt), desc(loans.id));
     } catch (err) {
       this.handleError(err, "listHistoryForCopy", { userGameId });
+    }
+  }
+
+  async listEndedForBorrower(
+    userId: string,
+    tx?: ITransaction,
+  ): Promise<Loan[]> {
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(
+          and(
+            eq(loans.borrowerUserId, userId),
+            inArray(loans.status, [...ENDED_STATUSES]),
+          ),
+        )
+        .orderBy(...newestReturnFirst);
+    } catch (err) {
+      this.handleError(err, "listEndedForBorrower", { userId });
+    }
+  }
+
+  async listEndedForCopies(
+    userGameIds: readonly string[],
+    tx?: ITransaction,
+  ): Promise<Loan[]> {
+    if (userGameIds.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(
+          and(
+            inArray(loans.userGameId, [...userGameIds]),
+            inArray(loans.status, [...ENDED_STATUSES]),
+          ),
+        )
+        .orderBy(...newestReturnFirst);
+    } catch (err) {
+      this.handleError(err, "listEndedForCopies", {
+        copies: String(userGameIds.length),
+      });
     }
   }
 

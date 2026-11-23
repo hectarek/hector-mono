@@ -41,6 +41,12 @@ export const PICKED_UP_STATUSES = [
   "passed-along",
 ] as const satisfies readonly LoanStatus[];
 
+// Ended after its pick-up, given back or handed on: Past loans (C12, R23).
+export const ENDED_STATUSES = [
+  "returned",
+  "passed-along",
+] as const satisfies readonly LoanStatus[];
+
 const isIn = (statuses: readonly LoanStatus[], status: LoanStatus) =>
   statuses.includes(status);
 
@@ -231,6 +237,18 @@ export function isOverdue(
   today: string,
 ): boolean {
   return loan.status === "out" && loan.dueOn !== null && today > loan.dueOn;
+}
+
+// How many days after its due date a loan came back, given back or handed on (C12's "3 days
+// late"), or 0.
+export function daysLate(
+  loan: Pick<LoanFields, "dueOn"> & { returnedOn: string | null },
+): number {
+  return loan.dueOn !== null &&
+    loan.returnedOn !== null &&
+    loan.returnedOn > loan.dueOn
+    ? daysBetween(loan.dueOn, loan.returnedOn)
+    : 0;
 }
 
 // A copy's line (R24): its open requests, oldest first. Two asked in the same instant go by id,

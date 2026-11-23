@@ -1,6 +1,7 @@
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import { DatabaseOperationError } from "@/src/entities/errors/common";
 import {
+  ENDED_STATUSES,
   HOLDING_STATUSES,
   type LoanStatus,
   OPEN_STATUSES,
@@ -15,6 +16,7 @@ import type {
 const open: readonly LoanStatus[] = OPEN_STATUSES;
 const holding: readonly LoanStatus[] = HOLDING_STATUSES;
 const pickedUp: readonly LoanStatus[] = PICKED_UP_STATUSES;
+const ended: readonly LoanStatus[] = ENDED_STATUSES;
 
 // The real repository's orders: a timestamp, then the id.
 const compare = (a: string | number, b: string | number) =>
@@ -24,6 +26,11 @@ const oldestFirst = (a: Loan, b: Loan) =>
 const newestPickUpFirst = (a: Loan, b: Loan) =>
   compare(b.pickedUpOn ?? "", a.pickedUpOn ?? "") ||
   compare(b.createdAt.getTime(), a.createdAt.getTime()) ||
+  compare(b.id, a.id);
+
+const newestReturnFirst = (a: Loan, b: Loan) =>
+  compare(b.returnedOn ?? "", a.returnedOn ?? "") ||
+  compare(b.pickedUpOn ?? "", a.pickedUpOn ?? "") ||
   compare(b.id, a.id);
 
 export class MockLoansRepository implements ILoansRepository {
@@ -118,6 +125,25 @@ export class MockLoansRepository implements ILoansRepository {
           loan.userGameId === userGameId && pickedUp.includes(loan.status),
       )
       .sort(newestPickUpFirst)
+      .map((loan) => ({ ...loan }));
+  }
+
+  async listEndedForBorrower(userId: string): Promise<Loan[]> {
+    return this.rows
+      .filter(
+        (loan) => loan.borrowerUserId === userId && ended.includes(loan.status),
+      )
+      .sort(newestReturnFirst)
+      .map((loan) => ({ ...loan }));
+  }
+
+  async listEndedForCopies(userGameIds: readonly string[]): Promise<Loan[]> {
+    const copies = new Set(userGameIds);
+    return this.rows
+      .filter(
+        (loan) => copies.has(loan.userGameId) && ended.includes(loan.status),
+      )
+      .sort(newestReturnFirst)
       .map((loan) => ({ ...loan }));
   }
 

@@ -7,10 +7,12 @@ import { CalendarIcon } from "@/app/_components/icons";
 import { formatDate } from "@/src/entities/week";
 
 // A day that already happened, picked on the date sheet (X1): C3's Picked up on and C5's Gave it
-// back on. It reads "Today, Tue, Nov 10" until another day is picked.
+// back on. It reads "Today, Tue, Nov 10" until another day is picked. Inside a group whose label
+// names it already (C9), its own label is for screen readers only.
 export function DayField({
   id,
   label,
+  labelHidden = false,
   hint,
   today,
   from,
@@ -20,6 +22,7 @@ export function DayField({
 }: {
   id: string;
   label: string;
+  labelHidden?: boolean;
   hint?: string;
   today: string;
   from?: string;
@@ -31,7 +34,9 @@ export function DayField({
   const words = formatDate(value, today);
   return (
     <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id} className={labelHidden ? "sr-only" : undefined}>
+        {label}
+      </FieldLabel>
       <button
         id={id}
         type="button"

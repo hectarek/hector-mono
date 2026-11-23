@@ -51,9 +51,12 @@ import type { IConfirmPassAlongUseCase } from "@/src/application/use-cases/loans
 import type { IConfirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import type { IConfirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import type { IGetLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import type { IGetRecordLoanChoicesUseCase } from "@/src/application/use-cases/loans/get-record-loan-choices.use-case";
 import type { IGiveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import type { IListLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import type { IListPastLoansUseCase } from "@/src/application/use-cases/loans/list-past-loans.use-case";
 import type { IPassAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
+import type { IRecordLoanUseCase } from "@/src/application/use-cases/loans/record-loan.use-case";
 import type { IRequestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import type { ITakeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
@@ -110,9 +113,12 @@ import type { IConfirmPassAlongController } from "@/src/interface-adapters/contr
 import type { IConfirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import type { IConfirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import type { IGetLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import type { IGetRecordLoanChoicesController } from "@/src/interface-adapters/controllers/loans/get-record-loan-choices.controller";
 import type { IGiveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import type { IListLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import type { IListPastLoansController } from "@/src/interface-adapters/controllers/loans/list-past-loans.controller";
 import type { IPassAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
+import type { IRecordLoanController } from "@/src/interface-adapters/controllers/loans/record-loan.controller";
 import type { IRequestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
 import type { ITakeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
@@ -197,6 +203,10 @@ export const DI_SYMBOLS = {
   IGetNoticeSettingsUseCase: Symbol.for("IGetNoticeSettingsUseCase"),
   IGetProfileController: Symbol.for("IGetProfileController"),
   IGetProfileUseCase: Symbol.for("IGetProfileUseCase"),
+  IGetRecordLoanChoicesController: Symbol.for(
+    "IGetRecordLoanChoicesController",
+  ),
+  IGetRecordLoanChoicesUseCase: Symbol.for("IGetRecordLoanChoicesUseCase"),
   IGetSuggestionController: Symbol.for("IGetSuggestionController"),
   IGetSuggestionUseCase: Symbol.for("IGetSuggestionUseCase"),
   IGetTabCountsController: Symbol.for("IGetTabCountsController"),
@@ -221,6 +231,8 @@ export const DI_SYMBOLS = {
   IListLoansUseCase: Symbol.for("IListLoansUseCase"),
   IListMyLibraryController: Symbol.for("IListMyLibraryController"),
   IListMyLibraryUseCase: Symbol.for("IListMyLibraryUseCase"),
+  IListPastLoansController: Symbol.for("IListPastLoansController"),
+  IListPastLoansUseCase: Symbol.for("IListPastLoansUseCase"),
   IListPeopleYouMayKnowController: Symbol.for(
     "IListPeopleYouMayKnowController",
   ),
@@ -242,6 +254,8 @@ export const DI_SYMBOLS = {
   IPassAlongUseCase: Symbol.for("IPassAlongUseCase"),
   IPutInBoxController: Symbol.for("IPutInBoxController"),
   IPutInBoxUseCase: Symbol.for("IPutInBoxUseCase"),
+  IRecordLoanController: Symbol.for("IRecordLoanController"),
+  IRecordLoanUseCase: Symbol.for("IRecordLoanUseCase"),
   IRemovePhotoController: Symbol.for("IRemovePhotoController"),
   IRemovePhotoUseCase: Symbol.for("IRemovePhotoUseCase"),
   IRemoveUserGameController: Symbol.for("IRemoveUserGameController"),
@@ -343,6 +357,8 @@ export interface DI_RETURN_TYPES {
   IGetNoticeSettingsUseCase: IGetNoticeSettingsUseCase;
   IGetProfileController: IGetProfileController;
   IGetProfileUseCase: IGetProfileUseCase;
+  IGetRecordLoanChoicesController: IGetRecordLoanChoicesController;
+  IGetRecordLoanChoicesUseCase: IGetRecordLoanChoicesUseCase;
   IGetSuggestionController: IGetSuggestionController;
   IGetSuggestionUseCase: IGetSuggestionUseCase;
   IGetTabCountsController: IGetTabCountsController;
@@ -363,6 +379,8 @@ export interface DI_RETURN_TYPES {
   IListLoansUseCase: IListLoansUseCase;
   IListMyLibraryController: IListMyLibraryController;
   IListMyLibraryUseCase: IListMyLibraryUseCase;
+  IListPastLoansController: IListPastLoansController;
+  IListPastLoansUseCase: IListPastLoansUseCase;
   IListPeopleYouMayKnowController: IListPeopleYouMayKnowController;
   IListPeopleYouMayKnowUseCase: IListPeopleYouMayKnowUseCase;
   IListSuggestionsController: IListSuggestionsController;
@@ -382,6 +400,8 @@ export interface DI_RETURN_TYPES {
   IPassAlongUseCase: IPassAlongUseCase;
   IPutInBoxController: IPutInBoxController;
   IPutInBoxUseCase: IPutInBoxUseCase;
+  IRecordLoanController: IRecordLoanController;
+  IRecordLoanUseCase: IRecordLoanUseCase;
   IRemovePhotoController: IRemovePhotoController;
   IRemovePhotoUseCase: IRemovePhotoUseCase;
   IRemoveUserGameController: IRemoveUserGameController;

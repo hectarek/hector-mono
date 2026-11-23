@@ -10,9 +10,12 @@ import { confirmPassAlongUseCase } from "@/src/application/use-cases/loans/confi
 import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import { getRecordLoanChoicesUseCase } from "@/src/application/use-cases/loans/get-record-loan-choices.use-case";
 import { giveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import { listLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import { listPastLoansUseCase } from "@/src/application/use-cases/loans/list-past-loans.use-case";
 import { passAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
+import { recordLoanUseCase } from "@/src/application/use-cases/loans/record-loan.use-case";
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
@@ -28,9 +31,12 @@ import { confirmPassAlongController } from "@/src/interface-adapters/controllers
 import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import { getRecordLoanChoicesController } from "@/src/interface-adapters/controllers/loans/get-record-loan-choices.controller";
 import { giveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import { listLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import { listPastLoansController } from "@/src/interface-adapters/controllers/loans/list-past-loans.controller";
 import { passAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
+import { recordLoanController } from "@/src/interface-adapters/controllers/loans/record-loan.controller";
 import { requestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
 import { takeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import { withdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
@@ -292,6 +298,53 @@ export function createLoansModule() {
     .bind(DI_SYMBOLS.ITakeBackPassAlongController)
     .toHigherOrderFunction(takeBackPassAlongController, [
       DI_SYMBOLS.ITakeBackPassAlongUseCase,
+      log,
+    ]);
+
+  // Recording a loan, and past loans (U16)
+  loansModule
+    .bind(DI_SYMBOLS.IRecordLoanUseCase)
+    .toHigherOrderFunction(recordLoanUseCase, [
+      friendships,
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IRecordLoanController)
+    .toHigherOrderFunction(recordLoanController, [
+      DI_SYMBOLS.IRecordLoanUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IGetRecordLoanChoicesUseCase)
+    .toHigherOrderFunction(getRecordLoanChoicesUseCase, [
+      userGames,
+      loans,
+      games,
+      friendships,
+      profiles,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IGetRecordLoanChoicesController)
+    .toHigherOrderFunction(getRecordLoanChoicesController, [
+      DI_SYMBOLS.IGetRecordLoanChoicesUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IListPastLoansUseCase)
+    .toHigherOrderFunction(listPastLoansUseCase, [
+      loans,
+      userGames,
+      games,
+      profiles,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IListPastLoansController)
+    .toHigherOrderFunction(listPastLoansController, [
+      DI_SYMBOLS.IListPastLoansUseCase,
       log,
     ]);
 

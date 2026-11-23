@@ -54,9 +54,12 @@ import { confirmPassAlongUseCase } from "@/src/application/use-cases/loans/confi
 import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import { getRecordLoanChoicesUseCase } from "@/src/application/use-cases/loans/get-record-loan-choices.use-case";
 import { giveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import { listLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import { listPastLoansUseCase } from "@/src/application/use-cases/loans/list-past-loans.use-case";
 import { passAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
+import { recordLoanUseCase } from "@/src/application/use-cases/loans/record-loan.use-case";
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
@@ -412,6 +415,24 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     listLoans: listLoansUseCase(loans, userGames, games, userProfiles),
+
+    // Recording a loan, and past loans (U16)
+    recordLoan: recordLoanUseCase(
+      friendships,
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    listPastLoans: listPastLoansUseCase(loans, userGames, games, userProfiles),
+    getRecordLoanChoices: getRecordLoanChoicesUseCase(
+      userGames,
+      loans,
+      games,
+      friendships,
+      userProfiles,
+    ),
 
     // Lines and passing it along (U15)
     passAlong: passAlongUseCase(userGames, loans, notices, transactions, log),

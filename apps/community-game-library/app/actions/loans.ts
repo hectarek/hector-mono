@@ -386,3 +386,29 @@ export async function takeBackPassAlong(
   revalidateEverything();
   return { message: `You still have it. ${nextName} is told.` };
 }
+
+// What C9 records.
+export type RecordLoanInput = {
+  userGameId: string;
+  borrowerUserId: string;
+  pickedUpOn: string;
+} & ({ periodDays: number } | { dueOn: string });
+
+// C9's Record the loan. Loans then lists it under You lent.
+export async function recordLoan(
+  input: RecordLoanInput,
+  borrowerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IRecordLoanController")(input, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("recordLoan"),
+      "That didn’t save. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `Loan recorded. ${borrowerName} is told.` };
+}

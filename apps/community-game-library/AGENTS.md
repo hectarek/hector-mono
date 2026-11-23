@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U15):
+The spec's code map, as far as it's built (U1 to U16):
 
 ```
 app/
@@ -48,7 +48,8 @@ app/
                              # copies/[id]/ (B7, B14: copy-form.tsx, remove-copy.tsx); friends/ (E1; link/
                              # E2; [userId]/ E3, with E4's dialog in unfriend-button.tsx, U10); inbox/ (F1
                              # and F2, with mark-read.tsx, U11); loans/ (C4's Needs you and You asked, U12;
-                             # In line, U15);
+                             # In line, U15; Record a loan and Past loans, U16); loans/record/ (C9, with
+                             # record-loan-form.tsx, U16); loans/past/ (C12, ?show=lent, U16);
                              # loans/[id]/ (C16, C2 with answer-form.tsx, C17 and C3's top, U12;
                              # loan-move-button.tsx, the moves that ask first; U13: C3's pick-up-form.tsx,
                              # C17's owner-pick-up.tsx, C5 and C7 in out-views.tsx with give-back-form.tsx
@@ -96,7 +97,7 @@ app/
                              # withdrawRequest, answerRequest, cancelLoan; U13: confirmPickUp, giveBack,
                              # confirmReturn; U14: askMoreTime, answerMoreTime, changeDueDate, callBack;
                              # U15: requestLoan's join, leaveLine, removeFromLine, passAlong,
-                             # confirmPassAlong, takeBackPassAlong
+                             # confirmPassAlong, takeBackPassAlong; U16: recordLoan
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
@@ -107,7 +108,7 @@ src/
                              # with what it points at (U11)
     loan.ts                  # the statuses, LOAN_MOVES and canMove, PASS_ALONG_FOLLOW_ONS, the
                              # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6), ordinal;
-                             # U14's MORE_TIME_DAYS and moreTimeFrom
+                             # U14's MORE_TIME_DAYS and moreTimeFrom; U16's ENDED_STATUSES and daysLate
     account-state.ts         # AccountState: removed, needs-profile, or ready (KTD3)
     in-app-browser.ts        # IN_APP_BROWSERS and inAppBrowserOf: A9's list, each pattern with its source
     notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
@@ -141,7 +142,8 @@ src/
                              # friend-requests, and friendships' getSince and listFriendsOfFriends, loans'
                              # setStatus and user-games' lock, the first loan write; U11: notices'
                              # listForUser, countUnread and markRead, loans' listByIds and
-                             # listOpenForBorrower; U12: loans' getById, create and update
+                             # listOpenForBorrower; U12: loans' getById, create and update; U16: loans'
+                             # listEndedForBorrower and listEndedForCopies
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/catalog/       # get-game, search-games (U6)
@@ -157,7 +159,8 @@ src/
                              # U13: confirm-pick-up, give-back, confirm-return; U14: ask-more-time,
                              # answer-more-time, change-due-date, call-back; U15: pass-along,
                              # confirm-pass-along, take-back-pass-along, and the-line.ts (firstInLine,
-                             # tellWhoseTurn, BACK_IN_LINE), which the moves share
+                             # tellWhoseTurn, BACK_IN_LINE), which the moves share; U16: record-loan,
+                             # get-record-loan-choices, list-past-loans
     use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
                              # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
@@ -232,6 +235,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **U13's patterns.** A loan's dates count from the real pick-up (`datesAtPickUp`): a day from the yes to today, and not after a date the owner picked. A return takes a day from the pick-up to today, and from then the loan can't run overdue (D15). For a day that already happened, the date sheet takes `until` (`DayField` in `loans/[id]/day-field.tsx`). `trackSpaces` (`app/_components/loan-track.tsx`) works out a loan's track: a space a day from today to the due day within a week, a space a week after that, and once it's late the last days up to the due one with a "+n" space for the piece. Each space carries its day as `id`, since a week-long loan repeats a weekday and Biome refuses an index key. Yes, it's back answers with the next request in the copy's line, which the sheet opens for the owner to answer; with nobody in line it goes on to Loans. A copy's note reads as a sentence: the page adds a full stop only when the note lacks one, and a new missing or damaged part joins the old note. C8 lays out its own two answers, since `SheetActions` adds a Cancel C8 doesn't draw. The loan's page keeps its views beside it, `loan-parts.tsx` and `out-views.tsx` (C5, C7).
 - **U14's patterns.** More time and a new due date count from the due date, or from today once it's overdue (`moreTimeFrom`, C14's "It's overdue, so these count from today."), and take a date after that; C6 and C14 share `DateChoice`. A request for more time puts its loan under Needs you, as C4 draws Gull & Anchor, rather than under You lent. A call-back makes the loan due today if it was due later, closes a waiting request, and ends a pass-along: the next friend's yes goes back to a request in line, with no `previousLoanId` (`PASS_ALONG_FOLLOW_ONS`). Its message offers Text Jo too through `shareOrCopy` with `callBackMessage`, since a notice is seen only when the app is opened (R52). The owner's stamp reads Called back above Overdue (C18). The dates line names the period only while the due date is still the one it gives, so more time, a new date or a call-back leave just the dates. C7 doesn't draw where C14 opens from, so Change the due date is a quiet link under It's back with me; C15's title is screens.md's ("Call Gull & Anchor back?") where the board says "Call it back?".
 - **U15's patterns.** A line is a copy's open requests, oldest first (`lineOf`); joining is `request-loan` with `join`, which takes a copy that's out, promised or asked for, while Ask to borrow on a copy lent meanwhile is still Changed underneath, and C1's next step joins with the same note. Leaving is `withdraw-request`, and the owner's Remove from line is `answer-request`'s no, with the note on `request-declined`, so there's no `remove-from-line` use case. `the-line.ts` holds what the moves share: `firstInLine`, read before a move, then `tellWhoseTurn`, which tells whoever is first after it and wasn't before (`turn-in-line`), unless they made the move or it told them already (data-model.md's "the friend who's now first in a line"). So a withdrawal, a yes or a no, a pass-along, I still have it and a call-back each tell the next friend, and someone already first when the copy comes home isn't told again: the owner's answer tells them. A pass-along needs the copy's `pass_along`, someone in line and no call-back; it closes a waiting request for more time, and the next friend's yes carries the giver's period. Taken back or called back, that yes is a request again in its old place (`BACK_IN_LINE`), its period cleared, so the owner's next yes sets its own; a yes now clears whichever of the period or the date it didn't set. `get-loan`'s `handoff` is the other borrower, with their phone while it's open, friends or not (R48). C11 is its own page, `loans/[id]/pass-along/`, since the board draws a back link to the loan; the next friend's page reuses C3's `PickUpForm` with `handedOn`. A link drawn as a button is `Button` with `nativeButton={false}` and `render={<Link />}`, which Base UI gives the button role, so tests find it as a button. C4's In line rows open the game's page, as the board's do, where Leave the line is. The boards draw "she" and "he": the words use the name, or "they".
+- **U16's patterns.** Record a loan (C9) takes a copy of the owner's that's lent and home, a friend, a day up to today and a period or a date; the loan is out at once, and the friend is told and doesn't confirm. A friend who'd asked for that copy has their request become the loan, since a borrower has one open loan per copy (`loans_one_open_per_borrower_idx`), and whoever was behind them is told it's their turn. B7's history already lists pass-alongs, both borrowers' loans, since `listHistoryForCopy` reads every picked-up status, so there's no `get-copy-history`. Past loans (C12) are the loans that ended after a pick-up, given back or handed on (`ENDED_STATUSES`), newest return first, with `daysLate`; its two views are `?show=lent` and the default, and its toggle is two links drawn as buttons, which Base UI gives the button role, so `aria-pressed` is valid on them. A field inside a group whose red label already names it takes `labelHidden` (`DayField`, `PeoplePicker`), so the name stays for screen readers without showing twice.
 
 ## Data Model
 
