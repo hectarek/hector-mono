@@ -91,13 +91,16 @@ export default async function YouPage() {
 
       <Group label="The app" overList>
         <List>
+          <ListRow href="/you/notices">
+            <span className="text-15 font-bold">Notices I get</span>
+          </ListRow>
           <ListRow href="/start/home-screen?from=you">
             <span className="text-15 font-bold">
               Put the app on my home screen
             </span>
           </ListRow>
-          <ListRow href="/you/notices">
-            <span className="text-15 font-bold">Notices I get</span>
+          <ListRow href="/you/catalog">
+            <span className="text-15 font-bold">About the catalog</span>
           </ListRow>
           {waiting && (
             <ListRow
@@ -142,10 +145,6 @@ export default async function YouPage() {
           </ListRow>
         </ul>
       </Group>
-
-      <p className="text-xs text-muted-foreground">
-        Game data from BoardGameGeek.
-      </p>
     </PageColumn>
   );
 }

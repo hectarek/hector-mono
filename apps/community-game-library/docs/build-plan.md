@@ -422,7 +422,7 @@ For the agent building one:
 
   No screen waits on it: whether a loan is overdue or due today is worked out when a page reads it.
 - KTD9. **One time zone, America/New_York**, as recipes' `PLAN_TIME_ZONE` and job-search's KTD18. Dates are `YYYY-MM-DD` strings end to end, and "today" comes from `todayIn` on the server, never the phone. A night's start and end are timestamps shown in Eastern time. A date shows its weekday, and its year once that isn't this year (screens.md). Revisit when a circle elsewhere joins.
-- KTD10. **Search runs on our copy, with trigrams (R2).** `games.search_title` holds the normalized title (`src/entities/search-title.ts`, U3) under a `pg_trgm` index. Neon has the extension, and so does the PGlite the tests use (0.5.17, the version installed, ships `pg_trgm`). The input is normalized the same way and matched by word similarity above a threshold. Results come in R2's two groups, games on the member's and their friends' copies first and then the rest, each ordered by closeness and then popularity. "ticket ride" finding Ticket to Ride is a test. U24 sizes it on the real catalog.
+- KTD10. **Search runs on our copy, with trigrams (R2).** `games.search_title` holds the normalized title (`src/entities/search-title.ts`, U3) under a `pg_trgm` index. Neon has the extension, and so does the PGlite the tests use (0.5.17, the version installed, ships `pg_trgm`). The input is normalized the same way and matched by word similarity above a threshold. Results come in R2's two groups, games on the member's and their friends' copies first and then the rest, each ordered by closeness and then popularity. "ticket ride" finding Ticket to Ride is a test. U24 sized it on the real catalog (2026-11-23): the threshold of 0.5 holds, and a search takes 4.5 ms in Postgres as a sequential scan of 2,154 games, too few for the planner to use the index (the app's AGENTS.md, Search).
 - KTD11. **Photos in Neon Object Storage (R4, R5, R40).**
   - Two buckets in the Neon project. `profile-photos` is private: a page that shows a photo gets a signed address that lasts an hour, made only for someone who may see the person (KTD4). `catalog-images` is public-read, for covers of games added by hand and box photos on suggestions, kept as their address in `image_url` (data-model rule 14).
   - The browser shrinks a picture to at most 800 px on its long side and under 300 KB (`app/_lib/shrink-image.ts`) before a server action stores it. Server Actions take 1 MB by default and Vercel's functions 4.5 MB (Vercel's limits, read 2026-11-12). The action checks the type and size again.
@@ -569,7 +569,8 @@ apps/community-game-library/
   scripts/                          # seed.ts, build-service-worker.ts, check-test-database.ts, require-migrations.ts, migrate-production.ts;
                                     # shape-catalog.ts, which makes db/catalog.jsonl (H6); load-catalog.ts, which loads it (U24);
                                     # lib/ (migrations.ts, terminal.ts), which the migration scripts share; lib/catalog.ts, the
-                                    # catalog's rules
+                                    # catalog's rules; lib/target-database.ts, which tells the test project's database from
+                                    # production's (U24)
   tests/                            # mirrors the tree; _support/ with cast.ts and focus.ts
   proxy.ts
 ```

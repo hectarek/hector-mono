@@ -15,35 +15,13 @@ import {
   migrationPlan,
   recordedMigrations,
 } from "@/scripts/lib/migrations";
+import {
+  isTestDatabase,
+  TEST_DATABASE_NOTE,
+  urlRefusal,
+} from "@/scripts/lib/target-database";
 import { ask, print, refuse, type Terminal } from "@/scripts/lib/terminal";
 import { loggable } from "@/src/entities/errors/loggable";
-
-// The test project's database carries this comment (scripts/check-test-database.ts checks it);
-// production's has none.
-const TEST_DATABASE_NOTE = "community-game-library-test";
-
-// Why the URL typed can't be the target, or null when it can. Bun loads .env, which holds the test
-// project's URL; the reason quotes neither.
-export function urlRefusal(
-  url: string,
-  envUrl: string | undefined,
-): string | null {
-  const parsed = URL.parse(url);
-  if (
-    !parsed?.hostname ||
-    !["postgres:", "postgresql:"].includes(parsed.protocol)
-  ) {
-    return "That isn't a postgres:// or postgresql:// URL. Nothing changed.";
-  }
-  if (url === envUrl) {
-    return "That's the URL in .env, the test project's. Nothing changed.";
-  }
-  return null;
-}
-
-export function isTestDatabase(note: string | null): boolean {
-  return note === TEST_DATABASE_NOTE;
-}
 
 export function confirmed(answer: string | null): boolean {
   return answer === "migrate";

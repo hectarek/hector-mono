@@ -11,9 +11,13 @@
 // --as maps a cast member to a real test account (.cast-accounts.json holds them); the rest keep
 // the cast's own ids, which no account has. It writes what's missing in one transaction and skips
 // what's there, so it runs again safely, and a unit that adds to the cast runs it again.
-import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
+import {
+  databaseNote,
+  isTestDatabase,
+  TEST_DATABASE_NOTE,
+} from "@/scripts/lib/target-database";
 import { print, refuse, type Terminal } from "@/scripts/lib/terminal";
 import { loggable } from "@/src/entities/errors/loggable";
 import { FriendRequestsRepository } from "@/src/infrastructure/repositories/friend-requests.repository";
@@ -30,10 +34,6 @@ import {
   insertCastRows,
   writeCastPeople,
 } from "@/tests/_support/cast";
-
-// The comment the test project's database carries (COMMENT ON DATABASE), as
-// scripts/check-test-database.ts checks it. Production's has none.
-const TEST_DATABASE_NOTE = "community-game-library-test";
 
 type SeedArgs = {
   commit: boolean;
@@ -77,19 +77,12 @@ export function parseArgs(argv: readonly string[]): SeedArgs | string {
   return args;
 }
 
-async function isTestDatabase(): Promise<boolean> {
-  const { rows } = await db.execute<{ note: string | null }>(sql`
-    select shobj_description(oid, 'pg_database') as note
-    from pg_database where datname = current_database()`);
-  return rows[0]?.note === TEST_DATABASE_NOTE;
-}
-
 // The seed's steps: the check, then the counts, and the writes with --commit.
 export async function seed(
   args: SeedArgs,
   terminal: Pick<Terminal, "print" | "refuse">,
 ): Promise<number> {
-  if (!(await isTestDatabase())) {
+  if (!isTestDatabase(await databaseNote(db))) {
     return terminal.refuse(
       `DATABASE_URL isn't the ${TEST_DATABASE_NOTE} Neon project's database, so the seed stops. Nothing was written.`,
     );

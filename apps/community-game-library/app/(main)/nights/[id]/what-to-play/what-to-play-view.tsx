@@ -14,6 +14,7 @@ import type { DI_RETURN_TYPES } from "@/di/types";
 import { listed } from "@/src/entities/listed";
 import { coverColorOf } from "@/src/entities/piece";
 import {
+  offersComplexity,
   type PlayComplexity,
   type PlayTime,
   whatToPlay,
@@ -106,10 +107,9 @@ export function WhatToPlayView({
   const [from, setFrom] = useState<"table" | "all">(
     choices.onTable.length > 0 ? "table" : "all",
   );
-  const { fits, leftOut } = whatToPlay(
-    from === "table" ? choices.onTable : choices.allGames,
-    { people, minutes, complexity },
-  );
+  const games = from === "table" ? choices.onTable : choices.allGames;
+  const { fits, leftOut } = whatToPlay(games, { people, minutes, complexity });
+  const offerComplexity = offersComplexity(games, complexity);
   const timeWords =
     TIMES.find((one) => one.value === `${minutes}`)?.words ?? "";
 
@@ -163,12 +163,14 @@ export function WhatToPlayView({
               if (time) setMinutes(time.minutes);
             }}
           />
-          <ChoiceButtons
-            label="Complexity"
-            options={COMPLEXITIES}
-            value={complexity}
-            onChange={setComplexity}
-          />
+          {offerComplexity && (
+            <ChoiceButtons
+              label="Complexity"
+              options={COMPLEXITIES}
+              value={complexity}
+              onChange={setComplexity}
+            />
+          )}
           <ChoiceButtons
             label="From"
             options={[
@@ -187,7 +189,8 @@ export function WhatToPlayView({
       {fits.length === 0 ? (
         <p className="rounded-lg border-2 border-dashed border-foreground p-3.5 text-13">
           Nothing fits {people} {people === 1 ? "person" : "people"} in{" "}
-          {timeWords}. Try more time or another complexity.
+          {timeWords}. Try more time
+          {offerComplexity ? " or another complexity" : ""}.
         </p>
       ) : (
         <Group label="Best fits first" overList>

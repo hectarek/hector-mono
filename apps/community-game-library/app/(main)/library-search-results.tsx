@@ -92,6 +92,10 @@ export function LibrarySearchResults({
       >
         Can’t find it? Suggest a game
       </Button>
+      {/* The catalog's sources' credit, Y1's foot of search results (U24). */}
+      <p className="text-xs text-muted-foreground">
+        Game facts from Wikidata and Wikipedia.
+      </p>
     </>
   );
 }

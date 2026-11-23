@@ -118,12 +118,17 @@ describe("the Library's search", () => {
         .closest("a")
         ?.getAttribute("href"),
     ).toBe("/my-library/suggest?title=harbor");
+    // The catalog's sources' credit, at the foot (Y1, U24).
+    expect(
+      view.getByText("Game facts from Wikidata and Wikipedia."),
+    ).toBeTruthy();
   });
 
   it("says when nothing is called what you typed", async () => {
     const view = await renderLibrary("fog lantern");
 
     expect(view.getByText("Nothing called “fog lantern” yet.")).toBeTruthy();
+    expect(view.queryByText(/Game facts from/) === null).toBe(true);
     expect(
       view
         .getByRole("button", { name: "Suggest a game" })
