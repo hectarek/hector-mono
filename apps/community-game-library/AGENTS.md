@@ -257,11 +257,13 @@ di/                          # container.ts, types.ts, modules: access (with rem
                              # logger, notices (U11's use cases), profile (profiles and settings), transaction,
                              # nights (game nights, U17's read; U18's use cases) and daily (the daily
                              # run, U17)
-db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
+db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables);
+                             # catalog.jsonl, the catalog's games (H6, see The catalog's dataset)
 lib/                         # auth/server.ts, logger.ts
 scripts/                     # check-test-database.ts, require-migrations.ts, migrate-production.ts,
                              # seed.ts (U4); lib/ (migrations.ts, terminal.ts); build-service-worker.ts
-                             # (U23), which builds public/sw.js before next build
+                             # (U23), which builds public/sw.js before next build; shape-catalog.ts, which
+                             # makes db/catalog.jsonl, with its rules in lib/catalog.ts (H6)
 tests/                       # bun:test, mirroring the tree; db/schema.test.ts; _support/ (see Testing)
 proxy.ts
 ```
@@ -341,6 +343,16 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - **An expansion in a copy's box** has the copy's game as its `base_game_id`. No key checks it.
 - **`updated_at`** moves on every update drizzle writes (`$onUpdate` in the schema). Raw SQL that updates a row sets it itself.
 - **The first migration starts with `create extension if not exists pg_trgm`**, added by hand: drizzle-kit writes no extensions. A migration is never edited once it's applied anywhere, since its hash is recorded there and the migration scripts would then take that database for another app's.
+
+## The catalog's dataset
+
+`db/catalog.jsonl` holds the catalog's games: Wikidata's published board, card and party games, with the facts Wikidata lacks taken from English Wikipedia's infoboxes. [docs/catalog-data.md](docs/catalog-data.md)'s plan says which games, where each value comes from and why (H6, decided with Hector on 2026-11-23), and U24 loads the file.
+
+- **No BoardGameGeek data, ever** (D7): its terms bar using it "as data for an AI". The script reads no BoardGameGeek property from Wikidata (P2339), and the tests use fictional records.
+- **To make it again**, run `bun scripts/shape-catalog.ts` from this folder. It rewrites the file in about a minute and a half; read the diff before committing. It reaches `query.wikidata.org` and `en.wikipedia.org`, so in Claude Code's sandbox it needs both hosts allowed. It sends one request at a time, a second apart, with the User-Agent Wikimedia's policy asks for (`USER_AGENT`, the public repo's address, Hector's choice). A change to a rule goes in `scripts/lib/catalog.ts` with a test.
+- **Ask the query service small questions.** The script lists the candidates first, then reads their details by `VALUES` in batches of 500, and asks again only on 429, 502, 503 or 504. One query doing both timed out, and a 500 means the query can't run ([the lesson](../../docs/solutions/integration-issues/wikidata-query-service-times-out-on-a-subclass-walk-joined-to-details.md)).
+- **Infobox values sit in templates.** `{{ubl|1–5 (standard)|1–7 (with expansion)}}` is Wingspan's players. `plainText` turns a list template into its lines and a wrapper into its text, and drops the rest; the first line, up to its bracket, is the base game's value.
+- A game's `id` is a UUID v5 of its Wikidata address, so it's the same every run, and U24's load inserts only ids it doesn't have.
 
 ## Backend Rules
 

@@ -1,8 +1,93 @@
 # Community Game Library: where the game data comes from
 
-Updated 2026-11-20
+Updated 2026-11-23
 
-**Decided 2026-11-20 (Hector):** we source and shape the catalog ourselves, with his help, as an effort beside the build, and U24 loads it ([build-plan.md](build-plan.md) D7 and H6, revised that day). The findings below stay as background. One of them binds the new plan: BGG's terms bar using its data "as data for an AI", so agents don't read or shape BGG's data, the list of every game included (the conditions, below).
+**The plan, decided with Hector on 2026-11-23** ([below](#the-plan)): the catalog is Wikidata's published board, card and party games, 2,141 of them that day. Where Wikidata lacks a fact, it comes from the game's English Wikipedia infobox. Nothing comes from BoardGameGeek (BGG). `scripts/shape-catalog.ts` makes the dataset, `db/catalog.jsonl`, and U24 loads it. This settles H6. It follows Hector's decision of 2026-11-20 that we source and shape the catalog ourselves ([build-plan.md](build-plan.md) D7). The survey of 2026-11-12 stays below as background. One of its findings binds the plan: BGG's terms bar using its data "as data for an AI", so agents don't read or shape BGG's data, its list of every game included.
+
+## The plan
+
+Hector picked each part on 2026-11-23 from options with their trade-offs, and approved a first set of 89 of the games the same day. The rules under each part are Claude's, checked against that day's data. They are in `scripts/lib/catalog.ts`, tested on fictional records in `tests/scripts/lib/catalog.test.ts`.
+
+### Which games
+
+Wikidata's published games. An item counts as a game when it's a board game or one of its subclasses, or it's directly one of these: a card game, a dedicated deck card game, a tabletop game, a dice game, a party game, a tile-based game, a trick-taking game or a board game expansion. It counts as published when it has a publisher, a designer or a release date. That condition leaves out about 3,000 traditional games and bare names, such as chess variants. An item is also left out when it has no English name, or when it's also a video game, software, a role-playing game, a gamebook or an archaeological artefact.
+
+On 2026-11-23, Wikidata had 2,440 published items. 2,141 made the catalog: 2,080 base games and 61 expansions. Of the rest, 259 had no English name, 35 weren't tabletop games and 5 expanded a game the catalog doesn't hold.
+
+Hector chose Wikidata's games alone over also adding his circle's games by hand. A test list of 66 well-known games, mass-market and hobby, found 63 in the catalog. Telestrations, Skull and Apples to Apples aren't there, since Wikidata gives them no publisher, designer or date. A game the catalog lacks comes in as a suggestion (R4).
+
+The script never reads Wikidata's BoardGameGeek ID property (P2339), either as a value or to choose games (D7).
+
+### Where each value comes from
+
+Wikidata (CC0) comes first wherever it has exactly one value. Where Wikidata has no value, or gives more than one, the game's English Wikipedia infobox (`{{Infobox game}}`) fills it. Hector chose that over Wikidata alone. Publishers are the exception, since Wikidata lists every edition's publisher and marks none as the original.
+
+| Column                                                                | From                                                            | Rule                                                                                                                                                                              | Filled, all 2,141                         | Filled, the 63 well-known |
+| --------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------- |
+| `type`, `base_game_id`                                                | Wikidata's "expansion of" (P8646)                               | An item that expands exactly one base game in the catalog is that game's expansion                                                                                                | 61 expansions                             |                           |
+| `title`                                                               | Wikidata's English label                                        | Without one, the English article's title, less its "(board game)". A label all in lower case ("mahjong") gets a capital                                                           | All                                       | All                       |
+| `year`                                                                | Wikidata's publication date (P577)                              | The earliest                                                                                                                                                                      | 1,704 (80%)                               | 57                        |
+| `publishers`                                                          | The infobox, else Wikidata (P123)                               | The infobox's list in its order, which names the original first. Without one, Wikidata's: the game's own country first, then the best known. At most three, in the Latin alphabet | 1,395 (65%), 427 from Wikipedia           | 59                        |
+| `designers`                                                           | Wikidata (P287, P170, P178, P50: people only), else the infobox |                                                                                                                                                                                   | 1,002 (47%), 207 from Wikipedia           | 60                        |
+| `min_players`, `max_players`                                          | Wikidata (P1872, P1873), else the infobox's `players`           | The infobox's first range, which is the base game's ("1–5 (standard)")                                                                                                            | 1,596 with both (75%), 103 from Wikipedia | 63                        |
+| `min_minutes`, `max_minutes`                                          | Wikidata (P2047), else the infobox's `playing_time`             | One value is both bounds, two are the range, and hours become minutes                                                                                                             | 710 (33%), 289 from Wikipedia             | 60                        |
+| `min_age`                                                             | Wikidata (P2899), else the infobox's `ages`                     |                                                                                                                                                                                   | 806 (38%), 183 from Wikipedia             | 49                        |
+| `categories`                                                          | Wikidata's classes (P31) and genres (P136)                      | Mapped to the catalog's own words (`CATEGORY_OF`). Wikidata's "card game" counts only as a class, since it also gives that genre to board games with cards (Catan, Wingspan)      | 965 (45%)                                 | 45                        |
+| `popularity`                                                          | Wikidata                                                        | How many Wikimedia sites have a page on the game (its sitelinks)                                                                                                                  | All                                       | All                       |
+| `best_players`, `complexity`, `description`, `image_url`, `video_url` | None                                                            | Empty                                                                                                                                                                             | None                                      | None                      |
+| `search_title`                                                        | U24's load                                                      | `toSearchTitle(title)`, as for every title                                                                                                                                        |                                           |                           |
+
+A value outside these bounds is taken for a mistake and left out: players from 1 to 100, play time up to a day, minimum age up to 21. Only plain facts come from the infoboxes: no Wikipedia text is kept.
+
+### What Hector fills in by hand
+
+Nothing before the load (Hector, 2026-11-23). Best player counts and complexity have no open source, so they stay empty:
+
+- The library's complexity filter doesn't show, since a filter shows only when some game in view has a value (R11).
+- What should we play? ranks games by "plays at" alone. If a host picks a complexity, it leaves out every game without one and says why (rule 14).
+
+The admin can fill these, and a description, a photo or a video, on any game in its record (G4).
+
+### Covers
+
+Every game shows the drawn token (Y1). Wikimedia Commons doesn't host box covers. The images Wikidata links are mostly photos of play, and each needs its own credit. Publishers' box art isn't free to use. The admin can add a photo of a box in a game's record (G4), as a suggestion's photo does now.
+
+### The dataset
+
+`db/catalog.jsonl` sits in the public repo, one game to a line. Each line uses the games model's field names and leaves out the values the game lacks. Base games come first, then the best known. Each line also keeps two fields that aren't columns: `wikidataId`, and `wikipediaFields`, which names the values taken from the infobox. A game's `id` is a UUID v5 of its Wikidata address, so it's the same on every run. JSON Lines means a run's diff shows only the games that changed. The file was 507 KB on 2026-11-23.
+
+To make it again:
+
+```bash
+cd apps/community-game-library && bun scripts/shape-catalog.ts
+```
+
+The run takes about a minute and a half. It sends about 45 requests, one at a time and a second apart. Each carries the User-Agent that Wikimedia's policy asks for: `CommunityGameLibraryCatalogBot/1.0 (https://github.com/hectarek/hector-mono)`. Hector chose the repo's address over an email (2026-11-23). A new run picks up new games and Wikidata's and Wikipedia's changes since.
+
+### How it loads (U24)
+
+`scripts/load-catalog.ts` reads `db/catalog.jsonl` and inserts each game whose `id` isn't in `games` yet:
+
+- base games before their expansions;
+- `search_title` written with `toSearchTitle`;
+- every value the line lacks written as null.
+
+It never updates a row already there, so the admin's corrections and the games added by hand stay. It runs dry by default and writes with `--commit`: on the test project first, then on production with Hector's OK at that moment. There's no migration. The file's ids make the load safe to run twice, so no column holds Wikidata's id (data-model.md rule 13).
+
+### Credits
+
+Wikidata's data is CC0 and the infobox values are facts, so neither source asks for credit. The app gives it once anyway, as "Game facts from Wikidata and Wikipedia": on About the catalog (Y1), which You links to, and at the foot of search results. A game's page carries none, since a game the admin added by hand looks the same there.
+
+### What it changes in the spec
+
+- D7 and H6 are settled as above.
+- R1 and R11: complexity and best counts stay empty until the admin fills them.
+- KTD10: search runs on about 2,100 games, not 100,000. U24 still times a search and checks the threshold against them.
+- data-model.md: the source is chosen without a column for its id (rule 13), and credits go on About the catalog and at the foot of search results.
+
+---
+
+Everything below is the survey of 2026-11-12, kept as background.
 
 What was found when the catalog's source was checked before the data model was written. These were findings only: how the catalog got filled wasn't decided until 2026-11-20. Hector's direction on 2026-11-12 is a simple data model first, holding only the values the spec and the drawn screens use. The proposed model is in [data-model.md](data-model.md). Every page named here was read on 2026-11-12, by one of two sessions. A line marked "our reading" is a judgment, not something the source states. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
 
@@ -119,27 +204,6 @@ The same lookup, for the 1,000 most-rated games: about 39% have an English Wikip
 | BGG's image links, from the API                                                         | Every BGG game                      | A link, or a copy     | Needs an approved application. A BGG developer reportedly asked apps in 2018 to serve copies rather than link BGG's host (secondhand), and the larger apps keep copies |
 | Wikimedia Commons, through Wikidata                                                     | 29% of the 1,000 most-rated games   | No                    | Free licenses with credit, but mostly photos of play. Wikipedia's own covers are non-free (8 of 10 checked)                                                            |
 | A member's photo of their box                                                           | What members add                    | Yes, about 50 KB each | Depends on members taking one                                                                                                                                          |
-
-## One possible direction, not decided
-
-Written before Hector's direction above, and kept as an option only. No sourcing plan is set. The catalog can't be designed as "BGG's fields, copied". One way it could work from day one on what is allowed today and get richer if BGG approves:
-
-1. **A game needs little.** A title and a player range are enough to list, search, lend and filter by players. Year, play time, age, complexity, best counts, categories, mechanics, designers, publishers, description, cover and expansions are all optional.
-2. **Each game records its source**: entered by hand, Wikidata, or BGG, with the outside id where there is one. That is what lets a hand-entered game be matched to its BGG record later (the merge in D11) and tells the app which fields it may edit.
-3. **Before BGG approves:** a member types a title, and the app offers matches from Wikidata to fill the year and player range. The cover is the drawn token, or the member's own photo.
-4. **Once BGG approves:** search runs on the names from BGG's CSV, kept on our side and refreshed weekly. A game's details are fetched the first time someone needs them and kept. BGG's fields are shown as they came, with the credit.
-
-## What it would change in the spec
-
-Proposed on the assumption of that direction. R1, R5 and R11 have since been settled by the data model ([data-model.md](data-model.md), 2026-11-12), which records no source; the rest stays open with the source.
-
-- **D7** (the catalog is our own copy of BGG's): names from the CSV plus details on demand, not a full copy filled before launch. The first release must work with no BGG access at all.
-- **R1** (what a game holds): only the title and the player range are required.
-- **R5 and the catalog-record screen (G4)**: the admin can't correct a BGG game's details, since the terms forbid modifying the data. Corrections stay for games entered by hand. On a BGG game the admin can still set the how-to-play video, which is ours.
-- **R11** (filters): complexity, category, mechanic and age only have data for games that came from BGG. Players, play time, owner and availability work for every game.
-- **A credit**: BGG's name and "Powered by BGG" logo wherever its data shows. The placement is drawn on the canvas (Y1).
-- **No AI on BGG's data**: the admin's AI helper stays dropped, test fixtures stay fictional, and an agent building the app doesn't read BGG's records.
-- **H1** (register with BGG) would have decided how rich the catalog is at launch. It isn't needed since the 2026-11-20 decision.
 
 ## Not checked
 
