@@ -140,7 +140,8 @@ function withCookies(headers: Headers, cookies: Map<string, string>): Headers {
 export const config = {
   matcher: [
     // Route handlers check their own access (the auth route lets sign-in through), and Neon's
-    // forms under /auth open signed out.
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|auth).*)",
+    // forms under /auth open signed out. So do the manifest, the icons, the service worker and
+    // the link previews (KTD19): a phone and a chat app fetch them without cookies.
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|auth|manifest.webmanifest|icon.svg|apple-icon.png|icons/|sw.js|previews/).*)",
   ],
 };

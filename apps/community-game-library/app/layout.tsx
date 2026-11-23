@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import { APP_TOASTER } from "@/app/_lib/notify";
 import "./globals.css";
+import { LINK_PREVIEWS, previewMetadata } from "@/app/_lib/link-previews";
 
 // Punchboard's three faces (docs/build-plan.md KTD12, the design system's building.md): IBM Plex
 // Sans for everything read, Stardos Stencil 700 for titles, labels, stamps and tabs (always
@@ -25,9 +26,13 @@ const plexMono = IBM_Plex_Mono({
   weight: "500",
 });
 
+// Every page's link preview is the app's own (Y2), but the friend and night links' (U23). From
+// the home screen it opens full screen, named Game Library on an iPhone too (R43).
 export const metadata: Metadata = {
   title: "Community Game Library",
-  description: "A private library for a circle of friends' board games.",
+  description: LINK_PREVIEWS.app.line,
+  appleWebApp: { capable: true, title: "Game Library" },
+  ...previewMetadata("app"),
 };
 
 // The browser's bar is kraft (the design system's Brand), and the page reaches under the

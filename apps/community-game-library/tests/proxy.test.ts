@@ -179,6 +179,13 @@ describe("proxy", () => {
       "/auth/sign-up",
       "/api/auth/get-session",
       "/_next/static/chunks/app.js",
+      // A phone and a chat app fetch these without cookies (KTD19, U23).
+      "/manifest.webmanifest",
+      "/icon.svg",
+      "/apple-icon.png",
+      "/icons/icon-192.png",
+      "/sw.js",
+      "/previews/friend.png",
     ]) {
       expect(guarded(path)).toBe(false);
     }

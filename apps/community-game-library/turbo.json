@@ -18,8 +18,10 @@
         "STORAGE_AWS_SECRET_ACCESS_KEY",
         "CRON_SECRET",
         "LOG_LEVEL",
-        "VERCEL_ENV"
-      ]
+        "VERCEL_ENV",
+        "VERCEL_GIT_COMMIT_SHA"
+      ],
+      "outputs": ["$TURBO_EXTENDS$", "public/sw.js"]
     }
   }
 }

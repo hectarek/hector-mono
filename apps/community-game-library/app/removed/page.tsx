@@ -1,5 +1,6 @@
 import { Button } from "@repo/ui/components/button";
 import { connection } from "next/server";
+import { ClearSavedCopies } from "@/app/_components/clear-saved-copies";
 import { gate } from "@/app/_lib/account";
 import { SIGN_OUT_HREF } from "@/app/_lib/auth-paths";
 
@@ -21,6 +22,7 @@ export default async function RemovedPage() {
       >
         Sign out
       </Button>
+      <ClearSavedCopies />
     </main>
   );
 }

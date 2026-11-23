@@ -2,6 +2,7 @@
   "$schema": "./node_modules/fallow/schema.json",
   "entry": [
     "apps/community-game-library/scripts/*.ts",
+    "apps/community-game-library/service-worker/worker.ts",
     "apps/hectors-recipes/scripts/check-test-database.ts",
     "apps/hectors-recipes/scripts/seed-from-obsidian.ts",
     "apps/hectors-recipes/service-worker/worker.ts",
