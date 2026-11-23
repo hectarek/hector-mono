@@ -57,6 +57,16 @@ export function startingTime(startsAt: Date, endsAt: Date | null): PlayTime {
   return PLAY_TIMES.filter((time) => time <= minutes).at(-1) ?? 60;
 }
 
+// Whether D8 offers its Complexity choice, as the library offers a filter (R11): while some game it
+// chooses from has a complexity, or while one is picked, so it can be cleared. The catalog's own
+// games have none until the admin fills them in (U24).
+export function offersComplexity(
+  games: readonly Pick<PlayGame, "complexity">[],
+  picked: PlayComplexity | null,
+): boolean {
+  return picked !== null || games.some((game) => game.complexity !== null);
+}
+
 // "60–90 min", or "90 min".
 export function minutesWords(game: PlayGame): string | null {
   const { minMinutes: low, maxMinutes: high } = game;

@@ -38,4 +38,31 @@ describe("S3FileStorageService", () => {
       "STORAGE_AWS_ENDPOINT_URL_S3",
     );
   });
+
+  // Production has Neon's own names; local development and the previews have STORAGE_ in front.
+  it("reads each setting with STORAGE_ in front, or else without it, as production has them", () => {
+    const names = {
+      AWS_ENDPOINT_URL_S3: CONFIG.endpoint,
+      AWS_REGION: CONFIG.region,
+      AWS_ACCESS_KEY_ID: CONFIG.accessKeyId,
+      AWS_SECRET_ACCESS_KEY: CONFIG.secretAccessKey,
+    };
+    Object.assign(process.env, names);
+    try {
+      expect(
+        new S3FileStorageService().publicUrl("catalog-images", "a.jpg"),
+      ).toBe(`${CONFIG.endpoint}/catalog-images/a.jpg`);
+      process.env.STORAGE_AWS_ENDPOINT_URL_S3 = "https://storage.example";
+      expect(
+        new S3FileStorageService().publicUrl("catalog-images", "a.jpg"),
+      ).toBe("https://storage.example/catalog-images/a.jpg");
+    } finally {
+      for (const name of [
+        ...Object.keys(names),
+        "STORAGE_AWS_ENDPOINT_URL_S3",
+      ]) {
+        delete process.env[name];
+      }
+    }
+  });
 });

@@ -4,13 +4,9 @@ import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import journal from "@/db/migrations/meta/_journal.json";
 import { MIGRATIONS_FOLDER } from "@/scripts/lib/migrations";
+import { isTestDatabase, urlRefusal } from "@/scripts/lib/target-database";
 import { type Terminal, typeKeys } from "@/scripts/lib/terminal";
-import {
-  confirmed,
-  isTestDatabase,
-  migrateTarget,
-  urlRefusal,
-} from "@/scripts/migrate-production";
+import { confirmed, migrateTarget } from "@/scripts/migrate-production";
 import { newPGlite } from "@/tests/_support/database";
 
 // Job-search's tests, on this app's journal.

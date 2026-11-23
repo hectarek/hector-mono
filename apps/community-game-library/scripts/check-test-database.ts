@@ -4,8 +4,7 @@
 // their dev server starts. The test database carries a comment naming it (COMMENT ON DATABASE);
 // production's has none.
 import { neon } from "@neondatabase/serverless";
-
-const TEST_DATABASE_NOTE = "community-game-library-test";
+import { TEST_DATABASE_NOTE } from "@/scripts/lib/target-database";
 
 // "ep-x-pooler.c-14.…" (database) and "ep-x.neonauth.c-14.…" (auth) both belong to "ep-x".
 function endpointOf(url: string): string {

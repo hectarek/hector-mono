@@ -14,6 +14,10 @@ const OPEN_SIGNED_OUT = [/^\/f\/[^/]+\/?$/, /^\/n\/[^/]+\/?$/];
 const SESSION_COOKIE = "__Secure-neon-auth.session_token";
 const SESSION_DATA_COOKIE = "__Secure-neon-auth.local.session_data";
 
+// What Neon Auth adds to the address when it sends someone back from Google: a one-time verifier
+// that its own middleware swaps for the session cookies (the SDK's NEON_AUTH_SESSION_VERIFIER_PARAM_NAME).
+const OAUTH_VERIFIER_PARAM = "neon_auth_session_verifier";
+
 /**
  * Optimistic auth check — reads the cookie, and only calls the auth server when the
  * session's cached copy has expired (see refreshSessionCache). Recipes' proxy.
@@ -34,6 +38,11 @@ const SESSION_DATA_COOKIE = "__Secure-neon-auth.local.session_data";
 export default async function proxy(
   request: NextRequest,
 ): Promise<NextResponse> {
+  // Back from Google, with no session cookie yet: the check below would send them to the welcome
+  // screen with the verifier unused, and a Google sign-in would never finish (2026-11-23).
+  if (request.nextUrl.searchParams.has(OAUTH_VERIFIER_PARAM)) {
+    return finishOAuthSignIn(request);
+  }
   const signedIn = request.cookies.has(SESSION_COOKIE);
   if (request.nextUrl.pathname === WELCOME_PATH) {
     return signedIn ? pastWelcome(request) : NextResponse.next();
@@ -47,6 +56,30 @@ export default async function proxy(
     return refreshSessionCache(request);
   }
   return NextResponse.next();
+}
+
+// Swaps the verifier for the session cookies as Neon's own middleware does (the SDK's
+// exchangeOAuthToken: get-session with the verifier and the challenge cookie), through our auth
+// route, which passes the address's query on to Neon. Then on to the same page without it. If the
+// swap fails, that page finds no session and sends them to the welcome screen.
+async function finishOAuthSignIn(request: NextRequest): Promise<NextResponse> {
+  const page = request.nextUrl.clone();
+  page.searchParams.delete(OAUTH_VERIFIER_PARAM);
+  const exchange = new URL("/api/auth/get-session", request.url);
+  exchange.search = request.nextUrl.search;
+  let setCookies: string[] = [];
+  try {
+    const response = await fetch(exchange, {
+      headers: { cookie: request.headers.get("cookie") ?? "" },
+      cache: "no-store",
+    });
+    if (response.ok) setCookies = response.headers.getSetCookie();
+  } catch {
+    // Can't reach auth: on to the page, which finds no session.
+  }
+  const onward = NextResponse.redirect(page);
+  for (const cookie of setCookies) onward.headers.append("set-cookie", cookie);
+  return onward;
 }
 
 function toWelcome(request: NextRequest): NextResponse {

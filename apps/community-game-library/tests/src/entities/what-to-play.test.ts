@@ -1,9 +1,28 @@
 import { describe, expect, it } from "bun:test";
 import {
+  offersComplexity,
   type PlayGame,
   startingTime,
   whatToPlay,
 } from "@/src/entities/what-to-play";
+
+describe("offersComplexity (R11, U24)", () => {
+  it("offers the choice while a game has a complexity, or while one is picked", () => {
+    expect(
+      offersComplexity([{ complexity: null }, { complexity: "light" }], null),
+    ).toBe(true);
+    expect(offersComplexity([{ complexity: "heavy" }], "new-players")).toBe(
+      true,
+    );
+  });
+
+  it("leaves it out when no game has one, as with the catalog's own games, until one is picked", () => {
+    expect(offersComplexity([{ complexity: null }], null)).toBe(false);
+    expect(offersComplexity([], null)).toBe(false);
+    // Picked on the table, then From moved to games with none: it stays, to be cleared.
+    expect(offersComplexity([{ complexity: null }], "medium")).toBe(true);
+  });
+});
 
 const game = (title: string, facts: Partial<PlayGame> = {}): PlayGame => ({
   id: title,

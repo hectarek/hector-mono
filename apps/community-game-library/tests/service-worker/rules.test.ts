@@ -29,6 +29,7 @@ describe("routeFor", () => {
       "/friends/abc",
       "/inbox",
       "/you",
+      "/you/catalog",
     ]) {
       expect(routeFor(pageLoad(path), ORIGIN)).toBe("page");
     }

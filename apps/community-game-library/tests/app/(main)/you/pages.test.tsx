@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import { render } from "@testing-library/react";
+import { render, within } from "@testing-library/react";
+import AboutCatalogPage from "@/app/(main)/you/catalog/page";
 import EditProfilePage from "@/app/(main)/you/edit/page";
 import YouPage from "@/app/(main)/you/page";
 import { updateProfile } from "@/app/actions/profile";
@@ -37,12 +38,24 @@ describe("E5, You", () => {
     ).toBe("/start/home-screen?from=you");
   });
 
-  it("has only the rows whose pages exist so far: Notices I get (U11) and Delete my account (U22), and Admin only for the admin", async () => {
+  it("has the rows whose pages exist: The app's in Y1's order, Delete my account (U22), and Admin only for the admin", async () => {
     const view = render(await YouPage());
     expect(view.queryByRole("link", { name: /Admin/ }) === null).toBe(true);
+    const theApp = view.getByRole("heading", { name: "The app" })
+      .parentElement as HTMLElement;
     expect(
-      view.getByRole("link", { name: "Notices I get" }).getAttribute("href"),
-    ).toBe("/you/notices");
+      within(theApp)
+        .getAllByRole("link")
+        .map((link) => [link.textContent, link.getAttribute("href")]),
+    ).toEqual([
+      ["Notices I get", "/you/notices"],
+      ["Put the app on my home screen", "/start/home-screen?from=you"],
+      ["About the catalog", "/you/catalog"],
+    ]);
+    // The credit is on About the catalog now, not here (U24).
+    expect(view.queryByText(/BoardGameGeek|Game facts from/) === null).toBe(
+      true,
+    );
     expect(
       view
         .getByRole("link", { name: "Delete my account" })
@@ -82,6 +95,36 @@ describe("E5, You", () => {
     signInAsNewUser();
     const err = await YouPage().catch((caught: unknown) => caught);
     expect((err as Redirected).url).toBe("/start/profile");
+  });
+});
+
+describe("About the catalog", () => {
+  it("says where the games come from, credits the sources and offers Suggest a game", () => {
+    const view = render(AboutCatalogPage());
+
+    expect(view.getByRole("heading", { level: 1 }).textContent).toBe(
+      "About the catalog",
+    );
+    expect(
+      view.getByRole("link", { name: "Back to You" }).getAttribute("href"),
+    ).toBe("/you");
+    expect(
+      view.getByText(/published board, card and party games on Wikidata/),
+    ).toBeTruthy();
+    expect(view.getByText(/^Game facts from/).textContent).toBe(
+      "Game facts from Wikidata and Wikipedia.",
+    );
+    expect(
+      ["Wikidata", "Wikipedia"].map((name) =>
+        view.getByRole("link", { name }).getAttribute("href"),
+      ),
+    ).toEqual(["https://www.wikidata.org", "https://en.wikipedia.org"]);
+    expect(
+      view
+        .getByRole("button", { name: "Can’t find a game? Suggest one" })
+        .closest("a")
+        ?.getAttribute("href"),
+    ).toBe("/my-library/suggest");
   });
 });
 

@@ -24,6 +24,7 @@ const SAVED_PAGES = [
   /^\/friends\/(?!link$)[^/]+$/,
   /^\/inbox$/,
   /^\/you$/,
+  /^\/you\/catalog$/,
 ];
 
 // Arriving here means leaving the signed-in app, so what was saved goes: the welcome page,
