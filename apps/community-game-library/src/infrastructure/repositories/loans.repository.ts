@@ -147,6 +147,24 @@ export class LoansRepository
     }
   }
 
+  async listInStatuses(
+    statuses: readonly LoanStatus[],
+    tx?: ITransaction,
+  ): Promise<Loan[]> {
+    if (statuses.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(loans)
+        .where(inArray(loans.status, [...statuses]))
+        .orderBy(asc(loans.createdAt), asc(loans.id));
+    } catch (err) {
+      this.handleError(err, "listInStatuses");
+    }
+  }
+
   async listEndedForBorrower(
     userId: string,
     tx?: ITransaction,

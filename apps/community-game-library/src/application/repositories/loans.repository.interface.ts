@@ -50,6 +50,11 @@ export interface ILoansRepository {
   // Loans by id, whoever's they are: a notice's loan, or a pass-along's previous one. The caller
   // has already checked the member may see them.
   listByIds(ids: readonly string[], tx?: ITransaction): Promise<Loan[]>;
+  // Every loan in these statuses, whoever's: the daily run's loans out and being returned (KTD8).
+  listInStatuses(
+    statuses: readonly LoanStatus[],
+    tx?: ITransaction,
+  ): Promise<Loan[]>;
   // A member's own open loans as the borrower, oldest first.
   listOpenForBorrower(userId: string, tx?: ITransaction): Promise<Loan[]>;
   // A move that changes only the status, such as a withdrawal or a cancellation, written after

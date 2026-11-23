@@ -7,6 +7,13 @@ import type { NoticeType } from "@/src/entities/notice-types";
 // isn't optional. U11 adds the inbox's reads.
 export interface INoticesRepository {
   add(notice: NewNotice, tx: ITransaction): Promise<Notice>;
+  // A reminder from the daily run (KTD8), for the day it's for: the unique index on the person,
+  // the type, the loan or night and the day lets it in once, so a second run the same day writes
+  // nothing. Answers whether it was written.
+  addReminder(
+    notice: NewNotice & { remindedOn: string },
+    tx: ITransaction,
+  ): Promise<boolean>;
   // A member's latest notices, newest first (F1), at most INBOX_LIMIT.
   listForUser(userId: string, tx?: ITransaction): Promise<Notice[]>;
   // How many of these types the member hasn't seen: the bell's count.

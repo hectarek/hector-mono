@@ -4,6 +4,8 @@
 // use cases here.
 import { beforeEach, describe } from "bun:test";
 import {
+  gameNightAttendees as gameNightAttendeesTable,
+  gameNights as gameNightsTable,
   games as gamesTable,
   notices as noticesTable,
   userGames as userGamesTable,
@@ -11,6 +13,7 @@ import {
 import type { IFriendLinksRepository } from "@/src/application/repositories/friend-links.repository.interface";
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { IGameSuggestionsRepository } from "@/src/application/repositories/game-suggestions.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
@@ -32,6 +35,7 @@ import { removeUserGameUseCase } from "@/src/application/use-cases/copies/remove
 import { setLendingUseCase } from "@/src/application/use-cases/copies/set-lending.use-case";
 import { setPassAlongForAllUseCase } from "@/src/application/use-cases/copies/set-pass-along-for-all.use-case";
 import { updateUserGameUseCase } from "@/src/application/use-cases/copies/update-user-game.use-case";
+import { runDailyUseCase } from "@/src/application/use-cases/daily/run-daily.use-case";
 import { answerFriendRequestUseCase } from "@/src/application/use-cases/friends/answer-friend-request.use-case";
 import { cancelFriendRequestUseCase } from "@/src/application/use-cases/friends/cancel-friend-request.use-case";
 import { checkFriendLinkUseCase } from "@/src/application/use-cases/friends/check-friend-link.use-case";
@@ -85,6 +89,8 @@ import { listSuggestionsUseCase } from "@/src/application/use-cases/suggestions/
 import { suggestGameUseCase } from "@/src/application/use-cases/suggestions/suggest-game.use-case";
 import { updateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
 import type { Game } from "@/src/entities/models/game.model";
+import type { GameNight } from "@/src/entities/models/game-night.model";
+import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
 import { FriendLinksRepository } from "@/src/infrastructure/repositories/friend-links.repository";
 import { MockFriendLinksRepository } from "@/src/infrastructure/repositories/friend-links.repository.mock";
@@ -92,6 +98,8 @@ import { FriendRequestsRepository } from "@/src/infrastructure/repositories/frie
 import { MockFriendRequestsRepository } from "@/src/infrastructure/repositories/friend-requests.repository.mock";
 import { FriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository";
 import { MockFriendshipsRepository } from "@/src/infrastructure/repositories/friendships.repository.mock";
+import { GameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository";
+import { MockGameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository.mock";
 import { GameSuggestionsRepository } from "@/src/infrastructure/repositories/game-suggestions.repository";
 import { MockGameSuggestionsRepository } from "@/src/infrastructure/repositories/game-suggestions.repository.mock";
 import { GamesRepository } from "@/src/infrastructure/repositories/games.repository";
@@ -124,6 +132,7 @@ type Repositories = {
   friendLinks: IFriendLinksRepository;
   friendRequests: IFriendRequestsRepository;
   friendships: IFriendshipsRepository;
+  gameNights: IGameNightsRepository;
   gameSuggestions: IGameSuggestionsRepository;
   games: IGamesRepository;
   loans: ILoansRepository;
@@ -144,6 +153,7 @@ function mockRepositories(): Repositories {
     friendLinks: new MockFriendLinksRepository(),
     friendRequests: new MockFriendRequestsRepository(notices),
     friendships,
+    gameNights: new MockGameNightsRepository(),
     gameSuggestions: new MockGameSuggestionsRepository(),
     games: new MockGamesRepository(),
     loans: new MockLoansRepository(),
@@ -163,6 +173,7 @@ export function postgresRepositories(): Repositories {
     friendLinks: new FriendLinksRepository(log),
     friendRequests: new FriendRequestsRepository(log),
     friendships: new FriendshipsRepository(log),
+    gameNights: new GameNightsRepository(log),
     gameSuggestions: new GameSuggestionsRepository(log),
     games: new GamesRepository(log),
     loans: new LoansRepository(log),
@@ -213,6 +224,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     friendLinks,
     friendRequests,
     friendships,
+    gameNights,
     gameSuggestions,
     games,
     loans,
@@ -433,6 +445,61 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       friendships,
       userProfiles,
     ),
+
+    // The daily run (U17), and a night for it to find, with who's on its list: in the mock's
+    // rows or the tables, since nights' own writes come with Batch 5.
+    runDaily: runDailyUseCase(
+      loans,
+      userGames,
+      notices,
+      gameNights,
+      transactions,
+      log,
+    ),
+    addNight: async (night: {
+      id: string;
+      createdBy: string;
+      startsAt: Date;
+      cancelledAt?: Date;
+      list: { userId: string; status: GameNightAttendee["status"] }[];
+    }) => {
+      const at = new Date("2026-11-01T12:00:00-05:00");
+      const row: GameNight = {
+        id: night.id,
+        createdBy: night.createdBy,
+        title: "Game night",
+        startsAt: night.startsAt,
+        endsAt: null,
+        place: "Sam’s",
+        address: null,
+        hostNote: null,
+        capacity: 8,
+        audience: "friends",
+        attendeesCanInvite: false,
+        guestsAllowed: false,
+        linkToken: null,
+        cancelledAt: night.cancelledAt ?? null,
+        createdAt: at,
+        updatedAt: at,
+      };
+      const list: GameNightAttendee[] = night.list.map((one) => ({
+        gameNightId: night.id,
+        userId: one.userId,
+        status: one.status,
+        guestCount: 0,
+        invitedBy: null,
+        waitlistedAt: null,
+        createdAt: at,
+        updatedAt: at,
+      }));
+      if (gameNights instanceof MockGameNightsRepository) {
+        gameNights.nights.push(row);
+        gameNights.attendees.push(...list);
+      } else {
+        await testDb.insert(gameNightsTable).values(row);
+        await testDb.insert(gameNightAttendeesTable).values(list);
+      }
+    },
 
     // Lines and passing it along (U15)
     passAlong: passAlongUseCase(userGames, loans, notices, transactions, log),

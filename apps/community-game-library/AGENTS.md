@@ -22,11 +22,12 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U16):
+The spec's code map, as far as it's built (U1 to U17):
 
 ```
 app/
   (api)/api/auth/[...path]/  # Neon Auth's endpoints, passed through; logged by status, path and class
+  (api)/api/cron/daily/      # the daily run (KTD8, U17): POST with CRON_SECRET as a bearer token
   (auth)/welcome/            # where signed-out visitors start: A1, or A9 inside a chat app's browser
                              # (page.tsx, welcome-screen.tsx)
   (auth)/auth/[path]/        # Neon's forms: make an account (A2), sign in (A8); layout.tsx loads the kit
@@ -111,6 +112,8 @@ src/
                              # U14's MORE_TIME_DAYS and moreTimeFrom; U16's ENDED_STATUSES and daysLate
     account-state.ts         # AccountState: removed, needs-profile, or ready (KTD3)
     in-app-browser.ts        # IN_APP_BROWSERS and inAppBrowserOf: A9's list, each pattern with its source
+    reminders.ts             # which reminders the daily run writes on a day, and which returns it closes
+                             # (loanReminders, returnClosesToday; KTD8, U17)
     notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
                              # DEFAULT_NOTICES_OFF
     piece.ts                 # PIECE_SHAPES, PIECE_COLORS, PEOPLE_ONLY_COLORS (R51); CoverColor and
@@ -143,7 +146,8 @@ src/
                              # setStatus and user-games' lock, the first loan write; U11: notices'
                              # listForUser, countUnread and markRead, loans' listByIds and
                              # listOpenForBorrower; U12: loans' getById, create and update; U16: loans'
-                             # listEndedForBorrower and listEndedForCopies
+                             # listEndedForBorrower and listEndedForCopies; U17: loans' listInStatuses,
+                             # notices' addReminder, and game-nights' listGoingToNightsStarting
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/catalog/       # get-game, search-games (U6)
@@ -161,6 +165,7 @@ src/
                              # confirm-pass-along, take-back-pass-along, and the-line.ts (firstInLine,
                              # tellWhoseTurn, BACK_IN_LINE), which the moves share; U16: record-loan,
                              # get-record-loan-choices, list-past-loans
+    use-cases/daily/         # run-daily (KTD8, U17)
     use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
                              # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
@@ -174,6 +179,7 @@ src/
     controllers/catalog/     # get-game, search-games
     controllers/friends/     # one per use case of friends/, but require-friend (U10)
     controllers/copies/      # one per use case of copies/, but require-own-copy
+    controllers/daily/       # run-daily (U17)
     controllers/loans/       # one per use case of loans/ (U12)
     controllers/notices/     # one per use case of notices/ (U11)
     controllers/suggestions/ # one per use case of suggestions/; form-fields.ts, the forms' field rules
@@ -187,7 +193,8 @@ di/                          # container.ts, types.ts, modules: access (with rem
                              # file-storage, suggestions (U9),
                              # friends (friendships, U4; requests, links and their use cases, U10), loans
                              # (U12's use cases),
-                             # logger, notices (U11's use cases), profile (profiles and settings), transaction
+                             # logger, notices (U11's use cases), profile (profiles and settings), transaction,
+                             # nights (game nights, U17's read) and daily (the daily run, U17)
 db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
 lib/                         # auth/server.ts, logger.ts
 scripts/                     # check-test-database.ts, require-migrations.ts, migrate-production.ts,
@@ -236,6 +243,7 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **U14's patterns.** More time and a new due date count from the due date, or from today once it's overdue (`moreTimeFrom`, C14's "It's overdue, so these count from today."), and take a date after that; C6 and C14 share `DateChoice`. A request for more time puts its loan under Needs you, as C4 draws Gull & Anchor, rather than under You lent. A call-back makes the loan due today if it was due later, closes a waiting request, and ends a pass-along: the next friend's yes goes back to a request in line, with no `previousLoanId` (`PASS_ALONG_FOLLOW_ONS`). Its message offers Text Jo too through `shareOrCopy` with `callBackMessage`, since a notice is seen only when the app is opened (R52). The owner's stamp reads Called back above Overdue (C18). The dates line names the period only while the due date is still the one it gives, so more time, a new date or a call-back leave just the dates. C7 doesn't draw where C14 opens from, so Change the due date is a quiet link under It's back with me; C15's title is screens.md's ("Call Gull & Anchor back?") where the board says "Call it back?".
 - **U15's patterns.** A line is a copy's open requests, oldest first (`lineOf`); joining is `request-loan` with `join`, which takes a copy that's out, promised or asked for, while Ask to borrow on a copy lent meanwhile is still Changed underneath, and C1's next step joins with the same note. Leaving is `withdraw-request`, and the owner's Remove from line is `answer-request`'s no, with the note on `request-declined`, so there's no `remove-from-line` use case. `the-line.ts` holds what the moves share: `firstInLine`, read before a move, then `tellWhoseTurn`, which tells whoever is first after it and wasn't before (`turn-in-line`), unless they made the move or it told them already (data-model.md's "the friend who's now first in a line"). So a withdrawal, a yes or a no, a pass-along, I still have it and a call-back each tell the next friend, and someone already first when the copy comes home isn't told again: the owner's answer tells them. A pass-along needs the copy's `pass_along`, someone in line and no call-back; it closes a waiting request for more time, and the next friend's yes carries the giver's period. Taken back or called back, that yes is a request again in its old place (`BACK_IN_LINE`), its period cleared, so the owner's next yes sets its own; a yes now clears whichever of the period or the date it didn't set. `get-loan`'s `handoff` is the other borrower, with their phone while it's open, friends or not (R48). C11 is its own page, `loans/[id]/pass-along/`, since the board draws a back link to the loan; the next friend's page reuses C3's `PickUpForm` with `handedOn`. A link drawn as a button is `Button` with `nativeButton={false}` and `render={<Link />}`, which Base UI gives the button role, so tests find it as a button. C4's In line rows open the game's page, as the board's do, where Leave the line is. The boards draw "she" and "he": the words use the name, or "they".
 - **U16's patterns.** Record a loan (C9) takes a copy of the owner's that's lent and home, a friend, a day up to today and a period or a date; the loan is out at once, and the friend is told and doesn't confirm. A friend who'd asked for that copy has their request become the loan, since a borrower has one open loan per copy (`loans_one_open_per_borrower_idx`), and whoever was behind them is told it's their turn. B7's history already lists pass-alongs, both borrowers' loans, since `listHistoryForCopy` reads every picked-up status, so there's no `get-copy-history`. Past loans (C12) are the loans that ended after a pick-up, given back or handed on (`ENDED_STATUSES`), newest return first, with `daysLate`; its two views are `?show=lent` and the default, and its toggle is two links drawn as buttons, which Base UI gives the button role, so `aria-pressed` is valid on them. A field inside a group whose red label already names it takes `labelHidden` (`DayField`, `PeoplePicker`), so the name stays for screen readers without showing twice.
+- **U17's patterns.** The daily run (KTD8) is job-search's: `vercel.json`'s `schedules` entry posts to `/api/cron/daily` at 7:00 America/New_York, and the route answers 401 unless the bearer token is `CRON_SECRET` (already in `turbo.json` and `.env.example` since U1). The proxy's matcher skips `/api`, so the route needed no line there. What to write is pure (`src/entities/reminders.ts`); the run writes each reminder with the day it's for through `addReminder`, an insert that does nothing on a conflict with `notices_one_reminder_a_day_idx`, and answers whether it wrote, so a second run the same day writes nothing. A return closes only while it's still being returned, read again under its copy's lock, and keeps the borrower's day. Nights are read 36 hours either side of the run and kept when `todayIn` of their start is today, so the run never works out an Eastern day's bounds in UTC. Each loan's and night's writes are a transaction of their own, and the run logs only its counts. Until Batch 5 writes nights, the test harness's `addNight` puts a night and its list in the mock's rows or the tables.
 
 ## Data Model
 

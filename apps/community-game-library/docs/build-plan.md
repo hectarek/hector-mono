@@ -580,7 +580,7 @@ Use cases by area, each a file named for what it does (`request-loan.use-case.ts
 - **notices:** list-inbox, mark-inbox-read, get-tab-counts; notice-groups.ts (shownTypes), the types a member's settings show, which the inbox and the bell share (U11, which named mark-read for the inbox it marks, revised 2026-11-22)
 - **account:** list-what-ends, delete-account
 - **admin:** require-admin, remove-account
-- **daily:** run-daily
+- **daily:** run-daily (U17, with reminders.ts in entities, and game-nights' first read for night-today)
 
 Two batches can be open at once (Batches and units), so the files both touch take one rule: in `di/container.ts`, `di/types.ts`, the code map and the app's `AGENTS.md`, add lines in alphabetical place within their list, and resolve a merge conflict there by keeping both sides.
 

@@ -1,6 +1,7 @@
 import type { IFriendLinksRepository } from "@/src/application/repositories/friend-links.repository.interface";
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { IGameSuggestionsRepository } from "@/src/application/repositories/game-suggestions.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
@@ -28,6 +29,7 @@ import type { IRemoveUserGameUseCase } from "@/src/application/use-cases/copies/
 import type { ISetLendingUseCase } from "@/src/application/use-cases/copies/set-lending.use-case";
 import type { ISetPassAlongForAllUseCase } from "@/src/application/use-cases/copies/set-pass-along-for-all.use-case";
 import type { IUpdateUserGameUseCase } from "@/src/application/use-cases/copies/update-user-game.use-case";
+import type { IRunDailyUseCase } from "@/src/application/use-cases/daily/run-daily.use-case";
 import type { IAnswerFriendRequestUseCase } from "@/src/application/use-cases/friends/answer-friend-request.use-case";
 import type { ICancelFriendRequestUseCase } from "@/src/application/use-cases/friends/cancel-friend-request.use-case";
 import type { ICheckFriendLinkUseCase } from "@/src/application/use-cases/friends/check-friend-link.use-case";
@@ -92,6 +94,7 @@ import type { IRemoveUserGameController } from "@/src/interface-adapters/control
 import type { ISetLendingController } from "@/src/interface-adapters/controllers/copies/set-lending.controller";
 import type { ISetPassAlongForAllController } from "@/src/interface-adapters/controllers/copies/set-pass-along-for-all.controller";
 import type { IUpdateUserGameController } from "@/src/interface-adapters/controllers/copies/update-user-game.controller";
+import type { IRunDailyController } from "@/src/interface-adapters/controllers/daily/run-daily.controller";
 import type { IAnswerFriendRequestController } from "@/src/interface-adapters/controllers/friends/answer-friend-request.controller";
 import type { ICancelFriendRequestController } from "@/src/interface-adapters/controllers/friends/cancel-friend-request.controller";
 import type { ICheckFriendLinkController } from "@/src/interface-adapters/controllers/friends/check-friend-link.controller";
@@ -185,6 +188,7 @@ export const DI_SYMBOLS = {
   IFriendLinksRepository: Symbol.for("IFriendLinksRepository"),
   IFriendRequestsRepository: Symbol.for("IFriendRequestsRepository"),
   IFriendshipsRepository: Symbol.for("IFriendshipsRepository"),
+  IGameNightsRepository: Symbol.for("IGameNightsRepository"),
   IGameSuggestionsRepository: Symbol.for("IGameSuggestionsRepository"),
   IGamesRepository: Symbol.for("IGamesRepository"),
   IGetAccountStateController: Symbol.for("IGetAccountStateController"),
@@ -264,6 +268,8 @@ export const DI_SYMBOLS = {
   IRequestLoanController: Symbol.for("IRequestLoanController"),
   IRequestLoanUseCase: Symbol.for("IRequestLoanUseCase"),
   IRequireAdmin: Symbol.for("IRequireAdmin"),
+  IRunDailyController: Symbol.for("IRunDailyController"),
+  IRunDailyUseCase: Symbol.for("IRunDailyUseCase"),
   ISearchGamesController: Symbol.for("ISearchGamesController"),
   ISearchGamesUseCase: Symbol.for("ISearchGamesUseCase"),
   ISendFriendRequestController: Symbol.for("ISendFriendRequestController"),
@@ -339,6 +345,7 @@ export interface DI_RETURN_TYPES {
   IFriendLinksRepository: IFriendLinksRepository;
   IFriendRequestsRepository: IFriendRequestsRepository;
   IFriendshipsRepository: IFriendshipsRepository;
+  IGameNightsRepository: IGameNightsRepository;
   IGameSuggestionsRepository: IGameSuggestionsRepository;
   IGamesRepository: IGamesRepository;
   IGetAccountStateController: IGetAccountStateController;
@@ -410,6 +417,8 @@ export interface DI_RETURN_TYPES {
   IRequestLoanController: IRequestLoanController;
   IRequestLoanUseCase: IRequestLoanUseCase;
   IRequireAdmin: IRequireAdmin;
+  IRunDailyController: IRunDailyController;
+  IRunDailyUseCase: IRunDailyUseCase;
   ISearchGamesController: ISearchGamesController;
   ISearchGamesUseCase: ISearchGamesUseCase;
   ISendFriendRequestController: ISendFriendRequestController;

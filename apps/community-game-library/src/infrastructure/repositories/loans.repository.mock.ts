@@ -128,6 +128,13 @@ export class MockLoansRepository implements ILoansRepository {
       .map((loan) => ({ ...loan }));
   }
 
+  async listInStatuses(statuses: readonly LoanStatus[]): Promise<Loan[]> {
+    return this.rows
+      .filter((loan) => statuses.includes(loan.status))
+      .sort(oldestFirst)
+      .map((loan) => ({ ...loan }));
+  }
+
   async listEndedForBorrower(userId: string): Promise<Loan[]> {
     return this.rows
       .filter(

@@ -34,6 +34,30 @@ export class MockNoticesRepository implements INoticesRepository {
     return { ...created };
   }
 
+  async addReminder(
+    notice: NewNotice & { remindedOn: string },
+  ): Promise<boolean> {
+    // As notices_one_reminder_a_day_idx.
+    const about = notice.loanId ?? notice.gameNightId ?? null;
+    if (
+      this.rows.some(
+        (row) =>
+          row.userId === notice.userId &&
+          row.type === notice.type &&
+          (row.loanId ?? row.gameNightId) === about &&
+          row.remindedOn === notice.remindedOn,
+      )
+    ) {
+      return false;
+    }
+    const created = await this.add(notice);
+    const row = this.rows.find((one) => one.id === created.id);
+    if (row) {
+      row.remindedOn = notice.remindedOn;
+    }
+    return true;
+  }
+
   async listForUser(userId: string): Promise<Notice[]> {
     return this.rows
       .filter((row) => row.userId === userId)

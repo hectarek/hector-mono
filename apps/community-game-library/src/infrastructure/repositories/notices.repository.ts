@@ -34,6 +34,22 @@ export class NoticesRepository
     }
   }
 
+  async addReminder(
+    notice: NewNotice & { remindedOn: string },
+    tx: ITransaction,
+  ): Promise<boolean> {
+    try {
+      const written = await this.getDbContext(tx)
+        .insert(notices)
+        .values(notice)
+        .onConflictDoNothing()
+        .returning({ id: notices.id });
+      return written.length > 0;
+    } catch (err) {
+      this.handleError(err, "addReminder", { userId: notice.userId });
+    }
+  }
+
   async listForUser(userId: string, tx?: ITransaction): Promise<Notice[]> {
     try {
       return await this.getDbContext(tx)
