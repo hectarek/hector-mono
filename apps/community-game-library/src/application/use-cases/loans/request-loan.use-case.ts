@@ -17,11 +17,12 @@ export type IRequestLoanUseCase = ReturnType<typeof requestLoanUseCase>;
 
 const lent: readonly LoanStatus[] = [...HOLDING_STATUSES, "accepted"];
 
-// Ask to borrow (R16; C1): a request for a friend's lendable copy, with an optional note, which
-// its owner is told of. Only a copy that isn't lent can be asked for this way: one said yes to or
-// out in the meantime is Changed underneath, with Join the line as its next step (U15). One that
-// someone else asked for first takes the request behind theirs, and the owner is told someone
-// joined the line. Asking twice keeps the first request.
+// Ask to borrow (R16; C1), or join the line (R24; C10): a request for a friend's lendable copy,
+// with an optional note, which its owner is told of. Only the owner's friends ask, since they're
+// the ones who see the copy (R48). Asking to borrow is for a copy that isn't lent: one said yes to
+// or out in the meantime is Changed underneath, with Join the line as its next step. Joining takes
+// a copy in any state, and a request behind someone else's or behind a loan tells the owner
+// someone joined the line. Asking twice keeps the first request.
 export const requestLoanUseCase = (
   friendshipsRepository: IFriendshipsRepository,
   userGamesRepository: IUserGamesRepository,
@@ -36,7 +37,7 @@ export const requestLoanUseCase = (
   });
 
   return async (
-    input: { userGameId: string; note: string | null },
+    input: { userGameId: string; note: string | null; join?: boolean },
     userId: string,
   ): Promise<Loan> =>
     transactionManagerService.startTransaction(async (tx) => {
@@ -54,10 +55,11 @@ export const requestLoanUseCase = (
       if (mine) {
         return mine;
       }
-      if (open.some((loan) => lent.includes(loan.status))) {
+      const isLent = open.some((loan) => lent.includes(loan.status));
+      if (isLent && !input.join) {
         throw new ChangedError("copy-lent");
       }
-      const ahead = lineOf(open).length > 0;
+      const ahead = isLent || lineOf(open).length > 0;
       const loan = await loansRepository.create(
         {
           userGameId: copy.id,

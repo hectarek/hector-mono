@@ -4,6 +4,11 @@ import type { IUserGamesRepository } from "@/src/application/repositories/user-g
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { lockedLoan } from "@/src/application/use-cases/loans/locked-loan";
+import {
+  BACK_IN_LINE,
+  firstInLine,
+  tellWhoseTurn,
+} from "@/src/application/use-cases/loans/the-line";
 import { UnauthorizedError } from "@/src/entities/errors/common";
 import { canMove, PASS_ALONG_FOLLOW_ONS } from "@/src/entities/loan";
 
@@ -12,7 +17,8 @@ export type ICallBackUseCase = ReturnType<typeof callBackUseCase>;
 // Call it back (C15, R20), the owner's alone, after the dialog: the loan is due today if it was
 // due later, a waiting request for more time closes, and any pass-along ends, the next friend's
 // yes going back to a request in line (PASS_ALONG_FOLLOW_ONS), so the game can only come back to
-// its owner. The borrower is told; C18 then offers to text them too (R52).
+// its owner. The borrower is told; C18 then offers to text them too (R52). The next friend, first
+// in line again, is told their turn is coming up.
 export const callBackUseCase = (
   userGamesRepository: IUserGamesRepository,
   loansRepository: ILoansRepository,
@@ -45,6 +51,7 @@ export const callBackUseCase = (
         throw new UnauthorizedError();
       }
       if (loan.status === "passing") {
+        const before = await firstInLine(loansRepository, copy.id, tx);
         const followOn = PASS_ALONG_FOLLOW_ONS["call-back"];
         for (const next of await loansRepository.listOpenForCopies(
           [copy.id],
@@ -54,13 +61,15 @@ export const callBackUseCase = (
             next.previousLoanId === loan.id &&
             next.status === followOn.from
           ) {
-            await loansRepository.update(
-              next.id,
-              { status: followOn.to, previousLoanId: null },
-              tx,
-            );
+            await loansRepository.update(next.id, BACK_IN_LINE, tx);
           }
         }
+        await tellWhoseTurn(
+          loansRepository,
+          noticesRepository,
+          { copyId: copy.id, before, userId },
+          tx,
+        );
       }
       await loansRepository.update(
         loan.id,

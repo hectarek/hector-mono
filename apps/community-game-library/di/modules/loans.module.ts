@@ -6,12 +6,15 @@ import { askMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-more-t
 import { callBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
 import { cancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
 import { changeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
+import { confirmPassAlongUseCase } from "@/src/application/use-cases/loans/confirm-pass-along.use-case";
 import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
 import { giveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import { listLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import { passAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
+import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import { LoansRepository } from "@/src/infrastructure/repositories/loans.repository";
 import { MockLoansRepository } from "@/src/infrastructure/repositories/loans.repository.mock";
@@ -21,12 +24,15 @@ import { askMoreTimeController } from "@/src/interface-adapters/controllers/loan
 import { callBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
 import { cancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
 import { changeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
+import { confirmPassAlongController } from "@/src/interface-adapters/controllers/loans/confirm-pass-along.controller";
 import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
 import { giveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import { listLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import { passAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
 import { requestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
+import { takeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import { withdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
 
 // Loans (R16 to R24, R48; U4's reads, then Batch 4's moves).
@@ -239,6 +245,53 @@ export function createLoansModule() {
     .bind(DI_SYMBOLS.IWithdrawRequestController)
     .toHigherOrderFunction(withdrawRequestController, [
       DI_SYMBOLS.IWithdrawRequestUseCase,
+      log,
+    ]);
+
+  // Passing it along (U15)
+  loansModule
+    .bind(DI_SYMBOLS.IPassAlongUseCase)
+    .toHigherOrderFunction(passAlongUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IPassAlongController)
+    .toHigherOrderFunction(passAlongController, [
+      DI_SYMBOLS.IPassAlongUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IConfirmPassAlongUseCase)
+    .toHigherOrderFunction(confirmPassAlongUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.IConfirmPassAlongController)
+    .toHigherOrderFunction(confirmPassAlongController, [
+      DI_SYMBOLS.IConfirmPassAlongUseCase,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.ITakeBackPassAlongUseCase)
+    .toHigherOrderFunction(takeBackPassAlongUseCase, [
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ]);
+  loansModule
+    .bind(DI_SYMBOLS.ITakeBackPassAlongController)
+    .toHigherOrderFunction(takeBackPassAlongController, [
+      DI_SYMBOLS.ITakeBackPassAlongUseCase,
       log,
     ]);
 

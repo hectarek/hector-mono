@@ -5,6 +5,7 @@ import {
 } from "@repo/ui/components/empty";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 import { AppHeader } from "@/app/_components/app-header";
 import { CopyRow, copyName } from "@/app/_components/copy-row";
 import { copySummary, copyWords } from "@/app/_components/copy-state";
@@ -13,6 +14,7 @@ import { Dice } from "@/app/_components/dice";
 import { GameVideo } from "@/app/_components/game-video";
 import { Group } from "@/app/_components/group";
 import { IOwnIt } from "@/app/_components/i-own-it";
+import { LeaveLine } from "@/app/_components/leave-line";
 import { List, ListRow, RowFacts, RowName } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Stamp } from "@/app/_components/stamp";
@@ -21,11 +23,15 @@ import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import { gameCard } from "@/src/entities/game-card";
 import { gameFacts, titleLine } from "@/src/entities/game-facts";
+import { listed } from "@/src/entities/listed";
 import type { CopyState } from "@/src/entities/loan";
 import type { Loan } from "@/src/entities/models/loan.model";
+import type { UserGame } from "@/src/entities/models/user-game.model";
+import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import { coverColorOf } from "@/src/entities/piece";
-import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
-import { AskToBorrow } from "./ask-to-borrow";
+import { formatMonthDay, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
+import { AskToBorrow, type CopyToAsk } from "./ask-to-borrow";
+import { JoinLine } from "./join-line";
 
 // A game's page (R14; B5, B11, B13; Wide2 in the 640 column): its cover with the member's own
 // stamp, its facts, About, its expansions or base game, the how-to-play video, then every copy
@@ -66,6 +72,30 @@ export default async function GamePage({
     ? `${free} of ${copies.length} available`
     : null;
   const places = new Map<string, number>();
+  // A friend's copy as C1 and C10 show it.
+  const toAsk = (
+    copy: UserGame,
+    owner: NameAndPiece,
+    boxedExpansions: readonly string[],
+  ): CopyToAsk => ({
+    userGameId: copy.id,
+    title: game.title,
+    color: coverColorOf(game),
+    imageUrl: game.imageUrl,
+    owner,
+    summary: copySummary(copy, boxedExpansions, baseGame?.title ?? game.title),
+  });
+  // A friend's copy of the game that's available, for C10's "Borrow that instead".
+  const insteadOf = (userGameId: string): CopyToAsk | null => {
+    const other = copies.find(
+      ({ copy, state }) =>
+        copy.id !== userGameId && !state.yours && state.kind === "available",
+    );
+    const owner = other && people[other.copy.userId];
+    return other && owner
+      ? toAsk(other.copy, owner, other.boxedExpansions)
+      : null;
+  };
 
   return (
     <PageColumn
@@ -221,22 +251,15 @@ export default async function GamePage({
                   lines={words.lines}
                   stamp={words.stamp}
                   href={copyHref(copy.id, state, user.id)}
-                  action={
-                    state.kind === "available" && !state.yours ? (
-                      <AskToBorrow
-                        userGameId={copy.id}
-                        title={game.title}
-                        color={coverColorOf(game)}
-                        imageUrl={game.imageUrl}
-                        owner={owner}
-                        summary={copySummary(
-                          copy,
-                          boxedExpansions,
-                          baseGame?.title ?? game.title,
-                        )}
-                      />
-                    ) : undefined
-                  }
+                  action={copyAction({
+                    copy: toAsk(copy, owner, boxedExpansions),
+                    lendable: copy.lendable,
+                    passAlong: copy.passAlong,
+                    state,
+                    people,
+                    userId: user.id,
+                    instead: insteadOf(copy.id),
+                  })}
                 />
               );
             })}
@@ -264,6 +287,80 @@ export default async function GamePage({
           )}
       </Group>
     </PageColumn>
+  );
+}
+
+// The button at the right of a friend's copy (B5, B13): Borrow while it's available (C1), Join the
+// line while it's out, promised or asked for (C10), and Leave the line once the member is in it.
+function copyAction({
+  copy,
+  lendable,
+  passAlong,
+  state,
+  people,
+  userId,
+  instead,
+}: {
+  copy: CopyToAsk;
+  lendable: boolean;
+  passAlong: boolean;
+  state: CopyState<Loan>;
+  people: Record<string, NameAndPiece>;
+  userId: string;
+  instead: CopyToAsk | null;
+}): ReactNode {
+  if (state.yours) {
+    return undefined;
+  }
+  if (state.kind === "available") {
+    return <AskToBorrow copy={copy} />;
+  }
+  if (state.kind === "in-line") {
+    const mine = state.line.find((loan) => loan.borrowerUserId === userId);
+    return mine ? <LeaveLine loanId={mine.id} title={copy.title} /> : undefined;
+  }
+  if (
+    !lendable ||
+    (state.kind !== "out" &&
+      state.kind !== "promised" &&
+      state.kind !== "requested")
+  ) {
+    return undefined;
+  }
+  const nameOf = (loan: Loan | null) =>
+    (loan && people[loan.borrowerUserId]?.name) ?? "A friend";
+  const ahead = state.line.flatMap((loan) => {
+    const person = people[loan.borrowerUserId];
+    return person ? [person] : [];
+  });
+  const holder = state.holder ?? state.promised;
+  const where =
+    state.holder !== null
+      ? `${nameOf(state.holder)} has it${state.holder.dueOn ? ` until ${formatMonthDay(state.holder.dueOn)}` : ""}`
+      : state.promised !== null
+        ? `${nameOf(state.promised)} is picking it up`
+        : `${nameOf(state.line[0] ?? null)} asked for it`;
+  const after = [
+    holder &&
+      `${nameOf(holder)}’s loan${holder.dueOn ? ` ends ${formatMonthDay(holder.dueOn)}` : ""}`,
+    ahead.length > 0 &&
+      `${listed(ahead.map((person) => `${person.name}’s`))} ${ahead.length > 1 ? "turns" : "turn"}`,
+  ].filter((part) => typeof part === "string");
+  return (
+    <JoinLine
+      copy={copy}
+      where={where}
+      ahead={ahead}
+      turn={
+        passAlong
+          ? `When it’s your turn, it’s handed straight to you: ${copy.owner.name} lets friends pass it along.`
+          : `When it’s your turn, ${copy.owner.name} is asked to lend it to you.`
+      }
+      earliest={
+        after.length > 0 ? `Earliest: after ${after.join(", and ")}.` : null
+      }
+      instead={instead}
+    />
   );
 }
 

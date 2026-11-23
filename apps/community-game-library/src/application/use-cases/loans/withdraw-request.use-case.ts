@@ -4,6 +4,7 @@ import type { IUserGamesRepository } from "@/src/application/repositories/user-g
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { lockedLoan } from "@/src/application/use-cases/loans/locked-loan";
+import { tellWhoseTurn } from "@/src/application/use-cases/loans/the-line";
 import { ChangedError, NotFoundError } from "@/src/entities/errors/common";
 import {
   canMove,
@@ -16,10 +17,11 @@ export type IWithdrawRequestUseCase = ReturnType<typeof withdrawRequestUseCase>;
 
 const lent: readonly LoanStatus[] = [...HOLDING_STATUSES, "accepted"];
 
-// Withdraw a request (R21; C16), by its borrower while it's still a request. The owner is told when
-// it was theirs to answer: first in line, with the copy home and no yes waiting. Leaving a line
-// further back tells nobody (U15). A request answered meanwhile is Changed underneath; one
-// withdrawn already stays as it is.
+// Withdraw a request (R21; C16), or leave a line (C10), by its borrower while it's still a request.
+// The owner is told when it was theirs to answer: first in line, with the copy home and no yes
+// waiting. Leaving a line otherwise tells the owner nothing, and whoever moves up to first is told
+// their turn is coming up. A request answered meanwhile is Changed underneath; one withdrawn
+// already stays as it is.
 export const withdrawRequestUseCase = (
   userGamesRepository: IUserGamesRepository,
   loansRepository: ILoansRepository,
@@ -51,10 +53,16 @@ export const withdrawRequestUseCase = (
         throw new ChangedError("request-answered");
       }
       const open = await loansRepository.listOpenForCopies([copy.id], tx);
+      const [first = null] = lineOf(open);
       const theirsToAnswer =
-        lineOf(open)[0]?.id === loan.id &&
-        !open.some((one) => lent.includes(one.status));
+        first?.id === loan.id && !open.some((one) => lent.includes(one.status));
       await loansRepository.setStatus(loan.id, "withdrawn", tx);
+      await tellWhoseTurn(
+        loansRepository,
+        noticesRepository,
+        { copyId: copy.id, before: first, userId },
+        tx,
+      );
       if (theirsToAnswer) {
         await noticesRepository.add(
           {

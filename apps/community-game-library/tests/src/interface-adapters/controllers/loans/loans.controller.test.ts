@@ -15,12 +15,15 @@ import { askMoreTimeController } from "@/src/interface-adapters/controllers/loan
 import { callBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
 import { cancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
 import { changeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
+import { confirmPassAlongController } from "@/src/interface-adapters/controllers/loans/confirm-pass-along.controller";
 import { confirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import { confirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import { getLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
 import { giveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import { listLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import { passAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
 import { requestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
+import { takeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import { withdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
 import { CAST } from "@/tests/_support/cast";
 import { controllerBasics, ID } from "@/tests/_support/controller";
@@ -31,11 +34,27 @@ describe("requestLoanController", () => {
   controllerBasics({
     make: (useCase, logger) => requestLoanController(useCase, logger),
     valid: { userGameId: ID, note: "  Can I grab it Friday?  " },
-    calledWith: [{ userGameId: ID, note: "Can I grab it Friday?" }, you.id],
+    calledWith: [
+      { userGameId: ID, note: "Can I grab it Friday?", join: false },
+      you.id,
+    ],
     invalid: {
       "a copy that isn't an id": { userGameId: "harbor", note: "" },
       "a note over 500 characters": { userGameId: ID, note: "x".repeat(501) },
+      "joining that isn't a yes or no": { userGameId: ID, join: "yes" },
     },
+  });
+
+  it("joins the line when asked to (C10)", async () => {
+    const useCase = mock(async () => undefined);
+    await requestLoanController(useCase as never, new MockLoggerService())(
+      { userGameId: ID, note: "", join: true },
+      you.id,
+    );
+    expect(useCase).toHaveBeenCalledWith(
+      { userGameId: ID, note: null, join: true },
+      you.id,
+    );
   });
 
   it("sends an empty note as none", async () => {
@@ -45,7 +64,7 @@ describe("requestLoanController", () => {
       you.id,
     );
     expect(useCase).toHaveBeenCalledWith(
-      { userGameId: ID, note: null },
+      { userGameId: ID, note: null, join: false },
       you.id,
     );
   });
@@ -158,6 +177,41 @@ describe("listLoansController", () => {
       you.id,
       expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
     );
+  });
+});
+
+describe("passAlongController", () => {
+  controllerBasics({
+    make: (useCase, logger) => passAlongController(useCase, logger),
+    valid: { loanId: ID },
+    calledWith: [ID, you.id],
+    invalid: { "a loan that isn't an id": { loanId: "moss" } },
+  });
+});
+
+describe("takeBackPassAlongController", () => {
+  controllerBasics({
+    make: (useCase, logger) => takeBackPassAlongController(useCase, logger),
+    valid: { loanId: ID },
+    calledWith: [ID, you.id],
+    invalid: { "no loan": {} },
+  });
+});
+
+describe("confirmPassAlongController", () => {
+  controllerBasics({
+    make: (useCase, logger) => confirmPassAlongController(useCase, logger),
+    valid: { loanId: ID, pickedUpOn: "2026-11-12" },
+    calledWith: [
+      ID,
+      "2026-11-12",
+      you.id,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    ],
+    invalid: {
+      "a day that isn't one": { loanId: ID, pickedUpOn: "Thursday" },
+      "no day": { loanId: ID },
+    },
   });
 });
 

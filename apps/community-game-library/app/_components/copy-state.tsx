@@ -1,6 +1,7 @@
 import { RowFacts } from "@/app/_components/list-row";
 import { Piece } from "@/app/_components/piece";
 import { expansionName } from "@/src/entities/game-facts";
+import { listed } from "@/src/entities/listed";
 import type { CopyStamp, CopyState } from "@/src/entities/loan";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
@@ -15,12 +16,6 @@ export const CONDITIONS: Record<UserGame["condition"], string> = {
 };
 
 const possessive = (name: string) => `${name}’s`;
-
-// "A, B and C".
-const listed = (items: readonly string[]) =>
-  items.length < 2
-    ? (items[0] ?? "")
-    : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
 
 // One line under a copy's name: a fact in mono, or words about a person beside their piece.
 export type CopyLine =

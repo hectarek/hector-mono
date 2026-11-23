@@ -55,14 +55,22 @@ describe("Loans (C4)", () => {
     }
   });
 
-  it("lists C4's sections in order: Jo's request for more time and Priya's request, then what you borrowed (R22)", async () => {
+  it("lists C4's sections in order: Jo's request for more time and Priya's request, what you borrowed, then the lines you're in (R22)", async () => {
     await signInAsYouWithTheCast();
     const view = render(await LoansPage());
     const page = within(view.container);
 
     expect(
       page.getAllByRole("heading", { level: 2 }).map((h) => h.textContent),
-    ).toEqual(["Needs you · 2", "You borrowed", "You asked"]);
+    ).toEqual(["Needs you · 2", "You borrowed", "In line", "You asked"]);
+    // C4's In line: Fenwick Fair opens its game's page, where Leave the line is.
+    const inLine = page.getByRole("link", { name: /Fenwick Fair/ });
+    expect(inLine.getAttribute("href")).toBe(
+      `/games/${CAST.games.fenwickFair.id}`,
+    );
+    for (const words of ["Priya’s copy", "Out until Nov 24", "1st in line"]) {
+      expect(within(inLine).getByText(words)).toBeTruthy();
+    }
     const moreTime = page.getByRole("link", { name: /Gull & Anchor/ });
     expect(moreTime.getAttribute("href")).toBe(
       `/loans/${CAST.loans.joHasGullAndAnchor.id}`,

@@ -10,11 +10,13 @@ import { optionalText } from "@/src/interface-adapters/controllers/suggestions/f
 const inputSchema = z.object({
   userGameId: z.uuid(),
   note: optionalText(500),
+  join: z.boolean().default(false),
 });
 
 export type IRequestLoanController = ReturnType<typeof requestLoanController>;
 
-// Ask to borrow (C1): the copy, and the note to its owner, which may be left empty.
+// Ask to borrow (C1) or Join the line (C10): the copy, and the note to its owner, which may be
+// left empty.
 export const requestLoanController = (
   useCase: IRequestLoanUseCase,
   loggerService: ILoggerService,

@@ -20,16 +20,18 @@ export type LoanItem = {
   next: NameAndPiece | null;
 };
 
-// Loans (C4, R22), as far as U14 builds it: Needs you, the requests for the member's copies that
-// are theirs to answer, the returns they confirm and the requests for more time (U14); what they borrowed and what they lent, overdue
-// first, with a yes waiting for its pick-up; and their requests waiting on an owner (You asked).
-// Lines and more time join with U14 and U15.
+// Loans (C4, R22), as far as U15 builds it: Needs you, the requests for the member's copies that
+// are theirs to answer, the returns they confirm and the requests for more time; what they
+// borrowed and what they lent, overdue first, with a yes waiting for its pick-up or a copy being
+// handed to them; the lines they're in, with their place and the loan ahead (In line); and their
+// requests waiting on an owner (You asked).
 export type LoansList = {
   // The member, whose piece stands on what they borrowed.
   you: NameAndPiece | null;
   needsYou: (LoanItem & { why: "request" | "return" | "more-time" })[];
   borrowed: LoanItem[];
   lent: LoanItem[];
+  inLine: (LoanItem & { place: number; holder: Loan | null })[];
   youAsked: LoanItem[];
 };
 
@@ -104,6 +106,7 @@ export const listLoansUseCase = (
       }
     }
     const borrowed: Row[] = [];
+    const inLine: (Row & { place: number; holder: Loan | null })[] = [];
     const waiting: Row[] = [];
     for (const copy of theirCopies) {
       const state = stateOf(copy);
@@ -116,7 +119,20 @@ export const listLoansUseCase = (
           ?.borrowerUserId ?? null;
       if (state.kind === "you-asked") {
         waiting.push({ loan, copy, other: copy.userId, next });
-      } else if (state.kind === "you-have-it" || state.kind === "to-pick-up") {
+      } else if (state.kind === "in-line") {
+        inLine.push({
+          loan,
+          copy,
+          other: copy.userId,
+          next: null,
+          place: state.line.findIndex((one) => one.id === loan.id) + 1,
+          holder: state.holder ?? state.promised,
+        });
+      } else if (
+        state.kind === "you-have-it" ||
+        state.kind === "to-pick-up" ||
+        state.kind === "handed-to-you"
+      ) {
         borrowed.push({ loan, copy, other: copy.userId, next });
       }
     }
@@ -127,6 +143,7 @@ export const listLoansUseCase = (
       ...moreTime,
       ...lent,
       ...borrowed,
+      ...inLine,
       ...waiting,
     ];
     const games = new Map(
@@ -183,6 +200,15 @@ export const listLoansUseCase = (
       ],
       borrowed: items(borrowed).sort(byDue(today)),
       lent: items(lent).sort(byDue(today)),
+      inLine: inLine
+        .flatMap((row) =>
+          items([row]).map((item) => ({
+            ...item,
+            place: row.place,
+            holder: row.holder,
+          })),
+        )
+        .sort(asked),
       youAsked: items(waiting).sort(asked),
     };
   };

@@ -11,7 +11,7 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 // A copy in a game's Copies (B5, B11, B13): its owner's 20px piece, "Sam’s copy", the lines its
 // state gives, and the person looking's own stamp. A copy with a page for the person looking (their
 // own, or the request they sent) is one link with a chevron, as ListRow; the rest show their state
-// where they stand, with the button it offers at the right (Borrow; Join the line with U15).
+// where they stand, with the button it offers at the right (Borrow, Join the line, Leave the line).
 export function CopyRow({
   name,
   owner,

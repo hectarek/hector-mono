@@ -47,12 +47,15 @@ import type { IAskMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-
 import type { ICallBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
 import type { ICancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
 import type { IChangeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
+import type { IConfirmPassAlongUseCase } from "@/src/application/use-cases/loans/confirm-pass-along.use-case";
 import type { IConfirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import type { IConfirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import type { IGetLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
 import type { IGiveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import type { IListLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import type { IPassAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
 import type { IRequestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
+import type { ITakeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import type { IGetTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import type { IListInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
@@ -103,12 +106,15 @@ import type { IAskMoreTimeController } from "@/src/interface-adapters/controller
 import type { ICallBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
 import type { ICancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
 import type { IChangeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
+import type { IConfirmPassAlongController } from "@/src/interface-adapters/controllers/loans/confirm-pass-along.controller";
 import type { IConfirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
 import type { IConfirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
 import type { IGetLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
 import type { IGiveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
 import type { IListLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import type { IPassAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
 import type { IRequestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
+import type { ITakeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
 import type { IGetTabCountsController } from "@/src/interface-adapters/controllers/notices/get-tab-counts.controller";
 import type { IListInboxController } from "@/src/interface-adapters/controllers/notices/list-inbox.controller";
@@ -159,6 +165,8 @@ export const DI_SYMBOLS = {
   IChangeDueDateUseCase: Symbol.for("IChangeDueDateUseCase"),
   ICheckFriendLinkController: Symbol.for("ICheckFriendLinkController"),
   ICheckFriendLinkUseCase: Symbol.for("ICheckFriendLinkUseCase"),
+  IConfirmPassAlongController: Symbol.for("IConfirmPassAlongController"),
+  IConfirmPassAlongUseCase: Symbol.for("IConfirmPassAlongUseCase"),
   IConfirmPickUpController: Symbol.for("IConfirmPickUpController"),
   IConfirmPickUpUseCase: Symbol.for("IConfirmPickUpUseCase"),
   IConfirmReturnController: Symbol.for("IConfirmReturnController"),
@@ -230,6 +238,8 @@ export const DI_SYMBOLS = {
   INoticesRepository: Symbol.for("INoticesRepository"),
   IOpenFriendLinkController: Symbol.for("IOpenFriendLinkController"),
   IOpenFriendLinkUseCase: Symbol.for("IOpenFriendLinkUseCase"),
+  IPassAlongController: Symbol.for("IPassAlongController"),
+  IPassAlongUseCase: Symbol.for("IPassAlongUseCase"),
   IPutInBoxController: Symbol.for("IPutInBoxController"),
   IPutInBoxUseCase: Symbol.for("IPutInBoxUseCase"),
   IRemovePhotoController: Symbol.for("IRemovePhotoController"),
@@ -252,6 +262,8 @@ export const DI_SYMBOLS = {
   ISetPhotoUseCase: Symbol.for("ISetPhotoUseCase"),
   ISuggestGameController: Symbol.for("ISuggestGameController"),
   ISuggestGameUseCase: Symbol.for("ISuggestGameUseCase"),
+  ITakeBackPassAlongController: Symbol.for("ITakeBackPassAlongController"),
+  ITakeBackPassAlongUseCase: Symbol.for("ITakeBackPassAlongUseCase"),
   ITransactionManagerService: Symbol.for("ITransactionManagerService"),
   IUnfriendController: Symbol.for("IUnfriendController"),
   IUnfriendUseCase: Symbol.for("IUnfriendUseCase"),
@@ -299,6 +311,8 @@ export interface DI_RETURN_TYPES {
   IChangeDueDateUseCase: IChangeDueDateUseCase;
   ICheckFriendLinkController: ICheckFriendLinkController;
   ICheckFriendLinkUseCase: ICheckFriendLinkUseCase;
+  IConfirmPassAlongController: IConfirmPassAlongController;
+  IConfirmPassAlongUseCase: IConfirmPassAlongUseCase;
   IConfirmPickUpController: IConfirmPickUpController;
   IConfirmPickUpUseCase: IConfirmPickUpUseCase;
   IConfirmReturnController: IConfirmReturnController;
@@ -364,6 +378,8 @@ export interface DI_RETURN_TYPES {
   INoticesRepository: INoticesRepository;
   IOpenFriendLinkController: IOpenFriendLinkController;
   IOpenFriendLinkUseCase: IOpenFriendLinkUseCase;
+  IPassAlongController: IPassAlongController;
+  IPassAlongUseCase: IPassAlongUseCase;
   IPutInBoxController: IPutInBoxController;
   IPutInBoxUseCase: IPutInBoxUseCase;
   IRemovePhotoController: IRemovePhotoController;
@@ -386,6 +402,8 @@ export interface DI_RETURN_TYPES {
   ISetPhotoUseCase: ISetPhotoUseCase;
   ISuggestGameController: ISuggestGameController;
   ISuggestGameUseCase: ISuggestGameUseCase;
+  ITakeBackPassAlongController: ITakeBackPassAlongController;
+  ITakeBackPassAlongUseCase: ITakeBackPassAlongUseCase;
   ITransactionManagerService: ITransactionManagerService;
   IUnfriendController: IUnfriendController;
   IUnfriendUseCase: IUnfriendUseCase;

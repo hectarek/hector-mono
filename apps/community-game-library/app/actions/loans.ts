@@ -19,15 +19,20 @@ function revalidateEverything(): void {
 // The names in these messages come from the screen that sent them: they only say what happened
 // to the person who tapped.
 
-// Ask to borrow's Send request (C1).
+// Ask to borrow's Send request (C1), or Join the line (C10, and C1's next step once the copy was
+// just lent). The game's page then reads "You asked" or the place in line.
 export async function requestLoan(
   userGameId: string,
   note: string,
   ownerName: string,
+  join = false,
 ): Promise<ActionState> {
   try {
     const userId = await getCurrentUserId();
-    await getInjection("IRequestLoanController")({ userGameId, note }, userId);
+    await getInjection("IRequestLoanController")(
+      { userGameId, note, join },
+      userId,
+    );
   } catch (err) {
     return toActionError(
       err,
@@ -36,7 +41,53 @@ export async function requestLoan(
     );
   }
   revalidateEverything();
-  return { message: `Request sent to ${ownerName}.` };
+  return {
+    message: join
+      ? `You joined the line. ${ownerName} is told.`
+      : `Request sent to ${ownerName}.`,
+  };
+}
+
+// Leave the line (B13, C16), after "Leave the line for Fenwick Fair?": the request is withdrawn.
+export async function leaveLine(loanId: string): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IWithdrawRequestController")({ loanId }, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("leaveLine"),
+      "Couldn’t leave the line. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: "You left the line." };
+}
+
+// Remove from line (C7), after "Take Ben out of the line?", with an optional note: the owner's no
+// to that request.
+export async function removeFromLine(
+  loanId: string,
+  note: string,
+  borrowerName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IAnswerRequestController")(
+      { loanId, answer: "no", note },
+      userId,
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("removeFromLine"),
+      "Couldn’t remove them. Try again.",
+    );
+  }
+  revalidateEverything();
+  return {
+    message: `${borrowerName} is out of the line. ${borrowerName} is told.`,
+  };
 }
 
 // Withdraw my request (C16), after "Withdraw your request for Quarry Lane?". Its dialog goes on to
@@ -274,4 +325,64 @@ export async function callBack(
   }
   revalidateEverything();
   return { message: `${borrowerName} is asked to bring it back.` };
+}
+
+// C11's I gave it to Jo. The loan's page then reads "Waiting for Jo to confirm".
+export async function passAlong(
+  loanId: string,
+  nextName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IPassAlongController")({ loanId }, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("passAlong"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `${nextName} is asked to confirm.` };
+}
+
+// The next friend's I have it, with the day. Their loan's page then reads as C5.
+export async function confirmPassAlong(
+  loanId: string,
+  pickedUpOn: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("IConfirmPassAlongController")(
+      { loanId, pickedUpOn },
+      userId,
+    );
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("confirmPassAlong"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: "The loan has started." };
+}
+
+// The giver's I still have it, while the next friend hasn't confirmed.
+export async function takeBackPassAlong(
+  loanId: string,
+  nextName: string,
+): Promise<ActionState> {
+  try {
+    const userId = await getCurrentUserId();
+    await getInjection("ITakeBackPassAlongController")({ loanId }, userId);
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("takeBackPassAlong"),
+      "That didn’t send. Try again.",
+    );
+  }
+  revalidateEverything();
+  return { message: `You still have it. ${nextName} is told.` };
 }

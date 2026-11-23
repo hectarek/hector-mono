@@ -50,12 +50,15 @@ import { askMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-more-t
 import { callBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
 import { cancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
 import { changeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
+import { confirmPassAlongUseCase } from "@/src/application/use-cases/loans/confirm-pass-along.use-case";
 import { confirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
 import { confirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
 import { getLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
 import { giveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
 import { listLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import { passAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
+import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import { getTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import { listInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
@@ -409,6 +412,23 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     listLoans: listLoansUseCase(loans, userGames, games, userProfiles),
+
+    // Lines and passing it along (U15)
+    passAlong: passAlongUseCase(userGames, loans, notices, transactions, log),
+    confirmPassAlong: confirmPassAlongUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
+    takeBackPassAlong: takeBackPassAlongUseCase(
+      userGames,
+      loans,
+      notices,
+      transactions,
+      log,
+    ),
     getLoan: getLoanUseCase(loans, userGames, games, userProfiles),
 
     // The inbox, the counts and notice settings (U11)

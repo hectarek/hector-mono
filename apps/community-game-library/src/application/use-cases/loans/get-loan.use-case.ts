@@ -32,13 +32,18 @@ export type LoanPage = {
   // The people in the copy's line, in order, by name and piece, with their requests (C5's Who's
   // involved, C7's The line): they needn't be the member's friends.
   line: (NameAndPiece & { loanId: string; askedAt: Date })[];
+  // The other borrower in a pass-along (R48): to the giver, the friend they hand it to now (the
+  // first in line, while the copy's switch is on and it hasn't been called back), are handing it to,
+  // or handed it to; to that friend, the giver. Their phone shows while the handoff is open, friends
+  // or not.
+  handoff: (NameAndPiece & { phone: string | null; loanId: string }) | null;
 };
 
 const open: readonly LoanStatus[] = OPEN_STATUSES;
 
-// A loan's page (C2, C3, C16, C17): only its copy's owner and its borrower see it, and anyone else
-// gets the Not found a stranger gets (D4, AE8), the admin included. Each read waits for the one
-// before (KTD2).
+// A loan's page (C2, C3, C5, C7, C11, C16, C17): only its copy's owner and its borrower see it, and
+// anyone else gets the Not found a stranger gets (D4, AE8), the admin included. Each read waits for
+// the one before (KTD2).
 export const getLoanUseCase = (
   loansRepository: ILoansRepository,
   userGamesRepository: IUserGamesRepository,
@@ -85,6 +90,10 @@ export const getLoanUseCase = (
     if (!you) {
       throw new NotFoundError();
     }
+    const handoffLoan = await handoffOf(loan, copy, loans, state.line);
+    const handoffPerson =
+      handoffLoan &&
+      (await userProfilesRepository.getByUserId(handoffLoan.borrowerUserId));
     return {
       loan,
       role,
@@ -105,6 +114,44 @@ export const getLoanUseCase = (
           ? [{ ...person, loanId: one.id, askedAt: one.createdAt }]
           : [];
       }),
+      handoff:
+        handoffLoan && handoffPerson
+          ? {
+              userId: handoffPerson.userId,
+              name: handoffPerson.name,
+              pieceShape: handoffPerson.pieceShape,
+              pieceColor: handoffPerson.pieceColor,
+              phone: open.includes(loan.status) ? handoffPerson.phone : null,
+              loanId: handoffLoan.id,
+            }
+          : null,
     };
   };
+
+  // The loan at the other end of a pass-along, if there is one (LoanPage's handoff).
+  async function handoffOf(
+    loan: Loan,
+    copy: UserGame,
+    loans: readonly Loan[],
+    line: readonly Loan[],
+  ): Promise<Loan | undefined> {
+    switch (loan.status) {
+      case "accepted":
+        return loan.previousLoanId === null
+          ? undefined
+          : loans.find((one) => one.id === loan.previousLoanId);
+      case "out":
+        return copy.passAlong && loan.calledBackAt === null
+          ? line[0]
+          : undefined;
+      case "passing":
+        return loans.find((one) => one.previousLoanId === loan.id);
+      case "passed-along":
+        return (await loansRepository.listHistoryForCopy(copy.id)).find(
+          (one) => one.previousLoanId === loan.id,
+        );
+      default:
+        return undefined;
+    }
+  }
 };

@@ -1,14 +1,12 @@
-import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/app/_components/app-header";
 import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
+import { LeaveLine } from "@/app/_components/leave-line";
 import { PageColumn } from "@/app/_components/page-column";
 import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
-import { getInjection } from "@/di/container";
-import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import { ordinal } from "@/src/entities/loan";
 import type { Loan } from "@/src/entities/models/loan.model";
 import { coverColorOf } from "@/src/entities/piece";
@@ -19,6 +17,7 @@ import {
   todayIn,
 } from "@/src/entities/week";
 import { AnswerForm } from "./answer-form";
+import { loadLoan } from "./load-loan";
 import { LoanMoveButton } from "./loan-move-button";
 import {
   Asker,
@@ -33,6 +32,7 @@ import {
 import { BorrowedLoan, LentLoan } from "./out-views";
 import { OwnerPickUp } from "./owner-pick-up";
 import { PickUpForm } from "./pick-up-form";
+import { RemoveFromLine } from "./remove-from-line";
 
 // A loan's page, for its copy's owner and its borrower only (D14: the one place its buttons live),
 // one board by the loan's status and the member's role: C16 to the borrower and C2 to the owner
@@ -48,7 +48,7 @@ export default async function LoanPage({
   const { user } = await gate("app");
   const { id } = await params;
   const view = await loadLoan(id, user.id);
-  const { loan, role, game, other, copyState } = view;
+  const { loan, role, game, other, copyState, handoff } = view;
   const now = new Date();
   const today = todayIn(PLAN_TIME_ZONE, now);
   const thumb = (
@@ -93,6 +93,16 @@ export default async function LoanPage({
           )}
           <Person person={other} line={`It’s ${other.name}’s copy`} />
         </Group>
+        {!toAnswer && (
+          <Group label="What you can do">
+            <LeaveLine
+              loanId={loan.id}
+              title={game.title}
+              size="lg"
+              thenOpen="/loans"
+            />
+          </Group>
+        )}
         {toAnswer && (
           <Group label="What you can do">
             <LoanMoveButton
@@ -138,11 +148,67 @@ export default async function LoanPage({
             asked={askedWhen(loan.createdAt, now)}
           />
         </Group>
-        {toAnswer && (
+        {toAnswer ? (
           <AnswerForm loanId={loan.id} borrower={other.name} today={today} />
+        ) : (
+          <Group label="What you can do">
+            <RemoveFromLine
+              loanId={loan.id}
+              name={other.name}
+              thenOpen="/loans"
+            />
+          </Group>
         )}
       </>
     );
+  } else if (
+    loan.status === "accepted" &&
+    loan.previousLoanId !== null &&
+    handoff
+  ) {
+    body =
+      role === "owner" ? (
+        <>
+          <Title>{game.title}</Title>
+          <Group label="The loan" aside={<Stamp tone="brown">Handed on</Stamp>}>
+            <Summary
+              thumb={thumb}
+              lead={`${handoff.name} is handing it to ${other.name}`}
+              facts={[`${other.name}’s loan starts when they say they have it`]}
+            />
+            <Person person={other} line="Getting it next" />
+          </Group>
+        </>
+      ) : (
+        <>
+          <Title>{`Get ${game.title} from ${handoff.name}`}</Title>
+          <Group label={`Next: get it from ${handoff.name}`}>
+            <Summary
+              thumb={thumb}
+              lead={game.title}
+              facts={[
+                `${handoff.name} is handing it to you · yours for ${periodWords(loan.periodDays)}`,
+              ]}
+            />
+            <Person person={handoff} line="to arrange the handoff" />
+            <p className="text-13 leading-snug text-muted-foreground">
+              It’s {other.name}’s copy, and {other.name} lets friends pass it
+              along. The loan stays {handoff.name}’s until you say you have it.
+            </p>
+          </Group>
+          <Group label="When you have it">
+            <PickUpForm
+              loanId={loan.id}
+              loan={loan}
+              saidYesOn={saidYesOn(loan)}
+              borrower={view.you}
+              today={today}
+              submitLabel="I have it"
+              handedOn
+            />
+          </Group>
+        </>
+      );
   } else if (loan.status === "accepted" && role === "owner") {
     body = (
       <>
@@ -230,11 +296,17 @@ export default async function LoanPage({
       </>
     );
   } else if (
-    (loan.status === "out" || loan.status === "returning") &&
+    (loan.status === "out" ||
+      loan.status === "returning" ||
+      loan.status === "passing") &&
     role === "borrower"
   ) {
     body = <BorrowedLoan view={view} today={today} now={now} />;
-  } else if (loan.status === "out" || loan.status === "returning") {
+  } else if (
+    loan.status === "out" ||
+    loan.status === "returning" ||
+    loan.status === "passing"
+  ) {
     body = <LentLoan view={view} today={today} now={now} />;
   } else {
     body = (
@@ -243,7 +315,7 @@ export default async function LoanPage({
         <Group label={role === "owner" ? "The loan" : "Your loan"}>
           <Summary
             thumb={thumb}
-            lead={endedLine(loan, role, other.name)}
+            lead={endedLine(loan, role, other.name, handoff?.name ?? null)}
             facts={
               loan.pickedUpOn
                 ? [
@@ -281,6 +353,8 @@ function endedLine(
   loan: Loan,
   role: "owner" | "borrower",
   other: string,
+  // In a pass-along, the friend it was handed to.
+  next: string | null,
 ): string {
   switch (loan.status) {
     case "declined":
@@ -292,22 +366,12 @@ function endedLine(
     case "cancelled":
       return "Called off before the pick-up";
     case "returned":
-    case "passed-along":
       return role === "owner" ? "Back with you" : `Back with ${other}`;
+    case "passed-along":
+      return role === "owner"
+        ? `${other} handed it to ${next ?? "the next friend"}`
+        : `You handed it to ${next ?? "the next friend"}`;
     default:
       return role === "owner" ? `${other} has it` : "You have it";
-  }
-}
-
-// Everything the page reads, through its controller: a loan the member isn't part of, or an id
-// that isn't one, is Not found.
-async function loadLoan(loanId: string, userId: string) {
-  try {
-    return await getInjection("IGetLoanController")({ loanId }, userId);
-  } catch (err) {
-    if (err instanceof NotFoundError || err instanceof InputParseError) {
-      notFound();
-    }
-    throw err;
   }
 }

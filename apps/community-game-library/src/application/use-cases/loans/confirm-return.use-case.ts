@@ -21,7 +21,8 @@ export type ReturnAnswer =
 // Is it back? (C8; R19, D15), the owner's alone. Yes, it's back closes the loan on the day given,
 // from the pick-up to today, and adds anything new missing or damaged to the copy's note, so the
 // next borrower knows; it also marks a loan that's out as back without waiting. It answers with
-// the next request in the copy's line, which the owner is asked to answer (U15 tells that friend).
+// the next request in the copy's line, which the owner is asked to answer: that friend, already
+// first in line, hears from the owner's answer (the-line.ts).
 // I don't have it yet puts a loan that's being returned back out, and tells the borrower.
 export const confirmReturnUseCase = (
   userGamesRepository: IUserGamesRepository,

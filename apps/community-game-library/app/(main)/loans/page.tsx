@@ -22,11 +22,12 @@ import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
 import type { DI_RETURN_TYPES } from "@/di/types";
-import { copyState } from "@/src/entities/loan";
+import { copyState, ordinal } from "@/src/entities/loan";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import { coverColorOf } from "@/src/entities/piece";
 import {
   formatDate,
+  formatMonthDay,
   formatWhen,
   PLAN_TIME_ZONE,
   todayIn,
@@ -97,19 +98,24 @@ function LoanItemRow({
 }
 
 // Loans (C4, R22): Needs you, the requests for the member's copies that are theirs to answer, the
-// requests for more time (U14) and the returns they confirm; You borrowed and You lent, overdue first; and You asked, their own
-// requests waiting on an owner. Each row opens the loan's page. The lines, more time, Record a loan
-// and Past loans come with U14 to U16.
+// requests for more time and the returns they confirm; You borrowed and You lent, overdue first;
+// In line, the copies the member waits for, each opening its game's page, where Leave the line is;
+// and You asked, their own requests waiting on an owner. The other rows open the loan's page.
+// Record a loan and Past loans come with U16.
 export default async function LoansPage() {
   await connection();
   const { user } = await gate("app");
-  const { you, needsYou, borrowed, lent, youAsked } = await getInjection(
-    "IListLoansController",
-  )(user.id);
+  const { you, needsYou, borrowed, lent, inLine, youAsked } =
+    await getInjection("IListLoansController")(user.id);
   const now = new Date();
   const today = todayIn(PLAN_TIME_ZONE, now);
   const empty =
-    needsYou.length + borrowed.length + lent.length + youAsked.length === 0;
+    needsYou.length +
+      borrowed.length +
+      lent.length +
+      inLine.length +
+      youAsked.length ===
+    0;
 
   return (
     <PageColumn width="read" header={<AppHeader title="Loans" />}>
@@ -228,6 +234,38 @@ export default async function LoansPage() {
                 borrower={item.other}
                 today={today}
               />
+            ))}
+          </List>
+        </Group>
+      )}
+
+      {inLine.length > 0 && (
+        <Group label="In line" overList>
+          <List>
+            {inLine.map(({ loan, game, other, place, holder }) => (
+              <ListRow
+                key={loan.id}
+                href={`/games/${game.id}`}
+                thumb={
+                  <CoverThumb
+                    color={coverColorOf(game)}
+                    imageUrl={game.imageUrl}
+                  />
+                }
+                stamp={
+                  <Stamp tone="brown">{`${ordinal(place)} in line`}</Stamp>
+                }
+              >
+                <RowName>{game.title}</RowName>
+                <RowFacts>{other.name}’s copy</RowFacts>
+                <RowFacts>
+                  {holder?.status === "accepted" || !holder
+                    ? `At ${other.name}’s`
+                    : holder.dueOn
+                      ? `Out until ${formatMonthDay(holder.dueOn)}`
+                      : "Out"}
+                </RowFacts>
+              </ListRow>
             ))}
           </List>
         </Group>

@@ -1,4 +1,5 @@
 import type { Game } from "@/src/entities/models/game.model";
+import { listed } from "./listed";
 
 // A game's facts in the boards' words (B5, B10, B11, Y1), each only when the game has it (rule
 // 14): ranges take an en dash, parts are kept apart by a middle dot.
@@ -10,13 +11,6 @@ function range(min: number | null, max: number | null): string | null {
   }
   const one = min ?? max;
   return one === null ? null : `${one}`;
-}
-
-// "A, B and C".
-function listed(items: readonly string[]): string {
-  return items.length < 2
-    ? (items[0] ?? "")
-    : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
 }
 
 // The facts panel, in B5's order: players with the best counts, play time, age, complexity.

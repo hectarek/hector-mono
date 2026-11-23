@@ -5,6 +5,10 @@ import type { ILoggerService } from "@/src/application/services/logger.service.i
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { lockedLoan } from "@/src/application/use-cases/loans/locked-loan";
 import {
+  firstInLine,
+  tellWhoseTurn,
+} from "@/src/application/use-cases/loans/the-line";
+import {
   ChangedError,
   InputParseError,
   UnauthorizedError,
@@ -14,7 +18,6 @@ import {
   HOLDING_STATUSES,
   type LOAN_PERIOD_DAYS,
   type LoanStatus,
-  lineOf,
 } from "@/src/entities/loan";
 
 export type IAnswerRequestUseCase = ReturnType<typeof answerRequestUseCase>;
@@ -32,9 +35,11 @@ const lent: readonly LoanStatus[] = [...HOLDING_STATUSES, "accepted"];
 // Answer a request (R16, D4; C2). Only the copy's owner answers, and anyone else, the admin
 // included, is refused (AE7). Yes goes to the first request in line while the copy is home, for a
 // week, two weeks or a month counted from the pick-up, or until a date after today; the borrower is
-// told. No goes to any request. A note to the borrower travels only on their notice. Under the copy's
-// lock, a request withdrawn or answered meanwhile, or a yes to someone else first, is Changed
-// underneath (KTD6, KTD16), so two answers at once can't both land.
+// told. No goes to any request, and is also how the owner takes someone out of a line (C7, R21). A
+// note to the borrower travels only on their notice. Either way, whoever moves up to first in line
+// is told their turn is coming up. Under the copy's lock, a request withdrawn or answered
+// meanwhile, or a yes to someone else first, is Changed underneath (KTD6, KTD16), so two answers at
+// once can't both land.
 export const answerRequestUseCase = (
   userGamesRepository: IUserGamesRepository,
   loansRepository: ILoansRepository,
@@ -74,6 +79,14 @@ export const answerRequestUseCase = (
         throw new ChangedError("request-answered");
       }
       const answeredAt = new Date();
+      const before = await firstInLine(loansRepository, copy.id, tx);
+      const tellNext = () =>
+        tellWhoseTurn(
+          loansRepository,
+          noticesRepository,
+          { copyId: copy.id, before, userId },
+          tx,
+        );
 
       if (answer.answer === "no") {
         await loansRepository.update(
@@ -91,6 +104,7 @@ export const answerRequestUseCase = (
           },
           tx,
         );
+        await tellNext();
         logger.debug("Declined", { loanId: loan.id });
         return;
       }
@@ -99,7 +113,7 @@ export const answerRequestUseCase = (
       if (open.some((one) => lent.includes(one.status))) {
         throw new ChangedError("copy-lent");
       }
-      if (lineOf(open)[0]?.id !== loan.id) {
+      if (before?.id !== loan.id) {
         throw new UnauthorizedError("Answer the first in line first.");
       }
       await loansRepository.update(
@@ -108,8 +122,8 @@ export const answerRequestUseCase = (
           status: "accepted",
           answeredAt,
           ...("dueOn" in answer
-            ? { dueOn: answer.dueOn }
-            : { periodDays: answer.periodDays }),
+            ? { dueOn: answer.dueOn, periodDays: null }
+            : { periodDays: answer.periodDays, dueOn: null }),
         },
         tx,
       );
@@ -123,6 +137,7 @@ export const answerRequestUseCase = (
         },
         tx,
       );
+      await tellNext();
       logger.debug("Accepted", { loanId: loan.id });
     });
   };
