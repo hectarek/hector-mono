@@ -4,29 +4,20 @@ import type { INoticesRepository } from "@/src/application/repositories/notices.
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { nightToChange } from "@/src/application/use-cases/nights/can-see-night";
+import { cancelAndTell } from "@/src/application/use-cases/nights/cancel-and-tell";
 import {
   InputParseError,
   UnauthorizedError,
 } from "@/src/entities/errors/common";
 import type { GameNight } from "@/src/entities/models/game-night.model";
-import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
 import { isUpcoming } from "@/src/entities/night";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 export type ICancelNightUseCase = ReturnType<typeof cancelNightUseCase>;
 
-// Who a cancelled night tells (data-model.md, night-cancelled; D11): everyone going, invited or
-// waiting. Someone who said maybe or can't go isn't.
-const TOLD: ReadonlySet<GameNightAttendee["status"]> = new Set([
-  "going",
-  "invited",
-  "waitlisted",
-]);
-
-// Cancel a night (D11, R34), after its dialog: only its host, and only while it's coming up. It
-// sets cancelled_at, so the night leaves Nights for everyone and shows under past nights as
-// Cancelled, and everyone going, invited or waiting is told (night-cancelled), with the host's
-// note. The night keeps its list and its table.
+// Cancel a night (D11, R34), after its dialog: only its host, and only while it's coming up.
+// cancelAndTell sets cancelled_at and tells everyone going, invited or waiting, with the host's
+// note.
 export const cancelNightUseCase = (
   friendshipsRepository: IFriendshipsRepository,
   gameNightsRepository: IGameNightsRepository,
@@ -55,26 +46,14 @@ export const cancelNightUseCase = (
       if (!isUpcoming(night.startsAt, todayIn(PLAN_TIME_ZONE, now))) {
         throw new InputParseError("This night is over.");
       }
-      const cancelled = await gameNightsRepository.update(
-        night.id,
-        { cancelledAt: now },
+      const cancelled = await cancelAndTell(
+        gameNightsRepository,
+        noticesRepository,
+        night,
+        note,
+        now,
         tx,
       );
-      const list = await gameNightsRepository.listAttendees([night.id], tx);
-      for (const one of list) {
-        if (one.userId !== userId && TOLD.has(one.status)) {
-          await noticesRepository.add(
-            {
-              userId: one.userId,
-              type: "night-cancelled",
-              createdBy: userId,
-              gameNightId: night.id,
-              answerNote: note,
-            },
-            tx,
-          );
-        }
-      }
       logger.debug("Night cancelled", { gameNightId: night.id });
       return cancelled;
     });

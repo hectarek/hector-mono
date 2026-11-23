@@ -23,6 +23,10 @@ import type { IUserGamesRepository } from "@/src/application/repositories/user-g
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
+import { deleteAccountUseCase } from "@/src/application/use-cases/account/delete-account.use-case";
+import { listWhatEndsUseCase } from "@/src/application/use-cases/account/list-what-ends.use-case";
+import { listAccountsUseCase } from "@/src/application/use-cases/admin/list-accounts.use-case";
+import { removeAccountUseCase } from "@/src/application/use-cases/admin/remove-account.use-case";
 import { requireAdmin } from "@/src/application/use-cases/admin/require-admin";
 import { getGameUseCase } from "@/src/application/use-cases/catalog/get-game.use-case";
 import { searchGamesUseCase } from "@/src/application/use-cases/catalog/search-games.use-case";
@@ -135,6 +139,7 @@ import { UserProfilesRepository } from "@/src/infrastructure/repositories/user-p
 import { MockUserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository.mock";
 import { UserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository";
 import { MockUserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository.mock";
+import { MockAuthService } from "@/src/infrastructure/services/mock-auth.service";
 import { MockFileStorageService } from "@/src/infrastructure/services/mock-file-storage.service";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { MockTransactionManagerService } from "@/src/infrastructure/services/mock-transaction-manager.service";
@@ -145,7 +150,7 @@ import {
   insertCastRows,
   writeCastPeople,
 } from "@/tests/_support/cast";
-import { resetDatabase, sql, testDb } from "@/tests/_support/database";
+import { resetDatabase, testDb } from "@/tests/_support/database";
 
 type Repositories = {
   friendLinks: IFriendLinksRepository;
@@ -259,6 +264,18 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
   // You is the admin, as on the canvas's E5.
   const adminAccount = { adminUserId: CAST.people.you.id };
   const admin = requireAdmin(adminAccount, log);
+  const auth = new MockAuthService();
+  const accountRepositories = [
+    friendLinks,
+    friendRequests,
+    friendships,
+    gameNights,
+    loans,
+    notices,
+    userGames,
+    userProfiles,
+    userSettings,
+  ] as const;
 
   return {
     repos,
@@ -606,6 +623,33 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     ),
     listPastNights: listPastNightsUseCase(gameNights, userProfiles),
 
+    // Deleting an account, and the admin's removal (U22). `auth` records each sign-in deleted.
+    auth,
+    listWhatEnds: listWhatEndsUseCase(
+      userGames,
+      loans,
+      games,
+      userProfiles,
+      gameNights,
+    ),
+    deleteAccount: deleteAccountUseCase(
+      ...accountRepositories,
+      storage,
+      auth,
+      transactions,
+      log,
+    ),
+    listAccounts: listAccountsUseCase(admin, userProfiles, userGames, loans),
+    removeAccount: removeAccountUseCase(
+      admin,
+      ...accountRepositories,
+      removedUsers,
+      storage,
+      auth,
+      transactions,
+      log,
+    ),
+
     // What should we play? and tables (U20)
     whatToPlay: whatToPlayUseCase(
       friendships,
@@ -779,13 +823,11 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       }
     },
 
-    // An account the admin removed (G8), until U22 adds the removal.
+    // An account the admin removed (G8), with no other change, as a gate test needs.
     async addRemovedUser(userId: string): Promise<void> {
-      if (removedUsers instanceof MockRemovedUsersRepository) {
-        removedUsers.userIds.add(userId);
-      } else {
-        await sql("insert into removed_users (user_id) values ($1)", [userId]);
-      }
+      await transactions.startTransaction((tx) =>
+        removedUsers.add(userId, new Date(), tx),
+      );
     },
   };
 }

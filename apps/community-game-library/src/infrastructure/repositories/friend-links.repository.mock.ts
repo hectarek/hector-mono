@@ -32,4 +32,8 @@ export class MockFriendLinksRepository implements IFriendLinksRepository {
     this.rows.push(row);
     return { ...row };
   }
+
+  async remove(userId: string): Promise<void> {
+    this.rows = this.rows.filter((row) => row.userId !== userId);
+  }
 }

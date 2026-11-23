@@ -66,4 +66,14 @@ export class UserSettingsRepository
       this.handleError(err, "update", { userId });
     }
   }
+
+  async remove(userId: string, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(userSettings)
+        .where(eq(userSettings.userId, userId));
+    } catch (err) {
+      this.handleError(err, "remove", { userId });
+    }
+  }
 }

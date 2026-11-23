@@ -24,6 +24,18 @@ export type NameAndPiece = Pick<
   "userId" | "name" | "pieceShape" | "pieceColor"
 >;
 
+// Someone whose account is gone (R41, U22). What stays of them, their past loans of others'
+// copies, the notices others got about them, their suggestions and the nights they hosted, shows
+// them by this name and the bone pawn (data-model.md, What goes with a copy or an account).
+export function formerMember(userId: string): NameAndPiece {
+  return {
+    userId,
+    name: "A former member",
+    pieceShape: "pawn",
+    pieceColor: "bone",
+  };
+}
+
 // A new member's profile (A4). A photo comes after, through its own step.
 export type NewUserProfile = NameAndPiece & { phone?: string | null };
 

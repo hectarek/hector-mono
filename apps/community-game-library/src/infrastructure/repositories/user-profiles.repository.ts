@@ -92,4 +92,25 @@ export class UserProfilesRepository
       this.handleError(err, "update", { userId });
     }
   }
+
+  async listAll(tx?: ITransaction): Promise<UserProfile[]> {
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(userProfiles)
+        .orderBy(asc(userProfiles.userId));
+    } catch (err) {
+      this.handleError(err, "listAll");
+    }
+  }
+
+  async remove(userId: string, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(userProfiles)
+        .where(eq(userProfiles.userId, userId));
+    } catch (err) {
+      this.handleError(err, "remove", { userId });
+    }
+  }
 }

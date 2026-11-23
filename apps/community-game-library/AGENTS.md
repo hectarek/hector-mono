@@ -22,7 +22,7 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U21):
+The spec's code map, as far as it's built (U1 to U22):
 
 ```
 app/
@@ -70,7 +70,8 @@ app/
                              # [id]/tables/ (D9), each with its view, U20; [id]/cancel-night.tsx
                              # (Cancelling and D11), [id]/calendar/ (KTD24's route) and past/ (D12), U21;
                              # you/ (E5), you/edit/ (E6) and
-                             # you/notices/ (E7, U11)
+                             # you/notices/ (E7, U11); you/delete/ (E8, with E9's dialog in
+                             # delete-account.tsx) and admin/accounts/ (G8, remove-account.tsx), U22
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
   removed/                   # a removed account's only page
   _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader; U11's
@@ -120,10 +121,11 @@ src/
                              # CHANGED_REASONS), loggable.ts (job-search's)
     models/                  # a Zod model per table (see Data Model), with its own fixed lists;
                              # user, session, transaction, logger; notice.model.ts's InboxNotice, a notice
-                             # with what it points at (U11)
+                             # with what it points at (U11); user-profile.model.ts's formerMember (U22)
     loan.ts                  # the statuses, LOAN_MOVES and canMove, PASS_ALONG_FOLLOW_ONS, the
                              # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6), ordinal;
-                             # U14's MORE_TIME_DAYS and moreTimeFrom; U16's ENDED_STATUSES and daysLate
+                             # U14's MORE_TIME_DAYS and moreTimeFrom; U16's ENDED_STATUSES and daysLate;
+                             # U22's isUnsettled, a loan to settle before its members can leave
     account-state.ts         # AccountState: removed, needs-profile, or ready (KTD3)
     in-app-browser.ts        # IN_APP_BROWSERS and inAppBrowserOf: A9's list, each pattern with its source
     night.ts                 # seatsTaken and seatsOpen (the host counts), isUpcoming (until its Eastern
@@ -176,9 +178,14 @@ src/
                              # game-nights' getById, lock, listVisibleFrom, create, update, listAttendees,
                              # getAttendee, addAttendee, listGames and addGames, and user-games' listByIds;
                              # U19: game-nights' getByLinkToken, updateAttendee, removeAttendee,
-                             # listWaitingInvites, listWentWith, removeGames and the votes
-    services/                # interfaces: authentication, logger, transaction-manager, file-storage
-    use-cases/admin/         # require-admin
+                             # listWaitingInvites, listWentWith, removeGames and the votes; U22:
+                             # removed-users' add, user-profiles' listAll and remove, user-settings' and
+                             # friend-links' remove, notices' removeAllFor, game-nights' removePlacesOf
+    services/                # interfaces: authentication (U22's signOut and deleteUser), logger,
+                             # transaction-manager, file-storage
+    use-cases/account/       # U22: list-what-ends, delete-account, and end-account.ts (endAccount,
+                             # removePhotoFile), what deleting and the admin's removal share
+    use-cases/admin/         # require-admin; U22: list-accounts (G8's search), remove-account
     use-cases/catalog/       # get-game, search-games (U6)
     use-cases/copies/        # add-user-game, get-user-game, list-library (U8), list-my-library, put-in-box, remove-user-game,
                              # require-own-copy (a plain function), set-lending, set-pass-along-for-all,
@@ -205,7 +212,8 @@ src/
                              # bring-games.ts (nightToBringTo), which the moves share; U20: what-to-play,
                              # split-tables, and play-choices.ts (playChoices), the games they read;
                              # U21: cancel-night, list-past-nights, and nightToChange (can-see-night.ts),
-                             # where every change to a night starts
+                             # where every change to a night starts; U22: cancel-and-tell.ts
+                             # (cancelAndTell), which cancelling a night and its host's leaving share
     use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
                              # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
@@ -216,6 +224,8 @@ src/
                              # remove-photo, set-photo, update-profile; get-notice-settings and
                              # update-notice-settings (U11)
   interface-adapters/
+    controllers/account/     # one per use case of account/, and admin/'s list-accounts and
+                             # remove-account (U22)
     controllers/catalog/     # get-game, search-games
     controllers/friends/     # one per use case of friends/, but require-friend (U10)
     controllers/copies/      # one per use case of copies/, but require-own-copy
@@ -291,6 +301,8 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **U19's patterns.** Every move that changes a night's seats takes its lock first (`lock`), then `nightToSee`, and ends with `fillSeats` (`night-seats.ts`): each waitlisted member who fits moves to going, in the waitlist's order, skipping one who doesn't, and is told (`waitlist-seat`, AE4); Edit's added seats do the same. `fits`, `waitlistOf` and `movingUp` are pure (`night.ts`). A member who stops going takes their games off the table with everyone's votes on them, and their own votes go (`leaveTable`); unfriending takes each off the other's nights coming up the same way. Going when the seat went meanwhile is `ChangedError('seats-taken')`, whose next step is Join the waitlist; joining the waitlist goes straight to going when the seats are there after all, and keeps a place already held. The host goes to their own night and doesn't answer. A night only invited people see gets its link when it's made or switched to them; the link reaches only someone who may invite (`get-night` blanks it otherwise), and `check-night-link` gives D14 the title, the start and the seats, never the place. `/n/<token>` copies `/f/<token>`: the proxy lets it through signed out, its client part (`open-night.tsx`) sends the link once the page is open, a link's invite has no `invited_by`, so the Nights tab, which counts invites by name with no answer, leaves it out, and a new member goes on to A4 already on the list. A link's address is built from the request's host, as E2's is, over http on localhost; a page that reads `headers()` needs `mock.module("next/headers")` in its screen test. D3's sheet (`night-answer.tsx`) offers Go alone or Join the waitlist when a member not going yet brings more guests than seats (AE4); someone going can't add more than the seats open. Invite people (D10) and Already invited list invites by name only; the full night's line is D10's. The screen tests share the container's mock rows within a file, so a file whose tests answer, invite or vote calls `resetCastNights()` (`tests/_support/members.ts`) in `beforeEach`. People you may know adds people who went to a past night with the member (`listWentWith`), "At Halloween one-shots" where no friend is shared; a shared friend wins. Kit Sample's answers and invite on the test project stay as test rows.
 - **U20's patterns.** What should we play? and tables are pure rules (`what-to-play.ts`, `tables.ts`; KTD23), and the use cases only gather what they choose from (`playChoices`: the night's table in the order it was laid, with votes summed per game, and every game on the shelves the member can see, one each, a game on the table keeping its place there), so the pages run the rules in the browser as the choices change, as B2's live count does. A game missing a value a rule needs is left out with why (rule 14), the people first, then the time, then the complexity. D9's split seats each party (a member and their guests) at the first table with room under an even share, or where most room is left, so a big party makes its table larger rather than failing; a split starts at two tables, and one table for all is offered beside it, not as the split; with two or three going there's no split, and the one table is the answer. D8's Time and Complexity are the shared ToggleGroup's filter chips and From its segmented control (`spacing={0}`), which the theme draws; tapping the picked complexity clears it. The tables' message for the share sheet names everyone, the member too, and nothing is stored.
 - **U21's patterns.** Every change to a night starts with `nightToChange` (`can-see-night.ts`) in place of `nightToSee`, which refuses a cancelled night with `ChangedError('night-cancelled')` (KTD16), so a page opened before the night was cancelled gets the changed line; a new change on a night starts with it too. A night is over once its Eastern day has gone or it's cancelled: its page then says only what it was (who came, or who was going, and its table), with no answer, invite, link, waitlist, table moves, What should we play?, calendar or Cancelling, and Past game nights (`listVisiblePast`, read 36 hours ahead and kept by the Eastern day) lists both kinds, newest first, a cancelled night stamped Cancelled. Cancelling keeps the night's list and table, and tells everyone going, invited or waiting (`night-cancelled`, the note in `answer_note`); the dialog then opens Nights and shows D15's message, with Text them too only when someone was told. The calendar file is a route handler at `/nights/[id]/calendar` that reads the night through get-night's controller, so only someone who can see the night gets it (404 for anyone else); Add to my calendar links it with a plain `<a>`, not `Link`, which would treat it as a page, and without `download`, so the browser hands the `text/calendar` response to the phone's calendar (still to check on a phone). D1's own tests count list items under Coming up only, since Past game nights is a row of its own below them.
+- **U22's patterns.** An account ends through `endAccount` (`src/application/use-cases/account/end-account.ts`), which deleting one's own (E9) and the admin's removal (G8) both run in one transaction: refused with `ChangedError('loan-open')` while a loan of theirs `isUnsettled` (a game out, being given back or handed on, or a yes being handed on), read again under each copy's lock; their requests withdrawn or cancelled with no notices; the nights they host coming up cancelled through `cancelAndTell`; other hosts' nights left as unfriending leaves them, the waitlist taking the seats; then their copies (the database cascades each one's loans, box and places on tables), friendships, friend requests, friend link, settings, inbox and profile. The photo's file and the sign-in go after the commit, and neither failure undoes it: both are logged. What stays of them (past loans of others' copies, a copy's history, the notices others got about them, the nights they hosted) shows them as `formerMember(userId)`, "A former member" with the bone pawn, so a read that looks people up falls back to it rather than dropping the row. The removal adds the `removed_users` row in the same transaction, so a session the removed account still has sees only `/removed` (the gate checks it before the missing profile).
+- **How a Neon Auth user is deleted** (U22, from Neon's docs and checked on the test project, 2026-11-23): `NeonAuthService.deleteUser` calls Neon's Delete Auth User endpoint (`DELETE https://console.neon.tech/api/v2/projects/{project}/branches/{branch}/auth/users/{id}`) with a project-scoped API key, which deletes the user with its sessions and its accounts. Better Auth's own `delete-user` is switched off in Neon's managed setup (it answers 404, with or without a password), and its admin `remove-user` needs a session with Neon Auth's admin role (403 for anyone else), so neither serves a member deleting their own account; deleting rows in `neon_auth` ourselves is out, since Neon manages that schema and its docs let apps only read and reference it. Without `NEON_API_KEY`, `NEON_PROJECT_ID` and `NEON_BRANCH_ID` the sign-in stays and a warning is logged; the app's rows still go. The action signs the device out after (`IAuthenticationService.signOut`, Neon's sign-out through the server SDK, which clears the session copy too).
 
 ## Data Model
 
@@ -304,7 +316,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 - **A request for more time** sets the three `more_time_` columns together, and either answer clears all three.
 - **A friendship is two rows**, made and deleted together: `IFriendshipsRepository.add` and `remove` write both in one statement, and `add` is a no-op for two people who are friends already. Accepting a friend request deletes it, and its notice goes with it.
 - **A notice** is written in its change's own transaction (KTD7) and points at one thing. A reminder has no `created_by` and carries `reminded_on`; the daily run inserts it with `on conflict do nothing`.
-- **User ids are Neon Auth's, with no foreign key.** The database deletes only what hangs off a copy, a loan, a night, a suggestion or a friend request (data-model.md, What goes with a copy or an account); deleting a member (U22) deletes the rest of their rows itself.
+- **User ids are Neon Auth's, with no foreign key.** The database deletes only what hangs off a copy, a loan, a night, a suggestion or a friend request (data-model.md, What goes with a copy or an account); deleting a member deletes the rest of their rows itself (`endAccount`, U22).
 - **An expansion in a copy's box** has the copy's game as its `base_game_id`. No key checks it.
 - **`updated_at`** moves on every update drizzle writes (`$onUpdate` in the schema). Raw SQL that updates a row sets it itself.
 - **The first migration starts with `create extension if not exists pg_trgm`**, added by hand: drizzle-kit writes no extensions. A migration is never edited once it's applied anywhere, since its hash is recorded there and the migration scripts would then take that database for another app's.
@@ -348,7 +360,7 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 
 ## Environments
 
-- Env names, in `.env.example` and `turbo.json`: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `ADMIN_USER_ID`, `STORAGE_AWS_ENDPOINT_URL_S3`, `STORAGE_AWS_REGION`, `STORAGE_AWS_ACCESS_KEY_ID`, `STORAGE_AWS_SECRET_ACCESS_KEY` (Neon's quickstart names with `STORAGE_` in front, so they never mix with the `AWS_` variables a function's platform sets), `CRON_SECRET` (the token Vercel's schedule sends the daily run, KTD8; production only, set by Hector before U17 merges) and `LOG_LEVEL`. `turbo.json` also lists `VERCEL_ENV` for the migration check. Turborepo withholds from `next build` any variable `turbo.json` doesn't list.
+- Env names, in `.env.example` and `turbo.json`: `DATABASE_URL`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `ADMIN_USER_ID`, `STORAGE_AWS_ENDPOINT_URL_S3`, `STORAGE_AWS_REGION`, `STORAGE_AWS_ACCESS_KEY_ID`, `STORAGE_AWS_SECRET_ACCESS_KEY` (Neon's quickstart names with `STORAGE_` in front, so they never mix with the `AWS_` variables a function's platform sets), `CRON_SECRET` (the token Vercel's schedule sends the daily run, KTD8; production only, set by Hector before U17 merges), `NEON_API_KEY`, `NEON_PROJECT_ID` and `NEON_BRANCH_ID` (Neon's API, for deleting an account's sign-in, U22; a project-scoped key Hector makes for each project) and `LOG_LEVEL`. `turbo.json` also lists `VERCEL_ENV` for the migration check. Turborepo withholds from `next build` any variable `turbo.json` doesn't list.
 - The local `.env` holds the Neon test project's values only: `community-game-library-test` (AWS US East, N. Virginia), whose database carries that name as its comment, with Neon Auth trusting localhost, its sign-up code check off, and both buckets. Its storage credential is "community-game-library local and previews" (U1, 2026-11-21). `ADMIN_USER_ID` is You's account (Robin Vale, the canvas's admin on E5), since U4 (2026-11-21).
 - Vercel's Preview environment holds the same test project's values, entered through the Vercel connector when H7's project was made (2026-11-21): the pooled database, Neon Auth's address, a cookie secret of its own, You as `ADMIN_USER_ID`, and a storage credential of its own, "community-game-library previews", so the previews' key can be revoked without touching local work. Secrets are Vercel's sensitive type, so they can't be read back or renamed: to change one, make a new value and replace it, and to fix a name, add the variable again under the right one and delete the old (the API refuses a sensitive variable's new name, 2026-11-22).
 - **The cast's accounts** (U4, 2026-11-21): each of the canvas's nine people has an account on the test project, `robin@example.com` for You and `<name>@example.com` for the rest, made through Neon Auth's sign-up behind the auth route, all with one generated password. `.cast-accounts.json` in this folder holds each member's email and user id and the password: gitignored, never committed, never copied into a doc, and meant for agents to sign in with on the dev server. Claude Code's auto-mode classifier refused reading the password into a session (2026-11-22), so a screen check signs in instead as a test account made through the app's sign-up and given friends on the test project, as U6 did with Kit Sample (`kit.u6@example.com`, Sam's and Alice's friend; its password isn't kept), while the screen tests cover what only You sees. The seed's `--as` takes its ids. The test project also has U2's shell account, `robin.u2-shell@example.com`, which isn't the cast's.

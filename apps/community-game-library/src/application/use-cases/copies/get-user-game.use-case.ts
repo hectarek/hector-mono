@@ -8,7 +8,10 @@ import { type CopyState, copyState } from "@/src/entities/loan";
 import type { Game } from "@/src/entities/models/game.model";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
-import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
+import {
+  formerMember,
+  type NameAndPiece,
+} from "@/src/entities/models/user-profile.model";
 
 export type IGetUserGameUseCase = ReturnType<typeof getUserGameUseCase>;
 
@@ -46,9 +49,14 @@ export const getUserGameUseCase = (
     const boxed = await userGamesRepository.listExpansionsInBoxes([copy.id]);
     const open = await loansRepository.listOpenForCopies([copy.id]);
     const history = await loansRepository.listHistoryForCopy(copy.id);
-    const people = await userProfilesRepository.getManyByUserIds([
+    const borrowers = [
       ...new Set([...open, ...history].map((loan) => loan.borrowerUserId)),
-    ]);
+    ];
+    const found = new Map(
+      (await userProfilesRepository.getManyByUserIds(borrowers)).map(
+        (person) => [person.userId, person],
+      ),
+    );
     return {
       copy,
       game,
@@ -56,8 +64,9 @@ export const getUserGameUseCase = (
       boxed: boxed.map((row) => row.gameId),
       state: copyState(copy, open, userId, today),
       history,
+      // A borrower whose account is gone shows as A former member (U22).
       people: Object.fromEntries(
-        people.map((person) => [person.userId, person]),
+        borrowers.map((id) => [id, found.get(id) ?? formerMember(id)]),
       ),
     };
   };

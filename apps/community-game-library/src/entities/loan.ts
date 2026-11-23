@@ -50,6 +50,17 @@ export const ENDED_STATUSES = [
 const isIn = (statuses: readonly LoanStatus[], status: LoanStatus) =>
   statuses.includes(status);
 
+// A loan its members have to settle before either leaves (R41, E8): a game is out, being given
+// back or handed on, or a yes is being handed on to its borrower, which can't be cancelled.
+export function isUnsettled(
+  loan: Pick<LoanFields, "status" | "previousLoanId">,
+): boolean {
+  return (
+    isIn(HOLDING_STATUSES, loan.status) ||
+    (loan.status === "accepted" && loan.previousLoanId !== null)
+  );
+}
+
 // The fields of a loans row these rules read (src/entities/models/loan.model.ts has them all).
 type LoanFields = {
   id: string;

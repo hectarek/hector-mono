@@ -28,4 +28,9 @@ export interface IUserProfilesRepository {
     changes: UserProfileChanges,
     tx?: ITransaction,
   ): Promise<void>;
+
+  // Every member, for the admin's search (G8, U22).
+  listAll(tx?: ITransaction): Promise<UserProfile[]>;
+  // An account's end (U22).
+  remove(userId: string, tx: ITransaction): Promise<void>;
 }

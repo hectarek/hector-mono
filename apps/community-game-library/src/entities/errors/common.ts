@@ -45,8 +45,8 @@ export class UnauthorizedError extends Error {
 }
 
 // Something changed underneath a person between seeing a screen and acting on it (KTD16): the
-// copy was lent, the request withdrawn or answered, the last seat taken, the night cancelled, or
-// the two aren't friends any more. Nothing was sent; the screen says what changed in one line
+// copy was lent, the request withdrawn or answered, the last seat taken, the night cancelled, the
+// two aren't friends any more, or a loan opened that has to be settled before an account goes. Nothing was sent; the screen says what changed in one line
 // (app/_lib/changed-lines.ts) and offers the next best action.
 export const CHANGED_REASONS = [
   "copy-lent",
@@ -55,6 +55,7 @@ export const CHANGED_REASONS = [
   "seats-taken",
   "night-cancelled",
   "not-friends",
+  "loan-open",
 ] as const;
 export type ChangedReason = (typeof CHANGED_REASONS)[number];
 

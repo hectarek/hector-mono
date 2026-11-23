@@ -56,7 +56,7 @@ describe("the admin's pages", () => {
   });
 
   // screens.md, Empty lists: The admin's suggestions.
-  it("says when no suggestions wait (G1)", async () => {
+  it("says when no suggestions wait, with the catalog's tasks and Accounts (G1)", async () => {
     const view = render(await AdminPage());
 
     expect(view.getByRole("heading", { level: 1 }).textContent).toBe("Admin");
@@ -64,6 +64,7 @@ describe("the admin's pages", () => {
     for (const [row, href] of [
       ["Find a game to edit", "/admin/games"],
       ["Add a game by hand", "/admin/games/new"],
+      ["Remove an account", "/admin/accounts"],
     ] as const) {
       expect(
         within(view.container)

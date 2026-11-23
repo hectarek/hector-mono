@@ -25,4 +25,15 @@ export class RemovedUsersRepository
       this.handleError(err, "isRemoved", { userId });
     }
   }
+
+  async add(userId: string, removedAt: Date, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .insert(removedUsers)
+        .values({ userId, removedAt })
+        .onConflictDoNothing();
+    } catch (err) {
+      this.handleError(err, "add", { userId });
+    }
+  }
 }

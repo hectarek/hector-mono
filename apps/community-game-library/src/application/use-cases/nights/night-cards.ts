@@ -2,7 +2,10 @@ import type { IGameNightsRepository } from "@/src/application/repositories/game-
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { GameNight } from "@/src/entities/models/game-night.model";
 import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
-import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
+import {
+  formerMember,
+  type NameAndPiece,
+} from "@/src/entities/models/user-profile.model";
 import { seatsOpen } from "@/src/entities/night";
 
 // What D1's cards, E3's rows and a night's page share: each night with its host, the people going
@@ -47,10 +50,8 @@ export async function nightCards(
     ).map((person) => [person.userId, person]),
   );
   return nights.flatMap((night) => {
-    const host = people.get(night.createdBy);
-    if (!host) {
-      return [];
-    }
+    // A host whose account is gone shows as A former member (U22).
+    const host = people.get(night.createdBy) ?? formerMember(night.createdBy);
     const list = lists.filter((one) => one.gameNightId === night.id);
     const going = list
       .filter((one) => one.status === "going")

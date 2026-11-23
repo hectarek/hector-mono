@@ -44,4 +44,8 @@ export class MockUserSettingsRepository implements IUserSettingsRepository {
     ) as UserSettingsChanges;
     this.settings.set(userId, { ...settings, ...set, updatedAt: new Date() });
   }
+
+  async remove(userId: string): Promise<void> {
+    this.settings.delete(userId);
+  }
 }
