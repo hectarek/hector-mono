@@ -59,9 +59,12 @@ export default async function CopyPage({
   const holder = personOf(state.holder?.borrowerUserId);
   if (state.holder && holder) {
     whereLines.push({
-      text: state.holder.dueOn
-        ? `${holder.name} has it · due ${formatDate(state.holder.dueOn, today)}`
-        : `${holder.name} has it`,
+      text:
+        state.holder.status === "returning" && state.holder.returnedOn
+          ? `${holder.name} gave it back ${formatDate(state.holder.returnedOn, today)}`
+          : state.holder.dueOn
+            ? `${holder.name} has it · due ${formatDate(state.holder.dueOn, today)}`
+            : `${holder.name} has it`,
       person: holder,
     });
   } else if (state.kind === "not-lent") {

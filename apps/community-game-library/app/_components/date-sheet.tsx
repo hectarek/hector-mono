@@ -35,16 +35,18 @@ function weekdayOf(date: string): number {
   return new Date(`${date}T00:00:00Z`).getUTCDay();
 }
 
-// The sheet every date choice opens (X1; R16, R20, R29): a month of days, today marked, and the
-// days before `from` switched off (a day before the pick-up, or before the current due date;
-// screens.md, When something goes wrong). Dates are "YYYY-MM-DD", and today comes from the
-// server (KTD9).
+// The sheet every date choice opens (X1; R16, R18, R19, R20, R29): a month of days, today
+// marked, and the days before `from` switched off (a day before the pick-up, or before the
+// current due date; screens.md, When something goes wrong), and after `until` for a day that
+// already happened (a pick-up or a return, U13). Dates are "YYYY-MM-DD", and today comes from
+// the server (KTD9).
 export function DateSheet({
   open,
   onOpenChange,
   title = "Pick a date",
   today,
   from,
+  until,
   value,
   onPick,
 }: {
@@ -54,6 +56,8 @@ export function DateSheet({
   today: string;
   // The first day that can be picked.
   from?: string;
+  // The last day that can be picked.
+  until?: string;
   value?: string;
   onPick: (date: string) => void;
 }) {
@@ -62,6 +66,7 @@ export function DateSheet({
       <Month
         today={today}
         from={from}
+        until={until}
         value={value}
         onPick={(date) => {
           onPick(date);
@@ -76,11 +81,13 @@ export function DateSheet({
 function Month({
   today,
   from,
+  until,
   value,
   onPick,
 }: {
   today: string;
   from?: string;
+  until?: string;
   value?: string;
   onPick: (date: string) => void;
 }) {
@@ -89,6 +96,7 @@ function Month({
   const days = daysOf(month);
   const firstDay = days[0] ?? `${month}-01`;
   const earliest = from?.slice(0, 7);
+  const latest = until?.slice(0, 7);
 
   return (
     <>
@@ -106,6 +114,7 @@ function Month({
         <button
           type="button"
           aria-label="Next month"
+          disabled={latest !== undefined && month >= latest}
           onClick={() => setMonth(shiftMonth(month, 1))}
           className="flex size-11 shrink-0 items-center justify-center text-foreground hover:text-destructive"
         >
@@ -139,7 +148,10 @@ function Month({
                 aria-label={isToday ? `Today, ${label}` : label}
                 aria-pressed={day === chosen}
                 aria-current={isToday ? "date" : undefined}
-                disabled={from !== undefined && day < from}
+                disabled={
+                  (from !== undefined && day < from) ||
+                  (until !== undefined && day > until)
+                }
                 onClick={() => setChosen(day)}
                 className="flex h-11 flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-foreground bg-secondary font-mono text-sm leading-none font-medium text-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground"
               >

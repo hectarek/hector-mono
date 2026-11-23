@@ -22,11 +22,12 @@ A private library for a circle of friends' board games: who owns which games, bo
 
 ## Architecture
 
-The spec's code map, as far as it's built (U1 to U11):
+The spec's code map, as far as it's built (U1 to U17):
 
 ```
 app/
   (api)/api/auth/[...path]/  # Neon Auth's endpoints, passed through; logged by status, path and class
+  (api)/api/cron/daily/      # the daily run (KTD8, U17): POST with CRON_SECRET as a bearer token
   (auth)/welcome/            # where signed-out visitors start: A1, or A9 inside a chat app's browser
                              # (page.tsx, welcome-screen.tsx)
   (auth)/auth/[path]/        # Neon's forms: make an account (A2), sign in (A8); layout.tsx loads the kit
@@ -39,14 +40,28 @@ app/
                              # library-search.tsx and library-search-results.tsx, shared with My library),
                              # loading.tsx (its header and skeleton); library-views.tsx (All friends | My
                              # library, U7);
-                             # games/[id]/ (B5, B11, B13); my-library/ (B6, A7), my-library/add/ (B8) and
+                             # games/[id]/ (B5, B11, B13; C1 in ask-to-borrow.tsx, U12; C10 in
+                             # join-line.tsx, U15); my-library/ (B6,
+                             # A7), my-library/add/ (B8) and
                              # my-library/suggest/ (B9); admin/ (G1; suggestions/[id]/ G2, suggestions/answered/
                              # G7, games/ G5, games/new/ G3, games/[id]/ G4; admin-reads.ts, their Not found;
                              # admin-loading.tsx, the skeleton each route's loading.tsx renders);
                              # copies/[id]/ (B7, B14: copy-form.tsx, remove-copy.tsx); friends/ (E1; link/
                              # E2; [userId]/ E3, with E4's dialog in unfriend-button.tsx, U10); inbox/ (F1
-                             # and F2, with mark-read.tsx, U11); you/ (E5), you/edit/ (E6) and you/notices/
-                             # (E7, U11)
+                             # and F2, with mark-read.tsx, U11); loans/ (C4's Needs you and You asked, U12;
+                             # In line, U15; Record a loan and Past loans, U16); loans/record/ (C9, with
+                             # record-loan-form.tsx, U16); loans/past/ (C12, ?show=lent, U16);
+                             # loans/[id]/ (C16, C2 with answer-form.tsx, C17 and C3's top, U12;
+                             # loan-move-button.tsx, the moves that ask first; U13: C3's pick-up-form.tsx,
+                             # C17's owner-pick-up.tsx, C5 and C7 in out-views.tsx with give-back-form.tsx
+                             # and C8's is-it-back.tsx, day-field.tsx, and loan-parts.tsx, the parts the
+                             # boards share; U14: C6's more-time-sheet.tsx, C13's more-time-answer.tsx,
+                             # C14's change-due-sheet.tsx, C15's call-back-button.tsx, date-choice.tsx;
+                             # U15: load-loan.ts, the pages' one read; pass-along/ (C11), with
+                             # pass-along-moves.tsx (I gave it to Jo, I still have it); C7's
+                             # remove-from-line.tsx);
+                             # you/ (E5), you/edit/ (E6) and
+                             # you/notices/ (E7, U11)
   account/[path]/            # Neon's account views, under the kit's own layout (no link to it yet)
   removed/                   # a removed account's only page
   _components/               # the look (U2, see Screens): app-header (AppBar, AppHeader; U11's
@@ -57,11 +72,14 @@ app/
                              # sheet, stamp, tab-bar, tab-count, track; action-form. U5's: auth-notice,
                              # home-screen-steps, open-in-browser (A9's Copy the link), piece-picker,
                              # profile-form (A4 and E6), steps. U6's: copy-row and copy-state (a copy and
-                             # its words, B13), game-row (GameCardRow, CatalogRow), game-video. U7's:
+                             # its words, B13; U12's copySummary, and a row's action), game-row
+                             # (GameCardRow, CatalogRow), game-video. U7's:
                              # i-own-it (IOwnIt, and AddedTally and AddedSoFar, B8's count), in-my-box,
                              # saved-switch (a switch that saves as it flips). U8's: library-list (the one
                              # list), library-controls (Filter, Sort, chips), filter-sheet (B2), sort-sheet
-                             # (B12). U9's: game-form (G3 and G4). U10's: friend-row (a person with Accept and
+                             # (B12). U9's: game-form (G3 and G4). U13's: loan-track (a loan's spaces on
+                             # the track, trackSpaces); date-sheet's until. U15's: leave-line (Leave the
+                             # line, from a game's page or the request's). U10's: friend-row (a person with Accept and
                              # Decline, You asked and Cancel request, or Add friend), what-its-for (A1's and
                              # A3's three lines)
   _lib/                      # current-user, auth-paths, safe-redirect, call-action, use-closes-on-leave,
@@ -76,7 +94,11 @@ app/
                              # removeCopy; suggestions.ts (U9): suggestGame; admin.ts (U9): answerSuggestion,
                              # addGame, updateGame; friends.ts (U10): makeFriendLink, openFriendLink,
                              # sendFriendRequest, answerFriendRequest, cancelFriendRequest, unfriend;
-                             # notices.ts (U11): markInboxRead, setNoticeGroup
+                             # notices.ts (U11): markInboxRead, setNoticeGroup; loans.ts (U12): requestLoan,
+                             # withdrawRequest, answerRequest, cancelLoan; U13: confirmPickUp, giveBack,
+                             # confirmReturn; U14: askMoreTime, answerMoreTime, changeDueDate, callBack;
+                             # U15: requestLoan's join, leaveLine, removeFromLine, passAlong,
+                             # confirmPassAlong, takeBackPassAlong; U16: recordLoan
   layout.tsx, globals.css, error.tsx, not-found.tsx
 src/
   entities/
@@ -86,9 +108,12 @@ src/
                              # user, session, transaction, logger; notice.model.ts's InboxNotice, a notice
                              # with what it points at (U11)
     loan.ts                  # the statuses, LOAN_MOVES and canMove, PASS_ALONG_FOLLOW_ONS, the
-                             # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6)
+                             # periods and datesAtPickUp, isOverdue, lineOf, copyState (KTD6), ordinal;
+                             # U14's MORE_TIME_DAYS and moreTimeFrom; U16's ENDED_STATUSES and daysLate
     account-state.ts         # AccountState: removed, needs-profile, or ready (KTD3)
     in-app-browser.ts        # IN_APP_BROWSERS and inAppBrowserOf: A9's list, each pattern with its source
+    reminders.ts             # which reminders the daily run writes on a day, and which returns it closes
+                             # (loanReminders, returnClosesToday; KTD8, U17)
     notice-types.ts          # NOTICE_TYPES with their groups, NOTICE_GROUPS in E7's order,
                              # DEFAULT_NOTICES_OFF
     piece.ts                 # PIECE_SHAPES, PIECE_COLORS, PEOPLE_ONLY_COLORS (R51); CoverColor and
@@ -99,13 +124,15 @@ src/
                              # shelves first or Add games' closest first
     game-card.ts             # gameCard: a game's card in a list from its copies' states (B1, B10)
     game-facts.ts            # a game's facts and lines in the boards' words, only what it has (rule 14)
+    listed.ts                # "A, B and C", a list in a sentence (U15)
     library-filters.ts       # R11 to R13 (U8): the address's view (parseLibraryView, libraryViewSearch),
                              # listLibrary (filter, sort, what to offer, B4's suggestion) over LibraryItems,
                              # countMatches (B2's live count), and the chips', count line's and B4's words
     video-link.ts            # videoEmbed, recipes'
     link-token.ts            # a link's 8-character code in Crockford's base 32 (newLinkToken, linkTokenOf),
                              # FRIEND_LINK_DAYS (U10; nights' links take the same form)
-    share-message.ts         # the ready messages for the share sheet (R52): the friend link's (U10)
+    share-message.ts         # the ready messages for the share sheet (R52): the friend link's (U10),
+                             # callBackMessage (C18, U14)
     week.ts                  # dates as "YYYY-MM-DD", todayIn, PLAN_TIME_ZONE = America/New_York (KTD9),
                              # formatDate ("Fri, Nov 20", with the year once it isn't this year),
                              # formatWeekday and formatMonthDay, its parts; formatDay ("today", "yesterday",
@@ -118,7 +145,9 @@ src/
                              # friend-requests, and friendships' getSince and listFriendsOfFriends, loans'
                              # setStatus and user-games' lock, the first loan write; U11: notices'
                              # listForUser, countUnread and markRead, loans' listByIds and
-                             # listOpenForBorrower
+                             # listOpenForBorrower; U12: loans' getById, create and update; U16: loans'
+                             # listEndedForBorrower and listEndedForCopies; U17: loans' listInStatuses,
+                             # notices' addReminder, and game-nights' listGoingToNightsStarting
     services/                # interfaces: authentication, logger, transaction-manager, file-storage
     use-cases/admin/         # require-admin
     use-cases/catalog/       # get-game, search-games (U6)
@@ -129,6 +158,14 @@ src/
                              # open-friend-link, list-friends, list-people-you-may-know, get-friend,
                              # send-friend-request, answer-friend-request, cancel-friend-request, unfriend;
                              # people-you-may-know.ts (friendsOfFriends), the read E1 and A5 share
+    use-cases/loans/         # U12: request-loan, withdraw-request, answer-request, cancel-loan, list-loans,
+                             # get-loan; locked-loan.ts (lockedLoan), where every move of a loan starts;
+                             # U13: confirm-pick-up, give-back, confirm-return; U14: ask-more-time,
+                             # answer-more-time, change-due-date, call-back; U15: pass-along,
+                             # confirm-pass-along, take-back-pass-along, and the-line.ts (firstInLine,
+                             # tellWhoseTurn, BACK_IN_LINE), which the moves share; U16: record-loan,
+                             # get-record-loan-choices, list-past-loans
+    use-cases/daily/         # run-daily (KTD8, U17)
     use-cases/notices/       # list-inbox, mark-inbox-read, get-tab-counts (U11); notice-groups.ts
                              # (shownTypes), the types a member's settings show
     use-cases/suggestions/   # suggest-game, list-suggestions, list-answered-suggestions, get-suggestion,
@@ -142,6 +179,8 @@ src/
     controllers/catalog/     # get-game, search-games
     controllers/friends/     # one per use case of friends/, but require-friend (U10)
     controllers/copies/      # one per use case of copies/, but require-own-copy
+    controllers/daily/       # run-daily (U17)
+    controllers/loans/       # one per use case of loans/ (U12)
     controllers/notices/     # one per use case of notices/ (U11)
     controllers/suggestions/ # one per use case of suggestions/; form-fields.ts, the forms' field rules
     controllers/profile/     # one per use case of profile/ (they check the user and the input)
@@ -152,8 +191,10 @@ src/
 di/                          # container.ts, types.ts, modules: access (with removed users),
                              # authentication, catalog (games, U6), copies (user games, U6; U7's use cases),
                              # file-storage, suggestions (U9),
-                             # friends (friendships, U4; requests, links and their use cases, U10), loans,
-                             # logger, notices (U11's use cases), profile (profiles and settings), transaction
+                             # friends (friendships, U4; requests, links and their use cases, U10), loans
+                             # (U12's use cases),
+                             # logger, notices (U11's use cases), profile (profiles and settings), transaction,
+                             # nights (game nights, U17's read) and daily (the daily run, U17)
 db/                          # schema.ts (every table, U3), index.ts, migrations/ (0000_all_tables)
 lib/                         # auth/server.ts, logger.ts
 scripts/                     # check-test-database.ts, require-migrations.ts, migrate-production.ts,
@@ -197,6 +238,12 @@ The look is Punchboard (D13), as `packages/ui/src/styles/themes/community-game-l
 - **U9's patterns.** Only the admin reads or writes a suggestion's answer or the catalog: each of those use cases starts with `requireAdmin`, and each admin page reads through `adminRead` (`app/(main)/admin/admin-reads.ts`), which turns a refusal into Not found, so a member can't tell the page exists. E5's Admin row is a read of the waiting suggestions that a refusal hides. The answering steps (`answerSuggestion` in `answer-step.ts`) are a plain function that `answer-suggestion` and `add-game` both call inside their transaction, so a game added from a suggestion answers it, puts it on the suggester's shelf (base games only, R3) and tells them in one write. A picture the admin or a member sends goes to the public `catalog-images` bucket (`storeGameImage`, `suggest-game`), and the file is removed when its row isn't written. G4 edits the whole record in G3's form (`game-form.tsx`), whose picture is an upload or an address, the upload winning when both are given.
 - **U10's patterns.** A friend link is opened by its page's client part (`open-link.tsx`), which sends `openFriendLink` once the page is open, never by the page's own load: link previews and prefetching load addresses on their own (recipes' join links). Signed in with no profile yet, the link makes the two friends first, then A4 carries `?friend=` on to A5. A use case named `use…` reads as a React hook to Biome's `useHookAtTopLevel`, so U10's is `open-friend-link`, and the nights' link will be `open-night-link` (the code map says so). Unfriending moves each open loan between the two after its copy's `lock` and `canMove` (KTD6), the app's first loan writes: requests are withdrawn, a yes not picked up yet is cancelled, and a loan that's out stays. Taking each off the other's game nights, and people from a past night in People you may know, come with nights' rows (U19's task says so). People you may know comes from `friendsOfFriends`, each with the friend they share, first by name ("Friend of Alice"). A client component imports nothing server-only, however deep: `open-link.tsx` showed `LinkGone` from a module that imported the welcome page, which reads `next/headers`, and only `next dev` and `next build` said so, while every test passed; `link-gone.tsx` and `what-its-for.tsx` hold the parts both sides use.
 - **U11's patterns.** The inbox (F1) lists a member's latest notices, newest first and at most `INBOX_LIMIT` (100), leaving out the groups they switched off on E7 (`shownTypes` in `notice-groups.ts`, which the bell's count shares). Each comes as an `InboxNotice`, with the loan, night or suggestion it points at, and its words come from `noticeText` (`app/_lib/notice-text.ts`): per type, the line, the detail under it, the page it opens and its stamp, one file per group under `notice-text/`, so a unit that adds a notice type adds its words there, with a case in its test. Opening the inbox marks the notices it listed read through its client part (`MarkInboxRead` in `mark-read.tsx`), once the page is open, as U10's friend link is opened, so a prefetch clears nothing; it sends their ids, so a notice that came after the page was drawn, or one a switched-off group hides, stays unread (`markRead`). A server action's `revalidatePath` re-renders the page being viewed ("Updates the UI immediately", in Next's `revalidatePath` reference), so the action brings the open inbox back with them read and the bell clears at once: `MarkInboxRead` keeps in state the ids that were unread when the page opened, and `IfNew` and `UnreadCount` mark from them until the member leaves. The tests stub `revalidatePath`, so the inbox's test rerenders the page itself to show the marks stay (found on the dev server, 2026-11-22, where they were gone 1.5 s after the inbox opened). F1's Mark all read isn't built, since opening does it. The tabs' counts come from the rows, not from notices (`get-tab-counts`, D14), so a group switched off changes only the bell's count, and Nights counts 0 until U19 gives nights their rows. `getShellCounts` (`app/_lib/shell-counts.ts`) reads them once a request with React's `cache`, for the bell, the bottom bar and the bar from 768px, and a failed read shows no counts rather than failing the page. E7 is a `SavedSwitch` per group, bound to `setNoticeGroup`.
+- **U12's patterns.** Every move of a loan starts with `lockedLoan` (`src/application/use-cases/loans/locked-loan.ts`): the loan, its copy's lock (`IUserGamesRepository.lock`, U10's, in place of the plan's `lockCopy`), the loan read again under the lock, and who the member is to it, its copy's owner or its borrower; anyone else, the admin included, gets Not found (D4, AE7, AE8). Then `canMove`, the write and the notices, in one transaction (KTD6, KTD7). A move that no longer applies throws `ChangedError` (`copy-lent`, `request-withdrawn`, `request-answered`), which the sheet or the form shows with `ChangedNotice` in place of its action. A loan's page shows one board by the loan's status and the member's role: C16 to the borrower and C2 to the owner while it's a request, C17 to the owner and C3's top to the borrower after a yes; a request further back in a line and the loan after the pick-up get theirs with U13 and U15. Its moves that ask first share `LoanMoveButton`, which goes on to Loans with the message, as unfriending does. Where a board says "his" or "she", the words use the name ("It’s Sam’s copy", "2 weeks from the day Priya picks it up"): profiles hold no pronouns. A copy's row takes an `action` (Borrow opens C1, `ask-to-borrow.tsx`), and a friend's copy you asked for, or one said yes to you, opens its loan's page. An owner's note goes on the borrower's notice with a yes as well as a no (`answer_note`), since C2 draws the note under both answers.
+- **U13's patterns.** A loan's dates count from the real pick-up (`datesAtPickUp`): a day from the yes to today, and not after a date the owner picked. A return takes a day from the pick-up to today, and from then the loan can't run overdue (D15). For a day that already happened, the date sheet takes `until` (`DayField` in `loans/[id]/day-field.tsx`). `trackSpaces` (`app/_components/loan-track.tsx`) works out a loan's track: a space a day from today to the due day within a week, a space a week after that, and once it's late the last days up to the due one with a "+n" space for the piece. Each space carries its day as `id`, since a week-long loan repeats a weekday and Biome refuses an index key. Yes, it's back answers with the next request in the copy's line, which the sheet opens for the owner to answer; with nobody in line it goes on to Loans. A copy's note reads as a sentence: the page adds a full stop only when the note lacks one, and a new missing or damaged part joins the old note. C8 lays out its own two answers, since `SheetActions` adds a Cancel C8 doesn't draw. The loan's page keeps its views beside it, `loan-parts.tsx` and `out-views.tsx` (C5, C7).
+- **U14's patterns.** More time and a new due date count from the due date, or from today once it's overdue (`moreTimeFrom`, C14's "It's overdue, so these count from today."), and take a date after that; C6 and C14 share `DateChoice`. A request for more time puts its loan under Needs you, as C4 draws Gull & Anchor, rather than under You lent. A call-back makes the loan due today if it was due later, closes a waiting request, and ends a pass-along: the next friend's yes goes back to a request in line, with no `previousLoanId` (`PASS_ALONG_FOLLOW_ONS`). Its message offers Text Jo too through `shareOrCopy` with `callBackMessage`, since a notice is seen only when the app is opened (R52). The owner's stamp reads Called back above Overdue (C18). The dates line names the period only while the due date is still the one it gives, so more time, a new date or a call-back leave just the dates. C7 doesn't draw where C14 opens from, so Change the due date is a quiet link under It's back with me; C15's title is screens.md's ("Call Gull & Anchor back?") where the board says "Call it back?".
+- **U15's patterns.** A line is a copy's open requests, oldest first (`lineOf`); joining is `request-loan` with `join`, which takes a copy that's out, promised or asked for, while Ask to borrow on a copy lent meanwhile is still Changed underneath, and C1's next step joins with the same note. Leaving is `withdraw-request`, and the owner's Remove from line is `answer-request`'s no, with the note on `request-declined`, so there's no `remove-from-line` use case. `the-line.ts` holds what the moves share: `firstInLine`, read before a move, then `tellWhoseTurn`, which tells whoever is first after it and wasn't before (`turn-in-line`), unless they made the move or it told them already (data-model.md's "the friend who's now first in a line"). So a withdrawal, a yes or a no, a pass-along, I still have it and a call-back each tell the next friend, and someone already first when the copy comes home isn't told again: the owner's answer tells them. A pass-along needs the copy's `pass_along`, someone in line and no call-back; it closes a waiting request for more time, and the next friend's yes carries the giver's period. Taken back or called back, that yes is a request again in its old place (`BACK_IN_LINE`), its period cleared, so the owner's next yes sets its own; a yes now clears whichever of the period or the date it didn't set. `get-loan`'s `handoff` is the other borrower, with their phone while it's open, friends or not (R48). C11 is its own page, `loans/[id]/pass-along/`, since the board draws a back link to the loan; the next friend's page reuses C3's `PickUpForm` with `handedOn`. A link drawn as a button is `Button` with `nativeButton={false}` and `render={<Link />}`, which Base UI gives the button role, so tests find it as a button. C4's In line rows open the game's page, as the board's do, where Leave the line is. The boards draw "she" and "he": the words use the name, or "they".
+- **U16's patterns.** Record a loan (C9) takes a copy of the owner's that's lent and home, a friend, a day up to today and a period or a date; the loan is out at once, and the friend is told and doesn't confirm. A friend who'd asked for that copy has their request become the loan, since a borrower has one open loan per copy (`loans_one_open_per_borrower_idx`), and whoever was behind them is told it's their turn. B7's history already lists pass-alongs, both borrowers' loans, since `listHistoryForCopy` reads every picked-up status, so there's no `get-copy-history`. Past loans (C12) are the loans that ended after a pick-up, given back or handed on (`ENDED_STATUSES`), newest return first, with `daysLate`; its two views are `?show=lent` and the default, and its toggle is two links drawn as buttons, which Base UI gives the button role, so `aria-pressed` is valid on them. A field inside a group whose red label already names it takes `labelHidden` (`DayField`, `PeoplePicker`), so the name stays for screen readers without showing twice.
+- **U17's patterns.** The daily run (KTD8) is job-search's: `vercel.json`'s `schedules` entry posts to `/api/cron/daily` at 7:00 America/New_York, and the route answers 401 unless the bearer token is `CRON_SECRET` (already in `turbo.json` and `.env.example` since U1). The proxy's matcher skips `/api`, so the route needed no line there. What to write is pure (`src/entities/reminders.ts`); the run writes each reminder with the day it's for through `addReminder`, an insert that does nothing on a conflict with `notices_one_reminder_a_day_idx`, and answers whether it wrote, so a second run the same day writes nothing. A return closes only while it's still being returned, read again under its copy's lock, and keeps the borrower's day. Nights are read 36 hours either side of the run and kept when `todayIn` of their start is today, so the run never works out an Eastern day's bounds in UTC. Each loan's and night's writes are a transaction of their own, and the run logs only its counts. Until Batch 5 writes nights, the test harness's `addNight` puts a night and its list in the mock's rows or the tables.
 
 ## Data Model
 
@@ -273,10 +320,10 @@ The database refuses on its own: a value outside its fixed list, an expansion wi
 
 - `tests/` mirrors the source tree (`proxy.ts` → `tests/proxy.test.ts`); run tests from this folder so `bunfig.toml`'s preload applies.
 - `tests/_support/preload.ts` runs before every test. It deletes the variables `.env` holds (all but `LOG_LEVEL`), so no test reaches the test project, points `@/db` at PGlite, swaps `@/lib/auth/server` for `tests/_support/neon-auth.ts` (its route handler records what reached Neon, and a test sets `neonAuth.answer` or `neonAuth.getSession` to make Neon fail, then calls `neonAuth.reset()`), makes `redirect()` throw `Redirected` and `notFound()` throw `NotFoundPage` (`tests/_support/next.ts`), lets `connection()` go on at once, and stubs `next/cache`, the router and `getCurrentUserId` (`nextState.userId`; `signInAsNewUser()` in `beforeEach`).
-- Database: PGlite with the real migrations (`tests/_support/database.ts`), loading `pg_trgm` from PGlite's contrib, which the first migration needs. A test that makes a database of its own, as the migration scripts' tests do, makes it with `newPGlite()`; a bare `new PGlite()` fails on that first line. `resetDatabase()` in `beforeEach` migrates once, then empties every table in `public`, which it finds itself, so a new table needs no line there. `sql()` runs raw checks, never inside an open transaction. The transaction manager's tests write temporary tables of their own.
+- Database: PGlite with the real migrations (`tests/_support/database.ts`), loading `pg_trgm` from PGlite's contrib, which the first migration needs. A test that makes a database of its own, as the migration scripts' tests do, makes it with `newPGlite()`; a bare `new PGlite()` fails on that first line. `resetDatabase()` in `beforeEach` migrates once, then empties every table in `public`, which it finds itself, so a new table needs no line there. `sql()` runs raw checks, never inside an open transaction. PGlite runs one transaction at a time, so a test of two moves at once (U12's two answers) shows that one lands, not the copy's lock itself, which matters on Neon. The transaction manager's tests write temporary tables of their own.
 - Constraints are tested on PGlite alone (KTD22), in `tests/db/schema.test.ts`: each refusal by its Postgres code and constraint name (`{ code: "23514", constraint: "games_type_check" }`), so a test can't pass on another error. It also holds each model to its table: every table has one, its type is drizzle's row type (a difference fails `bun ts`), and it parses every row drizzle reads back. A new column goes in the table, its model and that test's filled rows together.
 - Use-case tests use `describeEachBackend` and `makeApp()` (`tests/_support/app.ts`, recipes' harness): each runs on the mocks and on the real repositories over PGlite, and one that fails only on `[postgres]` means a mock has drifted from the SQL. Each unit adds its repositories and use cases there; `postgresRepositories()` is for a block that runs on PGlite alone. A repository no use case reads yet is tested the same way, through `makeApp().repos`, in `tests/src/infrastructure/repositories/`, with any check only the database can show (both rows of a friendship, a notice going with its failed change) in a block of its own (U4).
-- A mock mirrors its SQL: the same filters, the same order (a timestamp, then the id), the table's defaults, and its refusals as `DatabaseOperationError` (a second profile, a friendship with oneself). A mock whose table has no writes yet takes its rows from the tests: `MockLoansRepository.rows` until Batch 4, `MockRemovedUsersRepository.userIds` (through `addRemovedUser`) until U22.
+- A mock mirrors its SQL: the same filters, the same order (a timestamp, then the id), the table's defaults, and its refusals as `DatabaseOperationError` (a second profile, a friendship with oneself). A mock whose table has no writes yet takes its rows from the tests: `MockRemovedUsersRepository.userIds` (through `addRemovedUser`) until U22. The cast's loans still go into `MockLoansRepository.rows` (makeCast), while U12's moves write through `create` and `update`, which mirror the loans' unique indexes as refusals.
 - **The cast** (`tests/_support/cast.ts`, KTD13) is the design kit's world on its today, Tue Nov 10, 2026 (`CAST_TODAY`): the nine people with their pieces and the boards' phones; the circle of six (You, Alice, Sam, Priya, Jo, Ben) all friends, with Mei and Dev Alice's friends and Noor Sam's; Sam's pass-along on; the 11 games and 2 expansions with the kit's facts (complexity from its weight: under 2 light, from 3 heavy); the 11 copies; and 15 loans, the open ones in the boards' states (Jo has your Gull & Anchor, a day overdue, and asked for more time; you have Sam's Moss & Mortar, due Fri) and the five that ended (B7's and C12's histories). Tests name rows by key (`CAST.people.you.id`, `CAST.copies.yourGullAndAnchor.id`, `CAST.loans.joHasGullAndAnchor.id`), whose ids are fixed (`00000000-…`) and no account's. `tests/src/infrastructure/repositories/loans.repository.test.ts` checks each copy reads back with its board's stamp.
 - `makeApp().makeCast()` puts the cast in the current backend: its people (profiles, settings, friendships) through their repositories, `writeCastPeople`; on PGlite the games, copies, boxed expansions and loans through drizzle, `insertCastRows`; on the mocks the loans into `MockLoansRepository.rows`. A unit that gives a table its writes moves the cast's rows to them, and one that needs more of the boards' world (friend requests in U10, nights in U18, and the notices Batches 4 and 5 write) adds it to the cast with its writes. U11's tests add the notices they read themselves, through `INoticesRepository.add`. A row written through a repository is dated when it's written, so a friendship's "Friends since" (E3) reads the seed's month, not July.
 - **The seed** (`scripts/seed.ts`, KTD21) writes the cast to `.env`'s database and stops unless it carries the test project's comment. A dry run by default; `--commit` writes, in one transaction; `--as <name>=<user id>` maps a member to their account (`.cast-accounts.json`), and the rest keep the cast's ids. It writes what's missing and skips what's there, so it's safe to run again, and a unit that extends the cast runs it again (Commands). Its test runs it on PGlite with the comment and without. U4 ran it on the test project on 2026-11-21, every member mapped.

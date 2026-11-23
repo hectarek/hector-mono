@@ -6,8 +6,11 @@ import {
   it,
   setSystemTime,
 } from "bun:test";
-import { render, within } from "@testing-library/react";
+import { Toaster } from "@repo/ui/components/sonner";
+import { fireEvent, render, within } from "@testing-library/react";
+import { APP_TOASTER } from "@/app/_lib/notify";
 import GamePage from "@/app/(main)/games/[id]/page";
+import { getInjection } from "@/di/container";
 import { CAST } from "@/tests/_support/cast";
 import { signInAsYouWithTheCast } from "@/tests/_support/members";
 import { NotFoundPage } from "@/tests/_support/next";
@@ -198,6 +201,62 @@ describe("a game's page", () => {
       view.getByRole("link", { name: /^Harbor Lights/ }).getAttribute("href"),
     ).toBe(`/games/${games.harborLights.id}`);
     expect(row(view, "Sam’s copy")).toBeTruthy();
+  });
+
+  it("asks to borrow Sam's Harbor Lights with a note, then shows the copy as You asked (Send a borrow request)", async () => {
+    const view = render(
+      <>
+        {
+          await GamePage({
+            params: Promise.resolve({ id: games.harborLights.id }),
+            searchParams: Promise.resolve({}),
+          })
+        }
+        <Toaster id={APP_TOASTER} theme="light" />
+      </>,
+    );
+    fireEvent.click(
+      within(row(view, "Sam’s copy")).getByRole("button", { name: "Borrow" }),
+    );
+    const sheet = within(await view.findByRole("dialog"));
+    expect(sheet.getByText("Ask to borrow")).toBeTruthy();
+    expect(sheet.getByText("Sam’s copy · available")).toBeTruthy();
+    expect(
+      sheet.getByText("Good · 1 part missing · with Night Tide"),
+    ).toBeTruthy();
+    expect(
+      sheet.getByText(
+        "Sam picks how long you can keep it. The clock starts the day you pick it up.",
+      ),
+    ).toBeTruthy();
+    fireEvent.change(sheet.getByLabelText(/Note for Sam/), {
+      target: { value: "Can I grab it Friday?" },
+    });
+    fireEvent.submit(
+      sheet
+        .getByRole("button", { name: "Send request" })
+        .closest("form") as HTMLFormElement,
+    );
+    expect(await view.findByText("Request sent to Sam.")).toBeTruthy();
+
+    // The request's revalidation renders the page again: the copy reads You asked and opens it.
+    view.unmount();
+    const again = await renderGame(games.harborLights.id);
+    const asked = row(again, "Sam’s copy");
+    expect(within(asked).getByText("You asked")).toBeTruthy();
+    const href = asked.querySelector("a")?.getAttribute("href") ?? "";
+    expect(href).toMatch(/^\/loans\//);
+    const loanId = href.replace("/loans/", "");
+    const { loan } = await getInjection("IGetLoanController")(
+      { loanId },
+      CAST.people.you.id,
+    );
+    expect(loan.requestNote).toBe("Can I grab it Friday?");
+    // Withdrawn again, so the rest of this file sees the cast as the boards draw it.
+    await getInjection("IWithdrawRequestController")(
+      { loanId },
+      CAST.people.you.id,
+    );
   });
 
   it("is Not found for an id that isn't a game's", async () => {

@@ -1,5 +1,7 @@
 import { beforeEach, expect, it } from "bun:test";
+import { DatabaseOperationError } from "@/src/entities/errors/common";
 import { copyState } from "@/src/entities/loan";
+import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { describeEachBackend, makeApp } from "@/tests/_support/app";
 import { CAST, CAST_TODAY, castRows } from "@/tests/_support/cast";
 
@@ -125,5 +127,86 @@ describeEachBackend("ILoansRepository", () => {
       [copies.alicesTinKettleDerby.id]: "Available",
       [copies.josSaltAndSignal.id]: "Available",
     });
+  });
+});
+
+describeEachBackend("ILoansRepository's writes (U12)", () => {
+  let app: ReturnType<typeof makeApp>;
+  const write = <T>(change: (tx: ITransaction) => Promise<T>) =>
+    app.repos.transactions.startTransaction(change);
+
+  beforeEach(async () => {
+    app = makeApp();
+    await app.makeCast();
+  });
+
+  it("makes a request with the table's defaults, and reads it back by id", async () => {
+    const loan = await write((tx) =>
+      app.repos.loans.create(
+        {
+          userGameId: copies.samsHarborLights.id,
+          borrowerUserId: you.id,
+          requestNote: "Friday?",
+        },
+        tx,
+      ),
+    );
+    expect(loan).toMatchObject({
+      status: "requested",
+      requestNote: "Friday?",
+      periodDays: null,
+      dueOn: null,
+      answeredAt: null,
+      previousLoanId: null,
+    });
+    expect(await app.repos.loans.getById(loan.id)).toEqual(loan);
+    expect(await app.repos.loans.getById(copies.samsHarborLights.id)).toBe(
+      undefined,
+    );
+  });
+
+  it("refuses a second open loan by one borrower on one copy", async () => {
+    await expect(
+      write((tx) =>
+        app.repos.loans.create(
+          { userGameId: copies.samsQuarryLane.id, borrowerUserId: you.id },
+          tx,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(DatabaseOperationError);
+  });
+
+  it("writes a yes with its period, and refuses a second yes waiting on one copy", async () => {
+    const answeredAt = new Date("2026-11-10T09:30:00-05:00");
+    const yes = await write((tx) =>
+      app.repos.loans.update(
+        loans.priyaAskedForNightMarket.id,
+        { status: "accepted", periodDays: 14, answeredAt },
+        tx,
+      ),
+    );
+    expect(yes).toMatchObject({
+      status: "accepted",
+      periodDays: 14,
+      answeredAt,
+    });
+    const another = await write((tx) =>
+      app.repos.loans.create(
+        {
+          userGameId: copies.yourNightMarket.id,
+          borrowerUserId: CAST.people.sam.id,
+        },
+        tx,
+      ),
+    );
+    await expect(
+      write((tx) =>
+        app.repos.loans.update(
+          another.id,
+          { status: "accepted", periodDays: 7 },
+          tx,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(DatabaseOperationError);
   });
 });

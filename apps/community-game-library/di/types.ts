@@ -1,6 +1,7 @@
 import type { IFriendLinksRepository } from "@/src/application/repositories/friend-links.repository.interface";
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { IGameSuggestionsRepository } from "@/src/application/repositories/game-suggestions.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
@@ -28,6 +29,7 @@ import type { IRemoveUserGameUseCase } from "@/src/application/use-cases/copies/
 import type { ISetLendingUseCase } from "@/src/application/use-cases/copies/set-lending.use-case";
 import type { ISetPassAlongForAllUseCase } from "@/src/application/use-cases/copies/set-pass-along-for-all.use-case";
 import type { IUpdateUserGameUseCase } from "@/src/application/use-cases/copies/update-user-game.use-case";
+import type { IRunDailyUseCase } from "@/src/application/use-cases/daily/run-daily.use-case";
 import type { IAnswerFriendRequestUseCase } from "@/src/application/use-cases/friends/answer-friend-request.use-case";
 import type { ICancelFriendRequestUseCase } from "@/src/application/use-cases/friends/cancel-friend-request.use-case";
 import type { ICheckFriendLinkUseCase } from "@/src/application/use-cases/friends/check-friend-link.use-case";
@@ -39,6 +41,27 @@ import type { IMakeFriendLinkUseCase } from "@/src/application/use-cases/friends
 import type { IOpenFriendLinkUseCase } from "@/src/application/use-cases/friends/open-friend-link.use-case";
 import type { ISendFriendRequestUseCase } from "@/src/application/use-cases/friends/send-friend-request.use-case";
 import type { IUnfriendUseCase } from "@/src/application/use-cases/friends/unfriend.use-case";
+import type { IAnswerMoreTimeUseCase } from "@/src/application/use-cases/loans/answer-more-time.use-case";
+// Each list keeps its lines in alphabetical order, so two batches adding to it merge cleanly
+// (docs/build-plan.md, Code map).
+import type { IAnswerRequestUseCase } from "@/src/application/use-cases/loans/answer-request.use-case";
+import type { IAskMoreTimeUseCase } from "@/src/application/use-cases/loans/ask-more-time.use-case";
+import type { ICallBackUseCase } from "@/src/application/use-cases/loans/call-back.use-case";
+import type { ICancelLoanUseCase } from "@/src/application/use-cases/loans/cancel-loan.use-case";
+import type { IChangeDueDateUseCase } from "@/src/application/use-cases/loans/change-due-date.use-case";
+import type { IConfirmPassAlongUseCase } from "@/src/application/use-cases/loans/confirm-pass-along.use-case";
+import type { IConfirmPickUpUseCase } from "@/src/application/use-cases/loans/confirm-pick-up.use-case";
+import type { IConfirmReturnUseCase } from "@/src/application/use-cases/loans/confirm-return.use-case";
+import type { IGetLoanUseCase } from "@/src/application/use-cases/loans/get-loan.use-case";
+import type { IGetRecordLoanChoicesUseCase } from "@/src/application/use-cases/loans/get-record-loan-choices.use-case";
+import type { IGiveBackUseCase } from "@/src/application/use-cases/loans/give-back.use-case";
+import type { IListLoansUseCase } from "@/src/application/use-cases/loans/list-loans.use-case";
+import type { IListPastLoansUseCase } from "@/src/application/use-cases/loans/list-past-loans.use-case";
+import type { IPassAlongUseCase } from "@/src/application/use-cases/loans/pass-along.use-case";
+import type { IRecordLoanUseCase } from "@/src/application/use-cases/loans/record-loan.use-case";
+import type { IRequestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
+import type { ITakeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
+import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
 import type { IGetTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import type { IListInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import type { IMarkInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -71,6 +94,7 @@ import type { IRemoveUserGameController } from "@/src/interface-adapters/control
 import type { ISetLendingController } from "@/src/interface-adapters/controllers/copies/set-lending.controller";
 import type { ISetPassAlongForAllController } from "@/src/interface-adapters/controllers/copies/set-pass-along-for-all.controller";
 import type { IUpdateUserGameController } from "@/src/interface-adapters/controllers/copies/update-user-game.controller";
+import type { IRunDailyController } from "@/src/interface-adapters/controllers/daily/run-daily.controller";
 import type { IAnswerFriendRequestController } from "@/src/interface-adapters/controllers/friends/answer-friend-request.controller";
 import type { ICancelFriendRequestController } from "@/src/interface-adapters/controllers/friends/cancel-friend-request.controller";
 import type { ICheckFriendLinkController } from "@/src/interface-adapters/controllers/friends/check-friend-link.controller";
@@ -82,6 +106,25 @@ import type { IMakeFriendLinkController } from "@/src/interface-adapters/control
 import type { IOpenFriendLinkController } from "@/src/interface-adapters/controllers/friends/open-friend-link.controller";
 import type { ISendFriendRequestController } from "@/src/interface-adapters/controllers/friends/send-friend-request.controller";
 import type { IUnfriendController } from "@/src/interface-adapters/controllers/friends/unfriend.controller";
+import type { IAnswerMoreTimeController } from "@/src/interface-adapters/controllers/loans/answer-more-time.controller";
+import type { IAnswerRequestController } from "@/src/interface-adapters/controllers/loans/answer-request.controller";
+import type { IAskMoreTimeController } from "@/src/interface-adapters/controllers/loans/ask-more-time.controller";
+import type { ICallBackController } from "@/src/interface-adapters/controllers/loans/call-back.controller";
+import type { ICancelLoanController } from "@/src/interface-adapters/controllers/loans/cancel-loan.controller";
+import type { IChangeDueDateController } from "@/src/interface-adapters/controllers/loans/change-due-date.controller";
+import type { IConfirmPassAlongController } from "@/src/interface-adapters/controllers/loans/confirm-pass-along.controller";
+import type { IConfirmPickUpController } from "@/src/interface-adapters/controllers/loans/confirm-pick-up.controller";
+import type { IConfirmReturnController } from "@/src/interface-adapters/controllers/loans/confirm-return.controller";
+import type { IGetLoanController } from "@/src/interface-adapters/controllers/loans/get-loan.controller";
+import type { IGetRecordLoanChoicesController } from "@/src/interface-adapters/controllers/loans/get-record-loan-choices.controller";
+import type { IGiveBackController } from "@/src/interface-adapters/controllers/loans/give-back.controller";
+import type { IListLoansController } from "@/src/interface-adapters/controllers/loans/list-loans.controller";
+import type { IListPastLoansController } from "@/src/interface-adapters/controllers/loans/list-past-loans.controller";
+import type { IPassAlongController } from "@/src/interface-adapters/controllers/loans/pass-along.controller";
+import type { IRecordLoanController } from "@/src/interface-adapters/controllers/loans/record-loan.controller";
+import type { IRequestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
+import type { ITakeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
+import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
 import type { IGetTabCountsController } from "@/src/interface-adapters/controllers/notices/get-tab-counts.controller";
 import type { IListInboxController } from "@/src/interface-adapters/controllers/notices/list-inbox.controller";
 import type { IMarkInboxReadController } from "@/src/interface-adapters/controllers/notices/mark-inbox-read.controller";
@@ -104,8 +147,6 @@ import type { IListSuggestionsController } from "@/src/interface-adapters/contro
 import type { ISuggestGameController } from "@/src/interface-adapters/controllers/suggestions/suggest-game.controller";
 import type { IUpdateGameController } from "@/src/interface-adapters/controllers/suggestions/update-game.controller";
 
-// Each list keeps its lines in alphabetical order, so two batches adding to it merge cleanly
-// (docs/build-plan.md, Code map).
 export const DI_SYMBOLS = {
   AdminAccount: Symbol.for("AdminAccount"),
   IAddGameController: Symbol.for("IAddGameController"),
@@ -114,13 +155,31 @@ export const DI_SYMBOLS = {
   IAddUserGameUseCase: Symbol.for("IAddUserGameUseCase"),
   IAnswerFriendRequestController: Symbol.for("IAnswerFriendRequestController"),
   IAnswerFriendRequestUseCase: Symbol.for("IAnswerFriendRequestUseCase"),
+  IAnswerMoreTimeController: Symbol.for("IAnswerMoreTimeController"),
+  IAnswerMoreTimeUseCase: Symbol.for("IAnswerMoreTimeUseCase"),
+  IAnswerRequestController: Symbol.for("IAnswerRequestController"),
+  IAnswerRequestUseCase: Symbol.for("IAnswerRequestUseCase"),
   IAnswerSuggestionController: Symbol.for("IAnswerSuggestionController"),
   IAnswerSuggestionUseCase: Symbol.for("IAnswerSuggestionUseCase"),
+  IAskMoreTimeController: Symbol.for("IAskMoreTimeController"),
+  IAskMoreTimeUseCase: Symbol.for("IAskMoreTimeUseCase"),
   IAuthenticationService: Symbol.for("IAuthenticationService"),
+  ICallBackController: Symbol.for("ICallBackController"),
+  ICallBackUseCase: Symbol.for("ICallBackUseCase"),
   ICancelFriendRequestController: Symbol.for("ICancelFriendRequestController"),
   ICancelFriendRequestUseCase: Symbol.for("ICancelFriendRequestUseCase"),
+  ICancelLoanController: Symbol.for("ICancelLoanController"),
+  ICancelLoanUseCase: Symbol.for("ICancelLoanUseCase"),
+  IChangeDueDateController: Symbol.for("IChangeDueDateController"),
+  IChangeDueDateUseCase: Symbol.for("IChangeDueDateUseCase"),
   ICheckFriendLinkController: Symbol.for("ICheckFriendLinkController"),
   ICheckFriendLinkUseCase: Symbol.for("ICheckFriendLinkUseCase"),
+  IConfirmPassAlongController: Symbol.for("IConfirmPassAlongController"),
+  IConfirmPassAlongUseCase: Symbol.for("IConfirmPassAlongUseCase"),
+  IConfirmPickUpController: Symbol.for("IConfirmPickUpController"),
+  IConfirmPickUpUseCase: Symbol.for("IConfirmPickUpUseCase"),
+  IConfirmReturnController: Symbol.for("IConfirmReturnController"),
+  IConfirmReturnUseCase: Symbol.for("IConfirmReturnUseCase"),
   ICreateProfileController: Symbol.for("ICreateProfileController"),
   ICreateProfileUseCase: Symbol.for("ICreateProfileUseCase"),
   IFileStorage: Symbol.for("IFileStorage"),
@@ -129,6 +188,7 @@ export const DI_SYMBOLS = {
   IFriendLinksRepository: Symbol.for("IFriendLinksRepository"),
   IFriendRequestsRepository: Symbol.for("IFriendRequestsRepository"),
   IFriendshipsRepository: Symbol.for("IFriendshipsRepository"),
+  IGameNightsRepository: Symbol.for("IGameNightsRepository"),
   IGameSuggestionsRepository: Symbol.for("IGameSuggestionsRepository"),
   IGamesRepository: Symbol.for("IGamesRepository"),
   IGetAccountStateController: Symbol.for("IGetAccountStateController"),
@@ -141,16 +201,24 @@ export const DI_SYMBOLS = {
   IGetGameToEditController: Symbol.for("IGetGameToEditController"),
   IGetGameToEditUseCase: Symbol.for("IGetGameToEditUseCase"),
   IGetGameUseCase: Symbol.for("IGetGameUseCase"),
+  IGetLoanController: Symbol.for("IGetLoanController"),
+  IGetLoanUseCase: Symbol.for("IGetLoanUseCase"),
   IGetNoticeSettingsController: Symbol.for("IGetNoticeSettingsController"),
   IGetNoticeSettingsUseCase: Symbol.for("IGetNoticeSettingsUseCase"),
   IGetProfileController: Symbol.for("IGetProfileController"),
   IGetProfileUseCase: Symbol.for("IGetProfileUseCase"),
+  IGetRecordLoanChoicesController: Symbol.for(
+    "IGetRecordLoanChoicesController",
+  ),
+  IGetRecordLoanChoicesUseCase: Symbol.for("IGetRecordLoanChoicesUseCase"),
   IGetSuggestionController: Symbol.for("IGetSuggestionController"),
   IGetSuggestionUseCase: Symbol.for("IGetSuggestionUseCase"),
   IGetTabCountsController: Symbol.for("IGetTabCountsController"),
   IGetTabCountsUseCase: Symbol.for("IGetTabCountsUseCase"),
   IGetUserGameController: Symbol.for("IGetUserGameController"),
   IGetUserGameUseCase: Symbol.for("IGetUserGameUseCase"),
+  IGiveBackController: Symbol.for("IGiveBackController"),
+  IGiveBackUseCase: Symbol.for("IGiveBackUseCase"),
   IListAnsweredSuggestionsController: Symbol.for(
     "IListAnsweredSuggestionsController",
   ),
@@ -163,8 +231,12 @@ export const DI_SYMBOLS = {
   IListInboxUseCase: Symbol.for("IListInboxUseCase"),
   IListLibraryController: Symbol.for("IListLibraryController"),
   IListLibraryUseCase: Symbol.for("IListLibraryUseCase"),
+  IListLoansController: Symbol.for("IListLoansController"),
+  IListLoansUseCase: Symbol.for("IListLoansUseCase"),
   IListMyLibraryController: Symbol.for("IListMyLibraryController"),
   IListMyLibraryUseCase: Symbol.for("IListMyLibraryUseCase"),
+  IListPastLoansController: Symbol.for("IListPastLoansController"),
+  IListPastLoansUseCase: Symbol.for("IListPastLoansUseCase"),
   IListPeopleYouMayKnowController: Symbol.for(
     "IListPeopleYouMayKnowController",
   ),
@@ -182,14 +254,22 @@ export const DI_SYMBOLS = {
   INoticesRepository: Symbol.for("INoticesRepository"),
   IOpenFriendLinkController: Symbol.for("IOpenFriendLinkController"),
   IOpenFriendLinkUseCase: Symbol.for("IOpenFriendLinkUseCase"),
+  IPassAlongController: Symbol.for("IPassAlongController"),
+  IPassAlongUseCase: Symbol.for("IPassAlongUseCase"),
   IPutInBoxController: Symbol.for("IPutInBoxController"),
   IPutInBoxUseCase: Symbol.for("IPutInBoxUseCase"),
+  IRecordLoanController: Symbol.for("IRecordLoanController"),
+  IRecordLoanUseCase: Symbol.for("IRecordLoanUseCase"),
   IRemovePhotoController: Symbol.for("IRemovePhotoController"),
   IRemovePhotoUseCase: Symbol.for("IRemovePhotoUseCase"),
   IRemoveUserGameController: Symbol.for("IRemoveUserGameController"),
   IRemoveUserGameUseCase: Symbol.for("IRemoveUserGameUseCase"),
   IRemovedUsersRepository: Symbol.for("IRemovedUsersRepository"),
+  IRequestLoanController: Symbol.for("IRequestLoanController"),
+  IRequestLoanUseCase: Symbol.for("IRequestLoanUseCase"),
   IRequireAdmin: Symbol.for("IRequireAdmin"),
+  IRunDailyController: Symbol.for("IRunDailyController"),
+  IRunDailyUseCase: Symbol.for("IRunDailyUseCase"),
   ISearchGamesController: Symbol.for("ISearchGamesController"),
   ISearchGamesUseCase: Symbol.for("ISearchGamesUseCase"),
   ISendFriendRequestController: Symbol.for("ISendFriendRequestController"),
@@ -202,6 +282,8 @@ export const DI_SYMBOLS = {
   ISetPhotoUseCase: Symbol.for("ISetPhotoUseCase"),
   ISuggestGameController: Symbol.for("ISuggestGameController"),
   ISuggestGameUseCase: Symbol.for("ISuggestGameUseCase"),
+  ITakeBackPassAlongController: Symbol.for("ITakeBackPassAlongController"),
+  ITakeBackPassAlongUseCase: Symbol.for("ITakeBackPassAlongUseCase"),
   ITransactionManagerService: Symbol.for("ITransactionManagerService"),
   IUnfriendController: Symbol.for("IUnfriendController"),
   IUnfriendUseCase: Symbol.for("IUnfriendUseCase"),
@@ -218,6 +300,8 @@ export const DI_SYMBOLS = {
   IUserGamesRepository: Symbol.for("IUserGamesRepository"),
   IUserProfilesRepository: Symbol.for("IUserProfilesRepository"),
   IUserSettingsRepository: Symbol.for("IUserSettingsRepository"),
+  IWithdrawRequestController: Symbol.for("IWithdrawRequestController"),
+  IWithdrawRequestUseCase: Symbol.for("IWithdrawRequestUseCase"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -228,13 +312,31 @@ export interface DI_RETURN_TYPES {
   IAddUserGameUseCase: IAddUserGameUseCase;
   IAnswerFriendRequestController: IAnswerFriendRequestController;
   IAnswerFriendRequestUseCase: IAnswerFriendRequestUseCase;
+  IAnswerMoreTimeController: IAnswerMoreTimeController;
+  IAnswerMoreTimeUseCase: IAnswerMoreTimeUseCase;
+  IAnswerRequestController: IAnswerRequestController;
+  IAnswerRequestUseCase: IAnswerRequestUseCase;
   IAnswerSuggestionController: IAnswerSuggestionController;
   IAnswerSuggestionUseCase: IAnswerSuggestionUseCase;
+  IAskMoreTimeController: IAskMoreTimeController;
+  IAskMoreTimeUseCase: IAskMoreTimeUseCase;
   IAuthenticationService: IAuthenticationService;
+  ICallBackController: ICallBackController;
+  ICallBackUseCase: ICallBackUseCase;
   ICancelFriendRequestController: ICancelFriendRequestController;
   ICancelFriendRequestUseCase: ICancelFriendRequestUseCase;
+  ICancelLoanController: ICancelLoanController;
+  ICancelLoanUseCase: ICancelLoanUseCase;
+  IChangeDueDateController: IChangeDueDateController;
+  IChangeDueDateUseCase: IChangeDueDateUseCase;
   ICheckFriendLinkController: ICheckFriendLinkController;
   ICheckFriendLinkUseCase: ICheckFriendLinkUseCase;
+  IConfirmPassAlongController: IConfirmPassAlongController;
+  IConfirmPassAlongUseCase: IConfirmPassAlongUseCase;
+  IConfirmPickUpController: IConfirmPickUpController;
+  IConfirmPickUpUseCase: IConfirmPickUpUseCase;
+  IConfirmReturnController: IConfirmReturnController;
+  IConfirmReturnUseCase: IConfirmReturnUseCase;
   ICreateProfileController: ICreateProfileController;
   ICreateProfileUseCase: ICreateProfileUseCase;
   IFileStorage: IFileStorage;
@@ -243,6 +345,7 @@ export interface DI_RETURN_TYPES {
   IFriendLinksRepository: IFriendLinksRepository;
   IFriendRequestsRepository: IFriendRequestsRepository;
   IFriendshipsRepository: IFriendshipsRepository;
+  IGameNightsRepository: IGameNightsRepository;
   IGameSuggestionsRepository: IGameSuggestionsRepository;
   IGamesRepository: IGamesRepository;
   IGetAccountStateController: IGetAccountStateController;
@@ -255,16 +358,22 @@ export interface DI_RETURN_TYPES {
   IGetGameToEditController: IGetGameToEditController;
   IGetGameToEditUseCase: IGetGameToEditUseCase;
   IGetGameUseCase: IGetGameUseCase;
+  IGetLoanController: IGetLoanController;
+  IGetLoanUseCase: IGetLoanUseCase;
   IGetNoticeSettingsController: IGetNoticeSettingsController;
   IGetNoticeSettingsUseCase: IGetNoticeSettingsUseCase;
   IGetProfileController: IGetProfileController;
   IGetProfileUseCase: IGetProfileUseCase;
+  IGetRecordLoanChoicesController: IGetRecordLoanChoicesController;
+  IGetRecordLoanChoicesUseCase: IGetRecordLoanChoicesUseCase;
   IGetSuggestionController: IGetSuggestionController;
   IGetSuggestionUseCase: IGetSuggestionUseCase;
   IGetTabCountsController: IGetTabCountsController;
   IGetTabCountsUseCase: IGetTabCountsUseCase;
   IGetUserGameController: IGetUserGameController;
   IGetUserGameUseCase: IGetUserGameUseCase;
+  IGiveBackController: IGiveBackController;
+  IGiveBackUseCase: IGiveBackUseCase;
   IListAnsweredSuggestionsController: IListAnsweredSuggestionsController;
   IListAnsweredSuggestionsUseCase: IListAnsweredSuggestionsUseCase;
   IListFriendsController: IListFriendsController;
@@ -273,8 +382,12 @@ export interface DI_RETURN_TYPES {
   IListInboxUseCase: IListInboxUseCase;
   IListLibraryController: IListLibraryController;
   IListLibraryUseCase: IListLibraryUseCase;
+  IListLoansController: IListLoansController;
+  IListLoansUseCase: IListLoansUseCase;
   IListMyLibraryController: IListMyLibraryController;
   IListMyLibraryUseCase: IListMyLibraryUseCase;
+  IListPastLoansController: IListPastLoansController;
+  IListPastLoansUseCase: IListPastLoansUseCase;
   IListPeopleYouMayKnowController: IListPeopleYouMayKnowController;
   IListPeopleYouMayKnowUseCase: IListPeopleYouMayKnowUseCase;
   IListSuggestionsController: IListSuggestionsController;
@@ -290,14 +403,22 @@ export interface DI_RETURN_TYPES {
   INoticesRepository: INoticesRepository;
   IOpenFriendLinkController: IOpenFriendLinkController;
   IOpenFriendLinkUseCase: IOpenFriendLinkUseCase;
+  IPassAlongController: IPassAlongController;
+  IPassAlongUseCase: IPassAlongUseCase;
   IPutInBoxController: IPutInBoxController;
   IPutInBoxUseCase: IPutInBoxUseCase;
+  IRecordLoanController: IRecordLoanController;
+  IRecordLoanUseCase: IRecordLoanUseCase;
   IRemovePhotoController: IRemovePhotoController;
   IRemovePhotoUseCase: IRemovePhotoUseCase;
   IRemoveUserGameController: IRemoveUserGameController;
   IRemoveUserGameUseCase: IRemoveUserGameUseCase;
   IRemovedUsersRepository: IRemovedUsersRepository;
+  IRequestLoanController: IRequestLoanController;
+  IRequestLoanUseCase: IRequestLoanUseCase;
   IRequireAdmin: IRequireAdmin;
+  IRunDailyController: IRunDailyController;
+  IRunDailyUseCase: IRunDailyUseCase;
   ISearchGamesController: ISearchGamesController;
   ISearchGamesUseCase: ISearchGamesUseCase;
   ISendFriendRequestController: ISendFriendRequestController;
@@ -310,6 +431,8 @@ export interface DI_RETURN_TYPES {
   ISetPhotoUseCase: ISetPhotoUseCase;
   ISuggestGameController: ISuggestGameController;
   ISuggestGameUseCase: ISuggestGameUseCase;
+  ITakeBackPassAlongController: ITakeBackPassAlongController;
+  ITakeBackPassAlongUseCase: ITakeBackPassAlongUseCase;
   ITransactionManagerService: ITransactionManagerService;
   IUnfriendController: IUnfriendController;
   IUnfriendUseCase: IUnfriendUseCase;
@@ -324,4 +447,6 @@ export interface DI_RETURN_TYPES {
   IUserGamesRepository: IUserGamesRepository;
   IUserProfilesRepository: IUserProfilesRepository;
   IUserSettingsRepository: IUserSettingsRepository;
+  IWithdrawRequestController: IWithdrawRequestController;
+  IWithdrawRequestUseCase: IWithdrawRequestUseCase;
 }

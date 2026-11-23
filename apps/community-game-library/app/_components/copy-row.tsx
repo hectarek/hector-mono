@@ -9,21 +9,23 @@ import type { CopyStamp } from "@/src/entities/loan";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 
 // A copy in a game's Copies (B5, B11, B13): its owner's 20px piece, "Sam’s copy", the lines its
-// state gives, and the person looking's own stamp. A copy whose page the person looking opens
-// (their own) is one link with a chevron, as ListRow; the rest show their state where they
-// stand, and their buttons (Borrow, Join the line) come with Batch 4.
+// state gives, and the person looking's own stamp. A copy with a page for the person looking (their
+// own, or the request they sent) is one link with a chevron, as ListRow; the rest show their state
+// where they stand, with the button it offers at the right (Borrow, Join the line, Leave the line).
 export function CopyRow({
   name,
   owner,
   lines,
   stamp,
   href,
+  action,
 }: {
   name: string;
   owner: NameAndPiece;
   lines: readonly CopyLine[];
   stamp: CopyStamp | null;
   href?: string;
+  action?: ReactNode;
 }) {
   const body: ReactNode = (
     <>
@@ -34,6 +36,7 @@ export function CopyRow({
           <CopyLines lines={lines} />
         </span>
         {stamp && <Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
+        {action}
       </span>
     </>
   );

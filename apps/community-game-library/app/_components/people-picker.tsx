@@ -18,7 +18,8 @@ export type PickablePerson = {
 const BUTTONS_UP_TO = 6;
 
 // A "who" choice (record a loan's borrower, who to invite): each person by their piece and
-// name. One person, or several with `multiple`. The chosen ids go with the form as `name`.
+// name. One person, or several with `multiple`. The chosen ids go with the form as `name`. Inside
+// a group whose label names it already (C9), its legend is for screen readers only.
 export function PeoplePicker({
   label,
   name,
@@ -26,6 +27,7 @@ export function PeoplePicker({
   value,
   onChange,
   multiple = false,
+  labelHidden = false,
 }: {
   label: string;
   name: string;
@@ -33,6 +35,7 @@ export function PeoplePicker({
   value: string[];
   onChange: (ids: string[]) => void;
   multiple?: boolean;
+  labelHidden?: boolean;
 }) {
   const searchId = useId();
   const [search, setSearch] = useState("");
@@ -55,7 +58,11 @@ export function PeoplePicker({
 
   return (
     <fieldset className="flex min-w-0 flex-col gap-2">
-      <legend className="mb-2 text-13 font-semibold">{label}</legend>
+      <legend
+        className={labelHidden ? "sr-only" : "mb-2 text-13 font-semibold"}
+      >
+        {label}
+      </legend>
       {searchable && (
         // The kit's search field: the edge on a wrapper, a bare input inside, and the focus
         // ring on the wrapper.

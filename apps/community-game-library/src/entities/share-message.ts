@@ -4,3 +4,8 @@
 // E2's Share: your friend link, for the group chat.
 export const FRIEND_LINK_MESSAGE =
   "Be my friend on Community Game Library, so we can see each other’s board games:";
+
+// C18's Text Jo too, after calling a game back: the borrower sees the notice only when they next
+// open the app.
+export const callBackMessage = (title: string) =>
+  `Could you bring ${title} back? I need it.`;

@@ -41,6 +41,12 @@ export const PICKED_UP_STATUSES = [
   "passed-along",
 ] as const satisfies readonly LoanStatus[];
 
+// Ended after its pick-up, given back or handed on: Past loans (C12, R23).
+export const ENDED_STATUSES = [
+  "returned",
+  "passed-along",
+] as const satisfies readonly LoanStatus[];
+
 const isIn = (statuses: readonly LoanStatus[], status: LoanStatus) =>
   statuses.includes(status);
 
@@ -195,6 +201,14 @@ export function dueOn(pickedUpOn: string, periodDays: number): string {
   return addDays(pickedUpOn, periodDays);
 }
 
+// More time (R20; C6, C14): 3 more days or 1 more week, counted from the due date, or from today
+// once it's overdue ("It's overdue, so these count from today."), or a date after that.
+export const MORE_TIME_DAYS = [3, 7] as const;
+
+export function moreTimeFrom(dueOn: string, today: string): string {
+  return dueOn > today ? dueOn : today;
+}
+
 // A loan's dates from its pick-up on (R18): the due date its period gives, or, when the owner
 // picked a date, the days from the pick-up to it, so a pass-along's next loan can copy them (R48).
 export function datesAtPickUp(
@@ -225,6 +239,18 @@ export function isOverdue(
   return loan.status === "out" && loan.dueOn !== null && today > loan.dueOn;
 }
 
+// How many days after its due date a loan came back, given back or handed on (C12's "3 days
+// late"), or 0.
+export function daysLate(
+  loan: Pick<LoanFields, "dueOn"> & { returnedOn: string | null },
+): number {
+  return loan.dueOn !== null &&
+    loan.returnedOn !== null &&
+    loan.returnedOn > loan.dueOn
+    ? daysBetween(loan.dueOn, loan.returnedOn)
+    : 0;
+}
+
 // A copy's line (R24): its open requests, oldest first. Two asked in the same instant go by id,
 // so every read gives the same order.
 export function lineOf<
@@ -252,7 +278,13 @@ const brown = (word: string): CopyStamp => ({ word, tone: "brown" });
 
 type CopyLoan = Pick<
   LoanFields,
-  "id" | "borrowerUserId" | "status" | "previousLoanId" | "dueOn" | "createdAt"
+  | "id"
+  | "borrowerUserId"
+  | "status"
+  | "previousLoanId"
+  | "dueOn"
+  | "calledBackAt"
+  | "createdAt"
 >;
 
 // A copy's state for the person looking (R15, B13; KTD6's available, requested, you asked, 2nd in
@@ -285,7 +317,8 @@ export type CopyState<L> = {
   line: L[];
 };
 
-function ordinal(place: number): string {
+// "1st", "2nd", "11th": a place in a line.
+export function ordinal(place: number): string {
   const lastTwo = place % 100;
   if (lastTwo < 11 || lastTwo > 13) {
     const suffix = ["th", "st", "nd", "rd"][place % 10];
@@ -322,10 +355,13 @@ function holderStamp(loan: CopyLoan, today: string): CopyStamp {
   );
 }
 
-// The owner's stamp while someone else has their copy.
+// The owner's stamp while someone else has their copy: a call-back outranks overdue (C18).
 function ownersOutStamp(loan: CopyLoan, today: string): CopyStamp {
   if (loan.status === "returning") {
     return red("Given back");
+  }
+  if (loan.calledBackAt !== null) {
+    return { word: "Called back", tone: "late" };
   }
   if (loan.status === "passing") {
     return brown("Handed on");
