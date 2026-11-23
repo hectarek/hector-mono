@@ -24,3 +24,51 @@ export function seatsOpen(capacity: number, list: readonly Seated[]): number {
 export function isUpcoming(startsAt: Date, today: string): boolean {
   return todayIn(PLAN_TIME_ZONE, startsAt) >= today;
 }
+
+type Listed = Pick<
+  GameNightAttendee,
+  "userId" | "status" | "guestCount" | "waitlistedAt"
+>;
+
+// The seats a member takes: theirs, and one for each guest (R47).
+const seatsFor = (guestCount: number): number => 1 + guestCount;
+
+// Whether a member bringing `guests` fits on the night, counting the seats they hold already if
+// they're going (AE4: with one seat open, a member with a guest doesn't).
+export function fits(
+  capacity: number,
+  list: readonly Listed[],
+  userId: string,
+  guests: number,
+): boolean {
+  const others = list.filter((one) => one.userId !== userId);
+  return seatsTaken(others) + seatsFor(guests) <= capacity;
+}
+
+// The waitlist, in the order its people joined it (R31).
+export function waitlistOf<T extends Listed>(list: readonly T[]): T[] {
+  return list
+    .filter((one) => one.status === "waitlisted")
+    .sort(
+      (a, b) =>
+        (a.waitlistedAt?.getTime() ?? 0) - (b.waitlistedAt?.getTime() ?? 0) ||
+        (a.userId < b.userId ? -1 : 1),
+    );
+}
+
+// Who moves from the waitlist to going when seats open: the earliest waitlisted members whose
+// seats fit, each in turn, skipping one who doesn't (R31, AE4).
+export function movingUp<T extends Listed>(
+  capacity: number,
+  list: readonly T[],
+): T[] {
+  let taken = seatsTaken(list);
+  const moving: T[] = [];
+  for (const one of waitlistOf(list)) {
+    if (taken + seatsFor(one.guestCount) <= capacity) {
+      taken += seatsFor(one.guestCount);
+      moving.push(one);
+    }
+  }
+  return moving;
+}

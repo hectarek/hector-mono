@@ -8,9 +8,11 @@ import type {
 } from "@/src/entities/models/game-night.model";
 import type {
   GameNightAttendee,
+  GameNightAttendeeChanges,
   NewGameNightAttendee,
 } from "@/src/entities/models/game-night-attendee.model";
 import type { GameNightGame } from "@/src/entities/models/game-night-game.model";
+import type { GameNightVote } from "@/src/entities/models/game-night-vote.model";
 
 // The SQL's orders: a timestamp, then the id.
 const byStart = (a: GameNight, b: GameNight) =>
@@ -21,6 +23,11 @@ const byJoining = (a: GameNightAttendee, b: GameNightAttendee) =>
 const byPutting = (a: GameNightGame, b: GameNightGame) =>
   a.createdAt.getTime() - b.createdAt.getTime() ||
   a.userGameId.localeCompare(b.userGameId);
+
+const sameVote = (a: GameNightVote, b: GameNightVote) =>
+  a.gameNightId === b.gameNightId &&
+  a.userGameId === b.userGameId &&
+  a.userId === b.userId;
 
 // The table's checks: a capacity above none, and an end after the start.
 function refuseBadNight(
@@ -36,12 +43,18 @@ export class MockGameNightsRepository implements IGameNightsRepository {
   readonly nights: GameNight[] = [];
   readonly attendees: GameNightAttendee[] = [];
   readonly games: GameNightGame[] = [];
+  readonly votes: GameNightVote[] = [];
 
   // Who's whose friend, as the real repository's join reads it.
   constructor(private readonly friendships: IFriendshipsRepository) {}
 
   async getById(id: string): Promise<GameNight | undefined> {
     const night = this.nights.find((row) => row.id === id);
+    return night && { ...night };
+  }
+
+  async getByLinkToken(token: string): Promise<GameNight | undefined> {
+    const night = this.nights.find((row) => row.linkToken === token);
     return night && { ...night };
   }
 
@@ -72,8 +85,8 @@ export class MockGameNightsRepository implements IGameNightsRepository {
     const now = new Date();
     const row: GameNight = {
       id: crypto.randomUUID(),
-      ...night,
       linkToken: null,
+      ...night,
       cancelledAt: null,
       createdAt: now,
       updatedAt: now,
@@ -167,6 +180,153 @@ export class MockGameNightsRepository implements IGameNightsRepository {
         });
       }
     });
+  }
+
+  async updateAttendee(
+    gameNightId: string,
+    userId: string,
+    changes: GameNightAttendeeChanges,
+  ): Promise<GameNightAttendee> {
+    const row = this.attendees.find(
+      (one) => one.gameNightId === gameNightId && one.userId === userId,
+    );
+    if (!row || (changes.guestCount ?? 0) < 0) {
+      throw new DatabaseOperationError("updateAttendee failed");
+    }
+    Object.assign(row, changes, { updatedAt: new Date() });
+    return { ...row };
+  }
+
+  async removeAttendee(gameNightId: string, userId: string): Promise<void> {
+    const index = this.attendees.findIndex(
+      (one) => one.gameNightId === gameNightId && one.userId === userId,
+    );
+    if (index >= 0) {
+      this.attendees.splice(index, 1);
+    }
+  }
+
+  async listWaitingInvites(
+    userId: string,
+    from: Date,
+  ): Promise<{ gameNightId: string; startsAt: Date }[]> {
+    return this.attendees
+      .filter(
+        (one) =>
+          one.userId === userId &&
+          one.status === "invited" &&
+          one.invitedBy !== null,
+      )
+      .flatMap((one) => {
+        const night = this.nights.find((row) => row.id === one.gameNightId);
+        return night && night.cancelledAt === null && night.startsAt >= from
+          ? [night]
+          : [];
+      })
+      .sort(byStart)
+      .map((night) => ({ gameNightId: night.id, startsAt: night.startsAt }));
+  }
+
+  async listWentWith(
+    userId: string,
+    before: Date,
+  ): Promise<{ userId: string; gameNightId: string; title: string }[]> {
+    const went = (nightId: string, who: string) =>
+      this.attendees.some(
+        (one) =>
+          one.gameNightId === nightId &&
+          one.userId === who &&
+          one.status === "going",
+      );
+    return this.nights
+      .filter(
+        (night) =>
+          night.startsAt < before &&
+          night.cancelledAt === null &&
+          went(night.id, userId),
+      )
+      .sort((a, b) => byStart(b, a))
+      .flatMap((night) =>
+        this.attendees
+          .filter(
+            (one) =>
+              one.gameNightId === night.id &&
+              one.status === "going" &&
+              one.userId !== userId,
+          )
+          .map((one) => one.userId)
+          .sort()
+          .map((other) => ({
+            userId: other,
+            gameNightId: night.id,
+            title: night.title,
+          })),
+      );
+  }
+
+  async removeGames(
+    gameNightId: string,
+    userGameIds: readonly string[],
+  ): Promise<void> {
+    const gone = (row: { gameNightId: string; userGameId: string }) =>
+      row.gameNightId === gameNightId && userGameIds.includes(row.userGameId);
+    // As the votes' foreign key: a vote goes with its game's place on the table.
+    this.games.splice(
+      0,
+      this.games.length,
+      ...this.games.filter((one) => !gone(one)),
+    );
+    this.votes.splice(
+      0,
+      this.votes.length,
+      ...this.votes.filter((one) => !gone(one)),
+    );
+  }
+
+  async listVotes(gameNightIds: readonly string[]): Promise<GameNightVote[]> {
+    const ids = new Set(gameNightIds);
+    return this.votes
+      .filter((one) => ids.has(one.gameNightId))
+      .sort(
+        (a, b) =>
+          a.userGameId.localeCompare(b.userGameId) ||
+          a.userId.localeCompare(b.userId),
+      )
+      .map((one) => ({ ...one }));
+  }
+
+  async addVote(vote: GameNightVote): Promise<void> {
+    // As the votes' foreign key: only a game on the table takes one.
+    if (
+      !this.games.some(
+        (one) =>
+          one.gameNightId === vote.gameNightId &&
+          one.userGameId === vote.userGameId,
+      )
+    ) {
+      throw new DatabaseOperationError("addVote failed");
+    }
+    if (!this.votes.some((one) => sameVote(one, vote))) {
+      this.votes.push({ ...vote });
+    }
+  }
+
+  async removeVote(vote: GameNightVote): Promise<void> {
+    this.votes.splice(
+      0,
+      this.votes.length,
+      ...this.votes.filter((one) => !sameVote(one, vote)),
+    );
+  }
+
+  async removeVotesBy(gameNightId: string, userId: string): Promise<void> {
+    this.votes.splice(
+      0,
+      this.votes.length,
+      ...this.votes.filter(
+        (one) => !(one.gameNightId === gameNightId && one.userId === userId),
+      ),
+    );
   }
 
   async listGoingToNightsStarting(

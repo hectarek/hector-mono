@@ -3,6 +3,7 @@ import type { IUserGamesRepository } from "@/src/application/repositories/user-g
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
+import { newLinkToken } from "@/src/entities/link-token";
 import type {
   GameNight,
   NewGameNight,
@@ -18,7 +19,8 @@ export type NightToCreate = Omit<NewGameNight, "createdBy"> & {
 
 // Create a game night (D5, R29, R30, R47): it starts from now on, the host goes on its list as
 // going, so the seats count them, and the games picked from their library go on its table. A copy
-// that isn't theirs is Not found, as anyone else's copy is to them.
+// that isn't theirs is Not found, as anyone else's copy is to them. A night only invited people
+// see gets its link (D7, KTD18).
 export const createNightUseCase = (
   userGamesRepository: IUserGamesRepository,
   gameNightsRepository: IGameNightsRepository,
@@ -45,7 +47,11 @@ export const createNightUseCase = (
         throw new NotFoundError();
       }
       const created = await gameNightsRepository.create(
-        { ...night, createdBy: userId },
+        {
+          ...night,
+          createdBy: userId,
+          linkToken: night.audience === "invited" ? newLinkToken() : null,
+        },
         tx,
       );
       await gameNightsRepository.addAttendee(

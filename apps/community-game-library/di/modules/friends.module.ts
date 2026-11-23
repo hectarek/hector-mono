@@ -60,6 +60,7 @@ export function createFriendsModule() {
     IFriendLinksRepository: links,
     IFriendRequestsRepository: requests,
     IFriendshipsRepository: friendships,
+    IGameNightsRepository: gameNights,
     IGamesRepository: games,
     ILoansRepository: loans,
     ILoggerService: log,
@@ -99,6 +100,7 @@ export function createFriendsModule() {
       games,
       loans,
       files,
+      gameNights,
     ]);
   friendsModule
     .bind(DI_SYMBOLS.IListFriendsUseCase)
@@ -107,6 +109,7 @@ export function createFriendsModule() {
       requests,
       profiles,
       userGames,
+      gameNights,
     ]);
   friendsModule
     .bind(DI_SYMBOLS.IListPeopleYouMayKnowUseCase)
@@ -114,6 +117,7 @@ export function createFriendsModule() {
       friendships,
       requests,
       profiles,
+      gameNights,
     ]);
   friendsModule
     .bind(DI_SYMBOLS.IMakeFriendLinkUseCase)
@@ -136,6 +140,7 @@ export function createFriendsModule() {
       notices,
       transactions,
       log,
+      gameNights,
     ]);
   friendsModule
     .bind(DI_SYMBOLS.IUnfriendUseCase)
@@ -146,6 +151,8 @@ export function createFriendsModule() {
       loans,
       transactions,
       log,
+      gameNights,
+      notices,
     ]);
 
   for (const [controller, factory, useCase] of [

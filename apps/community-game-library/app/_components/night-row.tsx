@@ -78,7 +78,7 @@ function seatsLine(
 
 // Whose guests the seats show, since a guest is always named (screens.md rule 9): "Ben’s guest",
 // "Ben’s 2 guests", "Ben’s and Dev’s guests".
-export function guestWords(going: NightCardData["going"]): string | null {
+function guestWords(going: NightCardData["going"]): string | null {
   const bringing = going.filter((one) => one.guestCount > 0);
   const [only] = bringing;
   if (!only) {

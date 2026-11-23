@@ -10,6 +10,7 @@ import {
   gameNightAttendees,
   gameNightGames,
   gameNights,
+  gameNightVotes,
   games,
   loans,
   userGameExpansions,
@@ -27,6 +28,7 @@ import type {
 } from "@/src/entities/models/game-night.model";
 import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
 import type { GameNightGame } from "@/src/entities/models/game-night-game.model";
+import type { GameNightVote } from "@/src/entities/models/game-night-vote.model";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
@@ -614,10 +616,12 @@ type CastNight = {
   list: CastAttendee[];
   // The games on the table, in the order they were put there.
   table: { copy: CopyKey; at: string }[];
+  // Who'd play each (R38), as the boards draw it.
+  votes?: { copy: CopyKey; voters: CastName[] }[];
 };
 
-// The nights the boards show on the canvas's today (D1, D2, D5, D7, E3), then the two past ones
-// (D12). Times are Eastern. The votes on the tables come with U19, which writes them.
+// The nights the boards show on the canvas's today (D1, D2, D4, D5, D7, D13, E3), then the two
+// past ones (D12), with who'd play each game on their tables. Times are Eastern.
 const NIGHTS = {
   // Alice's Saturday night, for her friends: Alice, Sam, Jo and Priya going, Ben maybe, and you
   // invited by name with no answer yet (D1, D2).
@@ -652,6 +656,11 @@ const NIGHTS = {
       { copy: "alicesTinKettleDerby", at: "2026-11-03T09:30:00-05:00" },
       { copy: "samsQuarryLane", at: "2026-11-03T09:40:00-05:00" },
       { copy: "josSaltAndSignal", at: "2026-11-03T12:45:00-05:00" },
+    ],
+    votes: [
+      { copy: "samsHarborLights", voters: ["alice", "sam", "jo"] },
+      { copy: "alicesTinKettleDerby", voters: ["priya"] },
+      { copy: "samsQuarryLane", voters: ["sam"] },
     ],
   },
   // Your night, only for people you invite: full with Ben's guest, and Dev, who came by its link,
@@ -705,14 +714,21 @@ const NIGHTS = {
       { copy: "samsQuarryLane", at: "2026-11-07T08:05:00-05:00" },
       { copy: "samsHarborLights", at: "2026-11-07T08:06:00-05:00" },
     ],
+    votes: [
+      { copy: "samsQuarryLane", voters: ["sam", "priya", "jo", "ben"] },
+      { copy: "yourNightMarket", voters: ["you", "sam", "priya"] },
+      { copy: "samsHarborLights", voters: ["jo"] },
+    ],
   },
-  // Ben's birthday, for his friends and the two Alice invited: full, with Dev's guest (D1).
+  // Ben's birthday, for his friends and the two Alice invited: full, with Dev's guest (D1, D4).
+  // D4 draws Ben bringing Fenwick Fair; the cast's copy is Priya's.
   bensBirthdayGames: {
     id: castId(403),
     host: "ben",
     title: "Ben’s birthday games",
     startsAt: "2026-11-21T14:00:00-05:00",
     place: "Ben’s place",
+    address: "3 Wren Court",
     capacity: 8,
     audience: "friends",
     attendeesCanInvite: true,
@@ -738,7 +754,14 @@ const NIGHTS = {
         invitedBy: "alice",
       },
     ],
-    table: [],
+    table: [
+      { copy: "alicesTinKettleDerby", at: "2026-11-01T16:05:00-05:00" },
+      { copy: "priyasFenwickFair", at: "2026-11-02T09:05:00-05:00" },
+    ],
+    votes: [
+      { copy: "alicesTinKettleDerby", voters: ["alice", "ben", "jo"] },
+      { copy: "priyasFenwickFair", voters: ["priya"] },
+    ],
   },
   // Jo's Halloween one-shots: five came, with three games (D12).
   halloweenOneShots: {
@@ -970,6 +993,17 @@ export function castRows(accounts: Partial<Record<CastName, string>> = {}) {
         }),
       ),
     ),
+    nightVotes: Object.values<CastNight>(NIGHTS).flatMap((night) =>
+      (night.votes ?? []).flatMap(({ copy, voters }) =>
+        voters.map(
+          (voter): GameNightVote => ({
+            gameNightId: night.id,
+            userGameId: COPIES[copy].id,
+            userId: userIds[voter],
+          }),
+        ),
+      ),
+    ),
   };
 }
 type CastRows = ReturnType<typeof castRows>;
@@ -1183,6 +1217,14 @@ export async function insertCastRows(
       ({ gameNightId }) => nightsThere.has(gameNightId),
       (missing) =>
         db.insert(gameNightGames).values(missing).onConflictDoNothing(),
+      commit,
+    ),
+    await tally(
+      "Votes",
+      rows.nightVotes,
+      ({ gameNightId }) => nightsThere.has(gameNightId),
+      (missing) =>
+        db.insert(gameNightVotes).values(missing).onConflictDoNothing(),
       commit,
     ),
   ];

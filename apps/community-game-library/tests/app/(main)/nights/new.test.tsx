@@ -4,15 +4,22 @@ import {
   describe,
   expect,
   it,
+  mock,
   setSystemTime,
 } from "bun:test";
 import { Toaster } from "@repo/ui/components/sonner";
 import { fireEvent, render, waitFor, within } from "@testing-library/react";
-import { APP_TOASTER } from "@/app/_lib/notify";
-import NightPage from "@/app/(main)/nights/[id]/page";
-import NewNightPage from "@/app/(main)/nights/new/page";
-import { signInAsYouWithTheCast } from "@/tests/_support/members";
-import { nextState } from "@/tests/_support/next";
+
+// The host the request came to; headers() works only inside a request.
+mock.module("next/headers", () => ({
+  headers: async () => new Headers({ host: "communitygamelibrary.com" }),
+}));
+
+const { APP_TOASTER } = await import("@/app/_lib/notify");
+const { default: NewNightPage } = await import("@/app/(main)/nights/new/page");
+const { default: NightPage } = await import("@/app/(main)/nights/[id]/page");
+const { signInAsYouWithTheCast } = await import("@/tests/_support/members");
+const { nextState } = await import("@/tests/_support/next");
 
 async function renderNewNight() {
   await signInAsYouWithTheCast();

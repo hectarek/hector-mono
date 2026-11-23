@@ -1,8 +1,8 @@
 import { authViewPaths } from "@neondatabase/auth/react/ui/server";
 import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
+import { LinkPage } from "@/app/_components/link-gone";
 import { WhatItsFor } from "@/app/_components/what-its-for";
-import { LinkPage } from "./link-gone";
 
 // A3: a friend's link opened signed out. It names nobody, since a signed-out page carries no
 // member's name (R39); the two are friends once its visitor has an account and is in.

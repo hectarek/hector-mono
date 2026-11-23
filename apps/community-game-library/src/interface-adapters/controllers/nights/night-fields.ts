@@ -43,7 +43,9 @@ const detailsSchema = z.object(nightDetails);
 // before the start is on the next day's, as a night that runs past midnight does.
 export function detailsOf(
   details: z.infer<typeof detailsSchema>,
-): Required<Omit<GameNightChanges, "attendeesCanInvite" | "guestsAllowed">> {
+): Required<
+  Omit<GameNightChanges, "attendeesCanInvite" | "guestsAllowed" | "linkToken">
+> {
   const startsAt = atTimeIn(details.date, details.startsAt, PLAN_TIME_ZONE);
   const sameDayEnd =
     details.endsAt === null

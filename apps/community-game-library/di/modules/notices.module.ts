@@ -58,6 +58,7 @@ export function createNoticesModule() {
       userGames,
       loans,
       requests,
+      DI_SYMBOLS.IGameNightsRepository,
     ]);
   noticesModule
     .bind(DI_SYMBOLS.IListInboxController)

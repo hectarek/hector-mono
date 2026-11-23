@@ -89,7 +89,27 @@ export async function signInAsYouWithTheCast(): Promise<string> {
     gameNights.nights.push(...rows.nights);
     gameNights.attendees.push(...rows.nightAttendees);
     gameNights.games.push(...rows.nightGames);
+    gameNights.votes.push(...rows.nightVotes);
   }
   nextState.userId = CAST.people.you.id;
   return CAST.people.you.id;
+}
+
+// Puts the cast's nights back as the boards draw them, with their lists, tables and votes, for a
+// screen test file whose tests answer, invite or vote: the container's repositories live for the
+// whole run.
+export function resetCastNights(): void {
+  const gameNights = getInjection("IGameNightsRepository");
+  if (!(gameNights instanceof MockGameNightsRepository)) {
+    throw new Error("The container's repositories are the mocks under test");
+  }
+  const rows = castRows();
+  gameNights.nights.splice(0, gameNights.nights.length, ...rows.nights);
+  gameNights.attendees.splice(
+    0,
+    gameNights.attendees.length,
+    ...rows.nightAttendees,
+  );
+  gameNights.games.splice(0, gameNights.games.length, ...rows.nightGames);
+  gameNights.votes.splice(0, gameNights.votes.length, ...rows.nightVotes);
 }

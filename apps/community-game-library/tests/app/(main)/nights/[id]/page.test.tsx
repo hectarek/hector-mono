@@ -4,13 +4,20 @@ import {
   describe,
   expect,
   it,
+  mock,
   setSystemTime,
 } from "bun:test";
 import { render, within } from "@testing-library/react";
-import NightPage from "@/app/(main)/nights/[id]/page";
-import { CAST } from "@/tests/_support/cast";
-import { signInAsYouWithTheCast } from "@/tests/_support/members";
-import { NotFoundPage, nextState } from "@/tests/_support/next";
+
+// The host the request came to; headers() works only inside a request.
+mock.module("next/headers", () => ({
+  headers: async () => new Headers({ host: "communitygamelibrary.com" }),
+}));
+
+const { default: NightPage } = await import("@/app/(main)/nights/[id]/page");
+const { CAST } = await import("@/tests/_support/cast");
+const { signInAsYouWithTheCast } = await import("@/tests/_support/members");
+const { NotFoundPage, nextState } = await import("@/tests/_support/next");
 
 const { saturdayGameNight, heavyGamesAtMine } = CAST.nights;
 const nightPage = (id: string) =>
@@ -57,14 +64,39 @@ describe("A night's page (U18: D2, D7)", () => {
     const table = within(
       page.getByText("Games on the table").closest("section") as HTMLElement,
     );
+    // Most wanted first, with who'd play each and I'd play (U19).
     expect(
       table.getAllByRole("listitem").map((row) => row.textContent),
     ).toEqual([
-      "Night MarketBest at 5 · 60–90 minYou bring it",
-      "Salt & Signal2 players only · 30 minYou bring it",
-      "Quarry LaneBest at 5 · 90 minSam brings it",
-      "Harbor LightsBest at 4 · 45–60 minSam brings it",
+      "Quarry LaneBest at 5 · 90 minSam brings it4 want to playI’d play",
+      "Night MarketBest at 5 · 60–90 minYou bring it3 want to playYou’d play",
+      "Harbor LightsBest at 4 · 45–60 minSam brings it1 wants to playI’d play",
+      "Salt & Signal2 players only · 30 minYou bring itNo one yetI’d play",
     ]);
+    expect(table.getByText("Most wanted first")).toBeTruthy();
+    expect(
+      table
+        .getByRole("button", { name: "You’d play" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    // The night's link, the waitlist and who hasn't answered (U19).
+    for (const text of [
+      "communitygamelibrary.com/n/7QK2-MARR",
+      "Everyone invited has answered.",
+      "Waitlist · 1",
+      "1st on the waitlist · needs 1 seat",
+    ]) {
+      expect(page.getByText(text)).toBeTruthy();
+    }
+    expect(
+      page.getByRole("button", { name: "Remove from waitlist" }),
+    ).toBeTruthy();
+    expect(
+      page
+        .getByRole("button", { name: "Invite people" })
+        .closest("a")
+        ?.getAttribute("href"),
+    ).toBe(`/nights/${heavyGamesAtMine.id}/invite`);
     expect(
       page
         .getByRole("button", { name: "Edit" })

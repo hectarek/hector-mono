@@ -204,7 +204,7 @@ describeEachBackend("Friends (E1)", () => {
       ["Sam", 3],
     ]);
     expect(named(friends.peopleYouMayKnow)).toEqual(["Noor"]);
-    expect(friends.peopleYouMayKnow[0]?.via.name).toBe("Sam");
+    expect(friends.peopleYouMayKnow[0]?.via?.name).toBe("Sam");
   });
 
   it("gives a newcomer their new friend's friends, with You asked once asked (A5)", async () => {
@@ -233,7 +233,7 @@ describeEachBackend("Friends (E1)", () => {
       ["Priya", false],
       ["Robin Vale", false],
     ]);
-    expect(new Set(people.map((row) => row.via.name))).toEqual(
+    expect(new Set(people.map((row) => row.via?.name))).toEqual(
       new Set(["Sam"]),
     );
   });
@@ -262,6 +262,8 @@ describeEachBackend("a friend's page (E3)", () => {
       staying: [{ title: "Moss & Mortar", yours: false }],
       withdrawn: [{ title: "Quarry Lane", yours: false }],
       cancelled: [],
+      // Sam is on your Heavy games at mine (U19).
+      nights: [{ title: "Heavy games at mine", yours: true }],
     });
   });
 

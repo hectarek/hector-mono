@@ -25,7 +25,8 @@ export const gameNightSchema = z.object({
 });
 export type GameNight = z.infer<typeof gameNightSchema>;
 
-// What a new night holds (D5): the rest are the table's own.
+// What a new night holds (D5), with its link for a night only invited people see (U19): the rest
+// are the table's own.
 export type NewGameNight = Pick<
   GameNight,
   | "createdBy"
@@ -39,7 +40,8 @@ export type NewGameNight = Pick<
   | "audience"
   | "attendeesCanInvite"
   | "guestsAllowed"
->;
+> &
+  Partial<Pick<GameNight, "linkToken">>;
 
-// What the host's Edit changes (U18); the night's link (U19) and cancelling (U21) add theirs.
+// What the host's Edit changes (U18), and a new link (U19); cancelling (U21) adds its own.
 export type GameNightChanges = Partial<Omit<NewGameNight, "createdBy">>;

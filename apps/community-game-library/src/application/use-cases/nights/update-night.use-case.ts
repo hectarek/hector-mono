@@ -4,10 +4,12 @@ import type { INoticesRepository } from "@/src/application/repositories/notices.
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { nightToSee } from "@/src/application/use-cases/nights/can-see-night";
+import { fillSeats } from "@/src/application/use-cases/nights/night-seats";
 import {
   InputParseError,
   UnauthorizedError,
 } from "@/src/entities/errors/common";
+import { newLinkToken } from "@/src/entities/link-token";
 import type {
   GameNight,
   GameNightChanges,
@@ -34,7 +36,8 @@ const same = (a: Date | string | null, b: Date | string | null) =>
 
 // The host's Edit (from D7, R34): the night's fields change under its row lock, and everyone going
 // but the host gets night-changed when its time, place or words moved. The seats can't drop
-// below the ones taken, and a new start is from now on. Someone else who can see the night is
+// below the ones taken, more seats go to the waitlist first (R31), and a new start is from now on.
+// A night made only for people invited gets its link (U19). Someone else who can see the night is
 // refused; anyone else gets Not found (KTD4).
 export const updateNightUseCase = (
   friendshipsRepository: IFriendshipsRepository,
@@ -77,9 +80,13 @@ export const updateNightUseCase = (
       }
       const updated = await gameNightsRepository.update(
         gameNightId,
-        changes,
+        changes.audience === "invited" && night.linkToken === null
+          ? { ...changes, linkToken: newLinkToken() }
+          : changes,
         tx,
       );
+      // More seats go to the waitlist first.
+      await fillSeats(gameNightsRepository, noticesRepository, updated, tx);
       const told = TOLD_OF.some((key) => !same(night[key], updated[key]))
         ? list
             .filter((one) => one.status === "going" && one.userId !== userId)

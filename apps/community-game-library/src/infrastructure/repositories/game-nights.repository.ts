@@ -1,10 +1,24 @@
-import { and, asc, eq, gte, inArray, isNull, lt, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  ne,
+  or,
+} from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "@/db";
 import {
   friendships,
   gameNightAttendees,
   gameNightGames,
   gameNights,
+  gameNightVotes,
 } from "@/db/schema";
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
@@ -15,9 +29,11 @@ import type {
 } from "@/src/entities/models/game-night.model";
 import type {
   GameNightAttendee,
+  GameNightAttendeeChanges,
   NewGameNightAttendee,
 } from "@/src/entities/models/game-night-attendee.model";
 import type { GameNightGame } from "@/src/entities/models/game-night-game.model";
+import type { GameNightVote } from "@/src/entities/models/game-night-vote.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { BaseRepository } from "@/src/infrastructure/repositories/base.repository";
 
@@ -242,6 +258,224 @@ export class GameNightsRepository
         .onConflictDoNothing();
     } catch (err) {
       this.handleError(err, "addGames", { gameNightId });
+    }
+  }
+
+  async getByLinkToken(
+    token: string,
+    tx?: ITransaction,
+  ): Promise<GameNight | undefined> {
+    try {
+      const [night] = await this.getDbContext(tx)
+        .select()
+        .from(gameNights)
+        .where(eq(gameNights.linkToken, token))
+        .limit(1);
+      return night;
+    } catch (err) {
+      this.handleError(err, "getByLinkToken");
+    }
+  }
+
+  async updateAttendee(
+    gameNightId: string,
+    userId: string,
+    changes: GameNightAttendeeChanges,
+    tx: ITransaction,
+  ): Promise<GameNightAttendee> {
+    try {
+      const [row] = await this.getDbContext(tx)
+        .update(gameNightAttendees)
+        .set(changes)
+        .where(
+          and(
+            eq(gameNightAttendees.gameNightId, gameNightId),
+            eq(gameNightAttendees.userId, userId),
+          ),
+        )
+        .returning();
+      if (!row) {
+        throw new Error("No row returned");
+      }
+      return row;
+    } catch (err) {
+      this.handleError(err, "updateAttendee", { gameNightId });
+    }
+  }
+
+  async removeAttendee(
+    gameNightId: string,
+    userId: string,
+    tx: ITransaction,
+  ): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(gameNightAttendees)
+        .where(
+          and(
+            eq(gameNightAttendees.gameNightId, gameNightId),
+            eq(gameNightAttendees.userId, userId),
+          ),
+        );
+    } catch (err) {
+      this.handleError(err, "removeAttendee", { gameNightId });
+    }
+  }
+
+  async listWaitingInvites(
+    userId: string,
+    from: Date,
+    tx?: ITransaction,
+  ): Promise<{ gameNightId: string; startsAt: Date }[]> {
+    try {
+      return await this.getDbContext(tx)
+        .select({ gameNightId: gameNights.id, startsAt: gameNights.startsAt })
+        .from(gameNightAttendees)
+        .innerJoin(
+          gameNights,
+          eq(gameNights.id, gameNightAttendees.gameNightId),
+        )
+        .where(
+          and(
+            eq(gameNightAttendees.userId, userId),
+            eq(gameNightAttendees.status, "invited"),
+            isNotNull(gameNightAttendees.invitedBy),
+            isNull(gameNights.cancelledAt),
+            gte(gameNights.startsAt, from),
+          ),
+        )
+        .orderBy(asc(gameNights.startsAt), asc(gameNights.id));
+    } catch (err) {
+      this.handleError(err, "listWaitingInvites");
+    }
+  }
+
+  async listWentWith(
+    userId: string,
+    before: Date,
+    tx?: ITransaction,
+  ): Promise<{ userId: string; gameNightId: string; title: string }[]> {
+    const mine = alias(gameNightAttendees, "mine");
+    try {
+      return await this.getDbContext(tx)
+        .select({
+          userId: gameNightAttendees.userId,
+          gameNightId: gameNights.id,
+          title: gameNights.title,
+        })
+        .from(gameNights)
+        .innerJoin(
+          mine,
+          and(
+            eq(mine.gameNightId, gameNights.id),
+            eq(mine.userId, userId),
+            eq(mine.status, "going"),
+          ),
+        )
+        .innerJoin(
+          gameNightAttendees,
+          and(
+            eq(gameNightAttendees.gameNightId, gameNights.id),
+            eq(gameNightAttendees.status, "going"),
+            ne(gameNightAttendees.userId, userId),
+          ),
+        )
+        .where(
+          and(lt(gameNights.startsAt, before), isNull(gameNights.cancelledAt)),
+        )
+        .orderBy(
+          desc(gameNights.startsAt),
+          asc(gameNights.id),
+          asc(gameNightAttendees.userId),
+        );
+    } catch (err) {
+      this.handleError(err, "listWentWith");
+    }
+  }
+
+  async removeGames(
+    gameNightId: string,
+    userGameIds: readonly string[],
+    tx: ITransaction,
+  ): Promise<void> {
+    if (userGameIds.length === 0) {
+      return;
+    }
+    try {
+      await this.getDbContext(tx)
+        .delete(gameNightGames)
+        .where(
+          and(
+            eq(gameNightGames.gameNightId, gameNightId),
+            inArray(gameNightGames.userGameId, [...userGameIds]),
+          ),
+        );
+    } catch (err) {
+      this.handleError(err, "removeGames", { gameNightId });
+    }
+  }
+
+  async listVotes(
+    gameNightIds: readonly string[],
+    tx?: ITransaction,
+  ): Promise<GameNightVote[]> {
+    if (gameNightIds.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(gameNightVotes)
+        .where(inArray(gameNightVotes.gameNightId, [...gameNightIds]))
+        .orderBy(asc(gameNightVotes.userGameId), asc(gameNightVotes.userId));
+    } catch (err) {
+      this.handleError(err, "listVotes");
+    }
+  }
+
+  async addVote(vote: GameNightVote, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .insert(gameNightVotes)
+        .values(vote)
+        .onConflictDoNothing();
+    } catch (err) {
+      this.handleError(err, "addVote", { gameNightId: vote.gameNightId });
+    }
+  }
+
+  async removeVote(vote: GameNightVote, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(gameNightVotes)
+        .where(
+          and(
+            eq(gameNightVotes.gameNightId, vote.gameNightId),
+            eq(gameNightVotes.userGameId, vote.userGameId),
+            eq(gameNightVotes.userId, vote.userId),
+          ),
+        );
+    } catch (err) {
+      this.handleError(err, "removeVote", { gameNightId: vote.gameNightId });
+    }
+  }
+
+  async removeVotesBy(
+    gameNightId: string,
+    userId: string,
+    tx: ITransaction,
+  ): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(gameNightVotes)
+        .where(
+          and(
+            eq(gameNightVotes.gameNightId, gameNightId),
+            eq(gameNightVotes.userId, userId),
+          ),
+        );
+    } catch (err) {
+      this.handleError(err, "removeVotesBy", { gameNightId });
     }
   }
 

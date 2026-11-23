@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import { LinkGone } from "@/app/_components/link-gone";
 import { getAccount } from "@/app/_lib/account";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { OpenInBrowser } from "@/app/(auth)/welcome/welcome-screen";
@@ -8,7 +9,6 @@ import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import { inAppBrowserOf } from "@/src/entities/in-app-browser";
 import { formatDate, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
-import { LinkGone } from "./link-gone";
 import { InviteLanding } from "./link-screens";
 import { OpenLink } from "./open-link";
 

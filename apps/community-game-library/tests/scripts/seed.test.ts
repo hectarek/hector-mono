@@ -120,7 +120,8 @@ describe("seed", () => {
       "  Loans: 15 to write, 0 already there",
       "  Nights: 5 to write, 0 already there",
       "  Nights' lists: 28 to write, 0 already there",
-      "  Games on nights' tables: 13 to write, 0 already there",
+      "  Games on nights' tables: 15 to write, 0 already there",
+      "  Votes: 17 to write, 0 already there",
     ]);
     for (const table of [
       "user_profiles",
@@ -166,7 +167,7 @@ describe("seed", () => {
 
     const again = scriptedTerminal();
     expect(await seed(args, again)).toBe(0);
-    expect(again.lines.slice(-11)).toEqual([
+    expect(again.lines.slice(-12)).toEqual([
       "  Profiles: 0 written, 9 already there",
       "  Settings: 0 written, 9 already there",
       "  Friendships: 0 written, 18 already there",
@@ -177,7 +178,8 @@ describe("seed", () => {
       "  Loans: 0 written, 15 already there",
       "  Nights: 0 written, 5 already there",
       "  Nights' lists: 0 written, 28 already there",
-      "  Games on nights' tables: 0 written, 13 already there",
+      "  Games on nights' tables: 0 written, 15 already there",
+      "  Votes: 0 written, 17 already there",
     ]);
     expect(await count("friendships")).toBe(36);
   });

@@ -128,11 +128,12 @@ export default async function FriendsPage() {
       {peopleYouMayKnow.length > 0 && (
         <Group label="People you may know" overList>
           <List>
-            {peopleYouMayKnow.map(({ person, via }) => (
+            {peopleYouMayKnow.map(({ person, via, night }) => (
               <FriendRow
                 key={person.userId}
                 person={person}
                 via={via}
+                night={night}
                 request={{ kind: "none" }}
               />
             ))}

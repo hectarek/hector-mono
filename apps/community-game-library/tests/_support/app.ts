@@ -67,11 +67,21 @@ import { recordLoanUseCase } from "@/src/application/use-cases/loans/record-loan
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
+import { addGameToNightUseCase } from "@/src/application/use-cases/nights/add-game-to-night.use-case";
+import { answerNightUseCase } from "@/src/application/use-cases/nights/answer-night.use-case";
+import { checkNightLinkUseCase } from "@/src/application/use-cases/nights/check-night-link.use-case";
 import { createNightUseCase } from "@/src/application/use-cases/nights/create-night.use-case";
+import { getInviteChoicesUseCase } from "@/src/application/use-cases/nights/get-invite-choices.use-case";
 import { getNightUseCase } from "@/src/application/use-cases/nights/get-night.use-case";
 import { getNightGameChoicesUseCase } from "@/src/application/use-cases/nights/get-night-game-choices.use-case";
+import { inviteToNightUseCase } from "@/src/application/use-cases/nights/invite-to-night.use-case";
 import { listNightsUseCase } from "@/src/application/use-cases/nights/list-nights.use-case";
+import { makeNightLinkUseCase } from "@/src/application/use-cases/nights/make-night-link.use-case";
+import { openNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
+import { removeFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
+import { removeGameFromNightUseCase } from "@/src/application/use-cases/nights/remove-game-from-night.use-case";
 import { updateNightUseCase } from "@/src/application/use-cases/nights/update-night.use-case";
+import { voteUseCase } from "@/src/application/use-cases/nights/vote.use-case";
 import { getTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import { listInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import { markInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -530,6 +540,58 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       userProfiles,
     ),
 
+    // Invites, answers, the waitlist and guests (U19)
+    answerNight: answerNightUseCase(
+      friendships,
+      gameNights,
+      userGames,
+      notices,
+      transactions,
+      log,
+    ),
+    inviteToNight: inviteToNightUseCase(
+      friendships,
+      gameNights,
+      notices,
+      transactions,
+      log,
+    ),
+    getInviteChoices: getInviteChoicesUseCase(
+      friendships,
+      gameNights,
+      userProfiles,
+    ),
+    makeNightLink: makeNightLinkUseCase(
+      friendships,
+      gameNights,
+      transactions,
+      log,
+    ),
+    checkNightLink: checkNightLinkUseCase(gameNights),
+    openNightLink: openNightLinkUseCase(gameNights, transactions, log),
+    removeFromWaitlist: removeFromWaitlistUseCase(
+      friendships,
+      gameNights,
+      notices,
+      transactions,
+      log,
+    ),
+    addGameToNight: addGameToNightUseCase(
+      friendships,
+      gameNights,
+      userGames,
+      transactions,
+      log,
+    ),
+    removeGameFromNight: removeGameFromNightUseCase(
+      friendships,
+      gameNights,
+      userGames,
+      transactions,
+      log,
+    ),
+    vote: voteUseCase(friendships, gameNights, transactions, log),
+
     // Lines and passing it along (U15)
     passAlong: passAlongUseCase(userGames, loans, notices, transactions, log),
     confirmPassAlong: confirmPassAlongUseCase(
@@ -565,6 +627,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       userGames,
       loans,
       friendRequests,
+      gameNights,
     ),
     getNoticeSettings: getNoticeSettingsUseCase(userSettings),
     updateNoticeSettings: updateNoticeSettingsUseCase(
@@ -590,11 +653,13 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       friendRequests,
       userProfiles,
       userGames,
+      gameNights,
     ),
     listPeopleYouMayKnow: listPeopleYouMayKnowUseCase(
       friendships,
       friendRequests,
       userProfiles,
+      gameNights,
     ),
     getFriend: getFriendUseCase(
       friendships,
@@ -603,6 +668,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       games,
       loans,
       storage,
+      gameNights,
     ),
     sendFriendRequest: sendFriendRequestUseCase(
       friendships,
@@ -610,6 +676,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       notices,
       transactions,
       log,
+      gameNights,
     ),
     answerFriendRequest: answerFriendRequestUseCase(
       friendships,
@@ -629,6 +696,8 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       loans,
       transactions,
       log,
+      gameNights,
+      notices,
     ),
 
     // Fixtures
@@ -654,6 +723,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
           gameNights.nights.push(...rows.nights);
           gameNights.attendees.push(...rows.nightAttendees);
           gameNights.games.push(...rows.nightGames);
+          gameNights.votes.push(...rows.nightVotes);
         } else {
           await insertCastRows(rows, tx, { commit: true });
         }

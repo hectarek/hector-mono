@@ -45,8 +45,8 @@ const listed = (parts: string[]) =>
     ? (parts[0] ?? "")
     : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
 
-// E4's lines (R50 and its audit line): what stops, what stays open, and that the friend isn't
-// told. Their nights' line comes with nights' lists (U19).
+// E4's lines (R50 and its audit line): what stops, what stays open, the nights coming up that each
+// comes off (U19), and that the friend isn't told.
 function unfriendLines(
   name: string,
   between: Awaited<ReturnType<typeof loadFriend>>["between"],
@@ -62,6 +62,9 @@ function unfriendLines(
   const cancelled = between.cancelled.map(
     ({ title }) => `${title} isn’t picked up yet, so that loan is called off.`,
   );
+  const nights = between.nights.map(({ title, yours }) =>
+    yours ? `${name} comes off ${title}.` : `You come off ${title}.`,
+  );
   return [
     "You stop seeing each other’s libraries and game nights.",
     ...staying,
@@ -71,6 +74,7 @@ function unfriendLines(
         ]
       : []),
     ...cancelled,
+    ...nights,
     `${name} isn’t told. You can become friends again with a friend link.`,
   ];
 }

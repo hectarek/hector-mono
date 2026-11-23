@@ -30,3 +30,11 @@ export type NewGameNightAttendee = Pick<
   "gameNightId" | "userId" | "status"
 > &
   Partial<Pick<GameNightAttendee, "guestCount" | "invitedBy" | "waitlistedAt">>;
+
+// What an answer, an invite or the waitlist changes on a member's row (U19).
+export type GameNightAttendeeChanges = Partial<
+  Pick<
+    GameNightAttendee,
+    "status" | "guestCount" | "invitedBy" | "waitlistedAt"
+  >
+>;

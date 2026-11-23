@@ -187,13 +187,18 @@ describeEachBackend("nights and a new night (U18)", () => {
         address: "9 Juniper Court",
       });
       expect(page.going.find((one) => one.name === "Ben")?.guestCount).toBe(1);
+      // Most wanted first, as D7 draws them (U19's votes).
       expect(
-        page.games.map(({ game, owner }) => [game.title, owner.name]),
+        page.games.map(({ game, owner, voters }) => [
+          game.title,
+          owner.name,
+          voters.length,
+        ]),
       ).toEqual([
-        ["Night Market", "Robin Vale"],
-        ["Salt & Signal", "Robin Vale"],
-        ["Quarry Lane", "Sam"],
-        ["Harbor Lights", "Sam"],
+        ["Quarry Lane", "Sam", 4],
+        ["Night Market", "Robin Vale", 3],
+        ["Harbor Lights", "Sam", 1],
+        ["Salt & Signal", "Robin Vale", 0],
       ]);
     });
 
