@@ -104,6 +104,19 @@
         "3205"
       ],
       "port": 3205
+    },
+    {
+      "name": "community-game-library-prod",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/community-game-library",
+        "start",
+        "--port",
+        "3206"
+      ],
+      "port": 3206
     }
   ]
 }
