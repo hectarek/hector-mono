@@ -3,6 +3,7 @@ import {
   cardLine,
   catalogLine,
   gameFacts,
+  tableLine,
   titleLine,
 } from "@/src/entities/game-facts";
 import type { Game } from "@/src/entities/models/game.model";
@@ -54,6 +55,15 @@ describe("game-facts", () => {
     expect(catalogLine(castGame(CAST.games.nightTide.id))).toBe(
       "2021 · expansion",
     );
+  });
+
+  it("words a game's line on a night's table (D2, D7)", () => {
+    expect(tableLine(harborLights)).toBe("Best at 4 · 45–60 min");
+    expect(tableLine(castGame(CAST.games.saltAndSignal.id))).toBe(
+      "2 players only · 30 min",
+    );
+    expect(tableLine({ ...bare, minPlayers: 2, maxPlayers: 4 })).toBe("2–4");
+    expect(tableLine(bare)).toBe("");
   });
 
   it("shows only what a game has (rule 14)", () => {

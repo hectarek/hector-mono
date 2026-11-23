@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { LinkGone } from "@/app/_components/link-gone";
 import { callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
 import { openFriendLink } from "@/app/actions/friends";
-import { LinkGone } from "./link-gone";
 
 // A signed-in visitor's friend link (R49, KTD18): the page sends the link once it's open, so the
 // two are friends at once, then goes to the friend's page, or to setting up for a new member,

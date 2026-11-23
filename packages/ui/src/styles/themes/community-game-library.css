@@ -275,6 +275,20 @@
   padding: 0;
 }
 
+/* Buttons in a group (D5's seats stepper) join: the corners between them are square. */
+[data-theme="community-game-library"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):not(:last-child) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+[data-theme="community-game-library"]
+  [data-slot="button-group"]
+  > :is([data-slot="button"], .group\/button):not(:first-child) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
 /* Switched off: a dashed switched-off edge and no fill, not a faded button. Every disabled
    button in the app, its own included; one with no edge keeps none. */
 [data-theme="community-game-library"]

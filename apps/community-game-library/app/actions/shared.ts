@@ -61,17 +61,21 @@ export function text(formData: FormData, key: string): string | undefined {
 // Fields as the forms label them, in the words of each form's board. Anything not listed (hidden
 // ids) is never named: the person can't see those fields, so a code name would only confuse.
 // Each form's fields join it (A4 and E6's: name, phone, photo; B7's: condition, conditionNote; B9's,
-// G2's, G3's and G4's).
+// G2's, G3's and G4's; D5's: name, date, startsAt, endsAt, place, address, note, capacity).
 const FIELD_LABELS: Record<string, string> = {
+  address: "Address",
   bestPlayers: "Plays best at",
+  capacity: "Seats",
   categories: "Categories",
   complexity: "Complexity",
   condition: "Condition",
   conditionNote: "Missing or damaged parts",
+  date: "Date",
   declineNote: "Reason",
   description: "Description",
   designers: "Designers",
   dueOn: "Date",
+  endsAt: "Ends",
   imageUrl: "Image address",
   maxMinutes: "Play time",
   maxPlayers: "Players",
@@ -82,9 +86,11 @@ const FIELD_LABELS: Record<string, string> = {
   note: "Note",
   phone: "Phone",
   photo: "Photo",
+  place: "Place",
   publisher: "Publisher",
   publishers: "Publishers",
   sourceUrl: "Link",
+  startsAt: "Starts",
   title: "Title",
   videoUrl: "How-to-play video",
   year: "Year",

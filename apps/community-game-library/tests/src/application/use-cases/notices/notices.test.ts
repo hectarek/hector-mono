@@ -19,15 +19,18 @@ describeEachBackend("the inbox and the counts (U11)", () => {
     await app.makeCast();
   });
 
-  it("counts the cast's tabs as the boards do: 2 on Loans, 1 on Friends", async () => {
+  it("counts the cast's tabs as the boards do: 2 on Loans, 1 on Nights, 1 on Friends", async () => {
     // Priya asked for your Night Market, home; Jo asked for more time on Gull & Anchor; Ben's
-    // place in Gull & Anchor's line waits for it to come back, so it isn't counted (C4).
+    // place in Gull & Anchor's line waits for it to come back, so it isn't counted (C4). Alice
+    // invited you by name to her Saturday night, and you haven't answered (D1, U19).
     expect(await app.getTabCounts(you.id, TODAY)).toEqual({
       loans: 2,
-      nights: 0,
+      nights: 1,
       friends: 1,
       unread: 0,
     });
+    // Dev came to your night by its link, which the tab doesn't count (R33).
+    expect((await app.getTabCounts(CAST.people.dev.id, TODAY)).nights).toBe(0);
     expect((await app.getTabCounts(sam.id, TODAY)).loans).toBe(1);
   });
 

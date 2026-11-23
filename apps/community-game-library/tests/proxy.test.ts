@@ -103,6 +103,17 @@ describe("proxy", () => {
     );
   });
 
+  it("lets a signed-out visitor open a night's link, and nothing under it", async () => {
+    const response = await proxy(request("/n/7QK2-MARR"));
+    expect(response.headers.get("location")).toBeNull();
+    expect(locationOf(await proxy(request("/n/7QK2-MARR/more"))).pathname).toBe(
+      "/welcome",
+    );
+    expect(locationOf(await proxy(request("/nights"))).pathname).toBe(
+      "/welcome",
+    );
+  });
+
   it("doesn't add a return path for the home page", async () => {
     const location = locationOf(await proxy(request("/")));
     expect(location.pathname).toBe("/welcome");

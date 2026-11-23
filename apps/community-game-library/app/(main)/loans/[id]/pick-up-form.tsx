@@ -2,6 +2,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import { useState, useTransition } from "react";
+import { DayField } from "@/app/_components/day-field";
 import { LoanTrack } from "@/app/_components/loan-track";
 import { callAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
@@ -9,7 +10,6 @@ import { confirmPassAlong, confirmPickUp } from "@/app/actions/loans";
 import { datesAtPickUp } from "@/src/entities/loan";
 import type { PieceColor, PieceShape } from "@/src/entities/piece";
 import { formatDate } from "@/src/entities/week";
-import { DayField } from "./day-field";
 
 // C3's When you have it: the day it was picked up (today, or an earlier day from the yes on), the
 // track and the due date that day gives, and I've picked it up. The owner's Priya has it sends the

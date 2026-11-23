@@ -22,3 +22,19 @@ export const gameNightAttendeeSchema = z.object({
   updatedAt: z.date(),
 });
 export type GameNightAttendee = z.infer<typeof gameNightAttendeeSchema>;
+
+// A member put on a night's list: the host as going when it's made (U18), and anyone invited or
+// answering (U19).
+export type NewGameNightAttendee = Pick<
+  GameNightAttendee,
+  "gameNightId" | "userId" | "status"
+> &
+  Partial<Pick<GameNightAttendee, "guestCount" | "invitedBy" | "waitlistedAt">>;
+
+// What an answer, an invite or the waitlist changes on a member's row (U19).
+export type GameNightAttendeeChanges = Partial<
+  Pick<
+    GameNightAttendee,
+    "status" | "guestCount" | "invitedBy" | "waitlistedAt"
+  >
+>;

@@ -77,11 +77,12 @@ export default async function FriendsStepPage({
             People you may know
           </h2>
           <List>
-            {people.map(({ person, via, yourRequestId }) => (
+            {people.map(({ person, via, night, yourRequestId }) => (
               <FriendRow
                 key={person.userId}
                 person={person}
                 via={via}
+                night={night}
                 request={
                   yourRequestId
                     ? { kind: "yours", id: yourRequestId }

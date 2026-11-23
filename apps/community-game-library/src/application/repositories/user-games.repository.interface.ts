@@ -27,6 +27,8 @@ export interface IUserGamesRepository {
 
   // One copy, whoever owns it: a use case checks it's the caller's before showing or changing it.
   getById(id: string, tx?: ITransaction): Promise<UserGame | undefined>;
+  // Copies by their ids, whoever owns them, oldest first: the games on a night's table (U18).
+  listByIds(ids: readonly string[], tx?: ITransaction): Promise<UserGame[]>;
   // The copy's row lock (select … for update), taken before any move of its loans (KTD6), so two
   // moves on one copy wait for each other.
   lock(id: string, tx: ITransaction): Promise<void>;

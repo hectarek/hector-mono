@@ -6,7 +6,8 @@ const WELCOME_PATH = "/welcome";
 
 // Pages that open signed out too (KTD3, KTD18): a friend link shows A3, which names nobody, and
 // makes the two friends once its visitor is in.
-const OPEN_SIGNED_OUT = [/^\/f\/[^/]+\/?$/];
+// A friend link (A3) and a night's link (D14), and nothing under them.
+const OPEN_SIGNED_OUT = [/^\/f\/[^/]+\/?$/, /^\/n\/[^/]+\/?$/];
 
 // Primary session cookie set by @neondatabase/auth (Better Auth under the hood), and its
 // signed copy, kept a day (lib/auth/server.ts). See: node_modules/@neondatabase/auth/dist/server-*.mjs

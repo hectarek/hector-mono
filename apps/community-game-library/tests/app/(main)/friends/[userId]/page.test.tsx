@@ -63,6 +63,33 @@ describe("a friend's page (E3) and Unfriend (E4)", () => {
     ).toBeTruthy();
   });
 
+  it("lists the nights coming up that Sam is going to, each opening its night (U18)", async () => {
+    const page = within(render(await friendPage(sam.id)).container);
+    const nights = within(
+      page
+        .getByText("Game nights Sam is going to")
+        .closest("section") as HTMLElement,
+    );
+    expect(
+      nights
+        .getAllByRole("link")
+        .map((link) => [link.getAttribute("href"), link.textContent]),
+    ).toEqual([
+      [
+        `/nights/${CAST.nights.saturdayGameNight.id}`,
+        "Saturday game nightSat, Nov 14 · 7:00 PM ·Alice is hosting",
+      ],
+      [
+        `/nights/${CAST.nights.heavyGamesAtMine.id}`,
+        "Heavy games at mineFri, Nov 20 · 7:00 PM ·You’re hosting",
+      ],
+      [
+        `/nights/${CAST.nights.bensBirthdayGames.id}`,
+        "Ben’s birthday gamesSat, Nov 21 · 2:00 PM ·Ben is hosting",
+      ],
+    ]);
+  });
+
   it("asks first with E4's lines, then unfriends Sam and goes back to Friends", async () => {
     const view = render(
       <>
@@ -80,6 +107,7 @@ describe("a friend's page (E3) and Unfriend (E4)", () => {
       "You stop seeing each other’s libraries and game nights.",
       "Moss & Mortar stays on your Loans until it’s back with Sam.",
       "Your request for Quarry Lane is withdrawn, and you leave each other’s lines.",
+      "Sam comes off Heavy games at mine.",
       "Sam isn’t told. You can become friends again with a friend link.",
     ]);
     expect(dialog.getByRole("button", { name: "Keep Sam" })).toBeTruthy();

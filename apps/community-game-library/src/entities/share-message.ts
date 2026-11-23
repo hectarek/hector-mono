@@ -9,3 +9,12 @@ export const FRIEND_LINK_MESSAGE =
 // open the app.
 export const callBackMessage = (title: string) =>
   `Could you bring ${title} back? I need it.`;
+
+// D7's and D10's Share: a night's link, for the people the host wants there.
+export const nightLinkMessage = (title: string) =>
+  `You’re invited to ${title} on Community Game Library. See it and answer here:`;
+
+// D15's Text them too, after cancelling a night: the people told see the notice only when they
+// next open the app.
+export const nightCancelledMessage = (title: string, day: string) =>
+  `${title} on ${day} is cancelled. Sorry, everyone.`;

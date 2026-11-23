@@ -1,5 +1,6 @@
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import {
   friendsOfFriends,
@@ -16,11 +17,13 @@ export const listPeopleYouMayKnowUseCase = (
   friendshipsRepository: IFriendshipsRepository,
   friendRequestsRepository: IFriendRequestsRepository,
   userProfilesRepository: IUserProfilesRepository,
+  gameNightsRepository: IGameNightsRepository,
 ) => {
   const repositories = {
     friendships: friendshipsRepository,
     friendRequests: friendRequestsRepository,
     userProfiles: userProfilesRepository,
+    gameNights: gameNightsRepository,
   };
   return async (userId: string): Promise<PersonYouMayKnow[]> =>
     (await friendsOfFriends(repositories, userId)).people;

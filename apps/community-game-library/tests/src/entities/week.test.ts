@@ -1,9 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import {
   addDays,
+  atTimeIn,
+  clockIn,
   daysBetween,
+  formatClock,
   formatDate,
   formatMonth,
+  formatTimes,
   isIsoDate,
   PLAN_TIME_ZONE,
   todayIn,
@@ -56,5 +60,49 @@ describe("formatDate", () => {
   it("names a month by its name and year", () => {
     expect(formatMonth("2026-11")).toBe("November 2026");
     expect(formatMonth("2027-01")).toBe("January 2027");
+  });
+});
+
+// A night's times (KTD9): entered and shown on New York's clock, whatever the server's.
+describe("a night's times", () => {
+  it("finds the moment a time on a day is in New York, in winter and in summer", () => {
+    expect(atTimeIn("2026-11-20", "19:00", PLAN_TIME_ZONE)).toEqual(
+      new Date("2026-11-21T00:00:00Z"),
+    );
+    expect(atTimeIn("2026-07-04", "19:00", PLAN_TIME_ZONE)).toEqual(
+      new Date("2026-07-04T23:00:00Z"),
+    );
+    // The morning after the clocks go back on Nov 1.
+    expect(atTimeIn("2026-11-01", "09:30", PLAN_TIME_ZONE)).toEqual(
+      new Date("2026-11-01T14:30:00Z"),
+    );
+  });
+
+  it("reads a moment back as a time field holds it", () => {
+    expect(clockIn(new Date("2026-11-21T03:30:00Z"), PLAN_TIME_ZONE)).toBe(
+      "22:30",
+    );
+    expect(clockIn(new Date("2026-07-04T23:05:00Z"), PLAN_TIME_ZONE)).toBe(
+      "19:05",
+    );
+  });
+
+  it("writes a night's time as its card does, without the minutes on the hour", () => {
+    expect(formatClock(new Date("2026-11-21T00:00:00Z"))).toBe("7 PM");
+    expect(formatClock(new Date("2026-11-21T03:30:00Z"))).toBe("10:30 PM");
+  });
+
+  it("writes a night's times as its page does, naming AM or PM once when they match", () => {
+    const seven = new Date("2026-11-21T00:00:00Z");
+    expect(formatTimes(seven, new Date("2026-11-21T03:30:00Z"))).toBe(
+      "7 to 10:30 PM",
+    );
+    expect(
+      formatTimes(
+        new Date("2026-11-21T16:00:00Z"),
+        new Date("2026-11-21T19:00:00Z"),
+      ),
+    ).toBe("11 AM to 2 PM");
+    expect(formatTimes(seven, null)).toBe("7 PM");
   });
 });

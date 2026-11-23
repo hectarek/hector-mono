@@ -99,6 +99,17 @@ describe("toActionError", () => {
     });
   });
 
+  // D5's New game night names its seats in the board's words.
+  it("names D5's seats field", () => {
+    const schema = z.object({ capacity: z.number().max(99, "Too many") });
+    expect(
+      toActionError(parseError(schema, { capacity: 120 }), logger, FALLBACK),
+    ).toEqual({
+      error: "Seats: Too many",
+      fields: { capacity: "Too many" },
+    });
+  });
+
   // Hidden fields are never named.
   it("never names a field the form doesn't show", () => {
     const schema = z.object({ userGameId: z.uuid("Pick a game") });

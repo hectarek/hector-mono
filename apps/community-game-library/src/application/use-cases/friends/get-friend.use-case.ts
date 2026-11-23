@@ -1,4 +1,5 @@
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
@@ -21,7 +22,9 @@ import {
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
 import type { UserProfile } from "@/src/entities/models/user-profile.model";
+import { isUpcoming } from "@/src/entities/night";
 import { PHOTO_URL_SECONDS } from "@/src/entities/profile-photo";
+import { addDays } from "@/src/entities/week";
 
 export type IGetFriendUseCase = ReturnType<typeof getFriendUseCase>;
 
@@ -45,6 +48,8 @@ export type FriendPage = {
     staying: LoanBetween[];
     withdrawn: LoanBetween[];
     cancelled: LoanBetween[];
+    // Nights coming up that one hosts and the other is on, which the other comes off (U19).
+    nights: LoanBetween[];
   };
 };
 
@@ -61,6 +66,7 @@ export const getFriendUseCase = (
   gamesRepository: IGamesRepository,
   loansRepository: ILoansRepository,
   fileStorage: IFileStorage,
+  gameNightsRepository: IGameNightsRepository,
 ) => {
   return async (
     friendId: string,
@@ -157,6 +163,30 @@ export const getFriendUseCase = (
           : [];
       });
 
+    // The nights coming up that one of the two hosts and the other is on.
+    const hosted = (
+      await gameNightsRepository.listVisibleFrom(
+        viewerId,
+        new Date(`${addDays(today, -2)}T00:00:00Z`),
+      )
+    ).filter(
+      (night) =>
+        isUpcoming(night.startsAt, today) &&
+        (night.createdBy === viewerId || night.createdBy === friendId),
+    );
+    const onLists = await gameNightsRepository.listAttendees(
+      hosted.map((night) => night.id),
+    );
+    const nightsBetween = hosted.flatMap((night) => {
+      const yours = night.createdBy === viewerId;
+      const other = yours ? friendId : viewerId;
+      return onLists.some(
+        (one) => one.gameNightId === night.id && one.userId === other,
+      )
+        ? [{ title: night.title, yours }]
+        : [];
+    });
+
     return {
       profile,
       photoUrl,
@@ -166,6 +196,7 @@ export const getFriendUseCase = (
         staying: between((loan) => holding.includes(loan.status)),
         withdrawn: between((loan) => loan.status === "requested"),
         cancelled: between((loan) => loan.status === "accepted"),
+        nights: nightsBetween,
       },
     };
   };

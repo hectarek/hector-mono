@@ -1,10 +1,13 @@
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import { shownTypes } from "@/src/application/use-cases/notices/notice-groups";
 import { copyState } from "@/src/entities/loan";
+import { isUpcoming } from "@/src/entities/night";
+import { addDays } from "@/src/entities/week";
 
 export type IGetTabCountsUseCase = ReturnType<typeof getTabCountsUseCase>;
 
@@ -15,7 +18,7 @@ export type TabCounts = {
   // Requests to answer (the first in line on a copy that's home), pick-ups to confirm in a
   // pass-along, returns to confirm, and more-time requests to answer.
   loans: number;
-  // Invites by name with no answer, once nights have rows (U19).
+  // Invites by name with no answer, to nights coming up (R33, U19).
   nights: number;
   // Friend requests waiting for the member.
   friends: number;
@@ -28,6 +31,7 @@ export const getTabCountsUseCase = (
   userGamesRepository: IUserGamesRepository,
   loansRepository: ILoansRepository,
   friendRequestsRepository: IFriendRequestsRepository,
+  gameNightsRepository: IGameNightsRepository,
 ) => {
   return async (userId: string, today: string): Promise<TabCounts> => {
     const unread = await noticesRepository.countUnread(
@@ -76,9 +80,17 @@ export const getTabCountsUseCase = (
         request.recipientUserId === userId && request.status === "waiting",
     ).length;
 
+    // Read two days back and kept by their Eastern day (isUpcoming), as Nights does.
+    const nights = (
+      await gameNightsRepository.listWaitingInvites(
+        userId,
+        new Date(`${addDays(today, -2)}T00:00:00Z`),
+      )
+    ).filter((invite) => isUpcoming(invite.startsAt, today)).length;
+
     return {
       loans: requests + passAlongs + returns + moreTime,
-      nights: 0,
+      nights,
       friends,
       unread,
     };

@@ -1,5 +1,6 @@
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
+import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
@@ -10,15 +11,16 @@ export type ISendFriendRequestUseCase = ReturnType<
   typeof sendFriendRequestUseCase
 >;
 
-// Add friend (R49; E1, A5): a one-tap request to a friend's friend, who's told. There's no search
-// of everyone, so anyone else is Not found, as a stranger's account is (AE8). People from a night
-// you went to can be asked once nights have rows (U19). Asking twice keeps the first request.
+// Add friend (R49; E1, A5): a one-tap request to a friend's friend, or to someone you went to a
+// game night with (U19), who's told. There's no search of everyone, so anyone else is Not found,
+// as a stranger's account is (AE8). Asking twice keeps the first request.
 export const sendFriendRequestUseCase = (
   friendshipsRepository: IFriendshipsRepository,
   friendRequestsRepository: IFriendRequestsRepository,
   noticesRepository: INoticesRepository,
   transactionManagerService: ITransactionManagerService,
   loggerService: ILoggerService,
+  gameNightsRepository: IGameNightsRepository,
 ) => {
   const logger = loggerService.child({
     layer: "use-case",
@@ -40,7 +42,12 @@ export const sendFriendRequestUseCase = (
         userId,
         tx,
       );
-      if (!known.some((row) => row.userId === recipientUserId)) {
+      if (
+        !known.some((row) => row.userId === recipientUserId) &&
+        !(await gameNightsRepository.listWentWith(userId, new Date(), tx)).some(
+          (row) => row.userId === recipientUserId,
+        )
+      ) {
         throw new NotFoundError();
       }
       const existing = await friendRequestsRepository.getBetween(

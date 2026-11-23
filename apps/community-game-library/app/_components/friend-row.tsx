@@ -22,11 +22,14 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 export function FriendRow({
   person,
   via,
+  night = null,
   request,
 }: {
   person: NameAndPiece;
   // A friend you share: "Friend of Alice".
   via: NameAndPiece | null;
+  // Or the last night you were at together: "At Halloween one-shots" (U19).
+  night?: string | null;
   // Theirs to you, yours to them, or none yet.
   request:
     | { kind: "to-you"; id: string }
@@ -50,7 +53,11 @@ export function FriendRow({
       <Piece shape={person.pieceShape} color={person.pieceColor} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <RowName>{person.name}</RowName>
-        {via && <span className="text-xs">Friend of {via.name}</span>}
+        {via ? (
+          <span className="text-xs">Friend of {via.name}</span>
+        ) : (
+          night && <span className="text-xs">At {night}</span>
+        )}
       </span>
       {request.kind === "to-you" && (
         <>

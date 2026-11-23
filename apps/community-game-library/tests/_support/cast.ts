@@ -6,13 +6,29 @@
 // Fictional people only: the repo is public (R45). A unit that needs more of the boards' world
 // (friend requests, nights, notices) adds it here with its writes, and the seed picks it up.
 import { inArray } from "drizzle-orm";
-import { games, loans, userGameExpansions, userGames } from "@/db/schema";
+import {
+  gameNightAttendees,
+  gameNightGames,
+  gameNights,
+  gameNightVotes,
+  games,
+  loans,
+  userGameExpansions,
+  userGames,
+} from "@/db/schema";
 import type { IFriendRequestsRepository } from "@/src/application/repositories/friend-requests.repository.interface";
 import type { IFriendshipsRepository } from "@/src/application/repositories/friendships.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import { dueOn, type LoanStatus } from "@/src/entities/loan";
 import type { Game } from "@/src/entities/models/game.model";
+import type {
+  GAME_NIGHT_AUDIENCES,
+  GameNight,
+} from "@/src/entities/models/game-night.model";
+import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
+import type { GameNightGame } from "@/src/entities/models/game-night-game.model";
+import type { GameNightVote } from "@/src/entities/models/game-night-vote.model";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
@@ -27,7 +43,7 @@ import { unwrapDrizzleTx } from "@/src/infrastructure/services/transaction-manag
 export const CAST_TODAY = "2026-11-10";
 
 // A fixed id for each row, readable in a failing test: people end in 1 to 9, games in 1xx,
-// copies in 2xx and loans in 3xx. No account has one.
+// copies in 2xx, loans in 3xx and nights in 4xx. No account has one.
 const castId = (n: number) =>
   `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
@@ -572,12 +588,237 @@ const LOANS = {
   },
 } satisfies Record<string, CastLoan>;
 
-// What tests name: a person, game, copy or loan by its key (CAST.copies.yourGullAndAnchor.id).
+type CastAttendee = {
+  person: CastName;
+  status: GameNightAttendee["status"];
+  // When they went on the night's list: made with it, invited, or answered.
+  at: string;
+  guests?: number;
+  invitedBy?: CastName;
+};
+
+type CastNight = {
+  id: string;
+  host: CastName;
+  title: string;
+  startsAt: string;
+  endsAt?: string;
+  place: string;
+  address?: string;
+  hostNote?: string;
+  capacity: number;
+  audience: (typeof GAME_NIGHT_AUDIENCES)[number];
+  attendeesCanInvite?: boolean;
+  guestsAllowed?: boolean;
+  linkToken?: string;
+  createdAt: string;
+  // The host first, as going.
+  list: CastAttendee[];
+  // The games on the table, in the order they were put there.
+  table: { copy: CopyKey; at: string }[];
+  // Who'd play each (R38), as the boards draw it.
+  votes?: { copy: CopyKey; voters: CastName[] }[];
+};
+
+// The nights the boards show on the canvas's today (D1, D2, D4, D5, D7, D13, E3), then the two
+// past ones (D12), with who'd play each game on their tables. Times are Eastern.
+const NIGHTS = {
+  // Alice's Saturday night, for her friends: Alice, Sam, Jo and Priya going, Ben maybe, and you
+  // invited by name with no answer yet (D1, D2).
+  saturdayGameNight: {
+    id: castId(401),
+    host: "alice",
+    title: "Saturday game night",
+    startsAt: "2026-11-14T19:00:00-05:00",
+    endsAt: "2026-11-14T22:00:00-05:00",
+    place: "Alice’s place",
+    address: "14 Alder Row",
+    hostNote: "Snacks welcome. Street parking only.",
+    capacity: 6,
+    audience: "friends",
+    guestsAllowed: true,
+    createdAt: "2026-11-02T20:00:00-05:00",
+    list: [
+      { person: "alice", status: "going", at: "2026-11-02T20:00:00-05:00" },
+      { person: "sam", status: "going", at: "2026-11-03T09:15:00-05:00" },
+      { person: "jo", status: "going", at: "2026-11-03T12:40:00-05:00" },
+      { person: "priya", status: "going", at: "2026-11-04T18:05:00-05:00" },
+      { person: "ben", status: "maybe", at: "2026-11-05T08:30:00-05:00" },
+      {
+        person: "you",
+        status: "invited",
+        at: "2026-11-08T10:00:00-05:00",
+        invitedBy: "alice",
+      },
+    ],
+    table: [
+      { copy: "samsHarborLights", at: "2026-11-03T09:20:00-05:00" },
+      { copy: "alicesTinKettleDerby", at: "2026-11-03T09:30:00-05:00" },
+      { copy: "samsQuarryLane", at: "2026-11-03T09:40:00-05:00" },
+      { copy: "josSaltAndSignal", at: "2026-11-03T12:45:00-05:00" },
+    ],
+    votes: [
+      { copy: "samsHarborLights", voters: ["alice", "sam", "jo"] },
+      { copy: "alicesTinKettleDerby", voters: ["priya"] },
+      { copy: "samsQuarryLane", voters: ["sam"] },
+    ],
+  },
+  // Your night, only for people you invite: full with Ben's guest, and Dev, who came by its link,
+  // first on the waitlist (D1, D5, D7).
+  heavyGamesAtMine: {
+    id: castId(402),
+    host: "you",
+    title: "Heavy games at mine",
+    startsAt: "2026-11-20T19:00:00-05:00",
+    endsAt: "2026-11-20T22:30:00-05:00",
+    place: "Robin’s place",
+    address: "9 Juniper Court",
+    hostNote: "Bring a heavy game if you have one.",
+    capacity: 6,
+    audience: "invited",
+    guestsAllowed: true,
+    linkToken: "7QK2-MARR",
+    createdAt: "2026-11-06T21:00:00-05:00",
+    list: [
+      { person: "you", status: "going", at: "2026-11-06T21:00:00-05:00" },
+      {
+        person: "sam",
+        status: "going",
+        at: "2026-11-07T08:00:00-05:00",
+        invitedBy: "you",
+      },
+      {
+        person: "priya",
+        status: "going",
+        at: "2026-11-07T09:30:00-05:00",
+        invitedBy: "you",
+      },
+      {
+        person: "jo",
+        status: "going",
+        at: "2026-11-07T11:00:00-05:00",
+        invitedBy: "you",
+      },
+      {
+        person: "ben",
+        status: "going",
+        at: "2026-11-07T19:45:00-05:00",
+        guests: 1,
+        invitedBy: "you",
+      },
+      { person: "dev", status: "waitlisted", at: "2026-11-08T13:20:00-05:00" },
+    ],
+    table: [
+      { copy: "yourNightMarket", at: "2026-11-06T21:00:00-05:00" },
+      { copy: "yourSaltAndSignal", at: "2026-11-06T21:00:01-05:00" },
+      { copy: "samsQuarryLane", at: "2026-11-07T08:05:00-05:00" },
+      { copy: "samsHarborLights", at: "2026-11-07T08:06:00-05:00" },
+    ],
+    votes: [
+      { copy: "samsQuarryLane", voters: ["sam", "priya", "jo", "ben"] },
+      { copy: "yourNightMarket", voters: ["you", "sam", "priya"] },
+      { copy: "samsHarborLights", voters: ["jo"] },
+    ],
+  },
+  // Ben's birthday, for his friends and the two Alice invited: full, with Dev's guest (D1, D4).
+  // D4 draws Ben bringing Fenwick Fair; the cast's copy is Priya's.
+  bensBirthdayGames: {
+    id: castId(403),
+    host: "ben",
+    title: "Ben’s birthday games",
+    startsAt: "2026-11-21T14:00:00-05:00",
+    place: "Ben’s place",
+    address: "3 Wren Court",
+    capacity: 8,
+    audience: "friends",
+    attendeesCanInvite: true,
+    guestsAllowed: true,
+    createdAt: "2026-11-01T15:00:00-05:00",
+    list: [
+      { person: "ben", status: "going", at: "2026-11-01T15:00:00-05:00" },
+      { person: "alice", status: "going", at: "2026-11-01T16:00:00-05:00" },
+      { person: "sam", status: "going", at: "2026-11-01T17:30:00-05:00" },
+      { person: "priya", status: "going", at: "2026-11-02T09:00:00-05:00" },
+      { person: "jo", status: "going", at: "2026-11-02T12:00:00-05:00" },
+      {
+        person: "mei",
+        status: "going",
+        at: "2026-11-03T10:00:00-05:00",
+        invitedBy: "alice",
+      },
+      {
+        person: "dev",
+        status: "going",
+        at: "2026-11-03T10:05:00-05:00",
+        guests: 1,
+        invitedBy: "alice",
+      },
+    ],
+    table: [
+      { copy: "alicesTinKettleDerby", at: "2026-11-01T16:05:00-05:00" },
+      { copy: "priyasFenwickFair", at: "2026-11-02T09:05:00-05:00" },
+    ],
+    votes: [
+      { copy: "alicesTinKettleDerby", voters: ["alice", "ben", "jo"] },
+      { copy: "priyasFenwickFair", voters: ["priya"] },
+    ],
+  },
+  // Jo's Halloween one-shots: five came, with three games (D12).
+  halloweenOneShots: {
+    id: castId(404),
+    host: "jo",
+    title: "Halloween one-shots",
+    startsAt: "2026-10-31T19:00:00-04:00",
+    endsAt: "2026-10-31T23:00:00-04:00",
+    place: "Jo’s place",
+    capacity: 6,
+    audience: "friends",
+    createdAt: "2026-10-20T19:00:00-04:00",
+    list: [
+      { person: "jo", status: "going", at: "2026-10-20T19:00:00-04:00" },
+      { person: "you", status: "going", at: "2026-10-21T08:00:00-04:00" },
+      { person: "alice", status: "going", at: "2026-10-21T09:00:00-04:00" },
+      { person: "sam", status: "going", at: "2026-10-22T18:00:00-04:00" },
+      { person: "priya", status: "going", at: "2026-10-23T12:00:00-04:00" },
+    ],
+    table: [
+      { copy: "josSaltAndSignal", at: "2026-10-20T19:00:00-04:00" },
+      { copy: "yourNightMarket", at: "2026-10-21T08:05:00-04:00" },
+      { copy: "samsQuarryLane", at: "2026-10-22T18:05:00-04:00" },
+    ],
+  },
+  // Sam's September game night: four came, with two games (D12).
+  septemberGameNight: {
+    id: castId(405),
+    host: "sam",
+    title: "September game night",
+    startsAt: "2026-09-19T19:00:00-04:00",
+    endsAt: "2026-09-19T22:00:00-04:00",
+    place: "Sam’s place",
+    capacity: 5,
+    audience: "friends",
+    createdAt: "2026-09-10T19:00:00-04:00",
+    list: [
+      { person: "sam", status: "going", at: "2026-09-10T19:00:00-04:00" },
+      { person: "you", status: "going", at: "2026-09-11T08:00:00-04:00" },
+      { person: "alice", status: "going", at: "2026-09-11T09:00:00-04:00" },
+      { person: "ben", status: "going", at: "2026-09-12T18:00:00-04:00" },
+    ],
+    table: [
+      { copy: "samsHarborLights", at: "2026-09-10T19:00:00-04:00" },
+      { copy: "samsMossAndMortar", at: "2026-09-10T19:00:01-04:00" },
+    ],
+  },
+} satisfies Record<string, CastNight>;
+
+// What tests name: a person, game, copy, loan or night by its key
+// (CAST.copies.yourGullAndAnchor.id).
 export const CAST = {
   people: PEOPLE,
   games: { ...GAMES, ...EXPANSIONS },
   copies: COPIES,
   loans: LOANS,
+  nights: NIGHTS,
 };
 
 // When the games came into the catalog.
@@ -709,6 +950,60 @@ export function castRows(accounts: Partial<Record<CastName, string>> = {}) {
     loans: Object.values<CastLoan>(LOANS).map((loan) =>
       loanRow(loan, userIds[loan.borrower]),
     ),
+    nights: Object.values<CastNight>(NIGHTS).map(
+      (night): GameNight => ({
+        id: night.id,
+        createdBy: userIds[night.host],
+        title: night.title,
+        startsAt: new Date(night.startsAt),
+        endsAt: night.endsAt ? new Date(night.endsAt) : null,
+        place: night.place,
+        address: night.address ?? null,
+        hostNote: night.hostNote ?? null,
+        capacity: night.capacity,
+        audience: night.audience,
+        attendeesCanInvite: night.attendeesCanInvite ?? false,
+        guestsAllowed: night.guestsAllowed ?? false,
+        linkToken: night.linkToken ?? null,
+        cancelledAt: null,
+        createdAt: new Date(night.createdAt),
+        updatedAt: new Date(night.createdAt),
+      }),
+    ),
+    nightAttendees: Object.values<CastNight>(NIGHTS).flatMap((night) =>
+      night.list.map(
+        (one): GameNightAttendee => ({
+          gameNightId: night.id,
+          userId: userIds[one.person],
+          status: one.status,
+          guestCount: one.guests ?? 0,
+          invitedBy: one.invitedBy ? userIds[one.invitedBy] : null,
+          waitlistedAt: one.status === "waitlisted" ? new Date(one.at) : null,
+          createdAt: new Date(one.at),
+          updatedAt: new Date(one.at),
+        }),
+      ),
+    ),
+    nightGames: Object.values<CastNight>(NIGHTS).flatMap((night) =>
+      night.table.map(
+        ({ copy, at }): GameNightGame => ({
+          gameNightId: night.id,
+          userGameId: COPIES[copy].id,
+          createdAt: new Date(at),
+        }),
+      ),
+    ),
+    nightVotes: Object.values<CastNight>(NIGHTS).flatMap((night) =>
+      (night.votes ?? []).flatMap(({ copy, voters }) =>
+        voters.map(
+          (voter): GameNightVote => ({
+            gameNightId: night.id,
+            userGameId: COPIES[copy].id,
+            userId: userIds[voter],
+          }),
+        ),
+      ),
+    ),
   };
 }
 type CastRows = ReturnType<typeof castRows>;
@@ -805,9 +1100,10 @@ export async function writeCastPeople(
   ];
 }
 
-// The cast's rows in the tables no repository writes yet, straight through drizzle in the caller's
-// transaction: the games, the copies, the expansions in their boxes and the loans. Only the real
-// database takes them; the mocks get what their reads need from makeCast.
+// The cast's rows in the tables its people's repositories don't write, straight through drizzle in
+// the caller's transaction: the games, the copies, the expansions in their boxes, the loans and the
+// nights with their lists and tables, in the states the boards draw. Only the real database takes
+// them; the mocks get what their reads need from makeCast.
 export async function insertCastRows(
   rows: CastRows,
   tx: ITransaction,
@@ -856,6 +1152,18 @@ export async function insertCastRows(
       ),
   );
 
+  const nightsThere = await idsIn(
+    db
+      .select({ id: gameNights.id })
+      .from(gameNights)
+      .where(
+        inArray(
+          gameNights.id,
+          rows.nights.map(({ id }) => id),
+        ),
+      ),
+  );
+
   return [
     await tally(
       "Games",
@@ -885,6 +1193,38 @@ export async function insertCastRows(
       rows.loans,
       ({ id }) => loansThere.has(id),
       (missing) => db.insert(loans).values(missing).onConflictDoNothing(),
+      commit,
+    ),
+    await tally(
+      "Nights",
+      rows.nights,
+      ({ id }) => nightsThere.has(id),
+      (missing) => db.insert(gameNights).values(missing).onConflictDoNothing(),
+      commit,
+    ),
+    // A night's list and table go with it: a night that was there keeps its own.
+    await tally(
+      "Nights' lists",
+      rows.nightAttendees,
+      ({ gameNightId }) => nightsThere.has(gameNightId),
+      (missing) =>
+        db.insert(gameNightAttendees).values(missing).onConflictDoNothing(),
+      commit,
+    ),
+    await tally(
+      "Games on nights' tables",
+      rows.nightGames,
+      ({ gameNightId }) => nightsThere.has(gameNightId),
+      (missing) =>
+        db.insert(gameNightGames).values(missing).onConflictDoNothing(),
+      commit,
+    ),
+    await tally(
+      "Votes",
+      rows.nightVotes,
+      ({ gameNightId }) => nightsThere.has(gameNightId),
+      (missing) =>
+        db.insert(gameNightVotes).values(missing).onConflictDoNothing(),
       commit,
     ),
   ];
