@@ -45,6 +45,35 @@ const locationOf = (response: Response) =>
   new URL(response.headers.get("location") ?? "");
 
 describe("proxy", () => {
+  // A Google sign-in comes back to the page it started from, with a verifier and no session yet.
+  it("swaps the verifier from a Google sign-in for the session, then goes on without it", async () => {
+    const session = `${SESSION_COOKIE}=fresh; Path=/; HttpOnly; Secure`;
+    const asked: string[] = [];
+    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+      asked.push(String(input));
+      return new Response("{}", { headers: { "set-cookie": session } });
+    }) as unknown as typeof fetch;
+    const response = await proxy(
+      request("/my-library?neon_auth_session_verifier=one-time"),
+    );
+    expect(asked).toEqual([
+      "https://library.example/api/auth/get-session?neon_auth_session_verifier=one-time",
+    ]);
+    expect(locationOf(response).href).toBe(
+      "https://library.example/my-library",
+    );
+    expect(response.headers.getSetCookie()).toEqual([session]);
+  });
+
+  it("goes on to the page without the verifier when the swap can't reach auth", async () => {
+    globalThis.fetch = mock(async () => {
+      throw new Error("offline");
+    }) as unknown as typeof fetch;
+    const response = await proxy(request("/?neon_auth_session_verifier=x"));
+    expect(locationOf(response).href).toBe("https://library.example/");
+    expect(response.headers.getSetCookie()).toEqual([]);
+  });
+
   it("lets a signed-in request through without calling the auth server", async () => {
     const fetchMock = answerSessionWith([]);
     const response = await proxy(request("/loans", true));

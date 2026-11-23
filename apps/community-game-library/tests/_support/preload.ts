@@ -17,6 +17,11 @@ for (const key of [
   "STORAGE_AWS_REGION",
   "STORAGE_AWS_ACCESS_KEY_ID",
   "STORAGE_AWS_SECRET_ACCESS_KEY",
+  // Storage's names without STORAGE_, as production has them, in case a shell sets them.
+  "AWS_ENDPOINT_URL_S3",
+  "AWS_REGION",
+  "AWS_ACCESS_KEY_ID",
+  "AWS_SECRET_ACCESS_KEY",
   "CRON_SECRET",
 ]) {
   delete process.env[key];

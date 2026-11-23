@@ -5,8 +5,7 @@ import type {
 } from "@/src/application/services/file-storage.service.interface";
 
 // Where Neon Object Storage is and the credential for it (docs/build-plan.md KTD11): the branch's
-// S3 endpoint and region, and a storage credential's key id and secret. The variables are named as
-// Neon's quickstart names them, with STORAGE_ in front.
+// S3 endpoint and region, and a storage credential's key id and secret.
 type StorageConfig = {
   endpoint: string;
   region: string;
@@ -14,14 +13,22 @@ type StorageConfig = {
   secretAccessKey: string;
 };
 
+// A setting under Neon's quickstart name with STORAGE_ in front, as local development and the
+// previews have them, or under Neon's own name, as production has them (2026-11-23). The prefixed
+// name wins, so an AWS_ variable a shell already sets can't take over local development's storage:
+// Next doesn't replace a variable the environment has with .env's.
+function setting(name: string): string | undefined {
+  return process.env[`STORAGE_${name}`] || process.env[name];
+}
+
 function configFromEnv(): StorageConfig {
-  const endpoint = process.env.STORAGE_AWS_ENDPOINT_URL_S3;
-  const region = process.env.STORAGE_AWS_REGION;
-  const accessKeyId = process.env.STORAGE_AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.STORAGE_AWS_SECRET_ACCESS_KEY;
+  const endpoint = setting("AWS_ENDPOINT_URL_S3");
+  const region = setting("AWS_REGION");
+  const accessKeyId = setting("AWS_ACCESS_KEY_ID");
+  const secretAccessKey = setting("AWS_SECRET_ACCESS_KEY");
   if (!endpoint || !region || !accessKeyId || !secretAccessKey) {
     throw new Error(
-      "File storage isn't configured: STORAGE_AWS_ENDPOINT_URL_S3, STORAGE_AWS_REGION, STORAGE_AWS_ACCESS_KEY_ID and STORAGE_AWS_SECRET_ACCESS_KEY",
+      "File storage isn't configured: STORAGE_AWS_ENDPOINT_URL_S3, STORAGE_AWS_REGION, STORAGE_AWS_ACCESS_KEY_ID and STORAGE_AWS_SECRET_ACCESS_KEY, or the same without STORAGE_",
     );
   }
   return { endpoint, region, accessKeyId, secretAccessKey };
