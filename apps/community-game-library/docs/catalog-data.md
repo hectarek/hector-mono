@@ -6,7 +6,7 @@ Updated 2026-11-23
 
 ## The plan
 
-Hector picked each part on 2026-11-23 from options with their trade-offs. The rules under each part are Claude's, checked against that day's data. They are in `scripts/lib/catalog.ts`, tested on fictional records in `tests/scripts/lib/catalog.test.ts`.
+Hector picked each part on 2026-11-23 from options with their trade-offs, and approved a first set of 89 of the games the same day. The rules under each part are Claude's, checked against that day's data. They are in `scripts/lib/catalog.ts`, tested on fictional records in `tests/scripts/lib/catalog.test.ts`.
 
 ### Which games
 
