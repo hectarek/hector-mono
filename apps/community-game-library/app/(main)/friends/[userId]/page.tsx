@@ -7,13 +7,15 @@ import { GameCardRow } from "@/app/_components/game-row";
 import { Group } from "@/app/_components/group";
 import { PhoneIcon } from "@/app/_components/icons";
 import { LibraryList } from "@/app/_components/library-list";
+import { List } from "@/app/_components/list-row";
+import { NightRow } from "@/app/_components/night-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
 import { parseLibraryView } from "@/src/entities/library-filters";
-import { formatSince } from "@/src/entities/week";
+import { formatSince, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { UnfriendButton } from "./unfriend-button";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -44,7 +46,7 @@ const listed = (parts: string[]) =>
     : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
 
 // E4's lines (R50 and its audit line): what stops, what stays open, and that the friend isn't
-// told. Their nights' line comes with nights (U18).
+// told. Their nights' line comes with nights' lists (U19).
 function unfriendLines(
   name: string,
   between: Awaited<ReturnType<typeof loadFriend>>["between"],
@@ -74,8 +76,8 @@ function unfriendLines(
 }
 
 // A friend's page (E3; R10, R40): their photo, piece, name, phone and when you became friends,
-// their library in the Library's one list (U8), each copy as you see it, and Unfriend with E4's
-// dialog. The nights they're going to come with U18.
+// their library in the Library's one list (U8), each copy as you see it, the nights coming up
+// that they're going to and you can see (U18), and Unfriend with E4's dialog.
 export default async function FriendPage({
   params,
   searchParams,
@@ -93,6 +95,10 @@ export default async function FriendPage({
     user.id,
   );
   const { name } = profile;
+  const nights = await getInjection("IListNightsController")(user.id, {
+    goingUserId: friendId,
+  });
+  const today = todayIn(PLAN_TIME_ZONE);
 
   return (
     <PageColumn
@@ -180,6 +186,16 @@ export default async function FriendPage({
           ))}
         </LibraryList>
       </Group>
+
+      {nights.length > 0 && (
+        <Group label={`Game nights ${name} is going to`} overList>
+          <List>
+            {nights.map((card) => (
+              <NightRow key={card.night.id} card={card} today={today} />
+            ))}
+          </List>
+        </Group>
+      )}
 
       <section className="flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-3.5 py-3">
         <h2 className="font-heading text-15 font-bold tracking-wide text-destructive uppercase">

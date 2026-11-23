@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ChangedNotice } from "@/app/_components/changed-notice";
 import { DateSheet } from "@/app/_components/date-sheet";
+import { DayField } from "@/app/_components/day-field";
 import { Group } from "@/app/_components/group";
 import { PeoplePicker } from "@/app/_components/people-picker";
 import { callResultAction } from "@/app/_lib/call-action";
@@ -20,7 +21,6 @@ import type { DI_RETURN_TYPES } from "@/di/types";
 import { dueOn as dueAfter } from "@/src/entities/loan";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import { addDays, formatDate } from "@/src/entities/week";
-import { DayField } from "../[id]/day-field";
 
 type Choices = Awaited<
   ReturnType<DI_RETURN_TYPES["IGetRecordLoanChoicesController"]>

@@ -3,6 +3,7 @@
 // user: signInAsNewUser).
 import { getInjection } from "@/di/container";
 import type { ProfileForm } from "@/src/entities/models/user-profile.model";
+import { MockGameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository.mock";
 import { MockGamesRepository } from "@/src/infrastructure/repositories/games.repository.mock";
 import { MockLoansRepository } from "@/src/infrastructure/repositories/loans.repository.mock";
 import { MockRemovedUsersRepository } from "@/src/infrastructure/repositories/removed-users.repository.mock";
@@ -57,10 +58,12 @@ export async function signInAsYouWithTheCast(): Promise<string> {
   const games = getInjection("IGamesRepository");
   const userGames = getInjection("IUserGamesRepository");
   const loans = getInjection("ILoansRepository");
+  const gameNights = getInjection("IGameNightsRepository");
   if (
     !(games instanceof MockGamesRepository) ||
     !(userGames instanceof MockUserGamesRepository) ||
-    !(loans instanceof MockLoansRepository)
+    !(loans instanceof MockLoansRepository) ||
+    !(gameNights instanceof MockGameNightsRepository)
   ) {
     throw new Error("The container's repositories are the mocks under test");
   }
@@ -83,6 +86,9 @@ export async function signInAsYouWithTheCast(): Promise<string> {
     userGames.rows.push(...rows.copies);
     userGames.expansions.push(...rows.expansions);
     loans.rows.push(...rows.loans);
+    gameNights.nights.push(...rows.nights);
+    gameNights.attendees.push(...rows.nightAttendees);
+    gameNights.games.push(...rows.nightGames);
   }
   nextState.userId = CAST.people.you.id;
   return CAST.people.you.id;

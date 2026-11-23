@@ -67,6 +67,11 @@ import { recordLoanUseCase } from "@/src/application/use-cases/loans/record-loan
 import { requestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import { takeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import { withdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
+import { createNightUseCase } from "@/src/application/use-cases/nights/create-night.use-case";
+import { getNightUseCase } from "@/src/application/use-cases/nights/get-night.use-case";
+import { getNightGameChoicesUseCase } from "@/src/application/use-cases/nights/get-night-game-choices.use-case";
+import { listNightsUseCase } from "@/src/application/use-cases/nights/list-nights.use-case";
+import { updateNightUseCase } from "@/src/application/use-cases/nights/update-night.use-case";
 import { getTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import { listInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import { markInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -153,7 +158,7 @@ function mockRepositories(): Repositories {
     friendLinks: new MockFriendLinksRepository(),
     friendRequests: new MockFriendRequestsRepository(notices),
     friendships,
-    gameNights: new MockGameNightsRepository(),
+    gameNights: new MockGameNightsRepository(friendships),
     gameSuggestions: new MockGameSuggestionsRepository(),
     games: new MockGamesRepository(),
     loans: new MockLoansRepository(),
@@ -446,8 +451,8 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       userProfiles,
     ),
 
-    // The daily run (U17), and a night for it to find, with who's on its list: in the mock's
-    // rows or the tables, since nights' own writes come with Batch 5.
+    // The daily run (U17), and a night for it to find, with who's on its list, put straight in
+    // the mock's rows or the tables.
     runDaily: runDailyUseCase(
       loans,
       userGames,
@@ -500,6 +505,30 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
         await testDb.insert(gameNightAttendeesTable).values(list);
       }
     },
+
+    // Nights and a new night (U18)
+    createNight: createNightUseCase(userGames, gameNights, transactions, log),
+    updateNight: updateNightUseCase(
+      friendships,
+      gameNights,
+      notices,
+      transactions,
+      log,
+    ),
+    listNights: listNightsUseCase(gameNights, userProfiles),
+    getNight: getNightUseCase(
+      friendships,
+      gameNights,
+      userGames,
+      games,
+      userProfiles,
+    ),
+    getNightGameChoices: getNightGameChoicesUseCase(
+      userGames,
+      games,
+      loans,
+      userProfiles,
+    ),
 
     // Lines and passing it along (U15)
     passAlong: passAlongUseCase(userGames, loans, notices, transactions, log),
@@ -615,12 +644,16 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
         if (
           games instanceof MockGamesRepository &&
           userGames instanceof MockUserGamesRepository &&
-          loans instanceof MockLoansRepository
+          loans instanceof MockLoansRepository &&
+          gameNights instanceof MockGameNightsRepository
         ) {
           games.rows.push(...rows.games);
           userGames.rows.push(...rows.copies);
           userGames.expansions.push(...rows.expansions);
           loans.rows.push(...rows.loans);
+          gameNights.nights.push(...rows.nights);
+          gameNights.attendees.push(...rows.nightAttendees);
+          gameNights.games.push(...rows.nightGames);
         } else {
           await insertCastRows(rows, tx, { commit: true });
         }

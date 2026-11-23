@@ -62,6 +62,11 @@ import type { IRecordLoanUseCase } from "@/src/application/use-cases/loans/recor
 import type { IRequestLoanUseCase } from "@/src/application/use-cases/loans/request-loan.use-case";
 import type { ITakeBackPassAlongUseCase } from "@/src/application/use-cases/loans/take-back-pass-along.use-case";
 import type { IWithdrawRequestUseCase } from "@/src/application/use-cases/loans/withdraw-request.use-case";
+import type { ICreateNightUseCase } from "@/src/application/use-cases/nights/create-night.use-case";
+import type { IGetNightUseCase } from "@/src/application/use-cases/nights/get-night.use-case";
+import type { IGetNightGameChoicesUseCase } from "@/src/application/use-cases/nights/get-night-game-choices.use-case";
+import type { IListNightsUseCase } from "@/src/application/use-cases/nights/list-nights.use-case";
+import type { IUpdateNightUseCase } from "@/src/application/use-cases/nights/update-night.use-case";
 import type { IGetTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import type { IListInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import type { IMarkInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -125,6 +130,11 @@ import type { IRecordLoanController } from "@/src/interface-adapters/controllers
 import type { IRequestLoanController } from "@/src/interface-adapters/controllers/loans/request-loan.controller";
 import type { ITakeBackPassAlongController } from "@/src/interface-adapters/controllers/loans/take-back-pass-along.controller";
 import type { IWithdrawRequestController } from "@/src/interface-adapters/controllers/loans/withdraw-request.controller";
+import type { ICreateNightController } from "@/src/interface-adapters/controllers/nights/create-night.controller";
+import type { IGetNightController } from "@/src/interface-adapters/controllers/nights/get-night.controller";
+import type { IGetNightGameChoicesController } from "@/src/interface-adapters/controllers/nights/get-night-game-choices.controller";
+import type { IListNightsController } from "@/src/interface-adapters/controllers/nights/list-nights.controller";
+import type { IUpdateNightController } from "@/src/interface-adapters/controllers/nights/update-night.controller";
 import type { IGetTabCountsController } from "@/src/interface-adapters/controllers/notices/get-tab-counts.controller";
 import type { IListInboxController } from "@/src/interface-adapters/controllers/notices/list-inbox.controller";
 import type { IMarkInboxReadController } from "@/src/interface-adapters/controllers/notices/mark-inbox-read.controller";
@@ -180,6 +190,8 @@ export const DI_SYMBOLS = {
   IConfirmPickUpUseCase: Symbol.for("IConfirmPickUpUseCase"),
   IConfirmReturnController: Symbol.for("IConfirmReturnController"),
   IConfirmReturnUseCase: Symbol.for("IConfirmReturnUseCase"),
+  ICreateNightController: Symbol.for("ICreateNightController"),
+  ICreateNightUseCase: Symbol.for("ICreateNightUseCase"),
   ICreateProfileController: Symbol.for("ICreateProfileController"),
   ICreateProfileUseCase: Symbol.for("ICreateProfileUseCase"),
   IFileStorage: Symbol.for("IFileStorage"),
@@ -203,6 +215,10 @@ export const DI_SYMBOLS = {
   IGetGameUseCase: Symbol.for("IGetGameUseCase"),
   IGetLoanController: Symbol.for("IGetLoanController"),
   IGetLoanUseCase: Symbol.for("IGetLoanUseCase"),
+  IGetNightController: Symbol.for("IGetNightController"),
+  IGetNightGameChoicesController: Symbol.for("IGetNightGameChoicesController"),
+  IGetNightGameChoicesUseCase: Symbol.for("IGetNightGameChoicesUseCase"),
+  IGetNightUseCase: Symbol.for("IGetNightUseCase"),
   IGetNoticeSettingsController: Symbol.for("IGetNoticeSettingsController"),
   IGetNoticeSettingsUseCase: Symbol.for("IGetNoticeSettingsUseCase"),
   IGetProfileController: Symbol.for("IGetProfileController"),
@@ -235,6 +251,8 @@ export const DI_SYMBOLS = {
   IListLoansUseCase: Symbol.for("IListLoansUseCase"),
   IListMyLibraryController: Symbol.for("IListMyLibraryController"),
   IListMyLibraryUseCase: Symbol.for("IListMyLibraryUseCase"),
+  IListNightsController: Symbol.for("IListNightsController"),
+  IListNightsUseCase: Symbol.for("IListNightsUseCase"),
   IListPastLoansController: Symbol.for("IListPastLoansController"),
   IListPastLoansUseCase: Symbol.for("IListPastLoansUseCase"),
   IListPeopleYouMayKnowController: Symbol.for(
@@ -289,6 +307,8 @@ export const DI_SYMBOLS = {
   IUnfriendUseCase: Symbol.for("IUnfriendUseCase"),
   IUpdateGameController: Symbol.for("IUpdateGameController"),
   IUpdateGameUseCase: Symbol.for("IUpdateGameUseCase"),
+  IUpdateNightController: Symbol.for("IUpdateNightController"),
+  IUpdateNightUseCase: Symbol.for("IUpdateNightUseCase"),
   IUpdateNoticeSettingsController: Symbol.for(
     "IUpdateNoticeSettingsController",
   ),
@@ -337,6 +357,8 @@ export interface DI_RETURN_TYPES {
   IConfirmPickUpUseCase: IConfirmPickUpUseCase;
   IConfirmReturnController: IConfirmReturnController;
   IConfirmReturnUseCase: IConfirmReturnUseCase;
+  ICreateNightController: ICreateNightController;
+  ICreateNightUseCase: ICreateNightUseCase;
   ICreateProfileController: ICreateProfileController;
   ICreateProfileUseCase: ICreateProfileUseCase;
   IFileStorage: IFileStorage;
@@ -360,6 +382,10 @@ export interface DI_RETURN_TYPES {
   IGetGameUseCase: IGetGameUseCase;
   IGetLoanController: IGetLoanController;
   IGetLoanUseCase: IGetLoanUseCase;
+  IGetNightController: IGetNightController;
+  IGetNightGameChoicesController: IGetNightGameChoicesController;
+  IGetNightGameChoicesUseCase: IGetNightGameChoicesUseCase;
+  IGetNightUseCase: IGetNightUseCase;
   IGetNoticeSettingsController: IGetNoticeSettingsController;
   IGetNoticeSettingsUseCase: IGetNoticeSettingsUseCase;
   IGetProfileController: IGetProfileController;
@@ -386,6 +412,8 @@ export interface DI_RETURN_TYPES {
   IListLoansUseCase: IListLoansUseCase;
   IListMyLibraryController: IListMyLibraryController;
   IListMyLibraryUseCase: IListMyLibraryUseCase;
+  IListNightsController: IListNightsController;
+  IListNightsUseCase: IListNightsUseCase;
   IListPastLoansController: IListPastLoansController;
   IListPastLoansUseCase: IListPastLoansUseCase;
   IListPeopleYouMayKnowController: IListPeopleYouMayKnowController;
@@ -438,6 +466,8 @@ export interface DI_RETURN_TYPES {
   IUnfriendUseCase: IUnfriendUseCase;
   IUpdateGameController: IUpdateGameController;
   IUpdateGameUseCase: IUpdateGameUseCase;
+  IUpdateNightController: IUpdateNightController;
+  IUpdateNightUseCase: IUpdateNightUseCase;
   IUpdateNoticeSettingsController: IUpdateNoticeSettingsController;
   IUpdateNoticeSettingsUseCase: IUpdateNoticeSettingsUseCase;
   IUpdateProfileController: IUpdateProfileController;

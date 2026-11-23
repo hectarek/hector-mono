@@ -64,6 +64,14 @@ export class MockUserGamesRepository implements IUserGamesRepository {
     return copy && { ...copy };
   }
 
+  async listByIds(ids: readonly string[]): Promise<UserGame[]> {
+    const wanted = new Set(ids);
+    return this.rows
+      .filter((copy) => wanted.has(copy.id))
+      .sort(oldestFirst)
+      .map((copy) => ({ ...copy }));
+  }
+
   async listOwn(userId: string): Promise<UserGame[]> {
     return this.rows
       .filter((copy) => copy.userId === userId)

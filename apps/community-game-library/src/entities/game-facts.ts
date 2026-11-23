@@ -86,3 +86,18 @@ export function cardLine(game: Game): string {
     .filter((part) => part !== null)
     .join(SEPARATOR);
 }
+
+// A game's line on a night's table (D2, D7): the count it's best at, "Best at 4", or "2 players
+// only" when it plays at one count, then its play time, "Best at 4 · 45–60 min".
+export function tableLine(game: Game): string {
+  const players =
+    game.minPlayers !== null && game.minPlayers === game.maxPlayers
+      ? `${game.minPlayers} ${game.minPlayers === 1 ? "player" : "players"} only`
+      : game.bestPlayers?.length
+        ? `Best at ${game.bestPlayers.join(" or ")}`
+        : range(game.minPlayers, game.maxPlayers);
+  const minutes = range(game.minMinutes, game.maxMinutes);
+  return [players, minutes === null ? null : `${minutes} min`]
+    .filter((part) => part !== null)
+    .join(SEPARATOR);
+}

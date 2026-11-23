@@ -187,12 +187,46 @@ export function PlusIcon(props: IconProps) {
   );
 }
 
+// A stepper's one fewer (D5's seats): 16px, as the plus beside it.
+export function MinusIcon(props: IconProps) {
+  return (
+    <LineIcon
+      viewBox="0 0 16 16"
+      strokeWidth={2.4}
+      className="size-4"
+      {...props}
+    >
+      <path d="M3 8h10" />
+    </LineIcon>
+  );
+}
+
 // A search field's mark: 16px.
 export function SearchIcon({ className }: { className?: string }) {
   return (
     <LineIcon viewBox="0 0 16 16" className={cn("size-4", className)}>
       <circle cx="7" cy="7" r="4.5" />
       <path d="M10.5 10.5L14 14" />
+    </LineIcon>
+  );
+}
+
+// A night's place (D2, D7).
+export function PlaceIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <path d="M12 21s6.5-6 6.5-11a6.5 6.5 0 0 0-13 0c0 5 6.5 11 6.5 11z" />
+      <circle cx="12" cy="10" r="2.3" />
+    </LineIcon>
+  );
+}
+
+// A night only invited people see (D7).
+export function LockIcon(props: IconProps) {
+  return (
+    <LineIcon {...props}>
+      <rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5" />
+      <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" />
     </LineIcon>
   );
 }

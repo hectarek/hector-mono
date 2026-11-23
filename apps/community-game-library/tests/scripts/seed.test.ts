@@ -118,6 +118,9 @@ describe("seed", () => {
       "  Copies: 11 to write, 0 already there",
       "  Expansions in boxes: 2 to write, 0 already there",
       "  Loans: 15 to write, 0 already there",
+      "  Nights: 5 to write, 0 already there",
+      "  Nights' lists: 28 to write, 0 already there",
+      "  Games on nights' tables: 13 to write, 0 already there",
     ]);
     for (const table of [
       "user_profiles",
@@ -125,6 +128,7 @@ describe("seed", () => {
       "friend_requests",
       "games",
       "loans",
+      "game_nights",
     ]) {
       expect(await count(table)).toBe(0);
     }
@@ -155,10 +159,14 @@ describe("seed", () => {
     expect(await count("user_games", `user_id = '${ALICES}'`)).toBe(2);
     expect(await count("loans", `borrower_user_id = '${YOURS}'`)).toBe(6);
     expect(await count("user_game_expansions")).toBe(2);
+    // Your night, with you as its host, and Alice's Saturday night with her as hers.
+    expect(await count("game_nights", `created_by = '${YOURS}'`)).toBe(1);
+    expect(await count("game_nights", `created_by = '${ALICES}'`)).toBe(1);
+    expect(await count("game_night_attendees", `user_id = '${YOURS}'`)).toBe(4);
 
     const again = scriptedTerminal();
     expect(await seed(args, again)).toBe(0);
-    expect(again.lines.slice(-8)).toEqual([
+    expect(again.lines.slice(-11)).toEqual([
       "  Profiles: 0 written, 9 already there",
       "  Settings: 0 written, 9 already there",
       "  Friendships: 0 written, 18 already there",
@@ -167,6 +175,9 @@ describe("seed", () => {
       "  Copies: 0 written, 11 already there",
       "  Expansions in boxes: 0 written, 2 already there",
       "  Loans: 0 written, 15 already there",
+      "  Nights: 0 written, 5 already there",
+      "  Nights' lists: 0 written, 28 already there",
+      "  Games on nights' tables: 0 written, 13 already there",
     ]);
     expect(await count("friendships")).toBe(36);
   });

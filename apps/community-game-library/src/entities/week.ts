@@ -151,6 +151,87 @@ const CLOCK = new Intl.DateTimeFormat("en-US", {
 // A time of day, as G2 gives when a suggestion came: "9:12 AM".
 export const formatTime = (at: Date): string => CLOCK.format(at);
 
+// A clock's parts in the app's time zone, joined here with a plain space, since ICU builds put
+// different spaces before AM and PM (formatDate's note).
+function clockParts(at: Date): { short: string; period: string } {
+  const parts = CLOCK.formatToParts(at);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((one) => one.type === type)?.value ?? "";
+  const hour = part("hour");
+  const minute = part("minute");
+  return {
+    short: minute === "00" ? hour : `${hour}:${minute}`,
+    period: part("dayPeriod").toUpperCase(),
+  };
+}
+
+// A night's time as its card and page write it (D1, D2, D7): "7 PM", "10:30 PM".
+export function formatClock(at: Date): string {
+  const { short, period } = clockParts(at);
+  return `${short} ${period}`;
+}
+
+// A night's times (D2, D7): "7 to 10:30 PM", "11 AM to 2 PM", or "7 PM" with no end.
+export function formatTimes(startsAt: Date, endsAt: Date | null): string {
+  if (endsAt === null) {
+    return formatClock(startsAt);
+  }
+  const start = clockParts(startsAt);
+  const end = clockParts(endsAt);
+  return start.period === end.period
+    ? `${start.short} to ${end.short} ${end.period}`
+    : `${start.short} ${start.period} to ${end.short} ${end.period}`;
+}
+
+const WALL_CLOCKS = new Map<string, Intl.DateTimeFormat>();
+
+// How far a time zone's clocks are ahead of UTC at a moment, in milliseconds.
+function offsetAt(at: Date, timeZone: string): number {
+  let wall = WALL_CLOCKS.get(timeZone);
+  if (!wall) {
+    wall = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
+    WALL_CLOCKS.set(timeZone, wall);
+  }
+  const parts = wall.formatToParts(at);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((one) => one.type === type)?.value ?? 0);
+  const asUtc = Date.UTC(
+    part("year"),
+    part("month") - 1,
+    part("day"),
+    part("hour"),
+    part("minute"),
+    part("second"),
+  );
+  return asUtc - (at.getTime() - at.getUTCMilliseconds());
+}
+
+// The moment a time on a day's clock is in a time zone, as a night's start is entered (D5):
+// "19:00" on "2026-11-20" in New York is midnight UTC on Nov 21. The zone's offset is read at the
+// clock's time, then again at the answer, in case the clocks change between the two.
+export function atTimeIn(date: string, time: string, timeZone: string): Date {
+  const [year = 0, month = 1, day = 1] = date.split("-").map(Number);
+  const [hours = 0, minutes = 0] = time.split(":").map(Number);
+  const wall = Date.UTC(year, month - 1, day, hours, minutes);
+  const first = wall - offsetAt(new Date(wall), timeZone);
+  return new Date(wall - offsetAt(new Date(first), timeZone));
+}
+
+// A moment's time on a time zone's clock, as a time field holds it: "19:00".
+export function clockIn(at: Date, timeZone: string): string {
+  const shifted = new Date(at.getTime() + offsetAt(at, timeZone));
+  return shifted.toISOString().slice(11, 16);
+}
+
 // When a notice arrived, as F1's right-hand column says it: minutes ago within the hour, the time
 // today, Yesterday, a weekday within the week, then its month and day.
 export function formatNoticeTime(at: Date, now: Date): string {

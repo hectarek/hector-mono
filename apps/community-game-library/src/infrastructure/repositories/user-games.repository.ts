@@ -111,6 +111,24 @@ export class UserGamesRepository
     }
   }
 
+  async listByIds(
+    ids: readonly string[],
+    tx?: ITransaction,
+  ): Promise<UserGame[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    try {
+      return await this.getDbContext(tx)
+        .select()
+        .from(userGames)
+        .where(inArray(userGames.id, [...ids]))
+        .orderBy(asc(userGames.createdAt), asc(userGames.id));
+    } catch (err) {
+      this.handleError(err, "listByIds");
+    }
+  }
+
   async listOwn(userId: string, tx?: ITransaction): Promise<UserGame[]> {
     try {
       return await this.getDbContext(tx)
