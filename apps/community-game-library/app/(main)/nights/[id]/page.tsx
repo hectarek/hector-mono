@@ -245,7 +245,12 @@ export default async function NightPage({
         />
       )}
 
-      <TableGames page={page} userId={user.id} choices={choices} />
+      <TableGames
+        page={page}
+        userId={user.id}
+        choices={choices}
+        whatToPlay={!isHost}
+      />
 
       {isHost && (
         <Group label="What you can do">
@@ -256,6 +261,26 @@ export default async function NightPage({
           >
             Invite people
           </Button>
+          <div className="flex flex-wrap gap-2.5">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+              nativeButton={false}
+              render={<Link href={`/nights/${night.id}/what-to-play`} />}
+            >
+              What should we play?
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+              nativeButton={false}
+              render={<Link href={`/nights/${night.id}/tables`} />}
+            >
+              Split into tables
+            </Button>
+          </div>
           <Button
             variant="secondary"
             nativeButton={false}

@@ -75,8 +75,10 @@ import type { IMakeNightLinkUseCase } from "@/src/application/use-cases/nights/m
 import type { IOpenNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
 import type { IRemoveFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
 import type { IRemoveGameFromNightUseCase } from "@/src/application/use-cases/nights/remove-game-from-night.use-case";
+import type { ISplitTablesUseCase } from "@/src/application/use-cases/nights/split-tables.use-case";
 import type { IUpdateNightUseCase } from "@/src/application/use-cases/nights/update-night.use-case";
 import type { IVoteUseCase } from "@/src/application/use-cases/nights/vote.use-case";
+import type { IWhatToPlayUseCase } from "@/src/application/use-cases/nights/what-to-play.use-case";
 import type { IGetTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import type { IListInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import type { IMarkInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -153,8 +155,10 @@ import type { IMakeNightLinkController } from "@/src/interface-adapters/controll
 import type { IOpenNightLinkController } from "@/src/interface-adapters/controllers/nights/open-night-link.controller";
 import type { IRemoveFromWaitlistController } from "@/src/interface-adapters/controllers/nights/remove-from-waitlist.controller";
 import type { IRemoveGameFromNightController } from "@/src/interface-adapters/controllers/nights/remove-game-from-night.controller";
+import type { ISplitTablesController } from "@/src/interface-adapters/controllers/nights/split-tables.controller";
 import type { IUpdateNightController } from "@/src/interface-adapters/controllers/nights/update-night.controller";
 import type { IVoteController } from "@/src/interface-adapters/controllers/nights/vote.controller";
+import type { IWhatToPlayController } from "@/src/interface-adapters/controllers/nights/what-to-play.controller";
 import type { IGetTabCountsController } from "@/src/interface-adapters/controllers/notices/get-tab-counts.controller";
 import type { IListInboxController } from "@/src/interface-adapters/controllers/notices/list-inbox.controller";
 import type { IMarkInboxReadController } from "@/src/interface-adapters/controllers/notices/mark-inbox-read.controller";
@@ -336,6 +340,8 @@ export const DI_SYMBOLS = {
   ISetPassAlongForAllUseCase: Symbol.for("ISetPassAlongForAllUseCase"),
   ISetPhotoController: Symbol.for("ISetPhotoController"),
   ISetPhotoUseCase: Symbol.for("ISetPhotoUseCase"),
+  ISplitTablesController: Symbol.for("ISplitTablesController"),
+  ISplitTablesUseCase: Symbol.for("ISplitTablesUseCase"),
   ISuggestGameController: Symbol.for("ISuggestGameController"),
   ISuggestGameUseCase: Symbol.for("ISuggestGameUseCase"),
   ITakeBackPassAlongController: Symbol.for("ITakeBackPassAlongController"),
@@ -360,6 +366,8 @@ export const DI_SYMBOLS = {
   IUserSettingsRepository: Symbol.for("IUserSettingsRepository"),
   IVoteController: Symbol.for("IVoteController"),
   IVoteUseCase: Symbol.for("IVoteUseCase"),
+  IWhatToPlayController: Symbol.for("IWhatToPlayController"),
+  IWhatToPlayUseCase: Symbol.for("IWhatToPlayUseCase"),
   IWithdrawRequestController: Symbol.for("IWithdrawRequestController"),
   IWithdrawRequestUseCase: Symbol.for("IWithdrawRequestUseCase"),
 };
@@ -515,6 +523,8 @@ export interface DI_RETURN_TYPES {
   ISetPassAlongForAllUseCase: ISetPassAlongForAllUseCase;
   ISetPhotoController: ISetPhotoController;
   ISetPhotoUseCase: ISetPhotoUseCase;
+  ISplitTablesController: ISplitTablesController;
+  ISplitTablesUseCase: ISplitTablesUseCase;
   ISuggestGameController: ISuggestGameController;
   ISuggestGameUseCase: ISuggestGameUseCase;
   ITakeBackPassAlongController: ITakeBackPassAlongController;
@@ -537,6 +547,8 @@ export interface DI_RETURN_TYPES {
   IUserSettingsRepository: IUserSettingsRepository;
   IVoteController: IVoteController;
   IVoteUseCase: IVoteUseCase;
+  IWhatToPlayController: IWhatToPlayController;
+  IWhatToPlayUseCase: IWhatToPlayUseCase;
   IWithdrawRequestController: IWithdrawRequestController;
   IWithdrawRequestUseCase: IWithdrawRequestUseCase;
 }

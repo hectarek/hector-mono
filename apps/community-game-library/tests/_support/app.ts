@@ -80,8 +80,10 @@ import { makeNightLinkUseCase } from "@/src/application/use-cases/nights/make-ni
 import { openNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
 import { removeFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
 import { removeGameFromNightUseCase } from "@/src/application/use-cases/nights/remove-game-from-night.use-case";
+import { splitTablesUseCase } from "@/src/application/use-cases/nights/split-tables.use-case";
 import { updateNightUseCase } from "@/src/application/use-cases/nights/update-night.use-case";
 import { voteUseCase } from "@/src/application/use-cases/nights/vote.use-case";
+import { whatToPlayUseCase } from "@/src/application/use-cases/nights/what-to-play.use-case";
 import { getTabCountsUseCase } from "@/src/application/use-cases/notices/get-tab-counts.use-case";
 import { listInboxUseCase } from "@/src/application/use-cases/notices/list-inbox.use-case";
 import { markInboxReadUseCase } from "@/src/application/use-cases/notices/mark-inbox-read.use-case";
@@ -591,6 +593,22 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       log,
     ),
     vote: voteUseCase(friendships, gameNights, transactions, log),
+
+    // What should we play? and tables (U20)
+    whatToPlay: whatToPlayUseCase(
+      friendships,
+      gameNights,
+      userGames,
+      games,
+      userProfiles,
+    ),
+    splitTables: splitTablesUseCase(
+      friendships,
+      gameNights,
+      userGames,
+      games,
+      userProfiles,
+    ),
 
     // Lines and passing it along (U15)
     passAlong: passAlongUseCase(userGames, loans, notices, transactions, log),

@@ -13,8 +13,10 @@ import { makeNightLinkUseCase } from "@/src/application/use-cases/nights/make-ni
 import { openNightLinkUseCase } from "@/src/application/use-cases/nights/open-night-link.use-case";
 import { removeFromWaitlistUseCase } from "@/src/application/use-cases/nights/remove-from-waitlist.use-case";
 import { removeGameFromNightUseCase } from "@/src/application/use-cases/nights/remove-game-from-night.use-case";
+import { splitTablesUseCase } from "@/src/application/use-cases/nights/split-tables.use-case";
 import { updateNightUseCase } from "@/src/application/use-cases/nights/update-night.use-case";
 import { voteUseCase } from "@/src/application/use-cases/nights/vote.use-case";
+import { whatToPlayUseCase } from "@/src/application/use-cases/nights/what-to-play.use-case";
 import { GameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository";
 import { MockGameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository.mock";
 import { addGameToNightController } from "@/src/interface-adapters/controllers/nights/add-game-to-night.controller";
@@ -30,8 +32,10 @@ import { makeNightLinkController } from "@/src/interface-adapters/controllers/ni
 import { openNightLinkController } from "@/src/interface-adapters/controllers/nights/open-night-link.controller";
 import { removeFromWaitlistController } from "@/src/interface-adapters/controllers/nights/remove-from-waitlist.controller";
 import { removeGameFromNightController } from "@/src/interface-adapters/controllers/nights/remove-game-from-night.controller";
+import { splitTablesController } from "@/src/interface-adapters/controllers/nights/split-tables.controller";
 import { updateNightController } from "@/src/interface-adapters/controllers/nights/update-night.controller";
 import { voteController } from "@/src/interface-adapters/controllers/nights/vote.controller";
+import { whatToPlayController } from "@/src/interface-adapters/controllers/nights/what-to-play.controller";
 
 // Game nights (R29 to R39): U17's daily run reads who's going; U18 makes, edits and reads them;
 // U19 answers, invites, the night's link, the waitlist, and the games and votes.
@@ -264,6 +268,37 @@ export function createNightsModule() {
   nightsModule
     .bind(DI_SYMBOLS.IVoteController)
     .toHigherOrderFunction(voteController, [DI_SYMBOLS.IVoteUseCase, log]);
+
+  nightsModule
+    .bind(DI_SYMBOLS.IWhatToPlayUseCase)
+    .toHigherOrderFunction(whatToPlayUseCase, [
+      friendships,
+      gameNights,
+      userGames,
+      games,
+      profiles,
+    ]);
+  nightsModule
+    .bind(DI_SYMBOLS.IWhatToPlayController)
+    .toHigherOrderFunction(whatToPlayController, [
+      DI_SYMBOLS.IWhatToPlayUseCase,
+      log,
+    ]);
+  nightsModule
+    .bind(DI_SYMBOLS.ISplitTablesUseCase)
+    .toHigherOrderFunction(splitTablesUseCase, [
+      friendships,
+      gameNights,
+      userGames,
+      games,
+      profiles,
+    ]);
+  nightsModule
+    .bind(DI_SYMBOLS.ISplitTablesController)
+    .toHigherOrderFunction(splitTablesController, [
+      DI_SYMBOLS.ISplitTablesUseCase,
+      log,
+    ]);
 
   return nightsModule;
 }

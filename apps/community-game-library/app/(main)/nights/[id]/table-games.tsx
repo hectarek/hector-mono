@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
+import Link from "next/link";
 import { useState, useTransition } from "react";
+import { DicePair } from "@/app/_components/dice";
 import { Group } from "@/app/_components/group";
 import { Piece } from "@/app/_components/piece";
 import { callAction, callResultAction } from "@/app/_lib/call-action";
@@ -60,11 +62,14 @@ export function TableGames({
   page,
   userId,
   choices,
+  whatToPlay,
 }: {
   page: Night;
   userId: string;
   // The member's own copies for D6, when they may bring games.
   choices: NightGameChoices | null;
+  // What should we play? beside the games (D2, D13); the host has it under What you can do.
+  whatToPlay: boolean;
 }) {
   const [picking, setPicking] = useState(false);
   const [, startTransition] = useTransition();
@@ -168,17 +173,33 @@ export function TableGames({
           ))}
         </ul>
       )}
+      {(canBring || whatToPlay) && (
+        <div className="flex flex-wrap gap-2.5">
+          {canBring && choices && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPicking(true)}
+            >
+              I’ll bring a game
+            </Button>
+          )}
+          {whatToPlay && (
+            <Button
+              variant="secondary"
+              size="sm"
+              nativeButton={false}
+              render={<Link href={`/nights/${night.id}/what-to-play`} />}
+            >
+              <DicePair />
+              What should we play?
+            </Button>
+          )}
+        </div>
+      )}
       {canBring && choices && (
         <>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="self-start"
-            onClick={() => setPicking(true)}
-          >
-            I’ll bring a game
-          </Button>
           <PickGamesSheet
             open={picking}
             onOpenChange={setPicking}
