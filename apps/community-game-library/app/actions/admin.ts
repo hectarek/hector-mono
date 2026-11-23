@@ -134,3 +134,25 @@ export async function updateGame(
   revalidatePath("/");
   return { message: "Saved." };
 }
+
+// G8's Remove Dev's account, after its dialog: the account ends as a deleted one does, and a
+// removed_users row keeps it out. Its people's libraries, nights and loans change, so the whole
+// app revalidates. Admin opens after.
+export async function removeAccount(userId: string): Promise<ActionState> {
+  let name: string;
+  try {
+    const adminId = await getCurrentUserId();
+    ({ name } = await getInjection("IRemoveAccountController")(
+      { userId },
+      adminId,
+    ));
+  } catch (err) {
+    return toActionError(
+      err,
+      actionLogger("removeAccount"),
+      "That didn’t save. Try again.",
+    );
+  }
+  revalidatePath("/", "layout");
+  return { message: `${name}’s account is removed` };
+}

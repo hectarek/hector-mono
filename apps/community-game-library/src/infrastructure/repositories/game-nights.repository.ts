@@ -9,6 +9,7 @@ import {
   isNull,
   lt,
   ne,
+  notInArray,
   or,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -531,6 +532,29 @@ export class GameNightsRepository
         );
     } catch (err) {
       this.handleError(err, "listGoingToNightsStarting");
+    }
+  }
+
+  async removePlacesOf(userId: string, tx: ITransaction): Promise<void> {
+    try {
+      const db = this.getDbContext(tx);
+      await db.delete(gameNightVotes).where(eq(gameNightVotes.userId, userId));
+      await db
+        .delete(gameNightAttendees)
+        .where(
+          and(
+            eq(gameNightAttendees.userId, userId),
+            notInArray(
+              gameNightAttendees.gameNightId,
+              db
+                .select({ id: gameNights.id })
+                .from(gameNights)
+                .where(eq(gameNights.createdBy, userId)),
+            ),
+          ),
+        );
+    } catch (err) {
+      this.handleError(err, "removePlacesOf", { userId });
     }
   }
 }

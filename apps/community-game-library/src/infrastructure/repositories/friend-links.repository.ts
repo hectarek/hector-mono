@@ -67,4 +67,14 @@ export class FriendLinksRepository
       this.handleError(err, "set", { userId });
     }
   }
+
+  async remove(userId: string, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(friendLinks)
+        .where(eq(friendLinks.userId, userId));
+    } catch (err) {
+      this.handleError(err, "remove", { userId });
+    }
+  }
 }

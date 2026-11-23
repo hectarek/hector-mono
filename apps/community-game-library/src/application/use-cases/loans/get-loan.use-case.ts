@@ -12,7 +12,10 @@ import {
 import type { Game } from "@/src/entities/models/game.model";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
-import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
+import {
+  formerMember,
+  type NameAndPiece,
+} from "@/src/entities/models/user-profile.model";
 
 export type IGetLoanUseCase = ReturnType<typeof getLoanUseCase>;
 
@@ -70,10 +73,9 @@ export const getLoanUseCase = (
       throw new NotFoundError();
     }
     const game = await gamesRepository.getById(copy.gameId);
-    const other = await userProfilesRepository.getByUserId(
-      role === "owner" ? loan.borrowerUserId : copy.userId,
-    );
-    if (!game || !other) {
+    const otherId = role === "owner" ? loan.borrowerUserId : copy.userId;
+    const other = await userProfilesRepository.getByUserId(otherId);
+    if (!game) {
       throw new NotFoundError();
     }
     const loans = await loansRepository.listOpenForCopies([copy.id]);
@@ -99,13 +101,16 @@ export const getLoanUseCase = (
       role,
       copy,
       game,
-      other: {
-        userId: other.userId,
-        name: other.name,
-        pieceShape: other.pieceShape,
-        pieceColor: other.pieceColor,
-        phone: open.includes(loan.status) ? other.phone : null,
-      },
+      // Someone whose account is gone shows as A former member, with no phone (U22).
+      other: other
+        ? {
+            userId: other.userId,
+            name: other.name,
+            pieceShape: other.pieceShape,
+            pieceColor: other.pieceColor,
+            phone: open.includes(loan.status) ? other.phone : null,
+          }
+        : { ...formerMember(otherId), phone: null },
       copyState: state,
       you,
       line: state.line.flatMap((one) => {

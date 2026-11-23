@@ -123,4 +123,8 @@ export interface IGameNightsRepository {
     to: Date,
     tx?: ITransaction,
   ): Promise<{ gameNightId: string; userId: string; startsAt: Date }[]>;
+
+  // An account's end (U22): the member's places on other hosts' nights, and their votes on any
+  // night. The nights they host keep their lists.
+  removePlacesOf(userId: string, tx: ITransaction): Promise<void>;
 }

@@ -90,4 +90,12 @@ export class MockNoticesRepository implements INoticesRepository {
       }
     }
   }
+
+  async removeAllFor(userId: string): Promise<void> {
+    this.rows.splice(
+      0,
+      this.rows.length,
+      ...this.rows.filter((one) => one.userId !== userId),
+    );
+  }
 }

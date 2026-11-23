@@ -9,14 +9,19 @@
         "NEON_AUTH_BASE_URL",
         "NEON_AUTH_COOKIE_SECRET",
         "ADMIN_USER_ID",
+        "NEON_API_KEY",
+        "NEON_PROJECT_ID",
+        "NEON_BRANCH_ID",
         "STORAGE_AWS_ENDPOINT_URL_S3",
         "STORAGE_AWS_REGION",
         "STORAGE_AWS_ACCESS_KEY_ID",
         "STORAGE_AWS_SECRET_ACCESS_KEY",
         "CRON_SECRET",
         "LOG_LEVEL",
-        "VERCEL_ENV"
-      ]
+        "VERCEL_ENV",
+        "VERCEL_GIT_COMMIT_SHA"
+      ],
+      "outputs": ["$TURBO_EXTENDS$", "public/sw.js"]
     }
   }
 }

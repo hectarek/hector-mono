@@ -37,14 +37,17 @@ describe("E5, You", () => {
     ).toBe("/start/home-screen?from=you");
   });
 
-  it("has only the rows whose pages exist so far, Notices I get among them (U11)", async () => {
+  it("has only the rows whose pages exist so far: Notices I get (U11) and Delete my account (U22), and Admin only for the admin", async () => {
     const view = render(await YouPage());
-    for (const name of [/Admin/, /Delete my account/]) {
-      expect(view.queryByRole("link", { name }) === null).toBe(true);
-    }
+    expect(view.queryByRole("link", { name: /Admin/ }) === null).toBe(true);
     expect(
       view.getByRole("link", { name: "Notices I get" }).getAttribute("href"),
     ).toBe("/you/notices");
+    expect(
+      view
+        .getByRole("link", { name: "Delete my account" })
+        .getAttribute("href"),
+    ).toBe("/you/delete");
   });
 
   it("shows no phone line without a phone", async () => {

@@ -19,4 +19,5 @@ export const CHANGED_LINES: Record<
   },
   "night-cancelled": { line: "This game night was cancelled." },
   "not-friends": { line: "You aren’t friends any more." },
+  "loan-open": { line: "A loan just opened. Settle your loans first." },
 };

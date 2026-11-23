@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import HomeScreenPage from "@/app/(start)/start/home-screen/page";
 import ProfileStepPage from "@/app/(start)/start/profile/page";
 import { signInAsMember } from "@/tests/_support/members";
@@ -77,6 +77,34 @@ describe("A6, the home-screen step", () => {
     expect(view.queryByText("Choose Add to Home Screen") === null).toBe(true);
     fireEvent.click(view.getByRole("button", { name: "iPhone" }));
     expect(view.getByText("Choose Add to Home Screen")).toBeTruthy();
+  });
+
+  it("offers Chrome's own install prompt on Android when it fires one (U23)", async () => {
+    const view = await page();
+    let prompted = 0;
+    const offer = Object.assign(
+      new Event("beforeinstallprompt", { cancelable: true }),
+      {
+        prompt: async () => {
+          prompted += 1;
+        },
+      },
+    );
+    act(() => {
+      window.dispatchEvent(offer);
+    });
+    expect(offer.defaultPrevented).toBe(true);
+    expect(
+      view
+        .getByRole("button", { name: "Android" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(view.queryByText("Tap the menu (⋮) in Chrome") === null).toBe(true);
+    fireEvent.click(view.getByRole("button", { name: "Install the app" }));
+    await waitFor(() => expect(prompted).toBe(1));
+    await waitFor(() =>
+      expect(view.getByText("Tap the menu (⋮) in Chrome")).toBeTruthy(),
+    );
   });
 
   it("opened from You, goes back to You and shows no step count", async () => {

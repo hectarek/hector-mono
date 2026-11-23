@@ -1,5 +1,6 @@
 import { createContainer } from "@evyweb/ioctopus";
 import { createAccessModule } from "@/di/modules/access.module";
+import { createAccountModule } from "@/di/modules/account.module";
 import { createAuthenticationModule } from "@/di/modules/authentication.module";
 import { createCatalogModule } from "@/di/modules/catalog.module";
 import { createCopiesModule } from "@/di/modules/copies.module";
@@ -18,6 +19,7 @@ import { type DI_RETURN_TYPES, DI_SYMBOLS } from "@/di/types";
 const ApplicationContainer = createContainer();
 
 ApplicationContainer.load(Symbol("AccessModule"), createAccessModule());
+ApplicationContainer.load(Symbol("AccountModule"), createAccountModule());
 ApplicationContainer.load(
   Symbol("AuthenticationModule"),
   createAuthenticationModule(),

@@ -45,3 +45,6 @@ yarn-error.log*
 next-env.d.ts
 
 certificates
+
+# the service worker, built before next build (scripts/build-service-worker.ts)
+/public/sw.js

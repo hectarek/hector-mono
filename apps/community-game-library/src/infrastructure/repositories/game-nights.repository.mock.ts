@@ -371,4 +371,24 @@ export class MockGameNightsRepository implements IGameNightsRepository {
           })),
       );
   }
+
+  async removePlacesOf(userId: string): Promise<void> {
+    const hosted = new Set(
+      this.nights
+        .filter((night) => night.createdBy === userId)
+        .map((night) => night.id),
+    );
+    this.votes.splice(
+      0,
+      this.votes.length,
+      ...this.votes.filter((one) => one.userId !== userId),
+    );
+    this.attendees.splice(
+      0,
+      this.attendees.length,
+      ...this.attendees.filter(
+        (one) => one.userId !== userId || hosted.has(one.gameNightId),
+      ),
+    );
+  }
 }

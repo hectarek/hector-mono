@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "bun scripts/require-migrations.ts && next build",
+    "build": "bun scripts/require-migrations.ts && bun scripts/build-service-worker.ts && next build",
     "start": "next start",
     "ts": "tsc --noEmit",
     "check-types": "tsc --noEmit",

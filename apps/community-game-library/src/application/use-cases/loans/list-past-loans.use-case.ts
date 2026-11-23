@@ -6,7 +6,10 @@ import { daysLate } from "@/src/entities/loan";
 import type { Game } from "@/src/entities/models/game.model";
 import type { Loan } from "@/src/entities/models/loan.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
-import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
+import {
+  formerMember,
+  type NameAndPiece,
+} from "@/src/entities/models/user-profile.model";
 
 export type IListPastLoansUseCase = ReturnType<typeof listPastLoansUseCase>;
 
@@ -65,7 +68,7 @@ export const listPastLoansUseCase = (
     const item = (loan: Loan, otherId: string | undefined): PastLoan[] => {
       const copy = copies.get(loan.userGameId);
       const game = copy && games.get(copy.gameId);
-      const other = otherId && people.get(otherId);
+      const other = otherId && (people.get(otherId) ?? formerMember(otherId));
       return game && other
         ? [{ loan, game, other, daysLate: daysLate(loan) }]
         : [];

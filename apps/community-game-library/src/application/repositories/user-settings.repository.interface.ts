@@ -18,4 +18,7 @@ export interface IUserSettingsRepository {
     changes: UserSettingsChanges,
     tx?: ITransaction,
   ): Promise<void>;
+
+  // An account's end (U22).
+  remove(userId: string, tx: ITransaction): Promise<void>;
 }

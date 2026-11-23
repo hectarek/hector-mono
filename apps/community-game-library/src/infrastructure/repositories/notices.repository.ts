@@ -111,4 +111,14 @@ export class NoticesRepository
       this.handleError(err, "markRead", { userId });
     }
   }
+
+  async removeAllFor(userId: string, tx: ITransaction): Promise<void> {
+    try {
+      await this.getDbContext(tx)
+        .delete(notices)
+        .where(eq(notices.userId, userId));
+    } catch (err) {
+      this.handleError(err, "removeAllFor", { userId });
+    }
+  }
 }

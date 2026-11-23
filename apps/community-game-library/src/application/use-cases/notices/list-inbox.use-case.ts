@@ -9,6 +9,7 @@ import { shownTypes } from "@/src/application/use-cases/notices/notice-groups";
 import type { GameSuggestion } from "@/src/entities/models/game-suggestion.model";
 import type { InboxNotice } from "@/src/entities/models/notice.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
+import { formerMember } from "@/src/entities/models/user-profile.model";
 
 export type IListInboxUseCase = ReturnType<typeof listInboxUseCase>;
 
@@ -70,7 +71,9 @@ export const listInboxUseCase = (
       );
       return {
         notice,
-        actor: (notice.createdBy && people.get(notice.createdBy)) || null,
+        actor: notice.createdBy
+          ? (people.get(notice.createdBy) ?? formerMember(notice.createdBy))
+          : null,
         loan:
           loan && copy && game
             ? {
@@ -79,7 +82,10 @@ export const listInboxUseCase = (
                 gameTitle: game.title,
                 ownerId: copy.userId,
                 borrowerId: loan.borrowerUserId,
-                borrowerName: people.get(loan.borrowerUserId)?.name ?? null,
+                borrowerName: (
+                  people.get(loan.borrowerUserId) ??
+                  formerMember(loan.borrowerUserId)
+                ).name,
                 requestNote: loan.requestNote,
                 dueOn: loan.dueOn,
                 moreTimeDueOn: loan.moreTimeDueOn,

@@ -29,6 +29,9 @@ export interface INoticesRepository {
     noticeIds: readonly string[],
     tx: ITransaction,
   ): Promise<void>;
+
+  // An account's end (U22): the member's own inbox. The notices others got about them stay.
+  removeAllFor(userId: string, tx: ITransaction): Promise<void>;
 }
 
 // The inbox shows a member's latest hundred notices; older ones stay, unseen by anyone.

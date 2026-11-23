@@ -11,8 +11,8 @@ import { adminRead } from "@/app/(main)/admin/admin-reads";
 import { getInjection } from "@/di/container";
 import { formatDay } from "@/src/entities/week";
 
-// G1, Admin (R4, R5): the suggestions waiting, oldest first, then the catalog's tasks. Anyone
-// but the admin gets Not found. U22 adds Accounts.
+// G1, Admin (R4, R5, R41): the suggestions waiting, oldest first, then the catalog's tasks, then
+// Accounts. Anyone but the admin gets Not found.
 export default async function AdminPage() {
   await connection();
   const { user } = await gate("app");
@@ -72,6 +72,13 @@ export default async function AdminPage() {
           </ListRow>
           <ListRow href="/admin/games/new">
             <RowName>Add a game by hand</RowName>
+          </ListRow>
+        </List>
+      </Group>
+      <Group label="Accounts" overList>
+        <List>
+          <ListRow href="/admin/accounts">
+            <RowName>Remove an account</RowName>
           </ListRow>
         </List>
       </Group>

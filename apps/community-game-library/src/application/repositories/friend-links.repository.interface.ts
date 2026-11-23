@@ -16,4 +16,7 @@ export interface IFriendLinksRepository {
     expiresAt: Date,
     tx: ITransaction,
   ): Promise<FriendLink>;
+
+  // An account's end (U22).
+  remove(userId: string, tx: ITransaction): Promise<void>;
 }

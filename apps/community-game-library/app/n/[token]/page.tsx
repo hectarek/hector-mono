@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { LinkGone } from "@/app/_components/link-gone";
 import { getAccount } from "@/app/_lib/account";
 import { getCurrentUserId } from "@/app/_lib/current-user";
+import { previewMetadata } from "@/app/_lib/link-previews";
 import { OpenInBrowser } from "@/app/(auth)/welcome/welcome-screen";
 import { getInjection } from "@/di/container";
 import { InputParseError, NotFoundError } from "@/src/entities/errors/common";
@@ -16,6 +18,9 @@ import {
 } from "@/src/entities/week";
 import { NightLinkLanding } from "./night-link-screen";
 import { OpenNight } from "./open-night";
+
+// A game night's link shows Y2's preview in a chat app, the same for every link (U23).
+export const metadata: Metadata = previewMetadata("night");
 
 const GONE = "This link no longer works. Ask the host for a new one.";
 

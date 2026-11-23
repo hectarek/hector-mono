@@ -1,7 +1,10 @@
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { GameNight } from "@/src/entities/models/game-night.model";
-import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
+import {
+  formerMember,
+  type NameAndPiece,
+} from "@/src/entities/models/user-profile.model";
 import { isUpcoming, seatsTaken } from "@/src/entities/night";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
@@ -20,8 +23,7 @@ export type PastNight = {
 const READ_AHEAD_MS = 36 * 60 * 60 * 1000;
 
 // Past game nights (D12, R33): the nights the member can see (KTD4) whose day has gone, and the
-// cancelled ones, newest first. A night whose host has left goes unlisted, as a removed member's
-// name goes everywhere.
+// cancelled ones, newest first. A host whose account is gone shows as A former member (U22).
 export const listPastNightsUseCase = (
   gameNightsRepository: IGameNightsRepository,
   userProfilesRepository: IUserProfilesRepository,
@@ -47,21 +49,11 @@ export const listPastNightsUseCase = (
         ])
       ).map((person) => [person.userId, person]),
     );
-    return nights.flatMap((night) => {
-      const host = hosts.get(night.createdBy);
-      return host
-        ? [
-            {
-              night,
-              host,
-              came: seatsTaken(
-                lists.filter((one) => one.gameNightId === night.id),
-              ),
-              games: tables.filter((one) => one.gameNightId === night.id)
-                .length,
-            },
-          ]
-        : [];
-    });
+    return nights.map((night) => ({
+      night,
+      host: hosts.get(night.createdBy) ?? formerMember(night.createdBy),
+      came: seatsTaken(lists.filter((one) => one.gameNightId === night.id)),
+      games: tables.filter((one) => one.gameNightId === night.id).length,
+    }));
   };
 };

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ClearSavedCopies } from "@/app/_components/clear-saved-copies";
 import {
   WaysInPlaceholder,
   Welcome,
@@ -17,8 +18,11 @@ export default function WelcomePage({
   searchParams: SearchParams;
 }) {
   return (
-    <Suspense fallback={<Welcome ways={<WaysInPlaceholder />} />}>
-      <WelcomeOrOpenInBrowser searchParams={searchParams} />
-    </Suspense>
+    <>
+      <Suspense fallback={<Welcome ways={<WaysInPlaceholder />} />}>
+        <WelcomeOrOpenInBrowser searchParams={searchParams} />
+      </Suspense>
+      <ClearSavedCopies />
+    </>
   );
 }

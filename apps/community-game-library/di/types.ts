@@ -14,6 +14,10 @@ import type { IAuthenticationService } from "@/src/application/services/authenti
 import type { IFileStorage } from "@/src/application/services/file-storage.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
+import type { IDeleteAccountUseCase } from "@/src/application/use-cases/account/delete-account.use-case";
+import type { IListWhatEndsUseCase } from "@/src/application/use-cases/account/list-what-ends.use-case";
+import type { IListAccountsUseCase } from "@/src/application/use-cases/admin/list-accounts.use-case";
+import type { IRemoveAccountUseCase } from "@/src/application/use-cases/admin/remove-account.use-case";
 import type {
   AdminAccount,
   IRequireAdmin,
@@ -102,6 +106,10 @@ import type { IListAnsweredSuggestionsUseCase } from "@/src/application/use-case
 import type { IListSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-suggestions.use-case";
 import type { ISuggestGameUseCase } from "@/src/application/use-cases/suggestions/suggest-game.use-case";
 import type { IUpdateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
+import type { IDeleteAccountController } from "@/src/interface-adapters/controllers/account/delete-account.controller";
+import type { IListAccountsController } from "@/src/interface-adapters/controllers/account/list-accounts.controller";
+import type { IListWhatEndsController } from "@/src/interface-adapters/controllers/account/list-what-ends.controller";
+import type { IRemoveAccountController } from "@/src/interface-adapters/controllers/account/remove-account.controller";
 import type { IGetGameController } from "@/src/interface-adapters/controllers/catalog/get-game.controller";
 import type { ISearchGamesController } from "@/src/interface-adapters/controllers/catalog/search-games.controller";
 import type { IAddUserGameController } from "@/src/interface-adapters/controllers/copies/add-user-game.controller";
@@ -230,6 +238,8 @@ export const DI_SYMBOLS = {
   ICreateNightUseCase: Symbol.for("ICreateNightUseCase"),
   ICreateProfileController: Symbol.for("ICreateProfileController"),
   ICreateProfileUseCase: Symbol.for("ICreateProfileUseCase"),
+  IDeleteAccountController: Symbol.for("IDeleteAccountController"),
+  IDeleteAccountUseCase: Symbol.for("IDeleteAccountUseCase"),
   IFileStorage: Symbol.for("IFileStorage"),
   IFindGamesToEditController: Symbol.for("IFindGamesToEditController"),
   IFindGamesToEditUseCase: Symbol.for("IFindGamesToEditUseCase"),
@@ -275,6 +285,8 @@ export const DI_SYMBOLS = {
   IGiveBackUseCase: Symbol.for("IGiveBackUseCase"),
   IInviteToNightController: Symbol.for("IInviteToNightController"),
   IInviteToNightUseCase: Symbol.for("IInviteToNightUseCase"),
+  IListAccountsController: Symbol.for("IListAccountsController"),
+  IListAccountsUseCase: Symbol.for("IListAccountsUseCase"),
   IListAnsweredSuggestionsController: Symbol.for(
     "IListAnsweredSuggestionsController",
   ),
@@ -305,6 +317,8 @@ export const DI_SYMBOLS = {
   IListSuggestionsUseCase: Symbol.for("IListSuggestionsUseCase"),
   IListTakenPiecesController: Symbol.for("IListTakenPiecesController"),
   IListTakenPiecesUseCase: Symbol.for("IListTakenPiecesUseCase"),
+  IListWhatEndsController: Symbol.for("IListWhatEndsController"),
+  IListWhatEndsUseCase: Symbol.for("IListWhatEndsUseCase"),
   ILoansRepository: Symbol.for("ILoansRepository"),
   ILoggerService: Symbol.for("ILoggerService"),
   IMakeFriendLinkController: Symbol.for("IMakeFriendLinkController"),
@@ -324,6 +338,8 @@ export const DI_SYMBOLS = {
   IPutInBoxUseCase: Symbol.for("IPutInBoxUseCase"),
   IRecordLoanController: Symbol.for("IRecordLoanController"),
   IRecordLoanUseCase: Symbol.for("IRecordLoanUseCase"),
+  IRemoveAccountController: Symbol.for("IRemoveAccountController"),
+  IRemoveAccountUseCase: Symbol.for("IRemoveAccountUseCase"),
   IRemoveFromWaitlistController: Symbol.for("IRemoveFromWaitlistController"),
   IRemoveFromWaitlistUseCase: Symbol.for("IRemoveFromWaitlistUseCase"),
   IRemoveGameFromNightController: Symbol.for("IRemoveGameFromNightController"),
@@ -425,6 +441,8 @@ export interface DI_RETURN_TYPES {
   ICreateNightUseCase: ICreateNightUseCase;
   ICreateProfileController: ICreateProfileController;
   ICreateProfileUseCase: ICreateProfileUseCase;
+  IDeleteAccountController: IDeleteAccountController;
+  IDeleteAccountUseCase: IDeleteAccountUseCase;
   IFileStorage: IFileStorage;
   IFindGamesToEditController: IFindGamesToEditController;
   IFindGamesToEditUseCase: IFindGamesToEditUseCase;
@@ -468,6 +486,8 @@ export interface DI_RETURN_TYPES {
   IGiveBackUseCase: IGiveBackUseCase;
   IInviteToNightController: IInviteToNightController;
   IInviteToNightUseCase: IInviteToNightUseCase;
+  IListAccountsController: IListAccountsController;
+  IListAccountsUseCase: IListAccountsUseCase;
   IListAnsweredSuggestionsController: IListAnsweredSuggestionsController;
   IListAnsweredSuggestionsUseCase: IListAnsweredSuggestionsUseCase;
   IListFriendsController: IListFriendsController;
@@ -492,6 +512,8 @@ export interface DI_RETURN_TYPES {
   IListSuggestionsUseCase: IListSuggestionsUseCase;
   IListTakenPiecesController: IListTakenPiecesController;
   IListTakenPiecesUseCase: IListTakenPiecesUseCase;
+  IListWhatEndsController: IListWhatEndsController;
+  IListWhatEndsUseCase: IListWhatEndsUseCase;
   ILoansRepository: ILoansRepository;
   ILoggerService: ILoggerService;
   IMakeFriendLinkController: IMakeFriendLinkController;
@@ -511,6 +533,8 @@ export interface DI_RETURN_TYPES {
   IPutInBoxUseCase: IPutInBoxUseCase;
   IRecordLoanController: IRecordLoanController;
   IRecordLoanUseCase: IRecordLoanUseCase;
+  IRemoveAccountController: IRemoveAccountController;
+  IRemoveAccountUseCase: IRemoveAccountUseCase;
   IRemoveFromWaitlistController: IRemoveFromWaitlistController;
   IRemoveFromWaitlistUseCase: IRemoveFromWaitlistUseCase;
   IRemoveGameFromNightController: IRemoveGameFromNightController;

@@ -31,7 +31,7 @@ export async function signInAsMember(
   return userId;
 }
 
-// The account the admin removed (U22 adds the removal), in the container's repository.
+// An account the admin removed, with nothing else of it changed, for a gate's test.
 export function removeAccount(userId: string): void {
   const removed = getInjection("IRemovedUsersRepository");
   if (removed instanceof MockRemovedUsersRepository)

@@ -64,4 +64,14 @@ export class MockUserProfilesRepository implements IUserProfilesRepository {
     ) as UserProfileChanges;
     this.profiles.set(userId, { ...profile, ...set, updatedAt: new Date() });
   }
+
+  async listAll(): Promise<UserProfile[]> {
+    return [...this.profiles.values()]
+      .sort((a, b) => (a.userId < b.userId ? -1 : 1))
+      .map((profile) => ({ ...profile }));
+  }
+
+  async remove(userId: string): Promise<void> {
+    this.profiles.delete(userId);
+  }
 }

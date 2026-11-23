@@ -137,6 +137,9 @@ export default async function YouPage() {
               Sign out
             </a>
           </li>
+          <ListRow href="/you/delete">
+            <span className="text-15 font-bold">Delete my account</span>
+          </ListRow>
         </ul>
       </Group>
 
