@@ -1,8 +1,8 @@
 # Community Game Library: data model
 
-Updated 2026-11-12. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules.
+Updated 2026-11-23. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules. The catalog's source was chosen on 2026-11-23, with no change to the tables.
 
-Every table the first release needs, holding only the values the drawn screens and the spec use. Where the catalog's values come from is not decided; the findings are in [catalog-data.md](catalog-data.md). U3 creates all of them in one migration ([build-plan.md](build-plan.md), KTD5). The requirement and decision numbers (R, D, KTD) are build-plan.md's, and screen codes such as B5 are the design canvas's ([screens.md](screens.md)).
+Every table the first release needs, holding only the values the drawn screens and the spec use. Where the catalog's values come from is in [catalog-data.md](catalog-data.md)'s plan: Wikidata and English Wikipedia's infoboxes. U3 creates all of them in one migration ([build-plan.md](build-plan.md), KTD5). The requirement and decision numbers (R, D, KTD) are build-plan.md's, and screen codes such as B5 are the design canvas's ([screens.md](screens.md)).
 
 ## Naming rules
 
@@ -62,7 +62,7 @@ A check keeps `base_game_id` set exactly when `type` is `'expansion'`. What shou
 
 Only `type` and `title` are required, since a game can be known by its title before its details are. A screen shows a value only when the game has it: no line, fact, inked die or filter appears for a value that's missing (Hector, 2026-11-12). Rows, filters and suggestions lean on players and play time, so a game in someone's library should have those.
 
-Credits for outside data are shown once per source, at the foot of a game's page and of search results, and on About the catalog (Y1). Which credit shows is settled with the source.
+Credits for outside data are settled with the source. The catalog's sources, Wikidata and Wikipedia, ask for none. The app credits them once anyway: on About the catalog (Y1) and at the foot of search results. A game's page carries no credit, since a game added by hand looks the same there ([catalog-data.md](catalog-data.md), Credits, 2026-11-23).
 
 ### user_games
 
@@ -411,7 +411,7 @@ Hector reviewed the first draft on 2026-11-12, asked for names that follow one p
 
 | What                                  | Why                                                                                                           | On the screens                                                                                                                                                                                                |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| An outside source's id (`bgg_id`)     | No source is chosen yet (rule 13)                                                                             | No "Ours" stamp (G5), no merging a game into a source's record (G6, out of the first release), no Source group on the record (G4), and no searching a source from a suggestion (G2), until a source is chosen |
+| An outside source's id (`wikidata_id`) | The source is Wikidata (2026-11-23), and `db/catalog.jsonl` keeps each game's id there. The file's own ids make the load safe to run twice, so no column needs it (rule 13) | No "Ours" stamp (G5), no merging a game into a source's record (G6, out of the first release), no Source group on the record (G4), and no searching a source from a suggestion (G2) |
 | A history of changes (`game_changes`) | The game's row is the one source of truth (rule 12), and there is one admin                                   | The admin's record (G4) shows the current details only                                                                                                                                                        |
 | Who answered a suggestion             | One admin answers every suggestion                                                                            | None                                                                                                                                                                                                          |
 | A credit per game                     | Credits are per source (above)                                                                                | None                                                                                                                                                                                                          |
