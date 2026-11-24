@@ -1,8 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
-  "extends": [
-    "@repo/biome-config"
-  ],
+  "$schema": "https://biomejs.dev/schemas/2.6.8/schema.json",
+  "extends": ["@repo/biome-config"],
   "overrides": [
     {
       "includes": [
@@ -30,9 +28,7 @@
       }
     },
     {
-      "includes": [
-        "apps/hectors-recipes/app/_lib/app-icon.tsx"
-      ],
+      "includes": ["apps/hectors-recipes/app/_lib/app-icon.tsx"],
       "linter": {
         "rules": {
           "performance": {

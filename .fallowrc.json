@@ -1,12 +1,12 @@
 {
   "$schema": "./node_modules/fallow/schema.json",
   "entry": [
-    "apps/community-game-library/scripts/*.ts",
+    "apps/community-game-library/scripts/{build-service-worker,check-test-database,load-catalog,migrate-production,require-migrations,seed,shape-catalog}.ts",
     "apps/community-game-library/service-worker/worker.ts",
     "apps/hectors-recipes/scripts/check-test-database.ts",
     "apps/hectors-recipes/scripts/seed-from-obsidian.ts",
     "apps/hectors-recipes/service-worker/worker.ts",
-    "apps/job-search/scripts/*.ts"
+    "apps/job-search/scripts/{check-test-database,import-snapshot,migrate-production,require-migrations}.ts"
   ],
   "ignoreDependencies": ["@solidjs/diagnostics"],
   "ignoreExports": [
