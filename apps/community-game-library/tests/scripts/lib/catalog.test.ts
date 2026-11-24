@@ -3,10 +3,13 @@ import {
   ageFromText,
   baseOf,
   type CatalogGame,
+  categoriesFromText,
   categoriesOf,
   gameId,
+  type InfoboxFacts,
   infoboxFacts,
   infoboxParams,
+  isPublished,
   minutesFromText,
   minutesFromWikidata,
   namesFromText,
@@ -17,6 +20,7 @@ import {
   toJsonLines,
   type WikidataItem,
   whyLeftOut,
+  yearFromText,
 } from "@/scripts/lib/catalog";
 import { gameSchema } from "@/src/entities/models/game.model";
 
@@ -27,6 +31,9 @@ function item(overrides: Partial<WikidataItem> = {}): WikidataItem {
     qid: "Q900101",
     label: "Harbor Lights",
     enwikiTitle: "Harbor Lights (board game)",
+    dewikiTitle: null,
+    frwikiTitle: null,
+    published: true,
     sitelinks: 4,
     classes: ["Q131436"],
     genres: [],
@@ -59,6 +66,48 @@ const HARBOR_LIGHTS_ARTICLE = `'''Harbor Lights''' is a game.
 }}
 '''Harbor Lights''' is a game about a fishing fleet.`;
 
+// The same game's German and French articles, each infobox in its own language's names.
+const HARBOR_LIGHTS_GERMAN = `{{Infobox Spiel
+| Titel = Hafenlichter
+| Art = [[Kartenspiel]], Legespiel
+| Autor = [[Ines Varga]] und Tom Reyes
+| Verlag = {{USA}}: [[Tidewater Games]],<br />[[Fernhouse]], u.&nbsp;a.
+| Erscheinungsjahr = 2019<ref>{{Internetquelle |url=https://press.example/hafen |abruf=2024-05-01}}</ref>
+| Mitspieler = 2 bis 5
+| Dauer = ca. 45–60 Minuten
+| Alter = ab 10 Jahren
+}}
+'''Hafenlichter''' ist ein Spiel.`;
+
+const HARBOR_LIGHTS_FRENCH = `{{Infobox Jeu
+| nom = Feux du port
+| type = jeu de société
+| auteur0 = Ines Varga
+| auteur1 = Tom Reyes
+| éditeur = {{lang|en|[[Tidewater Games]]}}
+| année0 = 2019 (2020 en France)
+| joueurs mini = 2
+| joueurs maxi = 5 (6 avec l'extension)
+| âge mini = 10
+| durée = env. 1 h
+| mécanisme1 = coopération
+| thème1 = [[Science-fiction]]
+}}`;
+
+// An infobox's facts with nothing in them but what a test names.
+function facts(overrides: Partial<InfoboxFacts> = {}): InfoboxFacts {
+  return {
+    players: { min: null, max: null },
+    minutes: { min: null, max: null },
+    minAge: null,
+    year: null,
+    designers: [],
+    publishers: [],
+    categories: [],
+    ...overrides,
+  };
+}
+
 describe("infoboxParams", () => {
   it("splits the first infobox's parameters, not at a pipe inside a template or a link", () => {
     const params = infoboxParams(HARBOR_LIGHTS_ARTICLE);
@@ -76,23 +125,84 @@ describe("infoboxParams", () => {
 
 describe("infoboxFacts", () => {
   it("reads the base game's players, the play time, the age, the designers and the publishers", () => {
-    expect(infoboxFacts(HARBOR_LIGHTS_ARTICLE)).toEqual({
+    expect(infoboxFacts(HARBOR_LIGHTS_ARTICLE)).toEqual(
+      facts({
+        players: { min: 2, max: 5 },
+        minutes: { min: 45, max: 60 },
+        minAge: 10,
+        designers: ["Ines Varga", "Tom Reyes"],
+        publishers: ["Tidewater Games", "Fernhouse Spiele"],
+      }),
+    );
+  });
+
+  it("reads the English infobox's year and genre", () => {
+    expect(
+      infoboxFacts(
+        "{{Infobox game\n| date = {{Start date|2019}}\n| genre = [[Board game]]<br />[[Abstract strategy game]]\n}}",
+      ),
+    ).toEqual(facts({ year: 2019, categories: ["Abstract"] }));
+  });
+
+  it("reads a German infobox in German", () => {
+    expect(infoboxFacts(HARBOR_LIGHTS_GERMAN, "de")).toEqual({
       players: { min: 2, max: 5 },
       minutes: { min: 45, max: 60 },
       minAge: 10,
+      year: 2019,
       designers: ["Ines Varga", "Tom Reyes"],
-      publishers: ["Tidewater Games", "Fernhouse Spiele"],
+      publishers: ["Tidewater Games", "Fernhouse"],
+      categories: ["Card game", "Tile-laying"],
+    });
+  });
+
+  it("reads a French infobox, with its players apart and its authors and years numbered", () => {
+    expect(infoboxFacts(HARBOR_LIGHTS_FRENCH, "fr")).toEqual({
+      players: { min: 2, max: 5 },
+      minutes: { min: 60, max: 60 },
+      minAge: 10,
+      year: 2019,
+      designers: ["Ines Varga", "Tom Reyes"],
+      publishers: ["Tidewater Games"],
+      categories: ["Cooperative", "Science fiction"],
     });
   });
 
   it("gives nothing for parameters the infobox lacks", () => {
-    expect(infoboxFacts("{{Infobox game\n| name = Salt & Signal\n}}")).toEqual({
-      players: { min: null, max: null },
-      minutes: { min: null, max: null },
-      minAge: null,
-      designers: [],
-      publishers: [],
-    });
+    expect(infoboxFacts("{{Infobox game\n| name = Salt & Signal\n}}")).toEqual(
+      facts(),
+    );
+    expect(
+      infoboxFacts(
+        "{{Infobox Jeu\n| nom = Sel et signal\n| joueurs mini = 2\n}}",
+        "fr",
+      ),
+    ).toEqual(facts({ players: { min: 2, max: null } }));
+  });
+});
+
+describe("isPublished", () => {
+  it("counts what Wikidata shows published, or what the English infobox gives a designer or publisher", () => {
+    expect(isPublished(item(), undefined)).toBe(true);
+    expect(
+      isPublished(
+        item({ published: false }),
+        facts({ designers: ["Ines Varga"] }),
+      ),
+    ).toBe(true);
+    expect(
+      isPublished(
+        item({ published: false }),
+        facts({ publishers: ["Fernhouse"] }),
+      ),
+    ).toBe(true);
+  });
+
+  it("leaves out a game whose infobox has only a date, as a traditional game's does", () => {
+    expect(isPublished(item({ published: false }), facts({ year: 1890 }))).toBe(
+      false,
+    );
+    expect(isPublished(item({ published: false }), undefined)).toBe(false);
   });
 });
 
@@ -102,6 +212,10 @@ describe("playersFromText", () => {
     ["2-6", { min: 2, max: 6 }],
     ["3 to 8", { min: 3, max: 8 }],
     ["2+", { min: 2, max: null }],
+    ["2 bis 4", { min: 2, max: 4 }],
+    ["2 à 7", { min: 2, max: 7 }],
+    ["2 et plus", { min: 2, max: null }],
+    ["3 und mehr", { min: 3, max: null }],
     ["2", { min: 2, max: 2 }],
     ["Two", { min: null, max: null }],
     ["4–2", { min: null, max: null }],
@@ -118,10 +232,41 @@ describe("minutesFromText", () => {
     ["45 min", { min: 45, max: 45 }],
     ["60 minutes – 2 hours", { min: 60, max: 120 }],
     ["90", { min: 90, max: 90 }],
+    ["ca. 45 Minuten", { min: 45, max: 45 }],
+    ["2 bis 3 Stunden", { min: 120, max: 180 }],
+    ["1,5 Stunden", { min: 90, max: 90 }],
+    ["2 à 3h", { min: 120, max: 180 }],
+    ["30 min à 1h", { min: 30, max: 60 }],
     ["5", { min: null, max: null }],
     ["about an hour", { min: null, max: null }],
   ])("reads %p", (text, minutes) => {
     expect(minutesFromText(text)).toEqual(minutes);
+  });
+});
+
+describe("yearFromText", () => {
+  it.each([
+    ["{{Start date|1995}}", 1995],
+    ["1972 (1976 en France)", 1972],
+    ["2001<ref>{{cite web|access-date=2019-01-01}}</ref>", 2001],
+    ["unknown", null],
+  ])("reads %p", (text, year) => {
+    expect(yearFromText(text)).toBe(year);
+  });
+});
+
+describe("categoriesFromText", () => {
+  it("maps each language's own words to the catalog's", () => {
+    expect(categoriesFromText("Strategy, Economic", "en")).toEqual([
+      "Economic",
+      "Strategy",
+    ]);
+    expect(categoriesFromText("Kartenspiel", "de")).toEqual(["Card game"]);
+    expect(categoriesFromText("course", "fr")).toEqual(["Racing"]);
+  });
+
+  it("reads a word only in its own language", () => {
+    expect(categoriesFromText("course", "en")).toEqual([]);
   });
 });
 
@@ -154,6 +299,23 @@ describe("namesFromText", () => {
         "companies",
       ),
     ).toEqual(["Bellwether and Co.", "999 Tides"]);
+  });
+
+  it("splits people at the language's 'and', and drops what a flag left and 'among others'", () => {
+    expect(namesFromText("Ines Varga und Tom Reyes", "people", "de")).toEqual([
+      "Ines Varga",
+      "Tom Reyes",
+    ]);
+    expect(namesFromText("Ines Varga et Tom Reyes", "people", "fr")).toEqual([
+      "Ines Varga",
+      "Tom Reyes",
+    ]);
+    expect(
+      namesFromText(": Tidewater Games\nFernhouse\nu. a.", "companies", "de"),
+    ).toEqual(["Tidewater Games", "Fernhouse"]);
+    expect(namesFromText("Fernhouse u. a.", "companies", "de")).toEqual([
+      "Fernhouse",
+    ]);
   });
 });
 
@@ -224,23 +386,38 @@ describe("publishersOf", () => {
     { name: "Κάισσα", countries: ["Q41"], sitelinks: 20 },
   ];
 
-  it("takes the infobox's publishers, in its order, at most three", () => {
+  it("takes the English infobox's publishers, in its order, at most three", () => {
     expect(
-      publishersOf(item({ publishers }), [
-        "Fernhouse",
-        "Tidewater Games",
-        "Small Hours Press",
-        "Lantern Row Games",
-      ]),
+      publishersOf(item({ publishers }), {
+        en: facts({
+          publishers: [
+            "Fernhouse",
+            "Tidewater Games",
+            "Small Hours Press",
+            "Lantern Row Games",
+          ],
+        }),
+        de: facts({ publishers: ["Lantern Row Games"] }),
+      }),
     ).toEqual(["Fernhouse", "Tidewater Games", "Small Hours Press"]);
   });
 
-  it("without an infobox, puts the game's own country first, then the best known", () => {
-    expect(publishersOf(item({ publishers }), [])).toEqual([
-      "Tidewater Games",
-      "Lantern Row Games",
-      "Fernhouse",
-    ]);
+  it("without the English infobox's, puts the game's own country first, then the best known", () => {
+    expect(
+      publishersOf(item({ publishers }), {
+        de: facts({ publishers: ["Lantern Row Games"] }),
+      }),
+    ).toEqual(["Tidewater Games", "Lantern Row Games", "Fernhouse"]);
+  });
+
+  it("takes the German, then the French infobox's when neither English nor Wikidata names one", () => {
+    expect(
+      publishersOf(item({ publishers: [] }), {
+        de: facts({ publishers: ["Fernhouse"] }),
+        fr: facts({ publishers: ["Tidewater Games"] }),
+      }),
+    ).toEqual(["Fernhouse"]);
+    expect(publishersOf(item({ publishers: [] }), {})).toEqual([]);
   });
 });
 
@@ -260,7 +437,7 @@ describe("categoriesOf", () => {
 
 describe("shapeGame", () => {
   it("takes Wikidata's values where it has one each, and fits the games model", () => {
-    const game = shapeGame(item(), null, null);
+    const game = shapeGame(item(), {}, null);
     expect(game).toEqual({
       id: gameId("Q900101"),
       wikidataId: "Q900101",
@@ -301,7 +478,7 @@ describe("shapeGame", () => {
         designers: [],
         publishers: [],
       }),
-      infoboxFacts(HARBOR_LIGHTS_ARTICLE),
+      { en: infoboxFacts(HARBOR_LIGHTS_ARTICLE) },
       null,
     );
     expect(game).toMatchObject({
@@ -323,6 +500,57 @@ describe("shapeGame", () => {
     ]);
   });
 
+  it("fills what English leaves empty from the German, then the French infobox", () => {
+    const game = shapeGame(
+      item({
+        year: null,
+        maxPlayers: [],
+        durations: [],
+        minAges: [],
+        designers: [],
+        publishers: [],
+      }),
+      {
+        en: facts({ players: { min: 2, max: 4 } }),
+        de: infoboxFacts(HARBOR_LIGHTS_GERMAN, "de"),
+        fr: infoboxFacts(HARBOR_LIGHTS_FRENCH, "fr"),
+      },
+      null,
+    );
+    expect(game).toMatchObject({
+      year: 2019,
+      publishers: ["Tidewater Games", "Fernhouse"],
+      designers: ["Ines Varga", "Tom Reyes"],
+      minPlayers: 2,
+      maxPlayers: 4,
+      minMinutes: 45,
+      maxMinutes: 60,
+      minAge: 10,
+      categories: ["Card game", "Tile-laying"],
+    });
+    expect([...(game.wikipediaFields ?? [])].sort()).toEqual([
+      "categories",
+      "designers",
+      "maxMinutes",
+      "maxPlayers",
+      "minAge",
+      "minMinutes",
+      "publishers",
+      "year",
+    ]);
+  });
+
+  it("keeps Wikidata's player bound alone where an infobox's would cross it", () => {
+    const game = shapeGame(
+      item({ minPlayers: [4], maxPlayers: [] }),
+      { en: facts({ players: { min: 1, max: 3 } }) },
+      null,
+    );
+    expect(game.minPlayers).toBe(4);
+    expect(game.maxPlayers).toBeUndefined();
+    expect(game.wikipediaFields ?? []).not.toContain("maxPlayers");
+  });
+
   it("leaves out of the line what neither source has", () => {
     const game = shapeGame(
       item({
@@ -334,7 +562,7 @@ describe("shapeGame", () => {
         publishers: [],
         designers: [],
       }),
-      null,
+      {},
       null,
     );
     expect(Object.keys(game).sort()).toEqual([
@@ -347,10 +575,10 @@ describe("shapeGame", () => {
   });
 
   it("names a game from its article when it has no English label, and capitalizes a lower-case label", () => {
-    expect(shapeGame(item({ label: null }), null, null).title).toBe(
+    expect(shapeGame(item({ label: null }), {}, null).title).toBe(
       "Harbor Lights",
     );
-    expect(shapeGame(item({ label: "quarry lane" }), null, null).title).toBe(
+    expect(shapeGame(item({ label: "quarry lane" }), {}, null).title).toBe(
       "Quarry lane",
     );
   });
@@ -358,7 +586,7 @@ describe("shapeGame", () => {
   it("makes an expansion of the game it expands", () => {
     const game = shapeGame(
       item({ qid: "Q900112", label: "Harbor Lights: Night Tide" }),
-      null,
+      {},
       gameId("Q900101"),
     );
     expect(game.type).toBe("expansion");
@@ -394,20 +622,20 @@ describe("orderGames and toJsonLines", () => {
           label: "Harbor Lights: Night Tide",
           sitelinks: 9,
         }),
-        null,
+        {},
         gameId("Q900101"),
       ),
       shapeGame(
         item({ qid: "Q900103", label: "Night Market", sitelinks: 2 }),
-        null,
+        {},
         null,
       ),
       shapeGame(
         item({ qid: "Q900102", label: "Moss & Mortar", sitelinks: 2 }),
-        null,
+        {},
         null,
       ),
-      shapeGame(item({ qid: "Q900101", sitelinks: 4 }), null, null),
+      shapeGame(item({ qid: "Q900101", sitelinks: 4 }), {}, null),
     ];
     const ordered = orderGames(games);
     expect(ordered.map(({ title }) => title)).toEqual([

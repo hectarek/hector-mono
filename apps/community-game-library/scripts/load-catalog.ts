@@ -1,17 +1,25 @@
 // Loads db/catalog.jsonl, the catalog's own dataset (docs/catalog-data.md, How it loads), into the
 // games table (U24): each game whose id isn't there yet, base games before their expansions, with
-// its search title, and every value the file lacks as null. It never changes a row already there,
-// so the admin's corrections and the games added by hand stay, and a second run inserts nothing.
+// its search title, and every value the file lacks as null. Alone, it never changes a row already
+// there, so the admin's corrections and the games added by hand stay, and a second run inserts
+// nothing.
+//
+// With --update-from <commit>, it also brings the games already there up to the file. It names
+// the commit whose file the database was last loaded or updated from, and a value changes only
+// while it still holds what that file gave: a value the admin changed stays (planUpdate).
 //
 //   cd apps/community-game-library
 //   bun scripts/load-catalog.ts                         # a dry run on .env's database, the test project's
 //   bun scripts/load-catalog.ts --commit                # inserts there, in one transaction
+//   bun scripts/load-catalog.ts --update-from 605c24d   # a dry run of inserting and updating
 //   bun scripts/load-catalog.ts --production            # Hector's terminal: a dry run on production
 //   bun scripts/load-catalog.ts --production --commit   # inserts there once he types "load"
+//   bun scripts/load-catalog.ts --production --update-from 605c24d --commit   # once he types "update"
 //
 // Production's URL comes from a prompt that shows nothing as it's typed, as the production
 // migration's does (KTD1), and nothing prints it or an error's message.
 import { Pool } from "@neondatabase/serverless";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { z } from "zod";
 import { type Database, db } from "@/db";
@@ -35,18 +43,30 @@ const BATCH = 500;
 // A games row as the load writes it; the database sets the timestamps.
 export type CatalogRow = Omit<Game, "createdAt" | "updatedAt">;
 
-type LoadArgs = { commit: boolean; production: boolean };
+type LoadArgs = {
+  commit: boolean;
+  production: boolean;
+  // The commit whose db/catalog.jsonl the database holds, when the load updates too.
+  updateFrom: string | null;
+};
 
 // The command line's flags, or why they can't be used.
 export function parseArgs(argv: readonly string[]): LoadArgs | string {
-  const args: LoadArgs = { commit: false, production: false };
-  for (const flag of argv) {
+  const args: LoadArgs = { commit: false, production: false, updateFrom: null };
+  for (let index = 0; index < argv.length; index++) {
+    const flag = argv[index];
     if (flag === "--commit") {
       args.commit = true;
     } else if (flag === "--production") {
       args.production = true;
+    } else if (flag === "--update-from") {
+      const commit = argv[++index];
+      if (commit === undefined || !/^[\w./-]+$/.test(commit)) {
+        return "--update-from takes the commit the database was last loaded or updated from.";
+      }
+      args.updateFrom = commit;
     } else {
-      return `Unknown option ${flag}: the load takes --commit and --production.`;
+      return `Unknown option ${flag}: the load takes --commit, --production and --update-from <commit>.`;
     }
   }
   return args;
@@ -154,6 +174,106 @@ export function planLoad(
   };
 }
 
+// The columns an update may change: every one the file can give. A game's type and base game stay
+// as first loaded, since turning a game into an expansion, or moving it to another base game,
+// would leave the expansions in members' boxes under the wrong game.
+const UPDATED_COLUMNS = [
+  "title",
+  "year",
+  "publishers",
+  "designers",
+  "minPlayers",
+  "maxPlayers",
+  "bestPlayers",
+  "minMinutes",
+  "maxMinutes",
+  "minAge",
+  "complexity",
+  "categories",
+  "description",
+  "imageUrl",
+  "videoUrl",
+  "popularity",
+] as const satisfies readonly (keyof CatalogRow)[];
+type UpdatedColumn = (typeof UPDATED_COLUMNS)[number];
+
+export type GameUpdate = {
+  id: string;
+  title: string;
+  set: Partial<Pick<CatalogRow, UpdatedColumn | "searchTitle">>;
+};
+
+export type UpdatePlan = {
+  updates: GameUpdate[];
+  filled: number;
+  changed: number;
+  cleared: number;
+  // The games with a value the admin changed, which the update leaves as it is.
+  kept: { title: string; columns: UpdatedColumn[] }[];
+};
+
+const same = (a: unknown, b: unknown) =>
+  JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+// What an update does to the games already in the table: for each of the file's games there, each
+// value that differs from the file changes when it still holds what the file at the last load or
+// update gave (`previous`), so the admin's corrections stay. A game that file didn't have only
+// gets its empty values filled. Each change is a fill, a change or a clear.
+export function planUpdate(
+  rows: readonly CatalogRow[],
+  previous: readonly CatalogRow[],
+  existing: readonly Pick<CatalogRow, "id" | UpdatedColumn>[],
+): UpdatePlan {
+  const before = new Map(previous.map((row) => [row.id, row]));
+  const there = new Map(existing.map((row) => [row.id, row]));
+  const plan: UpdatePlan = {
+    updates: [],
+    filled: 0,
+    changed: 0,
+    cleared: 0,
+    kept: [],
+  };
+  for (const row of rows) {
+    const current = there.get(row.id);
+    if (current === undefined) {
+      continue;
+    }
+    const last = before.get(row.id);
+    const set: GameUpdate["set"] = {};
+    const kept: UpdatedColumn[] = [];
+    for (const column of UPDATED_COLUMNS) {
+      const now = current[column];
+      const next = row[column];
+      if (same(now, next)) {
+        continue;
+      }
+      const ours = last === undefined ? now === null : same(now, last[column]);
+      if (!ours) {
+        kept.push(column);
+        continue;
+      }
+      Object.assign(set, { [column]: next });
+      if (now === null) {
+        plan.filled++;
+      } else if (next === null) {
+        plan.cleared++;
+      } else {
+        plan.changed++;
+      }
+    }
+    if (set.title !== undefined) {
+      set.searchTitle = row.searchTitle;
+    }
+    if (Object.keys(set).length > 0) {
+      plan.updates.push({ id: row.id, title: row.title, set });
+    }
+    if (kept.length > 0) {
+      plan.kept.push({ title: current.title ?? row.title, columns: kept });
+    }
+  }
+  return plan;
+}
+
 type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 // Inserts the rows in batches, skipping an id another run put in meanwhile, and counts what went in.
@@ -173,14 +293,42 @@ async function insertRows(
   return inserted;
 }
 
+// Writes each update, its search title with its title; drizzle moves updated_at.
+async function updateRows(
+  tx: Transaction,
+  updates: readonly GameUpdate[],
+): Promise<number> {
+  let updated = 0;
+  for (const { id, set } of updates) {
+    const written = await tx
+      .update(schema.games)
+      .set(set)
+      .where(eq(schema.games.id, id))
+      .returning({ id: schema.games.id });
+    updated += written.length;
+  }
+  return updated;
+}
+
+// "Copper Kettle, The Lantern Row and 3 more".
+function someTitles(titles: readonly string[], most = 10): string {
+  const shown = titles.slice(0, most).join(", ");
+  return titles.length > most
+    ? `${shown} and ${titles.length - most} more`
+    : shown;
+}
+
 // The load's steps on a target: the check that it's the database meant, the counts, and with
 // `commit` the inserts, in one transaction, base games first so each expansion's game is there.
-// Production also waits for "load" to be typed.
+// Given the file the database was last loaded or updated from (`previous`), it updates the games
+// already there too, in the same transaction. Production also waits for "load" to be typed, or
+// "update" when it updates.
 export async function loadCatalog(
   target: { db: Database; production: boolean },
   rows: readonly CatalogRow[],
   commit: boolean,
   terminal: Terminal,
+  previous: readonly CatalogRow[] | null = null,
 ): Promise<number> {
   const testDatabase = isTestDatabase(await databaseNote(target.db));
   if (target.production && testDatabase) {
@@ -194,9 +342,7 @@ export async function loadCatalog(
     );
   }
 
-  const existing = await target.db
-    .select({ id: schema.games.id, searchTitle: schema.games.searchTitle })
-    .from(schema.games);
+  const existing = await target.db.select().from(schema.games);
   const plan = planLoad(rows, new Set(existing.map((game) => game.id)));
   const toInsert = plan.baseGames.length + plan.expansions.length;
   terminal.print(
@@ -215,37 +361,72 @@ export async function loadCatalog(
       `Already in games under another id, so they'd show twice: ${twice.map((row) => row.title).join(", ")}.`,
     );
   }
-  if (toInsert === 0) {
-    terminal.print("Nothing to insert.");
+  const update =
+    previous === null ? null : planUpdate(rows, previous, existing);
+  if (update !== null) {
+    terminal.print(
+      `To update: ${amount(update.updates.length, "game")}, with ${amount(update.filled, "value")} filled, ${update.changed} changed and ${update.cleared} cleared.`,
+    );
+    if (update.kept.length > 0) {
+      terminal.print(
+        `Kept as the admin left them: ${amount(update.kept.length, "game")} (${someTitles(update.kept.map(({ title }) => title))}).`,
+      );
+    }
+  }
+  const toUpdate = update?.updates.length ?? 0;
+  if (toInsert + toUpdate === 0) {
+    terminal.print(
+      update === null ? "Nothing to insert." : "Nothing to insert or update.",
+    );
     return 0;
   }
   if (!commit) {
     terminal.print(
-      "A dry run, so nothing was written. With --commit, the load inserts them.",
+      `A dry run, so nothing was written. With --commit, the load ${update === null ? "inserts them" : "inserts and updates them"}.`,
     );
     return 0;
   }
+  const word = update === null ? "load" : "update";
   if (
     target.production &&
     (await terminal.ask(
-      'Type "load" to insert them, anything else to stop: ',
-    )) !== "load"
+      `Type "${word}" to ${update === null ? "insert them" : "insert and update them"}, anything else to stop: `,
+    )) !== word
   ) {
     return terminal.refuse("Stopped. Nothing was written.");
   }
 
-  const inserted = await target.db.transaction(
-    async (tx) =>
+  const written = await target.db.transaction(async (tx) => ({
+    inserted:
       (await insertRows(tx, plan.baseGames)) +
       (await insertRows(tx, plan.expansions)),
+    updated: await updateRows(tx, update?.updates ?? []),
+  }));
+  terminal.print(
+    update === null
+      ? `Inserted ${amount(written.inserted, "game")}.`
+      : `Inserted ${amount(written.inserted, "game")} and updated ${written.updated}.`,
   );
-  terminal.print(`Inserted ${amount(inserted, "game")}.`);
   return 0;
 }
 
 // "1 game", "2 games".
 function amount(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
+
+// db/catalog.jsonl as it was at a commit, from git, or why it can't be read.
+function catalogAt(commit: string): CatalogRow[] | string {
+  const shown = Bun.spawnSync(["git", "show", `${commit}:./db/catalog.jsonl`], {
+    cwd: new URL("..", import.meta.url).pathname,
+  });
+  if (shown.exitCode !== 0) {
+    return `git has no db/catalog.jsonl at ${commit}.`;
+  }
+  const rows = readCatalog(shown.stdout.toString());
+  return typeof rows === "string"
+    ? `db/catalog.jsonl at ${commit} can't be read: ${rows}`
+    : rows;
 }
 
 async function main(): Promise<number> {
@@ -257,6 +438,10 @@ async function main(): Promise<number> {
   if (typeof rows === "string") {
     return refuse(`db/catalog.jsonl can't be loaded: ${rows}`);
   }
+  const previous = args.updateFrom === null ? null : catalogAt(args.updateFrom);
+  if (typeof previous === "string") {
+    return refuse(previous);
+  }
   const terminal = {
     print,
     refuse,
@@ -266,7 +451,13 @@ async function main(): Promise<number> {
     if (!process.env.DATABASE_URL) {
       return refuse("The load writes to .env's DATABASE_URL, which isn't set.");
     }
-    return loadCatalog({ db, production: false }, rows, args.commit, terminal);
+    return loadCatalog(
+      { db, production: false },
+      rows,
+      args.commit,
+      terminal,
+      previous,
+    );
   }
 
   if (!(process.stdin.isTTY && process.stdout.isTTY)) {
@@ -292,6 +483,7 @@ async function main(): Promise<number> {
       rows,
       args.commit,
       terminal,
+      previous,
     );
   } finally {
     await pool.end();

@@ -1,19 +1,25 @@
 // Makes db/catalog.jsonl, the catalog's own dataset (docs/catalog-data.md, The plan), from
-// Wikidata and English Wikipedia's infoboxes, and prints what it holds. U24 loads the file.
+// Wikidata and the English, German and French Wikipedias' infoboxes, and prints what it holds.
+// U24 loads the file.
 //
 //   cd apps/community-game-library
 //   bun scripts/shape-catalog.ts
 //
 // It asks Wikimedia one request at a time, a second apart, with a User-Agent that names the
 // project and where to reach it, as Wikimedia's policy asks (Hector, 2026-11-23). It reads no
-// BoardGameGeek data, and no Wikidata property that points at it (D7).
+// BoardGameGeek data, no Wikidata property that points at it, and no Wikidata value whose
+// reference names it (D7).
 import {
   BOARD_GAME,
   baseOf,
   type CatalogGame,
   gameId,
+  type Infoboxes,
   type InfoboxFacts,
   infoboxFacts,
+  isPublished,
+  LANGUAGES,
+  type Language,
   OTHER_GAME_CLASSES,
   orderGames,
   type Publisher,
@@ -28,8 +34,31 @@ import { print } from "@/scripts/lib/terminal";
 export const USER_AGENT = `CommunityGameLibraryCatalogBot/1.0 (https://github.com/hectarek/hector-mono) bun/${Bun.version}`;
 
 const WIKIDATA_QUERY = "https://query.wikidata.org/sparql";
-const WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php";
+const wikipediaApi = (language: Language) =>
+  `https://${language}.wikipedia.org/w/api.php`;
 const CATALOG_FILE = new URL("../db/catalog.jsonl", import.meta.url);
+
+// BoardGameGeek's own Wikidata item. A statement whose reference names it, or links to its site,
+// is left out, so none of BoardGameGeek's data reaches the catalog through Wikidata (D7).
+const BOARDGAMEGEEK = "Q887528";
+
+// The best-rank statements of `property` (what wdt: gives), each matched by `value`, a pattern on
+// the statement, unless a reference names BoardGameGeek. `name` keeps each statement's variables
+// apart.
+const statement = (property: string, name: string, value: string) =>
+  `?item p:${property} ?${name}St . ?${name}St a wikibase:BestRank ; ${value} .
+    ${notFromBoardGameGeek(name)}`;
+// The same for any of several properties, one UNION branch each. The query service answers 500
+// ("Headless value factory should not be asked for its namespace") to a query that aggregates
+// over a variable property or a statement itself, so neither appears outside its branch.
+const anyStatement = (properties: string[], name: string, value: string) =>
+  `${properties.map((p) => `{ ?item p:${p} ?${name}St . ?${name}St ps:${p} ${value} }`).join(" UNION ")}
+    ?${name}St a wikibase:BestRank .
+    ${notFromBoardGameGeek(name)}`;
+const notFromBoardGameGeek = (name: string) =>
+  `FILTER NOT EXISTS { ?${name}St prov:wasDerivedFrom ?${name}Ref .
+      { ?${name}Ref pr:P248 wd:${BOARDGAMEGEEK} }
+      UNION { ?${name}Ref pr:P854 ?${name}Url FILTER(CONTAINS(LCASE(STR(?${name}Url)), "boardgamegeek.com")) } }`;
 
 // Items per detail query (500 took about 3 s on 2026-11-23, well inside the service's 60 s), and
 // articles per Wikipedia request (the API's most for a client without a bot account).
@@ -47,11 +76,17 @@ const OTHER_GAMES_QUERY = `SELECT DISTINCT ?item WHERE {
 
 const values = (qids: string[]) => qids.map((qid) => `wd:${qid}`).join(" ");
 
-// Each candidate's name, article, classes and the rest, and whether it's published: it has a
-// publisher, a designer or a release date.
+// The properties that make an item a published game: a publisher, a designer (four ways Wikidata
+// names one) or a release date. Any statement of them counts, one whose reference names
+// BoardGameGeek too: it says the game was published, while its value stays out of the catalog.
+const DESIGNER_PROPERTIES = ["P287", "P170", "P178", "P50"];
+const PUBLISHED_PROPERTIES = ["P123", ...DESIGNER_PROPERTIES, "P577"];
+
+// Each candidate's name, articles, classes and the rest, and whether Wikidata shows it published.
 const itemsQuery = (
   qids: string[],
-) => `SELECT ?item (SAMPLE(STR(?l)) AS ?label) (SAMPLE(STR(?en)) AS ?enwiki) (SAMPLE(?sl) AS ?sitelinks)
+) => `SELECT ?item (SAMPLE(STR(?l)) AS ?label) (SAMPLE(?sl) AS ?sitelinks)
+  (SAMPLE(STR(?en)) AS ?enwiki) (SAMPLE(STR(?de)) AS ?dewiki) (SAMPLE(STR(?fr)) AS ?frwiki)
   (MAX(IF(BOUND(?made), 1, 0)) AS ?published)
   (GROUP_CONCAT(DISTINCT STRAFTER(STR(?class), "entity/"); separator=" ") AS ?classes)
   (GROUP_CONCAT(DISTINCT STRAFTER(STR(?genre), "entity/"); separator=" ") AS ?genres)
@@ -61,14 +96,16 @@ const itemsQuery = (
 WHERE {
   VALUES ?item { ${values(qids)} }
   ?item wikibase:sitelinks ?sl .
-  OPTIONAL { ?item wdt:P123|wdt:P287|wdt:P170|wdt:P178|wdt:P50|wdt:P577 ?made }
+  OPTIONAL { ?item ${PUBLISHED_PROPERTIES.map((p) => `wdt:${p}`).join("|")} ?made }
   OPTIONAL { ?item rdfs:label ?l FILTER(LANG(?l) = "en") }
-  OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> ; schema:name ?en }
+  OPTIONAL { ?enArticle schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> ; schema:name ?en }
+  OPTIONAL { ?deArticle schema:about ?item ; schema:isPartOf <https://de.wikipedia.org/> ; schema:name ?de }
+  OPTIONAL { ?frArticle schema:about ?item ; schema:isPartOf <https://fr.wikipedia.org/> ; schema:name ?fr }
   OPTIONAL { ?item wdt:P31 ?class }
   OPTIONAL { ?item wdt:P136 ?genre }
   OPTIONAL { ?item wdt:P495 ?country }
   OPTIONAL { ?item wdt:P8646 ?base }
-  OPTIONAL { ?item wdt:P577 ?date }
+  OPTIONAL { ${statement("P577", "date", "ps:P577 ?date")} }
 } GROUP BY ?item`;
 
 // Players, play time and age, each statement of the best rank with its unit.
@@ -79,11 +116,11 @@ const numbersQuery = (qids: string[]) => `SELECT ?item
   (GROUP_CONCAT(DISTINCT ?age; separator=" ") AS ?ages)
 WHERE {
   VALUES ?item { ${values(qids)} }
-  OPTIONAL { ?item wdt:P1872 ?minP }
-  OPTIONAL { ?item wdt:P1873 ?maxP }
-  OPTIONAL { ?item p:P2047 ?ds . ?ds a wikibase:BestRank ; psv:P2047 ?dv . ?dv wikibase:quantityAmount ?da ; wikibase:quantityUnit ?du .
+  OPTIONAL { ${statement("P1872", "minP", "ps:P1872 ?minP")} }
+  OPTIONAL { ${statement("P1873", "maxP", "ps:P1873 ?maxP")} }
+  OPTIONAL { ${statement("P2047", "dur", "psv:P2047 ?dv . ?dv wikibase:quantityAmount ?da ; wikibase:quantityUnit ?du")}
     BIND(CONCAT(STR(?da), ":", STRAFTER(STR(?du), "entity/")) AS ?dur) }
-  OPTIONAL { ?item p:P2899 ?as . ?as a wikibase:BestRank ; psv:P2899 ?av . ?av wikibase:quantityAmount ?aa ; wikibase:quantityUnit ?au .
+  OPTIONAL { ${statement("P2899", "age", "psv:P2899 ?av . ?av wikibase:quantityAmount ?aa ; wikibase:quantityUnit ?au")}
     BIND(CONCAT(STR(?aa), ":", STRAFTER(STR(?au), "entity/")) AS ?age) }
 } GROUP BY ?item`;
 
@@ -94,12 +131,14 @@ const peopleQuery = (qids: string[]) => `SELECT ?item
 WHERE {
   VALUES ?item { ${values(qids)} }
   OPTIONAL {
-    ?item wdt:P123 ?p . ?p rdfs:label ?pl FILTER(LANG(?pl) = "en") ?p wikibase:sitelinks ?ps .
+    ${statement("P123", "pub", "ps:P123 ?p")}
+    ?p rdfs:label ?pl FILTER(LANG(?pl) = "en") ?p wikibase:sitelinks ?pLinks .
     OPTIONAL { ?p wdt:P17 ?pc }
-    BIND(CONCAT(STR(?pl), "\\t", STR(?ps), "\\t", COALESCE(STRAFTER(STR(?pc), "entity/"), "")) AS ?pub)
+    BIND(CONCAT(STR(?pl), "\\t", STR(?pLinks), "\\t", COALESCE(STRAFTER(STR(?pc), "entity/"), "")) AS ?pub)
   }
   OPTIONAL {
-    ?item wdt:P287|wdt:P170|wdt:P178|wdt:P50 ?d . ?d wdt:P31 wd:Q5 ; rdfs:label ?dl FILTER(LANG(?dl) = "en")
+    ${anyStatement(DESIGNER_PROPERTIES, "des", "?d")}
+    ?d wdt:P31 wd:Q5 ; rdfs:label ?dl FILTER(LANG(?dl) = "en")
     BIND(STR(?dl) AS ?des)
   }
 } GROUP BY ?item`;
@@ -189,7 +228,8 @@ const batches = (qids: string[]) =>
     qids.slice(index * ITEMS_PER_QUERY, (index + 1) * ITEMS_PER_QUERY),
   );
 
-// The published games among the candidates, with everything the rules read.
+// The candidates Wikidata shows published, and those with an English article whose infobox might,
+// with everything the rules read but their numbers and people (fetchDetails).
 async function fetchItems(): Promise<Map<string, WikidataItem>> {
   const candidates = new Set<string>();
   for (const sparql of [BOARD_GAMES_QUERY, OTHER_GAMES_QUERY]) {
@@ -200,14 +240,19 @@ async function fetchItems(): Promise<Map<string, WikidataItem>> {
   const items = new Map<string, WikidataItem>();
   for (const batch of batches([...candidates].sort())) {
     for (const row of await query(itemsQuery(batch))) {
-      if (text(row, "published") !== "1") {
+      const published = text(row, "published") === "1";
+      const enwikiTitle = text(row, "enwiki") || null;
+      if (!(published || enwikiTitle)) {
         continue;
       }
       const year = Number(text(row, "year"));
       items.set(qidOf(row), {
         qid: qidOf(row),
         label: text(row, "label") || null,
-        enwikiTitle: text(row, "enwiki") || null,
+        enwikiTitle,
+        dewikiTitle: text(row, "dewiki") || null,
+        frwikiTitle: text(row, "frwiki") || null,
+        published,
         sitelinks: Number(text(row, "sitelinks")),
         classes: words(row, "classes"),
         genres: words(row, "genres"),
@@ -223,9 +268,15 @@ async function fetchItems(): Promise<Map<string, WikidataItem>> {
       });
     }
   }
-  for (const batch of batches([...items.keys()])) {
+  return items;
+}
+
+// Each item's players, play time, age, publishers and designers.
+async function fetchDetails(items: WikidataItem[]): Promise<void> {
+  const byQid = new Map(items.map((item) => [item.qid, item]));
+  for (const batch of batches([...byQid.keys()])) {
     for (const row of await query(numbersQuery(batch))) {
-      const item = items.get(qidOf(row));
+      const item = byQid.get(qidOf(row));
       if (item) {
         item.minPlayers = words(row, "minPlayers").map(Number);
         item.maxPlayers = words(row, "maxPlayers").map(Number);
@@ -234,14 +285,13 @@ async function fetchItems(): Promise<Map<string, WikidataItem>> {
       }
     }
     for (const row of await query(peopleQuery(batch))) {
-      const item = items.get(qidOf(row));
+      const item = byQid.get(qidOf(row));
       if (item) {
         item.publishers = publishers(row);
         item.designers = text(row, "designers").split("\n").filter(Boolean);
       }
     }
   }
-  return items;
 }
 
 type Page = {
@@ -254,8 +304,10 @@ type ArticlesAnswer = {
   error?: { code: string; info: string };
 };
 
-// Each article's infobox facts, by the title Wikidata gave, reading only its lead section.
+// Each article's infobox facts on one Wikipedia, by the title Wikidata gave, reading only its lead
+// section.
 async function fetchInfoboxes(
+  language: Language,
   titles: string[],
 ): Promise<Map<string, InfoboxFacts>> {
   const facts = new Map<string, InfoboxFacts>();
@@ -273,7 +325,7 @@ async function fetchInfoboxes(
       titles: batch.join("|"),
     });
     const answer = (await (
-      await request(`${WIKIPEDIA_API}?${params}`)
+      await request(`${wikipediaApi(language)}?${params}`)
     ).json()) as ArticlesAnswer;
     if (answer.error || !answer.query) {
       throw new Error(
@@ -286,19 +338,54 @@ async function fetchInfoboxes(
     for (const page of answer.query.pages) {
       const content = page.revisions?.[0]?.slots.main.content;
       if (content !== undefined) {
-        facts.set(asked.get(page.title) ?? page.title, infoboxFacts(content));
+        facts.set(
+          asked.get(page.title) ?? page.title,
+          infoboxFacts(content, language),
+        );
       }
     }
   }
   return facts;
 }
 
-// The catalog's games from the fetched items: those left out with why, each expansion with its
-// base game, and the infobox read for the values Wikidata lacks.
+const titleIn = (item: WikidataItem, language: Language) =>
+  ({ en: item.enwikiTitle, de: item.dewikiTitle, fr: item.frwikiTitle })[
+    language
+  ];
+
+// The articles the items have on one Wikipedia, each title once.
+const titlesIn = (items: WikidataItem[], language: Language) => [
+  ...new Set(
+    items
+      .map((item) => titleIn(item, language))
+      .filter((title): title is string => title !== null),
+  ),
+];
+
+// The catalog's games from the fetched items: the published ones, those left out with why, each
+// expansion with its base game, and each game's infoboxes read for the values Wikidata lacks.
 async function shapeCatalog(items: Map<string, WikidataItem>) {
+  const read: Partial<Record<Language, Map<string, InfoboxFacts>>> = {
+    en: await fetchInfoboxes("en", titlesIn([...items.values()], "en")),
+  };
+  const infoboxesOf = (item: WikidataItem): Infoboxes => {
+    const found: Infoboxes = {};
+    for (const language of LANGUAGES) {
+      const title = titleIn(item, language);
+      const facts = title === null ? undefined : read[language]?.get(title);
+      if (facts) {
+        found[language] = facts;
+      }
+    }
+    return found;
+  };
+  const published = [...items.values()].filter((item) =>
+    isPublished(item, infoboxesOf(item).en),
+  );
+  await fetchDetails(published);
   const leftOut = new Map<string, number>();
   const kept: WikidataItem[] = [];
-  for (const item of items.values()) {
+  for (const item of published) {
     const why = whyLeftOut(item);
     if (why === null) {
       kept.push(item);
@@ -318,53 +405,58 @@ async function shapeCatalog(items: Map<string, WikidataItem>) {
   if (noBase > 0) {
     leftOut.set("an expansion of a game not in the catalog", noBase);
   }
-  const titles = shelved
-    .map(({ enwikiTitle }) => enwikiTitle)
-    .filter((title): title is string => title !== null);
-  const infoboxes = await fetchInfoboxes([...new Set(titles)]);
+  read.de = await fetchInfoboxes("de", titlesIn(shelved, "de"));
+  read.fr = await fetchInfoboxes("fr", titlesIn(shelved, "fr"));
   const games = shelved.map((item) => {
     const base = baseOf(item, baseGames);
     return shapeGame(
       item,
-      item.enwikiTitle === null
-        ? null
-        : (infoboxes.get(item.enwikiTitle) ?? null),
+      infoboxesOf(item),
       base === null ? null : gameId(base),
     );
   });
-  return { games: orderGames(games), leftOut, articlesRead: infoboxes.size };
+  return {
+    games: orderGames(games),
+    leftOut,
+    byEnglishInfobox: shelved.filter((item) => !item.published).length,
+    articlesRead: [
+      `English ${read.en?.size ?? 0}`,
+      `German ${read.de.size}`,
+      `French ${read.fr.size}`,
+    ].join(", "),
+  };
 }
 
-function summary(
-  games: CatalogGame[],
-  leftOut: Map<string, number>,
-  articlesRead: number,
-) {
+function summary({
+  games,
+  leftOut,
+  byEnglishInfobox,
+  articlesRead,
+}: Awaited<ReturnType<typeof shapeCatalog>>) {
   const count = (has: (game: CatalogGame) => boolean) =>
     games.filter(has).length;
-  const fromWikipedia = (field: string) =>
-    count(
-      (game) => game.wikipediaFields?.some((name) => name === field) ?? false,
-    );
+  const filled = (field: keyof CatalogGame, from = field) =>
+    `${count((game) => game[field] !== undefined)}, ${count((game) => game.wikipediaFields?.some((name) => name === from) ?? false)} from Wikipedia`;
   return [
-    `${games.length} games: ${count((game) => game.type === "base-game")} base games and ${count((game) => game.type === "expansion")} expansions`,
-    `players (both bounds) ${count((game) => game.minPlayers !== undefined && game.maxPlayers !== undefined)}, ${fromWikipedia("maxPlayers")} from Wikipedia`,
-    `play time ${count((game) => game.minMinutes !== undefined)}, ${fromWikipedia("minMinutes")} from Wikipedia`,
-    `minimum age ${count((game) => game.minAge !== undefined)}, ${fromWikipedia("minAge")} from Wikipedia`,
-    `designers ${count((game) => game.designers !== undefined)}, ${fromWikipedia("designers")} from Wikipedia`,
-    `publishers ${count((game) => game.publishers !== undefined)}, ${fromWikipedia("publishers")} from Wikipedia`,
-    `year ${count((game) => game.year !== undefined)}, categories ${count((game) => game.categories !== undefined)}`,
-    `English Wikipedia articles read: ${articlesRead}`,
+    `${games.length} games: ${count((game) => game.type === "base-game")} base games and ${count((game) => game.type === "expansion")} expansions, ${byEnglishInfobox} published by their English infobox alone`,
+    `players (both bounds) ${count((game) => game.minPlayers !== undefined && game.maxPlayers !== undefined)}, ${count((game) => game.wikipediaFields?.includes("maxPlayers") ?? false)} from Wikipedia`,
+    `play time ${filled("minMinutes")}`,
+    `minimum age ${filled("minAge")}`,
+    `year ${filled("year")}`,
+    `designers ${filled("designers")}`,
+    `publishers ${filled("publishers")}`,
+    `categories ${filled("categories")}`,
+    `Wikipedia articles read: ${articlesRead}`,
     ...[...leftOut].map(([why, items]) => `left out, ${why}: ${items}`),
   ];
 }
 
 async function main(): Promise<number> {
   const items = await fetchItems();
-  const { games, leftOut, articlesRead } = await shapeCatalog(items);
-  await Bun.write(CATALOG_FILE, toJsonLines(games));
+  const shaped = await shapeCatalog(items);
+  await Bun.write(CATALOG_FILE, toJsonLines(shaped.games));
   print(`Wrote db/catalog.jsonl from ${items.size} Wikidata items.`);
-  for (const line of summary(games, leftOut, articlesRead)) {
+  for (const line of summary(shaped)) {
     print(line);
   }
   return 0;
