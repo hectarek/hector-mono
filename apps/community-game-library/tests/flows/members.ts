@@ -30,22 +30,25 @@ export async function signUp(
   return account;
 }
 
-const onStep = (page: Page, step: string) =>
-  new URL(page.url()).pathname.startsWith(`/start/${step}`);
-
-// A4 as it starts, then on through the steps that follow (A5 after a friend link, A6) to the
-// Library. Names are matched exactly: Playwright matches a name's words anywhere by default, and
-// "Next" then finds Next.js's own "Open Next.js Dev Tools" button on the dev server.
-export async function setUpProfile(page: Page) {
+// A4 as it starts, then on through each step that follows to the Library: A5 after a friend link,
+// then A6. Each step is waited for, since skipping them went unnoticed while they were optional
+// here (2026-11-24). Names are matched exactly: Playwright matches a name's words anywhere by
+// default, and "Next" then finds Next.js's own "Open Next.js Dev Tools" button on the dev server.
+export async function setUpProfile(
+  page: Page,
+  { friend }: { friend?: string } = {},
+) {
   await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/start/profile"));
-  if (onStep(page, "friends")) {
+  if (friend) {
+    await expect(
+      page.getByRole("heading", { name: `You and ${friend} are friends` }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Next", exact: true }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/start/friends"));
   }
-  if (onStep(page, "home-screen")) {
-    await page.getByRole("button", { name: "Go to my library" }).click();
-  }
+  await expect(
+    page.getByRole("heading", { name: "Put it on your home screen" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Go to my library" }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Library" }),
   ).toBeVisible();

@@ -31,9 +31,12 @@ function revalidateProfile(): void {
 }
 
 // A4's Next: the profile and its settings, then the photo if one was chosen. The form goes on to
-// the home-screen step itself (A5 joins before it with U10): a redirect from here would reach the
-// form as a failed send. A second send updates what's there, so a photo that fails can be sent
-// again with the rest.
+// the next step itself (A5 after a friend link, then A6): a redirect from here would reach the
+// form as a failed send. It revalidates nothing. A revalidation re-renders the open page, A4,
+// whose gate sends an account that now has a profile to the Library, so the response became a
+// redirect there and setting up skipped A5 and A6 (found 2026-11-24). A new member has no
+// signed-in page cached to refresh. A second send updates what's there, so a photo that fails
+// can be sent again with the rest.
 export async function createProfile(
   _state: ActionState,
   formData: FormData,
@@ -52,7 +55,6 @@ export async function createProfile(
       "Couldn’t save that. Try again.",
     );
   }
-  revalidateProfile();
   return { message: "Profile saved." };
 }
 
