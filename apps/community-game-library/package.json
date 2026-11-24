@@ -12,6 +12,7 @@
     "format": "biome format --write",
     "test": "bun test && bun run test:screens",
     "test:screens": "bun test --isolate --preload ./tests/_support/dom.ts --path-ignore-patterns='**/*.test.ts'",
+    "test:flows": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:production": "bun scripts/migrate-production.ts",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.17",
     "@happy-dom/global-registrator": "^21.0.4",
+    "@playwright/test": "1.65.1",
     "@repo/biome-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.5",

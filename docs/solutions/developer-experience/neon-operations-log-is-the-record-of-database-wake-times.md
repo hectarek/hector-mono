@@ -1,7 +1,7 @@
 ---
 title: On Vercel Hobby and Neon Free, a cold open's parts are in two logs, Neon's operations log for the database's wake and Vercel's runtime logs, within the hour, for the function's start
 date: 2026-11-10
-last_updated: 2026-11-10
+last_updated: 2026-11-24
 category: developer-experience
 module: "apps/hectors-recipes, and any app here on Vercel Hobby with a Neon Free database"
 problem_type: developer_experience
@@ -11,6 +11,7 @@ applies_when:
   - "A cold open is slow and you need to know how much of it was the database waking up"
   - "You need to split a slow request into Vercel starting the function, the database waking and the reads"
   - "The app runs on Vercel's Hobby plan, so its logs and timings are mostly unavailable"
+  - "A route or a scheduled run looks as if it never ran, because the Vercel MCP's runtime logs show nothing for it"
 related_components: [database, infrastructure]
 tags: [neon, vercel-hobby, cold-start, scale-to-zero, observability, measuring, runtime-logs]
 retire_when: "Vercel Hobby keeps more than an hour of runtime logs or allows observability queries; check Vercel's plan limits page"
@@ -23,8 +24,8 @@ retire_when: "Vercel Hobby keeps more than an hour of runtime logs or allows obs
 A free Neon database suspends after 5 idle minutes, and the next query waits for it to start again. Vercel's Hobby plan keeps no function warm, so the first request after a quiet spell also waits for a new function to start. Telling the two apart needs their timings, and on Hobby most of the usual places don't have them. On 2026-11-10, for `apps/hectors-recipes`:
 
 - **Runtime logs** go back one hour on Hobby. The Vercel MCP's `get_runtime_logs` refused an older window with a 400.
-- **Observability queries** (`create_observability_query`) need Pro and answered 402.
-- **The Vercel CLI** failed inside Claude Code's sandbox with a certificate error. Use the Vercel MCP instead.
+- **Observability queries** (`create_observability_query`) need Pro and answered 402. On 2026-11-24 two guessed request bodies got a bare 400 instead.
+- **The Vercel CLI** failed inside Claude Code's sandbox with a certificate error. Use the Vercel MCP instead. Its version 60.0.0 also has no command for a schedule's runs: Vercel's docs list `vercel schedules executions list`, from a later version.
 
 ## Guidance
 
@@ -39,13 +40,19 @@ A free Neon database suspends after 5 idle minutes, and the next query waits for
 - The middle number is a Unix time in milliseconds. In the two requests checked, it matched when the request reached Vercel (16:44:10.250 and 16:16:21.706), each within about 0.1 s of the browser's own navigation start, by the Mac's clock.
 - The gap from that time to the function's first log line is how long the function took to start.
 - The log lines after it time each read, and the operations log gives the wake inside them.
-- Grouping the hour's logs by `requestPath` (`group_by`) shows whether a route was called at all.
+- It lists only the lines the app printed. A request whose code prints nothing has no entry at all, so an empty answer doesn't mean a route wasn't called. Vercel's dashboard Logs view lists every request, and Neon's operations log shows the wake of one that reads the database.
+- Grouping the hour's logs by `requestPath` (`group_by`) shows whether a route that prints a line was called at all.
 
 What they showed for `apps/hectors-recipes`:
 
 - **11 October to 10 November 2026, the database:** 128 wakes. The 120 ordinary ones took a median 462 ms (90th percentile 760 ms). The 8 that followed an archive took 1.6–4.6 s, and each archive came 1,441–1,445 minutes after the compute suspended, so storage is archived after about a day asleep. The database had slept a median 30.5 minutes before each wake.
 - **One cold open on 10 November, the database asleep 16.5 minutes:** the function's first line came about 1.8 s after the request arrived, then 1.35 s of reads, including a 314 ms wake. Warm, the first line came 0.1 s after the request.
 - **The same hour:** no request to `/api/auth/get-session` in 40 minutes. That showed the proxy's session refresh no longer ran on every open (`docs/proxy-auth-research.md`, 2026-11 addendum).
+
+What they showed for `apps/community-game-library`, on 2026-11-24:
+
+- **The daily run's first morning:** Vercel's scheduler (`vercel-cron/1.0`, from `vercel.json`'s `schedules` entry for 7:00 America/New_York) posted to `/api/cron/daily` at 07:11:05 ET (12:11Z), and it answered 200, as the dashboard's Logs view showed (filtered by its `scheduleExecutionId`). `get_runtime_logs` returned nothing for windows holding it, since the route prints a line only when the run fails. A signed-out page request at 12:56Z didn't show there either.
+- **The run's wake:** a `start_compute` at 12:11:06Z that took 371 ms, after the database had slept since 10:20:01Z.
 
 ## Why This Matters
 
@@ -58,6 +65,7 @@ Timings of requests sent from a Claude Code session go through its network filte
 - Investigating a slow first request on an app whose Neon compute scales to zero.
 - Before choosing between paying to keep the database awake or functions warm and caching around them: the sleep lengths and the function's start say which one helps.
 - Within the hour of the request you're timing: after that, Hobby's runtime logs are gone and only the database's side remains.
+- When a route or a scheduled run seems not to have run: check the dashboard's Logs view, or the operations log, before trusting an empty `get_runtime_logs`.
 
 ## Related
 
