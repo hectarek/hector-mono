@@ -14,12 +14,12 @@ The spec for `apps/seating-chart`, a seating chart for planning a wedding: a roo
 
 ## Status
 
-|                   |                                                                                                                                |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Phase             | Batch 1 (U1 to U3) is built on the branch, not committed: the style tile is agreed, and every shared check passes (2026-11-24) |
-| Next              | Batch 1's pull request, with the Vercel project made first (H4); then Batch 2 (U4, U5)                                         |
-| Waiting on Hector | His OK to commit Batch 1, make the Vercel project and push                                                                     |
-| Updated           | 2026-11-24                                                                                                                     |
+|                   |                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase             | Batch 1 (U1 to U3) is in review: hectarek/hector-mono#139 (2026-11-24). The Vercel project, `seating-chart`, is made; its first deployment came from the branch and went to production, as [the lesson on new projects](../../../docs/solutions/developer-experience/new-vercel-projects-first-deployment-went-to-production-from-a-branch.md) expects, with no variables or domain to expose |
+| Next              | Batch 2 (U4, U5): guests and printing, once #139 merges                                                                                                                                                                                                                                                                                                                                       |
+| Waiting on Hector | His review and merge of #139                                                                                                                                                                                                                                                                                                                                                                  |
+| Updated           | 2026-11-24                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ---
 
@@ -164,7 +164,7 @@ Seating a wedding is a layout problem and a people problem at once. The room lim
 - H1. **Framework:** Solid 2.0 on plain Vite (KTD1), or React and Next.js like `relationship-meter`. _Answered 2026-11-24: Solid 2.0. Hector's reason: Solid's error reporting is built for AI agents, so problems should be easy to trace as they come up (KTD10)._
 - H2. **Scope:** guests and printing in this version (R14 to R19), or the floor plan first and guests in a second pass. And whether any of R20 to R22 moves up. _Answered 2026-11-24: both batches. R20 to R22 stay later._
 - H3. **The look:** an existing `@repo/ui` theme as it is, or a small style-tile round for this app first. This is a taste call. _Answered 2026-11-24: one quick style tile, "appealing and usable", not a round of options. Its tokens become the app's theme file._
-- H4. **Hosting:** a static Vercel project, so the app opens on any device at an address, or local only (`bun run dev`). _Answered 2026-11-24: a Vercel project (KTD8), made with Hector's OK just before Batch 1's first push._
+- H4. **Hosting:** a static Vercel project, so the app opens on any device at an address, or local only (`bun run dev`). _Answered 2026-11-24: a Vercel project (KTD8). Made the same day with Hector's OK, just before Batch 1's first push: `seating-chart`, Vite preset, root `apps/seating-chart`, Skip deployment on, no variables, no custom domain._
 - H5. **The name:** `seating-chart` is a working name for the folder and the page title. _Answered 2026-11-24: `seating-chart`._
 
 ---
