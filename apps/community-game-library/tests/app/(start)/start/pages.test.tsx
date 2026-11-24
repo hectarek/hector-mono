@@ -36,6 +36,47 @@ describe("A4, the profile step", () => {
     expect(view.queryByText("Taken by your friends") === null).toBe(true);
   });
 
+  // The photo starts as the Google picture, as if chosen (Hector, 2026-11-24); the form's part is
+  // tested in starting-photo.test.tsx.
+  it("starts a Google sign-up's photo from its Google picture, asked for at 400px", async () => {
+    nextState.userImage = "https://lh3.googleusercontent.com/a/test-user=s96-c";
+    const asked: string[] = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      asked.push(String(input));
+      return new Response(null, { status: 404 });
+    }) as typeof fetch;
+    try {
+      render(await ProfileStepPage({ searchParams: Promise.resolve({}) }));
+      await waitFor(() =>
+        expect(asked).toEqual([
+          "https://lh3.googleusercontent.com/a/test-user=s400-c",
+        ]),
+      );
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  });
+
+  it("starts an email sign-up's photo empty, asking for no picture", async () => {
+    const asked: string[] = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      asked.push(String(input));
+      return new Response(null, { status: 404 });
+    }) as typeof fetch;
+    try {
+      const view = render(
+        await ProfileStepPage({ searchParams: Promise.resolve({}) }),
+      );
+      await new Promise((settle) => setTimeout(settle, 20));
+      expect(asked).toEqual([]);
+      expect(view.container.querySelector("img") === null).toBe(true);
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  });
+
   it("sends a member who has a profile on to the app", async () => {
     await signInAsMember();
     expect(

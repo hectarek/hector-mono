@@ -7,6 +7,7 @@ import type { IGamesRepository } from "@/src/application/repositories/games.repo
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { IRemovedUsersRepository } from "@/src/application/repositories/removed-users.repository.interface";
+import type { ISignInsRepository } from "@/src/application/repositories/sign-ins.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
@@ -349,6 +350,7 @@ export const DI_SYMBOLS = {
   IRemoveUserGameController: Symbol.for("IRemoveUserGameController"),
   IRemoveUserGameUseCase: Symbol.for("IRemoveUserGameUseCase"),
   IRemovedUsersRepository: Symbol.for("IRemovedUsersRepository"),
+  ISignInsRepository: Symbol.for("ISignInsRepository"),
   IRequestLoanController: Symbol.for("IRequestLoanController"),
   IRequestLoanUseCase: Symbol.for("IRequestLoanUseCase"),
   IRequireAdmin: Symbol.for("IRequireAdmin"),
@@ -544,6 +546,7 @@ export interface DI_RETURN_TYPES {
   IRemoveUserGameController: IRemoveUserGameController;
   IRemoveUserGameUseCase: IRemoveUserGameUseCase;
   IRemovedUsersRepository: IRemovedUsersRepository;
+  ISignInsRepository: ISignInsRepository;
   IRequestLoanController: IRequestLoanController;
   IRequestLoanUseCase: IRequestLoanUseCase;
   IRequireAdmin: IRequireAdmin;

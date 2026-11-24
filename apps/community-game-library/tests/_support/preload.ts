@@ -83,7 +83,12 @@ mock.module("next/navigation", () => ({
 mock.module("@/app/_lib/current-user", () => ({
   getCurrentUser: async () =>
     nextState.userId
-      ? { id: nextState.userId, name: "Test User", email: "test@example.com" }
+      ? {
+          id: nextState.userId,
+          name: "Test User",
+          email: "test@example.com",
+          image: nextState.userImage,
+        }
       : undefined,
   getCurrentUserId: async () => nextState.userId,
 }));

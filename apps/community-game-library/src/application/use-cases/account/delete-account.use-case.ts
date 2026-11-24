@@ -4,10 +4,10 @@ import type { IFriendshipsRepository } from "@/src/application/repositories/frie
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
+import type { ISignInsRepository } from "@/src/application/repositories/sign-ins.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
-import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { IFileStorage } from "@/src/application/services/file-storage.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
@@ -20,8 +20,8 @@ import {
 export type IDeleteAccountUseCase = ReturnType<typeof deleteAccountUseCase>;
 
 // Delete my account (E9, R41), after its dialog: everything endAccount lists goes in one
-// transaction, refused while a loan of theirs is unsettled. Then their photo leaves storage and
-// their sign-in is deleted; the action signs this device out.
+// transaction, their sign-in anonymized with it, refused while a loan of theirs is unsettled. Then
+// their photo leaves storage, and the action signs this device out.
 export const deleteAccountUseCase = (
   friendLinksRepository: IFriendLinksRepository,
   friendRequestsRepository: IFriendRequestsRepository,
@@ -32,8 +32,8 @@ export const deleteAccountUseCase = (
   userGamesRepository: IUserGamesRepository,
   userProfilesRepository: IUserProfilesRepository,
   userSettingsRepository: IUserSettingsRepository,
+  signInsRepository: ISignInsRepository,
   fileStorage: IFileStorage,
-  authenticationService: IAuthenticationService,
   transactionManagerService: ITransactionManagerService,
   loggerService: ILoggerService,
 ) => {
@@ -51,6 +51,7 @@ export const deleteAccountUseCase = (
     userGames: userGamesRepository,
     userProfiles: userProfilesRepository,
     userSettings: userSettingsRepository,
+    signIns: signInsRepository,
   };
 
   return async (userId: string, now: Date): Promise<void> => {
@@ -58,7 +59,6 @@ export const deleteAccountUseCase = (
       (tx) => endAccount(repositories, userId, now, tx),
     );
     await removePhotoFile(fileStorage, logger, photoKey);
-    await authenticationService.deleteUser(userId);
     logger.info("Account deleted", { userId });
   };
 };

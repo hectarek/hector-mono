@@ -1,6 +1,6 @@
 # Community Game Library: screens
 
-Updated 2026-11-23
+Updated 2026-11-24
 
 Every screen of the app was drawn before any code, on a private design canvas. This file is the record the build works from: which screens exist, the rules they follow, and what happens in the states that weren't drawn. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
 
@@ -25,6 +25,8 @@ A code such as B5 is the screen's name on the canvas. "Serves" lists the require
 | A7     | An empty library                      | R39      |
 
 Two pages no board draws: the privacy policy (`/privacy`) and the terms of use (`/terms`), in Hector's words (2026-11-23). They open signed out, since Google's consent screen links to them, and read like About the catalog. A1's foot links both ("Privacy · Terms"), where its BoardGameGeek credit was, and so do two rows under You's The app (E5).
+
+A4 for a Google sign-up starts with its Google picture as the photo, as if they had chosen it, with Remove photo under it (Hector, 2026-11-24). Google's lettered picture, for an account with no photo of its own, starts the same way. An email sign-up starts with no photo, as drawn.
 
 **B · Library tab**
 

@@ -42,6 +42,7 @@ export function ProfileForm({
   action,
   initial,
   photoUrl,
+  startingPhoto,
   removePhoto,
   taken,
   next = mode === "edit" ? "/you" : "/start/home-screen",
@@ -50,6 +51,8 @@ export function ProfileForm({
   action: ProfileAction;
   initial: ProfileValues;
   photoUrl?: string | null;
+  // A4's photo to start with, as if chosen: the picture a Google sign-up came with.
+  startingPhoto?: string | null;
   // E6's way to take the photo away, when there is one.
   removePhoto?: () => Promise<ActionState>;
   // The friends' pieces, "Taken by your friends"; nothing draws when there are none.
@@ -118,6 +121,8 @@ export function ProfileForm({
             name="photo"
             optional
             photoUrl={photoUrl}
+            startWith={startingPhoto}
+            removable={mode === "start"}
             help="Shown on your page. Everywhere else your piece stands for you."
             error={state?.fields?.photo}
           />

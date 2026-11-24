@@ -3,7 +3,9 @@
 // NeonAuthService who's signed in, so a test can make Neon fail and check what the app logs.
 
 type AuthRouteContext = { params: Promise<{ path: string[] }> };
-type NeonSession = { user: { id: string; name: string; email: string } };
+type NeonSession = {
+  user: { id: string; name: string; email: string; image?: string | null };
+};
 
 const answerOk = async (): Promise<Response> => Response.json({});
 const noSession = async (): Promise<{ data: NeonSession | null }> => ({

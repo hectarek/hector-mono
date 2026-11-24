@@ -48,3 +48,7 @@ certificates
 
 # the service worker, built before next build (scripts/build-service-worker.ts)
 /public/sw.js
+
+# Browser flows (playwright test)
+/test-results/
+/playwright-report/

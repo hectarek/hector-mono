@@ -35,6 +35,7 @@
       "devDependencies": {
         "@electric-sql/pglite": "^0.5.17",
         "@happy-dom/global-registrator": "^21.0.4",
+        "@playwright/test": "1.65.1",
         "@repo/biome-config": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "^4.3.5",

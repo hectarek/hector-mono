@@ -14,7 +14,6 @@ import { removeAccountController } from "@/src/interface-adapters/controllers/ac
 export function createAccountModule() {
   const accountModule = createModule();
   const {
-    IAuthenticationService: auth,
     IFileStorage: storage,
     IFriendLinksRepository: friendLinks,
     IFriendRequestsRepository: friendRequests,
@@ -26,6 +25,7 @@ export function createAccountModule() {
     INoticesRepository: notices,
     IRemovedUsersRepository: removedUsers,
     IRequireAdmin: requireAdmin,
+    ISignInsRepository: signIns,
     ITransactionManagerService: transactions,
     IUserGamesRepository: userGames,
     IUserProfilesRepository: profiles,
@@ -41,6 +41,7 @@ export function createAccountModule() {
     userGames,
     profiles,
     settings,
+    signIns,
   ] as const;
 
   accountModule
@@ -63,7 +64,6 @@ export function createAccountModule() {
     .toHigherOrderFunction(deleteAccountUseCase, [
       ...accountRepositories,
       storage,
-      auth,
       transactions,
       log,
     ]);
@@ -94,7 +94,6 @@ export function createAccountModule() {
       ...accountRepositories,
       removedUsers,
       storage,
-      auth,
       transactions,
       log,
     ]);

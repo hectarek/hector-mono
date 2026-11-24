@@ -19,6 +19,7 @@ import type { IGamesRepository } from "@/src/application/repositories/games.repo
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { IRemovedUsersRepository } from "@/src/application/repositories/removed-users.repository.interface";
+import type { ISignInsRepository } from "@/src/application/repositories/sign-ins.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
@@ -133,13 +134,14 @@ import { NoticesRepository } from "@/src/infrastructure/repositories/notices.rep
 import { MockNoticesRepository } from "@/src/infrastructure/repositories/notices.repository.mock";
 import { RemovedUsersRepository } from "@/src/infrastructure/repositories/removed-users.repository";
 import { MockRemovedUsersRepository } from "@/src/infrastructure/repositories/removed-users.repository.mock";
+import { SignInsRepository } from "@/src/infrastructure/repositories/sign-ins.repository";
+import { MockSignInsRepository } from "@/src/infrastructure/repositories/sign-ins.repository.mock";
 import { UserGamesRepository } from "@/src/infrastructure/repositories/user-games.repository";
 import { MockUserGamesRepository } from "@/src/infrastructure/repositories/user-games.repository.mock";
 import { UserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository";
 import { MockUserProfilesRepository } from "@/src/infrastructure/repositories/user-profiles.repository.mock";
 import { UserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository";
 import { MockUserSettingsRepository } from "@/src/infrastructure/repositories/user-settings.repository.mock";
-import { MockAuthService } from "@/src/infrastructure/services/mock-auth.service";
 import { MockFileStorageService } from "@/src/infrastructure/services/mock-file-storage.service";
 import { MockLoggerService } from "@/src/infrastructure/services/mock-logger.service";
 import { MockTransactionManagerService } from "@/src/infrastructure/services/mock-transaction-manager.service";
@@ -150,7 +152,11 @@ import {
   insertCastRows,
   writeCastPeople,
 } from "@/tests/_support/cast";
-import { resetDatabase, testDb } from "@/tests/_support/database";
+import {
+  sql as databaseSql,
+  resetDatabase,
+  testDb,
+} from "@/tests/_support/database";
 
 type Repositories = {
   friendLinks: IFriendLinksRepository;
@@ -162,6 +168,7 @@ type Repositories = {
   loans: ILoansRepository;
   notices: INoticesRepository;
   removedUsers: IRemovedUsersRepository;
+  signIns: ISignInsRepository;
   transactions: ITransactionManagerService;
   userGames: IUserGamesRepository;
   userProfiles: IUserProfilesRepository;
@@ -183,6 +190,7 @@ function mockRepositories(): Repositories {
     loans: new MockLoansRepository(),
     notices,
     removedUsers: new MockRemovedUsersRepository(),
+    signIns: new MockSignInsRepository(),
     transactions: new MockTransactionManagerService(),
     userGames: new MockUserGamesRepository(friendships),
     userProfiles: new MockUserProfilesRepository(),
@@ -203,6 +211,7 @@ export function postgresRepositories(): Repositories {
     loans: new LoansRepository(log),
     notices: new NoticesRepository(log),
     removedUsers: new RemovedUsersRepository(log),
+    signIns: new SignInsRepository(log),
     transactions: new TransactionManagerService(log),
     userGames: new UserGamesRepository(log),
     userProfiles: new UserProfilesRepository(log),
@@ -254,6 +263,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     loans,
     notices,
     removedUsers,
+    signIns,
     transactions,
     userGames,
     userProfiles,
@@ -264,7 +274,6 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
   // You is the admin, as on the canvas's E5.
   const adminAccount = { adminUserId: CAST.people.you.id };
   const admin = requireAdmin(adminAccount, log);
-  const auth = new MockAuthService();
   const accountRepositories = [
     friendLinks,
     friendRequests,
@@ -275,6 +284,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     userGames,
     userProfiles,
     userSettings,
+    signIns,
   ] as const;
 
   return {
@@ -623,8 +633,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     ),
     listPastNights: listPastNightsUseCase(gameNights, userProfiles),
 
-    // Deleting an account, and the admin's removal (U22). `auth` records each sign-in deleted.
-    auth,
+    // Deleting an account, and the admin's removal (U22).
     listWhatEnds: listWhatEndsUseCase(
       userGames,
       loans,
@@ -635,7 +644,6 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     deleteAccount: deleteAccountUseCase(
       ...accountRepositories,
       storage,
-      auth,
       transactions,
       log,
     ),
@@ -645,7 +653,6 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       ...accountRepositories,
       removedUsers,
       storage,
-      auth,
       transactions,
       log,
     ),
@@ -774,6 +781,18 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       notices,
     ),
 
+    // The sign-ins a deletion or a removal anonymized (U22, 2026-11-24): the mock's record, or
+    // Neon Auth's stand-in tables on the database, where makeCast gives the cast its sign-ins.
+    async anonymizedSignIns(): Promise<string[]> {
+      if (signIns instanceof MockSignInsRepository) {
+        return [...signIns.anonymizedUserIds];
+      }
+      const rows = await databaseSql<{ id: string }>(
+        `select id from neon_auth."user" where email like 'deleted-%@deleted.invalid' order by id`,
+      );
+      return rows.map(({ id }) => id);
+    },
+
     // Fixtures
 
     // The design canvas's cast (tests/_support/cast.ts), each member as the cast's own id. Its
@@ -802,6 +821,18 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
           await insertCastRows(rows, tx, { commit: true });
         }
       });
+      if (!(signIns instanceof MockSignInsRepository)) {
+        for (const [key, person] of Object.entries(CAST.people)) {
+          await databaseSql(
+            `insert into neon_auth."user" (id, name, email, "emailVerified") values ($1, $2, $3, true)`,
+            [person.id, person.name, `${key}@example.com`],
+          );
+          await databaseSql(
+            `insert into neon_auth.account ("accountId", "providerId", "userId", password) values ($1, 'credential', $2, 'a hash')`,
+            [person.id, person.id],
+          );
+        }
+      }
     },
 
     // Games the cast doesn't have, such as one with a popularity, until U9 gives the catalog its
