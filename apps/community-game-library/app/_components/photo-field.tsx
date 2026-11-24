@@ -9,7 +9,14 @@ import {
 } from "@repo/ui/components/field";
 import { cn } from "@repo/ui/lib/utils";
 import Image from "next/image";
-import { type ChangeEvent, useEffect, useId, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { CameraIcon } from "@/app/_components/icons";
 import { shrinkImage } from "@/app/_lib/shrink-image";
 import { PHOTO_FAILED_LINE } from "@/src/entities/profile-photo";
@@ -47,7 +54,7 @@ export function PhotoField({
   name: string;
   label?: string;
   optional?: boolean;
-  help?: string;
+  help?: ReactNode;
   chooseLabel?: string;
   shape?: "round" | "box";
   // The photo already saved, if any.

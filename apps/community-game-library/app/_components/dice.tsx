@@ -35,19 +35,25 @@ const PIPS: Record<number, [number, number][]> = {
   ],
 };
 
-// One 28px die face. The best count is inked: a navy face with bone pips. On a bone suggestion
-// box the faces are chipboard.
+// One 28px die face, or 20px inside a button (D13's What should we play?). The best count is
+// inked: a navy face with bone pips. On a bone suggestion box or button the faces are chipboard.
 function Die({
   count,
   best = false,
   onBone = false,
+  small = false,
 }: {
   count: number;
   best?: boolean;
   onBone?: boolean;
+  small?: boolean;
 }) {
   return (
-    <svg viewBox="0 0 30 30" aria-hidden="true" className="size-7 shrink-0">
+    <svg
+      viewBox="0 0 30 30"
+      aria-hidden="true"
+      className={cn("shrink-0", small ? "size-5" : "size-7")}
+    >
       <rect
         x="1.5"
         y="1.5"
@@ -147,9 +153,11 @@ const PAIR = [
 // on its own (U26's dice tumble): it holds all three, stacked, and only the last shows at rest.
 export function DicePair({
   onBone = false,
+  small = false,
   tumbling = false,
 }: {
   onBone?: boolean;
+  small?: boolean;
   tumbling?: boolean;
 }) {
   return (
@@ -168,12 +176,12 @@ export function DicePair({
             )}
           >
             {faces.map((count) => (
-              <Die key={count} count={count} onBone={onBone} />
+              <Die key={count} count={count} onBone={onBone} small={small} />
             ))}
           </span>
         ) : (
           <span key={tilt} className={tilt}>
-            <Die count={faces[2]} onBone={onBone} />
+            <Die count={faces[2]} onBone={onBone} small={small} />
           </span>
         ),
       )}

@@ -177,13 +177,16 @@ export function TableGames({
           ))}
         </ul>
       )}
+      {/* One row, as D7 and D13 draw it: I'll bring a game at its own width, and What should we
+          play? taking the rest, its words on two lines when they need them. */}
       {(canBring || whatToPlay) && (
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex gap-2.5">
           {canBring && choices && (
             <Button
               type="button"
               variant="secondary"
               size="sm"
+              className="shrink-0"
               onClick={() => setPicking(true)}
             >
               I’ll bring a game
@@ -193,6 +196,7 @@ export function TableGames({
             <Button
               variant="secondary"
               size="sm"
+              className="flex-1"
               nativeButton={false}
               render={
                 <Link
@@ -201,8 +205,10 @@ export function TableGames({
                 />
               }
             >
-              <DicePair />
-              What should we play?
+              <DicePair onBone small />
+              <span className="text-left leading-tight whitespace-normal">
+                What should we play?
+              </span>
             </Button>
           )}
         </div>

@@ -123,7 +123,12 @@ export function ProfileForm({
             photoUrl={photoUrl}
             startWith={startingPhoto}
             removable={mode === "start"}
-            help="Shown on your page. Everywhere else your piece stands for you."
+            help={
+              <>
+                Shown on your page. Everywhere else your piece{" "}
+                <span className="whitespace-nowrap">stands for you.</span>
+              </>
+            }
             error={state?.fields?.photo}
           />
           {mode === "edit" && photoUrl && (

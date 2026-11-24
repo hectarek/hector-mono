@@ -1,10 +1,17 @@
+import { cn } from "@repo/ui/lib/utils";
 import { DicePair } from "@/app/_components/dice";
 import { Piece } from "@/app/_components/piece";
 
-// A1's and A3's three lines on what the app is for.
-export function WhatItsFor() {
+// A1's and A3's three lines on what the app is for, 16px under A1's words and 8px under A3's card
+// (`className="mt-2"`).
+export function WhatItsFor({ className }: { className?: string }) {
   return (
-    <ul className="mt-4 flex flex-col rounded-lg border-2 border-foreground bg-card *:border-dashed *:border-foreground *:not-first:border-t-2">
+    <ul
+      className={cn(
+        "mt-4 flex flex-col rounded-lg border-2 border-foreground bg-card *:border-dashed *:border-foreground *:not-first:border-t-2",
+        className,
+      )}
+    >
       <li className="flex items-center gap-3.5 p-3.5">
         <span
           aria-hidden="true"

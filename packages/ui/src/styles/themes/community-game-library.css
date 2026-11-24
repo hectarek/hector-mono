@@ -421,6 +421,13 @@
   stroke-width: 3.6;
 }
 
+/* A list of choices stacks its 44px rows with no gap between them (B12, C9, D3, G3); a grid of
+   them, such as the piece picker's, keeps the group's own gap. */
+[data-theme="community-game-library"]
+  [data-slot="radio-group"]:not([class*="grid-cols-"]) {
+  gap: 0;
+}
+
 [data-theme="community-game-library"] [data-slot="radio-group-item"] {
   width: 1.5rem;
   height: 1.5rem;
@@ -604,9 +611,11 @@
   gap: 0.875rem;
   text-align: left;
 }
+/* Its two buttons side by side, or one above the other when their words don't fit (E9). */
 [data-theme="community-game-library"] [data-slot="alert-dialog-footer"] {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.625rem;
   margin: 0;
   padding: 0;

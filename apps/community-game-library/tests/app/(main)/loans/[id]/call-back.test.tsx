@@ -75,6 +75,10 @@ describe("calling a game back (U14: C15, C18)", () => {
     ).toBeTruthy();
     expect(c18.queryByText("Jo asked for more time")).toBeNull();
     expect(c18.queryByRole("button", { name: "Call it back" })).toBeNull();
+    // C18 draws no Change the due date once it's called back.
+    expect(
+      c18.queryByRole("button", { name: "Change the due date" }),
+    ).toBeNull();
   });
 
   it("leads the borrower's page with Sam wants it back now", async () => {

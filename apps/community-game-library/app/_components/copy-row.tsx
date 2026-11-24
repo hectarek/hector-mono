@@ -32,7 +32,7 @@ export function CopyRow({
     <>
       <Piece shape={owner.pieceShape} color={owner.pieceColor} size={20} />
       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
-        <span className="flex min-w-0 flex-auto flex-col gap-0.5">
+        <span className="flex min-w-0 grow basis-28 flex-col gap-0.5">
           <RowName>{name}</RowName>
           <CopyLines lines={lines} />
         </span>

@@ -102,11 +102,12 @@ describe("A6, the home-screen step", () => {
     await signInAsMember();
   });
 
+  // Go to my library opens My library, which A7 draws for a new member.
   it("is step 3 of 3, with iPhone's steps first and Go to my library", async () => {
     const view = await page();
     expect(view.getByText("Step 3 of 3")).toBeTruthy();
     expect(view.getByText("Choose Add to Home Screen")).toBeTruthy();
-    expect(hrefOf(view, "Go to my library")).toBe("/");
+    expect(hrefOf(view, "Go to my library")).toBe("/my-library");
   });
 
   it("switches to Android's steps", async () => {

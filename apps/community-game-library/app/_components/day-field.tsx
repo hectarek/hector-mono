@@ -7,8 +7,9 @@ import { CalendarIcon } from "@/app/_components/icons";
 import { formatDate } from "@/src/entities/week";
 
 // A day that already happened, picked on the date sheet (X1): C3's Picked up on and C5's Gave it
-// back on. It reads "Today, Tue, Nov 10" until another day is picked. Inside a group whose label
-// names it already (C9), its own label is for screen readers only.
+// back on. It reads "Today, Tue, Nov 10" until another day is picked, and its sheet is titled
+// Pick a date, as X1 draws it. Inside a group whose label names it already (C9), its own label is
+// for screen readers only.
 export function DayField({
   id,
   label,
@@ -50,7 +51,6 @@ export function DayField({
       <DateSheet
         open={open}
         onOpenChange={setOpen}
-        title={label}
         today={today}
         from={from}
         until={until}

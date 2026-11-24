@@ -94,8 +94,9 @@
 /* The Punchboard kit's sizes that Tailwind's scale lacks (community-game-library's design
    system), named by their size in px so the arbitrary-values rule can stay on: 10 (counts),
    13 (secondary lines, dates, field labels), 15 (names, buttons, typed text, section labels),
-   22 (sheet and dialog titles) and 26 (a cover's title). Each keeps the font's own line height,
-   as the kit draws it; a component sets another with leading-*. */
+   22 (sheet and dialog titles), 26 (a cover's title) and 28 (the app's name on a link's page).
+   Each keeps the font's own line height, as the kit draws it; a component sets another with
+   leading-*. */
 @theme {
   --text-10: 0.625rem;
   --text-10--line-height: normal;
@@ -107,6 +108,8 @@
   --text-22--line-height: normal;
   --text-26: 1.625rem;
   --text-26--line-height: normal;
+  --text-28: 1.75rem;
+  --text-28--line-height: normal;
 }
 
 /* Safe areas: the iPhone notch and home indicator. pt-safe / pb-safe pad by the inset;

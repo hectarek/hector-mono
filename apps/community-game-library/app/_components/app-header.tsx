@@ -123,8 +123,9 @@ export function AppBar() {
 // A page's own header (the design system's Header). A tab's first screen has its stencil
 // title, at most one labelled action ("Record a loan", "New night"), and on a phone the bell
 // and the piece, which from 768px are in the bar above. A pushed page has the back link, named
-// for the page that opened it, and its own title in its body (sans 24px). Every state of a
-// tab's first screen keeps the same header.
+// for the page that opened it, 12px from the top and 6px above its own title in its body (sans
+// 24px), as every pushed page's board draws it. Every state of a tab's first screen keeps the
+// same header.
 export function AppHeader(
   props:
     | { title: string; action?: ReactNode }
@@ -132,7 +133,7 @@ export function AppHeader(
 ) {
   if ("back" in props) {
     return (
-      <header className="-ml-2.5 flex py-3">
+      <header className="-ml-2.5 flex pt-3 pb-1.5">
         <BackLink href={props.back.href} label={props.back.label} />
       </header>
     );

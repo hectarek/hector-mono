@@ -271,7 +271,8 @@ export default async function LoanPage({
           />
           <Person person={other} line="to arrange the pick-up" />
           <p className="text-13 leading-snug text-muted-foreground">
-            When the game is in your hands, come back and tap I’ve picked it up.
+            When the game is in your hands, come back and tap{" "}
+            <strong>I’ve picked it up</strong>.
           </p>
           <LoanMoveButton
             move="cancel"

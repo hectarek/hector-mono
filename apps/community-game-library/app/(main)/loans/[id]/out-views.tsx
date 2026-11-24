@@ -298,7 +298,8 @@ export function BorrowedLoan({
 }
 
 // C7, the member's copy someone has: who has it, the track with their piece, and the dates; It's
-// back with me and Change the due date (C14); the line, with Remove from line; the copy's
+// back with me and Change the due date (C14), which C18 drops once it's called back; the line,
+// with Remove from line; the copy's
 // pass-along switch in words, and its history; and Call it back (C15), which C18 then marks. It
 // leads with the borrower's request for more time (C13) while one waits, and with Is it back? (C8)
 // while they say they gave it back. Handed on, it reads "Robin is handing it to Jo" (R48).
@@ -421,14 +422,19 @@ export function LentLoan({
           {passing && handoff
             ? `Waiting for ${handoff.name} to confirm`
             : datesLine(loan, today)}
-          {loan.calledBackAt &&
-            ` · Called back ${formatWhen(loan.calledBackAt, now)}`}
+          {/* A line of its own, as C18 draws it, so no "·" is stranded where the dates wrap. */}
+          {loan.calledBackAt && (
+            <>
+              <br />
+              Called back {formatWhen(loan.calledBackAt, now)}
+            </>
+          )}
         </p>
       </Group>
       {out && (
         <Group label="What you can do">
           {isItBack(null)}
-          {loan.dueOn && (
+          {loan.dueOn && !loan.calledBackAt && (
             <ChangeDueSheet
               loanId={loan.id}
               title={game.title}

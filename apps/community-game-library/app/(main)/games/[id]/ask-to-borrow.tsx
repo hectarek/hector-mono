@@ -130,7 +130,8 @@ export function RequestForm({
         <Textarea
           id={noteId}
           name="note"
-          rows={2}
+          // Three lines for C1's request, two for C10's, as their boards draw them.
+          rows={join ? 2 : 3}
           maxLength={500}
           placeholder={join ? undefined : "Can I grab it Friday?"}
           value={note}

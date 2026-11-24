@@ -56,8 +56,8 @@ function Fillers({ rows }: { rows: number }) {
 
 // A row that opens a page: one link filling the row, its chevron at the far right after any
 // stamp (D14: the row shows the thing's state, its page changes it). The text stacks; a title
-// that wraps takes the room, and a stamp that no longer fits beside it drops under it
-// (screens.md rule 13). With a pointer, the row's ink turns stamp-red.
+// that wraps takes the room, and a stamp drops under it only when less than 112px is left for
+// the text (screens.md rule 13), so a long owner line doesn't push it down at 390px. With a pointer, the row's ink turns stamp-red.
 export function ListRow({
   href,
   thumb,
@@ -82,7 +82,7 @@ export function ListRow({
       >
         {thumb}
         <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
-          <span className="flex min-w-0 flex-auto flex-col gap-0.5">
+          <span className="flex min-w-0 grow basis-28 flex-col gap-0.5">
             {children}
           </span>
           {stamp}
