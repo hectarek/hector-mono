@@ -50,15 +50,19 @@ export function AddedSoFar() {
 
 // I own it (screens.md, After each action; B8, B10): the game goes on the member's shelf, the row
 // is stamped Added with Undo under it, and a message names the game with Undo and Edit copy.
-// `quiet` is B5's "I own this too. Add it to my library" under a game's copies.
+// `quiet` is B5's "I own this too. Add it to my library" under a game's copies. A catalog row
+// gives `yours`, and a game you own shows Yours in its place, as Add games stamps it. The row
+// keeps this part when the add's refresh makes the game yours, so Added and its Undo stay.
 export function IOwnIt({
   gameId,
   label = "I own it",
   quiet = false,
+  yours = false,
 }: {
   gameId: string;
   label?: string;
   quiet?: boolean;
+  yours?: boolean;
 }) {
   const router = useRouter();
   const tally = useContext(AddedCount);
@@ -122,6 +126,13 @@ export function IOwnIt({
         >
           Undo
         </Button>
+      </span>
+    );
+  }
+  if (yours) {
+    return (
+      <span className="shrink-0">
+        <Stamp tone="navy">Yours</Stamp>
       </span>
     );
   }

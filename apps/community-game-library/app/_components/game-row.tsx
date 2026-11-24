@@ -101,12 +101,8 @@ export function CatalogRow({
       </Link>
       {game.type === "expansion" ? (
         base?.yours && <InMyBox gameId={game.id} boxed={base.boxed} />
-      ) : yours ? (
-        <span className="shrink-0">
-          <Stamp tone="navy">Yours</Stamp>
-        </span>
       ) : (
-        <IOwnIt gameId={game.id} />
+        <IOwnIt gameId={game.id} yours={yours} />
       )}
     </ListItem>
   );

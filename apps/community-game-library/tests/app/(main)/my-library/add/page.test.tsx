@@ -91,6 +91,37 @@ describe("Add games", () => {
     ).toBe(true);
   });
 
+  // In the browser the add refreshes the page, which then knows the game is yours: the row keeps
+  // Added and its Undo rather than turning to Yours (found in Chromium, 2026-11-24).
+  it("keeps Added and Undo through the add's refresh", async () => {
+    const view = await renderAddGames("harbor");
+    fireEvent.click(
+      within(row(view, "Harbor Lights")).getByRole("button", {
+        name: "I own it",
+      }),
+    );
+    await waitFor(async () =>
+      expect(await yourCopiesOf(games.harborLights.id)).toHaveLength(1),
+    );
+    view.rerender(
+      <>
+        {await AddGamesPage({ searchParams: Promise.resolve({ q: "harbor" }) })}
+        <Toaster id={APP_TOASTER} theme="light" />
+      </>,
+    );
+    const lights = row(view, "Harbor Lights");
+    expect(within(lights).getByText("Added")).toBeTruthy();
+    expect(within(lights).queryByText("Yours")).toBeNull();
+
+    // Its Undo still works, which leaves the shelf as the next test expects it.
+    const undo = within(lights).getByRole("button", { name: "Undo" });
+    await waitFor(() => expect(undo.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(undo);
+    await waitFor(async () =>
+      expect(await yourCopiesOf(games.harborLights.id)).toHaveLength(0),
+    );
+  });
+
   it("stamps a game you own already Yours, with no I own it", async () => {
     const view = await renderAddGames("salt");
 
