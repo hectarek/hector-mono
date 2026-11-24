@@ -10,6 +10,24 @@ export const MAX_PHOTO_BYTES = 300_000;
 // A signed address lasts an hour, and is made only for someone who may see the person (KTD4).
 export const PHOTO_URL_SECONDS = 3600;
 
+// The picture a Google sign-up came with, as A4's photo starts from it (Hector, 2026-11-24): only
+// an https address, and Google's at 400px, where its address asks for the 96 a sign-in gives
+// ("…=s96-c"), so the photo isn't soft once shrunk like a chosen one. None for an email sign-up.
+export function startingPhotoOf(
+  image: string | null | undefined,
+): string | null {
+  if (!image) return null;
+  let address: URL;
+  try {
+    address = new URL(image);
+  } catch {
+    return null;
+  }
+  if (address.protocol !== "https:") return null;
+  address.pathname = address.pathname.replace(/=s\d+-c$/, "=s400-c");
+  return address.toString();
+}
+
 // Under Photo (screens.md, When something goes wrong), for a photo that's too large or fails.
 export const PHOTO_FAILED_LINE = "That photo didn’t upload. Try a smaller one.";
 

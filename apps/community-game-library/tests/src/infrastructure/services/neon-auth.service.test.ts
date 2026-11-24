@@ -18,8 +18,22 @@ describe("NeonAuthService", () => {
     expect(
       await new NeonAuthService(new RecordingLogger()).getSession(),
     ).toEqual({
-      user: { id: ALICE, name: "Alice", email: EMAIL },
+      user: { id: ALICE, name: "Alice", email: EMAIL, image: null },
     });
+  });
+
+  // Google's picture, which A4 starts the photo from (Hector, 2026-11-24).
+  it("answers the picture a Google sign-in came with", async () => {
+    const picture = "https://lh3.googleusercontent.com/a/alice-picture=s96-c";
+    neonAuth.getSession = async () => ({
+      data: {
+        user: { id: ALICE, name: "Alice", email: EMAIL, image: picture },
+      },
+    });
+    expect(
+      (await new NeonAuthService(new RecordingLogger()).getSession())?.user
+        .image,
+    ).toBe(picture);
   });
 
   it("answers null when no one is signed in", async () => {

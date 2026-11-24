@@ -3,10 +3,12 @@ import { ProfileForm } from "@/app/_components/profile-form";
 import { gate } from "@/app/_lib/account";
 import { createProfile } from "@/app/actions/profile";
 import { getInjection } from "@/di/container";
+import { startingPhotoOf } from "@/src/entities/profile-photo";
 import { ProfileStepHeading } from "./heading";
 
 // A4, step 1 of 3 (R40, R51): the name, from the account's own, a photo and a phone, both
-// optional, and the playing piece. Someone who came through a friend link (?friend=, U10) is
+// optional, and the playing piece. A Google sign-up's photo starts as its Google picture, as if
+// chosen, which they can replace or remove (Hector, 2026-11-24). Someone who came through a friend link (?friend=, U10) is
 // friends already, so their friend's piece shows as taken, and step 2 (A5) comes next. Its
 // skeleton is loading.tsx, under the steps' layout.
 export default async function ProfileStepPage({
@@ -34,6 +36,7 @@ export default async function ProfileStepPage({
           shape: "pawn",
           color: "mustard",
         }}
+        startingPhoto={startingPhotoOf(user.image)}
         taken={taken}
         next={next}
       />

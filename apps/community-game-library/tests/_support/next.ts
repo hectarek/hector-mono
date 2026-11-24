@@ -18,6 +18,8 @@ const USER_ID = "00000000-0000-4000-8000-0000000000f1";
 
 export const nextState = {
   userId: USER_ID as string | undefined,
+  // The picture the sign-in came with (a Google account's); an email account has none.
+  userImage: null as string | null,
   revalidated: [] as string[],
   // Where a screen's router.push() went (screen tests).
   pushed: [] as string[],
@@ -27,6 +29,7 @@ export const nextState = {
 
 function resetNextState(): void {
   nextState.userId = USER_ID;
+  nextState.userImage = null;
   nextState.revalidated = [];
   nextState.pushed = [];
   nextState.visit = "visit-1";
