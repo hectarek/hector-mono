@@ -157,57 +157,61 @@ export function PhotoField({
     </Button>
   );
 
+  // Remove photo sits after the field, where E6 puts its own: the field stretches each part of it
+  // to its full width.
   return (
-    <Field data-invalid={line ? "true" : undefined}>
-      <FieldTitle id={labelId}>
-        <span>
-          {label}
-          {optional && (
-            <span data-ink="smudge" className="font-normal">
-              {" · optional"}
+    <>
+      <Field data-invalid={line ? "true" : undefined}>
+        <FieldTitle id={labelId}>
+          <span>
+            {label}
+            {optional && (
+              <span data-ink="smudge" className="font-normal">
+                {" · optional"}
+              </span>
+            )}
+          </span>
+        </FieldTitle>
+        {shape === "round" ? (
+          <div className="flex items-center gap-3.5">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "relative flex size-18 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-foreground bg-secondary",
+                !shown && "border-dashed",
+              )}
+            >
+              {picture}
             </span>
-          )}
-        </span>
-      </FieldTitle>
-      {shape === "round" ? (
-        <div className="flex items-center gap-3.5">
-          <span
-            aria-hidden="true"
-            className={cn(
-              "relative flex size-18 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-foreground bg-secondary",
-              !shown && "border-dashed",
-            )}
-          >
-            {picture}
-          </span>
-          {button}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-foreground p-3.5">
-          <span
-            aria-hidden="true"
-            className={cn(
-              "relative flex items-center justify-center",
-              shown && "h-40 w-full",
-            )}
-          >
-            {picture}
-          </span>
-          {button}
-        </div>
-      )}
-      <input
-        ref={input}
-        type="file"
-        name={name}
-        accept="image/*"
-        tabIndex={-1}
-        aria-hidden="true"
-        className="sr-only"
-        onChange={choose}
-      />
-      {help && <FieldDescription>{help}</FieldDescription>}
-      {line && <FieldError>{line}</FieldError>}
+            {button}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed border-foreground p-3.5">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "relative flex items-center justify-center",
+                shown && "h-40 w-full",
+              )}
+            >
+              {picture}
+            </span>
+            {button}
+          </div>
+        )}
+        <input
+          ref={input}
+          type="file"
+          name={name}
+          accept="image/*"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="sr-only"
+          onChange={choose}
+        />
+        {help && <FieldDescription>{help}</FieldDescription>}
+        {line && <FieldError>{line}</FieldError>}
+      </Field>
       {removable && preview && (
         <Button
           type="button"
@@ -218,6 +222,6 @@ export function PhotoField({
           Remove photo
         </Button>
       )}
-    </Field>
+    </>
   );
 }
