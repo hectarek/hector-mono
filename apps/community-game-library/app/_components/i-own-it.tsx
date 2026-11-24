@@ -12,6 +12,7 @@ import {
 import { Stamp } from "@/app/_components/stamp";
 import { callAction, callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
+import { useMoment } from "@/app/_lib/use-moment";
 import { addCopy, undoAddCopy } from "@/app/actions/copies";
 
 // Add games counts what's added on it (B8's "1 added"); everywhere else nothing counts.
@@ -49,20 +50,27 @@ export function AddedSoFar() {
 
 // I own it (screens.md, After each action; B8, B10): the game goes on the member's shelf, the row
 // is stamped Added with Undo under it, and a message names the game with Undo and Edit copy.
-// `quiet` is B5's "I own this too. Add it to my library" under a game's copies.
+// `quiet` is B5's "I own this too. Add it to my library" under a game's copies. A catalog row
+// gives `yours`, and a game you own shows Yours in its place, as Add games stamps it. The row
+// keeps this part when the add's refresh makes the game yours, so Added and its Undo stay.
 export function IOwnIt({
   gameId,
   label = "I own it",
   quiet = false,
+  yours = false,
 }: {
   gameId: string;
   label?: string;
   quiet?: boolean;
+  yours?: boolean;
 }) {
   const router = useRouter();
   const tally = useContext(AddedCount);
   const [added, setAdded] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // Adding plays a moment (U26): the Added stamp presses, or on a catalog row whose cover shows
+  // its token, the token lifts out of its ring (app/globals.css).
+  const moment = useMoment(added);
 
   function undo(userGameId: string) {
     startTransition(async () => {
@@ -92,7 +100,10 @@ export function IOwnIt({
         cancel: { label: "Undo", onClick: () => undo(userGameId) },
         action: {
           label: "Edit copy",
-          onClick: () => router.push(`/copies/${userGameId}`),
+          onClick: () =>
+            router.push(`/copies/${userGameId}`, {
+              transitionTypes: ["go-deeper"],
+            }),
         },
       });
     });
@@ -100,8 +111,13 @@ export function IOwnIt({
 
   if (added) {
     return (
-      <span className="-mb-2 flex shrink-0 flex-col items-center gap-0.5">
-        <Stamp tone="navy">Added</Stamp>
+      <span
+        data-moment={moment.playing ? "add-copy" : undefined}
+        className="-mb-2 flex shrink-0 flex-col items-center gap-0.5"
+      >
+        <Stamp key={moment.key} tone="navy" press={moment.playing}>
+          Added
+        </Stamp>
         <Button
           variant="link"
           disabled={pending}
@@ -110,6 +126,13 @@ export function IOwnIt({
         >
           Undo
         </Button>
+      </span>
+    );
+  }
+  if (yours) {
+    return (
+      <span className="shrink-0">
+        <Stamp tone="navy">Yours</Stamp>
       </span>
     );
   }

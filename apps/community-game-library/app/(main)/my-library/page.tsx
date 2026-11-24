@@ -93,7 +93,7 @@ export default async function MyLibraryPage({
         <Button
           variant="secondary"
           nativeButton={false}
-          render={<Link href="/friends/link" />}
+          render={<Link href="/friends/link" transitionTypes={["go-deeper"]} />}
         >
           Share my friend link
         </Button>
@@ -121,7 +121,9 @@ export default async function MyLibraryPage({
           <>
             <Button
               nativeButton={false}
-              render={<Link href="/my-library/add" />}
+              render={
+                <Link href="/my-library/add" transitionTypes={["go-deeper"]} />
+              }
               className="self-start"
             >
               <PlusIcon data-icon="inline-start" />

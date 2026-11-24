@@ -119,6 +119,8 @@ function Tabs({
   return (
     <nav
       aria-label="Main"
+      // The bottom bar stays still as a page moves (U26); from 768px the header bar does.
+      data-motion-name={placement === "bottom" ? "tab-bar" : undefined}
       className={cn(
         placement === "bottom" &&
           "sticky bottom-0 z-30 border-t-2 border-foreground bg-card pb-safe md:hidden",

@@ -48,7 +48,9 @@ export default function AboutCatalogPage() {
       <Button
         variant="link"
         nativeButton={false}
-        render={<Link href="/my-library/suggest" />}
+        render={
+          <Link href="/my-library/suggest" transitionTypes={["go-deeper"]} />
+        }
         className="self-start"
       >
         Can’t find a game? Suggest one

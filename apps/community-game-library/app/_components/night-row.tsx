@@ -118,6 +118,7 @@ export function NightCard({
   return (
     <Link
       href={`/nights/${night.id}`}
+      transitionTypes={["go-deeper"]}
       className="flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-3.5 py-3 text-foreground hover:text-destructive focus-visible:-outline-offset-3"
     >
       <div className="flex items-center gap-2">

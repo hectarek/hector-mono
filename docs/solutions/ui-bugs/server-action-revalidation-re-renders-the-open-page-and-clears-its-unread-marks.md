@@ -1,6 +1,7 @@
 ---
-title: A server action's revalidatePath re-renders the page that sent it, which cleared the inbox's unread marks as soon as it opened
+title: "A server action's revalidatePath re-renders the page that sent it, which cleared the inbox's unread marks and a catalog row's Added"
 date: 2026-11-22
+last_updated: 2026-11-24
 category: ui-bugs
 module: "apps/community-game-library, and any app here whose page changes, through its own server action, the state it is showing"
 problem_type: ui_bug
@@ -9,15 +10,16 @@ symptoms:
   - "The inbox's red dots and its 2 unread line were gone 1.5 s after it opened, before anyone could read them"
   - "The bell read 2 unread on the page before, so the notices had been unread when the inbox rendered"
   - "Every screen test passed, the inbox's included"
+  - "On Add games, a row's Added stamp and its Undo turned to Yours about half a second after I own it"
 root_cause: wrong_api
 resolution_type: code_fix
 severity: medium
 framework_version: "next 16.4.6, react 19.3.1"
 related_components: [testing_framework]
-tags: [nextjs, server-actions, revalidatepath, unread, inbox, client-state, happy-dom]
+tags: [nextjs, server-actions, revalidatepath, unread, inbox, client-state, happy-dom, catalog-row, i-own-it]
 ---
 
-# A server action's revalidatePath re-renders the page that sent it, which cleared the inbox's unread marks as soon as it opened
+# A server action's revalidatePath re-renders the page that sent it, which cleared the inbox's unread marks and a catalog row's Added
 
 ## Problem
 
@@ -75,9 +77,45 @@ The inbox's screen test (`apps/community-game-library/tests/app/(main)/inbox/pag
 
 When the server renders the page again, React reconciles the new tree into the old one. `MarkInboxRead` sits at the same place, so it keeps its state: `useState`'s initializer ran once, on the first render, and the new `unreadIds` prop (now empty) doesn't replace it. The marks drawn from that state last until the member leaves the page.
 
+## A second case: the refresh unmounts a client part that a server prop swaps out (2026-11-24)
+
+Client state outlives the refresh only while its component stays at the same place in the tree. On Add games (B8), `CatalogRow` (`apps/community-game-library/app/_components/game-row.tsx`) chose between a static stamp and the client part from a server prop:
+
+```tsx
+// Before: `yours` comes from the server.
+yours ? (
+  <span className="shrink-0">
+    <Stamp tone="navy">Yours</Stamp>
+  </span>
+) : (
+  <IOwnIt gameId={game.id} />
+)
+```
+
+`IOwnIt` (`apps/community-game-library/app/_components/i-own-it.tsx`) keeps the added copy in `useState` and shows the Added stamp with Undo under it. Its action, `addCopy` (`apps/community-game-library/app/actions/copies.ts`), calls `revalidatePath` on `/`, `/my-library` and the game's page. `/my-library/add` isn't among them, but the open page rendered again anyway: when `revalidatePath` runs in an action, Next.js "re-renders the current route server-side" and sends it with the action's result (Next.js 16.4.6's server actions guide, bundled at `apps/community-game-library/node_modules/next/dist/docs/01-app/02-guides/server-actions.md`). The new render had `yours` true, so `CatalogRow` put the Yours span where `IOwnIt` had been. `IOwnIt` unmounted, its state went with it, and the row's Added and Undo turned to Yours about half a second after the tap. A Playwright check on the dev server found it: the locator for Added timed out, and the page snapshot showed the row stamped Yours. The screen tests had passed, for the same reason as the inbox's.
+
+The fix keeps `IOwnIt` in the row in every state and gives it the server's value to read:
+
+```tsx
+// apps/community-game-library/app/_components/game-row.tsx
+<IOwnIt gameId={game.id} yours={yours} />
+
+// apps/community-game-library/app/_components/i-own-it.tsx, after the Added branch
+if (yours) {
+  return (
+    <span className="shrink-0">
+      <Stamp tone="navy">Yours</Stamp>
+    </span>
+  );
+}
+```
+
+`IOwnIt` shows Added and Undo while its own state holds the added copy, then Yours for a game the member already owned, then the I own it button. The refresh changes only its `yours` prop, so it keeps its state. Its screen test (`apps/community-game-library/tests/app/(main)/my-library/add/page.test.tsx`, "keeps Added and Undo through the add's refresh") taps I own it, waits for the copy to be saved, renders the page again into the same root with `view.rerender`, and expects Added and Undo, and no Yours, before tapping Undo.
+
 ## Prevention
 
 - A page whose own server action changes the state it shows (marking read on open, a seen-at time, a dismissal) keeps whatever should outlive the change in client state, since the action's `revalidatePath` re-renders that page. `apps/community-game-library/AGENTS.md` says so in U11's patterns.
+- Keep that client part rendered in every state the action can lead to, and pass it the server's value as a prop it reads. A server prop that swaps it for another element unmounts it, and its state goes with it. `apps/community-game-library/AGENTS.md` says so under Testing.
 - Check such a page on the dev server after its action runs. Screen tests here stub `next/cache`; a test can stand in for the refresh with `rerender` and the page's fresh render.
 - Send the ids the page showed rather than marking "everything": the page's view is what the member saw.
 

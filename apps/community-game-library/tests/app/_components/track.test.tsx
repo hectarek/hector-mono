@@ -56,6 +56,49 @@ describe("Track", () => {
   });
 });
 
+// U26's piece hop: on a loan's page, a day passing while it shows hops the piece onto today.
+describe("Track's piece hop", () => {
+  const borrower = { shape: "pawn", color: "mustard" } as const;
+  const days = (...labels: string[]) =>
+    labels.map((label, index) => ({
+      label,
+      due: index === labels.length - 1,
+    }));
+  const pieceSpace = (view: ReturnType<typeof render>) =>
+    view.container.firstElementChild?.children[0]?.children[0] as HTMLElement;
+
+  it("hops the piece onto today's space when the day moves on", () => {
+    const view = render(
+      <Track
+        spaces={days("TUE", "WED", "THU", "FRI")}
+        today={0}
+        borrower={borrower}
+        day="2026-11-24"
+      />,
+    );
+    expect(pieceSpace(view).dataset.moment).toBeUndefined();
+
+    view.rerender(
+      <Track
+        spaces={days("WED", "THU", "FRI")}
+        today={0}
+        borrower={borrower}
+        day="2026-11-25"
+      />,
+    );
+    expect(pieceSpace(view).dataset.moment).toBe("hop");
+    expect(pieceSpace(view).querySelector("svg")).toBeTruthy();
+  });
+
+  it("keeps still without its day, as on the list of loans", () => {
+    const view = render(
+      <Track spaces={days("TUE", "WED")} today={0} borrower={borrower} />,
+    );
+    view.rerender(<Track spaces={days("WED")} today={0} borrower={borrower} />);
+    expect(pieceSpace(view).dataset.moment).toBeUndefined();
+  });
+});
+
 // The design system's Group: a panel with a red label inside, or a navy label over a list.
 describe("Group", () => {
   it("labels a panel inside it, and a list from above", () => {

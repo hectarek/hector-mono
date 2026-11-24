@@ -12,6 +12,7 @@ import { Sheet, SheetActions } from "@/app/_components/sheet";
 import { Stamp } from "@/app/_components/stamp";
 import { callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
+import { useMoment } from "@/app/_lib/use-moment";
 import { answerNight } from "@/app/actions/nights";
 import type { ActionState } from "@/app/actions/shared";
 import { ordinal } from "@/src/entities/loan";
@@ -90,13 +91,17 @@ function InviteLine({ context }: { context: AnswerContext }) {
 export function YourAnswer({ context }: { context: AnswerContext }) {
   const { state, pending, send } = useAnswer(context.gameNightId);
   const [changing, setChanging] = useState(false);
+  // Answering Going stamps it, with a press (U26).
+  const moment = useMoment(context.you);
 
   let body: ReactNode;
   if (context.you === "going") {
     body = (
       <>
         <p className="flex items-center gap-2.5 text-15 font-bold">
-          <Stamp tilt={2}>Going</Stamp>
+          <Stamp key={moment.key} tilt={2} press={moment.playing}>
+            Going
+          </Stamp>
           You + {context.guestCount} {guestsWord(context.guestCount)}
         </p>
         <Button variant="secondary" onClick={() => setChanging(true)}>

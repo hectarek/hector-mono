@@ -77,6 +77,7 @@ export function ListRow({
     <li>
       <Link
         href={href}
+        transitionTypes={["go-deeper"]}
         className="flex min-h-12 items-center gap-3 px-3 py-2.5 text-foreground hover:text-destructive focus-visible:-outline-offset-3"
       >
         {thumb}

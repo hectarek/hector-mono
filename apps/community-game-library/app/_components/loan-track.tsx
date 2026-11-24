@@ -53,17 +53,20 @@ export function trackSpaces(
 }
 
 // The track of a loan that's out, or of one about to be picked up on a day (C3's preview), with the
-// borrower's piece on today. The page says the dates in text (aria-hidden track).
+// borrower's piece on today. The page says the dates in text (aria-hidden track). On the loan's own
+// page the piece hops as a day passes (`moves`); a list of loans keeps still, so no two hop at once.
 export function LoanTrack({
   pickedUpOn,
   dueOn,
   today,
   borrower,
+  moves = false,
 }: {
   pickedUpOn: string;
   dueOn: string;
   today: string;
   borrower: { pieceShape: PieceShape; pieceColor: PieceColor };
+  moves?: boolean;
 }) {
   const track = trackSpaces(pickedUpOn, dueOn, today);
   return (
@@ -71,6 +74,7 @@ export function LoanTrack({
       spaces={track.spaces}
       today={track.today}
       borrower={{ shape: borrower.pieceShape, color: borrower.pieceColor }}
+      day={moves ? today : undefined}
     />
   );
 }

@@ -51,7 +51,7 @@ export function LegalPage({
       <Button
         variant="link"
         nativeButton={false}
-        render={<Link href={other.href} />}
+        render={<Link href={other.href} transitionTypes={["go-deeper"]} />}
         className="self-start"
       >
         {other.label}

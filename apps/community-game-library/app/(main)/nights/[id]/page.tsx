@@ -250,7 +250,12 @@ export default async function NightPage({
                 <Button
                   variant="secondary"
                   nativeButton={false}
-                  render={<Link href={`/nights/${night.id}/invite`} />}
+                  render={
+                    <Link
+                      href={`/nights/${night.id}/invite`}
+                      transitionTypes={["go-deeper"]}
+                    />
+                  }
                 >
                   Invite people
                 </Button>
@@ -300,7 +305,12 @@ export default async function NightPage({
           <Button
             size="lg"
             nativeButton={false}
-            render={<Link href={`/nights/${night.id}/invite`} />}
+            render={
+              <Link
+                href={`/nights/${night.id}/invite`}
+                transitionTypes={["go-deeper"]}
+              />
+            }
           >
             Invite people
           </Button>
@@ -310,7 +320,12 @@ export default async function NightPage({
               size="sm"
               className="flex-1"
               nativeButton={false}
-              render={<Link href={`/nights/${night.id}/what-to-play`} />}
+              render={
+                <Link
+                  href={`/nights/${night.id}/what-to-play`}
+                  transitionTypes={["go-deeper"]}
+                />
+              }
             >
               What should we play?
             </Button>
@@ -319,7 +334,12 @@ export default async function NightPage({
               size="sm"
               className="flex-1"
               nativeButton={false}
-              render={<Link href={`/nights/${night.id}/tables`} />}
+              render={
+                <Link
+                  href={`/nights/${night.id}/tables`}
+                  transitionTypes={["go-deeper"]}
+                />
+              }
             >
               Split into tables
             </Button>
@@ -338,7 +358,12 @@ export default async function NightPage({
               variant="secondary"
               className="flex-1"
               nativeButton={false}
-              render={<Link href={`/nights/${night.id}/edit`} />}
+              render={
+                <Link
+                  href={`/nights/${night.id}/edit`}
+                  transitionTypes={["go-deeper"]}
+                />
+              }
             >
               Edit
             </Button>

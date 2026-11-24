@@ -81,6 +81,7 @@ export function CatalogRow({
     <ListItem>
       <Link
         href={href}
+        transitionTypes={["go-deeper"]}
         className="flex min-w-0 flex-1 items-center gap-3 text-foreground hover:text-destructive focus-visible:-outline-offset-3"
       >
         <CoverThumb color={coverColorOf(game)} imageUrl={game.imageUrl} />
@@ -100,12 +101,8 @@ export function CatalogRow({
       </Link>
       {game.type === "expansion" ? (
         base?.yours && <InMyBox gameId={game.id} boxed={base.boxed} />
-      ) : yours ? (
-        <span className="shrink-0">
-          <Stamp tone="navy">Yours</Stamp>
-        </span>
       ) : (
-        <IOwnIt gameId={game.id} />
+        <IOwnIt gameId={game.id} yours={yours} />
       )}
     </ListItem>
   );

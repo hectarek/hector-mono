@@ -42,4 +42,22 @@ describe("Dice", () => {
       "fill-card",
     );
   });
+
+  // U26's dice tumble: asked again, each die turns through two faces and stops on its own.
+  it("stacks each die's three faces while it tumbles, its own last", () => {
+    const view = render(<DicePair tumbling />);
+    const pair = view.container.firstElementChild as HTMLElement;
+    expect(pair.dataset.moment).toBe("tumble");
+    const stacks = [...pair.children];
+    expect(stacks.map((stack) => stack.children.length)).toEqual([3, 3]);
+    expect(
+      stacks.map(
+        (stack) => stack.lastElementChild?.querySelectorAll("circle").length,
+      ),
+    ).toEqual([5, 3]);
+    expect(stacks[0]?.className).toContain("-rotate-10");
+
+    const resting = render(<DicePair />).container.firstElementChild;
+    expect((resting as HTMLElement).dataset.moment).toBeUndefined();
+  });
 });

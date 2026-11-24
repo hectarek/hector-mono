@@ -78,6 +78,40 @@ describe("Invites, answers, the waitlist and guests (U19: D2, D3, D4, D7, D10, D
     expect(again.getAllByRole("button", { name: "I’d play" }).length).toBe(4);
   });
 
+  // U26's stamp press: the answer's page comes back from the server where it is, Going arrives,
+  // and it presses; a night already answered shows it still.
+  it("presses Going as the answer comes back, not on a night already answered", async () => {
+    const { view, page } = await renderNight(saturdayGameNight.id);
+    fireEvent.click(page.getByRole("button", { name: "I’m going" }));
+    await waitFor(async () =>
+      expect(await statusOf(saturdayGameNight.id, you.id)).toBe("going"),
+    );
+    view.rerender(
+      <>
+        {
+          await NightPage({
+            params: Promise.resolve({ id: saturdayGameNight.id }),
+          })
+        }
+        <Toaster id={APP_TOASTER} theme="light" />
+      </>,
+    );
+    const going = () =>
+      page
+        .getByText("You + 0 guests")
+        .querySelector<HTMLElement>("[data-tone]");
+    expect(going()?.textContent).toBe("Going");
+    expect(going()?.dataset.moment).toBe("press");
+    view.unmount();
+
+    const again = (await renderNight(saturdayGameNight.id)).page;
+    expect(
+      again
+        .getByText("You + 0 guests")
+        .querySelector<HTMLElement>("[data-tone]")?.dataset.moment,
+    ).toBeUndefined();
+  });
+
   it("brings a guest on D3 who doesn't fit, and joins the waitlist for 2 seats (AE4)", async () => {
     // Five going with you, one seat left.
     await getInjection("IAnswerNightController")(

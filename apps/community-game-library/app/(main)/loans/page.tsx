@@ -132,7 +132,9 @@ export default async function LoansPage() {
               size="sm"
               variant="secondary"
               nativeButton={false}
-              render={<Link href="/loans/record" />}
+              render={
+                <Link href="/loans/record" transitionTypes={["go-deeper"]} />
+              }
             >
               Record a loan
             </Button>
@@ -152,7 +154,9 @@ export default async function LoansPage() {
             <Button
               variant="secondary"
               nativeButton={false}
-              render={<Link href="/loans/record" />}
+              render={
+                <Link href="/loans/record" transitionTypes={["go-deeper"]} />
+              }
             >
               Record a loan
             </Button>

@@ -20,7 +20,8 @@ export function useCoverArt(imageUrl: string | null | undefined) {
 // The 22px punch token in a 52px bone square: a game in a list row, a sheet or a card. While
 // the art loads, a dashed ring with no color sits where the token goes; the art is cropped to a
 // square from its centre. The game's name is always beside it, so it's hidden from screen
-// readers.
+// readers. The token's ring and its colored disc are apart, so the disc can lift out of the ring
+// as a copy is added (U26's token punch).
 export function CoverThumb({
   color,
   imageUrl,
@@ -39,9 +40,11 @@ export function CoverThumb({
       )}
       {(art === "none" || art === "failed") && (
         <span
-          data-color={color}
+          data-token
           className="size-5.5 rounded-full outline-2 outline-offset-2 outline-foreground outline-dashed"
-        />
+        >
+          <span data-color={color} className="block size-full rounded-full" />
+        </span>
       )}
       {imageUrl && (art === "loading" || art === "loaded") && (
         <Image

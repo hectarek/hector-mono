@@ -42,17 +42,22 @@ export function Stamp({
   tone = "navy",
   size = "row",
   tilt,
+  press = false,
   children,
 }: {
   tone?: StampTone;
   size?: keyof typeof SIZES;
   tilt?: StampTilt;
+  // While its status has just changed: the stamp presses down onto the page (U26's stamp press,
+  // app/globals.css). The caller plays it with useMoment.
+  press?: boolean;
   children: ReactNode;
 }) {
   return (
     <span
       data-tone={tone}
       data-ink={tone === "brown" ? "smudge" : undefined}
+      data-moment={press ? "press" : undefined}
       className={cn(
         "inline-block shrink-0 rounded-md border-2 font-heading font-bold whitespace-nowrap uppercase",
         TONES[tone],
