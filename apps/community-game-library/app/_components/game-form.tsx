@@ -176,6 +176,14 @@ export function GameForm({
             value: game.imageUrl,
             help: "Or a link to a picture, used when no image is chosen.",
           })}
+          {text("imageCredit", "Image credit", {
+            value: game.imageCredit,
+            help: "Who made the image and its licence, when its source asks for credit, like “Ines Varga, CC BY-SA 4.0”. A new image leaves the old credit behind.",
+          })}
+          {text("imageSourceUrl", "Credit link", {
+            value: game.imageSourceUrl,
+            help: "The page that gives the credit, such as the image’s page on Wikimedia Commons.",
+          })}
           <Field data-invalid={field("description") ? "true" : undefined}>
             <FieldLabel htmlFor="game-description">
               <span>Description{optional}</span>

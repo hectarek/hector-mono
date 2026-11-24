@@ -68,4 +68,45 @@ describe("Cover", () => {
     expect(view.getByText("Harbor Lights")).toBeTruthy();
     expect(token(view.container)).toBe("moss");
   });
+
+  it("credits the art under the tile, linked to its page, until the art fails", () => {
+    const view = render(
+      <Cover
+        title="Harbor Lights"
+        color="moss"
+        imageUrl="https://example.test/a.jpg"
+        imageCredit="Ines Varga, CC BY-SA 4.0"
+        imageSourceUrl="https://example.test/file-page"
+      />,
+    );
+    const credit = view.getByRole("link", { name: "Ines Varga, CC BY-SA 4.0" });
+    expect(credit.getAttribute("href")).toBe("https://example.test/file-page");
+    expect(credit.parentElement?.textContent).toBe(
+      "Image: Ines Varga, CC BY-SA 4.0",
+    );
+
+    const art = view.container.querySelector("img");
+    if (!art) throw new Error("No art drawn");
+    fireEvent.error(art);
+    expect(view.queryByText(/Ines Varga/) === null).toBe(true);
+  });
+
+  it("gives a credit without a page as plain words, and none without art", () => {
+    const credited = render(
+      <Cover
+        title="Harbor Lights"
+        color="moss"
+        imageUrl="https://example.test/a.jpg"
+        imageCredit="Public domain"
+      />,
+    );
+    expect(credited.getByText("Image: Public domain")).toBeTruthy();
+    expect(credited.queryByRole("link") === null).toBe(true);
+    credited.unmount();
+
+    const tokenOnly = render(
+      <Cover title="Harbor Lights" color="moss" imageCredit="Public domain" />,
+    );
+    expect(tokenOnly.queryByText(/Public domain/) === null).toBe(true);
+  });
 });

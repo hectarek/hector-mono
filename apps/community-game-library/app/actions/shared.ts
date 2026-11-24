@@ -76,6 +76,8 @@ const FIELD_LABELS: Record<string, string> = {
   designers: "Designers",
   dueOn: "Date",
   endsAt: "Ends",
+  imageCredit: "Image credit",
+  imageSourceUrl: "Credit link",
   imageUrl: "Image address",
   maxMinutes: "Play time",
   maxPlayers: "Players",

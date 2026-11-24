@@ -71,6 +71,13 @@ const NEXT_CATALOG = fileOf(
   { ...LINES.lantern, designers: ["Ines Varga"], popularity: 5 },
 );
 
+// A free image of The Lantern Row, as the file gives one from Wikimedia Commons.
+const IMAGE = {
+  imageUrl: "https://images.example/lantern-row-500px.jpg",
+  imageCredit: "Ines Varga, CC BY-SA 4.0",
+  imageSourceUrl: "https://images.example/File:Lantern_Row.jpg",
+};
+
 function rowsOf(text: string): CatalogRow[] {
   const rows = readCatalog(text);
   if (typeof rows === "string") {
@@ -155,6 +162,8 @@ describe("readCatalog", () => {
         categories: null,
         description: null,
         imageUrl: null,
+        imageCredit: null,
+        imageSourceUrl: null,
         videoUrl: null,
         popularity: 2,
       },
@@ -177,6 +186,8 @@ describe("readCatalog", () => {
         categories: ["Family"],
         description: null,
         imageUrl: null,
+        imageCredit: null,
+        imageSourceUrl: null,
         videoUrl: null,
         popularity: 9,
       },
@@ -218,12 +229,28 @@ describe("readCatalog", () => {
       "Line 1: an expansion has a base game, and only an expansion does.",
     ],
     [
+      "an image without its credit",
+      fileOf({ ...LINES.lantern, ...IMAGE, imageCredit: undefined }),
+      "Line 1: an image comes with its credit and its page.",
+    ],
+    [
+      "an image address that isn't a link",
+      fileOf({ ...LINES.lantern, ...IMAGE, imageUrl: "lantern.jpg" }),
+      "Line 1 isn't a game the load knows (imageUrl).",
+    ],
+    [
       "an expansion of a game the file lacks",
       fileOf(LINES.secondBrew, LINES.lantern),
       "Copper Kettle: Second Brew expands a game that isn't a base game in the file.",
     ],
   ])("refuses %s", (_case, text, reason) => {
     expect(readCatalog(text)).toBe(reason);
+  });
+
+  it("reads an image with its credit and its page", () => {
+    expect(rowsOf(fileOf({ ...LINES.lantern, ...IMAGE }))).toEqual([
+      expect.objectContaining(IMAGE),
+    ]);
   });
 });
 
@@ -299,6 +326,31 @@ describe("planUpdate", () => {
     ]);
     expect(plan.kept).toEqual([
       { title: "Copper Kettle: Second Brew", columns: ["year"] },
+    ]);
+  });
+
+  it("fills an image with its credit, and leaves both when the admin changed the image", () => {
+    const loaded = rowsOf(CATALOG);
+    const withImage = rowsOf(
+      fileOf(LINES.secondBrew, LINES.kettle, { ...LINES.lantern, ...IMAGE }),
+    );
+
+    expect(planUpdate(withImage, loaded, loaded).updates).toEqual([
+      { id: LANTERN, title: "The Lantern Row", set: IMAGE },
+    ]);
+
+    const ownPhoto = loaded.map((row) =>
+      row.id === LANTERN
+        ? { ...row, imageUrl: "https://bucket.example/games/lantern.jpg" }
+        : row,
+    );
+    const plan = planUpdate(withImage, loaded, ownPhoto);
+    expect(plan.updates).toEqual([]);
+    expect(plan.kept).toEqual([
+      {
+        title: "The Lantern Row",
+        columns: ["imageUrl", "imageCredit", "imageSourceUrl"],
+      },
     ]);
   });
 

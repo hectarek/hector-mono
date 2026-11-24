@@ -1,6 +1,6 @@
 // Makes db/catalog.jsonl, the catalog's own dataset (docs/catalog-data.md, The plan), from
-// Wikidata and the English, German and French Wikipedias' infoboxes, and prints what it holds.
-// U24 loads the file.
+// Wikidata and the English, German and French Wikipedias' infoboxes, with free images from
+// Wikimedia Commons for the best-known games, and prints what it holds. U24 loads the file.
 //
 //   cd apps/community-game-library
 //   bun scripts/shape-catalog.ts
@@ -13,9 +13,12 @@ import {
   BOARD_GAME,
   baseOf,
   type CatalogGame,
+  type CommonsImage,
   gameId,
   type Infoboxes,
   type InfoboxFacts,
+  imageFileFromText,
+  imageFilesOf,
   infoboxFacts,
   isPublished,
   LANGUAGES,
@@ -25,9 +28,11 @@ import {
   type Publisher,
   type Quantity,
   shapeGame,
+  textOfHtml,
   toJsonLines,
   type WikidataItem,
   whyLeftOut,
+  withImage,
 } from "@/scripts/lib/catalog";
 import { print } from "@/scripts/lib/terminal";
 
@@ -36,6 +41,7 @@ export const USER_AGENT = `CommunityGameLibraryCatalogBot/1.0 (https://github.co
 const WIKIDATA_QUERY = "https://query.wikidata.org/sparql";
 const wikipediaApi = (language: Language) =>
   `https://${language}.wikipedia.org/w/api.php`;
+const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const CATALOG_FILE = new URL("../db/catalog.jsonl", import.meta.url);
 
 // BoardGameGeek's own Wikidata item. A statement whose reference names it, or links to its site,
@@ -66,6 +72,13 @@ const ITEMS_PER_QUERY = 500;
 const ARTICLES_PER_REQUEST = 50;
 const PAUSE_MS = 1000;
 const ATTEMPTS = 4;
+
+// The best-known games that get a free image (Hector, 2026-11-24: "the top games"), and the width
+// asked of Commons: one of the widths Wikimedia's servers make, which refuse others to a link from
+// outside (mediawiki.org, Common thumbnail sizes, 2026). It covers the 148px-high cover on a
+// phone's screen.
+const IMAGED_GAMES = 500;
+const IMAGE_WIDTH = 500;
 
 // The candidates: board games and their subclasses, and the other game classes directly. Asked
 // apart and joined here, since one query asking both with the details timed out (2026-11-23).
@@ -108,14 +121,17 @@ WHERE {
   OPTIONAL { ${statement("P577", "date", "ps:P577 ?date")} }
 } GROUP BY ?item`;
 
-// Players, play time and age, each statement of the best rank with its unit.
+// Players, play time and age, each statement of the best rank with its unit, and the item's image
+// (the first by name, so a run doesn't pick another of several).
 const numbersQuery = (qids: string[]) => `SELECT ?item
+  (MIN(STR(?image)) AS ?image)
   (GROUP_CONCAT(DISTINCT STR(?minP); separator=" ") AS ?minPlayers)
   (GROUP_CONCAT(DISTINCT STR(?maxP); separator=" ") AS ?maxPlayers)
   (GROUP_CONCAT(DISTINCT ?dur; separator=" ") AS ?durations)
   (GROUP_CONCAT(DISTINCT ?age; separator=" ") AS ?ages)
 WHERE {
   VALUES ?item { ${values(qids)} }
+  OPTIONAL { ?item wdt:P18 ?image }
   OPTIONAL { ${statement("P1872", "minP", "ps:P1872 ?minP")} }
   OPTIONAL { ${statement("P1873", "maxP", "ps:P1873 ?maxP")} }
   OPTIONAL { ${statement("P2047", "dur", "psv:P2047 ?dv . ?dv wikibase:quantityAmount ?da ; wikibase:quantityUnit ?du")}
@@ -148,8 +164,10 @@ type Binding = Record<string, { value: string } | undefined>;
 let lastRequestAt = 0;
 
 // The answers that mean busy, worth asking again. The query service answers a query it can't run
-// with 500, which asking again doesn't change.
+// with 500, which asking again doesn't change, except one: its "Headless value factory" error came
+// and went for a query that ran before and after it (2026-11-24), so that one is asked again too.
 const BUSY = new Set([429, 502, 503, 504]);
+const PASSING_ERROR = /Headless value factory/;
 
 // One request at a time, a second apart, asked again when Wikimedia says it's busy.
 async function request(url: string, init: RequestInit = {}): Promise<Response> {
@@ -163,16 +181,18 @@ async function request(url: string, init: RequestInit = {}): Promise<Response> {
       ...init,
       headers: { ...init.headers, "User-Agent": USER_AGENT },
     });
-    if (!BUSY.has(response.status) || attempt === ATTEMPTS) {
-      if (!response.ok) {
-        const why =
-          (await response.text()).match(/\w*Exception[^\n]{0,200}/g)?.at(-1) ??
-          "";
-        throw new Error(
-          `${url.split("?")[0]} answered ${response.status} ${why}`,
-        );
-      }
+    if (response.ok) {
       return response;
+    }
+    const body = await response.text();
+    const again =
+      BUSY.has(response.status) ||
+      (response.status === 500 && PASSING_ERROR.test(body));
+    if (!again || attempt === ATTEMPTS) {
+      const why = body.match(/\w*Exception[^\n]{0,200}/g)?.at(-1) ?? "";
+      throw new Error(
+        `${url.split("?")[0]} answered ${response.status} ${why}`,
+      );
     }
     const retryAfter = Number(response.headers.get("Retry-After"));
     await Bun.sleep(
@@ -265,13 +285,14 @@ async function fetchItems(): Promise<Map<string, WikidataItem>> {
         minAges: [],
         publishers: [],
         designers: [],
+        image: null,
       });
     }
   }
   return items;
 }
 
-// Each item's players, play time, age, publishers and designers.
+// Each item's players, play time, age, image, publishers and designers.
 async function fetchDetails(items: WikidataItem[]): Promise<void> {
   const byQid = new Map(items.map((item) => [item.qid, item]));
   for (const batch of batches([...byQid.keys()])) {
@@ -282,6 +303,7 @@ async function fetchDetails(items: WikidataItem[]): Promise<void> {
         item.maxPlayers = words(row, "maxPlayers").map(Number);
         item.durations = quantities(row, "durations");
         item.minAges = quantities(row, "ages");
+        item.image = imageFileFromText(text(row, "image"));
       }
     }
     for (const row of await query(peopleQuery(batch))) {
@@ -348,6 +370,93 @@ async function fetchInfoboxes(
   return facts;
 }
 
+type ImagePage = {
+  title: string;
+  imageinfo?: {
+    url: string;
+    thumburl?: string;
+    descriptionurl: string;
+    mime: string;
+    extmetadata?: Record<string, { value: string } | undefined>;
+  }[];
+};
+type ImagesAnswer = {
+  query?: {
+    normalized?: { from: string; to: string }[];
+    redirects?: { from: string; to: string }[];
+    pages: ImagePage[];
+  };
+  error?: { code: string; info: string };
+};
+
+// What Commons says of each file, by the name asked for: its address IMAGE_WIDTH wide, its page,
+// and its credit. A file Commons lacks, such as box art English Wikipedia keeps under fair use,
+// isn't in the map.
+async function fetchCommonsImages(
+  files: string[],
+): Promise<Map<string, CommonsImage>> {
+  const images = new Map<string, CommonsImage>();
+  for (let start = 0; start < files.length; start += ARTICLES_PER_REQUEST) {
+    const batch = files.slice(start, start + ARTICLES_PER_REQUEST);
+    const params = new URLSearchParams({
+      action: "query",
+      prop: "imageinfo",
+      iiprop: "url|mime|extmetadata",
+      iiurlwidth: `${IMAGE_WIDTH}`,
+      iiextmetadatafilter:
+        "Artist|Attribution|AttributionRequired|LicenseShortName",
+      iiextmetadatalanguage: "en",
+      redirects: "1",
+      format: "json",
+      formatversion: "2",
+      maxlag: "5",
+      titles: batch.map((file) => `File:${file}`).join("|"),
+    });
+    const answer = (await (
+      await request(`${COMMONS_API}?${params}`)
+    ).json()) as ImagesAnswer;
+    if (answer.error || !answer.query) {
+      throw new Error(
+        `Commons answered ${answer.error?.code ?? "nothing"}: ${answer.error?.info ?? ""}`,
+      );
+    }
+    // A page's title back to the name asked for, through a redirect and Commons' spelling.
+    const back = new Map(
+      [
+        ...(answer.query.redirects ?? []),
+        ...(answer.query.normalized ?? []),
+      ].map(({ from, to }) => [to, from]),
+    );
+    const askedFor = (title: string) => {
+      let name = title;
+      for (let step = 0; step < 3 && back.has(name); step++) {
+        name = back.get(name) ?? name;
+      }
+      return name.replace(/^File:/, "");
+    };
+    for (const page of answer.query.pages) {
+      const info = page.imageinfo?.[0];
+      if (info === undefined) {
+        continue;
+      }
+      const field = (name: string) => {
+        const value = info.extmetadata?.[name]?.value;
+        return value === undefined ? null : textOfHtml(value);
+      };
+      images.set(askedFor(page.title), {
+        url: info.thumburl ?? info.url,
+        pageUrl: info.descriptionurl,
+        mime: info.mime,
+        artist: field("Artist"),
+        attribution: field("Attribution"),
+        licence: field("LicenseShortName"),
+        attributionRequired: field("AttributionRequired") !== "false",
+      });
+    }
+  }
+  return images;
+}
+
 const titleIn = (item: WikidataItem, language: Language) =>
   ({ en: item.enwikiTitle, de: item.dewikiTitle, fr: item.frwikiTitle })[
     language
@@ -407,16 +516,30 @@ async function shapeCatalog(items: Map<string, WikidataItem>) {
   }
   read.de = await fetchInfoboxes("de", titlesIn(shelved, "de"));
   read.fr = await fetchInfoboxes("fr", titlesIn(shelved, "fr"));
-  const games = shelved.map((item) => {
-    const base = baseOf(item, baseGames);
-    return shapeGame(
-      item,
-      infoboxesOf(item),
-      base === null ? null : gameId(base),
-    );
-  });
+  const games = orderGames(
+    shelved.map((item) => {
+      const base = baseOf(item, baseGames);
+      return shapeGame(
+        item,
+        infoboxesOf(item),
+        base === null ? null : gameId(base),
+      );
+    }),
+  );
+  // The best-known games' images, each game's tried in order (imageFilesOf).
+  const imageFiles = new Map(
+    games.slice(0, IMAGED_GAMES).flatMap((game) => {
+      const item = items.get(game.wikidataId);
+      return item ? [[game.id, imageFilesOf(item, infoboxesOf(item))]] : [];
+    }),
+  );
+  const commons = await fetchCommonsImages([
+    ...new Set([...imageFiles.values()].flat()),
+  ]);
   return {
-    games: orderGames(games),
+    games: games.map((game) =>
+      withImage(game, imageFiles.get(game.id) ?? [], commons),
+    ),
     leftOut,
     byEnglishInfobox: shelved.filter((item) => !item.published).length,
     articlesRead: [
@@ -446,6 +569,7 @@ function summary({
     `designers ${filled("designers")}`,
     `publishers ${filled("publishers")}`,
     `categories ${filled("categories")}`,
+    `images ${count((game) => game.imageUrl !== undefined)}, all among the ${IMAGED_GAMES} best known`,
     `Wikipedia articles read: ${articlesRead}`,
     ...[...leftOut].map(([why, items]) => `left out, ${why}: ${items}`),
   ];

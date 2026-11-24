@@ -92,6 +92,8 @@ export const games = pgTable(
     categories: text("categories").array(),
     description: text("description"),
     imageUrl: text("image_url"),
+    imageCredit: text("image_credit"),
+    imageSourceUrl: text("image_source_url"),
     videoUrl: text("video_url"),
     popularity: integer("popularity"),
     createdAt: createdAt(),

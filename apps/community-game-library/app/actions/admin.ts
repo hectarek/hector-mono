@@ -29,6 +29,8 @@ const GAME_FIELDS = [
   "categories",
   "description",
   "imageUrl",
+  "imageCredit",
+  "imageSourceUrl",
   "videoUrl",
 ] as const;
 

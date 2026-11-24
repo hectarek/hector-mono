@@ -1,7 +1,7 @@
 import type { IGamesRepository } from "@/src/application/repositories/games.repository.interface";
 import type { IFileStorage } from "@/src/application/services/file-storage.service.interface";
 import { InputParseError } from "@/src/entities/errors/common";
-import type { GameRecord } from "@/src/entities/models/game.model";
+import type { Game, GameRecord } from "@/src/entities/models/game.model";
 import type { ITransaction } from "@/src/entities/models/transaction.model";
 import { PHOTO_EXTENSIONS, type Photo } from "@/src/entities/profile-photo";
 
@@ -24,6 +24,21 @@ export async function checkFamily(
   if (base?.type !== "base-game") {
     throw new InputParseError("An expansion needs its base game");
   }
+}
+
+// A credit belongs to its image (data-model.md, games): when the admin changes or removes the
+// image and leaves the credit as it was, the credit goes with the old image.
+export function creditOnlyItsImage(
+  current: Game,
+  record: GameRecord,
+): GameRecord {
+  const sameImage = record.imageUrl === current.imageUrl;
+  const sameCredit =
+    record.imageCredit === current.imageCredit &&
+    record.imageSourceUrl === current.imageSourceUrl;
+  return sameImage || !sameCredit
+    ? record
+    : { ...record, imageCredit: null, imageSourceUrl: null };
 }
 
 // A game's picture uploaded on G3 or G4, into the public catalog bucket (KTD11): its address

@@ -6,8 +6,9 @@ import { PageColumn } from "@/app/_components/page-column";
 const SOURCE_LINK =
   "font-bold underline decoration-dashed decoration-2 underline-offset-4";
 
-// About the catalog (U24, the row Y1 draws on You): where the catalog's games and their facts come
-// from (docs/catalog-data.md, The plan), the sources' credit, and the way in for a game it lacks.
+// About the catalog (U24, the row Y1 draws on You): where the catalog's games, their facts and
+// their images come from (docs/catalog-data.md, The plan), the sources' credit, and the way in for
+// a game it lacks.
 // It reads nothing, so it prerenders whole.
 export default function AboutCatalogPage() {
   return (
@@ -21,7 +22,9 @@ export default function AboutCatalogPage() {
           Every game you add to your library comes from the catalog. It holds
           the published board, card and party games on Wikidata. Where Wikidata
           lacks a fact, such as the players or the play time, it comes from the
-          game’s page on English Wikipedia.
+          game’s page on Wikipedia, in English, German or French. The best-known
+          games have a free image from Wikimedia Commons, credited under it on
+          the game’s page.
         </p>
       </div>
       <p className="text-15">
@@ -36,7 +39,7 @@ export default function AboutCatalogPage() {
         </a>{" "}
         and{" "}
         <a
-          href="https://en.wikipedia.org"
+          href="https://www.wikipedia.org"
           target="_blank"
           rel="noreferrer"
           className={SOURCE_LINK}

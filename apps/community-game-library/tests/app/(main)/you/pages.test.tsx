@@ -113,6 +113,9 @@ describe("About the catalog", () => {
     expect(
       view.getByText(/published board, card and party games on Wikidata/),
     ).toBeTruthy();
+    expect(
+      view.getByText(/free image from Wikimedia Commons, credited under it/),
+    ).toBeTruthy();
     expect(view.getByText(/^Game facts from/).textContent).toBe(
       "Game facts from Wikidata and Wikipedia.",
     );
@@ -120,7 +123,7 @@ describe("About the catalog", () => {
       ["Wikidata", "Wikipedia"].map((name) =>
         view.getByRole("link", { name }).getAttribute("href"),
       ),
-    ).toEqual(["https://www.wikidata.org", "https://en.wikipedia.org"]);
+    ).toEqual(["https://www.wikidata.org", "https://www.wikipedia.org"]);
     expect(
       view
         .getByRole("button", { name: "Can’t find a game? Suggest one" })

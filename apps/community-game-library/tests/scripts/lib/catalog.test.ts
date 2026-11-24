@@ -3,23 +3,30 @@ import {
   ageFromText,
   baseOf,
   type CatalogGame,
+  type CommonsImage,
   categoriesFromText,
   categoriesOf,
+  creditOf,
   gameId,
   type InfoboxFacts,
+  imageFileFromText,
+  imageFilesOf,
   infoboxFacts,
   infoboxParams,
   isPublished,
   minutesFromText,
   minutesFromWikidata,
+  nameInCredit,
   namesFromText,
   orderGames,
   playersFromText,
   publishersOf,
   shapeGame,
+  textOfHtml,
   toJsonLines,
   type WikidataItem,
   whyLeftOut,
+  withImage,
   yearFromText,
 } from "@/scripts/lib/catalog";
 import { gameSchema } from "@/src/entities/models/game.model";
@@ -49,6 +56,7 @@ function item(overrides: Partial<WikidataItem> = {}): WikidataItem {
     minAges: [{ amount: 10, unit: "Q577" }],
     publishers: [{ name: "Tidewater Games", countries: ["Q30"], sitelinks: 1 }],
     designers: ["Ines Varga"],
+    image: null,
     ...overrides,
   };
 }
@@ -76,6 +84,7 @@ const HARBOR_LIGHTS_GERMAN = `{{Infobox Spiel
 | Mitspieler = 2 bis 5
 | Dauer = ca. 45–60 Minuten
 | Alter = ab 10 Jahren
+| Bild = Hafenlichter_Spielbrett.jpg
 }}
 '''Hafenlichter''' ist ein Spiel.`;
 
@@ -92,6 +101,7 @@ const HARBOR_LIGHTS_FRENCH = `{{Infobox Jeu
 | durée = env. 1 h
 | mécanisme1 = coopération
 | thème1 = [[Science-fiction]]
+| image = [[Fichier:feux du port.svg|200px]]
 }}`;
 
 // An infobox's facts with nothing in them but what a test names.
@@ -104,6 +114,7 @@ function facts(overrides: Partial<InfoboxFacts> = {}): InfoboxFacts {
     designers: [],
     publishers: [],
     categories: [],
+    image: null,
     ...overrides,
   };
 }
@@ -132,6 +143,7 @@ describe("infoboxFacts", () => {
         minAge: 10,
         designers: ["Ines Varga", "Tom Reyes"],
         publishers: ["Tidewater Games", "Fernhouse Spiele"],
+        image: "Harbor Lights box.png",
       }),
     );
   });
@@ -153,6 +165,7 @@ describe("infoboxFacts", () => {
       designers: ["Ines Varga", "Tom Reyes"],
       publishers: ["Tidewater Games", "Fernhouse"],
       categories: ["Card game", "Tile-laying"],
+      image: "Hafenlichter Spielbrett.jpg",
     });
   });
 
@@ -165,6 +178,7 @@ describe("infoboxFacts", () => {
       designers: ["Ines Varga", "Tom Reyes"],
       publishers: ["Tidewater Games"],
       categories: ["Cooperative", "Science fiction"],
+      image: "Feux du port.svg",
     });
   });
 
@@ -462,11 +476,23 @@ describe("shapeGame", () => {
       categories: null,
       description: null,
       imageUrl: null,
+      imageCredit: null,
+      imageSourceUrl: null,
       videoUrl: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
     expect(parsed.success).toBe(true);
+  });
+
+  it("drops the kind of game a label carries in brackets, and keeps an edition", () => {
+    const titleFor = (label: string) =>
+      shapeGame(item({ label }), {}, null).title;
+    expect(titleFor("Lantern Row (board game)")).toBe("Lantern Row");
+    expect(titleFor("Lantern Row (game)")).toBe("Lantern Row");
+    expect(titleFor("Lantern Row (2nd Edition)")).toBe(
+      "Lantern Row (2nd Edition)",
+    );
   });
 
   it("fills from the infobox what Wikidata lacks or gives more than once, and says so", () => {
@@ -648,5 +674,203 @@ describe("orderGames and toJsonLines", () => {
     expect(lines).toHaveLength(5);
     expect(lines.at(-1)).toBe("");
     expect(JSON.parse(lines[0] ?? "")).toEqual(ordered[0]);
+  });
+});
+
+describe("imageFileFromText", () => {
+  it.each([
+    ["Harbor_Lights box.png", "Harbor Lights box.png"],
+    ["[[File:harbor lights.jpg|250px|The box]]", "Harbor lights.jpg"],
+    ["[[Datei:Hafenlichter.JPG]]", "Hafenlichter.JPG"],
+    ["Fichier:Feux du port.svg <!-- the 2020 box -->", "Feux du port.svg"],
+    [
+      "http://commons.wikimedia.org/wiki/Special:FilePath/Harbor%20Lights%20%28game%29.jpg",
+      "Harbor Lights (game).jpg",
+    ],
+  ])("reads %p as %p", (value, file) => {
+    expect(imageFileFromText(value)).toBe(file);
+  });
+
+  it.each([
+    "",
+    "Harbor Lights",
+    "{{Multiple image|image1=A.jpg|image2=B.jpg}}",
+    "http://commons.wikimedia.org/wiki/Special:FilePath/%E0%A4%A.jpg",
+    "Harbor Lights.pdf",
+  ])("reads no image in %p", (value) => {
+    expect(imageFileFromText(value)).toBeNull();
+  });
+});
+
+describe("imageFilesOf", () => {
+  it("tries Wikidata's image, then the English, German and French infoboxes', each once", () => {
+    expect(
+      imageFilesOf(item({ image: "Harbor Lights table.jpg" }), {
+        fr: facts({ image: "Feux du port.svg" }),
+        de: facts({ image: "Harbor Lights table.jpg" }),
+        en: facts({ image: "Harbor Lights box.png" }),
+      }),
+    ).toEqual([
+      "Harbor Lights table.jpg",
+      "Harbor Lights box.png",
+      "Feux du port.svg",
+    ]);
+    expect(imageFilesOf(item(), {})).toEqual([]);
+  });
+});
+
+describe("textOfHtml", () => {
+  it("reads Commons' HTML as one line of text, its entities read and hidden parts left out", () => {
+    expect(
+      textOfHtml(
+        '<bdi><a href="//commons.example/wiki/User:Ines" title="User:Ines">Ines&nbsp;Varga</a></bdi>\n &amp; <span style="display: none;">Ines Varga</span>Tom&#32;Reyes &#x2013; Fernhouse',
+      ),
+    ).toBe("Ines Varga & Tom Reyes – Fernhouse");
+  });
+});
+
+// A Commons image as fetchCommonsImages gives it, with only what a test sets.
+function commonsImage(overrides: Partial<CommonsImage> = {}): CommonsImage {
+  return {
+    url: "https://images.example/thumb/Harbor_Lights_table.jpg/500px-Harbor_Lights_table.jpg",
+    pageUrl: "https://images.example/wiki/File:Harbor_Lights_table.jpg",
+    mime: "image/jpeg",
+    artist: "Ines Varga",
+    attribution: null,
+    licence: "CC BY-SA 4.0",
+    attributionRequired: true,
+    ...overrides,
+  };
+}
+
+describe("nameInCredit", () => {
+  it.each([
+    ["User_talk:Ines Varga", "Ines Varga"],
+    ["myself (User:Ines Varga)", "Ines Varga"],
+    [
+      "Harbor_lights.jpg: Tom Reyes derivative work: Ines (talk)",
+      "Tom Reyes derivative work: Ines",
+    ],
+    ["Ines Varga", "Ines Varga"],
+    ["en:User:Ines Ines", "Ines"],
+    ["Ines (talk) 10:39, 28 October 2009 (UTC)", "Ines"],
+    ["Ines (talk) (Uploads)", "Ines"],
+    [
+      "Original image by w:User:Tom Reyes, vectorized by User:InesV.",
+      "Original image by Tom Reyes, vectorized by InesV",
+    ],
+    ["Ines V.", "Ines V."],
+  ])("reads %p as %p", (who, name) => {
+    expect(nameInCredit(who)).toBe(name);
+  });
+});
+
+describe("creditOf", () => {
+  it.each([
+    ["names who made it and the licence", {}, "Ines Varga, CC BY-SA 4.0"],
+    [
+      "takes the credit a page asks for over its author",
+      { attribution: "Photo: Tom Reyes" },
+      "Photo: Tom Reyes, CC BY-SA 4.0",
+    ],
+    [
+      "doesn't repeat a licence the credit names",
+      { attribution: "Tom Reyes / CC BY-SA 4.0" },
+      "Tom Reyes / CC BY-SA 4.0",
+    ],
+    [
+      "names only the author under Commons' Attribution licence",
+      { licence: "Attribution" },
+      "Ines Varga",
+    ],
+    [
+      "takes the name out of Commons' boilerplate",
+      {
+        artist:
+          "No machine-readable author provided. Ines Varga assumed (based on copyright claims).",
+      },
+      "Ines Varga, CC BY-SA 4.0",
+    ],
+    [
+      "takes the name out of a wiki link",
+      { artist: "Photo by en:User:Ines_V (talk)" },
+      "Photo by Ines_V, CC BY-SA 4.0",
+    ],
+    [
+      "gives the licence alone when it asks for no name and has none",
+      {
+        artist: "Unknown author",
+        licence: "Public domain",
+        attributionRequired: false,
+      },
+      "Public domain",
+    ],
+  ])("%s", (_case, overrides, credit) => {
+    expect(creditOf(commonsImage(overrides))).toBe(credit);
+  });
+
+  it.each([
+    ["has no licence", { licence: null }],
+    ["is under the GFDL alone", { licence: "GFDL 1.2" }],
+    [
+      "has an email address in its credit",
+      { artist: "ines [at] example.test" },
+    ],
+    ["asks for a name it doesn't give", { artist: null }],
+    [
+      "has a credit too long for a line",
+      {
+        artist:
+          "Ines Varga, Tom Reyes, Mei Lin, Dev Patel, Noor Haddad, Ben Ortiz and Jo Park of the Harbor Lights club",
+      },
+    ],
+  ])("is none when the image %s", (_case, overrides) => {
+    expect(creditOf(commonsImage(overrides))).toBeNull();
+  });
+});
+
+describe("withImage", () => {
+  const game = shapeGame(
+    item(),
+    { en: infoboxFacts(HARBOR_LIGHTS_ARTICLE) },
+    null,
+  );
+
+  it("takes the first image Commons has as a picture with a credit, before the popularity", () => {
+    const commons = new Map([
+      ["Harbor Lights rules.pdf", commonsImage({ mime: "application/pdf" })],
+      ["Harbor Lights table.jpg", commonsImage()],
+    ]);
+    const imaged = withImage(
+      game,
+      [
+        "Harbor Lights box.png",
+        "Harbor Lights rules.pdf",
+        "Harbor Lights table.jpg",
+      ],
+      commons,
+    );
+    expect(imaged).toMatchObject({
+      imageUrl: commonsImage().url,
+      imageCredit: "Ines Varga, CC BY-SA 4.0",
+      imageSourceUrl: commonsImage().pageUrl,
+    });
+    expect(Object.keys(imaged).slice(-5)).toEqual([
+      "imageUrl",
+      "imageCredit",
+      "imageSourceUrl",
+      "popularity",
+      "wikipediaFields",
+    ]);
+  });
+
+  it("leaves a game none of whose images will do as it was", () => {
+    expect(
+      withImage(
+        game,
+        ["Harbor Lights table.jpg"],
+        new Map([["Harbor Lights table.jpg", commonsImage({ artist: null })]]),
+      ),
+    ).toBe(game);
   });
 });

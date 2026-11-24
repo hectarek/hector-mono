@@ -77,6 +77,7 @@ export function parseArgs(argv: readonly string[]): LoadArgs | string {
 // say where the line came from, and aren't columns.
 const counted = z.number().int().nonnegative();
 const names = z.array(z.string().min(1)).min(1);
+const link = z.string().regex(/^https:\/\/\S+$/);
 const catalogLine = z.strictObject({
   id: z.uuid(),
   wikidataId: z.string().regex(/^Q\d+$/),
@@ -92,6 +93,9 @@ const catalogLine = z.strictObject({
   maxMinutes: counted.optional(),
   minAge: counted.optional(),
   categories: names.optional(),
+  imageUrl: link.optional(),
+  imageCredit: z.string().min(1).optional(),
+  imageSourceUrl: link.optional(),
   popularity: counted,
   wikipediaFields: z.array(z.string()).optional(),
 });
@@ -127,6 +131,10 @@ export function readCatalog(text: string): CatalogRow[] | string {
     if ((line.type === "expansion") !== (line.baseGameId !== undefined)) {
       return `${where}: an expansion has a base game, and only an expansion does.`;
     }
+    const imageParts = [line.imageUrl, line.imageCredit, line.imageSourceUrl];
+    if (new Set(imageParts.map((part) => part === undefined)).size > 1) {
+      return `${where}: an image comes with its credit and its page.`;
+    }
     typeOf.set(line.id, line.type);
     rows.push({
       id: line.id,
@@ -146,7 +154,9 @@ export function readCatalog(text: string): CatalogRow[] | string {
       complexity: null,
       categories: line.categories ?? null,
       description: null,
-      imageUrl: null,
+      imageUrl: line.imageUrl ?? null,
+      imageCredit: line.imageCredit ?? null,
+      imageSourceUrl: line.imageSourceUrl ?? null,
       videoUrl: null,
       popularity: line.popularity,
     });
@@ -192,10 +202,18 @@ const UPDATED_COLUMNS = [
   "categories",
   "description",
   "imageUrl",
+  "imageCredit",
+  "imageSourceUrl",
   "videoUrl",
   "popularity",
 ] as const satisfies readonly (keyof CatalogRow)[];
 type UpdatedColumn = (typeof UPDATED_COLUMNS)[number];
+
+// Columns that change only together: an image and its credit (data-model.md, games). When the
+// admin changed one of them, the update leaves them all.
+const TOGETHER: readonly (readonly UpdatedColumn[])[] = [
+  ["imageUrl", "imageCredit", "imageSourceUrl"],
+];
 
 export type GameUpdate = {
   id: string;
@@ -218,7 +236,8 @@ const same = (a: unknown, b: unknown) =>
 // What an update does to the games already in the table: for each of the file's games there, each
 // value that differs from the file changes when it still holds what the file at the last load or
 // update gave (`previous`), so the admin's corrections stay. A game that file didn't have only
-// gets its empty values filled. Each change is a fill, a change or a clear.
+// gets its empty values filled. An image and its credit stay together (TOGETHER). Each change is a
+// fill, a change or a clear.
 export function planUpdate(
   rows: readonly CatalogRow[],
   previous: readonly CatalogRow[],
@@ -239,16 +258,33 @@ export function planUpdate(
       continue;
     }
     const last = before.get(row.id);
+    const differs = (column: UpdatedColumn) =>
+      !same(current[column], row[column]);
+    const held = new Set(
+      UPDATED_COLUMNS.filter(
+        (column) =>
+          differs(column) &&
+          !(last === undefined
+            ? current[column] === null
+            : same(current[column], last[column])),
+      ),
+    );
+    for (const group of TOGETHER) {
+      if (group.some((column) => held.has(column))) {
+        for (const column of group.filter(differs)) {
+          held.add(column);
+        }
+      }
+    }
     const set: GameUpdate["set"] = {};
     const kept: UpdatedColumn[] = [];
     for (const column of UPDATED_COLUMNS) {
       const now = current[column];
       const next = row[column];
-      if (same(now, next)) {
+      if (!differs(column)) {
         continue;
       }
-      const ours = last === undefined ? now === null : same(now, last[column]);
-      if (!ours) {
+      if (held.has(column)) {
         kept.push(column);
         continue;
       }

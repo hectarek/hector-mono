@@ -134,6 +134,8 @@ A4 for a Google sign-up starts with its Google picture as the photo, as if they 
 | Y2       | The home-screen icon (Three pieces, chosen 2026-11-12), the name and the link preview                 | R43           |
 | W0 to W4 | Wider screens: the rules, the library on a laptop and a tablet, a game's page, a sheet as a dialog    | R43           |
 
+An image from Wikimedia Commons carries its own credit, which Y1 doesn't draw: a line under the cover on the game's page, "Image: Ines Varga, CC BY-SA 4.0", linked to the image's page and shown while the image shows (2026-11-24). The record (G3, G4) has the credit's two fields, Image credit and Credit link, and a new image leaves the old credit behind.
+
 ## Rules every screen follows
 
 These came from Hector's reviews (D13, D14) and from a usability audit of all 65 first screens on 2026-11-11. The look itself, with its tokens and components, is a design system kept beside the canvas.

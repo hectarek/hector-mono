@@ -165,6 +165,31 @@ describe("a game's page", () => {
     );
   });
 
+  it("credits a game's image under its cover, linked to the image's page", async () => {
+    const catalog = getInjection("IGamesRepository");
+    const game = await catalog.getById(games.harborMaster.id);
+    if (!game) throw new Error("No Harbor Master");
+    await getInjection("ITransactionManagerService").startTransaction((tx) =>
+      catalog.update(
+        game.id,
+        {
+          ...game,
+          imageUrl: "https://images.example/harbor-master-500px.jpg",
+          imageCredit: "Ines Varga, CC BY-SA 4.0",
+          imageSourceUrl: "https://images.example/File:Harbor_Master.jpg",
+        },
+        tx,
+      ),
+    );
+
+    const view = await renderGame(games.harborMaster.id);
+    expect(
+      view
+        .getByRole("link", { name: "Ines Varga, CC BY-SA 4.0" })
+        .getAttribute("href"),
+    ).toBe("https://images.example/File:Harbor_Master.jpg");
+  });
+
   it("says when none of your friends own a game, with I own it", async () => {
     const view = await renderGame(games.harborMaster.id);
 

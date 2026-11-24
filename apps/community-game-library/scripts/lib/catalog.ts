@@ -34,6 +34,8 @@ export type WikidataItem = {
   publishers: Publisher[];
   // Designers who are people, by their English names.
   designers: string[];
+  // Wikidata's image of it, by its file name on Wikimedia Commons.
+  image: string | null;
 };
 
 // A Wikidata quantity: its amount and its unit's item, null when it has none.
@@ -56,14 +58,16 @@ export type InfoboxFacts = {
   designers: string[];
   publishers: string[];
   categories: string[];
+  // The infobox's image by its file name, which may be on Commons or only on that Wikipedia.
+  image: string | null;
 };
 
 // A game's infoboxes, one per Wikipedia that has an article on it.
 export type Infoboxes = Partial<Record<Language, InfoboxFacts>>;
 
 // One line of db/catalog.jsonl: a games row (data-model.md) without the values the dataset
-// doesn't fill (best counts, complexity, description, image, video), plus where it came from.
-// A value the game lacks is left out of the line, and U24 writes it as null.
+// doesn't fill (best counts, complexity, description, video), plus where it came from. A value
+// the game lacks is left out of the line, and U24 writes it as null.
 export type CatalogGame = {
   id: string;
   wikidataId: string;
@@ -79,6 +83,11 @@ export type CatalogGame = {
   maxMinutes?: number;
   minAge?: number;
   categories?: string[];
+  // A free image from Wikimedia Commons with its credit and its page, on the best-known games
+  // (withImage).
+  imageUrl?: string;
+  imageCredit?: string;
+  imageSourceUrl?: string;
   popularity: number;
   // The values taken from a Wikipedia infobox rather than Wikidata.
   wikipediaFields?: WikipediaField[];
@@ -279,9 +288,13 @@ export function whyLeftOut(item: WikidataItem): string | null {
 
 // The English label, or the English article's title without its "(board game)". A label all in
 // lower case, as Wikidata writes a common noun ("mahjong"), starts with a capital.
+// The kind of game in brackets that some labels carry, as Wikipedia's titles do: "Memory (game)",
+// "Insecta (board game)". An edition or a year in brackets stays.
+const KIND_IN_BRACKETS = /\s*\((?:[a-z-]+ )?game\)$/i;
+
 function titleOf(item: WikidataItem): string | null {
   const name =
-    item.label?.trim() ||
+    item.label?.replace(KIND_IN_BRACKETS, "").trim() ||
     item.enwikiTitle?.replace(/\s*\([^)]*\)$/, "").trim() ||
     null;
   if (name === null) {
@@ -624,6 +637,7 @@ type InfoboxLines = {
   designers: string;
   publishers: string;
   genre: string;
+  image: string;
 };
 
 // What a game's infobox says about its players, play time, age, year, designers, publishers and
@@ -653,6 +667,7 @@ export function infoboxFacts(
       language,
     ),
     categories: categoriesFromText(plainText(lines.genre), language),
+    image: imageFileFromText(lines.image),
   });
   if (language === "de") {
     return read({
@@ -663,6 +678,7 @@ export function infoboxFacts(
       designers: param("autor"),
       publishers: param("verlag"),
       genre: param("art"),
+      image: param("bild"),
     });
   }
   if (language === "fr") {
@@ -679,6 +695,7 @@ export function infoboxFacts(
       genre: [param("type"), numbered("mécanisme"), numbered("thème")].join(
         "\n",
       ),
+      image: param("image"),
     });
   }
   return read({
@@ -689,6 +706,7 @@ export function infoboxFacts(
     designers: param("designer"),
     publishers: param("publisher"),
     genre: param("genre"),
+    image: param("image") || param("image_link"),
   });
 }
 
@@ -941,4 +959,165 @@ export function orderGames(games: CatalogGame[]): CatalogGame[] {
 
 export function toJsonLines(games: CatalogGame[]): string {
   return games.map((game) => `${JSON.stringify(game)}\n`).join("");
+}
+
+// A Commons file's name from an infobox's image parameter or Wikidata's address for the file:
+// "[[File:harbor_lights.jpg|250px]]" and ".../Special:FilePath/Harbor%20Lights.jpg" both name
+// "Harbor lights.jpg", spaced and capitalized as Commons names it. Anything else is no image.
+export function imageFileFromText(value: string): string | null {
+  const address = value.match(/Special:FilePath\/(.+)$/)?.[1];
+  let name = value;
+  if (address !== undefined) {
+    try {
+      name = decodeURIComponent(address);
+    } catch {
+      return null;
+    }
+  }
+  name = (
+    name
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/^\s*\[\[/, "")
+      .split("|")[0] ?? ""
+  )
+    .replace(/\]\]\s*$/, "")
+    .replace(/^\s*(?:file|image|datei|bild|fichier)\s*:/i, "")
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!/^[^/{}<>[\]]+\.(?:jpe?g|png|gif|svg|webp|tiff?)$/i.test(name)) {
+    return null;
+  }
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+// A game's images in the order they're tried: Wikidata's, then its English, German and French
+// infoboxes'. English Wikipedia's are often box art it keeps under fair use, which Commons lacks.
+export function imageFilesOf(
+  item: WikidataItem,
+  infoboxes: Infoboxes,
+): string[] {
+  const files = [
+    item.image,
+    ...LANGUAGES.map((language) => infoboxes[language]?.image ?? null),
+  ];
+  return [...new Set(files.filter((file): file is string => file !== null))];
+}
+
+// What Wikimedia Commons says of an image file: its address at the width the script asked for,
+// its page, its type, and the credit its page asks for, as plain text.
+export type CommonsImage = {
+  url: string;
+  pageUrl: string;
+  mime: string;
+  artist: string | null;
+  attribution: string | null;
+  licence: string | null;
+  attributionRequired: boolean;
+};
+
+// The longest credit that reads as a line under a cover.
+const CREDIT_LENGTH = 100;
+
+// Commons gives its credit fields as HTML: their text on one line, with their entities read and
+// any hidden part left out.
+export function textOfHtml(html: string): string {
+  const named: Record<string, string> = {
+    amp: "&",
+    lt: "<",
+    gt: ">",
+    quot: '"',
+    apos: "'",
+    nbsp: " ",
+  };
+  return html
+    .replace(/<(\w+)[^>]*display:\s*none[^>]*>[\s\S]*?<\/\1>/gi, "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (entity, body: string) => {
+      if (body.startsWith("#")) {
+        const code =
+          body[1] === "x" || body[1] === "X"
+            ? Number.parseInt(body.slice(2), 16)
+            : Number(body.slice(1));
+        return Number.isFinite(code) ? String.fromCodePoint(code) : entity;
+      }
+      return named[body.toLowerCase()] ?? entity;
+    })
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// The name in a credit without Commons' boilerplate and wiki links around it: "No machine-readable
+// author provided. Ines assumed (based on copyright claims)." is Ines, "en:User:Ines Ines" is
+// Ines, "Ines (talk) 10:39, 28 October 2009 (UTC)" is Ines, and "myself (User:Ines)" is Ines. A
+// last word's full stop goes, but not an initial's.
+export function nameInCredit(who: string): string {
+  const name = who
+    .replace(
+      /^No machine-readable author provided\. (.+?) assumed \(based on copyright claims\)\.?$/i,
+      "$1",
+    )
+    .replace(/^[^:]*\.(?:jpe?g|png|gif|svg|tiff?):\s*/i, "")
+    .replace(/\b(?:[a-z]{1,3}:)?User(?:[ _]talk)?:/gi, "")
+    .replace(/\s*\((?:talk|uploads|contribs)\)/gi, "")
+    .replace(/\s*\d{1,2}:\d{2}, \d{1,2} \p{L}+ \d{4} \(UTC\)/giu, "")
+    .replace(/^(?:myself|self|own work)\s*\((.+)\)$/i, "$1")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/(\p{L}{3,})\.$/u, "$1");
+  return name.replace(/^(.+) \1$/, "$1");
+}
+
+// The credit an image asks for, on one line: who made it, then its licence ("Ines Varga, CC BY-SA
+// 4.0"). An image whose licence doesn't ask for a name and that gives none is credited by its
+// licence alone ("Public domain"), and one under Commons' Attribution licence, which asks only
+// for the name, by its name. The catalog doesn't use an image without a licence, under the GFDL
+// alone (which asks for its whole text to go with the image), without the name its licence asks
+// for, with an email address in its credit, or with a credit too long for a line.
+export function creditOf(image: CommonsImage): string | null {
+  const { licence } = image;
+  if (licence === null || licence === "" || /^GFDL\b/i.test(licence)) {
+    return null;
+  }
+  const who = image.attribution ?? image.artist;
+  if (who !== null && /@|\[at\]/i.test(who)) {
+    return null;
+  }
+  const name = who === null ? "" : nameInCredit(who);
+  if (name === "" || /^unknown\b/i.test(name)) {
+    return image.attributionRequired ? null : licence;
+  }
+  const credit =
+    licence === "Attribution" || name.includes(licence)
+      ? name
+      : `${name}, ${licence}`;
+  return credit.length <= CREDIT_LENGTH ? credit : null;
+}
+
+// The game with the first of its images that Commons has as a picture with a credit, its fields
+// set before its popularity, in the games model's order. A game none of whose images will do
+// stays as it was, and shows its token (Y1).
+export function withImage(
+  game: CatalogGame,
+  files: readonly string[],
+  commons: ReadonlyMap<string, CommonsImage>,
+): CatalogGame {
+  for (const file of files) {
+    const image = commons.get(file);
+    const credit = image?.mime.startsWith("image/") ? creditOf(image) : null;
+    if (image === undefined || credit === null) {
+      continue;
+    }
+    const { popularity, wikipediaFields, ...facts } = game;
+    return {
+      ...facts,
+      imageUrl: image.url,
+      imageCredit: credit,
+      imageSourceUrl: image.pageUrl,
+      popularity,
+      ...(wikipediaFields === undefined ? {} : { wikipediaFields }),
+    };
+  }
+  return game;
 }

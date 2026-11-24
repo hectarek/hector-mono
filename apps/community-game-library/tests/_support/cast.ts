@@ -844,6 +844,8 @@ function gameRow(game: CastGame, baseGameId: string | null): Game {
     categories: game.categories ?? null,
     description: game.description ?? null,
     imageUrl: null,
+    imageCredit: null,
+    imageSourceUrl: null,
     videoUrl: game.videoUrl ?? null,
     popularity: null,
     createdAt: new Date(CATALOGUED),

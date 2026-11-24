@@ -33,7 +33,9 @@ const form = {
   complexity: "light",
   categories: "Family",
   description: "",
-  imageUrl: "",
+  imageUrl: "https://images.example/fog-500px.jpg",
+  imageCredit: " Ines Varga, CC BY-SA 4.0 ",
+  imageSourceUrl: "https://images.example/File:Fog.jpg",
   videoUrl: "https://video.example/fog",
 };
 const record = {
@@ -52,7 +54,9 @@ const record = {
   complexity: "light",
   categories: ["Family"],
   description: null,
-  imageUrl: null,
+  imageUrl: "https://images.example/fog-500px.jpg",
+  imageCredit: "Ines Varga, CC BY-SA 4.0",
+  imageSourceUrl: "https://images.example/File:Fog.jpg",
   videoUrl: "https://video.example/fog",
 };
 
