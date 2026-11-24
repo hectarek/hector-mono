@@ -16,7 +16,7 @@ import { UnauthorizedError } from "@/src/entities/errors/common";
 
 // E5: the member's own page, reached from the piece at the top. Its profile first, then the rows
 // the app's other pages add as they're built: My library (U7), Notices I get (U11), Admin (U9),
-// Delete my account (U22) and About the catalog (U24).
+// Delete my account (U22), About the catalog (U24), and the privacy policy and terms of use.
 export default async function YouPage() {
   await connection();
   const { user } = await gate("app");
@@ -101,6 +101,12 @@ export default async function YouPage() {
           </ListRow>
           <ListRow href="/you/catalog">
             <span className="text-15 font-bold">About the catalog</span>
+          </ListRow>
+          <ListRow href="/privacy">
+            <span className="text-15 font-bold">Privacy policy</span>
+          </ListRow>
+          <ListRow href="/terms">
+            <span className="text-15 font-bold">Terms of use</span>
           </ListRow>
           {waiting && (
             <ListRow

@@ -6,8 +6,13 @@ const WELCOME_PATH = "/welcome";
 
 // Pages that open signed out too (KTD3, KTD18): a friend link shows A3, which names nobody, and
 // makes the two friends once its visitor is in.
-// A friend link (A3) and a night's link (D14), and nothing under them.
-const OPEN_SIGNED_OUT = [/^\/f\/[^/]+\/?$/, /^\/n\/[^/]+\/?$/];
+// A friend link (A3) and a night's link (D14), and nothing under them; and the privacy policy and
+// the terms of use, which Google's consent screen links to.
+const OPEN_SIGNED_OUT = [
+  /^\/f\/[^/]+\/?$/,
+  /^\/n\/[^/]+\/?$/,
+  /^\/(privacy|terms)\/?$/,
+];
 
 // Primary session cookie set by @neondatabase/auth (Better Auth under the hood), and its
 // signed copy, kept a day (lib/auth/server.ts). See: node_modules/@neondatabase/auth/dist/server-*.mjs
@@ -28,8 +33,8 @@ const OAUTH_VERIFIER_PARAM = "neon_auth_session_verifier";
  *
  * Every signed-out request goes to the welcome screen, except the welcome screen itself and
  * Neon's forms under /auth (the matcher below). Each page that opens signed out (docs/build-plan.md
- * KTD3: the friend and night links, the service worker, the manifest and icons) adds its own
- * line here, with a proxy test.
+ * KTD3: the friend and night links, the privacy policy and terms, the service worker, the
+ * manifest and icons) adds its own line here, with a proxy test.
  *
  * @see https://nextjs.org/docs/app/guides/authentication#optimistic-checks-with-proxy-optional
  * @see https://www.better-auth.com/docs/integrations/next (getSessionCookie pattern)

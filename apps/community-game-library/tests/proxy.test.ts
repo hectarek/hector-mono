@@ -143,6 +143,16 @@ describe("proxy", () => {
     );
   });
 
+  // Google's consent screen links to both.
+  it("lets a signed-out visitor read the privacy policy and the terms, and nothing under them", async () => {
+    for (const path of ["/privacy", "/terms"]) {
+      expect((await proxy(request(path))).headers.get("location")).toBeNull();
+      expect(locationOf(await proxy(request(`${path}/more`))).pathname).toBe(
+        "/welcome",
+      );
+    }
+  });
+
   it("doesn't add a return path for the home page", async () => {
     const location = locationOf(await proxy(request("/")));
     expect(location.pathname).toBe("/welcome");

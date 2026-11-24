@@ -26,6 +26,8 @@ const outsideKit = () =>
     Bun.resolveSync("@/app/removed/page", import.meta.dir),
     Bun.resolveSync("@/app/(main)/you/page", import.meta.dir),
     Bun.resolveSync("@/app/(main)/you/edit/page", import.meta.dir),
+    Bun.resolveSync("@/app/(legal)/privacy/page", import.meta.dir),
+    Bun.resolveSync("@/app/(legal)/terms/page", import.meta.dir),
   );
 
 describe("the root and signed-in layouts", () => {
@@ -45,7 +47,7 @@ describe("the root and signed-in layouts", () => {
   });
 });
 
-describe("the setup steps, the welcome page, the removed page and You", () => {
+describe("the setup steps, the welcome page, the removed page, You, and the privacy policy and terms", () => {
   test("don't load Neon's sign-in kit either: their links to sign out and the account are plain links", () => {
     expect([...outsideKit()].filter(KIT)).toEqual([]);
   });

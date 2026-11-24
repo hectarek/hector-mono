@@ -45,6 +45,18 @@ describe("the welcome page", () => {
     expect(hrefOf(view, "Sign in")).toBe("/auth/sign-in");
   });
 
+  // Google's consent screen needs both; the catalog's credit is on About the catalog (U24).
+  it("links the privacy policy and the terms at its foot", async () => {
+    const view = await welcome();
+    expect(
+      view.getByRole("link", { name: "Privacy" }).getAttribute("href"),
+    ).toBe("/privacy");
+    expect(view.getByRole("link", { name: "Terms" }).getAttribute("href")).toBe(
+      "/terms",
+    );
+    expect(view.queryByText(/BoardGameGeek/) === null).toBe(true);
+  });
+
   it("takes someone on to where they were headed", async () => {
     const view = await welcome({ redirectTo: "/games/abc" });
     expect(hrefOf(view, "Sign in")).toBe(

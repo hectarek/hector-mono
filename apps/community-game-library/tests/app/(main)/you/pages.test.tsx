@@ -51,6 +51,8 @@ describe("E5, You", () => {
       ["Notices I get", "/you/notices"],
       ["Put the app on my home screen", "/start/home-screen?from=you"],
       ["About the catalog", "/you/catalog"],
+      ["Privacy policy", "/privacy"],
+      ["Terms of use", "/terms"],
     ]);
     // The credit is on About the catalog now, not here (U24).
     expect(view.queryByText(/BoardGameGeek|Game facts from/) === null).toBe(
