@@ -1,0 +1,8 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@repo/ui/styles/globals.css";
+@import "@repo/ui/styles/themes/seating-chart.css";
+
+/* The shared stylesheet scans @repo/ui's React components for classes; this app uses none of them. */
+@source not "../../../packages/ui/src/components";
