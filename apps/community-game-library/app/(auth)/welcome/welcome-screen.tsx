@@ -70,12 +70,25 @@ export function Welcome({ ways }: { ways: React.ReactNode }) {
 
       <div className="mt-3 flex flex-col gap-2.5">{ways}</div>
 
-      <p className="mt-auto text-center text-xs text-muted-foreground">
-        Game data from BoardGameGeek.
+      {/* The catalog's credit is on About the catalog and under search results (U24), so the
+          foot links the privacy policy and the terms, which Google's consent screen needs. */}
+      <p className="mt-auto flex justify-center text-xs text-muted-foreground">
+        <Link href="/privacy" className={FOOT_LINK}>
+          Privacy
+        </Link>
+        <span aria-hidden="true" className="flex items-center">
+          ·
+        </span>
+        <Link href="/terms" className={FOOT_LINK}>
+          Terms
+        </Link>
       </p>
     </main>
   );
 }
+
+const FOOT_LINK =
+  "flex min-h-11 items-center px-2 underline underline-offset-4 hover:text-foreground";
 
 export function WaysInPlaceholder() {
   return (
