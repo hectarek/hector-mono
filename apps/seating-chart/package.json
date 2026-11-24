@@ -1,0 +1,36 @@
+{
+  "name": "seating-chart",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3103",
+    "build": "vite build",
+    "preview": "vite preview --port 3103",
+    "ts": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
+    "lint": "biome check --write --error-on-warnings && oxlint --deny-warnings .",
+    "format": "biome format --write",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@repo/ui": "workspace:*",
+    "@solidjs/web": "^2.0.3",
+    "solid-js": "^2.0.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@repo/biome-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@solidjs/diagnostics": "^2.0.3",
+    "@solidjs/vite-plugin": "^3.0.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/bun": "1.4.5",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

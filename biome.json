@@ -40,6 +40,25 @@
           }
         }
       }
+    },
+    {
+      "includes": ["apps/seating-chart/**"],
+      "linter": {
+        "domains": {
+          "solid": "recommended"
+        },
+        "rules": {
+          "correctness": {
+            "noSolidDestructuredProps": "error"
+          },
+          "performance": {
+            "useSolidForComponent": "error"
+          },
+          "suspicious": {
+            "noReactSpecificProps": "error"
+          }
+        }
+      }
     }
   ]
 }

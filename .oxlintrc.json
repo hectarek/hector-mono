@@ -52,6 +52,7 @@
         "apps/hectors-tools/**",
         "apps/job-search/**",
         "apps/relationship-meter/**",
+        "apps/seating-chart/**",
         "apps/stash/**"
       ],
       "rules": {

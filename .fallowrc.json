@@ -8,6 +8,7 @@
     "apps/hectors-recipes/service-worker/worker.ts",
     "apps/job-search/scripts/*.ts"
   ],
+  "ignoreDependencies": ["@solidjs/diagnostics"],
   "ignoreExports": [
     {
       "file": "apps/*/app/**/route.{ts,tsx}",

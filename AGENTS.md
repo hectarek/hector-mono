@@ -127,6 +127,7 @@ apps/
   hectors-tools/       # AI/web tools catalog (Next.js + AI SDK) — clean arch + DI, no DB or auth yet
   job-search/          # Private job search workspace (Next.js + Neon + Drizzle + auth) — clean arch on recipes' pattern; no search specifics in the repo
   community-game-library/  # Friends' board-game library: loans and game nights (Next.js + Neon + Drizzle + auth + object storage) — clean arch on recipes' pattern
+  seating-chart/       # Wedding seating chart: tables on a grid, guests, saved in localStorage (Solid 2.0 + Vite, no backend)
 
 packages/
   ui/                  # Shared UI components (shadcn/ui based) — see packages/ui/AGENTS.md
@@ -138,7 +139,7 @@ packages/
 
 Choose the simplest pattern that solves the problem.
 
-**Simple apps (portfolio, relationship-meter)**:
+**Simple apps (portfolio, relationship-meter, seating-chart)**:
 - Direct data imports or client state
 - No DI containers, no domain error classes
 - Server Components for static data
