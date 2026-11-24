@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { Stamp } from "@/app/_components/stamp";
 import { callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
+import { useMoment } from "@/app/_lib/use-moment";
 import { putInBox } from "@/app/actions/copies";
 import type { ActionState } from "@/app/actions/shared";
 
@@ -14,6 +15,8 @@ import type { ActionState } from "@/app/actions/shared";
 export function InMyBox({ gameId, boxed }: { gameId: string; boxed: boolean }) {
   const [inTheBox, setInTheBox] = useState(boxed);
   const [pending, startTransition] = useTransition();
+  // Its stamp presses as it arrives (U26).
+  const moment = useMoment(inTheBox);
 
   function put() {
     startTransition(async () => {
@@ -34,7 +37,9 @@ export function InMyBox({ gameId, boxed }: { gameId: string; boxed: boolean }) {
   if (inTheBox) {
     return (
       <span className="shrink-0">
-        <Stamp tone="navy">In the box</Stamp>
+        <Stamp key={moment.key} tone="navy" press={moment.playing}>
+          In the box
+        </Stamp>
       </span>
     );
   }

@@ -136,16 +136,47 @@ export function CountFace({ count, inked }: { count: number; inked: boolean }) {
   );
 }
 
-// A tilted pair marks a suggestion ("What should we play?").
-export function DicePair({ onBone = false }: { onBone?: boolean }) {
+// The pair's two faces, each after the two it turns through as it tumbles.
+const PAIR = [
+  { faces: [2, 6, 5], tilt: "-rotate-10" },
+  { faces: [4, 1, 3], tilt: "rotate-8" },
+] as const;
+
+// A tilted pair marks a suggestion ("What should we play?"). While new suggestions are asked for
+// (`tumbling`, played with useMoment and keyed on it), each die turns through two faces and stops
+// on its own (U26's dice tumble): it holds all three, stacked, and only the last shows at rest.
+export function DicePair({
+  onBone = false,
+  tumbling = false,
+}: {
+  onBone?: boolean;
+  tumbling?: boolean;
+}) {
   return (
-    <span aria-hidden="true" className="flex gap-0.75">
-      <span className="-rotate-10">
-        <Die count={5} onBone={onBone} />
-      </span>
-      <span className="rotate-8">
-        <Die count={3} onBone={onBone} />
-      </span>
+    <span
+      aria-hidden="true"
+      data-moment={tumbling ? "tumble" : undefined}
+      className="flex gap-0.75"
+    >
+      {PAIR.map(({ faces, tilt }) =>
+        tumbling ? (
+          <span
+            key={tilt}
+            className={cn(
+              "grid *:col-start-1 *:row-start-1 *:not-last:opacity-0",
+              tilt,
+            )}
+          >
+            {faces.map((count) => (
+              <Die key={count} count={count} onBone={onBone} />
+            ))}
+          </span>
+        ) : (
+          <span key={tilt} className={tilt}>
+            <Die count={faces[2]} onBone={onBone} />
+          </span>
+        ),
+      )}
     </span>
   );
 }

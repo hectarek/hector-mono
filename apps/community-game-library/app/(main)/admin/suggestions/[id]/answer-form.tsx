@@ -94,7 +94,10 @@ export function AnswerForm({
                 size="lg"
                 nativeButton={false}
                 render={
-                  <Link href={`/admin/games/new?suggestion=${suggestionId}`} />
+                  <Link
+                    href={`/admin/games/new?suggestion=${suggestionId}`}
+                    transitionTypes={["go-deeper"]}
+                  />
                 }
               >
                 Add it by hand

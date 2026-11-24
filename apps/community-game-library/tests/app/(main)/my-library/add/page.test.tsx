@@ -116,7 +116,11 @@ describe("Add games", () => {
         .getAllByRole("button")
         .map((button) => button.textContent),
     ).toEqual(["Undo", "Edit copy"]);
-    expect(within(row(view, "Harbor Master")).getByText("Added")).toBeTruthy();
+    // U26: the Added stamp presses as it arrives, or the row's cover token lifts instead where
+    // the cover shows one (app/globals.css picks which).
+    const added = within(row(view, "Harbor Master")).getByText("Added");
+    expect(added.dataset.moment).toBe("press");
+    expect(added.parentElement?.dataset.moment).toBe("add-copy");
     expect(await view.findByText("1 added")).toBeTruthy();
 
     fireEvent.click(

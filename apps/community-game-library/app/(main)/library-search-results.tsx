@@ -42,7 +42,7 @@ export function LibrarySearchResults({
             variant="secondary"
             size="lg"
             nativeButton={false}
-            render={<Link href={suggestHref} />}
+            render={<Link href={suggestHref} transitionTypes={["go-deeper"]} />}
           >
             Suggest a game
           </Button>
@@ -87,7 +87,7 @@ export function LibrarySearchResults({
       <Button
         variant="link"
         nativeButton={false}
-        render={<Link href={suggestHref} />}
+        render={<Link href={suggestHref} transitionTypes={["go-deeper"]} />}
         className="self-start"
       >
         Can’t find it? Suggest a game

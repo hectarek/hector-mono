@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ChangingStamp } from "@/app/_components/changing-stamp";
 import { type CopyLine, CopyLines } from "@/app/_components/copy-state";
 import { ForwardIcon } from "@/app/_components/icons";
 import { RowName } from "@/app/_components/list-row";
 import { Piece } from "@/app/_components/piece";
-import { Stamp } from "@/app/_components/stamp";
 import type { CopyStamp } from "@/src/entities/loan";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 
@@ -12,6 +12,7 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 // state gives, and the person looking's own stamp. A copy with a page for the person looking (their
 // own, or the request they sent) is one link with a chevron, as ListRow; the rest show their state
 // where they stand, with the button it offers at the right (Borrow, Join the line, Leave the line).
+// Its stamp presses when it changes there, as asking to borrow stamps it You asked (U26).
 export function CopyRow({
   name,
   owner,
@@ -35,7 +36,7 @@ export function CopyRow({
           <RowName>{name}</RowName>
           <CopyLines lines={lines} />
         </span>
-        {stamp && <Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
+        <ChangingStamp stamp={stamp} />
         {action}
       </span>
     </>
@@ -45,6 +46,7 @@ export function CopyRow({
       {href ? (
         <Link
           href={href}
+          transitionTypes={["go-deeper"]}
           className="flex min-h-12 items-center gap-2.5 px-3 py-2.5 text-foreground hover:text-destructive focus-visible:-outline-offset-3"
         >
           {body}

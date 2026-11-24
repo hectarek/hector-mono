@@ -40,7 +40,9 @@ export default async function NightsPage() {
               size="sm"
               variant="secondary"
               nativeButton={false}
-              render={<Link href="/nights/new" />}
+              render={
+                <Link href="/nights/new" transitionTypes={["go-deeper"]} />
+              }
             >
               New night
             </Button>
@@ -57,7 +59,9 @@ export default async function NightsPage() {
             <Button
               variant="secondary"
               nativeButton={false}
-              render={<Link href="/nights/new" />}
+              render={
+                <Link href="/nights/new" transitionTypes={["go-deeper"]} />
+              }
             >
               New game night
             </Button>

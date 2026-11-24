@@ -5,11 +5,13 @@ import { ButtonGroup } from "@repo/ui/components/button-group";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useState } from "react";
 import { CoverThumb } from "@/app/_components/cover-thumb";
+import { DicePair } from "@/app/_components/dice";
 import { Group } from "@/app/_components/group";
 import { MinusIcon, PlusIcon } from "@/app/_components/icons";
 import { List, ListRow, RowName } from "@/app/_components/list-row";
 import { Piece } from "@/app/_components/piece";
 import { Stamp } from "@/app/_components/stamp";
+import { useMoment } from "@/app/_lib/use-moment";
 import type { DI_RETURN_TYPES } from "@/di/types";
 import { listed } from "@/src/entities/listed";
 import { coverColorOf } from "@/src/entities/piece";
@@ -93,7 +95,8 @@ function ChoiceButtons<T extends string>({
 
 // What should we play? (D8; R37, KTD23): the people playing, the time we have, a complexity and
 // where from, starting from the night, and the best fits first, each with why, then the games left
-// out and why. The rules run here as the choices change (what-to-play.ts).
+// out and why. The rules run here as the choices change (what-to-play.ts), and each change asks
+// again, so the dice by the title tumble (U26).
 export function WhatToPlayView({
   choices,
   userId,
@@ -112,9 +115,14 @@ export function WhatToPlayView({
   const offerComplexity = offersComplexity(games, complexity);
   const timeWords =
     TIMES.find((one) => one.value === `${minutes}`)?.words ?? "";
+  const tumble = useMoment(`${people} ${minutes} ${complexity} ${from}`);
 
   return (
     <>
+      <div className="flex items-center gap-2.5">
+        <DicePair key={tumble.key} tumbling={tumble.playing} />
+        <h1 className="text-2xl leading-7 font-bold">What should we play?</h1>
+      </div>
       <Group label="Looking for">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2.5">

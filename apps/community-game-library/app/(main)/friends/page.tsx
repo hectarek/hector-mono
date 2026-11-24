@@ -25,7 +25,7 @@ const shareLink = (
   <Button
     variant="secondary"
     nativeButton={false}
-    render={<Link href="/friends/link" />}
+    render={<Link href="/friends/link" transitionTypes={["go-deeper"]} />}
     className="self-start"
   >
     <ShareIcon data-icon="inline-start" />

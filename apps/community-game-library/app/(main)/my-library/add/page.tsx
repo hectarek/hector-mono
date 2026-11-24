@@ -41,7 +41,7 @@ export default async function AddGamesPage({
     <Button
       variant="link"
       nativeButton={false}
-      render={<Link href={suggestHref} />}
+      render={<Link href={suggestHref} transitionTypes={["go-deeper"]} />}
       className="self-start"
     >
       Can’t find it? Suggest a game
@@ -74,7 +74,9 @@ export default async function AddGamesPage({
                 variant="secondary"
                 size="lg"
                 nativeButton={false}
-                render={<Link href={suggestHref} />}
+                render={
+                  <Link href={suggestHref} transitionTypes={["go-deeper"]} />
+                }
               >
                 Suggest a game
               </Button>

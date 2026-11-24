@@ -76,7 +76,7 @@ export default async function LibraryPage({
         <Button
           variant="secondary"
           nativeButton={false}
-          render={<Link href="/friends/link" />}
+          render={<Link href="/friends/link" transitionTypes={["go-deeper"]} />}
         >
           Share my friend link
         </Button>

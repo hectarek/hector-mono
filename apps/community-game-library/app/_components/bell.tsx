@@ -14,6 +14,7 @@ export function Bell({
   return (
     <Link
       href="/inbox"
+      transitionTypes={["go-deeper"]}
       aria-label={unread > 0 ? `Inbox, ${unread} unread` : "Inbox"}
       className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-foreground bg-secondary text-foreground hover:text-destructive"
     >

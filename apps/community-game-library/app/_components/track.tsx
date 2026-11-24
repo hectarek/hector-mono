@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@repo/ui/lib/utils";
 import { Piece } from "@/app/_components/piece";
+import { useMoment } from "@/app/_lib/use-moment";
 import type { PieceColor, PieceShape } from "@/src/entities/piece";
 
 export type TrackSpace = {
@@ -17,23 +20,37 @@ export type TrackSpace = {
 // standing on today with the word "today" under it, and the due space red. Up to a week is a
 // space a day, longer a space a week; the loan's own page works the spaces out (loan-track,
 // U13). The caller writes the dates under it ("Picked up Fri, Nov 6 · 1 week"), so it's hidden
-// from screen readers. Its red sits on chipboard, so it goes inside a panel.
+// from screen readers. Its red sits on chipboard, so it goes inside a panel. Given the `day`, it
+// moves with it: when a day passes while the page shows (a page brought up to date from the
+// phone's copy, or open past midnight), the piece hops onto today's space from the one before
+// (U26's piece hop).
 export function Track({
   spaces,
   today,
   borrower,
+  day,
 }: {
   spaces: TrackSpace[];
   // Which space the piece stands on.
   today: number;
   borrower: { shape: PieceShape; color: PieceColor };
+  // Today's date (YYYY-MM-DD), on the loan's own page.
+  day?: string;
 }) {
+  const hop = useMoment(day, (before, now) =>
+    Boolean(before && now && now > before),
+  );
   return (
     <div aria-hidden="true" className="flex flex-col gap-0.5">
       <div className="flex">
         {spaces.map((space, index) => (
           <span
-            key={space.id ?? space.label}
+            key={
+              index === today
+                ? `${space.id ?? space.label}-${hop.key}`
+                : (space.id ?? space.label)
+            }
+            data-moment={index === today && hop.playing ? "hop" : undefined}
             className="flex flex-1 justify-center"
           >
             {index === today && (

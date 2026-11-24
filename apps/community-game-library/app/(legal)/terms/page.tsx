@@ -41,7 +41,11 @@ export default function TermsPage() {
           <li>
             What you add stays yours: your photos, notes and messages. You let
             the app store them and show them to the people the{" "}
-            <Link href="/privacy" className={TEXT_LINK}>
+            <Link
+              href="/privacy"
+              transitionTypes={["go-deeper"]}
+              className={TEXT_LINK}
+            >
               privacy policy
             </Link>{" "}
             describes.

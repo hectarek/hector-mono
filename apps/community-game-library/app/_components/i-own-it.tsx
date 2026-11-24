@@ -12,6 +12,7 @@ import {
 import { Stamp } from "@/app/_components/stamp";
 import { callAction, callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
+import { useMoment } from "@/app/_lib/use-moment";
 import { addCopy, undoAddCopy } from "@/app/actions/copies";
 
 // Add games counts what's added on it (B8's "1 added"); everywhere else nothing counts.
@@ -63,6 +64,9 @@ export function IOwnIt({
   const tally = useContext(AddedCount);
   const [added, setAdded] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // Adding plays a moment (U26): the Added stamp presses, or on a catalog row whose cover shows
+  // its token, the token lifts out of its ring (app/globals.css).
+  const moment = useMoment(added);
 
   function undo(userGameId: string) {
     startTransition(async () => {
@@ -92,7 +96,10 @@ export function IOwnIt({
         cancel: { label: "Undo", onClick: () => undo(userGameId) },
         action: {
           label: "Edit copy",
-          onClick: () => router.push(`/copies/${userGameId}`),
+          onClick: () =>
+            router.push(`/copies/${userGameId}`, {
+              transitionTypes: ["go-deeper"],
+            }),
         },
       });
     });
@@ -100,8 +107,13 @@ export function IOwnIt({
 
   if (added) {
     return (
-      <span className="-mb-2 flex shrink-0 flex-col items-center gap-0.5">
-        <Stamp tone="navy">Added</Stamp>
+      <span
+        data-moment={moment.playing ? "add-copy" : undefined}
+        className="-mb-2 flex shrink-0 flex-col items-center gap-0.5"
+      >
+        <Stamp key={moment.key} tone="navy" press={moment.playing}>
+          Added
+        </Stamp>
         <Button
           variant="link"
           disabled={pending}

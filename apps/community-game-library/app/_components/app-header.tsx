@@ -19,6 +19,7 @@ function YouLink({
   return (
     <Link
       href="/you"
+      transitionTypes={["go-deeper"]}
       aria-label="You"
       className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-foreground bg-secondary"
     >
@@ -99,10 +100,14 @@ export function ShellTabBar({ placement }: { placement: "bottom" | "header" }) {
 
 // The top of the signed-in app from 768px (KTD14, Wide1 and Wide4): a chipboard bar with the
 // app's name, the four tabs, the bell and the member's piece, as wide as a browsed page. The
-// name is "Game Library" on a tablet and in full from 1100px, where it fits.
+// name is "Game Library" on a tablet and in full from 1100px, where it fits. It stays still as a
+// page moves (U26).
 export function AppBar() {
   return (
-    <header className="sticky top-0 z-30 hidden border-b-2 border-foreground bg-card px-6 md:block">
+    <header
+      data-motion-name="app-bar"
+      className="sticky top-0 z-30 hidden border-b-2 border-foreground bg-card px-6 md:block"
+    >
       <div className="mx-auto flex max-w-270 items-center gap-2.5 py-2">
         <p className="font-heading text-xl leading-none font-bold whitespace-nowrap uppercase">
           <span className="hidden min-[68.75rem]:inline">Community </span>

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
-import { DicePair } from "@/app/_components/dice";
 import { PageColumn } from "@/app/_components/page-column";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
@@ -43,10 +42,6 @@ export default async function WhatToPlayPage({
         />
       }
     >
-      <div className="flex items-center gap-2.5">
-        <DicePair />
-        <h1 className="text-2xl leading-7 font-bold">What should we play?</h1>
-      </div>
       <WhatToPlayView choices={choices} userId={user.id} />
     </PageColumn>
   );

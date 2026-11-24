@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { render } from "@testing-library/react";
+import { ChangingStamp } from "@/app/_components/changing-stamp";
 import { Stamp } from "@/app/_components/stamp";
 
 // The design system's Stamp: a status, its word saying whose move it is, its color the kind.
@@ -61,5 +62,40 @@ describe("Stamp", () => {
   it("is larger on a card or a cover", () => {
     const view = render(<Stamp size="card">Available</Stamp>);
     expect(view.getByText("Available").className).toContain("text-13");
+  });
+
+  // U26's stamp press, which app/globals.css draws: only while its status has just changed.
+  it("presses only when asked to", () => {
+    const view = render(
+      <>
+        <Stamp press>Added</Stamp>
+        <Stamp>Yours</Stamp>
+      </>,
+    );
+    expect(view.getByText("Added").dataset.moment).toBe("press");
+    expect(view.getByText("Yours").dataset.moment).toBeUndefined();
+  });
+});
+
+// A copy's stamp, which can change on its page (U26): asking to borrow stamps it You asked.
+describe("ChangingStamp", () => {
+  it("presses a stamp that arrives or changes while the page shows", () => {
+    const view = render(<ChangingStamp stamp={null} />);
+    expect(view.container.innerHTML).toBe("");
+
+    view.rerender(
+      <ChangingStamp stamp={{ word: "You asked", tone: "brown" }} />,
+    );
+    expect(view.getByText("You asked").dataset.moment).toBe("press");
+
+    view.rerender(<ChangingStamp stamp={{ word: "In line", tone: "brown" }} />);
+    expect(view.getByText("In line").dataset.moment).toBe("press");
+  });
+
+  it("doesn't press the stamp the page first shows", () => {
+    const view = render(
+      <ChangingStamp stamp={{ word: "Lent", tone: "navy" }} />,
+    );
+    expect(view.getByText("Lent").dataset.moment).toBeUndefined();
   });
 });

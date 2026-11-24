@@ -83,7 +83,9 @@ function Choices({
           <Button
             variant="secondary"
             nativeButton={false}
-            render={<Link href="/my-library/add" />}
+            render={
+              <Link href="/my-library/add" transitionTypes={["go-deeper"]} />
+            }
           >
             Add your first game
           </Button>

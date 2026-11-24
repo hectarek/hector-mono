@@ -194,7 +194,12 @@ export function TableGames({
               variant="secondary"
               size="sm"
               nativeButton={false}
-              render={<Link href={`/nights/${night.id}/what-to-play`} />}
+              render={
+                <Link
+                  href={`/nights/${night.id}/what-to-play`}
+                  transitionTypes={["go-deeper"]}
+                />
+              }
             >
               <DicePair />
               What should we play?

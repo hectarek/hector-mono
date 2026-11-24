@@ -171,6 +171,7 @@ export function BorrowedLoan({
             dueOn={loan.dueOn}
             today={today}
             borrower={you}
+            moves
           />
         )}
         <p className="font-mono text-2xs font-medium text-muted-foreground">
@@ -237,7 +238,12 @@ export function BorrowedLoan({
               <Button
                 size="lg"
                 nativeButton={false}
-                render={<Link href={`/loans/${loan.id}/pass-along`} />}
+                render={
+                  <Link
+                    href={`/loans/${loan.id}/pass-along`}
+                    transitionTypes={["go-deeper"]}
+                  />
+                }
               >
                 Hand it to {handoff.name}
               </Button>
@@ -408,6 +414,7 @@ export function LentLoan({
             dueOn={loan.dueOn}
             today={today}
             borrower={borrower}
+            moves
           />
         )}
         <p className="font-mono text-2xs font-medium text-muted-foreground">
@@ -451,6 +458,7 @@ export function LentLoan({
             </p>
             <Link
               href={`/copies/${copy.id}`}
+              transitionTypes={["go-deeper"]}
               className="self-start text-sm font-bold underline underline-offset-2"
             >
               Change it on this copy’s page
@@ -459,6 +467,7 @@ export function LentLoan({
         )}
         <Link
           href={`/copies/${copy.id}`}
+          transitionTypes={["go-deeper"]}
           className="flex min-h-11 items-center justify-between gap-2 text-15 font-bold hover:text-destructive"
         >
           This copy’s history

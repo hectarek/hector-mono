@@ -25,7 +25,7 @@ const notices = (
   <Button
     variant="link"
     nativeButton={false}
-    render={<Link href="/you/notices" />}
+    render={<Link href="/you/notices" transitionTypes={["go-deeper"]} />}
     className="self-start"
   >
     Choose which notices I get

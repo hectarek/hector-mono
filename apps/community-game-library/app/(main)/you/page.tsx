@@ -70,7 +70,7 @@ export default async function YouPage() {
               size="sm"
               variant="secondary"
               nativeButton={false}
-              render={<Link href="/you/edit" />}
+              render={<Link href="/you/edit" transitionTypes={["go-deeper"]} />}
             >
               Edit profile and piece
             </Button>
