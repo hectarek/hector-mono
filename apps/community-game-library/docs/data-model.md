@@ -1,6 +1,6 @@
 # Community Game Library: data model
 
-Updated 2026-11-23. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules. The catalog's source was chosen on 2026-11-23, with no change to the tables.
+Updated 2026-11-24. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules. The catalog's source was chosen on 2026-11-23, with no change to the tables.
 
 Every table the first release needs, holding only the values the drawn screens and the spec use. Where the catalog's values come from is in [catalog-data.md](catalog-data.md)'s plan: Wikidata and English Wikipedia's infoboxes. U3 creates all of them in one migration ([build-plan.md](build-plan.md), KTD5). The requirement and decision numbers (R, D, KTD) are build-plan.md's, and screen codes such as B5 are the design canvas's ([screens.md](screens.md)).
 
@@ -400,7 +400,7 @@ The tabs' counts (D14) aren't notices. Each counts what waits on the member ther
 ## What goes with a copy or an account
 
 - **Removing a copy** (B14, refused while it's out, AE2) deletes its expansions, its loans with their notices, and its place on nights' tables with their votes. The dialog says its loan history goes with it.
-- **Deleting an account** (R41, E8 and E9, once no loan of theirs is open) deletes their copies as above, ends their requests and places in line with no notices, cancels the nights they host and tells everyone going, invited or waitlisted, and deletes their friendships (both rows), friend requests either way, friend link, places on others' nights with their votes, settings, profile, photo and notices. Their Neon Auth user is deleted too (U22 confirms how). Kept: their past loans of other members' copies, which show them as "A former member", the notices others got about them, and their suggestions, which are catalog work.
+- **Deleting an account** (R41, E8 and E9, once no loan of theirs is open) deletes their copies as above, ends their requests and places in line with no notices, cancels the nights they host and tells everyone going, invited or waitlisted, and deletes their friendships (both rows), friend requests either way, friend link, places on others' nights with their votes, settings, profile, photo and notices. Their Neon Auth user stays, anonymized: its name, email and picture are replaced, and its ways in, sessions and waiting codes are deleted, so it can't be used again (Hector, 2026-11-24; the app's `AGENTS.md`, U22). Kept: their past loans of other members' copies, which show them as "A former member", the notices others got about them, and their suggestions, which are catalog work.
 - **The admin's removal** (G8) does the same and adds a `removed_users` row.
 
 ---

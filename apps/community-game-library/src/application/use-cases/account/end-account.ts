@@ -4,6 +4,7 @@ import type { IFriendshipsRepository } from "@/src/application/repositories/frie
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
+import type { ISignInsRepository } from "@/src/application/repositories/sign-ins.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
@@ -33,6 +34,7 @@ export type AccountRepositories = {
   userGames: IUserGamesRepository;
   userProfiles: IUserProfilesRepository;
   userSettings: IUserSettingsRepository;
+  signIns: ISignInsRepository;
 };
 
 // Nights that started up to a day and a half ago can still be today in the app's time zone, so
@@ -48,6 +50,8 @@ const DAY_AND_A_HALF_MS = 36 * 60 * 60 * 1000;
 //   (U19); and their places on other hosts' nights and their votes go
 // - their copies go, and the database takes each one's box, loans and places on tables with it
 // - their friendships, friend requests either way, friend link, settings, inbox and profile go
+// - their sign-in is anonymized, in Neon Auth's tables (ISignInsRepository), so it can't be used
+//   again and holds no name, email or picture
 // Kept: their past loans of others' copies, the notices others got about them, their suggestions
 // and the nights they hosted, all shown with formerMember. Answers their name and their photo's
 // key, which leaves storage once the transaction commits (removePhotoFile).
@@ -133,6 +137,7 @@ export async function endAccount(
   await repositories.userSettings.remove(userId, tx);
   await notices.removeAllFor(userId, tx);
   await repositories.userProfiles.remove(userId, tx);
+  await repositories.signIns.anonymize(userId, tx);
   return { name: profile.name, photoKey: profile.photoKey };
 }
 

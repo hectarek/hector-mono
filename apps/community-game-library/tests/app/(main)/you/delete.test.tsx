@@ -10,6 +10,7 @@ import { fireEvent, render, waitFor, within } from "@testing-library/react";
 import { DeleteAccount } from "@/app/(main)/you/delete/delete-account";
 import DeleteAccountPage from "@/app/(main)/you/delete/page";
 import { getInjection } from "@/di/container";
+import { MockSignInsRepository } from "@/src/infrastructure/repositories/sign-ins.repository.mock";
 import { MockAuthService } from "@/src/infrastructure/services/mock-auth.service";
 import { CAST } from "@/tests/_support/cast";
 import {
@@ -121,11 +122,17 @@ describe("Delete my account (U22: E8, E9)", () => {
     expect(
       await getInjection("IUserProfilesRepository").getByUserId(userId),
     ).toBeUndefined();
+    const signIns = getInjection("ISignInsRepository");
+    if (!(signIns instanceof MockSignInsRepository)) {
+      throw new Error(
+        "The container's sign-ins repository is the mock under test",
+      );
+    }
+    expect(signIns.anonymizedUserIds).toContain(userId);
     const auth = getInjection("IAuthenticationService");
     if (!(auth instanceof MockAuthService)) {
       throw new Error("The container's auth service is the mock under test");
     }
-    expect(auth.deletedUserIds).toContain(userId);
     expect(auth.signedOut).toBeGreaterThan(0);
   });
 });
