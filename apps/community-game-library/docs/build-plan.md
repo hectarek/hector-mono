@@ -455,7 +455,7 @@ For the agent building one:
   - Hobby is for non-commercial personal use, which this app is (D3).
   - Of the repo's other apps, hectors-recipes and job-search already skipped pushes that didn't touch them, while relationship-meter and main-portfolio paid a canceled deployment on every push through their `ignoreCommand`. hectarek/hector-mono#118 turned their skipping on and removed all four `ignoreCommand`s.
 - KTD21. **The catalog during the build (D7).** Until our own dataset is ready, the catalog is the canvas's fictional games, put into the test project's database by `scripts/seed.ts` (U4); tests use PGlite. Real games reach production through U24, which loads that dataset (`db/catalog.jsonl`, which `scripts/shape-catalog.ts` makes from Wikidata and Wikipedia), or the admin's Add a game by hand (G3). Launch needs the dataset (H6). Planning it is its own effort with Hector, run while the app is built (Hector, 2026-11-12; revised 2026-11-20: our own data rather than an import, so Y1's credit to BGG isn't needed).
-- KTD22. **Tests as recipes'.** Use cases run on both backends (`describeEachBackend`), constraints are tested on PGlite alone, controllers through `controllerBasics`, and screens with happy-dom against the real actions. Every acceptance example (AE1 to AE10) is a named test in the unit that builds it. Browser flows (Playwright) come in U25 only, on the test project, behind recipes' test-database guard with the comment `community-game-library-test`: making an account, then borrowing and giving back a game.
+- KTD22. **Tests as recipes'.** Use cases run on both backends (`describeEachBackend`), constraints are tested on PGlite alone, controllers through `controllerBasics`, and screens with happy-dom against the real actions. Every acceptance example (AE1 to AE10) is a named test in the unit that builds it. Browser flows (Playwright) come in U25 only, on the test project, behind recipes' test-database guard with the comment `community-game-library-test`: making an account, then borrowing and giving back a game. Built in U25 (2026-11-24): `tests/flows/getting-in.flow.ts` and `tests/flows/borrow.flow.ts`, run with `bun run test:flows` outside Claude Code's sandbox (the app's AGENTS.md, Testing).
 - KTD23. **What should we play? and tables are rules (R37, R46, D2).** Pure functions in `src/entities/what-to-play.ts` and `src/entities/tables.ts`, each answer with its reason. Claude wrote the rules to match D8 and D9, and marked the choices the boards don't make; Hector agreed each on 2026-11-12.
   - **The inputs** are D8's: the people playing (going plus guests to start), the time (1 hour, 90 minutes, 2 hours or 3 hours), the complexity, and where from: the games on the table, or all the member's friends' games and their own (R37 as revised).
   - **The defaults:** the time starts at the longest choice that fits the night's length, or 2 hours when the night has no end (Claude's choice). Where from starts on the games on the table when there are any. No complexity is picked to start, meaning any, and tapping the picked one clears it (Claude's choice). "New players" means light.
@@ -572,7 +572,9 @@ apps/community-game-library/
                                     # lib/ (migrations.ts, terminal.ts), which the migration scripts share; lib/catalog.ts, the
                                     # catalog's rules; lib/target-database.ts, which tells the test project's database from
                                     # production's (U24)
-  tests/                            # mirrors the tree; _support/ with cast.ts and focus.ts
+  tests/                            # mirrors the tree; _support/ with cast.ts and focus.ts; flows/, the browser
+                                    # flows (U25, KTD22): members.ts, getting-in.flow.ts, borrow.flow.ts
+  playwright.config.ts              # the flows' runner: port 3302, the test project's .env, the guard first (U25)
   proxy.ts
 ```
 
