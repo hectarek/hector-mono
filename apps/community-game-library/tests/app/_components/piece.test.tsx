@@ -10,13 +10,11 @@ const shapeOf = (svg: Element) => svg.querySelector("path")?.getAttribute("d");
 describe("Piece", () => {
   it("draws each shape in each color, always with its navy outline", () => {
     const view = render(
-      <>
-        {PIECE_SHAPES.flatMap((shape) =>
-          PIECE_COLORS.map((color) => (
-            <Piece key={`${shape}-${color}`} shape={shape} color={color} />
-          )),
-        )}
-      </>,
+      PIECE_SHAPES.flatMap((shape) =>
+        PIECE_COLORS.map((color) => (
+          <Piece key={`${shape}-${color}`} shape={shape} color={color} />
+        )),
+      ),
     );
     const pieces = [...view.container.querySelectorAll("svg")];
     expect(pieces).toHaveLength(PIECE_SHAPES.length * PIECE_COLORS.length);
