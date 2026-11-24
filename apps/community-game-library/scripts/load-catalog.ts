@@ -351,10 +351,17 @@ export async function loadCatalog(
   terminal.print(
     `To insert: ${amount(plan.baseGames.length, "base game")} and ${amount(plan.expansions.length, "expansion")}.`,
   );
-  // A game added by hand under a title the file also has would show twice in search.
-  const titlesThere = new Set(existing.map((game) => game.searchTitle));
+  // A game added by hand under a title the file also has would show twice in search. Only a game
+  // the file lacks was added by hand: two of the file's games can share a title, as the two games
+  // called Shogun do.
+  const fileIds = new Set(rows.map((row) => row.id));
+  const titlesByHand = new Set(
+    existing
+      .filter((game) => !fileIds.has(game.id))
+      .map((game) => game.searchTitle),
+  );
   const twice = [...plan.baseGames, ...plan.expansions].filter((row) =>
-    titlesThere.has(row.searchTitle),
+    titlesByHand.has(row.searchTitle),
   );
   if (twice.length > 0) {
     terminal.print(

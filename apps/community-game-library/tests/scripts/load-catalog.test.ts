@@ -445,6 +445,38 @@ describe("loadCatalog", () => {
     ]);
   });
 
+  it("doesn't name a game that shares its title with another of the file's games", async () => {
+    await loadCatalog(
+      onTest,
+      rowsOf(CATALOG),
+      true,
+      scriptedTerminal().terminal,
+    );
+    const namesake = {
+      id: "5d0e6f7a-8b9c-5d01-9e2f-3a4b5c6d7e8f",
+      wikidataId: "Q9000004",
+      type: "base-game",
+      title: "Copper Kettle",
+      year: 1987,
+      popularity: 1,
+    };
+    const run = scriptedTerminal();
+
+    expect(
+      await loadCatalog(
+        onTest,
+        rowsOf(fileOf(LINES.secondBrew, LINES.kettle, LINES.lantern, namesake)),
+        true,
+        run.terminal,
+      ),
+    ).toBe(0);
+    expect(run.lines).toEqual([
+      "In db/catalog.jsonl: 4 games. Already in games: 3.",
+      "To insert: 1 base game and 0 expansions.",
+      "Inserted 1 game.",
+    ]);
+  });
+
   it("refuses the test project's database as production", async () => {
     const run = scriptedTerminal("load");
 
