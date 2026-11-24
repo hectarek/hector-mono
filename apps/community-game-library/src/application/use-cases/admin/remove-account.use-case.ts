@@ -5,10 +5,10 @@ import type { IGameNightsRepository } from "@/src/application/repositories/game-
 import type { ILoansRepository } from "@/src/application/repositories/loans.repository.interface";
 import type { INoticesRepository } from "@/src/application/repositories/notices.repository.interface";
 import type { IRemovedUsersRepository } from "@/src/application/repositories/removed-users.repository.interface";
+import type { ISignInsRepository } from "@/src/application/repositories/sign-ins.repository.interface";
 import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
-import type { IAuthenticationService } from "@/src/application/services/authentication.service.interface";
 import type { IFileStorage } from "@/src/application/services/file-storage.service.interface";
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
@@ -37,9 +37,9 @@ export const removeAccountUseCase = (
   userGamesRepository: IUserGamesRepository,
   userProfilesRepository: IUserProfilesRepository,
   userSettingsRepository: IUserSettingsRepository,
+  signInsRepository: ISignInsRepository,
   removedUsersRepository: IRemovedUsersRepository,
   fileStorage: IFileStorage,
-  authenticationService: IAuthenticationService,
   transactionManagerService: ITransactionManagerService,
   loggerService: ILoggerService,
 ) => {
@@ -57,6 +57,7 @@ export const removeAccountUseCase = (
     userGames: userGamesRepository,
     userProfiles: userProfilesRepository,
     userSettings: userSettingsRepository,
+    signIns: signInsRepository,
   };
 
   return async (
@@ -76,7 +77,6 @@ export const removeAccountUseCase = (
       },
     );
     await removePhotoFile(fileStorage, logger, photoKey);
-    await authenticationService.deleteUser(accountId);
     logger.info("Account removed", { userId: accountId });
     return { name };
   };

@@ -80,7 +80,7 @@ describeEachBackend("deleting an account and the admin's removal (U22)", () => {
     expect(
       (await app.repos.gameNights.getById(heavyGamesAtMine.id))?.cancelledAt,
     ).toBeNull();
-    expect(app.auth.deletedUserIds).toEqual([]);
+    expect(await app.anonymizedSignIns()).toEqual([]);
   });
 
   it("deletes what goes with an account once its loans are settled, and keeps what stays (Priya)", async () => {
@@ -134,8 +134,8 @@ describeEachBackend("deleting an account and the admin's removal (U22)", () => {
       CAST_TODAY,
     );
     expect(copy.people[priya.id]?.name).toBe("A former member");
-    // Her sign-in goes too.
-    expect(app.auth.deletedUserIds).toEqual([priya.id]);
+    // Her sign-in is anonymized with them.
+    expect(await app.anonymizedSignIns()).toEqual([priya.id]);
   });
 
   it("cancels the nights the member hosts, and tells everyone going, invited or waiting (Alice)", async () => {
@@ -183,7 +183,7 @@ describeEachBackend("deleting an account and the admin's removal (U22)", () => {
     expect(
       (await app.repos.gameNights.getById(saturdayGameNight.id))?.cancelledAt,
     ).not.toBeNull();
-    expect(app.auth.deletedUserIds).toEqual([alice.id]);
+    expect(await app.anonymizedSignIns()).toEqual([alice.id]);
   });
 
   it("lets only the admin remove an account, never their own, and not while a game is out", async () => {

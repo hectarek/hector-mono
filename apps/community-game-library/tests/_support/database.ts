@@ -16,22 +16,60 @@ export function newPGlite(): PGlite {
 const client = newPGlite();
 export const testDb = drizzle({ client, schema });
 
+// Neon Auth's tables, which Neon makes and the migrations don't (the neon_auth schema), as far as
+// the app writes them: a deleted or removed account's sign-in is anonymized there
+// (SignInsRepository). Their columns and constraints are the test project's of 2026-11-24, and
+// tests/flows/delete-account.flow.ts checks the real ones.
+const NEON_AUTH_STAND_IN = `
+  create schema neon_auth;
+  create table neon_auth."user" (
+    id uuid primary key,
+    name text not null,
+    email text not null unique,
+    "emailVerified" boolean not null default false,
+    image text,
+    "createdAt" timestamptz not null default now(),
+    "updatedAt" timestamptz not null default now()
+  );
+  create table neon_auth.account (
+    id text primary key default gen_random_uuid()::text,
+    "accountId" text not null,
+    "providerId" text not null,
+    "userId" uuid not null references neon_auth."user"(id) on delete cascade,
+    password text
+  );
+  create table neon_auth.session (
+    id text primary key default gen_random_uuid()::text,
+    token text not null unique,
+    "userId" uuid not null references neon_auth."user"(id) on delete cascade,
+    "ipAddress" text,
+    "userAgent" text
+  );
+  create table neon_auth.verification (
+    id text primary key default gen_random_uuid()::text,
+    identifier text not null,
+    value text not null
+  );`;
+
 let migrated: Promise<void> | undefined;
 
 function migrateOnce(): Promise<void> {
-  migrated ??= migrate(testDb, {
-    migrationsFolder: `${import.meta.dir}/../../db/migrations`,
-  });
+  migrated ??= (async () => {
+    await migrate(testDb, {
+      migrationsFolder: `${import.meta.dir}/../../db/migrations`,
+    });
+    await client.exec(NEON_AUTH_STAND_IN);
+  })();
   return migrated;
 }
 
-// Call in beforeEach: migrates on first use, then empties every table the migrations made. It
-// finds them itself, so a new table needs no line here: job-search's list missed one, and its
-// rows carried over from test to test on Postgres alone (2026-10-29).
+// Call in beforeEach: migrates on first use, then empties every table the migrations made, and
+// Neon Auth's stand-ins. It finds them itself, so a new table needs no line here: job-search's
+// list missed one, and its rows carried over from test to test on Postgres alone (2026-10-29).
 export async function resetDatabase(): Promise<void> {
   await migrateOnce();
   const { rows } = await client.query<{ name: string }>(
-    "select quote_ident(tablename) as name from pg_tables where schemaname = 'public'",
+    "select quote_ident(schemaname) || '.' || quote_ident(tablename) as name from pg_tables where schemaname in ('public', 'neon_auth')",
   );
   if (rows.length > 0) {
     await client.exec(

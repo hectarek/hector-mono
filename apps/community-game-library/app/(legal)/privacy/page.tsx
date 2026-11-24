@@ -17,7 +17,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy policy"
-      updated="November 23, 2026"
+      updated="November 24, 2026"
       other={{ href: "/terms", label: "Terms of use" }}
     >
       <LegalText>
@@ -155,9 +155,11 @@ export default function PrivacyPage() {
         <LegalText>
           You can delete your account from You, under Delete my account, once no
           loan of yours is still open. That deletes your profile, photo, games,
-          friendships, requests, settings, inbox and sign-in. What other people
-          still need stays, with your name shown as “A former member”: past
-          loans of their games, notices they got, and past nights you hosted.
+          friendships, requests, settings and inbox. Your sign-in keeps no name,
+          email or picture, and can’t be used to sign in again. What other
+          people still need stays, with your name shown as “A former member”:
+          past loans of their games, notices they got, and past nights you
+          hosted.
         </LegalText>
       </Group>
 
