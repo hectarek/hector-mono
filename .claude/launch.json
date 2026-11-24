@@ -41,6 +41,12 @@
       "port": 3102
     },
     {
+      "name": "seating-chart",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "apps/seating-chart", "dev"],
+      "port": 3103
+    },
+    {
       "name": "hector-portfolio-prod",
       "runtimeExecutable": "bun",
       "runtimeArgs": [

@@ -53,7 +53,7 @@ On the spike's preview, from a Mac on 2026-11-20, with curl. Recipes' numbers ar
 - The lint config. Two shared rules assume Next.js and Tailwind: Biome's `noHeadElement` fires on Solid's `src/Document.tsx`, and Oxlint's `shadcn(no-unknown-classes)` fires on the spike's plain CSS classes. Both were left failing, since a check is never loosened to pass ([AGENTS.md](../AGENTS.md)); scoping them is Hector's call.
 - The prerendered shell from [fast-first-open.md](./fast-first-open.md), which is a Next.js feature. The saved copy a service worker keeps on the phone works with either.
 
-**Agents:** Solid 2.0 went stable on 2026-11-17, after the training data of the models that build here, and the 1.x patterns they know are wrong in 2.0. The spike worked from Solid's docs (`https://v2.solidjs.com/llms-full.txt`) and the primer in the app's `AGENTS.md`, which lists the 1.x-to-2.0 corrections.
+**Agents:** Solid 2.0 went stable on 2026-11-17, after the training data of the models that build here, and the 1.x patterns they know are wrong in 2.0. The spike worked from Solid's docs (`https://v2.solidjs.com/llms-full.txt`, which redirects to `https://docs.solidjs.com/llms-full.txt` since at least 2026-11-24) and the primer in the app's `AGENTS.md`, which lists the 1.x-to-2.0 corrections.
 
 ## Before starting again
 

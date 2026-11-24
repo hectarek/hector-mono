@@ -1,0 +1,65 @@
+/* ==========================================================================
+   SEATING CHART THEME (seating-chart): drafting paper and ink
+   From the seating chart's style tile (a private Design canvas; its link is in Hector's
+   tracker), agreed 2026-11-24. The plan is drawn on drafting paper: a solid ink edge seats
+   guests, a dashed edge only takes floor space, and selection is blue. Token-only.
+
+   Opt in: @import "@repo/ui/styles/themes/seating-chart.css" and data-theme="seating-chart"
+   on <html>. Fonts: Inter as --font-sans, Bricolage Grotesque as --font-heading, IBM Plex
+   Mono as --font-mono; the app loads them itself, so this file names them. The app is light
+   only and has no dark mode, so the dark block repeats the light values for the theme test
+   and never applies.
+
+   The tile's names: paper is --background, ink is --foreground and --primary, card is
+   --card, muted ink is --muted-foreground, the major grid line is --border, the minor grid
+   line is --accent, a fixture's fill is --muted, and selection is --ring.
+   ========================================================================== */
+
+[data-theme="seating-chart"] {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Bricolage Grotesque Variable", var(--font-sans);
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --background: #f4f6f3;
+  --foreground: #18212f;
+  --card: #ffffff;
+  --card-foreground: #18212f;
+  --popover: #ffffff;
+  --popover-foreground: #18212f;
+  --primary: #18212f;
+  --primary-foreground: #f4f6f3;
+  --secondary: #ffffff;
+  --secondary-foreground: #18212f;
+  --muted: #edf0ec;
+  --muted-foreground: #586374;
+  --accent: #e2e7e6;
+  --accent-foreground: #18212f;
+  --destructive: #b3261e;
+  --border: #c3cdcf;
+  --input: #c3cdcf;
+  --ring: #2f5bea;
+  --radius: 0.5rem;
+}
+
+[data-theme="seating-chart"].dark,
+.dark [data-theme="seating-chart"] {
+  --background: #f4f6f3;
+  --foreground: #18212f;
+  --card: #ffffff;
+  --card-foreground: #18212f;
+  --popover: #ffffff;
+  --popover-foreground: #18212f;
+  --primary: #18212f;
+  --primary-foreground: #f4f6f3;
+  --secondary: #ffffff;
+  --secondary-foreground: #18212f;
+  --muted: #edf0ec;
+  --muted-foreground: #586374;
+  --accent: #e2e7e6;
+  --accent-foreground: #18212f;
+  --destructive: #b3261e;
+  --border: #c3cdcf;
+  --input: #c3cdcf;
+  --ring: #2f5bea;
+  --radius: 0.5rem;
+}
