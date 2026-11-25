@@ -1,6 +1,6 @@
 # Community Game Library: screens
 
-Updated 2026-11-24
+Updated 2026-11-25
 
 Every screen of the app was drawn before any code, on a private design canvas. This file is the record the build works from: which screens exist, the rules they follow, and what happens in the states that weren't drawn. The requirement and decision numbers (R, D) are [build-plan.md](build-plan.md)'s.
 
@@ -70,6 +70,8 @@ A4 for a Google sign-up starts with its Google picture as the photo, as if they 
 | C11    | Pass it along                 | R48           |
 | C12    | Past loans                    | R23           |
 
+C9's Who's taking it starts with nobody picked, and the friend who asked for the picked game comes first in it, marked "asked for it" (Hector, 2026-11-25).
+
 **D · Nights tab**
 
 | Screen | What it is                    | Serves        |
@@ -91,6 +93,8 @@ A4 for a Google sign-up starts with its Google picture as the photo, as if they 
 | D9     | Split into tables             | R46           |
 | D12    | Past game nights              | R33           |
 
+A night's link offers Share, then Copy, on D7 and D10 as on E2 (rule 18), but both buttons are secondary there: each page's main action, Invite people on D7 and Send invites on D10, is the filled one (rule 2). What should we play? (D8) starts on All friends' games, whatever is on the table, with no complexity picked, where the board picks Medium (Hector, 2026-11-25). Its Left out gives the first three reasons, then "And 4 more games are left out."
+
 **E · Friends tab, and You**
 
 | Screen | What it is                   | Serves   |
@@ -104,6 +108,8 @@ A4 for a Google sign-up starts with its Google picture as the photo, as if they 
 | E7     | Notices I get                | R28      |
 | E8     | Delete my account            | R41      |
 | E9     | Delete, once nothing is open | R41      |
+
+E5's account line says how the member signs in, then their email (Hector, 2026-11-25): "Signed in with Google · robin@example.com", "Signed in with a password · robin@example.com", or "Signed in with Google or a password · robin@example.com" for an account with both (a Google account that resets its password gets a password too). An account that signs in another way reads "Signed in as robin@example.com".
 
 **F · Inbox, from the bell**
 
@@ -123,6 +129,8 @@ A4 for a Google sign-up starts with its Google picture as the photo, as if they 
 | G5     | Find a game to edit            | R5          |
 | G7     | Answered suggestions           | R4          |
 | G8     | Remove an account              | R41         |
+
+G3's categories are chips of the categories the catalog uses, the game's own first, then the most used, folded after six under More, with New category for one the catalog doesn't use yet. Is it an expansion? finds the base game in the catalog, and Not an expansion clears it. An expansion added from a suggestion doesn't land in the suggester's library, so G3's line then says only that they're told. G4 is G3's whole form, filled in, with Preview beside the how-to-play link while it holds one, which opens the video in a new tab. G8 shows each account's email under its name, and has no field for a reason (Hector, 2026-11-25).
 
 **Shared**
 
@@ -151,9 +159,16 @@ These came from Hector's reviews (D13, D14) and from a usability audit of all 65
 9. **A guest is a small pawn in the color of the member who brought them,** standing next to that member, and the word "guest" is always written.
 10. **One word per thing.** Complexity, not weight. Best at 4. Picked up, for owner to borrower; hand it to, for one borrower to the next; gave it back, for a return. A line is for a copy and a waitlist is for a seat. Games on the table are a night's games. Make an account, and sign in.
 11. **Back goes where the person came from.**
-12. **What looks tappable is.** A row with an arrow opens a page. Facts are plain text. A chip is only ever a filter.
+12. **What looks tappable is.** A row with an arrow opens a page. Facts are plain text. A chip is a filter, or one of several choices in a form, such as a game's categories (G3; Hector, 2026-11-25).
 13. **A title is never cut short.** It wraps to two lines, and a stamp that no longer fits drops under it.
 14. **Show only what a game has.** Every catalog value but the title may be missing. A line, a fact, an inked die or a filter appears only when there's a value for it; the drawings show games that have every value.
+
+Rules 15 to 18 came from Hector's look at the polish pass's open choices (2026-11-25): the same kind of thing works the same way on every screen.
+
+15. **A short task that belongs to the page behind opens as a sheet over it:** Filter and Sort, a date, asking to borrow, answering a night, picking a night's games, and your friend link (E2), which is the same sheet over whichever page offers it. A place with its own content, or a long form, is a page: Record a loan, a new night, Invite people, Hand it to Jo, Edit profile.
+16. **A dropdown of people or games shows each one's piece or cover,** and typing narrows it: Record a loan's friend and game (C9), and the admin's It's already here. A dropdown of plain values, such as a copy's condition or a night's time, is the phone's own.
+17. **Every date is picked on the date sheet (X1),** Is it back?'s Came back on (C8) included.
+18. **Every link offers Share, then Copy:** your friend link (E2), and a night's link on its page (D7) and on Invite people (D10).
 
 ## States that weren't drawn
 
@@ -220,7 +235,7 @@ Proposed on 2026-11-11 from the audit. Hector agreed the rules behind them on 20
 | All friends, before any friends          | No friends yet. Share your friend link to see what your friends own.        | Share my friend link |
 | All friends, when friends own nothing    | Your friends haven't added games yet.                                       |                      |
 | My library (A7)                          | Your library is empty. Search for a game you own and tap I own it.          | Add your first game  |
-| A filter that matches nothing (B4)       | The filter to drop, with how many games that brings back                    | Clear filters        |
+| A filter that matches nothing (B4)       | Each filter whose dropping brings games back, with how many, most first     | Clear filters        |
 | Search with no match                     | Nothing called "fog lantern" yet.                                           | Suggest a game       |
 | Add games, before typing                 | Search for a game you own.                                                  |                      |
 | A game none of your friends own          | None of your friends own this yet.                                          | I own it             |
