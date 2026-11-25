@@ -92,7 +92,7 @@ export function JoinLine({
               </ol>
               <p className="text-13 text-muted-foreground">{order}</p>
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col">
               <p className="text-13 leading-snug text-muted-foreground">
                 {earliest ? `${turn} ${earliest}` : turn}
               </p>

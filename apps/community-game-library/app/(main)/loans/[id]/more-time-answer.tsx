@@ -103,7 +103,8 @@ export function MoreTimeAnswer({
       <Sheet
         open={open}
         onOpenChange={setOpen}
-        title={`${borrower.name} asked for more time`}
+        // "more time" stays on one line, as C13 keeps it.
+        title={`${borrower.name} asked for more\u00a0time`}
       >
         <div className="flex items-center gap-3">
           <CoverThumb color={color} imageUrl={imageUrl} />

@@ -110,7 +110,9 @@ export function AnswerForm({
             {radio("answer-yes", "yes", "Yes, lend it")}
             {answer === "yes" && (
               <fieldset className="mb-2 ml-8.5 flex flex-col">
-                <legend className="text-13 font-semibold">Lend for</legend>
+                <legend className="mb-1.5 text-13 font-semibold">
+                  Lend for
+                </legend>
                 <RadioGroup
                   aria-label="Lend for"
                   value={period}

@@ -69,7 +69,7 @@ export default async function LoanPage({
         <Group
           label="Your request"
           aside={
-            <Stamp tone="brown">
+            <Stamp tone="brown" size="card" tilt={-2}>
               {toAnswer ? "You asked" : `${ordinal(place)} in line`}
             </Stamp>
           }
@@ -91,7 +91,7 @@ export default async function LoanPage({
               <span className="text-15">“{loan.requestNote}”</span>
             </div>
           )}
-          <Person person={other} line={`It’s ${other.name}’s copy`} />
+          <Person person={other} line={`It’s ${other.name}’s copy`} divided />
         </Group>
         {!toAnswer && (
           <Group label="What you can do">
@@ -114,8 +114,9 @@ export default async function LoanPage({
               title={`Withdraw your request for ${game.title}?`}
               body={`${other.name} is told.`}
             />
-            <p className="font-mono text-2xs font-medium text-muted-foreground">
-              If {other.name} says yes, this page shows where to pick it up.
+            <p className="font-mono text-2xs leading-normal font-medium text-muted-foreground">
+              If {other.name} says yes, this page shows{" "}
+              <span className="whitespace-nowrap">where to pick it up.</span>
             </p>
           </Group>
         )}
@@ -224,7 +225,7 @@ export default async function LoanPage({
                 : `${capitalized(periodWords(loan.periodDays))} from the day ${other.name} picks it up`,
             ]}
           />
-          <Person person={other} line="to arrange the pick-up" />
+          <Person person={other} line="to arrange the pick-up" divided />
         </Group>
         <Group label="What you can do">
           <OwnerPickUp

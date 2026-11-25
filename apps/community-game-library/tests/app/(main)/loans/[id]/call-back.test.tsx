@@ -52,10 +52,10 @@ describe("calling a game back (U14: C15, C18)", () => {
     expect(
       dialog.getByText("It stays overdue until you confirm it’s back."),
     ).toBeTruthy();
+    // C15's box for whoever is first in line.
+    expect(dialog.getByText("Ben keeps their place")).toBeTruthy();
     expect(
-      dialog.getByText(
-        "Ben keeps their place: 1st in line, and told when it’s back.",
-      ),
+      dialog.getByText("Ben is 1st in line and is told when it’s back."),
     ).toBeTruthy();
     expect(
       dialog.getByRole("button", { name: "Leave it with Jo" }),

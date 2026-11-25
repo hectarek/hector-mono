@@ -49,7 +49,8 @@ export function RemoveFromLine({
     <>
       <Button
         variant={thenOpen ? "secondary" : "link"}
-        size={thenOpen ? "lg" : "sm"}
+        // A quiet link keeps its own 4px sides: a small size would give it a row button's 14px.
+        size={thenOpen ? "lg" : "default"}
         className={thenOpen ? "w-full" : undefined}
         onClick={() => setOpen(true)}
       >

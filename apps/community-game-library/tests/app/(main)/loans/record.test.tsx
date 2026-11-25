@@ -67,7 +67,7 @@ describe("Record a loan (U16: C9)", () => {
     ).toBeTruthy();
     expect(
       page.getByText(
-        "Alice is told, and it shows on their Loans, with nothing to confirm.",
+        "Alice is told, and it shows on their Loans. They don’t confirm.",
       ),
     ).toBeTruthy();
 

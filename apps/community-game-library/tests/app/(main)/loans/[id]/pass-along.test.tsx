@@ -78,7 +78,18 @@ describe("lines and passing it along on a loan's pages (U15: C5, C7, C11)", () =
     ]) {
       expect(c11.getByText(words)).toBeTruthy();
     }
-    expect(c11.getByRole("link", { name: "Call Jo, 555 0117" })).toBeTruthy();
+    // C11's three steps are a numbered list, the phone under the first.
+    const steps = c11
+      .getByRole("heading", { name: "Three steps" })
+      .closest("section") as HTMLElement;
+    expect(steps.querySelector("ol")).toBeTruthy();
+    const [arrange] = within(steps).getAllByRole("listitem");
+    expect(within(steps).getAllByRole("listitem")).toHaveLength(3);
+    expect(
+      within(arrange as HTMLElement).getByRole("link", {
+        name: "Call Jo, 555 0117",
+      }),
+    ).toBeTruthy();
     fireEvent.click(c11.getByRole("button", { name: "I gave it to Jo" }));
     expect(await c11.findByText("Jo is asked to confirm.")).toBeTruthy();
     expect(nextState.pushed).toEqual([`/loans/${youHaveMossAndMortar.id}`]);
@@ -154,10 +165,12 @@ describe("lines and passing it along on a loan's pages (U15: C5, C7, C11)", () =
         "Pass-along is off: Jo returns it to you, then you answer Ben.",
       ),
     ).toBeTruthy();
+    // C7's quiet link, drawn as a button (Base UI gives it the role).
     expect(
       c7
-        .getByRole("link", { name: "Change it on this copy’s page" })
-        .getAttribute("href"),
+        .getByRole("button", { name: "Change it on this copy’s page" })
+        .closest("a")
+        ?.getAttribute("href"),
     ).toBe(`/copies/${yourGullAndAnchor.id}`);
     c7.unmount();
 

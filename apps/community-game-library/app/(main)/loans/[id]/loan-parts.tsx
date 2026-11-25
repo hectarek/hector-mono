@@ -1,3 +1,4 @@
+import { cn } from "@repo/ui/lib/utils";
 import type { ReactNode } from "react";
 import { PhoneIcon } from "@/app/_components/icons";
 import { Piece } from "@/app/_components/piece";
@@ -20,26 +21,35 @@ export function Summary({
   facts,
 }: {
   thumb: ReactNode;
-  // A person's 20px piece between the token and the words (C5, C7).
+  // A person's 20px piece between the token and the words, 8px from them (C5).
   piece?: ReactNode;
   lead: string;
   facts: string[];
 }) {
+  const words = (
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <span className="text-15 font-bold">{lead}</span>
+      {facts.map((fact) => (
+        <span
+          key={fact}
+          className="font-mono text-2xs font-medium text-muted-foreground"
+        >
+          {fact}
+        </span>
+      ))}
+    </div>
+  );
   return (
     <div className="flex items-center gap-3">
       {thumb}
-      {piece}
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-15 font-bold">{lead}</span>
-        {facts.map((fact) => (
-          <span
-            key={fact}
-            className="font-mono text-2xs font-medium text-muted-foreground"
-          >
-            {fact}
-          </span>
-        ))}
-      </div>
+      {piece ? (
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {piece}
+          {words}
+        </div>
+      ) : (
+        words
+      )}
     </div>
   );
 }
@@ -60,16 +70,24 @@ export function PhoneLink({ name, phone }: { name: string; phone: string }) {
   );
 }
 
-// The other person in the loan: their piece and name, why they're here, and their phone.
+// The other person in the loan: their piece and name, why they're here, and their phone. Under
+// the loan's own lines, a dashed rule sets them apart (`divided`, C16 and C17).
 export function Person({
   person,
   line,
+  divided = false,
 }: {
   person: NameAndPiece & { phone: string | null };
   line: string;
+  divided?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div
+      className={cn(
+        "flex items-center gap-2.5",
+        divided && "border-t-2 border-dashed border-foreground pt-2",
+      )}
+    >
       <Piece shape={person.pieceShape} color={person.pieceColor} size={20} />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="text-15 font-bold">{person.name}</span>

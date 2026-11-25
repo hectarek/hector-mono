@@ -47,7 +47,9 @@ describe("Past loans (U16: C12)", () => {
     expect(page.getByRole("heading", { level: 1 }).textContent).toBe(
       "Past loans",
     );
-    const borrowed = page.getByRole("button", { name: "You borrowed" });
+    // C12's two views, as one segmented control.
+    const views = within(page.getByRole("group", { name: "Which loans" }));
+    const borrowed = views.getByRole("button", { name: "You borrowed" });
     expect(borrowed.getAttribute("aria-pressed")).toBe("true");
     expect(
       page

@@ -127,6 +127,19 @@ describe("a loan out and its return (U13: C3, C5, C7, C8)", () => {
     expect(page.getByText("It’s Sam’s copy")).toBeTruthy();
     expect(page.getByText("Your due date doesn’t change.")).toBeTruthy();
     expect(page.getByText("1st in line")).toBeTruthy();
+    // C5's Who's involved is one list: Sam's row, then Jo's in line.
+    const involved = within(
+      page
+        .getByRole("heading", { name: "Who’s involved" })
+        .closest("section") as HTMLElement,
+    );
+    expect(involved.getAllByRole("list")).toHaveLength(1);
+    const rows = involved
+      .getAllByRole("listitem")
+      .map((li) => li.textContent ?? "");
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.startsWith("Sam")).toBe(true);
+    expect(rows[1]?.startsWith("Jo")).toBe(true);
 
     fireEvent.click(
       page.getByRole("button", { name: "I gave it back to Sam" }),

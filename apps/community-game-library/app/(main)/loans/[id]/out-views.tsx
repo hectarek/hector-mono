@@ -1,4 +1,5 @@
 import { Button } from "@repo/ui/components/button";
+import { cn } from "@repo/ui/lib/utils";
 import Link from "next/link";
 import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
@@ -28,9 +29,10 @@ import { RemoveFromLine } from "./remove-from-line";
 
 type LoanView = Awaited<ReturnType<DI_RETURN_TYPES["IGetLoanController"]>>;
 
-// The people in the copy's line, each with their place: the borrower's due date doesn't change
-// (C5), and the owner answers them in turn, or takes them out of the line (C7).
-function LineList({
+// The people in the copy's line, each with their place, as rows of a list: under the owner in
+// C5's Who's involved, where the borrower's due date doesn't change, and in C7's The line, where
+// the owner answers them in turn, or takes them out of the line.
+function LineRows({
   line,
   note,
   now,
@@ -41,30 +43,22 @@ function LineList({
   now: Date;
   removable?: boolean;
 }) {
-  return (
-    <List>
-      {line.map((person, index) => (
-        <ListItem key={person.loanId}>
-          <Piece
-            shape={person.pieceShape}
-            color={person.pieceColor}
-            size={20}
-          />
-          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <RowName>{person.name}</RowName>
-            <span className="text-xs text-muted-foreground">
-              {note ??
-                `${ordinal(index + 1)} in line · asked ${formatWhen(person.askedAt, now)}`}
-            </span>
-          </span>
-          {note && <Stamp tone="navy">{`${ordinal(index + 1)} in line`}</Stamp>}
-          {removable && (
-            <RemoveFromLine loanId={person.loanId} name={person.name} />
-          )}
-        </ListItem>
-      ))}
-    </List>
-  );
+  return line.map((person, index) => (
+    <ListItem key={person.loanId}>
+      <Piece shape={person.pieceShape} color={person.pieceColor} size={20} />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <RowName>{person.name}</RowName>
+        <span className="text-xs text-muted-foreground">
+          {note ??
+            `${ordinal(index + 1)} in line · asked ${formatWhen(person.askedAt, now)}`}
+        </span>
+      </span>
+      {note && <Stamp tone="navy">{`${ordinal(index + 1)} in line`}</Stamp>}
+      {removable && (
+        <RemoveFromLine loanId={person.loanId} name={person.name} />
+      )}
+    </ListItem>
+  ));
 }
 
 // What a request for more time asks for, in C5's words: "1 more week", "3 more days", or "more
@@ -141,7 +135,11 @@ export function BorrowedLoan({
       )}
       <Group
         label="The loan"
-        aside={<Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
+        aside={
+          <Stamp tone={stamp.tone} size="card" tilt={3}>
+            {stamp.word}
+          </Stamp>
+        }
       >
         <Summary
           thumb={
@@ -217,14 +215,12 @@ export function BorrowedLoan({
               )}
             </ListItem>
           )}
-        </List>
-        {line.length > 0 && (
-          <LineList
+          <LineRows
             line={line}
             note={out ? "Your due date doesn’t change." : undefined}
             now={now}
           />
-        )}
+        </List>
       </Group>
       {out && loan.pickedUpOn && (
         <Group label="What you can do">
@@ -345,7 +341,7 @@ export function LentLoan({
       <Title>{game.title}</Title>
       {out && loan.moreTimeDueOn && loan.pickedUpOn && loan.dueOn && (
         <Group label={`${borrower.name} asked for more time`}>
-          <div className="flex items-start gap-2.5">
+          <div className="flex items-center gap-2.5">
             <Piece
               shape={borrower.pieceShape}
               color={borrower.pieceColor}
@@ -391,19 +387,25 @@ export function LentLoan({
       )}
       <Group
         label="The loan"
-        aside={<Stamp tone={state.stamp.tone}>{state.stamp.word}</Stamp>}
+        aside={
+          <Stamp tone={state.stamp.tone} size="card">
+            {state.stamp.word}
+          </Stamp>
+        }
       >
         <div className="flex items-center gap-3">
           <CoverThumb color={coverColorOf(game)} imageUrl={game.imageUrl} />
-          <Piece
-            shape={borrower.pieceShape}
-            color={borrower.pieceColor}
-            size={20}
-          />
-          <span className="min-w-0 flex-1 text-15 font-bold">
-            {passing && handoff
-              ? `${borrower.name} is handing it to ${handoff.name}`
-              : `${borrower.name} has it`}
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            <Piece
+              shape={borrower.pieceShape}
+              color={borrower.pieceColor}
+              size={20}
+            />
+            <span className="min-w-0 text-15 font-bold">
+              {passing && handoff
+                ? `${borrower.name} is handing it to ${handoff.name}`
+                : `${borrower.name} has it`}
+            </span>
           </span>
           {borrower.phone && (
             <PhoneLink name={borrower.name} phone={borrower.phone} />
@@ -451,7 +453,9 @@ export function LentLoan({
       )}
       {line.length > 0 && (
         <Group label="The line" overList>
-          <LineList line={line} now={now} removable />
+          <List>
+            <LineRows line={line} now={now} removable />
+          </List>
         </Group>
       )}
       <Group label="Your copy">
@@ -462,19 +466,31 @@ export function LentLoan({
                 ? `Pass-along is on: ${borrower.name} hands it straight to ${next.name}, and you’re told who has it.`
                 : `Pass-along is off: ${borrower.name} returns it to you, then you answer ${next.name}.`}
             </p>
-            <Link
-              href={`/copies/${copy.id}`}
-              transitionTypes={["go-deeper"]}
-              className="self-start text-sm font-bold underline underline-offset-2"
+            <Button
+              variant="link"
+              nativeButton={false}
+              render={
+                <Link
+                  href={`/copies/${copy.id}`}
+                  transitionTypes={["go-deeper"]}
+                />
+              }
+              className="-mt-1 self-start"
             >
               Change it on this copy’s page
-            </Link>
+            </Button>
           </>
         )}
+        {/* Under the pass-along words, a dashed rule sets the history apart (C7). */}
         <Link
           href={`/copies/${copy.id}`}
           transitionTypes={["go-deeper"]}
-          className="flex min-h-11 items-center justify-between gap-2 text-15 font-bold hover:text-destructive"
+          className={cn(
+            "flex min-h-11 items-center justify-between gap-2 text-15 font-bold hover:text-destructive",
+            next &&
+              out &&
+              "min-h-13 border-t-2 border-dashed border-foreground pt-1.5",
+          )}
         >
           This copy’s history
           <ForwardIcon />
@@ -493,7 +509,7 @@ export function LentLoan({
               title={game.title}
               borrower={borrower.name}
               overdue={isOverdue(loan, today)}
-              nextName={next?.name ?? null}
+              next={next}
             />
           </Group>
         ))}
