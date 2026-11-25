@@ -9,6 +9,8 @@ import { getInjection } from "@/di/container";
 
 // G3, Add a game by hand (R5): from a suggestion (?suggestion=, G2's Add it by hand), the form
 // starts with what was sent, and adding it answers the suggestion; from Admin, it starts empty.
+// Its categories to tap are the catalog's, which only the admin reads, so anyone else is Not
+// found here too.
 export default async function AddGamePage({
   searchParams,
 }: {
@@ -17,18 +19,14 @@ export default async function AddGamePage({
   await connection();
   const { user } = await gate("app");
   const { suggestion: suggestionId } = await searchParams;
-  const from =
+  const [categories, from] = await Promise.all([
+    adminRead(() => getInjection("IListCategoriesController")(user.id)),
     typeof suggestionId === "string"
-      ? await adminRead(() =>
+      ? adminRead(() =>
           getInjection("IGetSuggestionController")({ suggestionId }, user.id),
         )
-      : null;
-  // Anyone but the admin is Not found here too.
-  if (!from) {
-    await adminRead(() => getInjection("IListSuggestionsController")(user.id));
-  }
-  const who = from?.by?.name ?? "Someone";
-
+      : null,
+  ]);
   return (
     <PageColumn
       width="read"
@@ -45,17 +43,9 @@ export default async function AddGamePage({
         />
       }
     >
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl leading-7 font-bold">Add a game by hand</h1>
-        {from && (
-          <p className="text-13 text-muted-foreground">
-            From {who}’s suggestion. When you add it, {who} is told and it lands
-            in their library.
-          </p>
-        )}
-      </div>
       <GameForm
         action={addGame}
+        title="Add a game by hand"
         game={
           from
             ? {
@@ -68,7 +58,12 @@ export default async function AddGamePage({
               }
             : {}
         }
-        suggestionId={from?.suggestion.id}
+        categories={categories}
+        suggestion={
+          from
+            ? { id: from.suggestion.id, by: from.by?.name ?? "Someone" }
+            : undefined
+        }
         submitLabel="Add to the catalog"
         done="/admin"
       />

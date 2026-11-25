@@ -47,11 +47,12 @@ const optionalCount = z
   .refine((value) => value === "" || /^\d{1,3}$/.test(value), "Enter a number")
   .transform((value) => (value === "" ? null : Number(value)));
 
-// A list typed with commas between: "Ines Varga, Tom Reed".
+// A list typed with commas between: "Ines Varga, Tom Reed", or the categories' chips sent that
+// way. Its limit is said in the forms' words, under Designers, Publishers or the chips.
 const optionalList = z
   .string()
   .trim()
-  .max(500)
+  .max(500, "Keep it to 500 characters")
   .transform((value) => {
     const items = [
       ...new Set(

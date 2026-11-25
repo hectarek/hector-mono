@@ -34,6 +34,10 @@ export interface IUserGamesRepository {
   lock(id: string, tx: ITransaction): Promise<void>;
   // A member's own copies, oldest first (My library, U7).
   listOwn(userId: string, tx?: ITransaction): Promise<UserGame[]>;
+  // Whether any member owns a copy of the game, and whether any copy's box holds it (an
+  // expansion), for the admin's change to its type (G4): yes or no, never whose.
+  hasCopies(gameId: string, tx?: ITransaction): Promise<boolean>;
+  isInABox(gameId: string, tx?: ITransaction): Promise<boolean>;
 
   // The writes (U7), each inside the caller's transaction.
   add(copy: NewUserGame, tx: ITransaction): Promise<UserGame>;

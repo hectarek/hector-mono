@@ -6,6 +6,7 @@ import { answerSuggestionController } from "@/src/interface-adapters/controllers
 import { findGamesToEditController } from "@/src/interface-adapters/controllers/suggestions/find-games-to-edit.controller";
 import { getGameToEditController } from "@/src/interface-adapters/controllers/suggestions/get-game-to-edit.controller";
 import { getSuggestionController } from "@/src/interface-adapters/controllers/suggestions/get-suggestion.controller";
+import { listCategoriesController } from "@/src/interface-adapters/controllers/suggestions/list-categories.controller";
 import { listSuggestionsController } from "@/src/interface-adapters/controllers/suggestions/list-suggestions.controller";
 import { suggestGameController } from "@/src/interface-adapters/controllers/suggestions/suggest-game.controller";
 import { updateGameController } from "@/src/interface-adapters/controllers/suggestions/update-game.controller";
@@ -193,6 +194,19 @@ describe("the admin's reads", () => {
       UnauthenticatedError,
     );
     await controller(you.id);
+    expect(useCase).toHaveBeenCalledWith(you.id);
+  });
+
+  it("turns away a signed-out visitor from the catalog's categories (G3)", async () => {
+    const useCase = mock(async () => ["Family"]);
+    const controller = listCategoriesController(
+      useCase,
+      new MockLoggerService(),
+    );
+    await expect(controller(undefined)).rejects.toBeInstanceOf(
+      UnauthenticatedError,
+    );
+    expect(await controller(you.id)).toEqual(["Family"]);
     expect(useCase).toHaveBeenCalledWith(you.id);
   });
 });

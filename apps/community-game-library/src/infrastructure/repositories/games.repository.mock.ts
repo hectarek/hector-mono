@@ -153,6 +153,19 @@ export class MockGamesRepository implements IGamesRepository {
       .map((game) => ({ ...game }));
   }
 
+  // Each use of a category counts, as unnest counts them.
+  async listCategories(): Promise<string[]> {
+    const uses = new Map<string, number>();
+    for (const game of this.rows) {
+      for (const category of game.categories ?? []) {
+        uses.set(category, (uses.get(category) ?? 0) + 1);
+      }
+    }
+    return [...uses]
+      .sort(([a, aUses], [b, bUses]) => bUses - aUses || compare(a, b))
+      .map(([category]) => category);
+  }
+
   async add(game: GameRecord): Promise<Game> {
     const now = new Date();
     const added: Game = {

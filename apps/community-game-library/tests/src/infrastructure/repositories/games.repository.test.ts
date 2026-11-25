@@ -135,6 +135,25 @@ describeEachBackend("IGamesRepository", () => {
     expect(await app.repos.games.listByIds([])).toEqual([]);
   });
 
+  it("lists the catalog's categories, the most used first, then by name (G3)", async () => {
+    // The cast's: Family on Harbor Lights and Night Market, Economic and Nautical on one each.
+    expect(await app.repos.games.listCategories()).toEqual([
+      "Family",
+      "Economic",
+      "Nautical",
+    ]);
+    await app.addGames(
+      catalogGame(1, "Lantern Row", { categories: ["Nautical", "Card game"] }),
+      catalogGame(2, "Lantern Glow", { categories: ["Nautical"] }),
+    );
+    expect(await app.repos.games.listCategories()).toEqual([
+      "Nautical",
+      "Family",
+      "Card game",
+      "Economic",
+    ]);
+  });
+
   it("lists a base game's expansions", async () => {
     expect(
       titles(await app.repos.games.listExpansions(games.harborLights.id)),

@@ -99,6 +99,26 @@ export class GamesRepository
     }
   }
 
+  async listCategories(tx?: ITransaction): Promise<string[]> {
+    try {
+      const executor = this.getDbContext(tx);
+      const used = executor
+        .select({
+          category: sql<string>`unnest(${games.categories})`.as("category"),
+        })
+        .from(games)
+        .as("used");
+      const rows = await executor
+        .select({ category: used.category })
+        .from(used)
+        .groupBy(used.category)
+        .orderBy(sql`count(*) desc`, sql`${used.category} collate "C"`);
+      return rows.map((row) => row.category);
+    } catch (err) {
+      this.handleError(err, "listCategories");
+    }
+  }
+
   async add(game: GameRecord, tx: ITransaction): Promise<Game> {
     try {
       const [added] = await this.getDbContext(tx)

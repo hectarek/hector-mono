@@ -141,6 +141,32 @@ export class UserGamesRepository
     }
   }
 
+  async hasCopies(gameId: string, tx?: ITransaction): Promise<boolean> {
+    try {
+      const found = await this.getDbContext(tx)
+        .select({ id: userGames.id })
+        .from(userGames)
+        .where(eq(userGames.gameId, gameId))
+        .limit(1);
+      return found.length > 0;
+    } catch (err) {
+      this.handleError(err, "hasCopies", { gameId });
+    }
+  }
+
+  async isInABox(gameId: string, tx?: ITransaction): Promise<boolean> {
+    try {
+      const found = await this.getDbContext(tx)
+        .select({ userGameId: userGameExpansions.userGameId })
+        .from(userGameExpansions)
+        .where(eq(userGameExpansions.gameId, gameId))
+        .limit(1);
+      return found.length > 0;
+    } catch (err) {
+      this.handleError(err, "isInABox", { gameId });
+    }
+  }
+
   async add(copy: NewUserGame, tx: ITransaction): Promise<UserGame> {
     try {
       const [added] = await this.getDbContext(tx)

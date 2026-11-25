@@ -7,8 +7,8 @@ import { adminRead } from "@/app/(main)/admin/admin-reads";
 import { updateGame } from "@/app/actions/admin";
 import { getInjection } from "@/di/container";
 
-// G4, a game's record (R5, R7): the admin corrects its details, its picture and its how-to-play
-// link in G3's form, saved with Save.
+// G4, a game's record (R5, R7): the admin corrects its details, its picture, its how-to-play
+// link and whether it's an expansion in G3's whole form (Hector, 2026-11-25), saved with Save.
 export default async function GameRecordPage({
   params,
 }: {
@@ -17,9 +17,12 @@ export default async function GameRecordPage({
   await connection();
   const { user } = await gate("app");
   const { id } = await params;
-  const { game, baseGame } = await adminRead(() =>
-    getInjection("IGetGameToEditController")({ gameId: id }, user.id),
-  );
+  const [{ game, baseGame }, categories] = await Promise.all([
+    adminRead(() =>
+      getInjection("IGetGameToEditController")({ gameId: id }, user.id),
+    ),
+    adminRead(() => getInjection("IListCategoriesController")(user.id)),
+  ]);
 
   return (
     <PageColumn
@@ -30,15 +33,15 @@ export default async function GameRecordPage({
         />
       }
     >
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl leading-7 font-bold">{game.title}</h1>
-        {baseGame && (
-          <p className="text-13 text-muted-foreground">
-            An expansion of {baseGame.title}
-          </p>
-        )}
-      </div>
-      <GameForm action={updateGame} game={game} submitLabel="Save" />
+      <GameForm
+        action={updateGame}
+        title={game.title}
+        subtitle={baseGame ? `An expansion of ${baseGame.title}` : undefined}
+        game={game}
+        baseGame={baseGame}
+        categories={categories}
+        submitLabel="Save"
+      />
     </PageColumn>
   );
 }

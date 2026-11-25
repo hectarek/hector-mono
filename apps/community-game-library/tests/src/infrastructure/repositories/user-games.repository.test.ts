@@ -81,4 +81,17 @@ describeEachBackend("IUserGamesRepository", () => {
     ]);
     expect(await app.repos.userGames.listExpansionsInBoxes([])).toEqual([]);
   });
+
+  // G4 asks before it changes a game's type: does anyone own it, or have it in a box?
+  it("says whether anyone owns a game, and whether any box holds it", async () => {
+    const { userGames } = app.repos;
+
+    expect(await userGames.hasCopies(games.harborLights.id)).toBe(true);
+    // Harbor Master is in the catalog, on nobody's shelf (B10).
+    expect(await userGames.hasCopies(games.harborMaster.id)).toBe(false);
+    // Night Tide is in Sam's Harbor Lights' box, and on no shelf of its own.
+    expect(await userGames.isInABox(games.nightTide.id)).toBe(true);
+    expect(await userGames.hasCopies(games.nightTide.id)).toBe(false);
+    expect(await userGames.isInABox(games.harborLights.id)).toBe(false);
+  });
 });
