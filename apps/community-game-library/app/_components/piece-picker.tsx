@@ -10,7 +10,7 @@ import {
 } from "@/src/entities/piece";
 
 const CHOICE =
-  "flex cursor-pointer flex-col items-center gap-1.5 rounded-sm pt-2 pb-1.5 has-data-checked:outline-2 has-data-checked:outline-dashed has-data-checked:outline-foreground";
+  "flex cursor-pointer flex-col items-center gap-1.5 rounded-lg pt-2 pb-1.5 has-data-checked:outline-2 has-data-checked:outline-dashed has-data-checked:outline-foreground";
 
 const CAPTION = "font-mono text-10 font-medium uppercase";
 
