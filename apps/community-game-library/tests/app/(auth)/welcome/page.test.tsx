@@ -75,6 +75,12 @@ describe("the welcome page", () => {
     expect(view.getByRole("heading", { level: 1 }).textContent).toBe(
       "Open this in your browser",
     );
+    // Step 1 draws the share icon inside its words, as A9 does.
+    expect(
+      view
+        .getByText("Tap the menu (··· or the share icon )")
+        .querySelector("svg"),
+    ).toBeTruthy();
     expect(view.getByRole("button", { name: "Copy the link" })).toBeTruthy();
     expect(view.queryByRole("button", { name: "Sign in" }) === null).toBe(true);
     expect(

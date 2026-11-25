@@ -6,6 +6,7 @@ import {
   EMAIL_TAKEN_LINE,
   showAuthMessage,
   toAuthMessage,
+  WRONG_PASSWORD_LINE,
 } from "@/app/_lib/auth-notice";
 
 afterEach(() => showAuthMessage(null));
@@ -66,6 +67,15 @@ describe("an email that already has an account", () => {
       "That password doesn’t match.",
     );
     expect(view.queryByRole("link") === null).toBe(true);
+  });
+
+  it("words a wrong password as A8 draws it, from Neon's message or its code", () => {
+    expect(
+      toAuthMessage({ variant: "error", message: "Invalid email or password" }),
+    ).toEqual({ variant: "error", message: WRONG_PASSWORD_LINE });
+    expect(LOCALIZATION.INVALID_EMAIL_OR_PASSWORD).toBe(
+      "That password doesn’t match this email.",
+    );
   });
 
   it("shows a plain message from the kit as a status line", () => {

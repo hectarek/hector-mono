@@ -1,10 +1,12 @@
-import { EMAIL_TAKEN_LINE } from "@/app/_lib/auth-notice";
+import { EMAIL_TAKEN_LINE, WRONG_PASSWORD_LINE } from "@/app/_lib/auth-notice";
 
 // Neon's wording, in the app's words (A2, A8). The kit's error codes pick their lines from here:
-// an email that has an account answers with one of the first two.
+// an email that has an account answers with one of the first two, a wrong password with the
+// third.
 export const LOCALIZATION = {
   USER_ALREADY_EXISTS: EMAIL_TAKEN_LINE,
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: EMAIL_TAKEN_LINE,
+  INVALID_EMAIL_OR_PASSWORD: WRONG_PASSWORD_LINE,
   SIGN_IN: "Sign in",
   SIGN_IN_ACTION: "Sign in",
   SIGN_IN_DESCRIPTION: "",
