@@ -99,8 +99,8 @@ const HOUR = new Intl.DateTimeFormat("en-US", {
 });
 
 // When something happened, as a line after a verb says it ("You asked this morning", B13), in
-// the app's time zone: this morning, afternoon or evening, yesterday, a weekday within the week,
-// then its date.
+// the app's time zone: this morning, afternoon or evening, yesterday, a weekday by its whole name
+// within the week ("asked Sunday", C7 and C18), then its date ("on Nov 2").
 export function formatWhen(at: Date, now: Date): string {
   const day = todayIn(PLAN_TIME_ZONE, at);
   const today = todayIn(PLAN_TIME_ZONE, now);
@@ -116,9 +116,7 @@ export function formatWhen(at: Date, now: Date): string {
   if (daysAgo === 1) {
     return "yesterday";
   }
-  return daysAgo < 7
-    ? `on ${formatWeekday(day)}`
-    : `on ${formatDate(day, today)}`;
+  return daysAgo < 7 ? formatDayName(day) : `on ${formatDate(day, today)}`;
 }
 
 // A month, given as "YYYY-MM", by its name and year: "November 2026".

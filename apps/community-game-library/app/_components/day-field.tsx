@@ -3,12 +3,12 @@
 import { Field, FieldDescription, FieldLabel } from "@repo/ui/components/field";
 import { useState } from "react";
 import { DateSheet } from "@/app/_components/date-sheet";
-import { CalendarIcon } from "@/app/_components/icons";
+import { ChevronDownIcon } from "@/app/_components/icons";
 import { formatDate } from "@/src/entities/week";
 
 // A day that already happened, picked on the date sheet (X1): C3's Picked up on and C5's Gave it
-// back on. It reads "Today, Tue, Nov 10" until another day is picked, and its sheet is titled
-// Pick a date, as X1 draws it. Inside a group whose label names it already (C9), its own label is
+// back on, and D5's Date. It reads "Today, Tue, Nov 10" until another day is picked, with a
+// select's chevron, and its sheet is titled Pick a date, as X1 draws it. Inside a group whose label names it already (C9), its own label is
 // for screen readers only.
 export function DayField({
   id,
@@ -45,7 +45,7 @@ export function DayField({
         className="flex min-h-11 items-center justify-between gap-2 rounded-lg border-2 border-foreground bg-secondary px-3 text-left text-15 text-foreground"
       >
         {value === today ? `Today, ${words}` : words}
-        <CalendarIcon className="shrink-0" />
+        <ChevronDownIcon />
       </button>
       {hint && <FieldDescription>{hint}</FieldDescription>}
       <DateSheet

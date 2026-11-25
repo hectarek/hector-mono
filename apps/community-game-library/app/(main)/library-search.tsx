@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { CloseIcon, SearchIcon } from "@/app/_components/icons";
@@ -16,6 +17,7 @@ export function LibrarySearch({
   path = "/",
   keep = "",
   label,
+  labelHidden = false,
 }: {
   initial: string;
   // The page whose address holds what's typed.
@@ -26,6 +28,8 @@ export function LibrarySearch({
   // Add games' label above the field, "Search the catalog". Without one the field names itself
   // inside, and says what it searches once something's typed.
   label?: string;
+  // Inside a group whose heading names it already (G8), the label is for screen readers only.
+  labelHidden?: boolean;
 }) {
   const router = useRouter();
   const fieldId = useId();
@@ -53,7 +57,10 @@ export function LibrarySearch({
   return (
     <search className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={fieldId} className="text-13 font-semibold">
+        <label
+          htmlFor={fieldId}
+          className={cn("text-13 font-semibold", labelHidden && "sr-only")}
+        >
           {label}
         </label>
       )}

@@ -205,7 +205,7 @@ export function TableGames({
                 />
               }
             >
-              <DicePair onBone small />
+              <DicePair onBone size="button" />
               <span className="text-left leading-tight whitespace-normal">
                 What should we play?
               </span>

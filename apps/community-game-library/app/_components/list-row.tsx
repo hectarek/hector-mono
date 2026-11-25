@@ -61,16 +61,22 @@ function Fillers({ rows }: { rows: number }) {
 export function ListRow({
   href,
   thumb,
+  thumbTop = false,
   stamp,
   aside,
+  count,
   children,
 }: {
   href: string;
   // Before the text: a CoverThumb, or a person's 20px piece.
   thumb?: ReactNode;
+  // The thumb at the top of a row of several lines, the rest centered (F1).
+  thumbTop?: boolean;
   stamp?: ReactNode;
   // A mono fact at the right ("4 games").
   aside?: ReactNode;
+  // A bare count at the right, 13px in navy ("2", D1's Past game nights, G1).
+  count?: number;
   children: ReactNode;
 }) {
   return (
@@ -80,7 +86,11 @@ export function ListRow({
         transitionTypes={["go-deeper"]}
         className="flex min-h-12 items-center gap-3 px-3 py-2.5 text-foreground hover:text-destructive focus-visible:-outline-offset-3"
       >
-        {thumb}
+        {thumb && thumbTop ? (
+          <span className="flex self-start pt-0.5">{thumb}</span>
+        ) : (
+          thumb
+        )}
         <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
           <span className="flex min-w-0 grow basis-28 flex-col gap-0.5">
             {children}
@@ -90,6 +100,11 @@ export function ListRow({
         {aside && (
           <span className="shrink-0 font-mono text-xs font-medium text-muted-foreground">
             {aside}
+          </span>
+        )}
+        {count !== undefined && (
+          <span className="shrink-0 font-mono text-13 font-medium">
+            {count}
           </span>
         )}
         <ForwardIcon />

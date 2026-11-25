@@ -54,9 +54,13 @@ export function FriendRow({
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <RowName>{person.name}</RowName>
         {via ? (
-          <span className="text-xs">Friend of {via.name}</span>
+          <span className="text-xs text-muted-foreground">
+            Friend of {via.name}
+          </span>
         ) : (
-          night && <span className="text-xs">At {night}</span>
+          night && (
+            <span className="text-xs text-muted-foreground">At {night}</span>
+          )
         )}
       </span>
       {request.kind === "to-you" && (

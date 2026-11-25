@@ -49,7 +49,7 @@ export function WhatItsFor({ className }: { className?: string }) {
       </li>
       <li className="flex items-center gap-3.5 p-3.5">
         <span className="flex w-21 shrink-0 justify-center">
-          <DicePair onBone />
+          <DicePair size="welcome" rest={[5, 3]} />
         </span>
         <span className="flex-1 text-15 leading-snug font-semibold">
           Plan a game night and pick what to play.
