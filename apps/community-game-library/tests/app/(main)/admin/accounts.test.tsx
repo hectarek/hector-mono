@@ -47,16 +47,37 @@ describe("Remove an account (U22: G8)", () => {
     expect(view.getByRole("heading", { level: 1 }).textContent).toBe(
       "Remove an account",
     );
-    const found = view.getByRole("radio", { name: /Dev/ });
+    // The search and what it finds sit in Find the account, whose heading names the field; the
+    // removal has its own last group.
+    const find = within(
+      view
+        .getByRole("heading", { name: "Find the account" })
+        .closest("section") as HTMLElement,
+    );
+    expect(
+      find.getByRole("searchbox", { name: "Find the account" }),
+    ).toBeTruthy();
+    const found = find.getByRole("radio", { name: /Dev/ });
     expect(found.getAttribute("aria-checked")).toBe("true");
     expect(
-      view.getByText("Joined Nov 2026").closest("label")?.textContent,
+      find.getByText("Joined Nov 2026").closest("label")?.textContent,
     ).toBe("DevJoined Nov 20260 games · 0 open loans");
-    expect(
+    const record = within(
       view
+        .getByRole("heading", { name: "On the record" })
+        .closest("section") as HTMLElement,
+    );
+    expect(
+      record
         .getByRole("button", { name: "Remove Dev’s account" })
         .hasAttribute("disabled"),
     ).toBe(false);
+    expect(
+      record
+        .getByRole("button", { name: "Cancel" })
+        .closest("a")
+        ?.getAttribute("href"),
+    ).toBe("/admin");
   });
 
   it("says when no account has the name, and finds nobody for an empty search", async () => {

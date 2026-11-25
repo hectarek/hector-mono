@@ -1,4 +1,4 @@
-import { Empty, EmptyDescription } from "@repo/ui/components/empty";
+import { Empty, EmptyHeader, EmptyTitle } from "@repo/ui/components/empty";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { Group } from "@/app/_components/group";
@@ -35,7 +35,9 @@ export default async function AdminPage() {
       >
         {waiting.length === 0 && (
           <Empty>
-            <EmptyDescription>No suggestions waiting.</EmptyDescription>
+            <EmptyHeader>
+              <EmptyTitle>No suggestions waiting.</EmptyTitle>
+            </EmptyHeader>
           </Empty>
         )}
         <List>
@@ -60,7 +62,7 @@ export default async function AdminPage() {
               </RowFacts>
             </ListRow>
           ))}
-          <ListRow href="/admin/suggestions/answered" aside={answered.length}>
+          <ListRow href="/admin/suggestions/answered" count={answered.length}>
             <RowName>Answered suggestions</RowName>
           </ListRow>
         </List>

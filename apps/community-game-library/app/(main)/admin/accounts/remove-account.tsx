@@ -4,9 +4,10 @@ import { Button } from "@repo/ui/components/button";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { ConfirmDialog } from "@/app/_components/confirm-dialog";
-import { List, ListItem, RowFacts, RowName } from "@/app/_components/list-row";
+import { Group } from "@/app/_components/group";
+import { RowFacts, RowName } from "@/app/_components/list-row";
 import { Piece } from "@/app/_components/piece";
 import { callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
@@ -24,15 +25,26 @@ type Found = NameAndPiece & {
 const count = (n: number, one: string, many: string) =>
   `${n} ${n === 1 ? one : many}`;
 
-// G8's accounts found, one to pick, and its removal: switched off while the account has a loan to
-// settle, and asking first ("Remove Dev's account?"). Admin opens after, with the message.
-export function RemoveAccount({ accounts }: { accounts: Found[] }) {
+// G8's two groups. Find the account holds the search, the accounts it finds and the one picked
+// (the only one found is picked already). On the record holds the removal, switched off while the
+// account has a loan to settle and asking first ("Remove Dev's account?"); Admin opens after, with
+// the message. The page draws the search, which keeps what's typed as the results change.
+export function RemoveAccount({
+  search,
+  searched,
+  accounts,
+}: {
+  search: ReactNode;
+  // Something was typed, so finding nobody says so.
+  searched: boolean;
+  accounts: Found[];
+}) {
   const router = useRouter();
-  const [picked, setPicked] = useState(
-    accounts.length === 1 ? accounts[0]?.userId : undefined,
-  );
+  const [chosen, setChosen] = useState<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
-  const account = accounts.find((one) => one.userId === picked);
+  const account =
+    accounts.find((one) => one.userId === chosen) ??
+    (accounts.length === 1 ? accounts[0] : undefined);
 
   async function confirm() {
     if (!account) {
@@ -53,41 +65,57 @@ export function RemoveAccount({ accounts }: { accounts: Found[] }) {
 
   return (
     <>
-      <RadioGroup
-        aria-label="Accounts found"
-        value={picked ?? ""}
-        onValueChange={setPicked}
-      >
-        <List>
-          {accounts.map((one) => (
-            <ListItem key={one.userId}>
-              <RadioGroupItem id={`account-${one.userId}`} value={one.userId} />
-              <label
-                htmlFor={`account-${one.userId}`}
-                className="flex min-h-11 flex-1 items-center gap-2.5"
-              >
-                <Piece
-                  shape={one.pieceShape}
-                  color={one.pieceColor}
-                  size={20}
-                />
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <RowName>{one.name}</RowName>
-                  <RowFacts>
-                    Joined {formatSince(new Date(one.joined))}
-                  </RowFacts>
-                  <RowFacts>
-                    {count(one.games, "game", "games")} ·{" "}
-                    {count(one.openLoans, "open loan", "open loans")}
-                  </RowFacts>
-                </span>
-              </label>
-            </ListItem>
-          ))}
-        </List>
-      </RadioGroup>
+      <Group label="Find the account">
+        {search}
+        {searched && accounts.length === 0 && (
+          <p className="text-13 text-muted-foreground">
+            No account has that name.
+          </p>
+        )}
+        {accounts.length > 0 && (
+          <RadioGroup
+            aria-label="Accounts found"
+            value={account?.userId ?? ""}
+            onValueChange={setChosen}
+          >
+            <ul className="flex flex-col *:border-dashed *:border-foreground *:not-first:border-t-2">
+              {accounts.map((one) => (
+                <li
+                  key={one.userId}
+                  className="flex items-center gap-2.5 py-2.5 first:pt-0 last:pb-0"
+                >
+                  <RadioGroupItem
+                    id={`account-${one.userId}`}
+                    value={one.userId}
+                  />
+                  <label
+                    htmlFor={`account-${one.userId}`}
+                    className="flex min-h-11 flex-1 items-center gap-2.5"
+                  >
+                    <Piece
+                      shape={one.pieceShape}
+                      color={one.pieceColor}
+                      size={20}
+                    />
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <RowName>{one.name}</RowName>
+                      <RowFacts>
+                        Joined {formatSince(new Date(one.joined))}
+                      </RowFacts>
+                      <RowFacts>
+                        {count(one.games, "game", "games")} ·{" "}
+                        {count(one.openLoans, "open loan", "open loans")}
+                      </RowFacts>
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </RadioGroup>
+        )}
+      </Group>
       {account && (
-        <div className="flex flex-col gap-2.5">
+        <Group label="On the record">
           {account.openLoans > 0 && (
             <p className="text-13 leading-snug text-muted-foreground">
               {account.name}’s loans have to be settled first.
@@ -103,7 +131,7 @@ export function RemoveAccount({ accounts }: { accounts: Found[] }) {
           </Button>
           <Button
             variant="quiet"
-            size="lg"
+            className="self-center"
             nativeButton={false}
             render={<Link href="/admin" />}
           >
@@ -120,7 +148,7 @@ export function RemoveAccount({ accounts }: { accounts: Found[] }) {
             {account.name} can’t sign in again. Their games disappear from
             everyone’s library. This can’t be undone.
           </ConfirmDialog>
-        </div>
+        </Group>
       )}
     </>
   );

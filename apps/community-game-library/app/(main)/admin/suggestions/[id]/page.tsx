@@ -1,4 +1,4 @@
-import { Empty, EmptyDescription } from "@repo/ui/components/empty";
+import { Empty, EmptyHeader, EmptyTitle } from "@repo/ui/components/empty";
 import Image from "next/image";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
@@ -121,7 +121,9 @@ export default async function SuggestionPage({
         </form>
         {matches.length === 0 ? (
           <Empty>
-            <EmptyDescription>No match in the catalog.</EmptyDescription>
+            <EmptyHeader>
+              <EmptyTitle>No match in the catalog.</EmptyTitle>
+            </EmptyHeader>
           </Empty>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">

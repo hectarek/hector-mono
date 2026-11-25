@@ -1,6 +1,5 @@
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
-import { Group } from "@/app/_components/group";
 import { PageColumn } from "@/app/_components/page-column";
 import { gate } from "@/app/_lib/account";
 import { RemoveAccount } from "@/app/(main)/admin/accounts/remove-account";
@@ -35,28 +34,26 @@ export default async function RemoveAccountPage({
           their friends’ libraries.
         </p>
       </div>
-      <Group label="Find the account">
-        <LibrarySearch initial={search} path="/admin/accounts" label="Name" />
-        {search.trim() !== "" && accounts.length === 0 && (
-          <p className="text-13 text-muted-foreground">
-            No account has that name.
-          </p>
-        )}
-      </Group>
-      {accounts.length > 0 && (
-        <RemoveAccount
-          key={search}
-          accounts={accounts.map(({ profile, games, openLoans }) => ({
-            userId: profile.userId,
-            name: profile.name,
-            pieceShape: profile.pieceShape,
-            pieceColor: profile.pieceColor,
-            joined: profile.createdAt.toISOString(),
-            games,
-            openLoans,
-          }))}
-        />
-      )}
+      <RemoveAccount
+        search={
+          <LibrarySearch
+            initial={search}
+            path="/admin/accounts"
+            label="Find the account"
+            labelHidden
+          />
+        }
+        searched={search.trim() !== ""}
+        accounts={accounts.map(({ profile, games, openLoans }) => ({
+          userId: profile.userId,
+          name: profile.name,
+          pieceShape: profile.pieceShape,
+          pieceColor: profile.pieceColor,
+          joined: profile.createdAt.toISOString(),
+          games,
+          openLoans,
+        }))}
+      />
     </PageColumn>
   );
 }
