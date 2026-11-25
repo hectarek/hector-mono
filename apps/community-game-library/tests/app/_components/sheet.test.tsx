@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { Activity, useState } from "react";
 import { Sheet, SheetActions } from "@/app/_components/sheet";
 import { focused } from "@/tests/_support/focus";
@@ -74,7 +74,11 @@ describe("Sheet", () => {
     const view = render(<Page mode="visible" />);
     await openSheet(view);
 
-    view.rerender(<Page mode="hidden" />);
+    // The close on leaving runs a microtask after the page hides (useClosesOnLeave), and you come
+    // back later than that.
+    await act(async () => {
+      view.rerender(<Page mode="hidden" />);
+    });
     view.rerender(<Page mode="visible" />);
     await waitFor(() => isClosed(view));
   });
