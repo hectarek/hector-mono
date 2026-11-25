@@ -16,6 +16,7 @@ import type { DI_RETURN_TYPES } from "@/di/types";
 import { listed } from "@/src/entities/listed";
 import { coverColorOf } from "@/src/entities/piece";
 import {
+  leftOutWords,
   offersComplexity,
   type PlayComplexity,
   type PlayTime,
@@ -96,10 +97,11 @@ function ChoiceButtons<T extends string>({
   );
 }
 
-// What should we play? (D8; R37, KTD23): the people playing, the time we have, a complexity and
-// where from, starting from the night, and the best fits first, each with why, then the games left
-// out and why. The rules run here as the choices change (what-to-play.ts), and each change asks
-// again, so the dice by the title tumble (U26).
+// What should we play? (D8; R37, KTD23): the people playing and the time we have, starting from
+// the night's, a complexity and where from, and the best fits first, each with why, then the games
+// left out and why. It always starts on All friends’ games with no complexity picked (Hector,
+// 2026-11-25), whatever is on the table. The rules run here as the choices change
+// (what-to-play.ts), and each change asks again, so the dice by the title tumble (U26).
 export function WhatToPlayView({
   choices,
   userId,
@@ -110,9 +112,7 @@ export function WhatToPlayView({
   const [people, setPeople] = useState(Math.max(1, choices.people));
   const [minutes, setMinutes] = useState<PlayTime>(choices.minutes);
   const [complexity, setComplexity] = useState<PlayComplexity | null>(null);
-  const [from, setFrom] = useState<"table" | "all">(
-    choices.onTable.length > 0 ? "table" : "all",
-  );
+  const [from, setFrom] = useState<"table" | "all">("all");
   const games = from === "table" ? choices.onTable : choices.allGames;
   const { fits, leftOut } = whatToPlay(games, { people, minutes, complexity });
   const offerComplexity = offersComplexity(games, complexity);
@@ -257,7 +257,7 @@ export function WhatToPlayView({
         <section className="flex flex-col gap-2 rounded-lg border-2 border-dashed border-foreground p-3.5">
           <h2 className="text-sm font-bold">Left out</h2>
           <p className="text-13 text-muted-foreground">
-            {leftOut.map((one) => one.reason).join(" ")}
+            {leftOutWords(leftOut)}
           </p>
         </section>
       )}
