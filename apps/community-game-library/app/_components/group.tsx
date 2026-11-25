@@ -24,12 +24,13 @@ export function Group({
   id?: string;
   children: ReactNode;
 }) {
+  // A list's label sits 4px further from what's above it, but not at the top of a page (C4).
   if (overList) {
     return (
-      <section className="flex flex-col gap-3">
+      <section className="mt-1 flex flex-col gap-3 first:mt-0">
         <h2
           id={id}
-          className="mt-1 scroll-mt-4 font-heading text-15 font-bold tracking-wider uppercase"
+          className="scroll-mt-4 font-heading text-15 font-bold tracking-wider uppercase"
         >
           {label}
         </h2>
