@@ -6,6 +6,10 @@ import type { NoticeType } from "@/src/entities/notice-types";
 // page it opens, and a stamp when it waits on the member.
 export type NoticeWords = {
   line: string;
+  // The line's words in bold, as F1 sets them: who did what ("Priya asked to borrow" Night
+  // Market), or for a line about a thing alone, what happened to it (Moss & Mortar "is due
+  // today").
+  bold: string;
   detail: string | null;
   href: string;
   stamp: { word: string; tone: StampTone } | null;
@@ -26,12 +30,28 @@ export const actorOf = (item: InboxNotice) => item.actor?.name ?? "Someone";
 export const quoted = (note: string | null | undefined) =>
   note ? `“${note}”` : null;
 
+type Said = Pick<NoticeWords, "line" | "bold">;
+
+// Someone did something, in bold, then what it was about: did("Priya asked to borrow", "Night
+// Market").
+export const did = (who: string, about: string): Said => ({
+  line: `${who} ${about}`,
+  bold: who,
+});
+
+// A thing, then what happened to it, in bold: happened("Moss & Mortar", "is due today").
+export const happened = (thing: string, what: string): Said => ({
+  line: `${thing} ${what}`,
+  bold: what,
+});
+
 export const words = (
-  line: string,
+  { line, bold }: Said,
   href: string,
   more: Partial<Pick<NoticeWords, "detail" | "stamp">> = {},
 ): NoticeWords => ({
   line,
+  bold,
   href,
   detail: more.detail ?? null,
   stamp: more.stamp ?? null,

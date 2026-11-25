@@ -1,5 +1,7 @@
 import {
   actorOf,
+  did,
+  happened,
   type NoticeTexts,
   quoted,
   words,
@@ -33,29 +35,33 @@ const whenOf = (item: InboxNotice, today: string) =>
 // The nights' notices (R26, R31, R34), in F1's words.
 export const NIGHT_TEXTS: NoticeTexts<NightType> = {
   "night-invite": (item, reader) =>
-    words(`${actorOf(item)} invited you to ${titleOf(item)}`, hrefOf(item), {
-      detail: whenOf(item, reader.today),
-      stamp: { word: "Invited", tone: "red" },
-    }),
+    words(
+      did(`${actorOf(item)} invited you`, `to ${titleOf(item)}`),
+      hrefOf(item),
+      {
+        detail: whenOf(item, reader.today),
+        stamp: { word: "Invited", tone: "red" },
+      },
+    ),
   "night-changed": (item, reader) =>
-    words(`${titleOf(item)} changed`, hrefOf(item), {
+    words(happened(titleOf(item), "changed"), hrefOf(item), {
       detail: whenOf(item, reader.today),
     }),
   "night-cancelled": (item) =>
-    words(`${titleOf(item)} is cancelled`, hrefOf(item), {
+    words(happened(titleOf(item), "is cancelled"), hrefOf(item), {
       detail: quoted(item.notice.answerNote),
     }),
   "waitlist-seat": (item, reader) =>
-    words(`A seat opened for you at ${titleOf(item)}`, hrefOf(item), {
+    words(did("A seat opened for you", `at ${titleOf(item)}`), hrefOf(item), {
       detail: whenOf(item, reader.today),
     }),
   "removed-from-waitlist": (item) =>
     words(
-      `${actorOf(item)} took you off the waitlist for ${titleOf(item)}`,
+      did(`${actorOf(item)} took you off the waitlist`, `for ${titleOf(item)}`),
       hrefOf(item),
     ),
   "night-today": (item) =>
-    words(`${titleOf(item)} is today`, hrefOf(item), {
+    words(happened(titleOf(item), "is today"), hrefOf(item), {
       detail: item.night ? formatTime(item.night.startsAt) : null,
     }),
 };
