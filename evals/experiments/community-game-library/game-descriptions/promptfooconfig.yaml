@@ -1,16 +1,16 @@
 # yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
 # Which model writes the best "About" paragraph for a game from its Wikipedia text? README.md has
 # the question, the games, how to run it and the results.
-description: Game descriptions from Wikipedia text, six models through OpenCode Zen
+description: Game descriptions from Wikipedia text, seven models through OpenCode Zen
 
 prompts:
   - id: file://prompts/v1.json
     label: v1
 
 # Each model is a letter, so the viewer doesn't name it while Hector rates the answers; the
-# README's key, folded away, says which is which. All six go through OpenCode Zen's
-# OpenAI-compatible endpoint, which translates the request for Claude and Gemini. All six are on
-# Vercel AI Gateway too, for when the experiment moves there.
+# README's key, folded away, says which is which. They all go through OpenCode Zen's
+# OpenAI-compatible endpoint, which translates the request for Claude and Gemini, and they're all
+# on Vercel AI Gateway too, for when the experiment moves there.
 providers:
   - id: openai:chat:gpt-6.1-sol
     label: A
@@ -33,6 +33,9 @@ providers:
     config: *zen
   - id: openai:chat:claude-sonnet-5-5
     label: F
+    config: *zen
+  - id: openai:chat:gemini-4-argon
+    label: G
     config: *zen
 
 tests: file://tests/load-articles.mjs:loadArticles

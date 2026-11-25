@@ -14,7 +14,7 @@
 
 **Games.** 24, in `tests/games.json` with why each is in: the 10 best known, one every 50 places down to number 500, where articles get shorter, and four whose articles make it hard: two mostly about awards and sales, two that give little more than the theme. A la carte's article is 33 words, so its right answer is NONE.
 
-**Models.** Six, through OpenCode Zen. They're labeled A to F, and the viewer heads each column with its letter ("[A] v1"), so the answers can be rated without knowing which model wrote them. All six are on Vercel AI Gateway too, for when the experiment moves there.
+**Models.** Seven, through OpenCode Zen. They're labeled A to G, and the viewer heads each column with its letter ("[A] v1"), so the answers can be rated without knowing which model wrote them. All seven are on Vercel AI Gateway too, for when the experiment moves there.
 
 <details>
 <summary>Which letter is which model (open after rating)</summary>
@@ -27,6 +27,7 @@
 | D     | Claude Opus 5.5   | $4 / $20                                 |
 | E     | GPT-6 Luna        | $0.10 / $0.50                            |
 | F     | Claude Sonnet 5.5 | $2 / $10                                 |
+| G     | Gemini 4 Argon    | $2 / $10                                 |
 
 </details>
 
@@ -34,10 +35,16 @@
 
 ## Run it
 
-From `evals/`, with `OPENCODE_API_KEY` in `evals/.env`. First, one game on all six models, for about 3 cents, to see every model answer:
+From `evals/`, with `OPENCODE_API_KEY` in `evals/.env`. First, one game on all seven models, for about 4 cents, to see every model answer:
 
 ```bash
 bun run eval -c experiments/community-game-library/game-descriptions/promptfooconfig.yaml -n 1
+```
+
+To run only some of the models, add `--filter-providers` with a pattern matched against their ids. This runs Claude Haiku 5.5, GPT-6 Luna and Gemini 4 Argon:
+
+```bash
+bun run eval -c experiments/community-game-library/game-descriptions/promptfooconfig.yaml -n 1 --filter-providers "haiku|luna|argon"
 ```
 
 Then all 24 games, saved for the record. At Zen's prices that's under a dollar, depending on how much each model thinks:
