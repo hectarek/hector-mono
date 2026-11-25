@@ -17,7 +17,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy policy"
-      updated="November 24, 2026"
+      updated="November 25, 2026"
       other={{ href: "/terms", label: "Terms of use" }}
     >
       <LegalText>
@@ -91,9 +91,9 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>The admin</strong>, Hector, runs the catalog, answers
-            suggestions, and can remove an account that misuses the app. As the
-            person who runs the app, he can also reach its database to keep it
-            working.
+            suggestions, and can remove an account that misuses the app, where
+            he sees its name and email address. As the person who runs the app,
+            he can also reach its database to keep it working.
           </li>
           <li>
             <strong>Photos.</strong> Profile photos are private: the app shows

@@ -8,7 +8,8 @@ import { LibrarySearch } from "@/app/(main)/library-search";
 import { getInjection } from "@/di/container";
 
 // G8, Remove an account (R41): the admin finds the account by name (?q= holds what's typed),
-// picks it, and removes it after its dialog. Anyone but the admin gets Not found.
+// sees the email it signs in with under the name, picks it, and removes it after its dialog.
+// Anyone but the admin gets Not found.
 export default async function RemoveAccountPage({
   searchParams,
 }: {
@@ -44,11 +45,12 @@ export default async function RemoveAccountPage({
           />
         }
         searched={search.trim() !== ""}
-        accounts={accounts.map(({ profile, games, openLoans }) => ({
+        accounts={accounts.map(({ profile, email, games, openLoans }) => ({
           userId: profile.userId,
           name: profile.name,
           pieceShape: profile.pieceShape,
           pieceColor: profile.pieceColor,
+          email,
           joined: profile.createdAt.toISOString(),
           games,
           openLoans,

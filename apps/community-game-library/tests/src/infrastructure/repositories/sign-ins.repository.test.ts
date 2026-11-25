@@ -5,7 +5,7 @@ import { TransactionManagerService } from "@/src/infrastructure/services/transac
 import { CAST } from "@/tests/_support/cast";
 import { resetDatabase, sql } from "@/tests/_support/database";
 
-const { priya, sam } = CAST.people;
+const { priya, sam, noor } = CAST.people;
 
 // A sign-in as Neon Auth keeps one: the user, a Google link and a password, and a session.
 async function signIn(userId: string, name: string, email: string) {
@@ -85,5 +85,30 @@ describe("SignInsRepository", () => {
     expect(await sql("select identifier from neon_auth.verification")).toEqual([
       { identifier: "email-verification-otp-sam@example.com" },
     ]);
+  });
+
+  // E5 and G8 read what the app shows of a sign-in (Hector, 2026-11-25).
+  it("reads the emails asked for in id order, and a sign-in's ways in, leaving out a provider the app doesn't offer", async () => {
+    await signIn(sam.id, "Sam", "sam@example.com");
+    await signIn(priya.id, "Priya", "priya@example.com");
+    await signIn(noor.id, "Noor", "noor@example.com");
+    // Noor signs in through a provider the app doesn't show, and has no password.
+    await sql(
+      `delete from neon_auth.account where "userId" = $1 and "providerId" = 'credential'`,
+      [noor.id],
+    );
+    await sql(
+      `insert into neon_auth.account ("accountId", "providerId", "userId") values ($1, 'github', $2)`,
+      [`github-${noor.id}`, noor.id],
+    );
+
+    const signIns = new SignInsRepository(new MockLoggerService());
+    expect(await signIns.listEmails([sam.id, priya.id])).toEqual([
+      { userId: sam.id, email: "sam@example.com" },
+      { userId: priya.id, email: "priya@example.com" },
+    ]);
+    expect(await signIns.listEmails([])).toEqual([]);
+    expect(await signIns.listWaysIn(sam.id)).toEqual(["google", "password"]);
+    expect(await signIns.listWaysIn(noor.id)).toEqual(["google"]);
   });
 });
