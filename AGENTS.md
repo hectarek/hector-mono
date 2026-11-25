@@ -70,6 +70,7 @@ bun run dev --filter=app-name        # dev server for specific app (--filter aft
 bun run --filter=app-name db:studio  # an app's own script (db:*): --filter goes before the script name
 bun run build --filter=app-name      # build specific app
 bun run build                        # build all apps
+cd evals && bun run eval -c experiments/<app>/<question>/promptfooconfig.yaml   # a model experiment: Hector's terminal, since it spends credits (evals/AGENTS.md)
 ```
 
 ## After Changes
@@ -133,6 +134,8 @@ packages/
   ui/                  # Shared UI components (shadcn/ui based) — see packages/ui/AGENTS.md
   biome-config/        # Shared Biome config
   typescript-config/   # Shared TS configs
+
+evals/                 # promptfoo experiments comparing models and prompts, one folder per question — see evals/AGENTS.md
 ```
 
 ## Pattern Complexity (Match to App)

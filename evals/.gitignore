@@ -1,0 +1,4 @@
+# Source text an experiment fetches (Wikipedia's is CC BY-SA, so it stays out of this MIT repo)
+.cache/
+# Exported runs: bulky, and they hold the source text too
+results/

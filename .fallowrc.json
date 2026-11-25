@@ -6,7 +6,8 @@
     "apps/hectors-recipes/scripts/check-test-database.ts",
     "apps/hectors-recipes/scripts/seed-from-obsidian.ts",
     "apps/hectors-recipes/service-worker/worker.ts",
-    "apps/job-search/scripts/{check-test-database,import-snapshot,migrate-production,require-migrations}.ts"
+    "apps/job-search/scripts/{check-test-database,import-snapshot,migrate-production,require-migrations}.ts",
+    "evals/experiments/**/*.mjs"
   ],
   "ignoreDependencies": ["@solidjs/diagnostics"],
   "ignoreExports": [
