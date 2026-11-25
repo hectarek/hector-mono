@@ -2,7 +2,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import { useState } from "react";
-import { OpenSeat, Piece } from "@/app/_components/piece";
+import { Piece } from "@/app/_components/piece";
 import { Sheet } from "@/app/_components/sheet";
 import { ordinal } from "@/src/entities/loan";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
@@ -14,12 +14,14 @@ import {
 } from "./ask-to-borrow";
 
 // Join the line on a friend's copy that's out, promised or asked for (B5, B13), and the sheet it
-// opens (C10): the copy and where it is, the order with the member's open seat at the end ("Jo, then
-// you"), what happens when it's their turn and how soon that can be, a copy of the same game that's
-// available instead, when there is one, which turns the sheet into Ask to borrow (C1), and a note
-// for the owner. The game's page then reads "2nd in line", with Leave the line.
+// opens (C10): the copy and where it is, the order with the member's own piece at the end, dashed
+// since the place is still to come ("Jo, then you"), what happens when it's their turn and how soon
+// that can be, a copy of the same game that's available instead, when there is one, which turns
+// the sheet into Ask to borrow (C1), and a note for the owner. The game's page then reads "2nd in
+// line", with Leave the line.
 export function JoinLine({
   copy,
+  me,
   where,
   ahead,
   turn,
@@ -27,6 +29,8 @@ export function JoinLine({
   instead,
 }: {
   copy: CopyToAsk;
+  // The member's own name and piece.
+  me: NameAndPiece;
   // "Ben has it until Nov 20".
   where: string;
   // The people in line now, in order.
@@ -84,7 +88,12 @@ export function JoinLine({
                   </li>
                 ))}
                 <li className="flex flex-col items-center gap-1">
-                  <OpenSeat />
+                  <Piece
+                    shape={me.pieceShape}
+                    color={me.pieceColor}
+                    size={24}
+                    dashed
+                  />
                   <span className="font-mono text-2xs font-medium">
                     You, {ordinal(ahead.length + 1)}
                   </span>

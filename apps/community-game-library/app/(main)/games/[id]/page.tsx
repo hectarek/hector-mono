@@ -1,8 +1,10 @@
+import { Button } from "@repo/ui/components/button";
 import {
   Empty,
   EmptyContent,
   EmptyDescription,
 } from "@repo/ui/components/empty";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
@@ -45,7 +47,7 @@ export default async function GamePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await connection();
-  const { user } = await gate("app");
+  const { user, me } = await gate("app");
   const { id } = await params;
   const { q, from } = await searchParams;
   const search = typeof q === "string" && q.trim() !== "" ? q : null;
@@ -248,13 +250,17 @@ export default async function GamePage({
               return (
                 <CopyRow
                   key={copy.id}
-                  name={copyName(state.yours ? null : owner.name, place)}
+                  name={copyName(
+                    state.yours ? "Your" : `${owner.name}’s`,
+                    place,
+                  )}
                   owner={owner}
                   lines={words.lines}
                   stamp={words.stamp}
                   href={copyHref(copy.id, state, user.id)}
                   action={copyAction({
                     copy: toAsk(copy, owner, boxedExpansions),
+                    me,
                     lendable: copy.lendable,
                     passAlong: copy.passAlong,
                     state,
@@ -278,6 +284,28 @@ export default async function GamePage({
             )}
           </Empty>
         )}
+        {/* B11: while your copy's row opens its loan, its own page is a quiet link under the
+            copies, named by its place among your copies, as its row is. */}
+        {copies
+          .filter(({ state }) => state.yours)
+          .map(({ copy, state }, index) =>
+            loanOfYours(state) ? (
+              <Button
+                key={copy.id}
+                variant="link"
+                nativeButton={false}
+                render={
+                  <Link
+                    href={`/copies/${copy.id}`}
+                    transitionTypes={["go-deeper"]}
+                  />
+                }
+                className="self-start"
+              >
+                {`Open ${copyName("my", index + 1)}`}
+              </Button>
+            ) : null,
+          )}
         {game.type === "base-game" &&
           copies.length > 0 &&
           !copies.some(({ state }) => state.yours) && (
@@ -293,9 +321,11 @@ export default async function GamePage({
 }
 
 // The button at the right of a friend's copy (B5, B13): Borrow while it's available (C1), Join the
-// line while it's out, promised or asked for (C10), and Leave the line once the member is in it.
+// line while it's out, promised or asked for (C10), with `me`, the member's own piece, at the end of
+// the line, and Leave the line once the member is in it.
 function copyAction({
   copy,
+  me,
   lendable,
   passAlong,
   state,
@@ -304,6 +334,7 @@ function copyAction({
   instead,
 }: {
   copy: CopyToAsk;
+  me: NameAndPiece;
   lendable: boolean;
   passAlong: boolean;
   state: CopyState<Loan>;
@@ -351,6 +382,7 @@ function copyAction({
   return (
     <JoinLine
       copy={copy}
+      me={me}
       where={where}
       ahead={ahead}
       turn={
@@ -366,23 +398,34 @@ function copyAction({
   );
 }
 
-// Where a copy's row opens: the member's own copy's page, or the loan page of their request or of
-// the yes waiting for their pick-up (screens.md: the copy "opens the request").
+// Where a copy's row opens: the member's own copy's loan (B11), or its page when it has none, and
+// on a friend's copy the loan page of their request, of the yes waiting for their pick-up or the
+// handoff waiting for them to confirm (a red stamp is their move, rule 7), or of the loan they have
+// (screens.md: the copy "opens the request"; B13 draws each with its chevron).
 function copyHref(
   copyId: string,
   state: CopyState<Loan>,
   userId: string,
 ): string | undefined {
   if (state.yours) {
-    return `/copies/${copyId}`;
+    const loan = loanOfYours(state);
+    return loan ? `/loans/${loan.id}` : `/copies/${copyId}`;
   }
   const mine =
     state.kind === "you-asked"
       ? state.line.find((loan) => loan.borrowerUserId === userId)
-      : state.kind === "to-pick-up"
+      : state.kind === "to-pick-up" || state.kind === "handed-to-you"
         ? state.promised
-        : null;
+        : state.kind === "you-have-it"
+          ? state.holder
+          : null;
   return mine ? `/loans/${mine.id}` : undefined;
+}
+
+// The loan the member's own copy's row opens, as its page's Open the loan does (B7): the one out,
+// else the yes waiting for its pick-up, else the first request.
+function loanOfYours(state: CopyState<Loan>): Loan | null {
+  return state.holder ?? state.promised ?? state.line[0] ?? null;
 }
 
 // Everything the page reads, through its controller: an id that isn't a game's is Not found.

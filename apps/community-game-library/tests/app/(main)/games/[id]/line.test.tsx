@@ -77,6 +77,15 @@ describe("a copy's line on a game's page (U15: B5, B13, C10)", () => {
     ).toBeTruthy();
     expect(sheet.getByText("1st")).toBeTruthy();
     expect(sheet.getByText("You, 2nd")).toBeTruthy();
+    // Your place to come is your own piece, the mustard pawn, with a dashed outline.
+    const yourPlace = sheet
+      .getByText("You, 2nd")
+      .closest("li")
+      ?.querySelector("path");
+    expect(yourPlace?.getAttribute("data-color")).toBe(
+      CAST.people.you.pieceColor,
+    );
+    expect(yourPlace?.getAttribute("stroke-dasharray")).toBe("3 2.5");
     expect(sheet.getByText("Jo, then you")).toBeTruthy();
     expect(
       sheet.getByText(

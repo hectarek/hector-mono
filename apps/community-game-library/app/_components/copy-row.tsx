@@ -10,8 +10,9 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 
 // A copy in a game's Copies (B5, B11, B13): its owner's 20px piece, "Sam’s copy", the lines its
 // state gives, and the person looking's own stamp. A copy with a page for the person looking (their
-// own, or the request they sent) is one link with a chevron, as ListRow; the rest show their state
-// where they stand, with the button it offers at the right (Borrow, Join the line, Leave the line).
+// own copy or its loan, or their own request, yes or loan on a friend's) is one link with a chevron,
+// as ListRow; the rest show their state where they stand, with the button it offers at the right
+// (Borrow, Join the line, Leave the line).
 // Its stamp presses when it changes there, as asking to borrow stamps it You asked (U26).
 export function CopyRow({
   name,
@@ -61,9 +62,9 @@ export function CopyRow({
 
 const ORDINALS = ["", "second", "third", "fourth", "fifth"];
 
-// "Your copy", "Sam’s copy", and "Sam’s second copy" for an owner's next copy of the game (B13).
-export function copyName(owner: string | null, place: number): string {
-  const whose = owner === null ? "Your" : `${owner}’s`;
+// "Your copy", "Sam’s copy", and "Sam’s second copy" for an owner's next copy of the game (B13),
+// or "my copy" in Open my copy (B11): whose it is, then its place among that owner's copies.
+export function copyName(whose: string, place: number): string {
   const which = place > 1 ? `${ORDINALS[place - 1] ?? `${place}th`} ` : "";
   return `${whose} ${which}copy`;
 }
