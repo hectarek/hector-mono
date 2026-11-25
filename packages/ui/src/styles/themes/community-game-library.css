@@ -268,6 +268,12 @@
   :is([data-slot="button"], .group\/button)[class~="h-9"] {
   min-height: 3rem;
 }
+/* A small button the boards draw 48px tall, with its 14px label: a night's I'll bring a game,
+   What should we play? and Split into tables (D2, D7, D13). */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)[class~="min-h-12"] {
+  min-height: 3rem;
+}
 [data-theme="community-game-library"]
   :is([data-slot="button"], .group\/button):is([class~="h-7"], [class~="h-6"]) {
   padding-inline: 0.875rem;

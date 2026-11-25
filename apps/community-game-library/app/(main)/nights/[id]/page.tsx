@@ -321,7 +321,7 @@ export default async function NightPage({
             <Button
               variant="secondary"
               size="sm"
-              className="flex-1"
+              className="min-h-12 flex-1"
               nativeButton={false}
               render={
                 <Link
@@ -338,7 +338,7 @@ export default async function NightPage({
             <Button
               variant="secondary"
               size="sm"
-              className="shrink-0"
+              className="min-h-12 shrink-0"
               nativeButton={false}
               render={
                 <Link

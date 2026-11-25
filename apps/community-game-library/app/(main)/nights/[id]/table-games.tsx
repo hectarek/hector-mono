@@ -199,7 +199,7 @@ export function TableGames({
               type="button"
               variant="secondary"
               size="sm"
-              className="shrink-0"
+              className="min-h-12 shrink-0"
               onClick={() => setPicking(true)}
             >
               I’ll bring a game
@@ -209,7 +209,7 @@ export function TableGames({
             <Button
               variant="secondary"
               size="sm"
-              className="flex-1"
+              className="min-h-12 flex-1"
               nativeButton={false}
               render={
                 <Link
