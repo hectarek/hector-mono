@@ -18,12 +18,13 @@
 }
 
 /* Neon's sign-in views where its class names can't reach (A2, A8). The show-password toggle at
-   the end of A2's field is an icon in the field, not a button with an edge (the theme gives every
-   button one, dashed while it's switched off). A8's Forgot your password? sits under its field
-   and any error line, as the board draws it: Neon puts it in the label's row, so that row steps
-   aside and the link (order-1, from the page's class names) joins the field's grid. */
+   the end of A2's field (Neon's field is data-slot="form-control") is an icon in the field, not
+   a button with an edge (the theme gives every button one, dashed while it's switched off). A8's
+   Forgot your password? sits under its field and any error line, as the board draws it: Neon
+   puts it in the label's row, so that row steps aside and the link (order-1, from the page's
+   class names) joins the field's grid. */
 [data-theme="community-game-library"]
-  [data-slot="input"]:is(
+  :is([data-slot="input"], [data-slot="form-control"]):is(
     [autocomplete="new-password"],
     [autocomplete="current-password"]
   )
