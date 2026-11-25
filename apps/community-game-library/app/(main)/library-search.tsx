@@ -73,7 +73,7 @@ export function LibrarySearch({
           placeholder={label ? undefined : "Search games"}
           value={text}
           onChange={(event) => search(event.target.value)}
-          className="h-9 min-w-0 flex-1 bg-transparent text-15 text-foreground placeholder:text-muted-foreground focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
+          className="min-w-0 self-stretch flex-1 bg-transparent text-15 text-foreground focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
         />
         {text !== "" && (
           <button

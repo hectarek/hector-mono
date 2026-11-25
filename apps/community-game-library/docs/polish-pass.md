@@ -13,23 +13,14 @@ Each screen at 390px beside its board, before the first friends are invited (Bat
 - List and copy rows keep their stamp on the right until less than 112px is left for the text (B1's Harbor Lights wrap, C4, D8).
 - Wider screens (W1 to W4) match their boards.
 
-## Shared parts still to fix
+## Shared parts, done
 
-- Quiet links that start a line sit 4 to 6px right of the text above: the theme's quiet rule keeps a 2px transparent border (`packages/ui/src/styles/themes/community-game-library.css`, Quiet), plus 4px padding. Drop the border, and pull a `self-start` quiet link left 4px (C3, C10, D7, D10, E2, F2, B-row).
-- Textarea ignores `rows` in Chromium (`field-sizing-content min-h-16`): a theme rule `[data-slot="textarea"][rows] { field-sizing: fixed }` (B7, C1, D5, G3).
-- DayField shows a calendar icon; C3, C5, C9 and D5 draw the select's 16px down chevron (`day-field.tsx`).
-- Stamps beside a loan panel's label use the 13px card size (C16 `loans/[id]/page.tsx`, C5 and C7 `out-views.tsx`, C4 `loans/page.tsx`).
-- `formatWhen` writes "on Sun" for 2 to 6 days ago; C7 and C18 write "Sunday" (`src/entities/week.ts`).
-- Mono small caps labels lack uppercase, tracking and smudge: `night-link.tsx`, `what-to-play-view.tsx` (two), `game-form.tsx` (two).
-- DicePair rests on 5 and 3; D2, D7, D8, D9 and D13 draw 6 and 2 (A1 draws 5 and 3). WhatItsFor's dice should drop `onBone` (A1, A3).
-- ListRow's bare count aside is 13px navy on D1 and G1, 12px brown on E5: a variant.
-- SavedSwitch's label is only its text line, so the tap target is under 44px: make the whole row the label (B6, B7, E7).
-- Placeholder ink is smudge on the boards (theme rule on `input::placeholder`).
-- CatalogRow's `mb-0.75` sits on an inline span and does nothing (`game-row.tsx`): move it to RowName (B8, B10).
-- FriendRow's second line is navy; the boards use text-brown (E1, A5).
-- Phone fields are Plex Mono (theme rule on `[data-slot="input"][type="tel"]`; A4, E6). Piece picker choices are 4px apart with 4px corners (theme gap for grid radio groups).
-- Group gap: forms use 12px (D5, G3), several panels 10px; Group is fixed at 8px.
-- The night's link and Copy/Share buttons are duplicated in `night-link.tsx` and `invite/page.tsx`; both need the boxed address and buttons at their own width.
+- Quiet links have no edge, and one that starts a line (`self-start`) sits flush with the words above it.
+- A Textarea with `rows` is that many lines tall; phone fields are typed in Plex Mono; placeholders are in smudge; a removable chip ends 10px after its ×; the piece picker's choices sit 4px apart.
+- DayField shows a select's chevron; a weekday within the week reads in full ("asked Sunday").
+- The dice pair rests on 6 and 2 (26px by a title, 20px in a button) and on A1's 5 and 3 at 30px.
+- CatalogRow's underline gets its 3px; a switch's whole row flips it; FriendRow's second line is in text-brown.
+- New options the screens use: a bare count and a top-aligned thumb on list rows, a roomy group (12px), a dashed piece, steps hanging from their circle, a row badge, a search with a hidden label, Share at its own width, and the kit's 40px size.
 
 ## Each row's fixes
 

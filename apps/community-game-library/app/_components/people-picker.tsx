@@ -77,7 +77,7 @@ export function PeoplePicker({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Find a friend"
-            className="h-9 min-w-0 flex-1 bg-transparent text-15 text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
+            className="min-w-0 self-stretch flex-1 bg-transparent text-15 text-foreground focus-visible:outline-none"
           />
         </div>
       )}
