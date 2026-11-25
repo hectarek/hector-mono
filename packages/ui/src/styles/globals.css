@@ -97,7 +97,8 @@
    22 (sheet and dialog titles), 26 (a cover's title), 28 (the app's name on a link's page) and
    40 (the welcome page's title).
    Each keeps the font's own line height, as the kit draws it; a component sets another with
-   leading-*. */
+   leading-*. cn (src/lib/utils.ts) lists them too, so a new size goes there as well:
+   tests/src/lib/utils.test.ts fails until it does. */
 @theme {
   --text-10: 0.625rem;
   --text-10--line-height: normal;
