@@ -8,8 +8,9 @@ import type { ActionState } from "@/app/actions/shared";
 
 // A switch that saves as it flips (screens.md, Flip a switch): "Saved.", or, when the save
 // fails, back as it was with what went wrong. Its words sit on the left and the switch on the
-// right (B6, B7). The label sits beside the switch, not around it: a Base UI switch inside its
-// label flips twice on a click in happy-dom.
+// right (B6, B7). The label holds both lines and fills the row's 44px, so a tap anywhere on the
+// words flips it; it sits beside the switch, not around it, since a Base UI switch inside its
+// label flips twice on a click in happy-dom. The switch is named by the first line alone.
 export function SavedSwitch({
   label,
   help,
@@ -25,6 +26,7 @@ export function SavedSwitch({
   const [checked, setChecked] = useState(on);
   const [, startTransition] = useTransition();
   const switchId = useId();
+  const labelId = useId();
   const helpId = useId();
 
   function flip(next: boolean) {
@@ -41,21 +43,28 @@ export function SavedSwitch({
   }
 
   return (
-    <div className="flex min-h-11 items-center justify-between gap-2.5">
-      <div className="flex flex-col gap-0.5">
-        <label htmlFor={switchId} className="text-15">
+    <div className="flex items-center justify-between gap-2.5">
+      <label
+        htmlFor={switchId}
+        className="flex min-h-11 flex-1 flex-col justify-center gap-0.5"
+      >
+        <span id={labelId} className="text-15">
           {label}
-        </label>
+        </span>
         {help && (
-          <p id={helpId} className="text-xs leading-snug text-muted-foreground">
+          <span
+            id={helpId}
+            className="text-xs leading-snug text-muted-foreground"
+          >
             {help}
-          </p>
+          </span>
         )}
-      </div>
+      </label>
       <Switch
         id={switchId}
         checked={checked}
         onCheckedChange={flip}
+        aria-labelledby={labelId}
         aria-describedby={help ? helpId : undefined}
       />
     </div>

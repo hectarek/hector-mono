@@ -4,6 +4,7 @@ import { Skeleton } from "@repo/ui/components/skeleton";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { connection } from "next/server";
+import { ShareIcon } from "@/app/_components/icons";
 import { CopyLinkButton } from "@/app/_components/open-in-browser";
 import { Steps } from "@/app/_components/steps";
 import { WhatItsFor } from "@/app/_components/what-its-for";
@@ -54,7 +55,7 @@ export function Welcome({ ways }: { ways: React.ReactNode }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-3 px-4 pt-18 pb-5">
       <div className="flex flex-col gap-3">
-        <h1 className="font-heading text-4xl leading-none font-bold uppercase">
+        <h1 className="font-heading text-40 leading-none font-bold uppercase">
           Community
           <br />
           Game
@@ -108,7 +109,7 @@ export function OpenInBrowser() {
       <p className="font-heading text-xl leading-none font-bold uppercase">
         Community Game Library
       </p>
-      <div className="mt-3 flex flex-col gap-2">
+      <div className="mt-2 flex flex-col gap-2">
         <h1 className="text-2xl leading-tight font-bold">
           Open this in your browser
         </h1>
@@ -122,7 +123,12 @@ export function OpenInBrowser() {
         steps={[
           {
             id: "menu",
-            text: "Tap the menu (··· or the share icon) on this page",
+            text: (
+              <>
+                Tap the menu (··· or the share icon{" "}
+                <ShareIcon className="inline size-4.5 align-text-bottom" />)
+              </>
+            ),
           },
           { id: "choose", text: "Choose Open in Safari or Open in Chrome" },
         ]}

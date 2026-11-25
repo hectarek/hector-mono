@@ -187,7 +187,7 @@ export function IsItBack({
             Yes, it’s back
           </Button>
           {gaveOn && (
-            <div className="flex flex-col items-center gap-0.5">
+            <div className="flex flex-col items-center">
               <Button
                 variant="link"
                 onClick={() => answer("not-yet")}
@@ -195,7 +195,7 @@ export function IsItBack({
               >
                 I don’t have it yet
               </Button>
-              <span className="text-xs text-muted-foreground">
+              <span className="-mt-1.5 text-xs text-muted-foreground">
                 {borrower.name} is told.
               </span>
             </div>

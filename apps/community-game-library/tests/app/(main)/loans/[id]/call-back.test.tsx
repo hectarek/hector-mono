@@ -52,10 +52,10 @@ describe("calling a game back (U14: C15, C18)", () => {
     expect(
       dialog.getByText("It stays overdue until you confirm it’s back."),
     ).toBeTruthy();
+    // C15's box for whoever is first in line.
+    expect(dialog.getByText("Ben keeps their place")).toBeTruthy();
     expect(
-      dialog.getByText(
-        "Ben keeps their place: 1st in line, and told when it’s back.",
-      ),
+      dialog.getByText("Ben is 1st in line and is told when it’s back."),
     ).toBeTruthy();
     expect(
       dialog.getByRole("button", { name: "Leave it with Jo" }),
@@ -75,6 +75,10 @@ describe("calling a game back (U14: C15, C18)", () => {
     ).toBeTruthy();
     expect(c18.queryByText("Jo asked for more time")).toBeNull();
     expect(c18.queryByRole("button", { name: "Call it back" })).toBeNull();
+    // C18 draws no Change the due date once it's called back.
+    expect(
+      c18.queryByRole("button", { name: "Change the due date" }),
+    ).toBeNull();
   });
 
   it("leads the borrower's page with Sam wants it back now", async () => {

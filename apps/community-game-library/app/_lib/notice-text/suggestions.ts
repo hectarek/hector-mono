@@ -1,5 +1,7 @@
 import {
   actorOf,
+  did,
+  happened,
   type NoticeTexts,
   quoted,
   words,
@@ -19,21 +21,28 @@ export const SUGGESTION_TEXTS: NoticeTexts<
       ? `/games/${suggestion.gameId}`
       : "/my-library";
     if (suggestion?.status === "declined") {
-      return words(`${titleOf(item)} wasn’t added to the catalog`, href, {
-        detail: quoted(item.notice.answerNote),
-      });
+      return words(
+        happened(titleOf(item), "wasn’t added to the catalog"),
+        href,
+        {
+          detail: quoted(item.notice.answerNote),
+        },
+      );
     }
     return words(
-      suggestion?.status === "already-here"
-        ? `${titleOf(item)} was in the catalog already`
-        : `${titleOf(item)} is in the catalog`,
+      happened(
+        titleOf(item),
+        suggestion?.status === "already-here"
+          ? "was in the catalog already"
+          : "is in the catalog",
+      ),
       href,
       { detail: "It’s in your library." },
     );
   },
   "suggestion-arrived": (item) =>
     words(
-      `${actorOf(item)} suggested ${titleOf(item)}`,
+      did(`${actorOf(item)} suggested`, titleOf(item)),
       item.suggestion ? `/admin/suggestions/${item.suggestion.id}` : "/admin",
       {
         detail: "A game to add to the catalog.",

@@ -8,6 +8,7 @@ import { BackLink } from "@/app/_components/back-link";
 import { AUTH_PATHS, skipsWhenSignedIn } from "@/app/_lib/auth-paths";
 import { safeRedirect } from "@/app/_lib/safe-redirect";
 import { auth } from "@/lib/auth/server";
+import { authHeading, authWordsOf } from "./view-parts";
 
 export function generateStaticParams() {
   return AUTH_PATHS.map((path) => ({ path }));
@@ -29,6 +30,10 @@ const CLASS_NAMES = {
     label: "text-13 font-semibold",
     button:
       "min-h-12 rounded-sm border-2 border-foreground text-base font-bold",
+    // A8's Forgot your password?: a quiet link with a 44px target, last in the password's
+    // field, under any error line (app/globals.css lets it out of the label's row).
+    forgotPasswordLink:
+      "order-1 flex min-h-11 items-center justify-self-start text-sm font-bold text-foreground underline decoration-dashed decoration-2 underline-offset-5",
   },
 };
 
@@ -92,6 +97,8 @@ async function AuthForm({
         redirectTo={redirectTo}
         classNames={CLASS_NAMES}
         className="max-w-none"
+        cardHeader={authHeading(path, redirectTo)}
+        localization={authWordsOf(path)}
       />
       <AuthNotice signInHref={`/auth/${authViewPaths.SIGN_IN}${query}`} />
     </>

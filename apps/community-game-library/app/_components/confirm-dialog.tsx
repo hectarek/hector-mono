@@ -18,8 +18,10 @@ import { useClosesOnLeave } from "@/app/_lib/use-closes-on-leave";
 // first): the question as its title, then who is told and what happens, and two buttons side by
 // side. The red one names the thing ("Call it back"); the other says what's kept ("Leave it with
 // Jo"), never "Not now" or a bare "Cancel", and has the cursor when it opens, so a stray Enter
-// keeps things as they are. No close button and no third choice. `onConfirm` runs the action and
-// answers with its error, if any; the dialog stays open to show it, and closes once it's done.
+// keeps things as they are. No close button and no third choice. When the two labels don't fit
+// side by side, each takes its own row, the red one first, as E9 draws them. `onConfirm` runs the
+// action and answers with its error, if any; the dialog stays open to show it, and closes once
+// it's done.
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -83,7 +85,7 @@ export function ConfirmDialog({
             type="button"
             variant="destructive"
             size="lg"
-            className="flex-1"
+            className="min-w-fit flex-1"
             disabled={pending}
             onClick={confirm}
           >
@@ -93,7 +95,7 @@ export function ConfirmDialog({
             ref={keep}
             variant="secondary"
             size="lg"
-            className="flex-1"
+            className="min-w-fit flex-1"
           >
             {keepLabel}
           </AlertDialogCancel>

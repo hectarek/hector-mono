@@ -11,7 +11,7 @@ import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { Group } from "@/app/_components/group";
 import { BellIcon } from "@/app/_components/icons";
-import { List, ListRow, RowFacts, RowName } from "@/app/_components/list-row";
+import { List, ListRow, RowFacts } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
 import { Stamp } from "@/app/_components/stamp";
@@ -21,16 +21,46 @@ import { getInjection } from "@/di/container";
 import { formatNoticeTime, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 import { IfNew, MarkInboxRead, UnreadCount } from "./mark-read";
 
-const notices = (
-  <Button
-    variant="link"
-    nativeButton={false}
-    render={<Link href="/you/notices" transitionTypes={["go-deeper"]} />}
-    className="self-start"
-  >
-    Choose which notices I get
-  </Button>
-);
+// Choose which notices I get: flush under the empty state's words (F2), centered under the lists
+// (F1).
+function ChooseNotices({ centered = false }: { centered?: boolean }) {
+  return (
+    <Button
+      variant="link"
+      nativeButton={false}
+      render={<Link href="/you/notices" transitionTypes={["go-deeper"]} />}
+      className={centered ? "self-center" : "self-start"}
+    >
+      Choose which notices I get
+    </Button>
+  );
+}
+
+// A notice's line as F1 sets it, 14px with its words in bold: "**Priya asked to borrow** Night
+// Market", "Moss & Mortar **is due today**".
+function NoticeLine({ line, bold }: { line: string; bold: string }) {
+  const at = line.indexOf(bold);
+  if (at < 0) return line;
+  return (
+    <>
+      {line.slice(0, at)}
+      <strong className="font-bold">{bold}</strong>
+      {line.slice(at + bold.length)}
+    </>
+  );
+}
+
+// The dot that marks a notice that was new when the inbox opened, after its stamp (F1).
+function NewDot({ id }: { id: string }) {
+  return (
+    <IfNew id={id}>
+      <span
+        aria-hidden="true"
+        className="size-2.5 shrink-0 rounded-full bg-destructive"
+      />
+    </IfNew>
+  );
+}
 
 // The inbox (F1, and F2 when it's empty; R25 to R27): the member's notices, newest first, in
 // Today and Earlier, each opening its thing's page, with what was new marked. It marks them all
@@ -75,7 +105,9 @@ export default async function InboxPage() {
               Requests, due dates and game-night news land here.
             </EmptyDescription>
           </EmptyHeader>
-          <EmptyContent>{notices}</EmptyContent>
+          <EmptyContent>
+            <ChooseNotices />
+          </EmptyContent>
         </Empty>
       ) : (
         <MarkInboxRead unreadIds={unreadIds}>
@@ -89,6 +121,7 @@ export default async function InboxPage() {
                     <ListRow
                       key={item.notice.id}
                       href={words.href}
+                      thumbTop
                       thumb={
                         item.actor ? (
                           <Piece
@@ -100,32 +133,33 @@ export default async function InboxPage() {
                         )
                       }
                       stamp={
-                        words.stamp && (
-                          <Stamp tone={words.stamp.tone}>
-                            {words.stamp.word}
-                          </Stamp>
+                        words.stamp ? (
+                          <span className="flex items-center gap-3">
+                            <Stamp tone={words.stamp.tone}>
+                              {words.stamp.word}
+                            </Stamp>
+                            <NewDot id={item.notice.id} />
+                          </span>
+                        ) : (
+                          <NewDot id={item.notice.id} />
                         )
                       }
                     >
-                      <RowName>
+                      <span className="text-sm leading-snug">
                         <IfNew id={item.notice.id}>
                           <span className="sr-only">Unread. </span>
                         </IfNew>
-                        {words.line}
-                      </RowName>
+                        <NoticeLine line={words.line} bold={words.bold} />
+                      </span>
                       {words.detail && (
-                        <span className="text-13 leading-snug">
+                        <span className="text-13 leading-snug text-muted-foreground">
                           {words.detail}
                         </span>
                       )}
                       <RowFacts>
-                        <IfNew id={item.notice.id}>
-                          <span
-                            aria-hidden="true"
-                            className="mr-1.5 inline-block size-2 rounded-full bg-destructive"
-                          />
-                        </IfNew>
-                        {formatNoticeTime(item.notice.createdAt, now)}
+                        <span data-ink="smudge">
+                          {formatNoticeTime(item.notice.createdAt, now)}
+                        </span>
                       </RowFacts>
                     </ListRow>
                   );
@@ -133,7 +167,7 @@ export default async function InboxPage() {
               </List>
             </Group>
           ))}
-          {notices}
+          <ChooseNotices centered />
         </MarkInboxRead>
       )}
     </PageColumn>

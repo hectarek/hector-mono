@@ -35,19 +35,35 @@ const PIPS: Record<number, [number, number][]> = {
   ],
 };
 
-// One 28px die face. The best count is inked: a navy face with bone pips. On a bone suggestion
-// box the faces are chipboard.
+// A die face's sizes: 30px for a count (B2's and G3's players); a pair's 20px inside a button
+// (D13's What should we play?), 26px beside a title (D8, D9) and 30px on the welcome page (A1).
+const DIE_SIZES = {
+  count: "size-7.5",
+  button: "size-5",
+  title: "size-6.5",
+  welcome: "size-7.5",
+} as const;
+type DieSize = keyof typeof DIE_SIZES;
+
+// One die face. The best count is inked: a navy face with bone pips. On a bone suggestion box or
+// button the faces are chipboard.
 function Die({
   count,
   best = false,
   onBone = false,
+  size = "count",
 }: {
   count: number;
   best?: boolean;
   onBone?: boolean;
+  size?: DieSize;
 }) {
   return (
-    <svg viewBox="0 0 30 30" aria-hidden="true" className="size-7 shrink-0">
+    <svg
+      viewBox="0 0 30 30"
+      aria-hidden="true"
+      className={cn("shrink-0", DIE_SIZES[size])}
+    >
       <rect
         x="1.5"
         y="1.5"
@@ -136,10 +152,11 @@ export function CountFace({ count, inked }: { count: number; inked: boolean }) {
   );
 }
 
-// The pair's two faces, each after the two it turns through as it tumbles.
+// The pair's two faces, each after the two it turns through as it tumbles, resting on 6 and 2 as
+// the night boards draw them (D2, D7, D8, D9, D13).
 const PAIR = [
-  { faces: [2, 6, 5], tilt: "-rotate-10" },
-  { faces: [4, 1, 3], tilt: "rotate-8" },
+  { faces: [2, 5, 6], tilt: "-rotate-10" },
+  { faces: [4, 1, 2], tilt: "rotate-8" },
 ] as const;
 
 // A tilted pair marks a suggestion ("What should we play?"). While new suggestions are asked for
@@ -147,9 +164,14 @@ const PAIR = [
 // on its own (U26's dice tumble): it holds all three, stacked, and only the last shows at rest.
 export function DicePair({
   onBone = false,
+  size = "title",
+  rest,
   tumbling = false,
 }: {
   onBone?: boolean;
+  size?: Exclude<DieSize, "count">;
+  // The faces it rests on, where a board draws others: A1's 5 and 3.
+  rest?: readonly [number, number];
   tumbling?: boolean;
 }) {
   return (
@@ -158,7 +180,7 @@ export function DicePair({
       data-moment={tumbling ? "tumble" : undefined}
       className="flex gap-0.75"
     >
-      {PAIR.map(({ faces, tilt }) =>
+      {PAIR.map(({ faces, tilt }, index) =>
         tumbling ? (
           <span
             key={tilt}
@@ -168,12 +190,16 @@ export function DicePair({
             )}
           >
             {faces.map((count) => (
-              <Die key={count} count={count} onBone={onBone} />
+              <Die key={count} count={count} onBone={onBone} size={size} />
             ))}
           </span>
         ) : (
           <span key={tilt} className={tilt}>
-            <Die count={faces[2]} onBone={onBone} />
+            <Die
+              count={rest?.[index] ?? faces[2]}
+              onBone={onBone}
+              size={size}
+            />
           </span>
         ),
       )}

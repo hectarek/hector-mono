@@ -99,6 +99,13 @@ describe("Loans (C4)", () => {
     for (const words of ["Due Fri", "From Sam", "Jo is 1st in line"]) {
       expect(within(borrowed).getByText(words)).toBeTruthy();
     }
+    // C4 draws a loan you borrowed as a card that opens it, titled by its game.
+    expect(
+      within(borrowed).getByRole("heading", {
+        level: 3,
+        name: "Moss & Mortar",
+      }),
+    ).toBeTruthy();
   });
 
   it("says No loans for a member with none (Empty lists)", async () => {

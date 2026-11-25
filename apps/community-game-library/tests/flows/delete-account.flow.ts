@@ -33,5 +33,7 @@ test("deletes an account, signs out, and its email and password no longer sign i
     .getByRole("textbox", { name: "Password", exact: true })
     .fill(account.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByText(/invalid email or password/i)).toBeVisible();
+  await expect(
+    page.getByText("That password doesn’t match this email."),
+  ).toBeVisible();
 });

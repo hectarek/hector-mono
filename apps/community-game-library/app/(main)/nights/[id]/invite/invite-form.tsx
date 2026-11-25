@@ -14,8 +14,9 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 
 // Invite people's Not invited yet (D10, R30): the inviter's friends not on the list, each ticked
 // or not, with Invite all my friends; a full night says the people invited join the waitlist
-// after whoever's last on it. Send goes back to the night, where each shows as Invited until they
-// answer (screens.md, Send invitations). Each box's label sits beside it, as on D6.
+// after whoever's last on it. Send stays off, reading "Send invites", until someone's ticked, and
+// goes back to the night, where each shows as Invited until they answer (screens.md, Send
+// invitations). Each box's label sits beside it, as on D6.
 export function InviteForm({
   gameNightId,
   friends,
@@ -64,7 +65,10 @@ export function InviteForm({
     <Group label="Not invited yet">
       <ul className="flex flex-col *:border-dashed *:border-foreground *:not-first:border-t-2">
         {friends.map((one) => (
-          <li key={one.userId} className="flex items-center gap-3 py-2">
+          <li
+            key={one.userId}
+            className="flex items-center gap-3 py-2.5 first:pt-0.5 last:pb-1"
+          >
             <Checkbox
               id={`invite-${one.userId}`}
               checked={ticked.includes(one.userId)}
@@ -112,9 +116,11 @@ export function InviteForm({
           disabled={pending || chosen.length === 0}
           onClick={send}
         >
-          {chosen.length === 1
-            ? "Send 1 invite"
-            : `Send ${chosen.length} invites`}
+          {chosen.length === 0
+            ? "Send invites"
+            : chosen.length === 1
+              ? "Send 1 invite"
+              : `Send ${chosen.length} invites`}
         </Button>
       </div>
     </Group>
@@ -132,7 +138,12 @@ export function CopyNightLink({ url }: { url: string }) {
     }
   }
   return (
-    <Button type="button" variant="secondary" onClick={copy}>
+    <Button
+      type="button"
+      variant="secondary"
+      className="self-start"
+      onClick={copy}
+    >
       Copy link
     </Button>
   );

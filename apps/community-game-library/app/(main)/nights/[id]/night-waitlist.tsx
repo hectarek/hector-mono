@@ -3,7 +3,7 @@
 import { Button } from "@repo/ui/components/button";
 import { useState } from "react";
 import { ConfirmDialog } from "@/app/_components/confirm-dialog";
-import { List, ListItem } from "@/app/_components/list-row";
+import { List } from "@/app/_components/list-row";
 import { Piece } from "@/app/_components/piece";
 import { callAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
@@ -14,7 +14,7 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 type Waiting = NameAndPiece & { guestCount: number };
 
 // The waitlist on the host's page (D7, R31): each person in order, the seats they need, and
-// Remove from waitlist, which asks first and tells them.
+// Remove from waitlist under that line, as D7 draws it, which asks first and tells them.
 export function NightWaitlist({
   gameNightId,
   waitlist,
@@ -27,7 +27,10 @@ export function NightWaitlist({
     <>
       <List>
         {waitlist.map((one, index) => (
-          <ListItem key={one.userId}>
+          <li
+            key={one.userId}
+            className="flex items-start gap-3 px-3 pt-2.5 pb-0.5"
+          >
             <Piece shape={one.pieceShape} color={one.pieceColor} size={20} />
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-15 font-bold">{one.name}</span>
@@ -35,15 +38,16 @@ export function NightWaitlist({
                 {ordinal(index + 1)} on the waitlist · needs{" "}
                 {1 + one.guestCount} {one.guestCount === 0 ? "seat" : "seats"}
               </span>
+              <Button
+                type="button"
+                variant="link"
+                className="self-start"
+                onClick={() => setRemoving(one)}
+              >
+                Remove from waitlist
+              </Button>
             </span>
-            <Button
-              type="button"
-              variant="link"
-              onClick={() => setRemoving(one)}
-            >
-              Remove from waitlist
-            </Button>
-          </ListItem>
+          </li>
         ))}
       </List>
       <ConfirmDialog

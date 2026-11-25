@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
 import { IOwnIt } from "@/app/_components/i-own-it";
+import { ForwardIcon } from "@/app/_components/icons";
 import {
   List,
   ListItem,
@@ -35,8 +37,9 @@ import {
   todayIn,
 } from "@/src/entities/week";
 
-// One of my copies (B7, R8, R9): where it is, This copy with Save, its two lending switches, its
-// loan history, the day it was added, a second copy, and Remove (B14). Only its owner opens it.
+// One of my copies (B7, R8, R9): where it is, with Open the loan, This copy with Save, its two
+// lending switches, its loan history, the day it was added, a second copy, and Remove (B14). Only
+// its owner opens it.
 export default async function CopyPage({
   params,
 }: {
@@ -91,6 +94,9 @@ export default async function CopyPage({
   }
   const stamp: CopyStamp | null =
     state.kind === "available" ? null : state.stamp;
+  // The loan Open the loan opens: the one out, else the yes waiting for its pick-up, else the
+  // first request.
+  const loan = state.holder ?? state.promised ?? first ?? null;
 
   return (
     <PageColumn
@@ -133,6 +139,16 @@ export default async function CopyPage({
             )}
           </div>
         ))}
+        {loan && (
+          <Link
+            href={`/loans/${loan.id}`}
+            transitionTypes={["go-deeper"]}
+            className="mt-1 -mb-2 flex min-h-11 items-center justify-between gap-3 border-t-2 border-dashed border-foreground text-15 font-bold text-foreground hover:text-destructive"
+          >
+            Open the loan
+            <ForwardIcon />
+          </Link>
+        )}
       </Group>
 
       <CopyForm

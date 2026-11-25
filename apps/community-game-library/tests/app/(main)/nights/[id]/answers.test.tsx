@@ -242,6 +242,12 @@ describe("Invites, answers, the waitlist and guests (U19: D2, D3, D4, D7, D10, D
       "JoGoing",
       "BenBringing 1 guestGoing",
     ]);
+    // Switched off, with no count, until someone's ticked.
+    expect(
+      page
+        .getByRole("button", { name: "Send invites" })
+        .hasAttribute("disabled"),
+    ).toBe(true);
     fireEvent.click(page.getByText("Alice"));
     expect(
       await page.findByText(

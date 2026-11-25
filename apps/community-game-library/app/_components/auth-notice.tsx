@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { EMAIL_TAKEN_LINE, useAuthMessage } from "@/app/_lib/auth-notice";
+import { EMAIL_TAKEN_LINE } from "@/app/_lib/auth-localization";
+import { useAuthMessage } from "@/app/_lib/auth-notice";
 
 // The line Neon's kit says back, under its form (screens.md, When something goes wrong): an
 // email that already has an account says so, with Sign in instead.

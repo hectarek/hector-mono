@@ -4,9 +4,9 @@ import { AppHeader } from "@/app/_components/app-header";
 import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
 import { ForwardIcon } from "@/app/_components/icons";
-import { List, ListItem, RowName } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
+import { Steps } from "@/app/_components/steps";
 import { gate } from "@/app/_lib/account";
 import { coverColorOf } from "@/src/entities/piece";
 import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
@@ -39,7 +39,6 @@ export default async function PassAlongPage({
     redirect(`/loans/${id}`);
   }
   const today = todayIn(PLAN_TIME_ZONE);
-  const step = "font-mono text-13 font-medium";
 
   return (
     <PageColumn
@@ -49,7 +48,7 @@ export default async function PassAlongPage({
       }
     >
       <Title>{`Hand it to ${handoff.name}`}</Title>
-      <Group label="The pass-along">
+      <Group label="The pass-along" roomy>
         <div className="flex items-center gap-3">
           <CoverThumb color={coverColorOf(game)} imageUrl={game.imageUrl} />
           <div className="flex min-w-0 flex-col gap-0.5">
@@ -64,13 +63,16 @@ export default async function PassAlongPage({
             </span>
           </div>
         </div>
-        <div className="flex items-end gap-3">
-          <span className="flex flex-col items-center gap-1">
+        {/* Who has it and who's next, each centered in half the width under a dashed rule. */}
+        <div className="flex items-start border-t-2 border-dashed border-foreground pt-3">
+          <span className="flex flex-1 flex-col items-center gap-1">
             <Piece shape={you.pieceShape} color={you.pieceColor} size={24} />
             <span className="font-mono text-2xs font-medium">You have it</span>
           </span>
-          <ForwardIcon className="mb-5 size-5" aria-hidden="true" />
-          <span className="flex flex-col items-center gap-1">
+          <span className="flex h-8.75 items-center">
+            <ForwardIcon aria-hidden="true" />
+          </span>
+          <span className="flex flex-1 flex-col items-center gap-1">
             <Piece
               shape={handoff.pieceShape}
               color={handoff.pieceColor}
@@ -83,31 +85,37 @@ export default async function PassAlongPage({
         </div>
       </Group>
       <Group label="Three steps" overList>
-        <List>
-          <ListItem>
-            <span className={step}>1</span>
-            <span className="min-w-0 flex-1">
-              <RowName>Arrange it with {handoff.name}</RowName>
-            </span>
-            {handoff.phone && (
-              <PhoneLink name={handoff.name} phone={handoff.phone} />
-            )}
-          </ListItem>
-          <ListItem>
-            <span className={step}>2</span>
-            <RowName>Give {handoff.name} the game</RowName>
-          </ListItem>
-          <ListItem>
-            <span className={step}>3</span>
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <RowName>{handoff.name} confirms they have it</RowName>
-              <span className="text-xs text-muted-foreground">
-                Your loan ends then. {handoff.name}’s starts that day and runs{" "}
-                {periodWords(loan.periodDays)}, the same as yours.
-              </span>
-            </span>
-          </ListItem>
-        </List>
+        <Steps
+          top
+          steps={[
+            {
+              id: "arrange",
+              text: (
+                <span className="flex flex-col gap-0.5">
+                  <span>Arrange it with {handoff.name}</span>
+                  {handoff.phone && (
+                    <span className="flex">
+                      <PhoneLink name={handoff.name} phone={handoff.phone} />
+                    </span>
+                  )}
+                </span>
+              ),
+            },
+            { id: "give", text: `Give ${handoff.name} the game` },
+            {
+              id: "confirm",
+              text: (
+                <span className="flex flex-col gap-0.5">
+                  <span>{handoff.name} confirms they have it</span>
+                  <span className="text-xs leading-snug font-normal text-muted-foreground">
+                    Your loan ends then. {handoff.name}’s starts that day and
+                    runs {periodWords(loan.periodDays)}, the same as yours.
+                  </span>
+                </span>
+              ),
+            },
+          ]}
+        />
       </Group>
       <Group label="When you’ve handed it over">
         <p className="text-13 leading-snug text-muted-foreground">

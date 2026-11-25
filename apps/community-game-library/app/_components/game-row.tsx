@@ -86,11 +86,13 @@ export function CatalogRow({
       >
         <CoverThumb color={coverColorOf(game)} imageUrl={game.imageUrl} />
         <span className="flex min-w-0 flex-auto flex-col gap-0.5">
-          <RowName>
-            <span className="mb-0.75 border-b-2 border-dashed border-current pb-px">
+          {/* RowName's size and weight on a block, so the underline's 3px reaches the facts
+              under it (B8, B10); a margin on the inline title does nothing. */}
+          <span className="mb-0.75 text-15 font-bold">
+            <span className="border-b-2 border-dashed border-current pb-px">
               {game.title}
             </span>
-          </RowName>
+          </span>
           {line && (
             <RowFacts>
               {base?.yours ? `${line} of ${base.title}` : line}

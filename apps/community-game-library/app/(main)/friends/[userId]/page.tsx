@@ -45,12 +45,26 @@ const listed = (parts: string[]) =>
     ? (parts[0] ?? "")
     : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
 
-// E4's lines (R50 and its audit line): what stops, what stays open, the nights coming up that each
-// comes off (U19), and that the friend isn't told.
+// E4's lines (R50 and its audit line): what stops, the nights coming up that each is taken off
+// (U19), what stays open, and that the friend isn't told.
 function unfriendLines(
   name: string,
   between: Awaited<ReturnType<typeof loadFriend>>["between"],
 ): string[] {
+  // "Sam is taken off Heavy games at mine, and you off Sam’s nights", as E4 draws it: each comes
+  // off the other's nights, named where there are some.
+  const yourNights = between.nights
+    .filter(({ yours }) => yours)
+    .map(({ title }) => title);
+  const theirNights = between.nights
+    .filter(({ yours }) => !yours)
+    .map(({ title }) => title);
+  const theirs = theirNights.length ? listed(theirNights) : `${name}’s nights`;
+  const nights = yourNights.length
+    ? [`${name} is taken off ${listed(yourNights)}, and you off ${theirs}.`]
+    : theirNights.length
+      ? [`You’re taken off ${theirs}.`]
+      : [];
   const staying = between.staying.map(({ title, yours }) =>
     yours
       ? `${title} stays on your Loans until ${name} gives it back.`
@@ -62,11 +76,9 @@ function unfriendLines(
   const cancelled = between.cancelled.map(
     ({ title }) => `${title} isn’t picked up yet, so that loan is called off.`,
   );
-  const nights = between.nights.map(({ title, yours }) =>
-    yours ? `${name} comes off ${title}.` : `You come off ${title}.`,
-  );
   return [
     "You stop seeing each other’s libraries and game nights.",
+    ...nights,
     ...staying,
     ...(requests.length
       ? [
@@ -74,7 +86,6 @@ function unfriendLines(
         ]
       : []),
     ...cancelled,
-    ...nights,
     `${name} isn’t told. You can become friends again with a friend link.`,
   ];
 }
@@ -145,7 +156,7 @@ export default async function FriendPage({
           </div>
         </div>
         {profile.phone && (
-          <div className="flex flex-col items-start gap-1 border-t-2 border-dashed border-foreground pt-1">
+          <div className="flex flex-col items-start border-t-2 border-dashed border-foreground pt-1">
             <a
               href={`tel:${profile.phone.replace(/[^\d+]/g, "")}`}
               aria-label={`Call ${name}, ${profile.phone}`}

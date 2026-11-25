@@ -22,7 +22,7 @@ export function NightLinkLanding({
   const query = `?${new URLSearchParams({ redirectTo: path })}`;
   return (
     <LinkPage>
-      <section className="mx-1.5 mt-3.5 flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-4 py-3.5 outline-2 outline-offset-5 outline-foreground outline-dashed">
+      <section className="mx-1.5 mt-3.5 mb-1.5 flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-4 py-3.5 outline-2 outline-offset-5 outline-foreground outline-dashed">
         <h1 className="text-15 font-bold">You’re invited to a game night</h1>
         <p className="text-2xl leading-tight font-bold">{title}</p>
         <div className="flex flex-col gap-1">

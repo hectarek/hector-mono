@@ -30,14 +30,18 @@ const SIZES = {
 export type PieceSize = keyof typeof SIZES;
 
 // Pieces stand for people the text beside them names, so they're hidden from screen readers.
+// A dashed piece is someone's place still to come, such as your own place in a line you're
+// about to join (C10).
 export function Piece({
   shape,
   color,
   size = 20,
+  dashed = false,
 }: {
   shape: PieceShape;
   color: PieceColor;
   size?: PieceSize;
+  dashed?: boolean;
 }) {
   return (
     <svg
@@ -50,6 +54,7 @@ export function Piece({
         data-color={color}
         strokeWidth={SIZES[size].outline}
         strokeLinejoin="round"
+        strokeDasharray={dashed ? "3 2.5" : undefined}
       />
     </svg>
   );

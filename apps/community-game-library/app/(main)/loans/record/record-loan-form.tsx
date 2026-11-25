@@ -203,7 +203,7 @@ export function RecordLoanForm({
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             {friend?.name ?? "Your friend"} is told, and it shows on their
-            Loans, with nothing to confirm.
+            Loans. They don’t confirm.
           </p>
         </div>
       )}

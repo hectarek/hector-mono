@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { List, ListRow, RowFacts, RowName } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
+import { Piece } from "@/app/_components/piece";
 import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
 import { adminRead } from "@/app/(main)/admin/admin-reads";
@@ -29,12 +30,10 @@ export default async function AnsweredPage() {
       width="read"
       header={<AppHeader back={{ href: "/admin", label: "Admin" }} />}
     >
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl leading-7 font-bold">Answered suggestions</h1>
-        <p className="font-mono text-xs font-medium text-muted-foreground">
-          {answered.length} answered, newest first
-        </p>
-      </div>
+      <h1 className="text-2xl leading-7 font-bold">Answered suggestions</h1>
+      <p className="font-mono text-xs font-medium text-muted-foreground">
+        {answered.length} answered, newest first
+      </p>
       {answered.length > 0 && (
         <List>
           {answered.map(({ suggestion, by, game }) => {
@@ -49,6 +48,15 @@ export default async function AnsweredPage() {
                   game
                     ? `/admin/games/${game.id}`
                     : `/admin/suggestions/${suggestion.id}`
+                }
+                thumb={
+                  by && (
+                    <Piece
+                      shape={by.pieceShape}
+                      color={by.pieceColor}
+                      size={20}
+                    />
+                  )
                 }
                 stamp={stamp && <Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
               >

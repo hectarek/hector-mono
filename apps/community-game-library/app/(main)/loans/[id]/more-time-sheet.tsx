@@ -62,7 +62,7 @@ export function MoreTimeSheet({
     <>
       <Button
         variant="link"
-        className="self-center"
+        className="-my-1.5 self-center"
         onClick={() => setOpen(true)}
       >
         Ask for more time

@@ -19,6 +19,15 @@ import {
 const { you, priya, jo } = CAST.people;
 const { priyaAskedForNightMarket, joHasGullAndAnchor } = CAST.loans;
 
+// A row's line as F1 sets it: its words in bold, then the whole line as it reads.
+const lineOf = (row: HTMLElement) => {
+  const bold = row.querySelector("strong");
+  return [
+    bold?.textContent,
+    bold?.parentElement?.textContent?.replace("Unread. ", ""),
+  ];
+};
+
 const tell = (notice: NewNotice) =>
   getInjection("ITransactionManagerService").startTransaction((tx) =>
     getInjection("INoticesRepository").add(notice, tx),
@@ -65,17 +74,17 @@ describe("the inbox (F1, F2)", () => {
       `/loans/${joHasGullAndAnchor.id}`,
     ]);
     const request = within(rows[0] as HTMLElement);
-    expect(
-      request.getByText("Priya asked to borrow Night Market"),
-    ).toBeTruthy();
+    expect(lineOf(rows[0] as HTMLElement)).toEqual([
+      "Priya asked to borrow",
+      "Priya asked to borrow Night Market",
+    ]);
     expect(request.getByText("“Can I grab it Friday?”")).toBeTruthy();
     expect(request.getByText("20 min ago")).toBeTruthy();
     expect(request.getByText("Requested")).toBeTruthy();
-    expect(
-      within(rows[1] as HTMLElement).getByText(
-        "Jo asked for more time on Gull & Anchor",
-      ),
-    ).toBeTruthy();
+    expect(lineOf(rows[1] as HTMLElement)).toEqual([
+      "Jo asked for more time",
+      "Jo asked for more time on Gull & Anchor",
+    ]);
     expect(
       page
         .getByRole("button", { name: "Choose which notices I get" })
@@ -99,7 +108,7 @@ describe("the inbox (F1, F2)", () => {
     // The next visit has nothing new.
     view.unmount();
     const later = within(render(await InboxPage()).container);
-    expect(later.getByText("Priya asked to borrow Night Market")).toBeTruthy();
+    expect(later.getByText("Priya asked to borrow").tagName).toBe("STRONG");
     expect(later.queryByText("2 unread") === null).toBe(true);
     expect(later.queryAllByText("Unread.")).toHaveLength(0);
   });

@@ -1,9 +1,9 @@
-import { Button } from "@repo/ui/components/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
 } from "@repo/ui/components/empty";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import Link from "next/link";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
@@ -36,10 +36,11 @@ export default async function PastLoansPage({
   const side = show === "lent" ? "lent" : "borrowed";
   const past = await getInjection("IListPastLoansController")(user.id);
   const loans = past[side];
-  const toggle = (which: "borrowed" | "lent", words: string) => (
-    <Button
-      size="sm"
-      variant={side === which ? "default" : "secondary"}
+  // The two views as the design system's segmented control, as B1's All friends | My library:
+  // each half a link, pressed on the view shown.
+  const view = (which: "borrowed" | "lent", words: string) => (
+    <ToggleGroupItem
+      value={which}
       nativeButton={false}
       render={
         <Link
@@ -48,10 +49,9 @@ export default async function PastLoansPage({
           scroll={false}
         />
       }
-      aria-pressed={side === which}
     >
       {words}
-    </Button>
+    </ToggleGroupItem>
   );
 
   return (
@@ -60,10 +60,15 @@ export default async function PastLoansPage({
       header={<AppHeader back={{ href: "/loans", label: "Loans" }} />}
     >
       <h1 className="text-2xl leading-7 font-bold">Past loans</h1>
-      <div className="flex gap-2">
-        {toggle("borrowed", "You borrowed")}
-        {toggle("lent", "You lent")}
-      </div>
+      <ToggleGroup
+        spacing={0}
+        aria-label="Which loans"
+        value={[side]}
+        className="w-full"
+      >
+        {view("borrowed", "You borrowed")}
+        {view("lent", "You lent")}
+      </ToggleGroup>
       {loans.length > 0 ? (
         <>
           <p className="font-mono text-xs font-medium text-muted-foreground">

@@ -1,3 +1,4 @@
+import { cn } from "@repo/ui/lib/utils";
 import type { ReactNode } from "react";
 
 // How everything on a page is grouped (the design system's Group): a chipboard panel with a red
@@ -8,6 +9,7 @@ export function Group({
   label,
   aside,
   overList = false,
+  roomy = false,
   id,
   children,
 }: {
@@ -16,16 +18,19 @@ export function Group({
   aside?: ReactNode;
   // A navy label on kraft, directly above a list, rather than a panel.
   overList?: boolean;
+  // A form's panel sets its fields 12px apart rather than 8px (D5, G3).
+  roomy?: boolean;
   // The label's id, for a link that jumps to the group (B5's "See copies").
   id?: string;
   children: ReactNode;
 }) {
+  // A list's label sits 4px further from what's above it, but not at the top of a page (C4).
   if (overList) {
     return (
-      <section className="flex flex-col gap-3">
+      <section className="mt-1 flex flex-col gap-3 first:mt-0">
         <h2
           id={id}
-          className="mt-1 scroll-mt-4 font-heading text-15 font-bold tracking-wider uppercase"
+          className="scroll-mt-4 font-heading text-15 font-bold tracking-wider uppercase"
         >
           {label}
         </h2>
@@ -34,7 +39,12 @@ export function Group({
     );
   }
   return (
-    <section className="flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-3.5 py-3">
+    <section
+      className={cn(
+        "flex flex-col rounded-lg border-2 border-foreground bg-card px-3.5 py-3",
+        roomy ? "gap-3" : "gap-2",
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
         <h2
           id={id}

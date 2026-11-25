@@ -74,6 +74,9 @@ describe("noticeText", () => {
       const words = noticeText(item(type), reader);
       expect(words.line.length).toBeGreaterThan(0);
       expect(words.line).not.toContain("undefined");
+      // F1 sets part of the line in bold.
+      expect(words.bold.length).toBeGreaterThan(0);
+      expect(words.line).toContain(words.bold);
       expect(words.detail ?? "").not.toContain("undefined");
       const route = AREA_ROUTES.find(([types]) => types.test(type))?.[1];
       expect(route).toBeDefined();
@@ -84,16 +87,24 @@ describe("noticeText", () => {
   it("says F1's lines for a request, more time and a friend", () => {
     expect(noticeText(item("loan-requested"), reader)).toMatchObject({
       line: "Sam asked to borrow Moss & Mortar",
+      bold: "Sam asked to borrow",
       detail: "“Can I grab it Friday?”",
       stamp: { word: "Requested", tone: "red" },
     });
     expect(noticeText(item("more-time-asked"), reader)).toMatchObject({
       line: "Sam asked for more time on Moss & Mortar",
+      bold: "Sam asked for more time",
       detail: "Until Fri, Nov 20",
     });
     expect(noticeText(item("friend-request"), reader)).toMatchObject({
       line: "Sam wants to be friends",
+      bold: "Sam wants",
       href: "/friends",
+    });
+    // A line about a thing alone bolds what happened to it.
+    expect(noticeText(item("due-today"), reader)).toMatchObject({
+      line: "Moss & Mortar is due today",
+      bold: "is due today",
     });
     expect(noticeText(item("line-joined"), reader).detail).toBe(
       "You have it until Friday. Your due date doesn’t change.",

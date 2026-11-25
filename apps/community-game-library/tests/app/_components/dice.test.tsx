@@ -54,10 +54,24 @@ describe("Dice", () => {
       stacks.map(
         (stack) => stack.lastElementChild?.querySelectorAll("circle").length,
       ),
-    ).toEqual([5, 3]);
+    ).toEqual([6, 2]);
     expect(stacks[0]?.className).toContain("-rotate-10");
 
     const resting = render(<DicePair />).container.firstElementChild;
     expect((resting as HTMLElement).dataset.moment).toBeUndefined();
+  });
+
+  // The night boards rest the pair on 6 and 2 (D8, D13); the welcome page on 5 and 3 (A1).
+  it("rests on 6 and 2, or on the faces a board draws", () => {
+    const pips = (view: ReturnType<typeof render>) =>
+      [...view.container.querySelectorAll("svg")].map(
+        (die) => die.querySelectorAll("circle").length,
+      );
+    expect(pips(render(<DicePair />))).toEqual([6, 2]);
+    const welcome = render(<DicePair size="welcome" rest={[5, 3]} />);
+    expect(pips(welcome)).toEqual([5, 3]);
+    expect(
+      welcome.container.querySelector("svg")?.getAttribute("class"),
+    ).toContain("size-7.5");
   });
 });

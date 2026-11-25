@@ -38,9 +38,24 @@ describe("E5, You", () => {
     ).toBe("/start/home-screen?from=you");
   });
 
-  it("has the rows whose pages exist: The app's in Y1's order, Delete my account (U22), and Admin only for the admin", async () => {
+  it("has the rows whose pages exist: Games and loans, The app's in Y1's order, Delete my account (U22), and Admin only for the admin", async () => {
     const view = render(await YouPage());
     expect(view.queryByRole("link", { name: /Admin/ }) === null).toBe(true);
+    expect(
+      view
+        .getAllByRole("heading", { level: 2 })
+        .map((heading) => heading.textContent),
+    ).toEqual(["Games and loans", "The app", "Account"]);
+    const gamesAndLoans = view.getByRole("heading", { name: "Games and loans" })
+      .parentElement as HTMLElement;
+    expect(
+      within(gamesAndLoans)
+        .getAllByRole("link")
+        .map((link) => [link.textContent, link.getAttribute("href")]),
+    ).toEqual([
+      ["My libraryNo games yet", "/my-library"],
+      ["Past loans", "/loans/past"],
+    ]);
     const theApp = view.getByRole("heading", { name: "The app" })
       .parentElement as HTMLElement;
     expect(

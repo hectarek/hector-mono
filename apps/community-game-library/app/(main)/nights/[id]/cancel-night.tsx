@@ -67,7 +67,11 @@ export function CancelNight({
       <p className="text-13 text-muted-foreground">
         Everyone going, invited or waiting is told.
       </p>
-      <Button variant="destructive" size="lg" onClick={() => setOpen(true)}>
+      <Button
+        variant="destructive"
+        className="self-start"
+        onClick={() => setOpen(true)}
+      >
         Cancel the night
       </Button>
       <ConfirmDialog

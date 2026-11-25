@@ -59,9 +59,10 @@ describe("a loan's page (U12: C16, C2, C17, C3)", () => {
         .getByRole("link", { name: "Call Sam, 555 0142" })
         .getAttribute("href"),
     ).toBe("tel:5550142");
+    // C16 keeps "where to pick it up." together on its line.
     expect(
-      page.getByText("If Sam says yes, this page shows where to pick it up."),
-    ).toBeTruthy();
+      page.getByText("where to pick it up.").closest("p")?.textContent,
+    ).toBe("If Sam says yes, this page shows where to pick it up.");
 
     fireEvent.click(page.getByRole("button", { name: "Withdraw my request" }));
     const dialog = within(await view.findByRole("alertdialog"));

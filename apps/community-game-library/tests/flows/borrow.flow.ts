@@ -26,7 +26,7 @@ test("borrows a friend's game, picks it up, gives it back, and the owner confirm
   // Ira joins through it, and they're friends at once.
   const borrower = await anotherMember(browser);
   await signUp(borrower, "Ira", link);
-  await setUpProfile(borrower);
+  await setUpProfile(borrower, { friend: "Wren" });
 
   // Ira asks to borrow it from the game's page.
   await borrower.getByRole("link", { name: new RegExp(GAME) }).click();

@@ -13,12 +13,15 @@ export function ShareButton({
   url,
   label = "Share",
   copied = "Copied",
+  className,
 }: {
   text: string;
   url?: string;
   label?: string;
   // The toast once it's copied ("Link copied").
   copied?: string;
+  // Where it sits: `self-start` keeps it at its own width in a column (D7, D10).
+  className?: string;
 }) {
   async function share() {
     const result = await shareOrCopy({ text, url });
@@ -26,7 +29,12 @@ export function ShareButton({
     if (result === "failed") notify("That didn’t copy. Try again.");
   }
   return (
-    <Button type="button" variant="secondary" onClick={share}>
+    <Button
+      type="button"
+      variant="secondary"
+      className={className}
+      onClick={share}
+    >
       <ShareIcon data-icon="inline-start" />
       {label}
     </Button>

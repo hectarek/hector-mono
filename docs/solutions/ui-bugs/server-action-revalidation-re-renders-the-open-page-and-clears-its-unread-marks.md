@@ -1,5 +1,5 @@
 ---
-title: "A server action's revalidatePath re-renders the page that sent it, which cleared the inbox's unread marks and a catalog row's Added"
+title: "A server action's revalidatePath re-renders the page that sent it: it cleared the inbox's unread marks and a catalog row's Added, and its gate sent new members past two setting-up steps"
 date: 2026-11-22
 last_updated: 2026-11-24
 category: ui-bugs
@@ -11,15 +11,17 @@ symptoms:
   - "The bell read 2 unread on the page before, so the notices had been unread when the inbox rendered"
   - "Every screen test passed, the inbox's included"
   - "On Add games, a row's Added stamp and its Undo turned to Yours about half a second after I own it"
+  - "After Set up your profile, Next went straight to the Library: no new member saw the friends step or the home-screen step"
+  - "The browser flows passed, since they waited for those steps only if they appeared"
 root_cause: wrong_api
 resolution_type: code_fix
 severity: medium
 framework_version: "next 16.4.6, react 19.3.1"
 related_components: [testing_framework]
-tags: [nextjs, server-actions, revalidatepath, unread, inbox, client-state, happy-dom, catalog-row, i-own-it]
+tags: [nextjs, server-actions, revalidatepath, unread, inbox, client-state, happy-dom, catalog-row, i-own-it, redirect, gate, setting-up, browser-flows]
 ---
 
-# A server action's revalidatePath re-renders the page that sent it, which cleared the inbox's unread marks and a catalog row's Added
+# A server action's revalidatePath re-renders the page that sent it: it cleared the inbox's unread marks and a catalog row's Added, and its gate sent new members past two setting-up steps
 
 ## Problem
 
@@ -112,12 +114,24 @@ if (yours) {
 
 `IOwnIt` shows Added and Undo while its own state holds the added copy, then Yours for a game the member already owned, then the I own it button. The refresh changes only its `yours` prop, so it keeps its state. Its screen test (`apps/community-game-library/tests/app/(main)/my-library/add/page.test.tsx`, "keeps Added and Undo through the add's refresh") taps I own it, waits for the copy to be saved, renders the page again into the same root with `view.rerender`, and expects Added and Undo, and no Yours, before tapping Undo.
 
+## A third case: the refresh re-runs the open page's gate, which redirects (2026-11-24)
+
+The re-render runs the open page's own checks too. Set up your profile (A4, `apps/community-game-library/app/(start)/start/profile/page.tsx`) starts with `gate("start")`, which sends an account to its landing when that isn't the page's: one with a profile lands on the Library, `/` (`apps/community-game-library/app/_lib/account.ts`). A4's Next calls the server action `createProfile` (`apps/community-game-library/app/actions/profile.ts`), and the form then goes on itself, with `router.push(next)` once the action answers: to the friends step (A5, `/start/friends`) after a friend link, else to the home-screen step (A6, `/start/home-screen`).
+
+`createProfile` called `revalidatePath("/", "layout")`, so the header's piece would show the new profile. The action's refresh rendered A4 again after the profile existed, the gate threw `redirect("/")` in that render, and Next turned the action's response into a redirect to the Library. On the client Next then rejects the action's promise with a redirect error (Next.js 16.4.6's `server-action-reducer.js`, installed after `bun install` at `apps/community-game-library/node_modules/next/dist/client/components/router-reducer/reducers/server-action-reducer.js`: "the action promise will be rejected with a redirect so that it's handled by RedirectBoundary"), so the form's `router.push(next)` never ran. Every new member skipped A5 and A6.
+
+A browser trace in a local production build showed it: `POST /start/profile`, then a navigation straight to `/`, and no request for `/start/home-screen`. The screen tests can't see it, since they have no server and client boundary and stub `next/cache`. The browser flows passed too: `setUpProfile` (`apps/community-game-library/tests/flows/members.ts`) clicked through A5 and A6 only if they appeared, and went on to the Library either way.
+
+The fix (pending in the polish pass's PR) is that `createProfile` revalidates nothing. A new member has no signed-in page cached to refresh, and each page after A4 renders fresh. After it, the same build went on to `/start/home-screen`, and from a friend link to `/start/friends`. `apps/community-game-library/tests/app/actions/profile.test.ts` pins that the first save revalidates nothing, and `setUpProfile` now requires each step: A5 when the sign-up came from a friend link, then A6.
+
 ## Prevention
 
 - A page whose own server action changes the state it shows (marking read on open, a seen-at time, a dismissal) keeps whatever should outlive the change in client state, since the action's `revalidatePath` re-renders that page. `apps/community-game-library/AGENTS.md` says so in U11's patterns.
 - Keep that client part rendered in every state the action can lead to, and pass it the server's value as a prop it reads. A server prop that swaps it for another element unmounts it, and its state goes with it. `apps/community-game-library/AGENTS.md` says so under Testing.
 - Check such a page on the dev server after its action runs. Screen tests here stub `next/cache`; a test can stand in for the refresh with `rerender` and the page's fresh render.
 - Send the ids the page showed rather than marking "everything": the page's view is what the member saw.
+- An action whose success makes the open page's own gate turn the member away (a first save that makes the account ready) must not revalidate that page, or must redirect itself: the refresh re-runs the gate, and its redirect replaces the action's answer and the form's own next step.
+- A browser flow requires each step of a sequence. One that clicks through a step only if it appears passes when the step is skipped.
 
 ## Related Issues
 

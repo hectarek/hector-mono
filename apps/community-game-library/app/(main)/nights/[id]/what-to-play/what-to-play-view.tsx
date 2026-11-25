@@ -71,7 +71,10 @@ function ChoiceButtons<T extends string>({
 }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <span className="font-mono text-2xs font-medium text-muted-foreground">
+      <span
+        data-ink="smudge"
+        className="font-mono text-2xs font-medium tracking-wider uppercase"
+      >
         {label}
       </span>
       <ToggleGroup
@@ -124,9 +127,13 @@ export function WhatToPlayView({
         <h1 className="text-2xl leading-7 font-bold">What should we play?</h1>
       </div>
       <Group label="Looking for">
-        <div className="flex flex-col gap-4">
+        {/* 16px under the label, as between the choices (D8). */}
+        <div className="mt-2 flex flex-col gap-4">
           <div className="flex flex-col gap-2.5">
-            <span className="font-mono text-2xs font-medium text-muted-foreground">
+            <span
+              data-ink="smudge"
+              className="font-mono text-2xs font-medium tracking-wider uppercase"
+            >
               People playing
             </span>
             <ButtonGroup aria-label="People playing">

@@ -56,21 +56,27 @@ function Fillers({ rows }: { rows: number }) {
 
 // A row that opens a page: one link filling the row, its chevron at the far right after any
 // stamp (D14: the row shows the thing's state, its page changes it). The text stacks; a title
-// that wraps takes the room, and a stamp that no longer fits beside it drops under it
-// (screens.md rule 13). With a pointer, the row's ink turns stamp-red.
+// that wraps takes the room, and a stamp drops under it only when less than 112px is left for
+// the text (screens.md rule 13), so a long owner line doesn't push it down at 390px. With a pointer, the row's ink turns stamp-red.
 export function ListRow({
   href,
   thumb,
+  thumbTop = false,
   stamp,
   aside,
+  count,
   children,
 }: {
   href: string;
   // Before the text: a CoverThumb, or a person's 20px piece.
   thumb?: ReactNode;
+  // The thumb at the top of a row of several lines, the rest centered (F1).
+  thumbTop?: boolean;
   stamp?: ReactNode;
   // A mono fact at the right ("4 games").
   aside?: ReactNode;
+  // A bare count at the right, 13px in navy ("2", D1's Past game nights, G1).
+  count?: number;
   children: ReactNode;
 }) {
   return (
@@ -80,9 +86,13 @@ export function ListRow({
         transitionTypes={["go-deeper"]}
         className="flex min-h-12 items-center gap-3 px-3 py-2.5 text-foreground hover:text-destructive focus-visible:-outline-offset-3"
       >
-        {thumb}
+        {thumb && thumbTop ? (
+          <span className="flex self-start pt-0.5">{thumb}</span>
+        ) : (
+          thumb
+        )}
         <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
-          <span className="flex min-w-0 flex-auto flex-col gap-0.5">
+          <span className="flex min-w-0 grow basis-28 flex-col gap-0.5">
             {children}
           </span>
           {stamp}
@@ -90,6 +100,11 @@ export function ListRow({
         {aside && (
           <span className="shrink-0 font-mono text-xs font-medium text-muted-foreground">
             {aside}
+          </span>
+        )}
+        {count !== undefined && (
+          <span className="shrink-0 font-mono text-13 font-medium">
+            {count}
           </span>
         )}
         <ForwardIcon />

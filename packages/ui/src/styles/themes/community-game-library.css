@@ -236,14 +236,16 @@
   background-color: transparent;
 }
 
-/* Quiet (link and quiet): text with a dashed underline, no box. */
+/* Quiet (link and quiet): text with a dashed underline, no box and no edge. One that starts a
+   line (self-start) is pulled 4px left, so its words line up with the words above it, as the
+   boards draw it. */
 [data-theme="community-game-library"]
   :is([data-slot="button"], .group\/button):is(
     [class~="underline-offset-4"],
     [class~="text-muted-foreground"]
   ) {
   padding-inline: 0.25rem;
-  border-color: transparent;
+  border-width: 0;
   background-color: transparent;
   color: var(--foreground);
   font-size: 0.875rem;
@@ -252,11 +254,24 @@
   text-decoration-thickness: 2px;
   text-underline-offset: 0.3125rem;
 }
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button):is(
+    [class~="underline-offset-4"],
+    [class~="text-muted-foreground"]
+  )[class~="self-start"] {
+  margin-inline-start: -0.25rem;
+}
 
 /* Sizes: lg is a screen's main action (48px); sm and xs sit in a list row or the header
    (14px label); the icon sizes are 44px squares. */
 [data-theme="community-game-library"]
   :is([data-slot="button"], .group\/button)[class~="h-9"] {
+  min-height: 3rem;
+}
+/* A small button the boards draw 48px tall, with its 14px label: a night's I'll bring a game,
+   What should we play? and Split into tables (D2, D7, D13). */
+[data-theme="community-game-library"]
+  :is([data-slot="button"], .group\/button)[class~="min-h-12"] {
   min-height: 3rem;
 }
 [data-theme="community-game-library"]
@@ -337,6 +352,20 @@
   padding: 0.625rem 0.75rem;
   line-height: 1.4;
   resize: none;
+}
+/* A note box with rows is that many lines tall, as the boards draw it (C1's three, D11's two):
+   the shared Textarea grows with its words, which ignores rows. */
+[data-theme="community-game-library"] [data-slot="textarea"][rows] {
+  field-sizing: fixed;
+}
+/* A phone number is typed in Plex Mono, as A4 and E6 draw it. */
+[data-theme="community-game-library"] [data-slot="input"][type="tel"] {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+/* A placeholder is in smudge, the boards' quietest ink. */
+[data-theme="community-game-library"] :is(input, textarea)::placeholder {
+  color: var(--smudge);
 }
 [data-theme="community-game-library"]
   :is(
@@ -421,6 +450,17 @@
   stroke-width: 3.6;
 }
 
+/* A list of choices stacks its 44px rows with no gap between them (B12, C9, D3, G3); a grid of
+   them, the piece picker's, sets them 4px apart (A4, E6). */
+[data-theme="community-game-library"]
+  [data-slot="radio-group"]:not([class*="grid-cols-"]) {
+  gap: 0;
+}
+[data-theme="community-game-library"]
+  [data-slot="radio-group"][class*="grid-cols-"] {
+  gap: 0.25rem;
+}
+
 [data-theme="community-game-library"] [data-slot="radio-group-item"] {
   width: 1.5rem;
   height: 1.5rem;
@@ -496,6 +536,13 @@
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: 500;
+}
+/* A chip that can be taken off ends in its ×, 10px from its edge (B3, B4). */
+[data-theme="community-game-library"]
+  :is([data-slot="toggle"], [data-slot="toggle-group-item"]):has(
+    > svg:last-child
+  ) {
+  padding-inline-end: 0.625rem;
 }
 [data-theme="community-game-library"]
   :is(
@@ -604,9 +651,11 @@
   gap: 0.875rem;
   text-align: left;
 }
+/* Its two buttons side by side, or one above the other when their words don't fit (E9). */
 [data-theme="community-game-library"] [data-slot="alert-dialog-footer"] {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.625rem;
   margin: 0;
   padding: 0;

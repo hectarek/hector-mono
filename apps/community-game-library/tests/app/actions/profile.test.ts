@@ -56,8 +56,10 @@ describe("createProfile (A4)", () => {
     expect(
       await getInjection("IUserSettingsRepository").getByUserId(userId),
     ).toBeDefined();
-    // The header's piece shows on every page.
-    expect(nextState.revalidated).toContain("/");
+    // Nothing: a revalidation re-renders A4, whose gate sends an account that now has a profile
+    // to the Library, so the form never went on to A5 or A6. A new member has no signed-in page
+    // cached to refresh.
+    expect(nextState.revalidated).toEqual([]);
   });
 
   it("needs a name, and says so under the field", async () => {

@@ -11,13 +11,8 @@ import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
-import {
-  List,
-  ListRow,
-  RowFacts,
-  RowLine,
-  RowName,
-} from "@/app/_components/list-row";
+import { ForwardIcon } from "@/app/_components/icons";
+import { List, ListRow, RowFacts, RowName } from "@/app/_components/list-row";
 import { LoanTrack } from "@/app/_components/loan-track";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
@@ -40,7 +35,7 @@ type Item = Awaited<
   ReturnType<DI_RETURN_TYPES["IListLoansController"]>
 >["borrowed"][number];
 
-// A person beside their piece, in a row's 12px line ("From Sam", "Jo is 1st in line").
+// A person beside their piece, in a loan card's line ("From Sam", "Jo is 1st in line").
 function PersonLine({
   person,
   children,
@@ -49,16 +44,17 @@ function PersonLine({
   children: string;
 }) {
   return (
-    <RowLine>
+    <span className="flex items-center gap-1.25 whitespace-nowrap">
       <Piece shape={person.pieceShape} color={person.pieceColor} size={11} />
       {children}
-    </RowLine>
+    </span>
   );
 }
 
-// A loan that's out, or said yes to, on Loans (C4): its game, its stamp, the track with the
-// borrower's piece while it's out, then who it's from or with, and who's next in line.
-function LoanItemRow({
+// A loan that's out, or said yes to, on Loans (C4): a card that opens the loan, with its game,
+// its stamp and the chevron on top, the track with the borrower's piece across it while it's out,
+// then one line of who it's from or with and who's next in line.
+function LoanCard({
   item,
   side,
   borrower,
@@ -73,30 +69,43 @@ function LoanItemRow({
   const viewer = side === "borrowed" ? loan.borrowerUserId : copy.userId;
   const { stamp } = copyState(copy, [loan], viewer, today);
   return (
-    <ListRow
-      href={`/loans/${loan.id}`}
-      stamp={<Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
-    >
-      <RowName>{game.title}</RowName>
-      {loan.status === "out" && loan.pickedUpOn && loan.dueOn && (
-        <LoanTrack
-          pickedUpOn={loan.pickedUpOn}
-          dueOn={loan.dueOn}
-          today={today}
-          borrower={borrower}
-        />
-      )}
-      <PersonLine person={other}>
-        {side === "borrowed"
-          ? `From ${other.name}`
-          : loan.status === "accepted"
-            ? `${other.name} hasn’t picked it up yet`
-            : `${other.name} has it`}
-      </PersonLine>
-      {next && (
-        <PersonLine person={next}>{`${next.name} is 1st in line`}</PersonLine>
-      )}
-    </ListRow>
+    <li>
+      <Link
+        href={`/loans/${loan.id}`}
+        transitionTypes={["go-deeper"]}
+        className="flex flex-col gap-2 rounded-lg border-2 border-foreground bg-card px-3.5 py-3 text-foreground hover:text-destructive"
+      >
+        <div className="flex items-center gap-2">
+          <h3 className="min-w-0 flex-1 text-base font-bold">{game.title}</h3>
+          <Stamp tone={stamp.tone} size="card" tilt={3}>
+            {stamp.word}
+          </Stamp>
+          <ForwardIcon className="-mr-2 -ml-0.5" />
+        </div>
+        {loan.status === "out" && loan.pickedUpOn && loan.dueOn && (
+          <LoanTrack
+            pickedUpOn={loan.pickedUpOn}
+            dueOn={loan.dueOn}
+            today={today}
+            borrower={borrower}
+          />
+        )}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-13 text-muted-foreground">
+          <PersonLine person={other}>
+            {side === "borrowed"
+              ? `From ${other.name}`
+              : loan.status === "accepted"
+                ? `${other.name} hasn’t picked it up yet`
+                : `${other.name} has it`}
+          </PersonLine>
+          {next && (
+            <PersonLine
+              person={next}
+            >{`${next.name} is 1st in line`}</PersonLine>
+          )}
+        </div>
+      </Link>
+    </li>
   );
 }
 
@@ -243,9 +252,9 @@ export default async function LoansPage() {
 
       {you && borrowed.length > 0 && (
         <Group label="You borrowed" overList>
-          <List>
+          <ul className="flex flex-col gap-3">
             {borrowed.map((item) => (
-              <LoanItemRow
+              <LoanCard
                 key={item.loan.id}
                 item={item}
                 side="borrowed"
@@ -253,15 +262,15 @@ export default async function LoansPage() {
                 today={today}
               />
             ))}
-          </List>
+          </ul>
         </Group>
       )}
 
       {lent.length > 0 && (
         <Group label="You lent" overList>
-          <List>
+          <ul className="flex flex-col gap-3">
             {lent.map((item) => (
-              <LoanItemRow
+              <LoanCard
                 key={item.loan.id}
                 item={item}
                 side="lent"
@@ -269,7 +278,7 @@ export default async function LoansPage() {
                 today={today}
               />
             ))}
-          </List>
+          </ul>
         </Group>
       )}
 

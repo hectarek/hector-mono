@@ -52,6 +52,19 @@ export function ForwardIcon(props: IconProps) {
   );
 }
 
+// A field that opens a choice, as a select's: 16px, the boards' date fields (C3, C5, C9, D5).
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <LineIcon
+      viewBox="0 0 16 16"
+      {...props}
+      className={cn("size-4", props.className)}
+    >
+      <path d="M4 6l4 4 4-4" />
+    </LineIcon>
+  );
+}
+
 export function CloseIcon(props: IconProps) {
   return (
     <LineIcon {...props}>

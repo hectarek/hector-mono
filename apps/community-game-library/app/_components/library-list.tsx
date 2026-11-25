@@ -108,33 +108,39 @@ export function LibraryList({
             <EmptyDescription>{noMatchLine(view, whose)}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            {suggestion && (
+            {/* B4's two ways out share a row, Clear filters dropping under the first when
+                they don't fit. */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {suggestion && (
+                <Button
+                  variant="secondary"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={href(withoutFilter(view, suggestion.filter))}
+                      scroll={false}
+                    />
+                  }
+                >
+                  {dropWords(
+                    filterWords(
+                      suggestion.filter,
+                      ownerWordsFor(owners, viewerId),
+                    ),
+                    suggestion.count,
+                  )}
+                </Button>
+              )}
               <Button
-                variant="secondary"
+                variant="link"
                 nativeButton={false}
                 render={
-                  <Link
-                    href={href(withoutFilter(view, suggestion.filter))}
-                    scroll={false}
-                  />
+                  <Link href={href(withoutFilters(view))} scroll={false} />
                 }
               >
-                {dropWords(
-                  filterWords(
-                    suggestion.filter,
-                    ownerWordsFor(owners, viewerId),
-                  ),
-                  suggestion.count,
-                )}
+                Clear filters
               </Button>
-            )}
-            <Button
-              variant="link"
-              nativeButton={false}
-              render={<Link href={href(withoutFilters(view))} scroll={false} />}
-            >
-              Clear filters
-            </Button>
+            </div>
           </EmptyContent>
         </Empty>
       ) : (

@@ -6,7 +6,7 @@ import {
   List,
   ListItem,
   ListRow,
-  RowLine,
+  RowFacts,
   RowName,
 } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
@@ -83,7 +83,8 @@ export default async function DeleteAccountPage() {
                     stamp={<Stamp tone={stamp.tone}>{stamp.word}</Stamp>}
                   >
                     <RowName>{game.title}</RowName>
-                    <RowLine>
+                    {/* Who has it and when it's due, as mono facts (E8). */}
+                    <span className="flex items-center gap-1.25 font-mono text-2xs font-medium whitespace-nowrap text-muted-foreground">
                       <Piece
                         shape={holder.pieceShape}
                         color={holder.pieceColor}
@@ -92,9 +93,9 @@ export default async function DeleteAccountPage() {
                       {holder.userId === user.id
                         ? "You have it"
                         : `${holder.name} has it`}
-                    </RowLine>
+                    </span>
                     {loan.dueOn && !isOverdue(loan, today) && (
-                      <RowLine>Due {formatDate(loan.dueOn, today)}</RowLine>
+                      <RowFacts>Due {formatDate(loan.dueOn, today)}</RowFacts>
                     )}
                   </ListRow>
                 );

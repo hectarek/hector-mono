@@ -29,10 +29,13 @@ export function NightLink({
   const [asking, setAsking] = useState(false);
   return (
     <div className="flex flex-col gap-2 border-t-2 border-dashed border-foreground pt-3">
-      <span className="font-mono text-2xs font-medium text-muted-foreground">
+      <span
+        data-ink="smudge"
+        className="font-mono text-2xs font-medium tracking-wider uppercase"
+      >
         The night’s link
       </span>
-      <p className="flex items-center gap-2">
+      <p className="flex min-h-11 items-center gap-2 rounded-lg border-2 border-foreground bg-secondary px-2.5">
         <LinkIcon className="shrink-0" />
         <span className="min-w-0 font-mono text-xs font-medium wrap-anywhere">
           {address}
@@ -48,9 +51,15 @@ export function NightLink({
         text={nightLinkMessage(title)}
         url={url}
         copied="Link copied"
+        className="self-start"
       />
       <div className="flex flex-wrap items-center gap-x-2.5">
-        <Button type="button" variant="link" onClick={() => setAsking(true)}>
+        <Button
+          type="button"
+          variant="link"
+          className="self-start"
+          onClick={() => setAsking(true)}
+        >
           Make a new link
         </Button>
         <span className="text-xs text-muted-foreground">
