@@ -207,6 +207,14 @@ describeEachBackend("Friends (E1)", () => {
     expect(friends.peopleYouMayKnow[0]?.via?.name).toBe("Sam");
   });
 
+  it("counts a friend's games, not their copies: a second Harbor Lights is still Alice's 2 games", async () => {
+    await app.addUserGame(CAST.games.harborLights.id, alice.id);
+    const { friends } = await app.listFriends(you.id);
+    expect(friends.find((row) => row.person.userId === alice.id)?.games).toBe(
+      2,
+    );
+  });
+
   it("gives a newcomer their new friend's friends, with You asked once asked (A5)", async () => {
     const link = await app.getFriendLink(sam.id, NOW);
     await app.openFriendLink(link.token, NEWCOMER, NOW);

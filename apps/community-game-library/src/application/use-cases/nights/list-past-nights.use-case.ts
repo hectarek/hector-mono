@@ -1,4 +1,5 @@
 import type { IGameNightsRepository } from "@/src/application/repositories/game-nights.repository.interface";
+import type { IUserGamesRepository } from "@/src/application/repositories/user-games.repository.interface";
 import type { IUserProfilesRepository } from "@/src/application/repositories/user-profiles.repository.interface";
 import type { GameNight } from "@/src/entities/models/game-night.model";
 import {
@@ -11,7 +12,7 @@ import { PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 export type IListPastNightsUseCase = ReturnType<typeof listPastNightsUseCase>;
 
 // A night on Past game nights (D12): its host, how many came, guests included, and how many games
-// were on its table ("Jo hosted · 5 came · 3 games").
+// were on its table, two copies of a game once ("Jo hosted · 5 came · 3 games").
 export type PastNight = {
   night: GameNight;
   host: NameAndPiece;
@@ -27,6 +28,7 @@ const READ_AHEAD_MS = 36 * 60 * 60 * 1000;
 export const listPastNightsUseCase = (
   gameNightsRepository: IGameNightsRepository,
   userProfilesRepository: IUserProfilesRepository,
+  userGamesRepository: IUserGamesRepository,
 ) => {
   return async (userId: string, now: Date): Promise<PastNight[]> => {
     const today = todayIn(PLAN_TIME_ZONE, now);
@@ -42,6 +44,14 @@ export const listPastNightsUseCase = (
     const ids = nights.map((night) => night.id);
     const lists = await gameNightsRepository.listAttendees(ids);
     const tables = await gameNightsRepository.listGames(ids);
+    // Each copy's game, so two members bringing the same game count it once.
+    const gameOf = new Map(
+      (
+        await userGamesRepository.listByIds([
+          ...new Set(tables.map((one) => one.userGameId)),
+        ])
+      ).map((copy) => [copy.id, copy.gameId]),
+    );
     const hosts = new Map(
       (
         await userProfilesRepository.getManyByUserIds([
@@ -53,7 +63,11 @@ export const listPastNightsUseCase = (
       night,
       host: hosts.get(night.createdBy) ?? formerMember(night.createdBy),
       came: seatsTaken(lists.filter((one) => one.gameNightId === night.id)),
-      games: tables.filter((one) => one.gameNightId === night.id).length,
+      games: new Set(
+        tables
+          .filter((one) => one.gameNightId === night.id)
+          .map((one) => gameOf.get(one.userGameId) ?? one.userGameId),
+      ).size,
     }));
   };
 };

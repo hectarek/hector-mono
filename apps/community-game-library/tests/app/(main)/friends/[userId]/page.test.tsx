@@ -127,4 +127,22 @@ describe("a friend's page (E3) and Unfriend (E4)", () => {
     await expect(friendPage(noor.id)).rejects.toThrow(NotFoundPage);
     await expect(friendPage("sam")).rejects.toThrow(NotFoundPage);
   });
+
+  // A second copy is the same game: the header, the count line and Filter's Show count games, as
+  // My library's do.
+  it("counts Alice's games, not her copies, once she has a second Harbor Lights", async () => {
+    await getInjection("IAddUserGameController")(
+      { gameId: CAST.games.harborLights.id },
+      CAST.people.alice.id,
+    );
+    const view = render(await friendPage(CAST.people.alice.id));
+    const page = within(view.container);
+    // The header, under Friends since.
+    expect(page.getByText("2 games")).toBeTruthy();
+    expect(page.getByText("2 games · by title")).toBeTruthy();
+
+    fireEvent.click(page.getByRole("button", { name: "Filter" }));
+    const sheet = within(await view.findByRole("dialog"));
+    expect(sheet.getByRole("button", { name: "Show 2 games" })).toBeTruthy();
+  });
 });
