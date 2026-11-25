@@ -79,16 +79,16 @@ export default async function FriendsPage() {
           <EmptyContent>{shareLink}</EmptyContent>
         </Empty>
       ) : (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>Bring in the rest of your group</EmptyTitle>
-            <EmptyDescription>
-              Share your friend link in the group chat. Whoever opens it becomes
-              your friend at once.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>{shareLink}</EmptyContent>
-        </Empty>
+        // A suggestion, so the punched-out box on bone, as E1 draws it (the empty state above has
+        // no fill).
+        <section className="flex flex-col gap-2 rounded-lg border-2 border-dashed border-foreground bg-secondary p-3.5">
+          <p className="text-15 font-bold">Bring in the rest of your group</p>
+          <p className="text-13 leading-snug text-muted-foreground">
+            Share your friend link in the group chat. Whoever opens it becomes
+            your friend at once.
+          </p>
+          {shareLink}
+        </section>
       )}
 
       {requestsYouSent.length > 0 && (

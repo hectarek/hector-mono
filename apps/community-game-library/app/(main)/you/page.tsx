@@ -9,14 +9,19 @@ import { List, ListRow } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
 import { Stamp } from "@/app/_components/stamp";
+import { TabCount } from "@/app/_components/tab-count";
 import { gate } from "@/app/_lib/account";
 import { SIGN_OUT_HREF } from "@/app/_lib/auth-paths";
 import { getInjection } from "@/di/container";
 import { UnauthorizedError } from "@/src/entities/errors/common";
 
+const games = (count: number) =>
+  count === 0 ? "No games yet" : count === 1 ? "1 game" : `${count} games`;
+
 // E5: the member's own page, reached from the piece at the top. Its profile first, then the rows
-// the app's other pages add as they're built: My library (U7), Notices I get (U11), Admin (U9),
-// Delete my account (U22), About the catalog (U24), and the privacy policy and terms of use.
+// the app's other pages add as they're built: My library (U7) with how many games are in it, Past
+// loans (U16), Notices I get (U11), Admin (U9), Delete my account (U22), About the catalog (U24),
+// and the privacy policy and terms of use.
 export default async function YouPage() {
   await connection();
   const { user } = await gate("app");
@@ -24,6 +29,8 @@ export default async function YouPage() {
     { userId: user.id },
     user.id,
   );
+  // My library as its page reads it, for the row's count: the copies before any filter.
+  const library = await getInjection("IListMyLibraryController")({}, user.id);
   // The admin's row (DE-25), with the suggestions waiting: anyone else is refused, and has none.
   const waiting = await getInjection("IListSuggestionsController")(
     user.id,
@@ -89,6 +96,17 @@ export default async function YouPage() {
         )}
       </section>
 
+      <Group label="Games and loans" overList>
+        <List>
+          <ListRow href="/my-library" aside={games(library.total)}>
+            <span className="text-15 font-bold">My library</span>
+          </ListRow>
+          <ListRow href="/loans/past">
+            <span className="text-15 font-bold">Past loans</span>
+          </ListRow>
+        </List>
+      </Group>
+
       <Group label="The app" overList>
         <List>
           <ListRow href="/you/notices">
@@ -114,13 +132,10 @@ export default async function YouPage() {
               stamp={<Stamp tone="navy">Admin</Stamp>}
               aside={
                 waiting.length > 0 && (
-                  <span
-                    role="img"
-                    aria-label={`${waiting.length} waiting`}
-                    className="text-13 font-bold text-destructive"
-                  >
-                    {waiting.length}
-                  </span>
+                  <>
+                    <TabCount count={waiting.length} on="row" />
+                    <span className="sr-only">{waiting.length} waiting</span>
+                  </>
                 )
               }
             >

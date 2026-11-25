@@ -105,9 +105,9 @@ describe("a friend's page (E3) and Unfriend (E4)", () => {
       dialog.getAllByRole("listitem").map((line) => line.textContent),
     ).toEqual([
       "You stop seeing each other’s libraries and game nights.",
+      "Sam is taken off Heavy games at mine, and you off Sam’s nights.",
       "Moss & Mortar stays on your Loans until it’s back with Sam.",
       "Your request for Quarry Lane is withdrawn, and you leave each other’s lines.",
-      "Sam comes off Heavy games at mine.",
       "Sam isn’t told. You can become friends again with a friend link.",
     ]);
     expect(dialog.getByRole("button", { name: "Keep Sam" })).toBeTruthy();
