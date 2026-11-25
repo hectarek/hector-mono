@@ -8,7 +8,9 @@ import {
   toActionError,
 } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
+import type { FriendLink } from "@/src/entities/models/friend-link.model";
 import type { FriendRequestAnswer } from "@/src/entities/models/friend-request.model";
+import { formatDate, PLAN_TIME_ZONE, todayIn } from "@/src/entities/week";
 
 // A friendship changes what a member sees everywhere: the Library, games' and copies' pages,
 // Friends and a friend's page (KTD16).
@@ -25,20 +27,56 @@ function revalidateRequests(): void {
 // The names in these messages come from the row tapped, as its screen shows them: they only say
 // what happened to the person who tapped it.
 
-// E2's Make a new link, after "Make a new link?".
-export async function makeFriendLink(): Promise<ActionState> {
+// Your friend link as E2's sheet shows it: its code, which the sheet puts after the address the
+// page was opened at, and the day it stops working, from the server's today (KTD9).
+export type FriendLinkState =
+  | { token: string; worksUntil: string; message?: string; error?: undefined }
+  | {
+      error: string;
+      token?: undefined;
+      worksUntil?: undefined;
+      message?: undefined;
+    };
+
+function shownLink({ token, expiresAt }: FriendLink) {
+  return {
+    token,
+    worksUntil: formatDate(
+      todayIn(PLAN_TIME_ZONE, expiresAt),
+      todayIn(PLAN_TIME_ZONE),
+    ),
+  };
+}
+
+// E2's sheet as it opens (R49): your friend link, or a new one when none works. The link is read
+// when the sheet opens rather than with the pages that offer it, so the Library, My library and
+// Friends read nothing more to show their button, and no page load or prefetch makes a link.
+export async function getFriendLink(): Promise<FriendLinkState> {
   try {
     const userId = await getCurrentUserId();
-    await getInjection("IMakeFriendLinkController")(userId);
+    return shownLink(await getInjection("IGetFriendLinkController")(userId));
   } catch (err) {
-    return toActionError(
-      err,
-      actionLogger("makeFriendLink"),
-      "Couldn’t make a new link. Try again.",
-    );
+    const fallback = "Couldn’t show your friend link. Try again.";
+    const state = toActionError(err, actionLogger("getFriendLink"), fallback);
+    return { error: state?.error ?? fallback };
   }
-  revalidatePath("/friends/link");
-  return { message: "New link made. The old one no longer works." };
+}
+
+// E2's Make a new link, after "Make a new link?": the sheet shows the new link it gives back. No
+// page shows the link, so there's nothing to revalidate.
+export async function makeFriendLink(): Promise<FriendLinkState> {
+  try {
+    const userId = await getCurrentUserId();
+    const link = await getInjection("IMakeFriendLinkController")(userId);
+    return {
+      ...shownLink(link),
+      message: "New link made. The old one no longer works.",
+    };
+  } catch (err) {
+    const fallback = "Couldn’t make a new link. Try again.";
+    const state = toActionError(err, actionLogger("makeFriendLink"), fallback);
+    return { error: state?.error ?? fallback };
+  }
 }
 
 // What opening a friend link gives back: the new friend, whose page comes next.

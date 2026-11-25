@@ -135,12 +135,11 @@ describe("My library", () => {
     expect(view.queryByRole("switch") === null).toBe(true);
     // A7's second box, until a friend joins.
     expect(view.getByText("No friends yet")).toBeTruthy();
-    expect(
-      view
-        .getByRole("button", { name: "Share my friend link" })
-        .closest("a")
-        ?.getAttribute("href"),
-    ).toBe("/friends/link");
     expect(view.queryByRole("button", { name: "Filter" }) === null).toBe(true);
+    // Its button opens your friend link over My library (E2).
+    fireEvent.click(view.getByRole("button", { name: "Share my friend link" }));
+    expect(
+      await view.findByRole("dialog", { name: "Your friend link" }),
+    ).toBeTruthy();
   });
 });

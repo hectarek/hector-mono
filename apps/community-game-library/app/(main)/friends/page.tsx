@@ -1,4 +1,3 @@
-import { Button } from "@repo/ui/components/button";
 import {
   Empty,
   EmptyContent,
@@ -6,44 +5,43 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@repo/ui/components/empty";
-import Link from "next/link";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { FriendRow } from "@/app/_components/friend-row";
 import { Group } from "@/app/_components/group";
-import { ShareIcon } from "@/app/_components/icons";
 import { List, ListRow, RowFacts, RowName } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
+import {
+  FriendLinkOnArrival,
+  ShareMyFriendLink,
+} from "@/app/_components/share-my-friend-link";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
 
 const games = (count: number) =>
   count === 0 ? "No games yet" : count === 1 ? "1 game" : `${count} games`;
 
-const shareLink = (
-  <Button
-    variant="secondary"
-    nativeButton={false}
-    render={<Link href="/friends/link" transitionTypes={["go-deeper"]} />}
-    className="self-start"
-  >
-    <ShareIcon data-icon="inline-start" />
-    Share my friend link
-  </Button>
-);
+const shareLink = <ShareMyFriendLink icon className="self-start" />;
 
 // Friends (E1; R49): requests to you, your friend link, requests you sent, your friends, and
-// people you may know. Nobody is searched for: a member brings people in with their link.
-export default async function FriendsPage() {
+// people you may know. Nobody is searched for: a member brings people in with their link, whose
+// sheet (E2) opens as the page arrives at ?show=friend-link, where /friends/link sends.
+export default async function FriendsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await connection();
   const { user } = await gate("app");
+  const { show } = await searchParams;
   const { requestsToYou, requestsYouSent, friends, peopleYouMayKnow } =
     await getInjection("IListFriendsController")(user.id);
   const [onlyAsker] = requestsToYou;
 
   return (
     <PageColumn width="read" header={<AppHeader title="Friends" />}>
+      {show === "friend-link" && <FriendLinkOnArrival />}
       {requestsToYou.length > 0 && (
         <Group
           label={`Wants to be your friend · ${requestsToYou.length}`}

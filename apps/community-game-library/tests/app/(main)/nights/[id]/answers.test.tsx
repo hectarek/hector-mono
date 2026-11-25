@@ -26,6 +26,7 @@ const { resetCastNights, signInAsYouWithTheCast } = await import(
   "@/tests/_support/members"
 );
 const { NotFoundPage, nextState } = await import("@/tests/_support/next");
+const { nightLinkMessage } = await import("@/src/entities/share-message");
 
 const { saturdayGameNight, heavyGamesAtMine, bensBirthdayGames } = CAST.nights;
 const { you, jo, ben, mei, sam } = CAST.people;
@@ -214,6 +215,76 @@ describe("Invites, answers, the waitlist and guests (U19: D2, D3, D4, D7, D10, D
       heavyGamesAtMine.id,
     );
     expect(night?.linkToken).not.toBe("7QK2-MARR");
+  });
+
+  // Every link offers Share and Copy as E2 does (Hector, 2026-11-25). The browser here has no
+  // share sheet, so Share copies the ready message with the link; Copy copies the link alone.
+  it("offers Share and Copy for the night's link, on the host's page (D7) and on Invite people (D10)", async () => {
+    const copied: string[] = [];
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          copied.push(text);
+        },
+      },
+    });
+    const url = "https://communitygamelibrary.com/n/7QK2-MARR";
+    const message = `${nightLinkMessage("Heavy games at mine")} ${url}`;
+    // A button's kind, by its variant's class: Button's variant carries no data attribute. The
+    // link's two are secondary, since each page has its own main action (rule 2).
+    const kinds = (buttons: HTMLElement[]) =>
+      buttons.map((button) => [
+        button.textContent,
+        button.classList.contains("bg-primary")
+          ? "filled"
+          : button.classList.contains("bg-secondary")
+            ? "secondary"
+            : "another kind",
+      ]);
+
+    const { view, page } = await renderNight(heavyGamesAtMine.id);
+    const nightsLink = within(
+      page.getByText("The night’s link").parentElement as HTMLElement,
+    );
+    expect(kinds(nightsLink.getAllByRole("button"))).toEqual([
+      ["Share", "secondary"],
+      ["Copy", "secondary"],
+      ["Make a new link", "another kind"],
+    ]);
+    expect(
+      kinds([page.getByRole("button", { name: "Invite people" })]),
+    ).toEqual([["Invite people", "filled"]]);
+    fireEvent.click(nightsLink.getByRole("button", { name: "Copy" }));
+    expect(await view.findByText("Link copied")).toBeTruthy();
+    expect(copied).toEqual([url]);
+    fireEvent.click(nightsLink.getByRole("button", { name: "Share" }));
+    await waitFor(() => expect(copied).toEqual([url, message]));
+    view.unmount();
+
+    const invite = render(
+      await InvitePage({
+        params: Promise.resolve({ id: heavyGamesAtMine.id }),
+      }),
+    );
+    const orShare = within(
+      within(invite.container)
+        .getByText("Or share the link")
+        .closest("section") as HTMLElement,
+    );
+    expect(kinds(orShare.getAllByRole("button"))).toEqual([
+      ["Share", "secondary"],
+      ["Copy", "secondary"],
+    ]);
+    expect(
+      kinds([
+        within(invite.container).getByRole("button", { name: "Send invites" }),
+      ]),
+    ).toEqual([["Send invites", "filled"]]);
+    fireEvent.click(orShare.getByRole("button", { name: "Copy" }));
+    await waitFor(() => expect(copied).toEqual([url, message, url]));
+    fireEvent.click(orShare.getByRole("button", { name: "Share" }));
+    await waitFor(() => expect(copied).toEqual([url, message, url, message]));
   });
 
   it("invites Alice from D10, who joins the waitlist after Dev, then goes back to the night (Send invitations)", async () => {
