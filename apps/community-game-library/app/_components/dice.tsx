@@ -35,10 +35,10 @@ const PIPS: Record<number, [number, number][]> = {
   ],
 };
 
-// A die face's sizes: 28px for a count (B2, D8's people playing); a pair's 20px inside a button
+// A die face's sizes: 30px for a count (B2's and G3's players); a pair's 20px inside a button
 // (D13's What should we play?), 26px beside a title (D8, D9) and 30px on the welcome page (A1).
 const DIE_SIZES = {
-  count: "size-7",
+  count: "size-7.5",
   button: "size-5",
   title: "size-6.5",
   welcome: "size-7.5",
