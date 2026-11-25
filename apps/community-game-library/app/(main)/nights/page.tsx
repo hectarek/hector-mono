@@ -83,7 +83,7 @@ export default async function NightsPage() {
         </Group>
       )}
       <List>
-        <ListRow href="/nights/past" aside={past.length}>
+        <ListRow href="/nights/past" count={past.length}>
           <RowName>Past game nights</RowName>
         </ListRow>
       </List>

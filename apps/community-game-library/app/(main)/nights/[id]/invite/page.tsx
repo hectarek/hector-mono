@@ -85,7 +85,7 @@ export default async function InvitePage({
       )}
       {address && (
         <Group label="Or share the link">
-          <p className="flex items-center gap-2">
+          <p className="flex min-h-11 items-center gap-2 rounded-lg border-2 border-foreground bg-secondary px-2.5">
             <LinkIcon className="shrink-0" />
             <span className="min-w-0 font-mono text-xs font-medium wrap-anywhere">
               {address}

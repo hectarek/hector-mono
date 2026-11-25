@@ -10,6 +10,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { AttendeeList } from "@/app/_components/attendee-list";
+import { DicePair } from "@/app/_components/dice";
 import { Group } from "@/app/_components/group";
 import { DownloadIcon, LockIcon, PlaceIcon } from "@/app/_components/icons";
 import {
@@ -53,7 +54,7 @@ function Audience({ page }: { page: NightPage }) {
     );
   }
   return (
-    <p className="text-xs text-muted-foreground">
+    <p data-ink="smudge" className="text-xs">
       {page.you === "host" ? "Your" : `${page.host.name}’s`} friends can see it
     </p>
   );
@@ -314,7 +315,9 @@ export default async function NightPage({
           >
             Invite people
           </Button>
-          <div className="flex flex-wrap gap-2.5">
+          {/* As D7 draws them: What should we play? with its dice and Add to my calendar take
+              the room, Split into tables and Edit keep their own width. */}
+          <div className="flex gap-2.5">
             <Button
               variant="secondary"
               size="sm"
@@ -327,12 +330,15 @@ export default async function NightPage({
                 />
               }
             >
-              What should we play?
+              <DicePair onBone size="button" />
+              <span className="text-left leading-tight whitespace-normal">
+                What should we play?
+              </span>
             </Button>
             <Button
               variant="secondary"
               size="sm"
-              className="flex-1"
+              className="shrink-0"
               nativeButton={false}
               render={
                 <Link
@@ -344,7 +350,7 @@ export default async function NightPage({
               Split into tables
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex gap-2.5">
             <Button
               variant="secondary"
               className="flex-1"
@@ -356,7 +362,7 @@ export default async function NightPage({
             </Button>
             <Button
               variant="secondary"
-              className="flex-1"
+              className="shrink-0"
               nativeButton={false}
               render={
                 <Link

@@ -22,7 +22,8 @@ function rowsOf(going: readonly Goer[]) {
 
 // Who's going to a night, as its host sees them (D7): each person's piece and name, "You" for the
 // member, "Host" under the host and "Bringing 1 guest" under someone who is, then a row for each
-// guest, a smaller pawn in their member's color named for them (screens.md rule 9).
+// guest, a smaller pawn in their member's color named for them (screens.md rule 9), centered in
+// the 20px a piece takes so every name starts in line.
 export function AttendeeList({
   going,
   hostId,
@@ -39,7 +40,9 @@ export function AttendeeList({
       {rowsOf(going).map(({ key, person, guest }) =>
         guest ? (
           <ListItem key={key}>
-            <Piece shape="pawn" color={person.pieceColor} size={14} />
+            <span className="flex w-5 shrink-0 justify-center">
+              <Piece shape="pawn" color={person.pieceColor} size={14} />
+            </span>
             <span className="text-15 font-bold">
               {person.userId === viewerId ? "Your" : `${person.name}’s`} guest
             </span>

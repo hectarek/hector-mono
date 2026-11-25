@@ -16,6 +16,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Switch } from "@repo/ui/components/switch";
 import { Textarea } from "@repo/ui/components/textarea";
+import { cn } from "@repo/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useId, useState, useTransition } from "react";
 import { CoverThumb } from "@/app/_components/cover-thumb";
@@ -217,7 +218,7 @@ export function NightForm({
         send();
       }}
     >
-      <Group label="When and where">
+      <Group label="When and where" roomy>
         <TextField id={`${ids}-name`} label="Name" error={fields?.name}>
           <Input
             id={`${ids}-name`}
@@ -312,13 +313,14 @@ export function NightForm({
         >
           <Textarea
             id={`${ids}-note`}
+            rows={3}
             value={details.note}
             onChange={(event) => change({ note: event.target.value })}
           />
         </TextField>
       </Group>
 
-      <Group label="Seats">
+      <Group label="Seats" roomy>
         <div className="flex flex-col gap-1.5">
           <ButtonGroup aria-label="Seats">
             <Button
@@ -381,15 +383,14 @@ export function NightForm({
               ],
             ] as const
           ).map(([value, words, help]) => (
-            <div key={value} className="flex items-start gap-2.5 py-1">
-              <RadioGroupItem
-                id={`${ids}-${value}`}
-                value={value}
-                className="mt-0.5"
-              />
+            <div
+              key={value}
+              className="flex items-center gap-2.5 not-first:mt-2"
+            >
+              <RadioGroupItem id={`${ids}-${value}`} value={value} />
               <label
                 htmlFor={`${ids}-${value}`}
-                className="flex flex-1 flex-col gap-0.5"
+                className="flex min-h-11 flex-1 flex-col justify-center gap-0.5"
               >
                 <span className="text-15">{words}</span>
                 <span className="text-xs text-muted-foreground">{help}</span>
@@ -430,7 +431,10 @@ export function NightForm({
           {onTable.length > 0 && (
             <ul className="flex flex-col *:border-dashed *:border-foreground *:not-first:border-t-2">
               {onTable.map(({ userGameId, game }) => (
-                <li key={userGameId} className="flex items-center gap-3 py-2">
+                <li
+                  key={userGameId}
+                  className="flex items-center gap-3 py-2.5 first:pt-0.5 last:pb-1"
+                >
                   <CoverThumb
                     color={coverColorOf(game)}
                     imageUrl={game.imageUrl}
@@ -445,6 +449,7 @@ export function NightForm({
                     type="button"
                     variant="ghost"
                     size="icon"
+                    className="-mr-1.5"
                     aria-label={`Remove ${game.title}`}
                     onClick={() =>
                       setPicked((now) => now.filter((id) => id !== userGameId))
@@ -456,15 +461,23 @@ export function NightForm({
               ))}
             </ul>
           )}
-          <Button
-            type="button"
-            variant="secondary"
-            className="self-start"
-            onClick={() => setPicking(true)}
+          {/* A perforation parts it from the games picked (D5). */}
+          <div
+            className={cn(
+              "flex",
+              onTable.length > 0 &&
+                "border-t-2 border-dashed border-foreground pt-3",
+            )}
           >
-            <PlusIcon data-icon="inline-start" />
-            Pick from my library
-          </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setPicking(true)}
+            >
+              <PlusIcon data-icon="inline-start" />
+              Pick from my library
+            </Button>
+          </div>
           <PickGamesSheet
             open={picking}
             onOpenChange={setPicking}

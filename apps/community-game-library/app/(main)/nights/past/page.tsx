@@ -1,8 +1,4 @@
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-} from "@repo/ui/components/empty";
+import { Empty, EmptyHeader, EmptyTitle } from "@repo/ui/components/empty";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import {
@@ -87,7 +83,7 @@ export default async function PastNightsPage() {
       ) : (
         <Empty>
           <EmptyHeader>
-            <EmptyDescription>No past game nights.</EmptyDescription>
+            <EmptyTitle>No past game nights.</EmptyTitle>
           </EmptyHeader>
         </Empty>
       )}

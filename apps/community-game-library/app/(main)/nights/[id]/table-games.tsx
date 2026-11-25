@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
+import { cn } from "@repo/ui/lib/utils";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { DicePair } from "@/app/_components/dice";
@@ -16,7 +17,8 @@ import { type NightGameChoices, PickGamesSheet } from "../pick-games-sheet";
 type Night = Awaited<ReturnType<DI_RETURN_TYPES["IGetNightController"]>>;
 
 // I'd play, pressed or not (R38): it reads "You'd play" once pressed, and goes back with what
-// went wrong when the vote doesn't save.
+// went wrong when the vote doesn't save. At least 100px wide, so the two words line up down the
+// table (D7).
 function IdPlay({
   gameNightId,
   userGameId,
@@ -46,6 +48,7 @@ function IdPlay({
       type="button"
       size="sm"
       variant={on ? "default" : "secondary"}
+      className="min-w-25"
       aria-pressed={on}
       onClick={flip}
     >
@@ -128,7 +131,10 @@ export function TableGames({
       ) : (
         <ul className="flex flex-col *:border-dashed *:border-foreground *:not-first:border-t-2">
           {games.map(({ userGameId, game, owner, voters }) => (
-            <li key={userGameId} className="flex items-center gap-2.5 py-2.5">
+            <li
+              key={userGameId}
+              className="flex items-center gap-2.5 py-2.5 first:pt-0.5 last:pb-1"
+            >
               <span className="flex min-w-0 flex-1 flex-col gap-0.75">
                 <span className="text-15 font-bold">{game.title}</span>
                 <span className="font-mono text-2xs font-medium text-muted-foreground">
@@ -145,7 +151,7 @@ export function TableGames({
                     : `${owner.name} brings it`}
                 </span>
                 {voters.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">
+                  <span data-ink="smudge" className="text-xs">
                     No one yet
                   </span>
                 ) : (
@@ -178,9 +184,16 @@ export function TableGames({
         </ul>
       )}
       {/* One row, as D7 and D13 draw it: I'll bring a game at its own width, and What should we
-          play? taking the rest, its words on two lines when they need them. */}
+          play? taking the rest, its words on two lines when they need them. A perforation parts
+          it from the games above (D2, D7). */}
       {(canBring || whatToPlay) && (
-        <div className="flex gap-2.5">
+        <div
+          className={cn(
+            "flex gap-2.5",
+            games.length > 0 &&
+              "border-t-2 border-dashed border-foreground pt-3",
+          )}
+        >
           {canBring && choices && (
             <Button
               type="button"
