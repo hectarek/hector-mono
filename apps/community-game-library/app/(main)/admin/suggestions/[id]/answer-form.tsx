@@ -2,26 +2,25 @@
 
 import { Button } from "@repo/ui/components/button";
 import { FieldError } from "@repo/ui/components/field";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@repo/ui/components/native-select";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Textarea } from "@repo/ui/components/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
+import { CoverThumb } from "@/app/_components/cover-thumb";
 import { Group } from "@/app/_components/group";
+import { IconCombobox } from "@/app/_components/icon-combobox";
 import { useLeaveGuard } from "@/app/_lib/leave-guard";
 import { notify } from "@/app/_lib/notify";
 import { answerSuggestion } from "@/app/actions/admin";
+import type { CoverColor } from "@/src/entities/piece";
 
 type Answer = "added" | "already-here" | "declined";
 
 // G2's Your answer: Add it (Add it by hand opens G3 with what was sent), It's already here (the
-// game picked from the catalog's matches above), or Decline (with a reason). Send answer stays
-// off until the answer has what it needs. Each label sits beside its radio: a Base UI control
-// inside its own label flips twice on one click in happy-dom.
+// game picked by its cover from the catalog's matches above, the closest first), or Decline (with
+// a reason). Send answer stays off until the answer has what it needs. Each label sits beside its
+// radio: a Base UI control inside its own label flips twice on one click in happy-dom.
 export function AnswerForm({
   suggestionId,
   who,
@@ -30,8 +29,13 @@ export function AnswerForm({
   suggestionId: string;
   // Who sent it, for "Ben is told either way".
   who: string;
-  // The catalog's matches for It's already here: "Chess (1475)".
-  matches: { id: string; label: string }[];
+  // The catalog's matches for It's already here, "Chess (1475)", with their covers.
+  matches: {
+    id: string;
+    label: string;
+    color: CoverColor;
+    imageUrl: string | null;
+  }[];
 }) {
   const router = useRouter();
   const [answer, setAnswer] = useState<Answer>("added");
@@ -115,19 +119,26 @@ export function AnswerForm({
           {answer === "already-here" && (
             <div className="pb-2.5 pl-8.5">
               {matches.length > 0 ? (
-                <NativeSelect
+                <IconCombobox
+                  id="answer-game"
+                  label="The game"
+                  labelHidden
                   name="gameId"
-                  aria-label="The game"
+                  noun="game"
+                  options={matches.map((match) => ({
+                    value: match.id,
+                    label: match.label,
+                    icon: (
+                      <CoverThumb
+                        color={match.color}
+                        imageUrl={match.imageUrl}
+                        size={32}
+                      />
+                    ),
+                  }))}
                   value={gameId}
-                  onChange={(event) => setGameId(event.target.value)}
-                  className="w-full"
-                >
-                  {matches.map((match) => (
-                    <NativeSelectOption key={match.id} value={match.id}>
-                      {match.label}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  onChange={setGameId}
+                />
               ) : (
                 <p className="text-13 text-muted-foreground">
                   Search the catalog above to find it.

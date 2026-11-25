@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
 import Image from "next/image";
 import { useState } from "react";
 import type { CoverColor } from "@/src/entities/piece";
@@ -17,31 +18,51 @@ export function useCoverArt(imageUrl: string | null | undefined) {
   };
 }
 
-// The 22px punch token in a 52px bone square: a game in a list row, a sheet or a card. While
-// the art loads, a dashed ring with no color sits where the token goes; the art is cropped to a
-// square from its centre. The game's name is always beside it, so it's hidden from screen
-// readers. The token's ring and its colored disc are apart, so the disc can lift out of the ring
-// as a copy is added (U26's token punch).
+// The square and its token: 52px with a 22px token in a list row, a sheet or a card; 32px with a
+// 14px token, the copies counter's, in a 44px field and its list (a combobox's games).
+const SIZES = {
+  52: { square: "size-13", token: "size-5.5", art: "48px" },
+  32: { square: "size-8", token: "size-3.5", art: "28px" },
+} as const;
+
+// The punch token in a bone square. While the art loads, a dashed ring with no color sits where
+// the token goes; the art is cropped to a square from its centre. The game's name is always
+// beside it, so it's hidden from screen readers. The token's ring and its colored disc are apart,
+// so the disc can lift out of the ring as a copy is added (U26's token punch).
 export function CoverThumb({
   color,
   imageUrl,
+  size = 52,
 }: {
   color: CoverColor;
   imageUrl?: string | null;
+  size?: keyof typeof SIZES;
 }) {
   const { art, onLoad, onError } = useCoverArt(imageUrl);
+  const { square, token, art: artSize } = SIZES[size];
   return (
     <span
       aria-hidden="true"
-      className="relative flex size-13 shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-foreground bg-secondary"
+      className={cn(
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-foreground bg-secondary",
+        square,
+      )}
     >
       {art === "loading" && (
-        <span className="size-5.5 rounded-full outline-2 outline-offset-2 outline-foreground outline-dashed" />
+        <span
+          className={cn(
+            "rounded-full outline-2 outline-offset-2 outline-foreground outline-dashed",
+            token,
+          )}
+        />
       )}
       {(art === "none" || art === "failed") && (
         <span
           data-token
-          className="size-5.5 rounded-full outline-2 outline-offset-2 outline-foreground outline-dashed"
+          className={cn(
+            "rounded-full outline-2 outline-offset-2 outline-foreground outline-dashed",
+            token,
+          )}
         >
           <span data-color={color} className="block size-full rounded-full" />
         </span>
@@ -52,7 +73,7 @@ export function CoverThumb({
           alt=""
           fill
           unoptimized
-          sizes="48px"
+          sizes={artSize}
           onLoad={onLoad}
           onError={onError}
           className={

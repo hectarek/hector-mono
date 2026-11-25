@@ -172,7 +172,7 @@ describeEachBackend("recording a loan, and past loans (U16)", () => {
     it("offers your lendable copies at home, with who asked, and your friends by name", async () => {
       const { copies, friends } = await app.getRecordLoanChoices(you.id, TODAY);
       expect(
-        copies.map((copy) => [copy.title, copy.askedBy?.name ?? null]),
+        copies.map((copy) => [copy.game.title, copy.askedBy?.name ?? null]),
       ).toEqual([
         ["Night Market", "Priya"],
         ["Salt & Signal", null],

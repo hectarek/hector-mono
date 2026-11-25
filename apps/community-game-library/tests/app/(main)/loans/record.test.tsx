@@ -17,6 +17,18 @@ import {
 } from "@/tests/_support/members";
 import { nextState } from "@/tests/_support/next";
 
+// A dropdown's list opens over the page, outside the form, so it's found in the whole document.
+const listOf = (view: ReturnType<typeof render>, field: HTMLElement) => {
+  fireEvent.click(field);
+  return view.findByRole("listbox");
+};
+const listClosed = (view: ReturnType<typeof render>) =>
+  waitFor(() => expect(view.queryByRole("listbox") === null).toBe(true));
+const choices = (list: HTMLElement) =>
+  within(list)
+    .getAllByRole("option")
+    .map((option) => option.textContent);
+
 describe("Record a loan (U16: C9)", () => {
   beforeEach(() => {
     // The kit's today, Tue Nov 10, 2026, in the morning.
@@ -42,19 +54,42 @@ describe("Record a loan (U16: C9)", () => {
     expect(
       page.getByText("For a loan you made face to face. No request needed."),
     ).toBeTruthy();
-    const game = page.getByRole("combobox", { name: "Game" });
-    expect(
-      [...game.querySelectorAll("option")].map((option) => option.textContent),
-    ).toEqual(["Night Market · Priya asked for it", "Salt & Signal"]);
-    fireEvent.change(game, {
-      target: {
-        value: (game.querySelectorAll("option")[1] as HTMLOptionElement).value,
-      },
-    });
     // Nobody is taking it yet, so it can't be recorded.
+    const taker = page.getByRole("combobox", { name: "Who’s taking it" });
+    expect(taker.textContent).toBe("Pick a friend");
     const record = page.getByRole("button", { name: "Record the loan" });
     expect((record as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.click(page.getByRole("button", { name: "Alice" }));
+    // It starts on Night Market, which Priya asked for, so she comes first.
+    expect(choices(await listOf(view, taker))).toEqual([
+      "Priya · asked for it",
+      "Alice",
+      "Ben",
+      "Jo",
+      "Sam",
+    ]);
+    fireEvent.click(taker);
+    await listClosed(view);
+
+    const game = page.getByRole("combobox", { name: "Game" });
+    expect(game.textContent).toBe("Night Market");
+    const games = await listOf(view, game);
+    expect(choices(games)).toEqual([
+      "Night Market · Priya asked for it",
+      "Salt & Signal",
+    ]);
+    fireEvent.click(
+      within(games).getByRole("option", { name: "Salt & Signal" }),
+    );
+    await listClosed(view);
+    expect(game.textContent).toBe("Salt & Signal");
+
+    // Nobody asked for Salt & Signal, so the friends are in name order.
+    const friends = await listOf(view, taker);
+    expect(choices(friends)).toEqual(["Alice", "Ben", "Jo", "Priya", "Sam"]);
+    fireEvent.click(within(friends).getByRole("option", { name: "Alice" }));
+    await listClosed(view);
+    expect(taker.textContent).toBe("Alice");
+    expect((record as HTMLButtonElement).disabled).toBe(false);
     expect(page.getByRole("button", { name: "Picked up on" }).textContent).toBe(
       "Today, Tue, Nov 10",
     );
