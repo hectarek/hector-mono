@@ -1,4 +1,14 @@
-import { EMAIL_TAKEN_LINE, WRONG_PASSWORD_LINE } from "@/app/_lib/auth-notice";
+// Plain words with no React in this module, since the sign-in page, a Server Component, reads
+// them through view-parts.tsx: auth-notice.ts holds the kit's toast and its client hook.
+
+// The line for an email that already has an account. Neon answers one with the code
+// USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL, and toAuthMessage also words it by its message.
+export const EMAIL_TAKEN_LINE = "That email already has an account.";
+
+// The line for a sign-in whose email and password don't match (A8). Neon answers with the code
+// INVALID_EMAIL_OR_PASSWORD: localization words it by the code, and toAuthMessage by the
+// message, for a toast that carries no code.
+export const WRONG_PASSWORD_LINE = "That password doesn’t match this email.";
 
 // Neon's wording, in the app's words (A2, A8). The kit's error codes pick their lines from here:
 // an email that has an account answers with one of the first two, a wrong password with the

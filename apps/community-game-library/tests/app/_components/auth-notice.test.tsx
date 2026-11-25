@@ -1,13 +1,12 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { act, render } from "@testing-library/react";
 import { AuthNotice } from "@/app/_components/auth-notice";
-import { LOCALIZATION } from "@/app/_lib/auth-localization";
 import {
   EMAIL_TAKEN_LINE,
-  showAuthMessage,
-  toAuthMessage,
+  LOCALIZATION,
   WRONG_PASSWORD_LINE,
-} from "@/app/_lib/auth-notice";
+} from "@/app/_lib/auth-localization";
+import { showAuthMessage, toAuthMessage } from "@/app/_lib/auth-notice";
 
 afterEach(() => showAuthMessage(null));
 
