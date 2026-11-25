@@ -5,6 +5,7 @@ import type { ITransactionManagerService } from "@/src/application/services/tran
 import type { IRequireAdmin } from "@/src/application/use-cases/admin/require-admin";
 import {
   checkFamily,
+  creditOnlyItsImage,
   storeGameImage,
 } from "@/src/application/use-cases/suggestions/game-record";
 import { NotFoundError } from "@/src/entities/errors/common";
@@ -35,10 +36,14 @@ export const updateGameUseCase = (
     const image = photo ? await storeGameImage(fileStorage, photo) : null;
     try {
       return await transactionManagerService.startTransaction(async (tx) => {
-        if (!(await gamesRepository.getById(gameId, tx))) {
+        const current = await gamesRepository.getById(gameId, tx);
+        if (!current) {
           throw new NotFoundError();
         }
-        const withImage = image ? { ...record, imageUrl: image.url } : record;
+        const withImage = creditOnlyItsImage(
+          current,
+          image ? { ...record, imageUrl: image.url } : record,
+        );
         await checkFamily(gamesRepository, withImage, tx);
         const game = await gamesRepository.update(gameId, withImage, tx);
         logger.debug("Game saved", { gameId });

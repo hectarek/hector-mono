@@ -108,6 +108,8 @@ export default async function GamePage({
         title={game.title}
         color={coverColorOf(game)}
         imageUrl={game.imageUrl}
+        imageCredit={game.imageCredit}
+        imageSourceUrl={game.imageSourceUrl}
         stamp={
           card && (
             <Stamp tone={card.stamp.tone} size="card" tilt={6}>

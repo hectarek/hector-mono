@@ -26,6 +26,11 @@ export const gameSchema = z.object({
   categories: z.array(z.string()).nullable(),
   description: z.string().nullable(),
   imageUrl: z.string().nullable(),
+  // The image's credit as its source asks for it, who made it and its licence ("Ines Varga,
+  // CC BY-SA 4.0"), and the page that gives it. They belong to the image: a new one leaves
+  // them behind (G4).
+  imageCredit: z.string().nullable(),
+  imageSourceUrl: z.string().nullable(),
   videoUrl: z.string().nullable(),
   popularity: z.number().int().nullable(),
   createdAt: z.date(),

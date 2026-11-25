@@ -99,6 +99,8 @@ export const gameRecordSchema = z.object({
   categories: optionalList,
   description: optionalText(4000),
   imageUrl: optionalLink,
+  imageCredit: optionalText(300),
+  imageSourceUrl: optionalLink,
   videoUrl: optionalLink,
 });
 
@@ -121,6 +123,8 @@ export const gameRecordOf = ({
   categories,
   description,
   imageUrl,
+  imageCredit,
+  imageSourceUrl,
   videoUrl,
 }: z.infer<typeof gameRecordSchema>): GameRecord => ({
   type,
@@ -139,5 +143,7 @@ export const gameRecordOf = ({
   categories,
   description,
   imageUrl,
+  imageCredit,
+  imageSourceUrl,
   videoUrl,
 });

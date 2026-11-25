@@ -29,6 +29,8 @@ function catalogGame(n: number, title: string, more: Partial<Game> = {}): Game {
     categories: null,
     description: null,
     imageUrl: null,
+    imageCredit: null,
+    imageSourceUrl: null,
     videoUrl: null,
     popularity: null,
     createdAt: added,

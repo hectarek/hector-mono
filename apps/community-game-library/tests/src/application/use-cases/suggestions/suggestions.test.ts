@@ -28,6 +28,8 @@ const fogLantern: GameRecord = {
   categories: null,
   description: null,
   imageUrl: null,
+  imageCredit: null,
+  imageSourceUrl: null,
   videoUrl: null,
 };
 const photo = {
@@ -203,6 +205,42 @@ describeEachBackend("suggestions", () => {
       ),
     ).toEqual(["Fog Lantern: Deluxe"]);
     expect((await app.getGameToEdit(game.id, you.id)).baseGame).toBeNull();
+  });
+
+  it("drops an image's credit with the image, unless the admin changes the credit too", async () => {
+    const credited = {
+      ...fogLantern,
+      imageUrl: "https://images.example/fog-lantern-500px.jpg",
+      imageCredit: "Ines Varga, CC BY-SA 4.0",
+      imageSourceUrl: "https://images.example/File:Fog_Lantern.jpg",
+    };
+    const game = await app.addGame(credited, null, null, you.id);
+    const credit = (saved: GameRecord) => [
+      saved.imageUrl,
+      saved.imageCredit,
+      saved.imageSourceUrl,
+    ];
+
+    // Saved with the same image, the credit stays.
+    expect(
+      credit(await app.updateGame(game.id, credited, null, you.id)),
+    ).toEqual(credit(credited));
+    // A new image typed with a credit for it keeps that credit.
+    const retaken = {
+      ...credited,
+      imageUrl: "https://images.example/fog-lantern-box.jpg",
+      imageCredit: "Tom Reed, CC BY 4.0",
+    };
+    expect(
+      credit(await app.updateGame(game.id, retaken, null, you.id)),
+    ).toEqual(credit(retaken));
+    // An uploaded photo leaves the old credit behind.
+    const uploaded = await app.updateGame(game.id, retaken, photo, you.id);
+    expect(uploaded.imageUrl).toContain("catalog-images");
+    expect([uploaded.imageCredit, uploaded.imageSourceUrl]).toEqual([
+      null,
+      null,
+    ]);
   });
 
   it("needs an expansion's base game to be a base game", async () => {
