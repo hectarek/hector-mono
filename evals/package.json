@@ -1,0 +1,14 @@
+{
+  "name": "@repo/evals",
+  "private": true,
+  "scripts": {
+    "eval": "PROMPTFOO_DISABLE_TELEMETRY=1 PROMPTFOO_DISABLE_UPDATE=1 PROMPTFOO_DISABLE_SHARING=1 PROMPTFOO_PASS_RATE_THRESHOLD=0 promptfoo eval",
+    "view": "PROMPTFOO_DISABLE_TELEMETRY=1 PROMPTFOO_DISABLE_UPDATE=1 PROMPTFOO_DISABLE_SHARING=1 promptfoo view",
+    "lint": "bunx biome check --write --error-on-warnings",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@repo/biome-config": "workspace:*",
+    "promptfoo": "0.126.0"
+  }
+}
