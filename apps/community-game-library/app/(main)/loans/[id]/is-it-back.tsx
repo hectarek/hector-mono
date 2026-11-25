@@ -2,14 +2,11 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Field, FieldDescription, FieldLabel } from "@repo/ui/components/field";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@repo/ui/components/native-select";
 import { Textarea } from "@repo/ui/components/textarea";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CoverThumb } from "@/app/_components/cover-thumb";
+import { DayField } from "@/app/_components/day-field";
 import { Piece } from "@/app/_components/piece";
 import { Sheet } from "@/app/_components/sheet";
 import { callResultAction } from "@/app/_lib/call-action";
@@ -17,19 +14,11 @@ import { notify } from "@/app/_lib/notify";
 import { confirmReturn } from "@/app/actions/loans";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import type { CoverColor } from "@/src/entities/piece";
-import { addDays, formatDate } from "@/src/entities/week";
+import { formatDate } from "@/src/entities/week";
 
-// The days it can have come back on, today first, back to the pick-up: two months at most.
-function daysBack(today: string, pickedUpOn: string): string[] {
-  const days: string[] = [];
-  for (let day = today; day >= pickedUpOn && days.length < 60; ) {
-    days.push(day);
-    day = addDays(day, -1);
-  }
-  return days;
-}
-
-// Is it back? (C8), the owner's sheet, with its two answers and no Cancel, as C8 draws it: the day it came back (the day the borrower gave, which the
+// Is it back? (C8), the owner's sheet, with its two answers and no Cancel, as C8 draws it: the day
+// it came back, on the date sheet as every date is (screens.md's rule 17), from the pick-up to
+// today as C5's Gave it back on and confirm-return take it (the day the borrower gave, which the
 // owner can change), anything new missing or damaged, added to the copy's note, then Yes, it's
 // back. While the borrower says they gave it back, I don't have it yet puts the loan back out and
 // tells them. It also marks a loan that's out as back without waiting (C7's It's back with me).
@@ -129,28 +118,20 @@ export function IsItBack({
             )}
           </div>
         </div>
-        <Field>
-          <FieldLabel htmlFor={`came-back-${loanId}`}>Came back on</FieldLabel>
-          <NativeSelect
-            id={`came-back-${loanId}`}
-            value={day}
-            onChange={(event) => setDay(event.target.value)}
-            className="w-full"
-          >
-            {daysBack(today, pickedUpOn).map((one) => (
-              <NativeSelectOption key={one} value={one}>
-                {one === today
-                  ? `Today, ${formatDate(one, today)}`
-                  : formatDate(one, today)}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-          {gaveOn && (
-            <FieldDescription>
-              The day {borrower.name} gave. Change it if that’s wrong.
-            </FieldDescription>
-          )}
-        </Field>
+        <DayField
+          id={`came-back-${loanId}`}
+          label="Came back on"
+          hint={
+            gaveOn
+              ? `The day ${borrower.name} gave. Change it if that’s wrong.`
+              : undefined
+          }
+          today={today}
+          from={pickedUpOn}
+          until={today}
+          value={day}
+          onChange={setDay}
+        />
         {conditionNote && (
           <p className="text-13 leading-snug text-muted-foreground">
             Already noted on this copy: {conditionNote}
