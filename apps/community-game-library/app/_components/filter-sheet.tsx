@@ -161,9 +161,10 @@ function AvailableNow({
   onChange: (on: boolean) => void;
 }) {
   const id = useId();
+  // B2's panel holds one 44px row, 12px in; a tap anywhere on its words flips the switch.
   return (
-    <div className="flex min-h-11 items-center justify-between gap-2.5 rounded-lg border-2 border-foreground bg-card px-3.5 py-1.5">
-      <label htmlFor={id} className="text-15">
+    <div className="flex items-center justify-between gap-2.5 rounded-lg border-2 border-foreground bg-card px-3.5 py-3">
+      <label htmlFor={id} className="flex min-h-11 flex-1 items-center text-15">
         Available now
       </label>
       <Switch id={id} checked={on} onCheckedChange={onChange} />
@@ -267,8 +268,9 @@ function Players({
         <ToggleGroupItem value="plays-with">Plays with</ToggleGroupItem>
         <ToggleGroupItem value="plays-best-with">Best at</ToggleGroupItem>
       </ToggleGroup>
-      {/* Seven 44px dice fit the sheet's width with no gap between them, their faces 28px. */}
-      <div className="-mx-1.5 flex flex-wrap">
+      {/* Seven 44px dice fit the sheet's width, their faces 28px, spread across it as B2 draws
+          them. */}
+      <div className="-mx-1.5 flex flex-wrap justify-between">
         {shown.map((count) => {
           const pressed = players?.fit === fit && players.count === count;
           return (

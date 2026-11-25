@@ -24,7 +24,7 @@ export default async function SuggestPage({
       header={<AppHeader back={{ href: back, label: "Search" }} />}
     >
       <h1 className="text-2xl leading-7 font-bold">Suggest a game</h1>
-      <p className="text-sm leading-5">
+      <p className="text-sm leading-5 text-muted-foreground">
         {typed && <>We couldn’t find “{typed}”. </>}
         Tell us what it is, and the admin will add it or tell you why not. If
         it’s added, it lands in your library.

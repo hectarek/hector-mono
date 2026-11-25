@@ -102,10 +102,15 @@ export function copyWords({
         state.yours ? "You keep it at home" : `${owner.name} keeps it at home`,
       );
       break;
-    case "requested":
+    case "requested": {
       fact(home);
-      about(first ?? null, (name) => `${name} asked for it`);
+      // B11 names who asked in mono, without a piece, as B13 names who has it.
+      const asker = first && people[first.borrowerUserId];
+      if (asker) {
+        fact(`${asker.name} asked for it`);
+      }
       break;
+    }
     case "promised":
       fact(home);
       about(state.promised, (name) =>

@@ -55,6 +55,12 @@ describe("a copy's page", () => {
     expect(within(where).getByText("Jo has it · due Mon, Nov 9")).toBeTruthy();
     expect(within(where).getByText("Overdue")).toBeTruthy();
     expect(within(where).getByText("Ben is 1st in line")).toBeTruthy();
+    // The panel ends in the way to Jo's loan (C7).
+    expect(
+      within(where)
+        .getByRole("link", { name: "Open the loan" })
+        .getAttribute("href"),
+    ).toBe(`/loans/${CAST.loans.joHasGullAndAnchor.id}`);
 
     const thisCopy = panel(view, "This copy");
     expect(
@@ -187,6 +193,16 @@ describe("a copy's page", () => {
         false,
       ),
     );
+  });
+
+  it("has no loan to open for a copy at home", async () => {
+    const view = await renderCopy(copies.yourPaperKites.id);
+    const where = panel(view, "Where it is");
+
+    expect(within(where).getByText("You keep it at home")).toBeTruthy();
+    expect(
+      within(where).queryByRole("link", { name: "Open the loan" }),
+    ).toBeNull();
   });
 
   it("is Not found for someone else's copy, or an id that isn't one", async () => {
