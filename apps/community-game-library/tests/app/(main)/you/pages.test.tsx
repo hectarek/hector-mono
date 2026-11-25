@@ -5,12 +5,15 @@ import EditProfilePage from "@/app/(main)/you/edit/page";
 import YouPage from "@/app/(main)/you/page";
 import { updateProfile } from "@/app/actions/profile";
 import { form } from "@/tests/_support/form";
-import { signInAsMember } from "@/tests/_support/members";
+import { addSignIn, signInAsMember } from "@/tests/_support/members";
 import { nextState, Redirected, signInAsNewUser } from "@/tests/_support/next";
 
 describe("E5, You", () => {
+  let userId: string;
+
   beforeEach(async () => {
-    await signInAsMember({ name: "Quinn Sample", phone: "555 0123" });
+    userId = await signInAsMember({ name: "Quinn Sample", phone: "555 0123" });
+    addSignIn(userId, "test@example.com", ["password"]);
   });
 
   it("shows the member's name, piece and phone, with Edit profile and Sign out", async () => {
@@ -28,7 +31,9 @@ describe("E5, You", () => {
     expect(
       view.getByRole("link", { name: "Sign out" }).getAttribute("href"),
     ).toBe("/auth/sign-out");
-    expect(view.getByText("Signed in as test@example.com")).toBeTruthy();
+    expect(
+      view.getByText("Signed in with a password · test@example.com"),
+    ).toBeTruthy();
     // The piece is the one they picked.
     expect(
       view.container.querySelector('path[data-color="teal"]'),
@@ -36,6 +41,30 @@ describe("E5, You", () => {
     expect(
       view.getByRole("link", { name: /home screen/ }).getAttribute("href"),
     ).toBe("/start/home-screen?from=you");
+  });
+
+  it("starts Account with how the account signs in, then its email (Hector, 2026-11-25)", async () => {
+    for (const [waysIn, line] of [
+      [["google"], "Signed in with Google · test@example.com"],
+      [
+        ["google", "password"],
+        "Signed in with Google or a password · test@example.com",
+      ],
+      // Only a provider the app doesn't offer: the email alone.
+      [[], "Signed in as test@example.com"],
+    ] as const) {
+      addSignIn(userId, "test@example.com", waysIn);
+      const view = render(await YouPage());
+      const account = within(
+        view.getByRole("heading", { name: "Account" })
+          .parentElement as HTMLElement,
+      );
+      // Its first line. The text match reads the no-break space before the email as a space.
+      expect(account.getByText(line)).toBe(
+        account.getAllByRole("listitem")[0] as HTMLElement,
+      );
+      view.unmount();
+    }
   });
 
   it("has the rows whose pages exist: Games and loans, The app's in Y1's order, Delete my account (U22), and Admin only for the admin", async () => {

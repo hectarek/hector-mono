@@ -124,7 +124,11 @@ export function createNightsModule() {
     ]);
   nightsModule
     .bind(DI_SYMBOLS.IListPastNightsUseCase)
-    .toHigherOrderFunction(listPastNightsUseCase, [gameNights, profiles]);
+    .toHigherOrderFunction(listPastNightsUseCase, [
+      gameNights,
+      profiles,
+      userGames,
+    ]);
   nightsModule
     .bind(DI_SYMBOLS.IListPastNightsController)
     .toHigherOrderFunction(listPastNightsController, [

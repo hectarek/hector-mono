@@ -109,6 +109,7 @@ describeEachBackend("suggestions", () => {
       () => app.updateGame(games.harborLights.id, fogLantern, null, sam.id),
       () => app.findGamesToEdit("harbor", sam.id),
       () => app.getGameToEdit(games.harborLights.id, sam.id),
+      () => app.listCategories(sam.id),
     ]) {
       await expect(attempt()).rejects.toBeInstanceOf(UnauthorizedError);
     }
@@ -264,5 +265,161 @@ describeEachBackend("suggestions", () => {
     expect((await app.getGameToEdit(night.id, you.id)).baseGame?.title).toBe(
       "Harbor Lights",
     );
+  });
+
+  it("marks a game in the catalog an expansion, and a base game again (G4)", async () => {
+    const fog = await app.addGame(fogLantern, null, null, you.id);
+    const ofHarborLights = {
+      ...fogLantern,
+      type: "expansion",
+      baseGameId: games.harborLights.id,
+    } as const;
+
+    expect(
+      await app.updateGame(fog.id, ofHarborLights, null, you.id),
+    ).toMatchObject({ type: "expansion", baseGameId: games.harborLights.id });
+    expect((await app.getGameToEdit(fog.id, you.id)).baseGame?.title).toBe(
+      "Harbor Lights",
+    );
+    expect(
+      (await app.repos.games.listExpansions(games.harborLights.id)).map(
+        ({ id }) => id,
+      ),
+    ).toContain(fog.id);
+    expect(
+      await app.updateGame(fog.id, fogLantern, null, you.id),
+    ).toMatchObject({ type: "base-game", baseGameId: null });
+  });
+
+  it("keeps a game from being its own base game, or an expansion while it has its own", async () => {
+    const fog = await app.addGame(fogLantern, null, null, you.id);
+    await expect(
+      app.updateGame(
+        fog.id,
+        { ...fogLantern, type: "expansion", baseGameId: fog.id },
+        null,
+        you.id,
+      ),
+    ).rejects.toThrow("A game can’t be an expansion of itself");
+    // Harbor Lights has Night Tide, which would be an expansion's expansion.
+    await expect(
+      app.updateGame(
+        games.harborLights.id,
+        {
+          ...fogLantern,
+          title: "Harbor Lights",
+          type: "expansion",
+          baseGameId: games.gullAndAnchor.id,
+        },
+        null,
+        you.id,
+      ),
+    ).rejects.toThrow(
+      "A game with expansions of its own can’t be an expansion",
+    );
+    expect(await app.repos.games.getById(games.harborLights.id)).toMatchObject({
+      type: "base-game",
+      baseGameId: null,
+    });
+  });
+
+  it("keeps a game members own a base game, and an expansion in someone’s box an expansion (G4)", async () => {
+    // Paper Kites is on your shelf.
+    await expect(
+      app.updateGame(
+        games.paperKites.id,
+        {
+          ...fogLantern,
+          title: "Paper Kites",
+          type: "expansion",
+          baseGameId: games.gullAndAnchor.id,
+        },
+        null,
+        you.id,
+      ),
+    ).rejects.toThrow("Members own this game, so it can’t become an expansion");
+    // Low Tide is in the box of your Gull & Anchor.
+    const lowTide = {
+      ...fogLantern,
+      title: "Gull & Anchor: Low Tide",
+      type: "expansion",
+      baseGameId: games.gullAndAnchor.id,
+    } as const;
+    await expect(
+      app.updateGame(
+        games.lowTide.id,
+        { ...lowTide, type: "base-game", baseGameId: null },
+        null,
+        you.id,
+      ),
+    ).rejects.toThrow(
+      "This expansion is in someone’s box, so it can’t become a base game",
+    );
+    // Nor does it become another game's expansion while it's in that box.
+    await expect(
+      app.updateGame(
+        games.lowTide.id,
+        { ...lowTide, baseGameId: games.harborLights.id },
+        null,
+        you.id,
+      ),
+    ).rejects.toThrow(
+      "This expansion is in someone’s box, so its base game can’t change",
+    );
+    expect(await app.repos.games.getById(games.paperKites.id)).toMatchObject({
+      type: "base-game",
+      baseGameId: null,
+    });
+    expect(await app.repos.games.getById(games.lowTide.id)).toMatchObject({
+      type: "expansion",
+      baseGameId: games.gullAndAnchor.id,
+    });
+    // Its other fields still change while it stays an expansion of the same game.
+    expect(
+      await app.updateGame(
+        games.lowTide.id,
+        { ...lowTide, year: 2021 },
+        null,
+        you.id,
+      ),
+    ).toMatchObject({
+      type: "expansion",
+      baseGameId: games.gullAndAnchor.id,
+      year: 2021,
+    });
+  });
+
+  it("adds a suggestion as an expansion: they're told, and it stays off their shelf", async () => {
+    const suggestion = await suggest(priya.id);
+    const game = await app.addGame(
+      { ...fogLantern, type: "expansion", baseGameId: games.harborLights.id },
+      null,
+      suggestion.id,
+      you.id,
+    );
+
+    expect(
+      (await app.repos.userGames.listOwn(priya.id)).some(
+        (copy) => copy.gameId === game.id,
+      ),
+    ).toBe(false);
+    expect((await app.noticesOf(priya.id)).map(({ type }) => type)).toEqual([
+      "suggestion-answered",
+    ]);
+  });
+
+  it("gives the admin the catalog's categories, the most used first (G3)", async () => {
+    await app.addGame(
+      { ...fogLantern, categories: ["Nautical", "Dice"] },
+      null,
+      null,
+      you.id,
+    );
+    expect(await app.listCategories(you.id)).toEqual([
+      "Family",
+      "Nautical",
+      "Dice",
+      "Economic",
+    ]);
   });
 });

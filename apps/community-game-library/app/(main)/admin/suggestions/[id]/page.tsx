@@ -10,6 +10,7 @@ import { gate } from "@/app/_lib/account";
 import { adminRead } from "@/app/(main)/admin/admin-reads";
 import { AnswerForm } from "@/app/(main)/admin/suggestions/[id]/answer-form";
 import { getInjection } from "@/di/container";
+import { coverColorOf } from "@/src/entities/piece";
 import { formatDay, formatTime } from "@/src/entities/week";
 
 // G2, a suggestion (R4): what was sent, whether the catalog has it (a search, the suggestion's
@@ -144,6 +145,8 @@ export default async function SuggestionPage({
             id: game.id,
             label:
               game.year === null ? game.title : `${game.title} (${game.year})`,
+            color: coverColorOf(game),
+            imageUrl: game.imageUrl,
           }))}
         />
       )}

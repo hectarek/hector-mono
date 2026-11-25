@@ -16,6 +16,8 @@ import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
 import { formatSince } from "@/src/entities/week";
 
 type Found = NameAndPiece & {
+  // The email it signs in with, under the name; none when its sign-in has none.
+  email: string | null;
   // When the account was made, as an ISO time.
   joined: string;
   games: number;
@@ -99,6 +101,11 @@ export function RemoveAccount({
                     />
                     <span className="flex min-w-0 flex-col gap-0.5">
                       <RowName>{one.name}</RowName>
+                      {one.email && (
+                        <span className="text-xs wrap-break-word text-muted-foreground">
+                          {one.email}
+                        </span>
+                      )}
                       <RowFacts>
                         Joined {formatSince(new Date(one.joined))}
                       </RowFacts>

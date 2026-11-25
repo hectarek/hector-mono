@@ -71,6 +71,11 @@ describeEachBackend("deleting an account and the admin's removal (U22)", () => {
     expect(ends.games).toBe(4);
   });
 
+  it("counts the games that leave (E8), not the copies: a second Night Market is still your 4 games", async () => {
+    await app.addUserGame(CAST.games.nightMarket.id, you.id);
+    expect((await app.listWhatEnds(you.id, NOW)).games).toBe(4);
+  });
+
   it("refuses while a game of theirs is out, and changes nothing (R41)", async () => {
     const refused = await app
       .deleteAccount(you.id, NOW)
@@ -203,22 +208,47 @@ describeEachBackend("deleting an account and the admin's removal (U22)", () => {
     expect((await app.getAccountState(alice.id)).state).toBe("ready");
   });
 
-  it("finds accounts by name for the admin, with their games and loans to settle (G8)", async () => {
+  it("finds accounts by name for the admin, with their emails, games and loans to settle (G8)", async () => {
     expect(
       (await app.listAccounts("A", you.id)).map((one) => [
         one.profile.name,
+        one.email,
         one.games,
         one.openLoans,
       ]),
     ).toEqual([
-      [alice.name, 2, 1],
-      [priya.name, 1, 1],
-      [sam.name, 3, 1],
+      [alice.name, "alice@example.com", 2, 1],
+      [priya.name, "priya@example.com", 1, 1],
+      [sam.name, "sam@example.com", 3, 1],
     ]);
     expect(await app.listAccounts("  ", you.id)).toEqual([]);
     const refused = await app
       .listAccounts("a", sam.id)
       .catch((err: unknown) => err);
     expect(refused).toBeInstanceOf(UnauthorizedError);
+  });
+
+  it("counts an account's games, not its copies: a second Harbor Lights is still Alice's 2 games (G8)", async () => {
+    await app.addUserGame(CAST.games.harborLights.id, alice.id);
+    const [found] = await app.listAccounts("Alice", you.id);
+    expect(found?.games).toBe(2);
+  });
+
+  it("finds an account whose sign-in has no email with none (G8)", async () => {
+    await app.createProfile(
+      {
+        name: "Quinn Sample",
+        pieceShape: "cone",
+        pieceColor: "teal",
+        phone: null,
+      },
+      "00000000-0000-4000-8000-0000000000b1",
+    );
+    expect(
+      (await app.listAccounts("quinn", you.id)).map((one) => [
+        one.profile.name,
+        one.email,
+      ]),
+    ).toEqual([["Quinn Sample", null]]);
   });
 });

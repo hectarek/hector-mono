@@ -242,6 +242,14 @@ describeEachBackend("copies", () => {
     expect(library.passingAlong).toBe(0);
   });
 
+  it("counts My library's games, not its copies, for You's My library row (E5)", async () => {
+    await app.addUserGame(games.nightMarket.id, you.id);
+    const library = await app.listMyLibrary(you.id, CAST_TODAY, EMPTY_VIEW);
+    // Two copies of Night Market, one game.
+    expect(library.items).toHaveLength(5);
+    expect(library.total).toBe(4);
+  });
+
   it("shows a copy's box and its history to its owner (B7)", async () => {
     const view = await app.getUserGame(
       copies.yourGullAndAnchor.id,

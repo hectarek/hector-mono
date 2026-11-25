@@ -1,18 +1,16 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@repo/ui/components/native-select";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ChangedNotice } from "@/app/_components/changed-notice";
+import { CoverThumb } from "@/app/_components/cover-thumb";
 import { DateSheet } from "@/app/_components/date-sheet";
 import { DayField } from "@/app/_components/day-field";
 import { Group } from "@/app/_components/group";
-import { PeoplePicker } from "@/app/_components/people-picker";
+import { IconCombobox } from "@/app/_components/icon-combobox";
+import { Piece } from "@/app/_components/piece";
 import { callResultAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
 import { recordLoan } from "@/app/actions/loans";
@@ -20,6 +18,7 @@ import type { ActionState } from "@/app/actions/shared";
 import type { DI_RETURN_TYPES } from "@/di/types";
 import { dueOn as dueAfter } from "@/src/entities/loan";
 import type { NameAndPiece } from "@/src/entities/models/user-profile.model";
+import { coverColorOf } from "@/src/entities/piece";
 import { addDays, formatDate } from "@/src/entities/week";
 
 type Choices = Awaited<
@@ -37,11 +36,12 @@ const PERIODS: { value: Period; words: string }[] = [
 // How far back a loan made face to face can start.
 const EARLIEST_DAYS = 60;
 
-// Record a loan's form (C9): the game, a copy of the member's that's home; who's taking it, a
-// friend; the day it was picked up, today or earlier; and a week, two weeks, a month or a picked
-// date, with the due date that gives. Record the loan goes on to Loans, where it's out. Each
-// radio's label sits beside it: a Base UI control inside its own label flips twice on one click in
-// happy-dom.
+// Record a loan's form (C9): the game, a copy of the member's that's home, by its cover; who's
+// taking it, a friend by their piece, nobody until one is picked, and first the friend who asked
+// for the game picked, "asked for it"; the day it was picked up, today or earlier; and a week,
+// two weeks, a month or a picked date, with the due date that gives. Record the loan goes on to
+// Loans, where it's out. Each radio's label sits beside it: a Base UI control inside its own label
+// flips twice on one click in happy-dom.
 export function RecordLoanForm({
   copies,
   friends,
@@ -53,15 +53,38 @@ export function RecordLoanForm({
 }) {
   const router = useRouter();
   const [userGameId, setUserGameId] = useState(copies[0]?.userGameId ?? "");
-  const [taker, setTaker] = useState<string[]>([]);
+  const [takerId, setTakerId] = useState("");
   const [day, setDay] = useState(today);
   const [period, setPeriod] = useState<Period>("14");
   const [picked, setPicked] = useState<string>();
   const [picking, setPicking] = useState(false);
   const [state, setState] = useState<ActionState>(null);
   const [pending, startTransition] = useTransition();
-  const friend = friends.find((one) => one.userId === taker[0]) ?? null;
+  const friend = friends.find((one) => one.userId === takerId) ?? null;
   const due = period === "date" ? picked : dueAfter(day, Number(period));
+  const askerId = copies.find((copy) => copy.userGameId === userGameId)?.askedBy
+    ?.userId;
+  const games = copies.map((copy) => ({
+    value: copy.userGameId,
+    label: copy.game.title,
+    icon: (
+      <CoverThumb
+        color={coverColorOf(copy.game)}
+        imageUrl={copy.game.imageUrl}
+        size={32}
+      />
+    ),
+    note: copy.askedBy ? `${copy.askedBy.name} asked for it` : undefined,
+  }));
+  const takers = [
+    ...friends.filter((one) => one.userId === askerId),
+    ...friends.filter((one) => one.userId !== askerId),
+  ].map((one) => ({
+    value: one.userId,
+    label: one.name,
+    icon: <Piece shape={one.pieceShape} color={one.pieceColor} size={16} />,
+    note: one.userId === askerId ? "asked for it" : undefined,
+  }));
 
   const send = () => {
     if (!friend || !due) {
@@ -98,35 +121,28 @@ export function RecordLoanForm({
         send();
       }}
     >
-      <Group label="Game" id="record-game">
-        <NativeSelect
-          aria-labelledby="record-game"
-          className="w-full"
+      <Group label="Game">
+        <IconCombobox
+          id="record-game"
+          label="Game"
+          labelHidden
+          name="userGameId"
+          noun="game"
+          options={games}
           value={userGameId}
-          onChange={(event) => setUserGameId(event.target.value)}
-        >
-          {copies.map((copy) => (
-            <NativeSelectOption key={copy.userGameId} value={copy.userGameId}>
-              {copy.askedBy
-                ? `${copy.title} · ${copy.askedBy.name} asked for it`
-                : copy.title}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+          onChange={setUserGameId}
+        />
       </Group>
       <Group label="Who’s taking it">
-        <PeoplePicker
+        <IconCombobox
+          id="record-taker"
           label="Who’s taking it"
           labelHidden
           name="borrowerUserId"
-          people={friends.map((one) => ({
-            id: one.userId,
-            name: one.name,
-            shape: one.pieceShape,
-            color: one.pieceColor,
-          }))}
-          value={taker}
-          onChange={setTaker}
+          noun="friend"
+          options={takers}
+          value={takerId}
+          onChange={setTakerId}
         />
       </Group>
       <Group label="Picked up on">

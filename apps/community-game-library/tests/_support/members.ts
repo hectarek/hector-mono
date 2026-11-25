@@ -3,10 +3,12 @@
 // user: signInAsNewUser).
 import { getInjection } from "@/di/container";
 import type { ProfileForm } from "@/src/entities/models/user-profile.model";
+import type { WayIn } from "@/src/entities/ways-in";
 import { MockGameNightsRepository } from "@/src/infrastructure/repositories/game-nights.repository.mock";
 import { MockGamesRepository } from "@/src/infrastructure/repositories/games.repository.mock";
 import { MockLoansRepository } from "@/src/infrastructure/repositories/loans.repository.mock";
 import { MockRemovedUsersRepository } from "@/src/infrastructure/repositories/removed-users.repository.mock";
+import { MockSignInsRepository } from "@/src/infrastructure/repositories/sign-ins.repository.mock";
 import { MockUserGamesRepository } from "@/src/infrastructure/repositories/user-games.repository.mock";
 import { MockFileStorageService } from "@/src/infrastructure/services/mock-file-storage.service";
 import { CAST, castRows, writeCastPeople } from "@/tests/_support/cast";
@@ -36,6 +38,20 @@ export function removeAccount(userId: string): void {
   const removed = getInjection("IRemovedUsersRepository");
   if (removed instanceof MockRemovedUsersRepository)
     removed.userIds.add(userId);
+}
+
+// An account's sign-in in the container's mock, as Neon Auth keeps it: its email and its ways in
+// (E5, G8). Neon Auth writes them, never the app.
+export function addSignIn(
+  userId: string,
+  email: string,
+  waysIn: readonly WayIn[],
+): void {
+  const signIns = getInjection("ISignInsRepository");
+  if (!(signIns instanceof MockSignInsRepository)) {
+    throw new Error("The container's repositories are the mocks under test");
+  }
+  signIns.rows.set(userId, { email, waysIn: [...waysIn] });
 }
 
 // The files stored for one member, in the container's file storage (which lives for the whole

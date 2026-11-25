@@ -1,7 +1,7 @@
 import { GAME_COMPLEXITIES, type Game } from "@/src/entities/models/game.model";
 
 // The library's filters and sorts (R11 to R13, B1 to B4, B12): what the page's address says, what
-// each keeps, which to offer, B4's way out of a view that matches nothing, and their words. Within
+// each keeps, which to offer, B4's ways out of a view that matches nothing, and their words. Within
 // one filter any value matches; across filters, every one must. A filter keeps a game when any of
 // its copies matches, and the game's card stays whole (B3's Harbor Lights).
 
@@ -84,9 +84,11 @@ export const EMPTY_VIEW: LibraryView = {
   sort: "title",
 };
 
-// What a filter reads of a game, small enough to hand the filter sheet for its live count.
+// What a filter reads of a game, small enough to hand the filter sheet for its live count, and its
+// id, so a game with two copies counts once.
 export type GameFacts = Pick<
   Game,
+  | "id"
   | "minPlayers"
   | "maxPlayers"
   | "bestPlayers"
@@ -300,11 +302,15 @@ function keeps(item: FilterableItem, view: LibraryView): boolean {
   );
 }
 
-// How many a view keeps: the filter sheet's "Show 2 games" as choices change.
+// How many games a view keeps: the filter sheet's "Show 2 games" as choices change, and B4's
+// counts. My library and a friend's library list copies, and a game with two counts once, as their
+// count lines count it.
 export const countMatches = (
   items: readonly FilterableItem[],
   view: LibraryView,
-): number => items.filter((item) => keeps(item, view)).length;
+): number =>
+  new Set(items.filter((item) => keeps(item, view)).map(({ game }) => game.id))
+    .size;
 
 const compare = (a: string | number, b: string | number) =>
   a < b ? -1 : a > b ? 1 : 0;
@@ -402,17 +408,21 @@ function offeredFilters(items: readonly FilterableItem[]): OfferedFilters {
   };
 }
 
-// B4: when nothing matches, the one filter whose dropping brings back the most, and how many.
+// B4: when nothing matches, a filter whose dropping brings games back, and how many.
 export type DropSuggestion = { filter: ActiveFilter; count: number };
 
 export type LibraryList<T extends LibraryItem> = {
   items: T[];
-  // How many were in view before the filters.
+  // How many games were in view before the filters, a game with two copies once: a friend's page
+  // and You's My library row show it.
   total: number;
   // Every game in view's facts, for the filter sheet's live count.
   inView: FilterableItem[];
   offered: OfferedFilters;
-  suggestion: DropSuggestion | null;
+  // B4's ways out (Hector, 2026-11-25): each filter whose dropping brings back at least one game,
+  // most first, ties in the chips' order. None while something matches, or when no one filter
+  // brings anything back.
+  dropSuggestions: DropSuggestion[];
 };
 
 export function listLibrary<T extends LibraryItem>(
@@ -420,20 +430,23 @@ export function listLibrary<T extends LibraryItem>(
   view: LibraryView,
 ): LibraryList<T> {
   const kept = items.filter((item) => keeps(item, view));
-  let suggestion: DropSuggestion | null = null;
-  if (kept.length === 0) {
-    for (const filter of activeFilters(view)) {
-      const found = countMatches(items, withoutFilter(view, filter));
-      if (found > (suggestion?.count ?? 0)) {
-        suggestion = { filter, count: found };
-      }
-    }
-  }
+  // The sort is stable, so filters bringing back as many keep the chips' order.
+  const dropSuggestions =
+    kept.length === 0
+      ? activeFilters(view)
+          .map((filter) => ({
+            filter,
+            count: countMatches(items, withoutFilter(view, filter)),
+          }))
+          .filter(({ count }) => count > 0)
+          .sort((a, b) => b.count - a.count)
+      : [];
   return {
     items: kept.sort(sorter(view.sort)),
-    total: items.length,
+    total: new Set(items.map(({ game }) => game.id)).size,
     inView: items.map(({ game, ownerIds, availableNow }) => ({
       game: {
+        id: game.id,
         minPlayers: game.minPlayers,
         maxPlayers: game.maxPlayers,
         bestPlayers: game.bestPlayers,
@@ -447,7 +460,7 @@ export function listLibrary<T extends LibraryItem>(
       availableNow,
     })),
     offered: offeredFilters(items),
-    suggestion,
+    dropSuggestions,
   };
 }
 
@@ -556,6 +569,6 @@ export function noMatchLine(view: LibraryView, whose: LibraryWhose): string {
       : `${whose.friend}’s library has no ${game}.`;
 }
 
-// B4's way out: "Without “30 min or less”: 1 game".
+// One of B4's ways out: "Without “30 min or less”: 1 game".
 export const dropWords = (words: string, count: number) =>
   `Without “${words}”: ${games(count)}`;

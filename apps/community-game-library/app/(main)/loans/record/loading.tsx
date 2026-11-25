@@ -13,7 +13,7 @@ export default function Loading() {
         <span className="sr-only">Loading</span>
         <Skeleton className="h-7 w-2/3" />
         <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-20 w-full" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-44 w-full" />
       </div>

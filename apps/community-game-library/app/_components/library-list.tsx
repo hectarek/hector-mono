@@ -55,7 +55,7 @@ export function LibraryList({
     shown: number;
     inView: FilterableItem[];
     offered: OfferedFilters;
-    suggestion: DropSuggestion | null;
+    dropSuggestions: DropSuggestion[];
   };
   // The owners the owner filter offers, the member first.
   owners: NameAndPiece[];
@@ -75,7 +75,7 @@ export function LibraryList({
   children: ReactNode;
 }) {
   const href = (next: LibraryView) => `${path}${libraryViewSearch(next)}`;
-  const { suggestion } = list;
+  const ownerWords = ownerWordsFor(owners, viewerId);
   return (
     <>
       <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-start">
@@ -108,28 +108,29 @@ export function LibraryList({
             <EmptyDescription>{noMatchLine(view, whose)}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            {/* B4's two ways out share a row, Clear filters dropping under the first when
-                they don't fit. */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              {suggestion && (
-                <Button
-                  variant="secondary"
-                  nativeButton={false}
-                  render={
-                    <Link
-                      href={href(withoutFilter(view, suggestion.filter))}
-                      scroll={false}
-                    />
-                  }
-                >
-                  {dropWords(
-                    filterWords(
-                      suggestion.filter,
-                      ownerWordsFor(owners, viewerId),
-                    ),
-                    suggestion.count,
-                  )}
-                </Button>
+            {/* B4's ways out: a button for each filter whose dropping brings games back,
+                most first, stacked 10px apart as the app stacks its buttons, then Clear
+                filters 4px under them, as B4 draws it. A label too long for the box wraps,
+                as the night page's What should we play? does. */}
+            <div className="flex flex-col items-start gap-1">
+              {list.dropSuggestions.length > 0 && (
+                <div className="flex flex-col items-start gap-2.5">
+                  {list.dropSuggestions.map(({ filter, count }) => {
+                    const without = href(withoutFilter(view, filter));
+                    return (
+                      <Button
+                        key={without}
+                        variant="secondary"
+                        nativeButton={false}
+                        render={<Link href={without} scroll={false} />}
+                      >
+                        <span className="text-left leading-tight whitespace-normal">
+                          {dropWords(filterWords(filter, ownerWords), count)}
+                        </span>
+                      </Button>
+                    );
+                  })}
+                </div>
               )}
               <Button
                 variant="link"

@@ -6,6 +6,7 @@ import { findGamesToEditUseCase } from "@/src/application/use-cases/suggestions/
 import { getGameToEditUseCase } from "@/src/application/use-cases/suggestions/get-game-to-edit.use-case";
 import { getSuggestionUseCase } from "@/src/application/use-cases/suggestions/get-suggestion.use-case";
 import { listAnsweredSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-answered-suggestions.use-case";
+import { listCategoriesUseCase } from "@/src/application/use-cases/suggestions/list-categories.use-case";
 import { listSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-suggestions.use-case";
 import { suggestGameUseCase } from "@/src/application/use-cases/suggestions/suggest-game.use-case";
 import { updateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
@@ -17,6 +18,7 @@ import { findGamesToEditController } from "@/src/interface-adapters/controllers/
 import { getGameToEditController } from "@/src/interface-adapters/controllers/suggestions/get-game-to-edit.controller";
 import { getSuggestionController } from "@/src/interface-adapters/controllers/suggestions/get-suggestion.controller";
 import { listAnsweredSuggestionsController } from "@/src/interface-adapters/controllers/suggestions/list-answered-suggestions.controller";
+import { listCategoriesController } from "@/src/interface-adapters/controllers/suggestions/list-categories.controller";
 import { listSuggestionsController } from "@/src/interface-adapters/controllers/suggestions/list-suggestions.controller";
 import { suggestGameController } from "@/src/interface-adapters/controllers/suggestions/suggest-game.controller";
 import { updateGameController } from "@/src/interface-adapters/controllers/suggestions/update-game.controller";
@@ -97,6 +99,9 @@ export function createSuggestionsModule() {
       games,
     ]);
   suggestionsModule
+    .bind(DI_SYMBOLS.IListCategoriesUseCase)
+    .toHigherOrderFunction(listCategoriesUseCase, [requireAdmin, games]);
+  suggestionsModule
     .bind(DI_SYMBOLS.IListSuggestionsUseCase)
     .toHigherOrderFunction(listSuggestionsUseCase, [
       requireAdmin,
@@ -118,6 +123,7 @@ export function createSuggestionsModule() {
     .toHigherOrderFunction(updateGameUseCase, [
       requireAdmin,
       games,
+      userGames,
       files,
       transactions,
       log,
@@ -154,6 +160,11 @@ export function createSuggestionsModule() {
       DI_SYMBOLS.IListAnsweredSuggestionsController,
       listAnsweredSuggestionsController,
       DI_SYMBOLS.IListAnsweredSuggestionsUseCase,
+    ],
+    [
+      DI_SYMBOLS.IListCategoriesController,
+      listCategoriesController,
+      DI_SYMBOLS.IListCategoriesUseCase,
     ],
     [
       DI_SYMBOLS.IListSuggestionsController,

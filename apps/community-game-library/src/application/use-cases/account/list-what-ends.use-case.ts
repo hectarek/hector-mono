@@ -166,7 +166,8 @@ export const listWhatEndsUseCase = (
           inLine: inLine(loan),
         }))
         .sort(requestsFirst),
-      games: own.length,
+      // Games, not copies: a second copy of a game counts once.
+      games: new Set(own.map((copy) => copy.gameId)).size,
     };
   };
 };

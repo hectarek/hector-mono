@@ -45,37 +45,54 @@ describe("What should we play? and tables (U20: D8, D9)", () => {
     setSystemTime();
   });
 
-  it("starts D8 from the night and the table, and changes the fits as the choices change", async () => {
+  it("starts D8 from the night on all friends’ games with no complexity picked, and changes the fits as the choices change", async () => {
     const view = render(await WhatToPlayPage(params(heavyGamesAtMine.id)));
     const page = within(view.container);
+    const pressed = (name: string) =>
+      page.getByRole("button", { name }).getAttribute("aria-pressed");
     expect(page.getByText("6 are going, guests included.")).toBeTruthy();
-    expect(
-      page
-        .getByRole("button", { name: "3 hours" })
-        .getAttribute("aria-pressed"),
-    ).toBe("true");
-    expect(
-      page
-        .getByRole("button", { name: "Games on the table" })
-        .getAttribute("aria-pressed"),
-    ).toBe("true");
+    expect(pressed("3 hours")).toBe("true");
+    // Hector, 2026-11-25: All friends’ games, though the night has games on its table.
+    expect(pressed("All friends’ games")).toBe("true");
+    expect(pressed("Games on the table")).toBe("false");
+    for (const level of ["Light", "Medium", "Heavy", "New players"]) {
+      expect(pressed(level)).toBe("false");
+    }
     const fits = () =>
       within(
         page.getByText("Best fits first").closest("section") as HTMLElement,
       )
         .getAllByRole("link")
         .map((row) => row.textContent);
+    const leftOut = () =>
+      page.getByText("Left out").closest("section")?.querySelector("p")
+        ?.textContent;
+    // Tin Kettle Derby plays best at 6, so it comes before the table's games.
+    expect(fits()).toEqual([
+      "Tin Kettle DerbyPlays 6, best at 620 min · lightAlice has it",
+      "Quarry LanePlays 6, best at 590 min · mediumSam brings itOn the table",
+      "Night MarketPlays 6, best at 560–90 min · mediumYou bring itOn the table",
+    ]);
+    // Six are left out: the first three reasons, then how many more.
+    expect(leftOut()).toBe(
+      "Salt & Signal seats 2. Harbor Lights seats 5 at most. Gull & Anchor seats 4 at most. And 3 more games are left out.",
+    );
+
+    // D8's board: Medium picked, which leaves out Tin Kettle Derby too.
+    fireEvent.click(page.getByRole("button", { name: "Medium" }));
     expect(fits()).toEqual([
       "Quarry LanePlays 6, best at 590 min · mediumSam brings itOn the table",
       "Night MarketPlays 6, best at 560–90 min · mediumYou bring itOn the table",
     ]);
-    expect(
-      page.getByText("Salt & Signal seats 2. Harbor Lights seats 5 at most."),
-    ).toBeTruthy();
+    expect(leftOut()).toBe(
+      "Salt & Signal seats 2. Harbor Lights seats 5 at most. Gull & Anchor seats 4 at most. And 4 more games are left out.",
+    );
 
-    fireEvent.click(page.getByRole("button", { name: "Medium" }));
-    fireEvent.click(page.getByRole("button", { name: "All friends’ games" }));
-    expect(page.getByText(/Tin Kettle Derby is light\./)).toBeTruthy();
+    // Three or fewer read in full.
+    fireEvent.click(page.getByRole("button", { name: "Games on the table" }));
+    expect(leftOut()).toBe(
+      "Salt & Signal seats 2. Harbor Lights seats 5 at most.",
+    );
 
     fireEvent.click(page.getByRole("button", { name: "1 hour" }));
     expect(

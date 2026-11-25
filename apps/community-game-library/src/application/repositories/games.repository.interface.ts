@@ -22,6 +22,8 @@ export interface IGamesRepository {
   listByIds(ids: readonly string[], tx?: ITransaction): Promise<Game[]>;
   // A base game's expansions, by title.
   listExpansions(baseGameId: string, tx?: ITransaction): Promise<Game[]>;
+  // Every category the catalog's games use, the most used first, then by name (G3's chips).
+  listCategories(tx?: ITransaction): Promise<string[]>;
 
   // The admin's writes (G3, G4), each writing the search title with the title (KTD10).
   add(game: GameRecord, tx: ITransaction): Promise<Game>;

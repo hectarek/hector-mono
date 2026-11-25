@@ -8,17 +8,19 @@ import { List, ListItem } from "@/app/_components/list-row";
 import { NightStamp } from "@/app/_components/night-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { Piece } from "@/app/_components/piece";
+import { ShareAndCopy } from "@/app/_components/share-button";
 import { gate } from "@/app/_lib/account";
 import { getInjection } from "@/di/container";
+import { nightLinkMessage } from "@/src/entities/share-message";
 import { loadNight } from "../load-night";
-import { CopyNightLink, InviteForm } from "./invite-form";
+import { InviteForm } from "./invite-form";
 
 // D10's stamps tilt one way, then the other.
 const TILTS = [-3, 2, -2, 3] as const;
 
 // Invite people (D10, R30): for the host, or someone going once the host lets them. Not invited
-// yet, Already invited with each person's answer, and Or share the link for a night that has one.
-// Anyone else gets Not found.
+// yet, Already invited with each person's answer, and Or share the link for a night that has one,
+// with Share and Copy as every link has them. Anyone else gets Not found.
 export default async function InvitePage({
   params,
 }: {
@@ -91,7 +93,12 @@ export default async function InvitePage({
               {address}
             </span>
           </p>
-          <CopyNightLink url={`${local ? "http" : "https"}://${address}`} />
+          {/* Send invites is the page's main action. */}
+          <ShareAndCopy
+            text={nightLinkMessage(night.title)}
+            url={`${local ? "http" : "https"}://${address}`}
+            secondary
+          />
           <p className="text-xs text-muted-foreground">
             Anyone who opens this link can see the night and join while there’s
             room. Share it only with people you want there.

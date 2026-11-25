@@ -24,7 +24,8 @@ export type FriendsList = {
   // Yours, waiting or declined: a declined one still reads "You asked", so its sender isn't told
   // (R49).
   requestsYouSent: FriendRequestRow[];
-  // By name, each with how many copies they own: "2 games", "No games yet".
+  // By name, each with how many games they own, a game with two copies once: "2 games", "No games
+  // yet".
   friends: { person: NameAndPiece; games: number }[];
   // Anyone you've asked shows under your requests instead.
   peopleYouMayKnow: PersonYouMayKnow[];
@@ -92,8 +93,11 @@ export const listFriendsUseCase = (
             ? [
                 {
                   person,
-                  games: copies.filter((copy) => copy.userId === friendId)
-                    .length,
+                  games: new Set(
+                    copies
+                      .filter((copy) => copy.userId === friendId)
+                      .map((copy) => copy.gameId),
+                  ).size,
                 },
               ]
             : [];

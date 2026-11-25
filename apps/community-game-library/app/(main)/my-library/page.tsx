@@ -22,6 +22,7 @@ import {
 } from "@/app/_components/list-row";
 import { PageColumn } from "@/app/_components/page-column";
 import { SavedSwitch } from "@/app/_components/saved-switch";
+import { ShareMyFriendLink } from "@/app/_components/share-my-friend-link";
 import { Stamp } from "@/app/_components/stamp";
 import { gate } from "@/app/_lib/account";
 import { LibrarySearch } from "@/app/(main)/library-search";
@@ -90,13 +91,7 @@ export default async function MyLibraryPage({
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button
-          variant="secondary"
-          nativeButton={false}
-          render={<Link href="/friends/link" transitionTypes={["go-deeper"]} />}
-        >
-          Share my friend link
-        </Button>
+        <ShareMyFriendLink />
       </EmptyContent>
     </Empty>
   );

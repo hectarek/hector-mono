@@ -10,6 +10,7 @@ import {
   typed,
 } from "@/app/actions/shared";
 import { getInjection } from "@/di/container";
+import type { Game } from "@/src/entities/models/game.model";
 
 // The record's fields as G3's and G4's form sends them, for their controllers to check.
 const GAME_FIELDS = [
@@ -109,6 +110,32 @@ export async function addGame(
       actionLogger("addGame"),
       "Couldn’t add that. Try again.",
     );
+  }
+}
+
+// What Expansion of's search gives back: the catalog's matches, or why it couldn't look.
+export type FoundGames =
+  | { games: Game[]; error?: undefined }
+  | { error: string; games?: undefined };
+
+// G3's and G4's Expansion of, as the admin types (Hector, 2026-11-25): the catalog by title,
+// through G5's search, Find a game to edit. The form offers the base games among them.
+export async function findGames(typedTitle: string): Promise<FoundGames> {
+  try {
+    const userId = await getCurrentUserId();
+    return {
+      games: await getInjection("IFindGamesToEditController")(
+        { q: typedTitle },
+        userId,
+      ),
+    };
+  } catch (err) {
+    const state = toActionError(
+      err,
+      actionLogger("findGames"),
+      "Couldn’t search the catalog. Try again.",
+    );
+    return { error: state?.error ?? "Couldn’t search the catalog. Try again." };
   }
 }
 

@@ -98,67 +98,68 @@ describe("globals.css", () => {
 });
 
 // A theme may set only some tokens (the rest come from the default), but whatever it sets
-// in light it must also set in dark, or the light value leaks into dark mode.
-describe.each(readdirSync(THEMES).filter((file) => file !== "default.css"))(
-  "theme %s",
-  (file) => {
-    const name = file.replace(/\.css$/, "");
-    const rules = tokensBySelector(read(join(THEMES, file)));
-    const light = `[data-theme="${name}"]`;
+// in light it must also set in dark, or the light value leaks into dark mode. Only .css files
+// are themes: Claude Code leaves a .claude folder in a shell's working directory.
+describe.each(
+  readdirSync(THEMES).filter(
+    (file) => file.endsWith(".css") && file !== "default.css",
+  ),
+)("theme %s", (file) => {
+  const name = file.replace(/\.css$/, "");
+  const rules = tokensBySelector(read(join(THEMES, file)));
+  const light = `[data-theme="${name}"]`;
 
-    it("is selected with data-theme and sets some tokens", () => {
-      expect(rules.get(light)?.size ?? 0).toBeGreaterThan(0);
-    });
+  it("is selected with data-theme and sets some tokens", () => {
+    expect(rules.get(light)?.size ?? 0).toBeGreaterThan(0);
+  });
 
-    it("sets in dark mode every contract token it sets in light", () => {
+  it("sets in dark mode every contract token it sets in light", () => {
+    const setInLight = CONTRACT.filter((token) => rules.get(light)?.has(token));
+    for (const dark of [`${light}.dark`, `.dark ${light}`]) {
+      expect({ dark, missing: missing(rules.get(dark), setInLight) }).toEqual({
+        dark,
+        missing: [],
+      });
+    }
+  });
+
+  it("does the same for each colour variant (data-neo etc.)", () => {
+    const variants = [...rules.keys()].filter(
+      (selector) =>
+        selector.startsWith(`${light}[`) && !selector.endsWith(".dark"),
+    );
+    for (const variant of variants) {
       const setInLight = CONTRACT.filter((token) =>
-        rules.get(light)?.has(token),
+        rules.get(variant)?.has(token),
       );
-      for (const dark of [`${light}.dark`, `.dark ${light}`]) {
-        expect({ dark, missing: missing(rules.get(dark), setInLight) }).toEqual(
-          { dark, missing: [] },
-        );
-      }
-    });
+      const dark = `${variant}.dark`;
+      expect({
+        variant,
+        missing: missing(rules.get(dark), setInLight),
+      }).toEqual({
+        variant,
+        missing: [],
+      });
+    }
+  });
 
-    it("does the same for each colour variant (data-neo etc.)", () => {
-      const variants = [...rules.keys()].filter(
-        (selector) =>
-          selector.startsWith(`${light}[`) && !selector.endsWith(".dark"),
+  // Surfaces re-value tokens for part of an app, picked by an element inside it
+  // (`[data-theme="x"]:has([data-surface="reading"])`); dark must follow there too.
+  it("does the same for each surface (:has(...))", () => {
+    const surfaces = [...rules.keys()].filter((selector) =>
+      selector.startsWith(`${light}:has(`),
+    );
+    for (const surface of surfaces) {
+      const rest = surface.slice(light.length);
+      const setInLight = CONTRACT.filter((token) =>
+        rules.get(surface)?.has(token),
       );
-      for (const variant of variants) {
-        const setInLight = CONTRACT.filter((token) =>
-          rules.get(variant)?.has(token),
-        );
-        const dark = `${variant}.dark`;
+      for (const dark of [`${light}.dark${rest}`, `.dark ${light}${rest}`]) {
         expect({
-          variant,
+          dark,
           missing: missing(rules.get(dark), setInLight),
-        }).toEqual({
-          variant,
-          missing: [],
-        });
+        }).toEqual({ dark, missing: [] });
       }
-    });
-
-    // Surfaces re-value tokens for part of an app, picked by an element inside it
-    // (`[data-theme="x"]:has([data-surface="reading"])`); dark must follow there too.
-    it("does the same for each surface (:has(...))", () => {
-      const surfaces = [...rules.keys()].filter((selector) =>
-        selector.startsWith(`${light}:has(`),
-      );
-      for (const surface of surfaces) {
-        const rest = surface.slice(light.length);
-        const setInLight = CONTRACT.filter((token) =>
-          rules.get(surface)?.has(token),
-        );
-        for (const dark of [`${light}.dark${rest}`, `.dark ${light}${rest}`]) {
-          expect({
-            dark,
-            missing: missing(rules.get(dark), setInLight),
-          }).toEqual({ dark, missing: [] });
-        }
-      }
-    });
-  },
-);
+    }
+  });
+});

@@ -1,4 +1,3 @@
-import { Button } from "@repo/ui/components/button";
 import {
   Empty,
   EmptyContent,
@@ -6,13 +5,13 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@repo/ui/components/empty";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { AppHeader } from "@/app/_components/app-header";
 import { GameCardRow } from "@/app/_components/game-row";
 import { LibraryList } from "@/app/_components/library-list";
 import { PageColumn } from "@/app/_components/page-column";
+import { ShareMyFriendLink } from "@/app/_components/share-my-friend-link";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { LibrarySearch } from "@/app/(main)/library-search";
 import { LibrarySearchResults } from "@/app/(main)/library-search-results";
@@ -73,13 +72,7 @@ export default async function LibraryPage({
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button
-          variant="secondary"
-          nativeButton={false}
-          render={<Link href="/friends/link" transitionTypes={["go-deeper"]} />}
-        >
-          Share my friend link
-        </Button>
+        <ShareMyFriendLink />
       </EmptyContent>
     </Empty>
   );

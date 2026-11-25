@@ -79,6 +79,14 @@ export class MockUserGamesRepository implements IUserGamesRepository {
       .map((copy) => ({ ...copy }));
   }
 
+  async hasCopies(gameId: string): Promise<boolean> {
+    return this.rows.some((copy) => copy.gameId === gameId);
+  }
+
+  async isInABox(gameId: string): Promise<boolean> {
+    return this.expansions.some((boxed) => boxed.gameId === gameId);
+  }
+
   // The table's defaults: in good condition, no note, lent.
   async add(copy: NewUserGame): Promise<UserGame> {
     const now = new Date();

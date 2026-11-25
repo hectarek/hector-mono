@@ -4,14 +4,14 @@ import { Button } from "@repo/ui/components/button";
 import { useState } from "react";
 import { ConfirmDialog } from "@/app/_components/confirm-dialog";
 import { LinkIcon } from "@/app/_components/icons";
-import { ShareButton } from "@/app/_components/share-button";
+import { ShareAndCopy } from "@/app/_components/share-button";
 import { callAction } from "@/app/_lib/call-action";
 import { notify } from "@/app/_lib/notify";
 import { makeNightLink } from "@/app/actions/nights";
 import { nightLinkMessage } from "@/src/entities/share-message";
 
-// The night's link, on the host's page (D7; R30, KTD18): its address, who it lets in, Share, and
-// Make a new link after its dialog, which ends the old one.
+// The night's link, on the host's page (D7; R30, KTD18): its address, who it lets in, Share and
+// Copy, and Make a new link after its dialog, which ends the old one.
 export function NightLink({
   gameNightId,
   title,
@@ -47,12 +47,8 @@ export function NightLink({
           : "Only you can invite by name."}{" "}
         Anyone with the link can see the night and join while there’s room.
       </p>
-      <ShareButton
-        text={nightLinkMessage(title)}
-        url={url}
-        copied="Link copied"
-        className="self-start"
-      />
+      {/* Invite people is the page's main action. */}
+      <ShareAndCopy text={nightLinkMessage(title)} url={url} secondary />
       <div className="flex flex-wrap items-center gap-x-2.5">
         <Button
           type="button"

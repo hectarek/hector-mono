@@ -1,6 +1,6 @@
 # Community Game Library: data model
 
-Updated 2026-11-24. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules. The catalog's source was chosen on 2026-11-23, with no change to the tables. On 2026-11-24 Hector asked for free images on the best-known games with their credits, which added `image_credit` and `image_source_url` to `games`.
+Updated 2026-11-25. Hector confirmed the catalog's tables on 2026-11-12, and the rest (members, friends, loans, game nights and notices) the same day, under the same rules. The catalog's source was chosen on 2026-11-23, with no change to the tables. On 2026-11-24 Hector asked for free images on the best-known games with their credits, which added `image_credit` and `image_source_url` to `games`.
 
 Every table the first release needs, holding only the values the drawn screens and the spec use. Where the catalog's values come from is in [catalog-data.md](catalog-data.md)'s plan: Wikidata, the English, German and French Wikipedias' infoboxes, and Wikimedia Commons for images. U3 created all of them in one migration ([build-plan.md](build-plan.md), KTD5), and the image's credit came in a second, `0001_image_credits` (2026-11-24). The requirement and decision numbers (R, D, KTD) are build-plan.md's, and screen codes such as B5 are the design canvas's ([screens.md](screens.md)).
 
@@ -59,6 +59,8 @@ One row per game or expansion.
 | `created_at`, `updated_at`   | timestamptz                            | yes                        |                                                                                               |              |
 
 A check keeps `base_game_id` set exactly when `type` is `'expansion'`. What should we play?'s fourth choice, "New players", isn't stored: it picks light games (R37).
+
+The admin can make a game an expansion or a base game on its record (G4), or change its base game, within rules the save checks before the database does (`checkFamily`, then `checkTypeChange`, 2026-11-25). A game can't be an expansion of itself. A game with expansions of its own can't become an expansion, since their base game would then be an expansion. A game members own can't become an expansion, since a copy is a base game's (R3). And an expansion in someone's box can't become a base game or change its base game, since a box holds expansions of its copy's game (`user_game_expansions`, below).
 
 `search_title` is the title in lower case, without accents, punctuation or a leading "the", "a" or "an". The app writes it whenever it writes the title (`src/entities/search-title.ts`), and a trigram index on it serves search (KTD10). It isn't a generated column, since Postgres's accent-stripping function can't be used in one.
 
@@ -125,6 +127,8 @@ A user's suggestion of a game that search didn't find (R4, B9, G2).
 ---
 
 ## Members
+
+A member's sign-in is Neon Auth's, in its own tables (the `neon_auth` schema, in the app's database), and outside this model. The app reads two of its columns (2026-11-25): `neon_auth."user".email`, the email each account found on the admin's Remove an account shows (G8, read by the admin only), and `neon_auth.account."providerId"`, how the member signs in, for their own account line on You (E5). It writes there only to anonymize an account that ends (What goes with a copy or an account, below).
 
 ### user_profiles
 

@@ -1,10 +1,34 @@
 import { describe, expect, it } from "bun:test";
 import {
+  leftOutWords,
   offersComplexity,
   type PlayGame,
   startingTime,
   whatToPlay,
 } from "@/src/entities/what-to-play";
+
+describe("leftOutWords (Hector, 2026-11-25)", () => {
+  const reasons = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      reason: `Game ${index + 1} seats 2.`,
+    }));
+
+  it("gives every reason while three or fewer are left out", () => {
+    expect(leftOutWords(reasons(3))).toBe(
+      "Game 1 seats 2. Game 2 seats 2. Game 3 seats 2.",
+    );
+    expect(leftOutWords(reasons(1))).toBe("Game 1 seats 2.");
+  });
+
+  it("gives the first three, then how many more", () => {
+    expect(leftOutWords(reasons(4))).toBe(
+      "Game 1 seats 2. Game 2 seats 2. Game 3 seats 2. And 1 more game is left out.",
+    );
+    expect(leftOutWords(reasons(23))).toBe(
+      "Game 1 seats 2. Game 2 seats 2. Game 3 seats 2. And 20 more games are left out.",
+    );
+  });
+});
 
 describe("offersComplexity (R11, U24)", () => {
   it("offers the choice while a game has a complexity, or while one is picked", () => {

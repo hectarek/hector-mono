@@ -15,6 +15,7 @@ import RemoveAccountPage from "@/app/(main)/admin/accounts/page";
 import { getInjection } from "@/di/container";
 import { CAST } from "@/tests/_support/cast";
 import {
+  addSignIn,
   signInAsMember,
   signInAsYouWithTheCast,
 } from "@/tests/_support/members";
@@ -36,13 +37,14 @@ describe("Remove an account (U22: G8)", () => {
     // The kit's today, Tue Nov 10, 2026, in the morning.
     setSystemTime(new Date("2026-11-10T09:00:00-05:00"));
     await signInAsYouWithTheCast();
+    addSignIn(dev.id, "dev@example.com", ["password"]);
     nextState.pushed = [];
   });
   afterEach(() => {
     setSystemTime();
   });
 
-  it("finds Dev by name, with when Dev joined, Dev's games and open loans", async () => {
+  it("finds Dev by name, with Dev's email, when Dev joined, Dev's games and open loans", async () => {
     const view = render(await searching("dev"));
     expect(view.getByRole("heading", { level: 1 }).textContent).toBe(
       "Remove an account",
@@ -59,9 +61,10 @@ describe("Remove an account (U22: G8)", () => {
     ).toBeTruthy();
     const found = find.getByRole("radio", { name: /Dev/ });
     expect(found.getAttribute("aria-checked")).toBe("true");
+    // The name, the email it signs in with, when it joined, then its games and loans.
     expect(
       find.getByText("Joined Nov 2026").closest("label")?.textContent,
-    ).toBe("DevJoined Nov 20260 games · 0 open loans");
+    ).toBe("Devdev@example.comJoined Nov 20260 games · 0 open loans");
     const record = within(
       view
         .getByRole("heading", { name: "On the record" })

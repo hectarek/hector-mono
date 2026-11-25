@@ -95,11 +95,10 @@ Alone, it never updates a row already there, so the admin's corrections and the 
 
 An image and its credit and page change only together: when the admin changed one of them, the update leaves all three (`TOGETHER`).
 
-The test project holds the file of 2026-11-24 with images. Production holds the file from commit 605c24d (U24, 2026-11-23) until Hector runs the update there, after its migration for the image's credit (`0001_image_credits`):
+Both databases hold the file of commit 6b90363, with images: the test project since 2026-11-24, and production since 2026-11-25, after its migration for the image's credit (`0001_image_credits`). The next update names that commit:
 
 ```bash
-cd apps/community-game-library && bun run db:migrate:production   # Hector's terminal: asks for the URL, then "migrate"
-cd apps/community-game-library && bun scripts/load-catalog.ts --production --update-from 605c24d --commit   # Hector's terminal: asks for the URL, then "update"
+cd apps/community-game-library && bun scripts/load-catalog.ts --production --update-from 6b90363 --commit   # Hector's terminal: asks for the URL, then "update"
 ```
 
 After an update, the next one names the commit whose file it ran with.

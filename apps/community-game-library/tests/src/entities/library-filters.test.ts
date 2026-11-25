@@ -164,6 +164,24 @@ describe("the library's filters (R11)", () => {
     ).toBe(5);
   });
 
+  // My library and a friend's library list copies, and their count lines count games.
+  it("counts games, not copies, for Show 1 game and B4", () => {
+    const moss = items.find(({ game }) => game.title === "Moss & Mortar");
+    if (!moss) {
+      throw new Error("No Moss & Mortar");
+    }
+    const copies = [...items, { ...moss, ownerIds: [people.you.id] }];
+    const heavy: LibraryView = { ...EMPTY_VIEW, complexities: ["heavy"] };
+    // Two copies of Moss & Mortar are one game, in the sheet's count and in B4's.
+    expect(countMatches(listLibrary(copies, EMPTY_VIEW).inView, heavy)).toBe(1);
+    expect(
+      listLibrary(copies, { ...heavy, time: "30-minutes" }).dropSuggestions,
+    ).toEqual([
+      { filter: { kind: "complexity", complexity: "heavy" }, count: 3 },
+      { filter: { kind: "time", time: "30-minutes" }, count: 1 },
+    ]);
+  });
+
   it("caps play time at the game's longest play", () => {
     expect(titles({ time: "30-minutes" })).toEqual([
       "Paper Kites",
@@ -213,22 +231,55 @@ describe("the library's filters (R11)", () => {
     expect(light.complexities).toEqual(["light"]);
   });
 
-  // B4: the filter to drop, with how many games that brings back.
-  it("names the filter whose dropping brings back the most", () => {
-    const view: LibraryView = {
-      ...EMPTY_VIEW,
-      complexities: ["heavy"],
-      time: "30-minutes",
-    };
-    const list = listLibrary(items, view);
+  // B4 (Hector, 2026-11-25): each filter to drop that brings games back, with how many.
+  describe("B4's ways out", () => {
+    const dropsFor = (view: Partial<LibraryView>) =>
+      listLibrary(items, { ...EMPTY_VIEW, ...view }).dropSuggestions;
 
-    expect(list.items).toEqual([]);
-    // Dropping heavy brings back the three short games; dropping the cap, only Moss & Mortar.
-    expect(list.suggestion).toEqual({
-      filter: { kind: "complexity", complexity: "heavy" },
-      count: 3,
+    it("offers each filter whose dropping brings games back, most first", () => {
+      const view: LibraryView = {
+        ...EMPTY_VIEW,
+        players: { fit: "plays-with", count: 4 },
+        complexities: ["heavy"],
+        time: "30-minutes",
+      };
+      expect(listLibrary(items, view).items).toEqual([]);
+      // B4's case: dropping heavy brings back Paper Kites and Tin Kettle Derby, dropping the cap
+      // Moss & Mortar, and dropping 4 players nothing, so it isn't offered.
+      expect(dropsFor(view)).toEqual([
+        { filter: { kind: "complexity", complexity: "heavy" }, count: 2 },
+        { filter: { kind: "time", time: "30-minutes" }, count: 1 },
+      ]);
+      // Most first, ahead of the chips' order: Jo's one game isn't medium, and five games are.
+      expect(
+        dropsFor({ complexities: ["medium"], owners: [people.jo.id] }),
+      ).toEqual([
+        { filter: { kind: "owner", userId: people.jo.id }, count: 5 },
+        { filter: { kind: "complexity", complexity: "medium" }, count: 1 },
+      ]);
     });
-    expect(listLibrary(items, EMPTY_VIEW).suggestion).toBeNull();
+
+    it("keeps the chips' order between filters that bring back as many", () => {
+      // Moss & Mortar is the heavy one, and Fenwick Fair is Priya's.
+      expect(
+        dropsFor({ complexities: ["heavy"], owners: [people.priya.id] }),
+      ).toEqual([
+        { filter: { kind: "complexity", complexity: "heavy" }, count: 1 },
+        { filter: { kind: "owner", userId: people.priya.id }, count: 1 },
+      ]);
+    });
+
+    it("offers none when no one filter brings a game back, or while something matches", () => {
+      expect(
+        dropsFor({
+          complexities: ["heavy"],
+          time: "30-minutes",
+          owners: [people.priya.id],
+        }),
+      ).toEqual([]);
+      expect(dropsFor({})).toEqual([]);
+      expect(dropsFor({ time: "30-minutes" })).toEqual([]);
+    });
   });
 
   it("takes one filter off and keeps the rest", () => {

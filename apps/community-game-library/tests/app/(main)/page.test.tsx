@@ -233,7 +233,20 @@ describe("All friends", () => {
     expect(nextState.pushed.at(-1)).toBe("/");
   });
 
-  it("draws B4: nothing matches, with the filter whose dropping brings back the most", async () => {
+  // B4's ways out, in order: the buttons inside No games match's box.
+  const waysOut = (view: ReturnType<typeof render>) =>
+    within(
+      view
+        .getByText("No games match")
+        .closest("[data-slot='empty']") as HTMLElement,
+    )
+      .getAllByRole("button")
+      .map((button) => [
+        button.textContent,
+        button.closest("a")?.getAttribute("href"),
+      ]);
+
+  it("draws B4: nothing matches, with each filter whose dropping brings games back, most first", async () => {
     const view = await renderView({
       "plays-with": "4",
       complexity: "heavy",
@@ -248,21 +261,45 @@ describe("All friends", () => {
         "No one’s library has a heavy game for four that plays in 30 minutes or less.",
       ),
     ).toBeTruthy();
-    expect(
-      list
-        .getByRole("button", { name: "Without “Complexity: heavy”: 2 games" })
-        .closest("a")
-        ?.getAttribute("href"),
-    ).toBe("/?plays-with=4&time=30-minutes");
-    expect(
-      list
-        .getByRole("button", { name: "Clear filters" })
-        .closest("a")
-        ?.getAttribute("href"),
-    ).toBe("/");
+    // Dropping 4 players brings nothing back, so it isn't offered. Clear filters comes last.
+    expect(waysOut(view)).toEqual([
+      [
+        "Without “Complexity: heavy”: 2 games",
+        "/?plays-with=4&time=30-minutes",
+      ],
+      ["Without “30 min or less”: 1 game", "/?plays-with=4&complexity=heavy"],
+      ["Clear filters", "/"],
+    ]);
+    // Each label wraps inside its button, so a long one stays inside a phone's box. happy-dom
+    // lays nothing out, so this checks the label's own span.
+    for (const name of [
+      "Without “Complexity: heavy”: 2 games",
+      "Without “30 min or less”: 1 game",
+    ]) {
+      expect(
+        list
+          .getByRole("button", { name })
+          .firstElementChild?.classList.contains("whitespace-normal"),
+      ).toBe(true);
+    }
     expect(
       list.queryByRole("button", { name: "Share these filters" }) === null,
     ).toBe(true);
+  });
+
+  it("draws B4 with only Clear filters when no one filter brings a game back", async () => {
+    const view = await renderView({
+      owner: CAST.people.priya.id,
+      complexity: "heavy",
+      time: "30-minutes",
+    });
+
+    expect(
+      view.getByText(
+        "No game in your library or your friends’ matches all of these.",
+      ),
+    ).toBeTruthy();
+    expect(waysOut(view)).toEqual([["Clear filters", "/"]]);
   });
 
   // B2: the sheet's choices are its own until Show applies them, and its count follows them.
@@ -327,12 +364,11 @@ describe("All friends", () => {
 
     expect(view.getByText("0 games")).toBeTruthy();
     expect(view.getByText("No friends yet")).toBeTruthy();
-    expect(
-      view
-        .getByRole("button", { name: "Share my friend link" })
-        .closest("a")
-        ?.getAttribute("href"),
-    ).toBe("/friends/link");
     expect(view.queryByRole("button", { name: "Filter" }) === null).toBe(true);
+    // It opens your friend link over the Library (E2).
+    fireEvent.click(view.getByRole("button", { name: "Share my friend link" }));
+    expect(
+      await view.findByRole("dialog", { name: "Your friend link" }),
+    ).toBeTruthy();
   });
 });

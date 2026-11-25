@@ -18,17 +18,33 @@ test("borrows a friend's game, picks it up, gives it back, and the owner confirm
   await owner.getByLabel("Search the catalog").fill(GAME);
   await owner.getByRole("button", { name: "I own it", exact: true }).click();
   await expect(owner.getByText("Added", { exact: true })).toBeVisible();
-  await owner.goto("/friends/link");
-  const address = await owner.getByText(/\/f\//).textContent();
+  // The link opens as a sheet over Friends (E2).
+  await owner.goto("/friends");
+  await owner.getByRole("button", { name: "Share my friend link" }).click();
+  const address = await owner
+    .getByRole("dialog", { name: "Your friend link" })
+    .getByText(/\/f\//)
+    .textContent();
   const link = address?.match(/\/f\/\S+/)?.[0];
   expect(link).toBeTruthy();
+  // Its page's old address, in links and bookmarks from before, opens Friends with it open, and
+  // the address it leaves is Friends' own, so a reload doesn't open it again.
+  await owner.goto("/friends/link");
+  await expect(owner).toHaveURL(/\/friends$/);
+  await expect(
+    owner
+      .getByRole("dialog", { name: "Your friend link" })
+      .getByText(String(link)),
+  ).toBeVisible();
 
   // Ira joins through it, and they're friends at once.
   const borrower = await anotherMember(browser);
   await signUp(borrower, "Ira", link);
   await setUpProfile(borrower, { friend: "Wren" });
 
-  // Ira asks to borrow it from the game's page.
+  // Ira asks to borrow it from the game's page. Setting up ends on My library (A6 opens A7), and
+  // Wren's game is under All friends.
+  await borrower.goto("/");
   await borrower.getByRole("link", { name: new RegExp(GAME) }).click();
   await borrower.getByRole("button", { name: "Borrow", exact: true }).click();
   await borrower

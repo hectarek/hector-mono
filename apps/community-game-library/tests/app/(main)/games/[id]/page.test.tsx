@@ -13,9 +13,9 @@ import GamePage from "@/app/(main)/games/[id]/page";
 import { getInjection } from "@/di/container";
 import { CAST } from "@/tests/_support/cast";
 import { signInAsYouWithTheCast } from "@/tests/_support/members";
-import { NotFoundPage } from "@/tests/_support/next";
+import { NotFoundPage, nextState } from "@/tests/_support/next";
 
-const { games, copies } = CAST;
+const { games, copies, loans } = CAST;
 
 // The page as the server renders it, opened from a search for harbor or not.
 const renderGame = async (id: string, q?: string) =>
@@ -128,8 +128,56 @@ describe("a game's page", () => {
     for (const line of ["At home", "Priya asked for it", "Requested"]) {
       expect(within(yours).getByText(line)).toBeTruthy();
     }
+    // The row opens Priya's request, and the copy's own page is the quiet link under the copies.
     expect(yours.querySelector("a")?.getAttribute("href")).toBe(
-      `/copies/${copies.yourNightMarket.id}`,
+      `/loans/${loans.priyaAskedForNightMarket.id}`,
+    );
+    expect(
+      view.getByRole("button", { name: "Open my copy" }).getAttribute("href"),
+    ).toBe(`/copies/${copies.yourNightMarket.id}`);
+  });
+
+  it("opens your copy's loan from its row, the one out before the line, or the copy's page when it has none (B11)", async () => {
+    // Jo has your Gull & Anchor, and Ben is 1st in line.
+    const out = await renderGame(games.gullAndAnchor.id);
+    expect(row(out, "Your copy").querySelector("a")?.getAttribute("href")).toBe(
+      `/loans/${loans.joHasGullAndAnchor.id}`,
+    );
+    expect(
+      out.getByRole("button", { name: "Open my copy" }).getAttribute("href"),
+    ).toBe(`/copies/${copies.yourGullAndAnchor.id}`);
+    out.unmount();
+
+    // Your Paper Kites stays home: its row opens its page, so nothing more is offered.
+    const home = await renderGame(games.paperKites.id);
+    expect(
+      row(home, "Your copy").querySelector("a")?.getAttribute("href"),
+    ).toBe(`/copies/${copies.yourPaperKites.id}`);
+    expect(home.queryByRole("button", { name: /^Open my/ })).toBeNull();
+  });
+
+  it("names your second copy, and offers Open my copy only for the one whose row opens a loan", async () => {
+    const you = CAST.people.you.id;
+    const { copy } = await getInjection("IAddUserGameController")(
+      { gameId: games.nightMarket.id },
+      you,
+    );
+
+    const view = await renderGame(games.nightMarket.id);
+    expect(view.getByRole("heading", { name: "Copies · 2" })).toBeTruthy();
+    expect(
+      row(view, "Your second copy").querySelector("a")?.getAttribute("href"),
+    ).toBe(`/copies/${copy.id}`);
+    expect(
+      view
+        .getAllByRole("button", { name: /^Open my/ })
+        .map((link) => [link.textContent, link.getAttribute("href")]),
+    ).toEqual([["Open my copy", `/copies/${copies.yourNightMarket.id}`]]);
+
+    // Removed again, so the rest of this file sees the cast as the boards draw it.
+    await getInjection("IRemoveUserGameController")(
+      { userGameId: copy.id },
+      you,
     );
   });
 
@@ -162,6 +210,51 @@ describe("a game's page", () => {
     // Your Paper Kites stays home.
     expect(await lines(games.paperKites.id, "Your copy")).toEqual(
       expect.arrayContaining(["You keep it at home", "Not lent"]),
+    );
+  });
+
+  // B13: a friend's copy with an arrow opens your own request or loan; one you're in line for
+  // offers Leave the line instead.
+  it("opens your loan from a friend's copy you have, as it opens your request", async () => {
+    const opens = async (gameId: string, name: string) => {
+      const view = await renderGame(gameId);
+      const href = row(view, name).querySelector("a")?.getAttribute("href");
+      view.unmount();
+      return href ?? null;
+    };
+
+    // You have Sam's Moss & Mortar, due Friday.
+    expect(await opens(games.mossAndMortar.id, "Sam’s copy")).toBe(
+      `/loans/${loans.youHaveMossAndMortar.id}`,
+    );
+    // You asked for Sam's Quarry Lane this morning.
+    expect(await opens(games.quarryLane.id, "Sam’s copy")).toBe(
+      `/loans/${loans.youAskedForQuarryLane.id}`,
+    );
+    // You're 1st in line for Priya's Fenwick Fair, which Ben has.
+    expect(await opens(games.fenwickFair.id, "Priya’s copy")).toBeNull();
+  });
+
+  // A red stamp is the member's move (screens.md rule 7): a copy handed to them opens the loan
+  // where they confirm they have it.
+  it("opens the handoff from a friend's copy handed to you", async () => {
+    // You hand Sam's Moss & Mortar on to Jo, next in line, and Jo opens the game.
+    await getInjection("IPassAlongController")(
+      { loanId: loans.youHaveMossAndMortar.id },
+      CAST.people.you.id,
+    );
+    nextState.userId = CAST.people.jo.id;
+    const view = await renderGame(games.mossAndMortar.id);
+    const sams = row(view, "Sam’s copy");
+    expect(within(sams).getByText("Handed to you")).toBeTruthy();
+    expect(sams.querySelector("a")?.getAttribute("href")).toBe(
+      `/loans/${loans.joAskedForMossAndMortar.id}`,
+    );
+
+    // Taken back, so the rest of this file sees the cast as the boards draw it.
+    await getInjection("ITakeBackPassAlongController")(
+      { loanId: loans.youHaveMossAndMortar.id },
+      CAST.people.you.id,
     );
   });
 

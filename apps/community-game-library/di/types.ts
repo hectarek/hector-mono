@@ -16,6 +16,7 @@ import type { IFileStorage } from "@/src/application/services/file-storage.servi
 import type { ILoggerService } from "@/src/application/services/logger.service.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import type { IDeleteAccountUseCase } from "@/src/application/use-cases/account/delete-account.use-case";
+import type { IListWaysInUseCase } from "@/src/application/use-cases/account/list-ways-in.use-case";
 import type { IListWhatEndsUseCase } from "@/src/application/use-cases/account/list-what-ends.use-case";
 import type { IListAccountsUseCase } from "@/src/application/use-cases/admin/list-accounts.use-case";
 import type { IRemoveAccountUseCase } from "@/src/application/use-cases/admin/remove-account.use-case";
@@ -104,11 +105,13 @@ import type { IFindGamesToEditUseCase } from "@/src/application/use-cases/sugges
 import type { IGetGameToEditUseCase } from "@/src/application/use-cases/suggestions/get-game-to-edit.use-case";
 import type { IGetSuggestionUseCase } from "@/src/application/use-cases/suggestions/get-suggestion.use-case";
 import type { IListAnsweredSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-answered-suggestions.use-case";
+import type { IListCategoriesUseCase } from "@/src/application/use-cases/suggestions/list-categories.use-case";
 import type { IListSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-suggestions.use-case";
 import type { ISuggestGameUseCase } from "@/src/application/use-cases/suggestions/suggest-game.use-case";
 import type { IUpdateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
 import type { IDeleteAccountController } from "@/src/interface-adapters/controllers/account/delete-account.controller";
 import type { IListAccountsController } from "@/src/interface-adapters/controllers/account/list-accounts.controller";
+import type { IListWaysInController } from "@/src/interface-adapters/controllers/account/list-ways-in.controller";
 import type { IListWhatEndsController } from "@/src/interface-adapters/controllers/account/list-what-ends.controller";
 import type { IRemoveAccountController } from "@/src/interface-adapters/controllers/account/remove-account.controller";
 import type { IGetGameController } from "@/src/interface-adapters/controllers/catalog/get-game.controller";
@@ -190,6 +193,7 @@ import type { IFindGamesToEditController } from "@/src/interface-adapters/contro
 import type { IGetGameToEditController } from "@/src/interface-adapters/controllers/suggestions/get-game-to-edit.controller";
 import type { IGetSuggestionController } from "@/src/interface-adapters/controllers/suggestions/get-suggestion.controller";
 import type { IListAnsweredSuggestionsController } from "@/src/interface-adapters/controllers/suggestions/list-answered-suggestions.controller";
+import type { IListCategoriesController } from "@/src/interface-adapters/controllers/suggestions/list-categories.controller";
 import type { IListSuggestionsController } from "@/src/interface-adapters/controllers/suggestions/list-suggestions.controller";
 import type { ISuggestGameController } from "@/src/interface-adapters/controllers/suggestions/suggest-game.controller";
 import type { IUpdateGameController } from "@/src/interface-adapters/controllers/suggestions/update-game.controller";
@@ -294,6 +298,8 @@ export const DI_SYMBOLS = {
   IListAnsweredSuggestionsUseCase: Symbol.for(
     "IListAnsweredSuggestionsUseCase",
   ),
+  IListCategoriesController: Symbol.for("IListCategoriesController"),
+  IListCategoriesUseCase: Symbol.for("IListCategoriesUseCase"),
   IListFriendsController: Symbol.for("IListFriendsController"),
   IListFriendsUseCase: Symbol.for("IListFriendsUseCase"),
   IListInboxController: Symbol.for("IListInboxController"),
@@ -318,6 +324,8 @@ export const DI_SYMBOLS = {
   IListSuggestionsUseCase: Symbol.for("IListSuggestionsUseCase"),
   IListTakenPiecesController: Symbol.for("IListTakenPiecesController"),
   IListTakenPiecesUseCase: Symbol.for("IListTakenPiecesUseCase"),
+  IListWaysInController: Symbol.for("IListWaysInController"),
+  IListWaysInUseCase: Symbol.for("IListWaysInUseCase"),
   IListWhatEndsController: Symbol.for("IListWhatEndsController"),
   IListWhatEndsUseCase: Symbol.for("IListWhatEndsUseCase"),
   ILoansRepository: Symbol.for("ILoansRepository"),
@@ -492,6 +500,8 @@ export interface DI_RETURN_TYPES {
   IListAccountsUseCase: IListAccountsUseCase;
   IListAnsweredSuggestionsController: IListAnsweredSuggestionsController;
   IListAnsweredSuggestionsUseCase: IListAnsweredSuggestionsUseCase;
+  IListCategoriesController: IListCategoriesController;
+  IListCategoriesUseCase: IListCategoriesUseCase;
   IListFriendsController: IListFriendsController;
   IListFriendsUseCase: IListFriendsUseCase;
   IListInboxController: IListInboxController;
@@ -514,6 +524,8 @@ export interface DI_RETURN_TYPES {
   IListSuggestionsUseCase: IListSuggestionsUseCase;
   IListTakenPiecesController: IListTakenPiecesController;
   IListTakenPiecesUseCase: IListTakenPiecesUseCase;
+  IListWaysInController: IListWaysInController;
+  IListWaysInUseCase: IListWaysInUseCase;
   IListWhatEndsController: IListWhatEndsController;
   IListWhatEndsUseCase: IListWhatEndsUseCase;
   ILoansRepository: ILoansRepository;

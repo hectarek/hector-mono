@@ -178,7 +178,11 @@ export default async function FriendPage({
         <LibraryList
           path={`/friends/${friendId}`}
           view={parseLibraryView(query)}
-          list={{ ...library, shown: library.items.length }}
+          // The count is of games, not copies, as My library's is (B6).
+          list={{
+            ...library,
+            shown: new Set(library.items.map(({ game }) => game.id)).size,
+          }}
           owners={[]}
           viewerId={user.id}
           whose={{ friend: name }}

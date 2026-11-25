@@ -25,6 +25,7 @@ import type { IUserProfilesRepository } from "@/src/application/repositories/use
 import type { IUserSettingsRepository } from "@/src/application/repositories/user-settings.repository.interface";
 import type { ITransactionManagerService } from "@/src/application/services/transaction-manager.service.interface";
 import { deleteAccountUseCase } from "@/src/application/use-cases/account/delete-account.use-case";
+import { listWaysInUseCase } from "@/src/application/use-cases/account/list-ways-in.use-case";
 import { listWhatEndsUseCase } from "@/src/application/use-cases/account/list-what-ends.use-case";
 import { listAccountsUseCase } from "@/src/application/use-cases/admin/list-accounts.use-case";
 import { removeAccountUseCase } from "@/src/application/use-cases/admin/remove-account.use-case";
@@ -109,6 +110,7 @@ import { findGamesToEditUseCase } from "@/src/application/use-cases/suggestions/
 import { getGameToEditUseCase } from "@/src/application/use-cases/suggestions/get-game-to-edit.use-case";
 import { getSuggestionUseCase } from "@/src/application/use-cases/suggestions/get-suggestion.use-case";
 import { listAnsweredSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-answered-suggestions.use-case";
+import { listCategoriesUseCase } from "@/src/application/use-cases/suggestions/list-categories.use-case";
 import { listSuggestionsUseCase } from "@/src/application/use-cases/suggestions/list-suggestions.use-case";
 import { suggestGameUseCase } from "@/src/application/use-cases/suggestions/suggest-game.use-case";
 import { updateGameUseCase } from "@/src/application/use-cases/suggestions/update-game.use-case";
@@ -116,6 +118,7 @@ import type { Game } from "@/src/entities/models/game.model";
 import type { GameNight } from "@/src/entities/models/game-night.model";
 import type { GameNightAttendee } from "@/src/entities/models/game-night-attendee.model";
 import type { UserGame } from "@/src/entities/models/user-game.model";
+import type { WayIn } from "@/src/entities/ways-in";
 import { FriendLinksRepository } from "@/src/infrastructure/repositories/friend-links.repository";
 import { MockFriendLinksRepository } from "@/src/infrastructure/repositories/friend-links.repository.mock";
 import { FriendRequestsRepository } from "@/src/infrastructure/repositories/friend-requests.repository";
@@ -287,6 +290,35 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
     signIns,
   ] as const;
 
+  // An account's sign-in as Neon Auth keeps it, which the app reads (E5, G8) but never writes:
+  // the mock's row, or Neon Auth's stand-in tables on the database, a Google link and a password
+  // each an account row with Better Auth's provider id.
+  async function addSignIn(
+    { userId, name, email }: { userId: string; name: string; email: string },
+    waysIn: readonly WayIn[],
+  ): Promise<void> {
+    if (signIns instanceof MockSignInsRepository) {
+      signIns.rows.set(userId, { email, waysIn: [...waysIn] });
+      return;
+    }
+    await databaseSql(
+      `insert into neon_auth."user" (id, name, email, "emailVerified") values ($1, $2, $3, true)`,
+      [userId, name, email],
+    );
+    if (waysIn.includes("google")) {
+      await databaseSql(
+        `insert into neon_auth.account ("accountId", "providerId", "userId") values ($1, 'google', $2)`,
+        [`google-${userId}`, userId],
+      );
+    }
+    if (waysIn.includes("password")) {
+      await databaseSql(
+        `insert into neon_auth.account ("accountId", "providerId", "userId", password) values ($1, 'credential', $2, 'a hash')`,
+        [userId, userId],
+      );
+    }
+  }
+
   return {
     repos,
     // What the photo steps stored, by bucket and key.
@@ -399,9 +431,17 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    updateGame: updateGameUseCase(admin, games, storage, transactions, log),
+    updateGame: updateGameUseCase(
+      admin,
+      games,
+      userGames,
+      storage,
+      transactions,
+      log,
+    ),
     findGamesToEdit: findGamesToEditUseCase(admin, games),
     getGameToEdit: getGameToEditUseCase(admin, games),
+    listCategories: listCategoriesUseCase(admin, games),
     // What a member was told: the notices mock's rows, or the table's on PGlite.
     noticesOf: async (userId: string) =>
       notices instanceof MockNoticesRepository
@@ -631,7 +671,7 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    listPastNights: listPastNightsUseCase(gameNights, userProfiles),
+    listPastNights: listPastNightsUseCase(gameNights, userProfiles, userGames),
 
     // Deleting an account, and the admin's removal (U22).
     listWhatEnds: listWhatEndsUseCase(
@@ -647,7 +687,13 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
-    listAccounts: listAccountsUseCase(admin, userProfiles, userGames, loans),
+    listAccounts: listAccountsUseCase(
+      admin,
+      userProfiles,
+      userGames,
+      loans,
+      signIns,
+    ),
     removeAccount: removeAccountUseCase(
       admin,
       ...accountRepositories,
@@ -656,6 +702,9 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
       transactions,
       log,
     ),
+
+    // How a member signs in, on You (E5).
+    listWaysIn: listWaysInUseCase(signIns),
 
     // What should we play? and tables (U20)
     whatToPlay: whatToPlayUseCase(
@@ -821,19 +870,16 @@ export function makeApp(repos: Repositories = currentBackend.repositories()) {
           await insertCastRows(rows, tx, { commit: true });
         }
       });
-      if (!(signIns instanceof MockSignInsRepository)) {
-        for (const [key, person] of Object.entries(CAST.people)) {
-          await databaseSql(
-            `insert into neon_auth."user" (id, name, email, "emailVerified") values ($1, $2, $3, true)`,
-            [person.id, person.name, `${key}@example.com`],
-          );
-          await databaseSql(
-            `insert into neon_auth.account ("accountId", "providerId", "userId", password) values ($1, 'credential', $2, 'a hash')`,
-            [person.id, person.id],
-          );
-        }
+      // Each with a password and their own address (G8 shows it).
+      for (const [key, person] of Object.entries(CAST.people)) {
+        await addSignIn(
+          { userId: person.id, name: person.name, email: `${key}@example.com` },
+          ["password"],
+        );
       }
     },
+
+    addSignIn,
 
     // Games the cast doesn't have, such as one with a popularity, until U9 gives the catalog its
     // writes.

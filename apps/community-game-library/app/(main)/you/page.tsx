@@ -14,6 +14,7 @@ import { gate } from "@/app/_lib/account";
 import { SIGN_OUT_HREF } from "@/app/_lib/auth-paths";
 import { getInjection } from "@/di/container";
 import { UnauthorizedError } from "@/src/entities/errors/common";
+import { signedInLine } from "@/src/entities/ways-in";
 
 const games = (count: number) =>
   count === 0 ? "No games yet" : count === 1 ? "1 game" : `${count} games`;
@@ -21,7 +22,7 @@ const games = (count: number) =>
 // E5: the member's own page, reached from the piece at the top. Its profile first, then the rows
 // the app's other pages add as they're built: My library (U7) with how many games are in it, Past
 // loans (U16), Notices I get (U11), Admin (U9), Delete my account (U22), About the catalog (U24),
-// and the privacy policy and terms of use.
+// and the privacy policy and terms of use. Account says how the member signs in, and the email.
 export default async function YouPage() {
   await connection();
   const { user } = await gate("app");
@@ -29,7 +30,7 @@ export default async function YouPage() {
     { userId: user.id },
     user.id,
   );
-  // My library as its page reads it, for the row's count: the copies before any filter.
+  // My library as its page reads it, for the row's count: the games before any filter.
   const library = await getInjection("IListMyLibraryController")({}, user.id);
   // The admin's row (DE-25), with the suggestions waiting: anyone else is refused, and has none.
   const waiting = await getInjection("IListSuggestionsController")(
@@ -40,6 +41,8 @@ export default async function YouPage() {
     }
     throw err;
   });
+  // How the account signs in, for Account's first line (Hector, 2026-11-25).
+  const waysIn = await getInjection("IListWaysInController")(user.id);
 
   return (
     <PageColumn
@@ -147,8 +150,8 @@ export default async function YouPage() {
 
       <Group label="Account" overList>
         <ul className="flex flex-col rounded-lg border-2 border-foreground bg-card *:border-dashed *:border-foreground *:not-first:border-t-2">
-          <li className="px-3 py-2.5 font-mono text-xs font-medium text-muted-foreground">
-            Signed in as {user.email}
+          <li className="px-3 py-2.5 font-mono text-xs font-medium wrap-break-word text-muted-foreground">
+            {signedInLine(waysIn, user.email)}
           </li>
           <li>
             {/* A plain link, so it loads the whole page as Neon's own links do and is never

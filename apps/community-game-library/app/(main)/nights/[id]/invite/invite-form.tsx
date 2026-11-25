@@ -126,25 +126,3 @@ export function InviteForm({
     </Group>
   );
 }
-
-// Or share the link (D10): the link alone, on the clipboard.
-export function CopyNightLink({ url }: { url: string }) {
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(url);
-      notify("Link copied");
-    } catch {
-      notify("That didn’t copy. Try again.");
-    }
-  }
-  return (
-    <Button
-      type="button"
-      variant="secondary"
-      className="self-start"
-      onClick={copy}
-    >
-      Copy link
-    </Button>
-  );
-}

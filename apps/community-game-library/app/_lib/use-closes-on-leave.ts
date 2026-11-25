@@ -14,8 +14,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 // once. Closed the usual way, it would start its closing animation, and the next page can
 // hide it before that runs, leaving it open on screen when you come back.
 // `close` may change every render; the latest runs.
+//
+// The close on hiding waits a microtask: in development, Strict Mode unmounts and mounts every
+// component once more as it first mounts, which would close a sheet that opens with its page
+// (E2's, on arrival from /friends/link). That second mount comes first, so only a real hide
+// closes it.
 export function useClosesOnLeave(close: () => void): number {
   const latest = useRef(close);
+  const shown = useRef(false);
   const [leaves, setLeaves] = useState(0);
   useLayoutEffect(() => {
     latest.current = close;
@@ -36,13 +42,17 @@ export function useClosesOnLeave(close: () => void): number {
       window.removeEventListener("popstate", leave);
     };
   }, []);
-  useLayoutEffect(
-    () => () => {
-      latest.current();
-      setLeaves((count) => count + 1);
-    },
-    [],
-  );
+  useLayoutEffect(() => {
+    shown.current = true;
+    return () => {
+      shown.current = false;
+      queueMicrotask(() => {
+        if (shown.current) return;
+        latest.current();
+        setLeaves((count) => count + 1);
+      });
+    };
+  }, []);
   return leaves;
 }
 

@@ -80,6 +80,21 @@ describeEachBackend("cancelling and past nights (U21)", () => {
     }
   });
 
+  it("counts the games on a past night's table, not the copies: Jo's Salt & Signal beside yours is one game (D12)", async () => {
+    await app.addGameToNight(
+      heavyGamesAtMine.id,
+      [CAST.copies.josSaltAndSignal.id],
+      jo.id,
+    );
+    await app.cancelNight(heavyGamesAtMine.id, null, you.id, NOW);
+    expect((await pastOf(you.id))[0]).toEqual([
+      "Heavy games at mine",
+      6,
+      4,
+      true,
+    ]);
+  });
+
   it("lists only the past nights the member could see (KTD4)", async () => {
     // Mei went to none and is friends with neither host; Noor is Sam's friend.
     expect(await pastOf(mei.id)).toEqual([]);

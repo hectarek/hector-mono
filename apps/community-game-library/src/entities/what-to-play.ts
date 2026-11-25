@@ -161,3 +161,20 @@ export function whatToPlay<T extends PlayGame>(
   }
   return { fits: fits.sort(byBestFit), leftOut };
 }
+
+// Left out's line (Hector, 2026-11-25): the first three reasons, then how many more games are left
+// out, so all friends' games don't each get a reason. Three or fewer are all given.
+const LEFT_OUT_REASONS = 3;
+
+export function leftOutWords(leftOut: readonly { reason: string }[]): string {
+  const more = leftOut.length - LEFT_OUT_REASONS;
+  const reasons = leftOut.slice(0, LEFT_OUT_REASONS).map((one) => one.reason);
+  if (more > 0) {
+    reasons.push(
+      more === 1
+        ? "And 1 more game is left out."
+        : `And ${more} more games are left out.`,
+    );
+  }
+  return reasons.join(" ");
+}
