@@ -10,6 +10,7 @@ import Link from "next/link";
 import { BackLink } from "@/app/_components/back-link";
 import { JoinButton } from "@/app/_components/join-button";
 import { PageMotion } from "@/app/_components/page-motion";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import {
   SPACE_TYPE_CONTENTS,
@@ -49,6 +50,7 @@ export default async function JoinPage({
   if (!invite) {
     return (
       <PageMotion>
+        <ReadyMark />
         <div className="flex flex-col">
           <BackLink href="/" label="Recipes" />
           <Empty className="my-8">
@@ -75,6 +77,7 @@ export default async function JoinPage({
   // Not a tab, so it has the way back (D32).
   return (
     <PageMotion>
+      <ReadyMark />
       <div className="flex flex-col">
         <BackLink href="/" label="Recipes" />
         <Empty className="my-8">

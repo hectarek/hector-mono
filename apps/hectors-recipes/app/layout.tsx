@@ -50,7 +50,7 @@ export default function RootLayout({
       <body>
         <Providers>{children}</Providers>
         <PageWait />
-        <ReadyMark />
+        <ReadyMark of="shell" />
       </body>
     </html>
   );

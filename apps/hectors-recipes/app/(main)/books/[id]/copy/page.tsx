@@ -10,6 +10,7 @@ import Link from "next/link";
 import { BackLink } from "@/app/_components/back-link";
 import { BulkCopyForm } from "@/app/_components/bulk-copy-form";
 import { PageMotion } from "@/app/_components/page-motion";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadBooks } from "@/app/_lib/load-books";
 import { getInjection } from "@/di/container";
@@ -34,6 +35,7 @@ export default async function CopyRecipesPage({
 
   return (
     <PageMotion>
+      <ReadyMark />
       <div className="flex flex-col gap-4">
         <BackLink href={`/?book=${source.id}`} label={source.name} />
         <div>

@@ -10,6 +10,7 @@ import {
   ShowLink,
 } from "@/app/_components/plan-show";
 import { PlanWeek } from "@/app/_components/plan-week";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { SpaceHeader } from "@/app/_components/space-header";
 import { SpaceSwitcher } from "@/app/_components/space-switcher";
 import { StartOwnPlanButton } from "@/app/_components/start-own-plan-button";
@@ -75,6 +76,7 @@ export default async function PlanPage({
 
   return (
     <PageMotion>
+      <ReadyMark />
       {/* Cook days or eat days (D93): the select in the title row; the week, its links and the
         plan pills keep it. */}
       <PlanShowProvider initial={show}>

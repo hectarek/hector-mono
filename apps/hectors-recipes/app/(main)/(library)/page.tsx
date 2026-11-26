@@ -12,6 +12,7 @@ import Link from "next/link";
 import { LibraryResults } from "@/app/_components/library-results";
 import { PageMotion } from "@/app/_components/page-motion";
 import { ProduceTile } from "@/app/_components/produce-tile";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { PageTitle, SpaceHeader } from "@/app/_components/space-header";
 import { SpaceSwitcher } from "@/app/_components/space-switcher";
 import { TitleMenu } from "@/app/_components/title-menu";
@@ -69,6 +70,7 @@ export default async function LibraryPage({
 
   return (
     <PageMotion>
+      <ReadyMark />
       <div className="flex flex-col gap-4">
         <SpaceSwitcher
           spaces={

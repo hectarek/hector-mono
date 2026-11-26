@@ -7,10 +7,12 @@ import {
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import Link from "next/link";
+import { ReadyMark } from "@/app/_components/ready-mark";
 
 export default function NotFound() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md items-center px-4">
+      <ReadyMark />
       <Empty>
         <EmptyHeader>
           <EmptyTitle>Not found</EmptyTitle>

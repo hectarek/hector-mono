@@ -8,6 +8,7 @@ import {
 } from "@repo/ui/components/empty";
 import Link from "next/link";
 import { FreshEachVisit } from "@/app/_components/fresh-each-visit";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { RecipeForm } from "@/app/_components/recipe-form";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadRecipe } from "@/app/_lib/load-recipe";
@@ -27,6 +28,7 @@ export default async function EditRecipePage({
   if (!canEdit) {
     return (
       <Empty className="my-8">
+        <ReadyMark />
         <EmptyHeader>
           <EmptyTitle>You can view this recipe but not edit it</EmptyTitle>
           <EmptyDescription>
@@ -57,6 +59,7 @@ export default async function EditRecipePage({
   // A fresh visit shows the recipe as saved; Back brings back what was being typed.
   return (
     <FreshEachVisit>
+      <ReadyMark />
       <RecipeForm
         mode="edit"
         heading="Edit recipe"

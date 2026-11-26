@@ -1,5 +1,6 @@
 import { AddToListButton } from "@/app/_components/add-to-list-button";
 import { CookMode } from "@/app/_components/cook-mode";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadRecipe } from "@/app/_lib/load-recipe";
 import { type SearchParams, servingsParam } from "@/app/_lib/search-params";
@@ -28,6 +29,7 @@ export default async function CookPage({
 
   return (
     <article className="flex flex-1 flex-col">
+      <ReadyMark />
       <CookMode
         recipeId={recipe.id}
         title={recipe.title}
