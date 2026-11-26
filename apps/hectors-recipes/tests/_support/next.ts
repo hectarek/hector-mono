@@ -21,6 +21,8 @@ export const nextState = {
   revalidated: [] as string[],
   // Where a screen's router.push() went (screen tests).
   pushed: [] as string[],
+  // How many times a screen's router.back() was called (screen tests).
+  wentBack: 0,
   // The router's bfcacheId: a new value is a fresh arrival at the page (a link, a redirect).
   visit: "visit-1",
 };
@@ -29,6 +31,7 @@ export function resetNextState(): void {
   nextState.userId = USER_ID;
   nextState.revalidated = [];
   nextState.pushed = [];
+  nextState.wentBack = 0;
   nextState.visit = "visit-1";
 }
 

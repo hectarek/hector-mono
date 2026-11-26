@@ -83,20 +83,23 @@ export function searchRecipes(
 
 // The library's orders (D80), beside its groupings in one Sort and group control. Saved first
 // is the default, so it never shows in the address.
-const LIBRARY_ORDERS = ["saved", "recent", "az"] as const;
+const LIBRARY_ORDERS = ["recent", "saved", "az"] as const;
 export type LibraryOrder = (typeof LIBRARY_ORDERS)[number];
+// The order with nothing in the address (D106).
+export const DEFAULT_ORDER: LibraryOrder = "recent";
 
 export function isLibraryOrder(value: unknown): value is LibraryOrder {
   return LIBRARY_ORDERS.some((order) => order === value);
 }
 
-// The library in an order, before search and grouping (D80): saved first (D77), the recipes
-// last opened on this device first (D76; `viewedAt` is when, in ms), or A to Z, which is the
-// order recipes arrive in. Recipes not saved, or never opened, keep A to Z after the rest.
+// The library in an order, before search and grouping (D80, D106): the recipes this person
+// opened most recently first (`viewed`, the most recent first), saved first (D77, each part A
+// to Z), or A to Z, which is the order recipes arrive in. Recipes never opened keep A to Z
+// after the rest.
 export function orderRecipes(
   recipes: ListedRecipe[],
   order: LibraryOrder,
-  { saved, viewedAt }: { saved: string[]; viewedAt: Record<string, number> },
+  { saved, viewed }: { saved: string[]; viewed: string[] },
 ): ListedRecipe[] {
   if (order === "az") return recipes;
   if (order === "saved") {
@@ -106,12 +109,12 @@ export function orderRecipes(
       ...recipes.filter((recipe) => !isSaved.has(recipe.id)),
     ];
   }
-  const viewed = recipes
-    .filter((recipe) => viewedAt[recipe.id] !== undefined)
-    .sort((a, b) => (viewedAt[b.id] ?? 0) - (viewedAt[a.id] ?? 0));
+  const rank = new Map(viewed.map((id, index) => [id, index]));
   return [
-    ...viewed,
-    ...recipes.filter((recipe) => viewedAt[recipe.id] === undefined),
+    ...recipes
+      .filter((recipe) => rank.has(recipe.id))
+      .sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0)),
+    ...recipes.filter((recipe) => !rank.has(recipe.id)),
   ];
 }
 

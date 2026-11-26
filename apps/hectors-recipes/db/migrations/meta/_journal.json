@@ -148,6 +148,13 @@
       "when": 1793483303227,
       "tag": "0020_recipe_share_token",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795703509673,
+      "tag": "0021_activity_events",
+      "breakpoints": true
     }
   ]
 }

@@ -181,3 +181,59 @@
     opacity: 1;
   }
 }
+
+/* Produce hop (docs/ux-plan.md D104, `PageWait`): while a page is on screen but its code is
+   still loading, so a tap would do nothing, the reader's produce row hops in a wave under the
+   header, as `ReadingWait`'s does (a 1.6 s wave, each drawing 140 ms after the one before).
+   CSS alone, by transform and opacity, which keep moving while the page's code loads. It shows
+   after 300 ms, so a page that's ready by then shows nothing, and `ReadyMark` hides it. With
+   reduced motion it appears without fading and stands still. */
+[data-page-wait] {
+  opacity: 0;
+  animation: 200ms ease-out 300ms both page-wait-show;
+}
+html[data-ready] [data-page-wait] {
+  display: none;
+}
+[data-page-wait] svg {
+  animation: 1600ms ease-in-out infinite page-wait-hop;
+}
+[data-page-wait] svg:nth-child(2) {
+  animation-delay: 140ms;
+}
+[data-page-wait] svg:nth-child(3) {
+  animation-delay: 280ms;
+}
+[data-page-wait] svg:nth-child(4) {
+  animation-delay: 420ms;
+}
+[data-page-wait] svg:nth-child(5) {
+  animation-delay: 560ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page-wait] {
+    animation-duration: 1ms;
+  }
+  [data-page-wait] svg {
+    animation: none;
+  }
+}
+
+@keyframes page-wait-show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes page-wait-hop {
+  0%,
+  36%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  18% {
+    transform: translateY(-0.5rem) rotate(-8deg);
+  }
+}

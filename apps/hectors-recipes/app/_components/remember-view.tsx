@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { rememberView } from "@/app/_lib/recently-viewed";
+import { recordView } from "@/app/actions/recipes";
 
-// Notes on this device that the recipe was opened, for the library's Recently viewed (D76).
+// Notes that this person opened the recipe, for the library's Recently viewed (D106). From
+// the page once it shows, never its render, so a prefetch doesn't count. A tap away doesn't
+// wait for it: Next.js lets a navigation go ahead of a pending server action.
 export function RememberView({ recipeId }: { recipeId: string }) {
   useEffect(() => {
-    rememberView(recipeId);
+    recordView(recipeId).catch(() => {
+      // No signal: this open just doesn't count.
+    });
   }, [recipeId]);
   return null;
 }

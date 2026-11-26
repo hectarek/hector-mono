@@ -197,6 +197,22 @@ export async function setBookmark(
   return null;
 }
 
+// Notes that this person opened a recipe's page, for the library's Recently viewed (docs/
+// ux-plan.md D106), once the page shows, so a prefetch never counts. Nothing is revalidated:
+// the library's order catches up when its copy in the phone's memory runs out (D87), never
+// while you're looking at it, so cards don't move under a finger. A view that can't be
+// noted changes nothing the person sees, so it's only logged.
+export async function recordView(recipeId: string): Promise<void> {
+  try {
+    await getInjection("IRecordViewController")(
+      { recipeId },
+      await getCurrentUserId(),
+    );
+  } catch (err) {
+    toActionError(err, actionLogger("recordView"), "Couldn't note the view.");
+  }
+}
+
 // Turns a recipe's view-only public link on or off (docs/ux-plan.md D98), from its ⋯ sheet.
 // The page comes back with the link, or without it.
 export async function setRecipeLink(

@@ -5,12 +5,16 @@ import { createRecipeUseCase } from "@/src/application/use-cases/recipes/create-
 import { deleteRecipeUseCase } from "@/src/application/use-cases/recipes/delete-recipe.use-case";
 import { getAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-all-recipes.use-case";
 import { getBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
+import { getRecentViewsUseCase } from "@/src/application/use-cases/recipes/get-recent-views.use-case";
 import { getRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import { getRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
 import { getSharedRecipeUseCase } from "@/src/application/use-cases/recipes/get-shared-recipe.use-case";
+import { recordViewUseCase } from "@/src/application/use-cases/recipes/record-view.use-case";
 import { setBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
 import { setRecipeLinkUseCase } from "@/src/application/use-cases/recipes/set-recipe-link.use-case";
 import { updateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
+import { ActivityEventsRepository } from "@/src/infrastructure/repositories/activity-events.repository";
+import { MockActivityEventsRepository } from "@/src/infrastructure/repositories/activity-events.repository.mock";
 import { BookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository";
 import { MockBookmarksRepository } from "@/src/infrastructure/repositories/bookmarks.repository.mock";
 import { RecipesRepository } from "@/src/infrastructure/repositories/recipes.repository";
@@ -22,9 +26,11 @@ import { createRecipeController } from "@/src/interface-adapters/controllers/rec
 import { deleteRecipeController } from "@/src/interface-adapters/controllers/recipes/delete-recipe.controller";
 import { getAllRecipesController } from "@/src/interface-adapters/controllers/recipes/get-all-recipes.controller";
 import { getBookmarksController } from "@/src/interface-adapters/controllers/recipes/get-bookmarks.controller";
+import { getRecentViewsController } from "@/src/interface-adapters/controllers/recipes/get-recent-views.controller";
 import { getRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import { getRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
 import { getSharedRecipeController } from "@/src/interface-adapters/controllers/recipes/get-shared-recipe.controller";
+import { recordViewController } from "@/src/interface-adapters/controllers/recipes/record-view.controller";
 import { setBookmarkController } from "@/src/interface-adapters/controllers/recipes/set-bookmark.controller";
 import { setRecipeLinkController } from "@/src/interface-adapters/controllers/recipes/set-recipe-link.controller";
 import { updateRecipeController } from "@/src/interface-adapters/controllers/recipes/update-recipe.controller";
@@ -40,6 +46,9 @@ export function createRecipesModule() {
     recipesModule
       .bind(DI_SYMBOLS.IBookmarksRepository)
       .toClass(MockBookmarksRepository);
+    recipesModule
+      .bind(DI_SYMBOLS.IActivityEventsRepository)
+      .toClass(MockActivityEventsRepository);
   } else {
     recipesModule
       .bind(DI_SYMBOLS.IRecipesRepository)
@@ -50,6 +59,9 @@ export function createRecipesModule() {
     recipesModule
       .bind(DI_SYMBOLS.IBookmarksRepository)
       .toClass(BookmarksRepository, [DI_SYMBOLS.ILoggerService]);
+    recipesModule
+      .bind(DI_SYMBOLS.IActivityEventsRepository)
+      .toClass(ActivityEventsRepository, [DI_SYMBOLS.ILoggerService]);
   }
 
   const writeDeps = [
@@ -209,6 +221,34 @@ export function createRecipesModule() {
     .bind(DI_SYMBOLS.IGetBookmarksController)
     .toHigherOrderFunction(getBookmarksController, [
       DI_SYMBOLS.IGetBookmarksUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+
+  // Recently viewed, per person (docs/ux-plan.md D106).
+  recipesModule
+    .bind(DI_SYMBOLS.IRecordViewUseCase)
+    .toHigherOrderFunction(recordViewUseCase, [
+      DI_SYMBOLS.IActivityEventsRepository,
+      DI_SYMBOLS.IRecipesRepository,
+      DI_SYMBOLS.ITransactionManagerService,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipesModule
+    .bind(DI_SYMBOLS.IRecordViewController)
+    .toHigherOrderFunction(recordViewController, [
+      DI_SYMBOLS.IRecordViewUseCase,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipesModule
+    .bind(DI_SYMBOLS.IGetRecentViewsUseCase)
+    .toHigherOrderFunction(getRecentViewsUseCase, [
+      DI_SYMBOLS.IActivityEventsRepository,
+      DI_SYMBOLS.ILoggerService,
+    ]);
+  recipesModule
+    .bind(DI_SYMBOLS.IGetRecentViewsController)
+    .toHigherOrderFunction(getRecentViewsController, [
+      DI_SYMBOLS.IGetRecentViewsUseCase,
       DI_SYMBOLS.ILoggerService,
     ]);
 

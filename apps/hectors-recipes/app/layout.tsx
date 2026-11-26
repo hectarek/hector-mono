@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Young_Serif } from "next/font/google";
+import { PageWait } from "@/app/_components/page-wait";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { Providers } from "@/app/_providers/providers";
 import "./globals.css";
 
@@ -47,6 +49,8 @@ export default function RootLayout({
     >
       <body>
         <Providers>{children}</Providers>
+        <PageWait />
+        <ReadyMark />
       </body>
     </html>
   );

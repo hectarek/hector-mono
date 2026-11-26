@@ -48,7 +48,9 @@ const router = {
   replace: (url: string) => {
     nextState.pushed.push(url);
   },
-  back: () => {},
+  back: () => {
+    nextState.wentBack += 1;
+  },
   forward: () => {},
   refresh: () => {},
   prefetch: () => {},

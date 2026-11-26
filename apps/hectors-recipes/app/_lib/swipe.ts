@@ -8,13 +8,18 @@ const MIN_SIDEWAYS_RATIO = 1.5;
 const EDGE = 24;
 
 // Whether a touch from `start` to `end` was a sideways swipe (docs/ux-plan.md D51): to the
-// left for what comes next, to the right for what came before.
+// left for what comes next, to the right for what came before. `fromEdges` lets it start at
+// the screen's sides, where the app opened from the home screen has no back swipe of its own
+// (D105).
 export function swipeDirection(
   start: Point,
   end: Point,
   screenWidth: number,
+  { fromEdges = false }: { fromEdges?: boolean } = {},
 ): SwipeDirection | null {
-  if (start.x < EDGE || start.x > screenWidth - EDGE) return null;
+  if (!fromEdges && (start.x < EDGE || start.x > screenWidth - EDGE)) {
+    return null;
+  }
   const sideways = end.x - start.x;
   const vertical = Math.abs(end.y - start.y);
   if (

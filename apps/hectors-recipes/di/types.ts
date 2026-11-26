@@ -1,3 +1,4 @@
+import type { IActivityEventsRepository } from "@/src/application/repositories/activity-events.repository.interface";
 import type { IBookmarksRepository } from "@/src/application/repositories/bookmarks.repository.interface";
 import type { IGroceryItemsRepository } from "@/src/application/repositories/grocery-items.repository.interface";
 import type { IPlanEntriesRepository } from "@/src/application/repositories/plan-entries.repository.interface";
@@ -35,11 +36,13 @@ import type { IDeleteRecipeUseCase } from "@/src/application/use-cases/recipes/d
 import type { IGetAllRecipesUseCase } from "@/src/application/use-cases/recipes/get-all-recipes.use-case";
 import type { IGetBookmarksUseCase } from "@/src/application/use-cases/recipes/get-bookmarks.use-case";
 import type { IGetReadsLeftUseCase } from "@/src/application/use-cases/recipes/get-reads-left.use-case";
+import type { IGetRecentViewsUseCase } from "@/src/application/use-cases/recipes/get-recent-views.use-case";
 import type { IGetRecipeUseCase } from "@/src/application/use-cases/recipes/get-recipe.use-case";
 import type { IGetRecipesUseCase } from "@/src/application/use-cases/recipes/get-recipes.use-case";
 import type { IGetSharedRecipeUseCase } from "@/src/application/use-cases/recipes/get-shared-recipe.use-case";
 import type { IReadRecipeUseCase } from "@/src/application/use-cases/recipes/read-recipe.use-case";
 import type { IReadRecipeFromLinkUseCase } from "@/src/application/use-cases/recipes/read-recipe-from-link.use-case";
+import type { IRecordViewUseCase } from "@/src/application/use-cases/recipes/record-view.use-case";
 import type { ISetBookmarkUseCase } from "@/src/application/use-cases/recipes/set-bookmark.use-case";
 import type { ISetRecipeLinkUseCase } from "@/src/application/use-cases/recipes/set-recipe-link.use-case";
 import type { IUpdateRecipeUseCase } from "@/src/application/use-cases/recipes/update-recipe.use-case";
@@ -81,11 +84,13 @@ import type { IDeleteRecipeController } from "@/src/interface-adapters/controlle
 import type { IGetAllRecipesController } from "@/src/interface-adapters/controllers/recipes/get-all-recipes.controller";
 import type { IGetBookmarksController } from "@/src/interface-adapters/controllers/recipes/get-bookmarks.controller";
 import type { IGetReadsLeftController } from "@/src/interface-adapters/controllers/recipes/get-reads-left.controller";
+import type { IGetRecentViewsController } from "@/src/interface-adapters/controllers/recipes/get-recent-views.controller";
 import type { IGetRecipeController } from "@/src/interface-adapters/controllers/recipes/get-recipe.controller";
 import type { IGetRecipesController } from "@/src/interface-adapters/controllers/recipes/get-recipes.controller";
 import type { IGetSharedRecipeController } from "@/src/interface-adapters/controllers/recipes/get-shared-recipe.controller";
 import type { IReadRecipeController } from "@/src/interface-adapters/controllers/recipes/read-recipe.controller";
 import type { IReadRecipeFromLinkController } from "@/src/interface-adapters/controllers/recipes/read-recipe-from-link.controller";
+import type { IRecordViewController } from "@/src/interface-adapters/controllers/recipes/record-view.controller";
 import type { ISetBookmarkController } from "@/src/interface-adapters/controllers/recipes/set-bookmark.controller";
 import type { ISetRecipeLinkController } from "@/src/interface-adapters/controllers/recipes/set-recipe-link.controller";
 import type { IUpdateRecipeController } from "@/src/interface-adapters/controllers/recipes/update-recipe.controller";
@@ -111,6 +116,7 @@ export const DI_SYMBOLS = {
   IRecipeReaderService: Symbol.for("IRecipeReaderService"),
   IRecipeReadsRepository: Symbol.for("IRecipeReadsRepository"),
   IBookmarksRepository: Symbol.for("IBookmarksRepository"),
+  IActivityEventsRepository: Symbol.for("IActivityEventsRepository"),
   IRecipePageFetcherService: Symbol.for("IRecipePageFetcherService"),
   IGrantPlanSubscriptionUseCase: Symbol.for("IGrantPlanSubscriptionUseCase"),
   IGrantPlanSubscriptionController: Symbol.for(
@@ -167,6 +173,8 @@ export const DI_SYMBOLS = {
   IAdoptRecipesUseCase: Symbol.for("IAdoptRecipesUseCase"),
   ISetBookmarkUseCase: Symbol.for("ISetBookmarkUseCase"),
   IGetBookmarksUseCase: Symbol.for("IGetBookmarksUseCase"),
+  IRecordViewUseCase: Symbol.for("IRecordViewUseCase"),
+  IGetRecentViewsUseCase: Symbol.for("IGetRecentViewsUseCase"),
   ISetRecipeLinkUseCase: Symbol.for("ISetRecipeLinkUseCase"),
   IGetSharedRecipeUseCase: Symbol.for("IGetSharedRecipeUseCase"),
 
@@ -215,6 +223,8 @@ export const DI_SYMBOLS = {
   IAdoptRecipesController: Symbol.for("IAdoptRecipesController"),
   ISetBookmarkController: Symbol.for("ISetBookmarkController"),
   IGetBookmarksController: Symbol.for("IGetBookmarksController"),
+  IRecordViewController: Symbol.for("IRecordViewController"),
+  IGetRecentViewsController: Symbol.for("IGetRecentViewsController"),
   ISetRecipeLinkController: Symbol.for("ISetRecipeLinkController"),
   IGetSharedRecipeController: Symbol.for("IGetSharedRecipeController"),
 };
@@ -226,6 +236,7 @@ export interface DI_RETURN_TYPES {
   IRecipeReaderService: IRecipeReaderService;
   IRecipeReadsRepository: IRecipeReadsRepository;
   IBookmarksRepository: IBookmarksRepository;
+  IActivityEventsRepository: IActivityEventsRepository;
   IRecipePageFetcherService: IRecipePageFetcherService;
   IGrantPlanSubscriptionUseCase: IGrantPlanSubscriptionUseCase;
   IGrantPlanSubscriptionController: IGrantPlanSubscriptionController;
@@ -280,6 +291,8 @@ export interface DI_RETURN_TYPES {
   IAdoptRecipesUseCase: IAdoptRecipesUseCase;
   ISetBookmarkUseCase: ISetBookmarkUseCase;
   IGetBookmarksUseCase: IGetBookmarksUseCase;
+  IRecordViewUseCase: IRecordViewUseCase;
+  IGetRecentViewsUseCase: IGetRecentViewsUseCase;
   ISetRecipeLinkUseCase: ISetRecipeLinkUseCase;
   IGetSharedRecipeUseCase: IGetSharedRecipeUseCase;
 
@@ -326,6 +339,8 @@ export interface DI_RETURN_TYPES {
   IAdoptRecipesController: IAdoptRecipesController;
   ISetBookmarkController: ISetBookmarkController;
   IGetBookmarksController: IGetBookmarksController;
+  IRecordViewController: IRecordViewController;
+  IGetRecentViewsController: IGetRecentViewsController;
   ISetRecipeLinkController: ISetRecipeLinkController;
   IGetSharedRecipeController: IGetSharedRecipeController;
 }
