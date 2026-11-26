@@ -4,6 +4,7 @@ import { CopyGroceriesButton } from "@/app/_components/copy-groceries-button";
 import { GroceryList } from "@/app/_components/grocery-list";
 import { LiveList } from "@/app/_components/live-list";
 import { PageMotion } from "@/app/_components/page-motion";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { SpaceHeader } from "@/app/_components/space-header";
 import { SpaceSwitcher } from "@/app/_components/space-switcher";
 import { getCurrentUserId } from "@/app/_lib/current-user";
@@ -32,6 +33,7 @@ export default async function GroceriesPage({
 
   return (
     <PageMotion>
+      <ReadyMark />
       <div className="flex flex-col gap-4">
         {/* Live updates (D21), with a slower refresh as the safety net when they can't connect. */}
         <LiveList planId={current.id} />

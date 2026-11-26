@@ -9,6 +9,7 @@ import {
   EmptyTitle,
 } from "@repo/ui/components/empty";
 import Link from "next/link";
+import { ReadyMark } from "@/app/_components/ready-mark";
 
 // Last-resort screen for unexpected failures (the server already logged the details).
 export default function ErrorPage({
@@ -19,6 +20,7 @@ export default function ErrorPage({
 }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md items-center px-4">
+      <ReadyMark />
       <Empty>
         <EmptyHeader>
           <EmptyTitle>Something went wrong</EmptyTitle>

@@ -23,4 +23,10 @@ describe("PageWait and ReadyMark", () => {
     expect(document.documentElement.hasAttribute("data-ready")).toBe(true);
     expect(performance.getEntriesByName("page-ready")).toHaveLength(1);
   });
+
+  it("marks only the shell from the root layout, which leaves the row showing", () => {
+    render(<ReadyMark of="shell" />);
+    expect(document.documentElement.hasAttribute("data-ready")).toBe(false);
+    expect(performance.getEntriesByName("shell-ready")).toHaveLength(1);
+  });
 });

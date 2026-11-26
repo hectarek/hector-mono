@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { Logo } from "@/app/_components/logo";
 import { ProduceArt } from "@/app/_components/produce-art";
 import type { Produce } from "@/app/_components/produce-tile";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { safeRedirect } from "@/app/_lib/safe-redirect";
 import { SPACE_TYPE_CONTENTS } from "@/app/_lib/space-href";
 import { getInjection } from "@/di/container";
@@ -89,6 +90,7 @@ async function WaysIn({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <>
+      <ReadyMark />
       {invite && (
         <div
           role="note"

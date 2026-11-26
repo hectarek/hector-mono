@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { BackLink } from "@/app/_components/back-link";
 import { Logo } from "@/app/_components/logo";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { AUTH_PATHS, skipsWhenSignedIn } from "@/app/_lib/auth-paths";
 import { safeRedirect } from "@/app/_lib/safe-redirect";
 import { auth } from "@/lib/auth/server";
@@ -85,6 +86,7 @@ async function AuthForm({
 
   return (
     <>
+      <ReadyMark />
       <BackLink href={welcomeHref} label="Welcome" />
       <Logo className="h-5 w-auto self-start" />
       {/* The prop overrides the raw ?redirectTo= that AuthView would otherwise trust. */}

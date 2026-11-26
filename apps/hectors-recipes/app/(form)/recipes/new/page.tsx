@@ -9,6 +9,7 @@ import {
 } from "@repo/ui/components/item";
 import { Camera, ChevronRight, ClipboardPaste, PenLine } from "lucide-react";
 import Link from "next/link";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { TopBar } from "@/app/_components/top-bar";
 
 // Adding a recipe starts with how (ux-plan D34): from a link or a recipe's text, read for you
@@ -46,6 +47,7 @@ export default async function NewRecipePage({
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadyMark />
       <TopBar
         start={
           <Button

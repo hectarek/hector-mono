@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Logo } from "@/app/_components/logo";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { RecipeCover } from "@/app/_components/recipe-cover";
 import { RecipeFacts } from "@/app/_components/recipe-facts";
 import { RecipeMethod } from "@/app/_components/recipe-method";
@@ -47,6 +48,7 @@ export default async function SharedRecipePage({
 
   return (
     <main className="pt-safe-6 pb-safe-6 mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-6 px-4">
+      <ReadyMark />
       <Logo className="h-5 w-auto self-start" />
       <article data-surface="reading">
         <RecipeServings

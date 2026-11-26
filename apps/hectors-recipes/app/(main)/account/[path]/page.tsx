@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { notFound } from "next/navigation";
 import { AppearanceCard } from "@/app/_components/appearance-card";
 import { BackLink } from "@/app/_components/back-link";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { ACCOUNT_PATHS, SIGN_OUT_HREF } from "@/app/_lib/auth-paths";
 
 export function generateStaticParams() {
@@ -24,6 +25,7 @@ export default async function AccountPage({
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
+      <ReadyMark />
       {/* The account menu opens from any tab, so this goes home rather than guessing. */}
       <BackLink href="/" label="Recipes" />
       <AccountView path={path} />

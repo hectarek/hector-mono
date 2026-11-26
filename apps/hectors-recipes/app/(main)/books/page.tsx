@@ -7,6 +7,7 @@ import { DefaultBookPicker } from "@/app/_components/default-book-picker";
 import { JoinLinkForm } from "@/app/_components/join-link-form";
 import { NewBookForm } from "@/app/_components/new-book-form";
 import { PageMotion } from "@/app/_components/page-motion";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { RoleBadge } from "@/app/_components/role-badge";
 import { getCurrentUserId } from "@/app/_lib/current-user";
 import { loadBooks } from "@/app/_lib/load-books";
@@ -18,6 +19,7 @@ export default async function BooksPage() {
 
   return (
     <PageMotion>
+      <ReadyMark />
       <div className="flex flex-col gap-6">
         <BackLink href="/" label="Recipes" />
         <div>

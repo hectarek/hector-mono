@@ -4,6 +4,7 @@ import { DeleteSpaceButton } from "@/app/_components/delete-space-button";
 import { InviteLinks } from "@/app/_components/invite-links";
 import { MemberList } from "@/app/_components/member-list";
 import { PageMotion } from "@/app/_components/page-motion";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { RenameSpaceForm } from "@/app/_components/rename-space-form";
 import { RoleBadge } from "@/app/_components/role-badge";
 import { getCurrentUserId } from "@/app/_lib/current-user";
@@ -55,6 +56,7 @@ export default async function SpaceSettingsPage({
 
   return (
     <PageMotion>
+      <ReadyMark />
       <div className="flex flex-col gap-6">
         <BackLink href={spaceHref(space)} label={space.name} />
 

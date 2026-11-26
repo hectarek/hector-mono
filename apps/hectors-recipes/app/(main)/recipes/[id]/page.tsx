@@ -6,6 +6,7 @@ import { AddToPlanButton } from "@/app/_components/add-to-plan-button";
 import { BackLink } from "@/app/_components/back-link";
 import { BookmarkButton } from "@/app/_components/bookmark-button";
 import { PageMotion } from "@/app/_components/page-motion";
+import { ReadyMark } from "@/app/_components/ready-mark";
 import { RecipeCover } from "@/app/_components/recipe-cover";
 import { RecipeFacts } from "@/app/_components/recipe-facts";
 import { RecipeMenu } from "@/app/_components/recipe-menu";
@@ -50,6 +51,7 @@ export default async function RecipePage({
 
   return (
     <PageMotion>
+      <ReadyMark />
       <article data-surface="reading">
         <RememberView recipeId={recipe.id} />
         <RecipeServings
