@@ -133,13 +133,13 @@ describe("Recipes", () => {
     ]);
     expect(window.location.search).toBe("?q=rice&group=meal");
 
-    await user.selectOptions(groupBy, "Saved first");
+    await user.selectOptions(groupBy, "Recently viewed");
     expect(view.queryAllByRole("region")).toEqual([]);
     expect(cards(view.getByRole("list"))).toHaveLength(2);
     expect(window.location.search).toBe("?q=rice");
   });
 
-  // D77, D80: saved recipes first by default, and the Saved chip shows only them.
+  // D77, D80: Saved first puts saved recipes first, and the Saved chip shows only them.
   it("puts saved recipes first, and the Saved chip shows only them", async () => {
     const userId = nextStateUser();
     const all = await getInjection("IGetAllRecipesController")({}, userId);
@@ -149,7 +149,13 @@ describe("Recipes", () => {
       userId,
     );
 
+    const user = userEvent.setup();
     const view = render(await page());
+    await user.selectOptions(
+      view.getByRole("combobox", { name: "Sort and group" }),
+      "Saved first",
+    );
+    expect(window.location.search).toBe("?sort=saved");
     expect(cards(view.getByRole("list"))[0]).toContain("Stock");
     // P27.1: its card carries the Saved mark; the others don't.
     const [first, second] = within(view.getByRole("list")).getAllByRole("link");
@@ -160,7 +166,7 @@ describe("Recipes", () => {
       null,
     );
     expect(view.getByRole("link", { name: "Saved" }).getAttribute("href")).toBe(
-      "/?saved=1",
+      "/?saved=1&sort=saved",
     );
 
     view.unmount();
@@ -173,32 +179,36 @@ describe("Recipes", () => {
     saved.getByText("1 of 4 recipes");
   });
 
-  // D76, D80: Recently viewed orders by what was opened on this device.
-  it("orders by what was opened last on this device", async () => {
+  // D106: Recently viewed is the default, from what this person opened, in order from the
+  // server's first render.
+  it("orders by what this person opened last, by default", async () => {
     const userId = nextStateUser();
     const all = await getInjection("IGetAllRecipesController")({}, userId);
     const id = (title: string) =>
       all.recipes.find((recipe) => recipe.title === title)?.id ?? "";
-    localStorage.setItem(
-      "recently-viewed",
-      JSON.stringify({
-        [id("Chicken and Rice")]: 100,
-        [id("Banana Bread")]: 200,
-      }),
-    );
+    for (const title of ["Chicken and Rice", "Banana Bread"]) {
+      await getInjection("IRecordViewController")(
+        { recipeId: id(title) },
+        userId,
+      );
+    }
     const user = userEvent.setup();
     const view = render(await page());
 
-    await user.selectOptions(
-      view.getByRole("combobox", { name: "Sort and group" }),
-      "Recently viewed",
-    );
-    expect(cards(view.getByRole("list")).slice(0, 2)).toEqual([
+    expect(cards(view.getByRole("list"))).toEqual([
       expect.stringContaining("Banana Bread"),
       expect.stringContaining("Chicken and Rice"),
+      expect.stringContaining("Burrito Bowls"),
+      expect.stringContaining("Stock"),
     ]);
-    expect(window.location.search).toBe("?sort=recent");
-    localStorage.removeItem("recently-viewed");
+    const arrange = view.getByRole("combobox", { name: "Sort and group" });
+    expect(arrange).toHaveProperty("value", "recent");
+
+    await user.selectOptions(arrange, "A to Z");
+    expect(cards(view.getByRole("list"))[0]).toContain("Banana Bread");
+    expect(window.location.search).toBe("?sort=az");
+    await user.selectOptions(arrange, "Recently viewed");
+    expect(window.location.search).toBe("");
   });
 
   // A card without a photo shows its YouTube video's thumbnail; a photo stays first.

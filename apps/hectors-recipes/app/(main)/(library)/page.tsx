@@ -33,7 +33,7 @@ export default async function LibraryPage({
   const sort = firstParam(params.sort);
   const savedOnly = firstParam(params.saved) === "1";
   const requestedBook = firstParam(params.book);
-  const { books, current, showAll, saved, library } = await loadLibrary(
+  const { books, current, showAll, saved, viewed, library } = await loadLibrary(
     requestedBook,
     tag,
   );
@@ -108,6 +108,7 @@ export default async function LibraryPage({
               : library.recipes
           }
           saved={saved}
+          viewed={viewed}
           savedOnly={savedOnly}
           total={library.total}
           bookNames={
@@ -188,8 +189,10 @@ async function loadLibrary(
     userId,
     requestedBook === ALL_RECIPES ? undefined : requestedBook,
   );
-  // This person's saved recipes (D77): first by default, and the Saved chip's filter.
+  // This person's saved recipes (D77), for Saved first and the Saved chip's filter, and the
+  // ones they opened, for Recently viewed, the default order (D106).
   const saved = await getInjection("IGetBookmarksController")(userId);
+  const viewed = await getInjection("IGetRecentViewsController")(userId);
   // With no book asked for, their default book; without one, All recipes once they're in
   // two or more (D17).
   const showAll =
@@ -204,5 +207,5 @@ async function loadLibrary(
         { spaceId: current.id, tag },
         userId,
       );
-  return { books, current, showAll, saved, library };
+  return { books, current, showAll, saved, viewed, library };
 }

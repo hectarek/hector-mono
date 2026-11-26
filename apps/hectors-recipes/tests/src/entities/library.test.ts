@@ -216,20 +216,20 @@ describe("groupRecipes", () => {
   });
 });
 
-// D80: the library's order, before search and grouping.
+// D80, D106: the library's order, before search and grouping.
 describe("orderRecipes", () => {
   const [apple, bread, chili, dal] = ["Apple Pie", "Bread", "Chili", "Dal"].map(
     (title) => recipe(title),
   );
   const list = [apple, bread, chili, dal] as ListedRecipe[];
-  const none = { saved: [], viewedAt: {} };
+  const none = { saved: [], viewed: [] };
 
   it("puts saved recipes first, each part A to Z", () => {
     expect(
       titles(
         orderRecipes(list, "saved", {
           saved: [dal?.id ?? "", bread?.id ?? ""],
-          viewedAt: {},
+          viewed: [],
         }),
       ),
     ).toEqual(["Bread", "Dal", "Apple Pie", "Chili"]);
@@ -237,17 +237,16 @@ describe("orderRecipes", () => {
   });
 
   it("puts the last opened first, the rest A to Z", () => {
-    const viewedAt = { [chili?.id ?? ""]: 100, [apple?.id ?? ""]: 300 };
-    expect(
-      titles(orderRecipes(list, "recent", { saved: [], viewedAt })),
-    ).toEqual(["Apple Pie", "Chili", "Bread", "Dal"]);
+    const viewed = [apple?.id ?? "", chili?.id ?? ""];
+    expect(titles(orderRecipes(list, "recent", { saved: [], viewed }))).toEqual(
+      ["Apple Pie", "Chili", "Bread", "Dal"],
+    );
+    expect(titles(orderRecipes(list, "recent", none))).toEqual(titles(list));
   });
 
   it("leaves A to Z as it comes", () => {
     expect(
-      titles(
-        orderRecipes(list, "az", { saved: [dal?.id ?? ""], viewedAt: {} }),
-      ),
+      titles(orderRecipes(list, "az", { saved: [dal?.id ?? ""], viewed: [] })),
     ).toEqual(titles(list));
   });
 });

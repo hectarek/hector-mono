@@ -15,7 +15,7 @@ import { Bookmark, Check, Search } from "lucide-react";
 import Link from "next/link";
 import type { FormEvent, ReactNode } from "react";
 import { libraryHref } from "@/app/_lib/library-href";
-import type { LibraryOrder } from "@/src/entities/library";
+import { DEFAULT_ORDER, type LibraryOrder } from "@/src/entities/library";
 import {
   TAG_CATEGORIES,
   TAG_CATEGORY_LABELS,
@@ -23,16 +23,15 @@ import {
 } from "@/src/entities/models/tag.model";
 
 const ORDER_LABELS: Record<LibraryOrder, string> = {
-  saved: "Saved first",
   recent: "Recently viewed",
+  saved: "Saved first",
   az: "A to Z",
 };
 
-// The search box, Sort and group (D80), the Saved chip and the tag chips. Still a plain GET
-// form and links, so searching, tags and grouping work before the page's script has loaded and
-// every view has its own address; with the script, the list narrows as you type and reorders
-// or regroups as you pick (LibraryResults). The orders need the script: Recently viewed is
-// kept on the device (D76).
+// The search box, Sort and group (D80, D106), the Saved chip and the tag chips. Still a plain
+// GET form and links, so searching, tags and grouping work before the page's script has loaded
+// and every view has its own address; with the script, the list narrows as you type and
+// reorders or regroups as you pick (LibraryResults).
 export function LibraryFilters({
   book,
   tags,
@@ -65,7 +64,7 @@ export function LibraryFilters({
   }
 
   // Where a chip goes: everything as it is, with the chip's own filter flipped.
-  const sort = order === "saved" ? undefined : order;
+  const sort = order === DEFAULT_ORDER ? undefined : order;
   const href = (filters: { tag?: string; saved: boolean }) =>
     libraryHref({
       book,

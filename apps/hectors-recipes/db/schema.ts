@@ -7,6 +7,7 @@ import {
   foreignKey,
   index,
   integer,
+  jsonb,
   numeric,
   pgTable,
   primaryKey,
@@ -358,6 +359,43 @@ export const recipeBookmarks = pgTable(
   (table) => [
     primaryKey({ columns: [table.userId, table.recipeId] }),
     index("recipe_bookmarks_recipe_idx").on(table.recipeId),
+  ],
+);
+
+// What people do in the app (docs/ux-plan.md D106): one row per event, never changed once
+// written. `type` names the kind (`ACTIVITY_TYPES` in src/entities/models/activity-event.model.ts),
+// checked by the code rather than here, so a new kind needs no migration; `details` holds what
+// that kind carries. An event is about a recipe, a space (a book or meal plan), both or
+// neither, and goes with them when they're deleted. `occurred_at` is stepped past the person's
+// newest event, so their events keep the order they happened in.
+export const activityEvents = pgTable(
+  "activity_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull(),
+    type: text("type").notNull(),
+    recipeId: uuid("recipe_id").references(() => recipes.id, {
+      onDelete: "cascade",
+    }),
+    spaceId: uuid("space_id").references(() => spaces.id, {
+      onDelete: "cascade",
+    }),
+    details: jsonb("details")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
+    occurredAt: timestamp("occurred_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("activity_events_user_type_time_idx").on(
+      table.userId,
+      table.type,
+      table.occurredAt,
+    ),
+    index("activity_events_recipe_idx").on(table.recipeId),
+    index("activity_events_space_idx").on(table.spaceId),
   ],
 );
 

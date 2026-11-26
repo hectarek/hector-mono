@@ -11,13 +11,13 @@ import {
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { LibraryFilters } from "@/app/_components/library-filters";
 import { ProduceTile } from "@/app/_components/produce-tile";
 import { RecipeCard } from "@/app/_components/recipe-card";
 import { libraryHref } from "@/app/_lib/library-href";
-import { viewedAt as readViewedAt } from "@/app/_lib/recently-viewed";
 import {
+  DEFAULT_ORDER,
   groupRecipes,
   isLibraryOrder,
   type LibraryOrder,
@@ -33,12 +33,11 @@ import {
 } from "@/src/entities/models/tag.model";
 
 // The library's search, Sort and group, chips and cards (ux-plan P10.4, D57, D80). The page
-// sends every card the tag (and the Saved chip) allows; here they're put in order (saved first
-// by default, D77), narrowed as you type by the same rule the server uses, and grouped under
-// headings. The address (?q=, ?sort=, ?group=) is kept up to date, replaced rather than added
-// to history, so Back and shared links still work. Server-rendered from the address, the first
-// view is already filtered and grouped; Recently viewed, kept on the device (D76), orders once
-// the page has loaded.
+// sends every card the tag (and the Saved chip) allows; here they're put in order (recently
+// viewed by default, D106), narrowed as you type by the same rule the server uses, and grouped
+// under headings. The address (?q=, ?sort=, ?group=) is kept up to date, replaced rather than
+// added to history, so Back and shared links still work. Server-rendered from the address and
+// the person's views, the first view is already in order, filtered and grouped.
 export function LibraryResults({
   book,
   tags,
@@ -47,6 +46,7 @@ export function LibraryResults({
   recipes,
   total,
   saved,
+  viewed,
   savedOnly,
   bookNames,
   empty,
@@ -60,6 +60,8 @@ export function LibraryResults({
   total: number;
   // This person's saved recipes (D77).
   saved: string[];
+  // The recipes this person opened, the most recent first (D106).
+  viewed: string[];
   // Only saved recipes are shown (?saved=1).
   savedOnly: boolean;
   // Each card's book, when the grid mixes books (All recipes).
@@ -77,13 +79,11 @@ export function LibraryResults({
   });
   const [order, setOrder] = useState<LibraryOrder>(() => {
     const value = searchParams.get("sort");
-    return isLibraryOrder(value) ? value : "saved";
+    return isLibraryOrder(value) ? value : DEFAULT_ORDER;
   });
-  const [viewedAt, setViewedAt] = useState<Record<string, number>>({});
-  useEffect(() => setViewedAt(readViewedAt()), []);
 
   const shown = searchRecipes(
-    orderRecipes(recipes, order, { saved, viewedAt }),
+    orderRecipes(recipes, order, { saved, viewed }),
     search,
   );
 
@@ -99,7 +99,7 @@ export function LibraryResults({
         search: text.trim() || undefined,
         tag: activeTag,
         saved: savedOnly,
-        sort: next.order === "saved" ? undefined : next.order,
+        sort: next.order === DEFAULT_ORDER ? undefined : next.order,
         group: next.group,
       }),
     );
@@ -113,8 +113,11 @@ export function LibraryResults({
   // One control for both (D80): a grouping keeps the default order inside its headings.
   function changeArrangement(value: string) {
     const next = isTagCategory(value)
-      ? { order: "saved" as const, group: value }
-      : { order: isLibraryOrder(value) ? value : "saved", group: undefined };
+      ? { order: DEFAULT_ORDER, group: value }
+      : {
+          order: isLibraryOrder(value) ? value : DEFAULT_ORDER,
+          group: undefined,
+        };
     setOrder(next.order);
     setGroup(next.group);
     replaceAddress(search, next);
@@ -205,7 +208,7 @@ export function LibraryResults({
                 <Link
                   href={libraryHref({
                     book,
-                    sort: order === "saved" ? undefined : order,
+                    sort: order === DEFAULT_ORDER ? undefined : order,
                     group,
                   })}
                   onClick={() => setSearch("")}
