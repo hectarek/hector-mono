@@ -23,4 +23,12 @@ describe("swipeDirection", () => {
       swipeDirection({ x: 365, y: 300 }, { x: 150, y: 300 }, WIDTH),
     ).toBeNull();
   });
+
+  it("lets a swipe start at the sides when asked (the home-screen app, D105)", () => {
+    expect(
+      swipeDirection({ x: 4, y: 300 }, { x: 200, y: 300 }, WIDTH, {
+        fromEdges: true,
+      }),
+    ).toBe("previous");
+  });
 });
