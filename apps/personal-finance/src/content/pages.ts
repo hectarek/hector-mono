@@ -30,6 +30,24 @@ export const PAGES: readonly SitePage[] = [
     topic: "investing",
     readFirst: [],
   },
+  {
+    slug: "words",
+    title: "Money words, in plain English",
+    summary:
+      "Every money word this site uses, each explained in a sentence or two.",
+    kind: "glossary",
+    topic: null,
+    readFirst: [],
+  },
+  {
+    slug: "resources",
+    title: "Where to learn more",
+    summary:
+      "The free courses, calculators and books worth your time, and why each one is.",
+    kind: "resources",
+    topic: null,
+    readFirst: [],
+  },
 ];
 
 export const HOME_LINE =

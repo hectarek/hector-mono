@@ -1,4 +1,4 @@
-import type { TopicSlug } from "./topics";
+import { TOPICS, type TopicSlug } from "./topics";
 
 type Resource = {
   title: string;
@@ -156,3 +156,11 @@ export const RESOURCES: readonly Resource[] = [
     caveat: null,
   },
 ];
+
+// The resources page's groups: every topic that has resources, in the topics' order.
+export function resourcesByTopic() {
+  return TOPICS.map((topic) => ({
+    topic,
+    resources: RESOURCES.filter((r) => r.topics.includes(topic.slug)),
+  })).filter((group) => group.resources.length > 0);
+}
