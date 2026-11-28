@@ -6,6 +6,8 @@ type PageMetadataInput = {
   title: string;
   description: string;
   path: `/${string}`;
+  // A preview another page shares, by its slug: the walkthrough's steps use "start".
+  preview?: string;
 };
 
 // Each page's canonical link, og:url and its own preview. No title: the shell renders the only
@@ -15,9 +17,11 @@ export function pageMetadata({
   title,
   description,
   path,
+  preview,
 }: PageMetadataInput): Metadata {
   const url = `${SITE_URL}${path}`;
-  const slug = path === "/" ? "home" : path.slice(1).replaceAll("/", "-");
+  const slug =
+    preview ?? (path === "/" ? "home" : path.slice(1).replaceAll("/", "-"));
   const image = {
     url: `${SITE_URL}/previews/${slug}-${PREVIEW_VERSION}.png`,
     width: 1200,

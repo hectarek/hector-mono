@@ -24,12 +24,16 @@ app/
   page.tsx             home: Start here and the topic tiles
   [topic]/             one route for every topic, from src/content/topics.ts
   compound-growth/     the growth calculator: page.tsx and growth-calculator.tsx (client)
+  start/               the walkthrough: /start is the first step, [step]/ the rest (KTD11)
+  words/, resources/   the glossary and the outside resources
   _components/         page-title, site-header, site-footer, topic-tile, resource-item
     calculator/        the parts every calculator shares: field, headline, parts, chart and table
+    walkthrough/       step-view, step-shell (keys, swipes, focus), diagrams, growth-example
 src/
   site.ts              SITE_NAME, SITE_URL, PREVIEW_VERSION
   seo.ts               pageMetadata, and metadataForPage(slug) from the content list
-  content/             topics, pages, resources: the lists the site is built from (KTD2)
+  content/             topics, pages, resources, words, steps: the lists the site is built from (KTD2)
+  lib/swipe.ts         the swipe and arrow-key rules, pure and tested
   finance/             the money math, plain TypeScript with no React (KTD7)
 docs/
   build-plan.md        the plan of record
@@ -47,6 +51,8 @@ tests/                 bun test; tests/screens/*.test.tsx run with bun run test:
 - Adding a page: an entry in `src/content/pages.ts`, its folder under `app/` exporting `metadata = metadataForPage("<slug>")`, and its preview: `bun scripts/render-previews.ts` from this folder, outside the Claude Code sandbox (headless Chrome). Tests fail on a page without a folder or a preview, and on a leftover preview.
 - Calculator fields are `<Input data-size="lg">` (44px, 16px text, so an iPhone doesn't zoom), `type="text" inputMode="decimal" autoComplete="off"`, outside any form. `src/finance/parse.ts`'s `checkField` gives each field its range and its fix message; a comma is a thousands separator in a dollar field and a decimal point in a percent field.
 - The headline is drawn twice: a visible copy that follows every keystroke, `aria-hidden`, and a screen-reader-only polite copy that settles 500ms after typing stops, so a screen reader hears it once. While a field is invalid, `ResultBody` keeps the result's height and hides its numbers (`invisible`).
+- The walkthrough's steps are data in `src/content/steps.ts`, at most three blocks each. In a text block, `[[shown words|glossary-slug]]` marks a word's first use and renders as `<Word>`, a link to `/words#slug` that a tap turns into its definition once the page's code runs. A step slug is a link people may have been sent: never rename or reuse one. Every step shares the walkthrough's preview (`pageMetadata`'s `preview: "start"`), and `/start` and `/start/<first slug>` both have `/start` as their canonical link.
+- `StepShell` moves focus to the new step's heading on every step change except the first page a reader lands on. Its key listener lives in an effect, so the steps Next keeps mounted but hidden stop listening. Swipes are ignored when they start on a field, a button, a growth example (`data-swipe-ignore`), a scrolling table, or while the reader is zoomed in.
 - Charts are `aria-hidden`, pass `accessibilityLayer={false}` (recharts 3.11 otherwise makes the SVG a focus stop) and `isAnimationActive={false}`, and sit beside a captioned table, their equivalent. recharts is pinned to exactly `3.11.0`, `@repo/ui`'s version.
 
 ## Gotchas

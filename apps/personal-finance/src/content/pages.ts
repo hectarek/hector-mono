@@ -1,4 +1,5 @@
 import { SITE_NAME } from "@/src/site";
+import { STEPS } from "./steps";
 import { TOPICS, type TopicSlug } from "./topics";
 
 type PageKind =
@@ -21,6 +22,14 @@ type SitePage = {
 // an entry here, its folder under app/, and its preview (bun scripts/render-previews.ts).
 // A slug is a link people have been sent, so it never changes or gets reused.
 export const PAGES: readonly SitePage[] = [
+  {
+    slug: "start",
+    title: "Start here",
+    summary: "A short walk through how money works, one idea at a time.",
+    kind: "walkthrough",
+    topic: "basics",
+    readFirst: [],
+  },
   {
     slug: "compound-growth",
     title: "Watch your money grow",
@@ -66,7 +75,10 @@ export const PREVIEW_CARDS: readonly {
 
 // The name the tab title shows for a path, or null for the home page and unknown paths.
 export function pageNameFor(path: string): string | null {
-  const slug = path.split("/")[1] ?? "";
+  const [, slug = "", step] = path.split("/");
+  if (slug === "start") {
+    return (STEPS.find((s) => s.slug === step) ?? STEPS[0])?.title ?? null;
+  }
   return (
     TOPICS.find((t) => t.slug === slug)?.name ??
     PAGES.find((p) => p.slug === slug)?.title ??

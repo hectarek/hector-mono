@@ -46,3 +46,22 @@ describe("pageMetadata", () => {
     );
   });
 });
+
+describe("pageMetadata with a shared preview", () => {
+  it("names the given preview rather than one drawn from the path", () => {
+    const step = pageMetadata({
+      title: "Start early, then stop",
+      description: "A short walk through how money works.",
+      path: "/start/start-early-then-stop",
+      preview: "start",
+    });
+    expect(step.openGraph?.images).toEqual([
+      expect.objectContaining({
+        url: `${SITE_URL}/previews/start-${PREVIEW_VERSION}.png`,
+      }),
+    ]);
+    expect(step.alternates?.canonical).toBe(
+      `${SITE_URL}/start/start-early-then-stop`,
+    );
+  });
+});

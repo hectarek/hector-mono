@@ -1,4 +1,5 @@
 import type { RESOURCES } from "@/src/content/resources";
+import { formatDate } from "@/src/finance/format";
 
 type Resource = (typeof RESOURCES)[number];
 
@@ -27,18 +28,9 @@ export function ResourceItem({ resource }: { resource: Resource }) {
       )}
       {resource.link?.checked && (
         <p className="text-base text-muted-foreground">
-          Link checked {formatChecked(resource.link.checked)}
+          Link checked {formatDate(resource.link.checked)}
         </p>
       )}
     </li>
   );
-}
-
-// "2026-11-28" as "November 28, 2026". The date is a constant from the content list, so building
-// it reads no clock while the page prerenders.
-function formatChecked(isoDate: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "long",
-    timeZone: "UTC",
-  }).format(new Date(`${isoDate}T00:00:00Z`));
 }
