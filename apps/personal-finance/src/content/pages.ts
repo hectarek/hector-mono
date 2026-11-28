@@ -75,9 +75,17 @@ export const PREVIEW_CARDS: readonly {
 
 // The name the tab title shows for a path, or null for the home page and unknown paths.
 export function pageNameFor(path: string): string | null {
-  const [, slug = "", step] = path.split("/");
+  const [, slug = "", step, ...rest] = path.split("/");
+  if (rest.length > 0) {
+    return null;
+  }
   if (slug === "start") {
-    return (STEPS.find((s) => s.slug === step) ?? STEPS[0])?.title ?? null;
+    const shown =
+      step === undefined ? STEPS[0] : STEPS.find((s) => s.slug === step);
+    return shown?.title ?? null;
+  }
+  if (step !== undefined) {
+    return null;
   }
   return (
     TOPICS.find((t) => t.slug === slug)?.name ??

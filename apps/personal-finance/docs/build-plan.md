@@ -16,12 +16,12 @@ The plan for `apps/personal-finance` (a working name, H1): a free site Hector ca
 
 ## Status
 
-|                   |                                                                                                                                                                                                                                                                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase             | Batch 1 (U1 to U5) is built and committed on the branch, not pushed: every check passes, every page builds static, and Lighthouse accessibility is 100 on each page (2026-11-28). U8's four style tiles are on a private Claude Design canvas                                                                                |
-| Next              | Push Batch 1 and open its pull request, once Hector OKs the Vercel project (H4). U9 follows his pick of a look (H3), then Batch 2 (U6, U7) after the reader check                                                                                                                                                            |
-| Waiting on Hector | H1 to H6; which compounding rule the growth calculator uses (the talk's yearly rule or monthly compounding); which meaning of "asset" the site teaches; whether the walkthrough's steps keep sharing one preview; and whether charts stay on recharts, which adds about 146 KB of compressed JavaScript to a calculator page |
-| Updated           | 2026-11-28                                                                                                                                                                                                                                                                                                                   |
+|                   |                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase             | Batch 1 (U1 to U5) is built and committed on the branch, not pushed: every check passes, every page builds static, and Lighthouse accessibility is 100 on each page (2026-11-28). U8's four style tiles are on a private Claude Design canvas                                                                                                        |
+| Next              | Push Batch 1 and open its pull request, once Hector OKs the Vercel project (H4). U9 follows his pick of a look (H3), then Batch 2 (U6, U7) after the reader check                                                                                                                                                                                    |
+| Waiting on Hector | H1 to H6; which compounding rule the growth calculator uses (the talk's yearly rule or monthly compounding); which meaning of "asset" the site teaches; whether the walkthrough's steps keep sharing one preview; and whether charts stay on recharts, which adds about 90 KB of compressed JavaScript to a calculator page, loaded after its fields |
+| Updated           | 2026-11-28                                                                                                                                                                                                                                                                                                                                           |
 
 ---
 
@@ -517,7 +517,7 @@ apps/personal-finance/
 - **Requirements:** R21, R22. KTD5, KTD16.
 - **Dependencies:** U8 and H3. It lands in the open batch.
 - **Files:**
-  - Create: `packages/ui/src/styles/themes/personal-finance.css`
+  - Create: `packages/ui/src/styles/themes/personal-finance.css`, and the site's icons in the new look: `app/icon.png` and `app/apple-icon.png`, as the portfolio has them. Until then a browser's automatic `/favicon.ico` request matches `[topic]` and renders the not-found page on request. _Added 2026-11-28 (review of Batch 1)._
   - Modify: `app/globals.css`, `app/layout.tsx` (`data-theme`), `docs/preview-card.html`, `public/previews/*.png`, `AGENTS.md`
 - **Approach:**
   1. Generate the theme from the Design System rather than hand-picking values, as `recipes.css` is.

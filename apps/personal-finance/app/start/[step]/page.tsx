@@ -8,7 +8,7 @@ type StepPageProps = { params: Promise<{ step: string }> };
 
 // Every step is real HTML at its own link, so it reads before the page's code loads and on
 // phones too old to run it (KTD11).
-export function generateStaticParams() {
+export function generateStaticParams(): { step: string }[] {
   return STEPS.map((step) => ({ step: step.slug }));
 }
 

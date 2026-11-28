@@ -1,9 +1,4 @@
-import {
-  allocateRounded,
-  formatDollars,
-  formatPercent,
-  formatYears,
-} from "./format";
+import { formatDollars, formatPercent, formatYears } from "./format";
 import type { FieldRule } from "./parse";
 
 export type DepositFrequency = "monthly" | "yearly";
@@ -80,18 +75,17 @@ export function growth(input: GrowthInput): Growth {
   return { byYear, putIn, total, earned: total - putIn };
 }
 
-// The amounts the sentence and the parts both show, rounded together so the parts add up to the
-// total (allocateRounded, R14).
+// The amounts the sentence and the parts both show. Put-in and total each round to the nearest
+// dollar, as the year-by-year table rounds them, and what it earned is the difference, so the
+// parts still add up to the total (R14) and match the table's last row.
 export function roundedGrowth(result: Growth): {
   putIn: number;
   earned: number;
   total: number;
 } {
-  const [putIn = 0, earned = 0] = allocateRounded([
-    result.putIn,
-    result.earned,
-  ]);
-  return { putIn, earned, total: putIn + earned };
+  const putIn = Math.round(result.putIn);
+  const total = Math.round(result.total);
+  return { putIn, earned: total - putIn, total };
 }
 
 // The headline sentence (R14): the main inputs restated, then the rounded total. In today's

@@ -74,4 +74,12 @@ describe("the tab title on the walkthrough", () => {
     );
     expect(pageNameFor("/start")).toBe(STEPS[0]?.title ?? "");
   });
+
+  it("names nothing for a mistyped or outdated link, so its not-found page isn't titled as a page", async () => {
+    const { pageNameFor } = await import("@/src/content/pages");
+    expect(pageNameFor("/start/no-such-step")).toBeNull();
+    expect(pageNameFor("/start/start-early-then-stop/extra")).toBeNull();
+    expect(pageNameFor("/basics/x")).toBeNull();
+    expect(pageNameFor("/compound-growth/x")).toBeNull();
+  });
 });

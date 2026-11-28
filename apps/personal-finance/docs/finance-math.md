@@ -80,4 +80,6 @@ Money shows in whole dollars. A shown amount is never NaN, infinity or −$0.
 
 A result's parts are rounded together so they add up to the rounded total, by the largest remainder: round the total, round every part down, then give the dollars left over to the parts with the largest remainders (`allocateRounded`).
 
+Growth over time has two parts, and its year-by-year table shows put-in and total on their own. So `roundedGrowth` rounds put-in and the total each to the nearest dollar, as the table does, and shows what it earned as the difference. The parts still add up, and they match the table's last row. A largest-remainder split could show a put-in a dollar off the table's: in today's dollars, $500 a month for 4 years at 7% and 3% inflation puts in $22,607.61, which the split would show as $22,607 beside the table's $22,608.
+
 **Example 9: parts of $1,210.45, $300.40 and $99.30.** The total, $1,610.15, rounds to $1,610. Rounded down, the parts are $1,210, $300 and $99, which is $1,609. The one dollar left goes to the largest remainder, 0.45, so the parts show as **$1,211, $300 and $99**, which add up to $1,610. Rounding each part on its own would show $1,210 + $300 + $99 = $1,609 beside a total of $1,610.

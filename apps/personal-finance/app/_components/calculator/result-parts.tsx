@@ -20,7 +20,8 @@ export function ResultBody({
 type Part = { label: string; amount: number };
 
 // How the total is built (R14, D7). The amounts are whole dollars that already add up to the
-// total (allocateRounded), so the sum shown here is the total the sentence states.
+// total (roundedGrowth, or allocateRounded for more parts), so the sum shown here is the total
+// the sentence states.
 export function ResultParts({
   parts,
   totalLabel,

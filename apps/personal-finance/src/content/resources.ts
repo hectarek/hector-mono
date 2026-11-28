@@ -157,8 +157,13 @@ export const RESOURCES: readonly Resource[] = [
   },
 ];
 
+type ResourceGroup = {
+  topic: (typeof TOPICS)[number];
+  resources: readonly Resource[];
+};
+
 // The resources page's groups: every topic that has resources, in the topics' order.
-export function resourcesByTopic() {
+export function resourcesByTopic(): ResourceGroup[] {
   return TOPICS.map((topic) => ({
     topic,
     resources: RESOURCES.filter((r) => r.topics.includes(topic.slug)),

@@ -117,6 +117,39 @@ describe("the growth calculator", () => {
     );
   });
 
+  it("in today's dollars, asks for inflation and says when inflation took more than the return gave", async () => {
+    render(<GrowthCalculator />);
+    expect(screen.queryByLabelText("Inflation a year")).toBeNull();
+
+    fireEvent.click(screen.getByRole("switch"));
+    expect(screen.getByLabelText("Inflation a year")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Yearly return"), {
+      target: { value: "0" },
+    });
+
+    expect(
+      screen.getByText("What inflation took", { selector: "dt" }),
+    ).toBeTruthy();
+    await waitFor(() =>
+      expect(liveRegion().textContent).toContain(
+        "in today's dollars, at 3% inflation: less than",
+      ),
+    );
+  });
+
+  it("with yearly deposits that stop early, says the money then keeps growing", async () => {
+    render(<GrowthCalculator />);
+    fireEvent.click(screen.getByRole("button", { name: "Each year" }));
+    fireEvent.change(screen.getByLabelText("Keep putting money in for"), {
+      target: { value: "10" },
+    });
+    await waitFor(() =>
+      expect(liveRegion().textContent).toContain(
+        "Putting in $200 a year for 10 years, then letting it grow until year 30, at 7% a year",
+      ),
+    );
+  });
+
   it("keeps every focus stop out of the chart", () => {
     // happy-dom lays nothing out, so recharts would measure 0 by 0 and draw nothing: give the
     // chart a phone's width.

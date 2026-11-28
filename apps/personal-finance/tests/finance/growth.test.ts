@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import { GROWTH_EXAMPLE } from "@/src/finance/assumptions";
-import { describeGrowth, type GrowthInput, growth } from "@/src/finance/growth";
+import {
+  describeGrowth,
+  type GrowthInput,
+  growth,
+  roundedGrowth,
+} from "@/src/finance/growth";
 
 // To the cent, as docs/finance-math.md states them: never a looser tolerance.
 const cents = (amount: number) => Math.round(amount * 100) / 100;
@@ -145,6 +150,26 @@ describe("growth in today's dollars", () => {
     expect(describeGrowth(input, result)).toBe(
       "Putting in $100 a month for 10 years at 0% a year, you'd have about $8,929 in today's dollars, at 3% inflation: less than the $10,376 you put in, because inflation makes each dollar buy less.",
     );
+  });
+
+  it("shows the same put-in in the parts as in the table's last row, and the parts still add up", () => {
+    // $500 a month for 4 years at 7%: in today's dollars the put-in is $22,607.61, which a
+    // largest-remainder split would show as $22,607 beside the table's $22,608.
+    const input: GrowthInput = {
+      ...nothing,
+      deposit: 500,
+      frequency: "monthly",
+      years: 4,
+      rate: 0.07,
+      inflation: 0.03,
+    };
+    const result = growth(input);
+    const lastRow = result.byYear.at(-1);
+    const shown = roundedGrowth(result);
+    expect(cents(result.putIn)).toBe(22_607.61);
+    expect(shown.putIn).toBe(Math.round(lastRow?.putIn ?? Number.NaN));
+    expect(shown.total).toBe(Math.round(lastRow?.total ?? Number.NaN));
+    expect(shown.putIn + shown.earned).toBe(shown.total);
   });
 });
 

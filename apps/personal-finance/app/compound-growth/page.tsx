@@ -36,8 +36,8 @@ export default function CompoundGrowthPage() {
 
       <GrowthCalculator />
 
-      <section aria-labelledby="how-it-works" className="space-y-3">
-        <h2 id="how-it-works" className="font-semibold text-xl">
+      <section aria-labelledby="growth-how-it-works" className="space-y-3">
+        <h2 id="growth-how-it-works" className="font-semibold text-xl">
           How this works
         </h2>
         <p>
@@ -53,8 +53,8 @@ export default function CompoundGrowthPage() {
         </p>
       </section>
 
-      <section aria-labelledby="left-out" className="space-y-3">
-        <h2 id="left-out" className="font-semibold text-xl">
+      <section aria-labelledby="growth-left-out" className="space-y-3">
+        <h2 id="growth-left-out" className="font-semibold text-xl">
           What this leaves out
         </h2>
         <ul className="list-disc space-y-2 pl-6">
@@ -71,8 +71,8 @@ export default function CompoundGrowthPage() {
         </ul>
       </section>
 
-      <section aria-labelledby="go-further" className="space-y-4">
-        <h2 id="go-further" className="font-semibold text-xl">
+      <section aria-labelledby="growth-go-further" className="space-y-4">
+        <h2 id="growth-go-further" className="font-semibold text-xl">
           Go further
         </h2>
         <ul>

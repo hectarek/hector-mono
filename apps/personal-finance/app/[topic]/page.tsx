@@ -9,7 +9,7 @@ import { pageMetadata } from "@/src/seo";
 
 type TopicPageProps = { params: Promise<{ topic: string }> };
 
-export function generateStaticParams() {
+export function generateStaticParams(): { topic: string }[] {
   return TOPICS.map((t) => ({ topic: t.slug }));
 }
 
@@ -66,8 +66,11 @@ export default async function TopicPage({ params }: TopicPageProps) {
         </p>
       )}
 
-      <section aria-labelledby="go-further" className="space-y-4">
-        <h2 id="go-further" className="font-semibold text-xl">
+      <section
+        aria-labelledby={`${topic.slug}-go-further`}
+        className="space-y-4"
+      >
+        <h2 id={`${topic.slug}-go-further`} className="font-semibold text-xl">
           {pages.length > 0 ? "Go further" : "Good places to start"}
         </h2>
         <ul className="space-y-6">
