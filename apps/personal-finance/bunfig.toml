@@ -1,0 +1,2 @@
+[test]
+# No preload: the app reads no secrets, and its tests reach no services.

@@ -1,0 +1,4 @@
+@import "@repo/ui/styles/globals.css";
+
+/* The default theme until Hector picks a look from the style tiles (the plan's U8 and U9).
+   Its theme file then joins this import list, and <html> gets its data-theme. */
