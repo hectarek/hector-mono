@@ -3,7 +3,6 @@ import { TopicTile } from "@/app/_components/topic-tile";
 import { Word } from "@/app/_components/word";
 import { STEPS, textParts } from "@/src/content/steps";
 import { TOPICS } from "@/src/content/topics";
-import type { WordSlug } from "@/src/content/words";
 import { StepDiagram } from "./diagrams";
 import { GrowthExample } from "./growth-example";
 import { StepShell } from "./step-shell";
@@ -11,7 +10,7 @@ import { StepShell } from "./step-shell";
 type Step = (typeof STEPS)[number];
 
 // The first step lives at /start, the rest at /start/<slug> (KTD11).
-export function stepPath(index: number): string {
+export function stepPath(index: number): `/${string}` {
   const step = STEPS[index];
   return index === 0 || !step ? "/start" : `/start/${step.slug}`;
 }
@@ -21,7 +20,7 @@ function Text({ text }: { text: string }) {
     <p>
       {textParts(text).map((part) =>
         "word" in part ? (
-          <Word key={part.word} slug={part.word as WordSlug}>
+          <Word key={part.word} slug={part.word}>
             {part.text}
           </Word>
         ) : (
@@ -51,7 +50,7 @@ function Block({ step, block }: { step: Step; block: Step["blocks"][number] }) {
         <GrowthExample
           id={step.slug}
           deposit={block.deposit}
-          every={block.every}
+          frequency={block.frequency}
           depositYears={block.depositYears}
           years={block.years}
           yearlyReturn={block.yearlyReturn}
@@ -72,11 +71,7 @@ function Block({ step, block }: { step: Step; block: Step["blocks"][number] }) {
         <ul className="grid gap-3 sm:grid-cols-2">
           {TOPICS.map((topic) => (
             <li key={topic.slug}>
-              <TopicTile
-                slug={topic.slug}
-                name={topic.name}
-                line={topic.line}
-              />
+              <TopicTile topic={topic} />
             </li>
           ))}
         </ul>
@@ -94,7 +89,7 @@ function blockKey(block: Step["blocks"][number]): string {
     case "diagram":
       return block.diagram;
     case "growth":
-      return `growth-${block.every}-${block.deposit}`;
+      return `growth-${block.frequency}-${block.deposit}`;
     case "link":
       return block.slug;
     case "topics":

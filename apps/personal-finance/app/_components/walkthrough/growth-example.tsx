@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { MoneyField } from "@/app/_components/calculator/money-field";
 import { ResultSentence } from "@/app/_components/calculator/result-sentence";
-import { allocateRounded, formatDollars } from "@/src/finance/format";
-import { growth } from "@/src/finance/growth";
-import { checkField, type FieldRule } from "@/src/finance/parse";
-
-const DEPOSIT: FieldRule = { unit: "dollars", noun: "a deposit" };
+import { formatDollars } from "@/src/finance/format";
+import {
+  DEPOSIT_RULE,
+  type DepositFrequency,
+  GROWTH_PURPOSE,
+  growth,
+  roundedGrowth,
+} from "@/src/finance/growth";
+import { checkField } from "@/src/finance/parse";
 
 // One of the talk's growth examples, live (R8): it opens on the talk's numbers, offers one field,
 // the deposit, so the step keeps to three things on screen (R6), and runs the same math as
@@ -15,7 +19,7 @@ const DEPOSIT: FieldRule = { unit: "dollars", noun: "a deposit" };
 export function GrowthExample({
   id,
   deposit,
-  every,
+  frequency,
   depositYears,
   years,
   yearlyReturn,
@@ -23,31 +27,28 @@ export function GrowthExample({
 }: {
   id: string;
   deposit: number;
-  every: "year" | "month";
+  frequency: DepositFrequency;
   depositYears: number;
   years: number;
   yearlyReturn: number;
   startAge: number;
 }) {
   const [text, setText] = useState(deposit.toLocaleString("en-US"));
-  const check = checkField(DEPOSIT, text, "to see what it grows to");
+  const check = checkField(DEPOSIT_RULE, text, GROWTH_PURPOSE);
 
   let sentence: string;
   if (check.ok) {
     const result = growth({
       start: 0,
       deposit: check.value ?? 0,
-      frequency: every === "month" ? "monthly" : "yearly",
+      frequency,
       years,
       depositYears,
       rate: yearlyReturn,
       inflation: null,
     });
-    const [putIn = 0, earned = 0] = allocateRounded([
-      result.putIn,
-      result.earned,
-    ]);
-    sentence = `At ${startAge + years}, you'd have about ${formatDollars(putIn + earned)}, from ${formatDollars(putIn)} you put in.`;
+    const { putIn, total } = roundedGrowth(result);
+    sentence = `At ${startAge + years}, you'd have about ${formatDollars(total)}, from ${formatDollars(putIn)} you put in.`;
   } else {
     sentence = check.problem;
   }
@@ -58,9 +59,11 @@ export function GrowthExample({
       <MoneyField
         id={`${id}-deposit`}
         label={
-          every === "month" ? "Each month you put in" : "Each year you put in"
+          frequency === "monthly"
+            ? "Each month you put in"
+            : "Each year you put in"
         }
-        rule={DEPOSIT}
+        rule={DEPOSIT_RULE}
         value={text}
         onValueChange={setText}
         invalid={!check.ok}

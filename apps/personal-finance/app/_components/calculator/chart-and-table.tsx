@@ -1,12 +1,16 @@
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-} from "@repo/ui/components/chart";
+"use client";
+
+import type { ChartConfig } from "@repo/ui/components/chart";
+import dynamic from "next/dynamic";
 import { useId } from "react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
-import { formatCompactDollars, formatDollars } from "@/src/finance/format";
+import { formatDollars } from "@/src/finance/format";
+
+// Loaded in the browser only, after the fields work: recharts draws nothing on the server
+// anyway. The placeholder holds the chart's height, so the page doesn't shift when it arrives.
+const SeriesChart = dynamic(
+  () => import("./series-chart").then((module) => module.SeriesChart),
+  { ssr: false, loading: () => <div aria-hidden="true" className="h-64" /> },
+);
 
 type Series = {
   key: string;
@@ -23,10 +27,9 @@ type Row = {
   values: readonly number[];
 };
 
-// A chart beside the table that is its equivalent (R22, KTD13). The chart is for the eye only:
-// hidden from screen readers, with no focus stop of its own (recharts 3.11 turns its keyboard
-// layer on by default), and no animation, since a calculator redraws on every keystroke. The
-// table carries every number, and scrolls sideways inside its own labelled region at 320px.
+// A chart beside the table that is its equivalent (R22, KTD13). The chart is for the eye only
+// (series-chart.tsx); the table carries every number, and scrolls sideways inside its own
+// labelled region at 320px.
 export function ChartAndTable({
   caption,
   rowHeader,
@@ -49,38 +52,7 @@ export function ChartAndTable({
 
   return (
     <div className="space-y-6">
-      <ChartContainer
-        config={config}
-        aria-hidden="true"
-        className="aspect-auto h-64 w-full"
-      >
-        <LineChart
-          data={data}
-          accessibilityLayer={false}
-          margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} />
-          <YAxis
-            tickFormatter={formatCompactDollars}
-            tickLine={false}
-            axisLine={false}
-            width={56}
-          />
-          <ChartLegend verticalAlign="top" content={<ChartLegendContent />} />
-          {series.map((s) => (
-            <Line
-              key={s.key}
-              dataKey={s.key}
-              stroke={`var(--color-${s.key})`}
-              strokeWidth={2}
-              strokeDasharray={s.dashed ? "6 4" : undefined}
-              dot={false}
-              isAnimationActive={false}
-            />
-          ))}
-        </LineChart>
-      </ChartContainer>
+      <SeriesChart config={config} data={data} series={series} />
 
       {/* A named section is a region landmark. It takes no tabIndex (Biome's
           noNoninteractiveTabindex): Chrome and Firefox let a keyboard focus a scroller that

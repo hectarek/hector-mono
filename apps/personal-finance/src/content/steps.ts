@@ -6,6 +6,9 @@
 // In a text block, [[shown words|glossary-slug]] marks a word's first use on the step, which
 // renders as <Word> (R19).
 
+import type { DepositFrequency } from "@/src/finance/growth";
+import type { WordSlug } from "./words";
+
 type Diagram =
   | "money-in-and-out"
   | "own-and-owe"
@@ -23,7 +26,7 @@ type StepBlock =
   | {
       kind: "growth";
       deposit: number;
-      every: "year" | "month";
+      frequency: DepositFrequency;
       depositYears: number;
       years: number;
       yearlyReturn: number;
@@ -141,7 +144,7 @@ export const STEPS: readonly Step[] = [
       {
         kind: "growth",
         deposit: 1000,
-        every: "year",
+        frequency: "yearly",
         depositYears: 30,
         years: 30,
         yearlyReturn: 0.08,
@@ -160,7 +163,7 @@ export const STEPS: readonly Step[] = [
       {
         kind: "growth",
         deposit: 1000,
-        every: "year",
+        frequency: "yearly",
         depositYears: 10,
         years: 40,
         yearlyReturn: 0.08,
@@ -183,7 +186,7 @@ export const STEPS: readonly Step[] = [
       {
         kind: "growth",
         deposit: 200,
-        every: "month",
+        frequency: "monthly",
         depositYears: 40,
         years: 40,
         yearlyReturn: 0.11,
@@ -283,14 +286,15 @@ export function wordMarks(text: string): string[] {
 }
 
 // A text block split into plain runs and marked words, for rendering.
+// Every mark's slug is a glossary word: tests/content/steps.test.ts checks them against WORDS.
 export function textParts(
   text: string,
-): ({ text: string } | { text: string; word: string })[] {
-  const parts: ({ text: string } | { text: string; word: string })[] = [];
+): ({ text: string } | { text: string; word: WordSlug })[] {
+  const parts: ({ text: string } | { text: string; word: WordSlug })[] = [];
   let last = 0;
   for (const match of text.matchAll(WORD_MARK)) {
     if (match.index > last) parts.push({ text: text.slice(last, match.index) });
-    parts.push({ text: match[1] ?? "", word: match[2] ?? "" });
+    parts.push({ text: match[1] ?? "", word: (match[2] ?? "") as WordSlug });
     last = match.index + match[0].length;
   }
   if (last < text.length) parts.push({ text: text.slice(last) });

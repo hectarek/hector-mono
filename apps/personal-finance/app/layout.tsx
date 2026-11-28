@@ -1,6 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 import { PageTitle } from "./_components/page-title";
 import { SiteFooter } from "./_components/site-footer";
@@ -32,7 +33,7 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} font-sans antialiased`}>

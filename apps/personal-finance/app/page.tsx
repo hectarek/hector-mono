@@ -40,11 +40,7 @@ export default function Home() {
         <ul className="grid gap-3 sm:grid-cols-2">
           {TOPICS.map((topic) => (
             <li key={topic.slug}>
-              <TopicTile
-                slug={topic.slug}
-                name={topic.name}
-                line={topic.line}
-              />
+              <TopicTile topic={topic} />
             </li>
           ))}
         </ul>

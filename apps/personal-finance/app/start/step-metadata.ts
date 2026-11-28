@@ -14,7 +14,7 @@ export function stepMetadata(index: number): Metadata {
   return pageMetadata({
     title: step.title,
     description: WALKTHROUGH.summary,
-    path: stepPath(index) as `/${string}`,
+    path: stepPath(index),
     preview: "start",
   });
 }

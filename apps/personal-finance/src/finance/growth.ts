@@ -4,8 +4,17 @@ import {
   formatPercent,
   formatYears,
 } from "./format";
+import type { FieldRule } from "./parse";
 
 export type DepositFrequency = "monthly" | "yearly";
+
+// The deposit field and the end of its fix message, shared by /compound-growth and the
+// walkthrough's growth examples so the two ask for a deposit the same way.
+export const DEPOSIT_RULE = {
+  unit: "dollars",
+  noun: "a deposit",
+} as const satisfies FieldRule;
+export const GROWTH_PURPOSE = "to see what it grows to";
 
 export type GrowthInput = {
   start: number;
@@ -71,14 +80,25 @@ export function growth(input: GrowthInput): Growth {
   return { byYear, putIn, total, earned: total - putIn };
 }
 
-// The headline sentence (R14): the main inputs restated, then the rounded total. In today's
-// dollars, when the total is below what went in, it names inflation as the reason (KTD8).
-export function describeGrowth(input: GrowthInput, result: Growth): string {
-  const { start, deposit, frequency, years, depositYears, inflation } = input;
+// The amounts the sentence and the parts both show, rounded together so the parts add up to the
+// total (allocateRounded, R14).
+export function roundedGrowth(result: Growth): {
+  putIn: number;
+  earned: number;
+  total: number;
+} {
   const [putIn = 0, earned = 0] = allocateRounded([
     result.putIn,
     result.earned,
   ]);
+  return { putIn, earned, total: putIn + earned };
+}
+
+// The headline sentence (R14): the main inputs restated, then the rounded total. In today's
+// dollars, when the total is below what went in, it names inflation as the reason (KTD8).
+export function describeGrowth(input: GrowthInput, result: Growth): string {
+  const { start, deposit, frequency, years, depositYears, inflation } = input;
+  const { putIn, earned, total: rounded } = roundedGrowth(result);
   const each = `${formatDollars(deposit)} a ${frequency === "monthly" ? "month" : "year"}`;
   const lead =
     start > 0
@@ -89,7 +109,7 @@ export function describeGrowth(input: GrowthInput, result: Growth): string {
     depositYears !== null && depositYears < years
       ? `for ${formatYears(depositYears)}, then letting it grow until year ${years}, at ${rate}`
       : `for ${formatYears(years)} at ${rate}`;
-  const total = formatDollars(putIn + earned);
+  const total = formatDollars(rounded);
 
   if (inflation === null) return `${lead} ${span}, you'd have about ${total}.`;
   const today = `${total} in today's dollars, at ${formatPercent(inflation * 100)} inflation`;

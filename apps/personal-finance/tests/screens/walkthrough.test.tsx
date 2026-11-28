@@ -6,7 +6,7 @@ import { GrowthExample } from "@/app/_components/walkthrough/growth-example";
 const STARTING_AT_35 = {
   id: "starting-at-35",
   deposit: 1000,
-  every: "year",
+  frequency: "yearly",
   depositYears: 30,
   years: 30,
   yearlyReturn: 0.08,

@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactNode, type TouchEvent, useEffect, useRef } from "react";
+import {
+  type ReactNode,
+  type TouchEvent,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { keyDirection, swipeDirection } from "@/src/lib/swipe";
 
 // Set after the first step a reader sees, so arriving cold from a texted link leaves focus where
@@ -29,6 +35,14 @@ export function StepShell({
   const shell = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
 
+  const go = useCallback(
+    (direction: "next" | "previous" | null) => {
+      const to = direction === null ? null : { next, previous }[direction];
+      if (to) router.push(to);
+    },
+    [next, previous, router],
+  );
+
   useEffect(() => {
     if (arrived) {
       shell.current?.querySelector<HTMLElement>("[data-step-heading]")?.focus();
@@ -49,17 +63,11 @@ export function StepShell({
           target?.closest("input, textarea, select, [contenteditable]"),
         ),
       });
-      const to =
-        direction === "next"
-          ? next
-          : direction === "previous"
-            ? previous
-            : null;
-      if (to) router.push(to);
+      go(direction);
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [next, previous, router]);
+  }, [go]);
 
   function onTouchStart(event: TouchEvent) {
     const touch = event.touches[0];
@@ -82,9 +90,7 @@ export function StepShell({
       { x: touch.clientX, y: touch.clientY },
       window.innerWidth,
     );
-    const to =
-      direction === "next" ? next : direction === "previous" ? previous : null;
-    if (to) router.push(to);
+    go(direction);
   }
 
   return (

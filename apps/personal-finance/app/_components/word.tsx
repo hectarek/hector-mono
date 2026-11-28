@@ -5,6 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@repo/ui/components/popover";
+import type { ReactNode } from "react";
 import { WORDS, type WordSlug } from "@/src/content/words";
 
 // A money word's first use on a page: a real link to its entry on /words, so it works before
@@ -16,7 +17,7 @@ export function Word({
   children,
 }: {
   slug: WordSlug;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const entry = WORDS[slug];
   const href = `/words#${slug}`;

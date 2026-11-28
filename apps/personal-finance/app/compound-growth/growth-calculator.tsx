@@ -13,20 +13,20 @@ import {
 } from "@/app/_components/calculator/result-parts";
 import { ResultSentence } from "@/app/_components/calculator/result-sentence";
 import { GROWTH_EXAMPLE, QUICK_RETURNS } from "@/src/finance/assumptions";
-import { allocateRounded } from "@/src/finance/format";
 import {
+  DEPOSIT_RULE,
   type DepositFrequency,
   describeGrowth,
+  GROWTH_PURPOSE,
   type GrowthInput,
   growth,
+  roundedGrowth,
 } from "@/src/finance/growth";
 import { checkField, type FieldRule } from "@/src/finance/parse";
 
-const PURPOSE = "to see what it grows to";
-
 // The fields in the order they're shown, which is the order their messages are named in.
 const FIELDS = {
-  deposit: { unit: "dollars", noun: "a deposit" },
+  deposit: DEPOSIT_RULE,
   years: { unit: "years", noun: "how many years" },
   rate: { unit: "percent", noun: "a yearly return" },
   start: { unit: "dollars", noun: "a starting amount" },
@@ -75,7 +75,7 @@ function shownFields(form: Form): FieldName[] {
 function readForm(form: Form): Reading {
   const values = new Map<FieldName, number | null>();
   for (const name of shownFields(form)) {
-    const check = checkField(FIELDS[name], form.text[name], PURPOSE);
+    const check = checkField(FIELDS[name], form.text[name], GROWTH_PURPOSE);
     if (!check.ok) return { ok: false, problem: check.problem };
     values.set(name, check.value);
   }
@@ -92,6 +92,11 @@ function readForm(form: Form): Reading {
       inflation: form.todaysDollars ? value("inflation") / 100 : null,
     },
   };
+}
+
+function earnedLabel(earned: number, today: boolean): string {
+  if (earned < 0) return "What inflation took";
+  return today ? "What it earned, after inflation" : "What it earned";
 }
 
 function exampleInput(): GrowthInput {
@@ -122,16 +127,13 @@ export function GrowthCalculator() {
     rule: FIELDS[name],
     value: form.text[name],
     onValueChange: (text: string) => setText(name, text),
-    invalid: !checkField(FIELDS[name], form.text[name], PURPOSE).ok,
+    invalid: !checkField(FIELDS[name], form.text[name], GROWTH_PURPOSE).ok,
   });
 
   const reading = readForm(form);
   const result = growth(lastValid);
   const today = lastValid.inflation !== null;
-  const [putIn = 0, earned = 0] = allocateRounded([
-    result.putIn,
-    result.earned,
-  ]);
+  const { putIn, earned } = roundedGrowth(result);
   const inToday = today ? ", in today's dollars" : "";
 
   return (
@@ -258,14 +260,7 @@ export function GrowthCalculator() {
           <ResultParts
             parts={[
               { label: `What you put in${inToday}`, amount: putIn },
-              earned < 0
-                ? { label: "What inflation took", amount: earned }
-                : {
-                    label: today
-                      ? "What it earned, after inflation"
-                      : "What it earned",
-                    amount: earned,
-                  },
+              { label: earnedLabel(earned, today), amount: earned },
             ]}
             totalLabel={`What it grew to${inToday}`}
           />

@@ -1,14 +1,8 @@
 import Link from "next/link";
+import type { TOPICS } from "@/src/content/topics";
 
-export function TopicTile({
-  slug,
-  name,
-  line,
-}: {
-  slug: string;
-  name: string;
-  line: string;
-}) {
+export function TopicTile({ topic }: { topic: (typeof TOPICS)[number] }) {
+  const { slug, name, line } = topic;
   return (
     <Link
       href={`/${slug}`}
