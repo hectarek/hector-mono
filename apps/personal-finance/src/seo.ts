@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PAGES } from "./content/pages";
 import { PREVIEW_VERSION, SITE_NAME, SITE_URL } from "./site";
 
 type PageMetadataInput = {
@@ -42,4 +43,16 @@ export function pageMetadata({
       images: [image.url],
     },
   };
+}
+
+// The metadata of a page in the content list, from its entry: one source for its title, its
+// summary and its link.
+export function metadataForPage(slug: string): Metadata {
+  const page = PAGES.find((p) => p.slug === slug);
+  if (!page) throw new Error(`No page "${slug}" in src/content/pages.ts`);
+  return pageMetadata({
+    title: page.title,
+    description: page.summary,
+    path: `/${page.slug}`,
+  });
 }

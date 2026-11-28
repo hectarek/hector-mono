@@ -20,7 +20,17 @@ type SitePage = {
 // Every page of the site's own, each at its own top-level link (/mortgage). Adding a page means
 // an entry here, its folder under app/, and its preview (bun scripts/render-previews.ts).
 // A slug is a link people have been sent, so it never changes or gets reused.
-export const PAGES: readonly SitePage[] = [];
+export const PAGES: readonly SitePage[] = [
+  {
+    slug: "compound-growth",
+    title: "Watch your money grow",
+    summary:
+      "Put in a little at a time and see what it turns into, with the math shown.",
+    kind: "calculator",
+    topic: "investing",
+    readFirst: [],
+  },
+];
 
 export const HOME_LINE =
   "Money, explained in plain words, with tools to try the numbers.";
