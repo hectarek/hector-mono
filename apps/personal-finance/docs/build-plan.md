@@ -16,12 +16,12 @@ The plan for `apps/personal-finance` (a working name, H1): a free site Hector ca
 
 ## Status
 
-|                   |                                                                                                                                                                                     |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase             | Plan drafted 2026-11-27, nothing built. This file lands in Batch 1's pull request with U1, since a push of an app folder that has no `package.json` yet deploys every app on Vercel |
-| Next              | U8, the style tiles, and U1, the app's shell: neither waits on the other                                                                                                            |
-| Waiting on Hector | His read of this plan, and H1 to H6                                                                                                                                                 |
-| Updated           | 2026-11-27                                                                                                                                                                          |
+|                   |                                                                                                                                                                                                                                                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase             | Batch 1 (U1 to U5) is built and committed on the branch, not pushed: every check passes, every page builds static, and Lighthouse accessibility is 100 on each page (2026-11-28). U8's four style tiles are on a private Claude Design canvas                                                                                |
+| Next              | Push Batch 1 and open its pull request, once Hector OKs the Vercel project (H4). U9 follows his pick of a look (H3), then Batch 2 (U6, U7) after the reader check                                                                                                                                                            |
+| Waiting on Hector | H1 to H6; which compounding rule the growth calculator uses (the talk's yearly rule or monthly compounding); which meaning of "asset" the site teaches; whether the walkthrough's steps keep sharing one preview; and whether charts stay on recharts, which adds about 146 KB of compressed JavaScript to a calculator page |
+| Updated           | 2026-11-28                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
