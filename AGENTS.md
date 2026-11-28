@@ -129,6 +129,7 @@ apps/
   job-search/          # Private job search workspace (Next.js + Neon + Drizzle + auth) — clean arch on recipes' pattern; no search specifics in the repo
   community-game-library/  # Friends' board-game library: loans and game nights (Next.js + Neon + Drizzle + auth + object storage) — clean arch on recipes' pattern
   seating-chart/       # Wedding seating chart: tables on a grid, guests, saved in localStorage (Solid 2.0 + Vite, no backend)
+  personal-finance/    # Personal finance explainers and calculators to text to anyone, all in the browser (Next.js, fully static, no backend)
 
 packages/
   ui/                  # Shared UI components (shadcn/ui based) — see packages/ui/AGENTS.md
@@ -142,7 +143,7 @@ evals/                 # promptfoo experiments comparing models and prompts, one
 
 Choose the simplest pattern that solves the problem.
 
-**Simple apps (portfolio, relationship-meter, seating-chart)**:
+**Simple apps (portfolio, relationship-meter, seating-chart, personal-finance)**:
 - Direct data imports or client state
 - No DI containers, no domain error classes
 - Server Components for static data

@@ -47,6 +47,19 @@
       "port": 3103
     },
     {
+      "name": "personal-finance",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/personal-finance",
+        "dev",
+        "--port",
+        "3104"
+      ],
+      "port": 3104
+    },
+    {
       "name": "hector-portfolio-prod",
       "runtimeExecutable": "bun",
       "runtimeArgs": [
@@ -123,6 +136,19 @@
         "3206"
       ],
       "port": 3206
+    },
+    {
+      "name": "personal-finance-prod",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "--cwd",
+        "apps/personal-finance",
+        "start",
+        "--port",
+        "3207"
+      ],
+      "port": 3207
     }
   ]
 }

@@ -16,6 +16,7 @@ Personal monorepo for Hector Gonzalez's apps and shared packages. Turborepo + Bu
 | [`job-search`](./apps/job-search) | Private job search workspace (auth + DB), kept current by its owner and an AI agent | — | Next.js 16, Neon Postgres, Drizzle, Neon Auth, clean architecture |
 | [`community-game-library`](./apps/community-game-library) | A circle of friends' board games: who owns what, loans with due dates, game nights (auth + DB) | — | Next.js 16, Neon Postgres, Drizzle, Neon Auth, Neon Object Storage, clean architecture |
 | [`seating-chart`](./apps/seating-chart) | Wedding seating chart: a room to scale, tables and guests | — | Solid 2.0, Vite, Tailwind — saved in localStorage, no backend |
+| [`personal-finance`](./apps/personal-finance) | Personal finance explainers and calculators, readable with no money background | — | Next.js 16, React 19 — fully static, nothing saved, no backend |
 
 ## Packages
 

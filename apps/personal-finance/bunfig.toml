@@ -1,0 +1,5 @@
+[test]
+# No preload: the app reads no secrets, and its tests reach no services.
+# Screen tests (*.test.tsx) need a browser (happy-dom) each, so they run on their own,
+# isolated: `bun run test:screens`. `bun run test` runs both.
+pathIgnorePatterns = ["**/*.test.tsx"]
